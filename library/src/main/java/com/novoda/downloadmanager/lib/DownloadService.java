@@ -159,7 +159,7 @@ public class DownloadService extends Service {
 
     private NotificationImageRetriever getNotificationImageRetriever() {
         if (!(getApplication() instanceof NotificationImageRetrieverFactory)) {
-            throw new RuntimeException("You need your Application to implementt NotificationImageRetrieverFactory");
+            return new OkHttpNotificationImageRetriever();
         }
         return ((NotificationImageRetrieverFactory) getApplication()).createNotificationImageRetriever();
     }
