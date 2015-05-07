@@ -143,7 +143,7 @@ public class DownloadService extends Service {
         mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         mStorageManager = new StorageManager(this);
 
-        mUpdateThread = new HandlerThread("Mubi-UpdateThread");
+        mUpdateThread = new HandlerThread("DownloadManager-UpdateThread");
         mUpdateThread.start();
         mUpdateHandler = new Handler(mUpdateThread.getLooper(), mUpdateCallback);
 
