@@ -142,7 +142,7 @@ public class DownloadNotifier {
             buildActionIntents(tag, type, cluster, builder);
 
             Notification notification = buildTitlesAndDescription(res, type, cluster, builder);
-            mNotifManager.notify(0, notification);
+            mNotifManager.notify(tag.hashCode(), notification);
         }
 
         removeStaleTagsThatWerentRenewed(clustered);
@@ -333,7 +333,7 @@ public class DownloadNotifier {
         while (it.hasNext()) {
             final String tag = it.next();
             if (!clustered.containsKey(tag)) {
-                mNotifManager.cancel(0);
+                mNotifManager.cancel(tag.hashCode());
                 it.remove();
             }
         }
