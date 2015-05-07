@@ -25,7 +25,10 @@ import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.*;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.Message;
 import android.os.Process;
 import android.text.TextUtils;
 
@@ -34,7 +37,11 @@ import com.novoda.notils.logger.simple.Log;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -153,7 +160,8 @@ public class DownloadService extends Service {
         mNotifier.cancelAll();
 
         mObserver = new DownloadManagerContentObserver();
-        getContentResolver().registerContentObserver(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
+        getContentResolver().registerContentObserver(
+                Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
                 true, mObserver);
     }
 
@@ -210,7 +218,9 @@ public class DownloadService extends Service {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
             final int startId = msg.arg1;
-            if (DEBUG_LIFECYCLE) Log.v("Updating for startId " + startId);
+            if (DEBUG_LIFECYCLE) {
+                Log.v("Updating for startId " + startId);
+            }
 
             // Since database is current source of truth, our "active" status
             // depends on database state. We always get one final update pass
@@ -253,7 +263,9 @@ public class DownloadService extends Service {
                 // will always be delivered with a new startId.
 
                 if (stopSelfResult(startId)) {
-                    if (DEBUG_LIFECYCLE) Log.v("Nothing left; stopped");
+                    if (DEBUG_LIFECYCLE) {
+                        Log.v("Nothing left; stopped");
+                    }
                     getContentResolver().unregisterContentObserver(mObserver);
                     mScanner.shutdown();
                     mUpdateThread.quit();
