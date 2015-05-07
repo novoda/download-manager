@@ -25,7 +25,7 @@ import java.util.concurrent.Future;
  * Stores information about an individual download.
  */
 public class DownloadInfo {
-    public static final String EXTRA_EXTRA = "com.mubi.spotlight.download.lib.KEY_INTENT_EXTRA";
+    public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
 
     // TODO: move towards these in-memory objects being sources of truth, and
 
@@ -533,7 +533,8 @@ public class DownloadInfo {
      * Query and return status of requested download.
      */
     public static int queryDownloadStatus(ContentResolver resolver, long id) {
-        final Cursor cursor = resolver.query(ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id),
+        final Cursor cursor = resolver.query(
+                ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id),
                 new String[]{Downloads.Impl.COLUMN_STATUS}, null, null, null);
         try {
             if (cursor.moveToFirst()) {
