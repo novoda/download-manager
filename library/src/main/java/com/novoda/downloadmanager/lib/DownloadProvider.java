@@ -60,7 +60,8 @@ public final class DownloadProvider extends ContentProvider {
     /**
      * Added so we can use our own ContentProvider - Matches: Downloads.java
      */
-    public static final String AUTHORITY = "downloadsSCUBA";
+    public static final String AUTHORITY = Reflector.reflectAuthority();
+
     /**
      * Database filename
      */
@@ -74,7 +75,7 @@ public final class DownloadProvider extends ContentProvider {
     /**
      * Name of table in the database
      */
-    private static final String DB_TABLE = AUTHORITY;
+    private static final String DB_TABLE = "Downloads";
 
     /**
      * MIME type for the entire download list

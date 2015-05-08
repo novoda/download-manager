@@ -19,6 +19,10 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
+    <provider
+        android:name="com.novoda.downloadmanager.lib.DownloadProvider"
+        android:authorities="com.novoda.downloadmanager.demo"
+        android:exported="false" />
   </application>
 
 </manifest>
