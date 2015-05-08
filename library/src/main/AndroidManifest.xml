@@ -13,7 +13,7 @@
 
     <provider
       android:name="com.novoda.downloadmanager.lib.DownloadProvider"
-      android:authorities="downloadsSCUBA"
+      android:authorities="${downloadAuthority}"
       android:exported="false" />
 
     <activity android:name="com.novoda.downloadmanager.lib.SizeLimitActivity" />

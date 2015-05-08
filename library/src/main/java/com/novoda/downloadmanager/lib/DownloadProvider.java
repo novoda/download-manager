@@ -37,6 +37,7 @@ import android.os.Process;
 import android.provider.OpenableColumns;
 import android.text.TextUtils;
 
+import com.novoda.downloadmanager.BuildConfig;
 import com.novoda.notils.logger.simple.Log;
 
 import java.io.File;
@@ -60,7 +61,7 @@ public final class DownloadProvider extends ContentProvider {
     /**
      * Added so we can use our own ContentProvider - Matches: Downloads.java
      */
-    public static final String AUTHORITY = "downloadsSCUBA";
+    static final String AUTHORITY = BuildConfig.DOWNLOAD_AUTHORITY;
     /**
      * Database filename
      */
