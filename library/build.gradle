@@ -25,7 +25,7 @@ android {
         def projects = rootProject.getProject().getChildProjects();
         projects.each {
             def authority = it.value.android.defaultConfig.manifestPlaceholders.downloadAuthority
-            if(authority) {
+            if (authority) {
                 buildConfigField "String", "DOWNLOAD_AUTHORITY", "\"${authority}\""
             }
         }
