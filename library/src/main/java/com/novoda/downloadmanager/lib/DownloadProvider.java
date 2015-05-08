@@ -75,7 +75,7 @@ public final class DownloadProvider extends ContentProvider {
     /**
      * Name of table in the database
      */
-    private static final String DB_TABLE = AUTHORITY;
+    private static final String DB_TABLE = "DownloadManagerTable";
 
     /**
      * MIME type for the entire download list
