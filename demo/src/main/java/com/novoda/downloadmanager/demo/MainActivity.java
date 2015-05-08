@@ -1,80 +1,43 @@
 package com.novoda.downloadmanager.demo;
 
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.Query;
 import com.novoda.downloadmanager.lib.Request;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements QueryForDownloadsAsyncTask.Callback {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String BIG_FILE = "http://downloads.bbc.co.uk/podcasts/radio4/fricomedy/fricomedy_20150501-1855a.mp3";
     private static final String BBC_COMEDY_IMAGE = "http://ichef.bbci.co.uk/podcasts/artwork/266/fricomedy.jpg";
 
     private DownloadManager downloadManager;
+    private ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         com.novoda.notils.logger.simple.Log.setShowLogs(true);
         setContentView(R.layout.activity_main);
+        listView = (ListView) findViewById(R.id.main_downloads_list);
         downloadManager = new DownloadManager(getContentResolver());
 
         setupDownloadingExample();
 
-        final List<Download> downloads = new ArrayList<>();
-        Cursor cursor = downloadManager.query(new Query());
-        while (cursor.moveToNext()) {
-            String title = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TITLE));
-            String fileName = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_FILENAME));
-            downloads.add(new Download(title, fileName));
-        }
+        QueryForDownloadsAsyncTask.newInstance(downloadManager, this).execute(new Query());
+    }
 
-        ListView listView = (ListView) findViewById(R.id.main_downloads_list);
-        listView.setAdapter(
-                new BaseAdapter() {
-                    @Override
-                    public int getCount() {
-                        return downloads.size();
-                    }
-
-                    @Override
-                    public Download getItem(int position) {
-                        return downloads.get(position);
-                    }
-
-                    @Override
-                    public long getItemId(int position) {
-                        return position;
-                    }
-
-                    @Override
-                    public View getView(int position, View convertView, ViewGroup parent) {
-                        View view = View.inflate(parent.getContext(), R.layout.list_item_download, null);
-
-                        Download download = getItem(position);
-                        TextView titleTextView = (TextView) view.findViewById(R.id.download_title_text);
-                        TextView locationTextView = (TextView) view.findViewById(R.id.download_location_text);
-
-                        titleTextView.setText(download.getTitle());
-                        locationTextView.setText(download.getFileName());
-
-                        return view;
-                    }
-                });
+    @Override
+    public void onQueryResult(List<Download> downloads) {
+        listView.setAdapter(new DownloadAdapter(downloads));
     }
 
     private void setupDownloadingExample() {
@@ -96,5 +59,4 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
-
 }
