@@ -22,7 +22,7 @@ android {
         minSdkVersion 14
         targetSdkVersion 22
 
-        def projects = rootProject.getProject().getChildProjects();
+        def projects = rootProject.getProject().getChildProjects()
         projects.each {
             def authority = it.value.android.defaultConfig.manifestPlaceholders.downloadAuthority
             if (authority) {
