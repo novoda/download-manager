@@ -25,6 +25,19 @@ dependencies {
 
 Simple example source code can be found in this demo module: [Android Simple Demo][2]
 
+You will need to add this to your Android application build.gradle:
+
+```groovy
+
+android { 
+  defaultConfig {
+       // other things
+       
+       manifestPlaceholders = [downloadAuthority: "${applicationId}"]
+  }
+}
+```
+
 
 ## Links
 
