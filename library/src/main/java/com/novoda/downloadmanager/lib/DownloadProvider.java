@@ -59,7 +59,7 @@ import java.util.Map;
 public final class DownloadProvider extends ContentProvider {
 
     /**
-     * Added so we can use our own ContentProvider - Matches: Downloads.java
+     * Added so we can use our own ContentProvider
      */
     static final String AUTHORITY = BuildConfig.DOWNLOAD_AUTHORITY;
     /**
