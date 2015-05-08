@@ -9,16 +9,23 @@
   android:paddingTop="@dimen/activity_vertical_margin"
   tools:context=".MainActivity">
 
-  <TextView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="@string/hello_world" />
-
   <Button
     android:id="@+id/main_download_button"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="@string/button_download_text" />
+
+  <Button
+    android:id="@+id/main_refresh_button"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/button_refresh_text" />
+
+  <TextView
+    android:id="@+id/main_no_downloads_view"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/no_downloads" />
 
   <ListView
     android:id="@+id/main_downloads_list"

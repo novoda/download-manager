@@ -31,13 +31,7 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         downloadManager = new DownloadManager(getContentResolver());
 
         setupDownloadingExample();
-
-        QueryForDownloadsAsyncTask.newInstance(downloadManager, this).execute(new Query());
-    }
-
-    @Override
-    public void onQueryResult(List<Download> downloads) {
-        listView.setAdapter(new DownloadAdapter(downloads));
+        setupQueryingExample();
     }
 
     private void setupDownloadingExample() {
@@ -58,5 +52,22 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
                         Log.d(TAG, "Download starting with id: " + id);
                     }
                 });
+    }
+
+    private void setupQueryingExample() {
+        QueryForDownloadsAsyncTask.newInstance(downloadManager, this).execute(new Query());
+        findViewById(R.id.main_refresh_button).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        QueryForDownloadsAsyncTask.newInstance(downloadManager, MainActivity.this).execute(new Query());
+                    }
+                });
+        listView.setEmptyView(findViewById(R.id.main_no_downloads_view));
+    }
+
+    @Override
+    public void onQueryResult(List<Download> downloads) {
+        listView.setAdapter(new DownloadAdapter(downloads));
     }
 }

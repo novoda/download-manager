@@ -38,7 +38,7 @@ class DownloadAdapter extends BaseAdapter {
         TextView locationTextView = (TextView) view.findViewById(R.id.download_location_text);
 
         titleTextView.setText(download.getTitle());
-        locationTextView.setText(download.getFileName());
+        locationTextView.setText(download.getDownloadStatusText() + " : " + download.getFileName());
 
         return view;
     }
