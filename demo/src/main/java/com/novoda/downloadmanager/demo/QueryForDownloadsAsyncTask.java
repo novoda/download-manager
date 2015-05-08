@@ -27,15 +27,17 @@ public class QueryForDownloadsAsyncTask extends AsyncTask<Query, Void, List<Down
     @Override
     protected List<Download> doInBackground(Query... params) {
         Cursor cursor = downloadManager.query(params[0]);
-
         List<Download> downloads = new ArrayList<>();
-        while (cursor.moveToNext()) {
-            String title = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TITLE));
-            String fileName = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_FILENAME));
-            int downloadStatus = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS));
-            downloads.add(new Download(title, fileName, downloadStatus));
+        try {
+            while (cursor.moveToNext()) {
+                String title = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TITLE));
+                String fileName = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_FILENAME));
+                int downloadStatus = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS));
+                downloads.add(new Download(title, fileName, downloadStatus));
+            }
+        } finally {
+            cursor.close();
         }
-
         return downloads;
     }
 
