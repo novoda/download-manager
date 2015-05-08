@@ -35,22 +35,12 @@ public class MainActivity extends AppCompatActivity {
 
         setupDownloadingExample();
 
-        class Foo {
-            String title;
-            String fileName;
-
-            public Foo(String title, String fileName) {
-                this.title = title;
-                this.fileName = fileName;
-            }
-        }
-
-        final List<Foo> foos = new ArrayList<>();
+        final List<Download> downloads = new ArrayList<>();
         Cursor cursor = downloadManager.query(new Query());
         while (cursor.moveToNext()) {
             String title = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TITLE));
             String fileName = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_FILENAME));
-            foos.add(new Foo(title, fileName));
+            downloads.add(new Download(title, fileName));
         }
 
         ListView listView = (ListView) findViewById(R.id.main_downloads_list);
@@ -58,12 +48,12 @@ public class MainActivity extends AppCompatActivity {
                 new BaseAdapter() {
                     @Override
                     public int getCount() {
-                        return foos.size();
+                        return downloads.size();
                     }
 
                     @Override
-                    public Foo getItem(int position) {
-                        return foos.get(position);
+                    public Download getItem(int position) {
+                        return downloads.get(position);
                     }
 
                     @Override
@@ -75,12 +65,12 @@ public class MainActivity extends AppCompatActivity {
                     public View getView(int position, View convertView, ViewGroup parent) {
                         View view = View.inflate(parent.getContext(), R.layout.list_item_download, null);
 
-                        Foo foo = getItem(position);
+                        Download download = getItem(position);
                         TextView titleTextView = (TextView) view.findViewById(R.id.download_title_text);
                         TextView locationTextView = (TextView) view.findViewById(R.id.download_location_text);
 
-                        titleTextView.setText(foo.title);
-                        locationTextView.setText(foo.fileName);
+                        titleTextView.setText(download.getTitle());
+                        locationTextView.setText(download.getFileName());
 
                         return view;
                     }
