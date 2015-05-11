@@ -21,6 +21,17 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 22
+
+        def projects = rootProject.getProject().getChildProjects()
+        projects.each {
+            def project = it.value
+            if (project.hasProperty('android')) {
+                def authority = project.android.defaultConfig.manifestPlaceholders.downloadAuthority
+                if (authority) {
+                    buildConfigField "String", "DOWNLOAD_AUTHORITY", "\"${authority}\""
+                }
+            }
+        }
     }
 
     lintOptions {

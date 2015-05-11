@@ -37,6 +37,7 @@ import android.os.Process;
 import android.provider.OpenableColumns;
 import android.text.TextUtils;
 
+import com.novoda.downloadmanager.BuildConfig;
 import com.novoda.notils.logger.simple.Log;
 
 import java.io.File;
@@ -58,7 +59,7 @@ import java.util.Map;
 public final class DownloadProvider extends ContentProvider {
 
     /**
-     * Added so we can use our own ContentProvider - Matches: Downloads.java
+     * Added so we can use our own ContentProvider
      */
     public static final String AUTHORITY = Reflector.reflectAuthority();
 
