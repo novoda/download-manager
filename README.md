@@ -38,7 +38,7 @@ android {
 }
 ```
 You also need to **create this file in this exact package** (we hope to do this for you in the future):
-``java
+```java
 package com.novoda.downloadmanager;
 
 public class Authority {
