@@ -11,14 +11,14 @@
     android:allowBackup="true"
     android:label="@string/app_name">
 
+    <activity android:name="com.novoda.downloadmanager.lib.SizeLimitActivity" />
+
+    <service android:name="com.novoda.downloadmanager.lib.DownloadService" />
+
     <provider
       android:name="com.novoda.downloadmanager.lib.DownloadProvider"
       android:authorities="${downloadAuthority}"
       android:exported="false" />
-
-    <activity android:name="com.novoda.downloadmanager.lib.SizeLimitActivity" />
-
-    <service android:name="com.novoda.downloadmanager.lib.DownloadService" />
 
     <receiver
       android:name="com.novoda.downloadmanager.lib.DownloadReceiver"

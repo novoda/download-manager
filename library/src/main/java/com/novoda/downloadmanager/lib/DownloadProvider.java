@@ -61,7 +61,8 @@ public final class DownloadProvider extends ContentProvider {
     /**
      * Added so we can use our own ContentProvider
      */
-    static final String AUTHORITY = BuildConfig.DOWNLOAD_AUTHORITY;
+    public static final String AUTHORITY = Reflector.reflectAuthority();
+
     /**
      * Database filename
      */
@@ -75,7 +76,7 @@ public final class DownloadProvider extends ContentProvider {
     /**
      * Name of table in the database
      */
-    private static final String DB_TABLE = "DownloadManagerTable";
+    private static final String DB_TABLE = "Downloads";
 
     /**
      * MIME type for the entire download list
