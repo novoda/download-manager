@@ -10,7 +10,7 @@ final class Reflector {
     private static String cachedAuthority;
 
     private Reflector() {
-
+        // static helper class
     }
 
     static String reflectAuthority() {
