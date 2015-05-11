@@ -33,7 +33,7 @@ android {
   defaultConfig {
        // other things
        
-       manifestPlaceholders = [downloadAuthority: "${applicationId}"]
+       manifestPlaceholders = [downloadAuthority: "com.your.unique.authority"]
   }
 }
 ```
