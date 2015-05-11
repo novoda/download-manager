@@ -9,6 +9,10 @@ final class Reflector {
 
     private static String cachedAuthority;
 
+    private Reflector() {
+
+    }
+
     static String reflectAuthority() {
         if (cachedAuthority == null) {
             try {
