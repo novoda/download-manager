@@ -15,6 +15,11 @@
 
     <service android:name="com.novoda.downloadmanager.lib.DownloadService" />
 
+    <provider
+      android:name="com.novoda.downloadmanager.lib.DownloadProvider"
+      android:authorities="${downloadAuthority}"
+      android:exported="false" />
+
     <receiver
       android:name="com.novoda.downloadmanager.lib.DownloadReceiver"
       android:exported="false">
