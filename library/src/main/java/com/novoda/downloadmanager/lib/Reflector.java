@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 
 final class Reflector {
 
-    private static final String CLASS_NAME = "com.novoda.downloadmanager.lib.Authority";
+    private static final String CLASS_NAME = "com.novoda.downloadmanager.Authority";
     private static final String CONSTANT_FULL_NAME = CLASS_NAME + ".AUTHORITY";
 
     private static String cachedAuthority;
