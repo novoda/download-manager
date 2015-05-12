@@ -82,19 +82,19 @@ public final class Downloads {
         public static final String PERMISSION_NO_NOTIFICATION = "android.permission.DOWNLOAD_WITHOUT_NOTIFICATION";
 
         /**
-         * Added so we can use our own ContentProvider - Matches: DownloadProvider.java
-         */
-        private static final String AUTHORITY = "content://" + DownloadProvider.AUTHORITY;
-        /**
          * The content:// URI to access downloads owned by the caller's UID.
          */
-        public static final Uri CONTENT_URI = Uri.parse(AUTHORITY + "/my_downloads");
+        public static final Uri CONTENT_URI(String authority) {
+            return Uri.parse("content://" + authority + "/my_downloads");
+        }
 
         /**
          * The content URI for accessing all downloads across all UIDs (requires the
          * ACCESS_ALL_DOWNLOADS permission).
          */
-        public static final Uri ALL_DOWNLOADS_CONTENT_URI = Uri.parse(AUTHORITY + "/all_downloads");
+        public static final Uri ALL_DOWNLOADS_CONTENT_URI(String authority) {
+            return Uri.parse("content://" + authority + "/all_downloads");
+        }
 
         /**
          * URI segment to access a publicly accessible downloaded file
@@ -105,8 +105,9 @@ public final class Downloads {
          * The content URI for accessing publicly accessible downloads (i.e., it requires no
          * permissions to access this downloaded file)
          */
-        public static final Uri PUBLICLY_ACCESSIBLE_DOWNLOADS_URI = Uri.parse(AUTHORITY + "/" + PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT);
-
+        public static final Uri PUBLICLY_ACCESSIBLE_DOWNLOADS_URI(String authority) {
+            return Uri.parse("content://" + authority + "/" + PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT);
+        }
         /**
          * Broadcast Action: this is sent by the download manager to the app
          * that had initiated a download when that download completes. The
@@ -819,7 +820,7 @@ public final class Downloads {
     /**
      * Delete all the downloads for a package/class pair.
      */
-    public static void removeAllDownloads(Context context, String notificationClass) {
-        context.getContentResolver().delete(Impl.CONTENT_URI, QUERY_WHERE_CLAUSE, new String[]{notificationClass});
+    public static void removeAllDownloads(Context context, String authority, String notificationClass) {
+        context.getContentResolver().delete(Impl.CONTENT_URI(authority), QUERY_WHERE_CLAUSE, new String[]{notificationClass});
     }
 }

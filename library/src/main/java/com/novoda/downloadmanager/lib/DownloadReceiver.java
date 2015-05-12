@@ -43,6 +43,7 @@ public class DownloadReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
+        final String authority = DownloadProvider.determineAuthority(context);
         String action = intent.getAction();
         if (ACTION_BOOT_COMPLETED.equals(action)) {
             startService(context);
@@ -57,7 +58,7 @@ public class DownloadReceiver extends BroadcastReceiver {
                 || ACTION_HIDE.equals(action)
                 || ACTION_DELETE.equals(action)
                 || ACTION_CANCEL.equals(action)) {
-            handleSystemNotificationAction(context, intent);
+            handleSystemNotificationAction(context, authority, intent);
         }
     }
 
@@ -69,45 +70,45 @@ public class DownloadReceiver extends BroadcastReceiver {
         }
     }
 
-    private void handleSystemNotificationAction(final Context context, final Intent intent) {
+    private void handleSystemNotificationAction(final Context context, final String authority, final Intent intent) {
         final PendingResult result = goAsync();
         if (result == null) {
-            handleNotificationBroadcast(context, intent);
+            handleNotificationBroadcast(context, authority, intent);
         } else {
             sAsyncHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    handleNotificationBroadcast(context, intent);
+                    handleNotificationBroadcast(context, authority, intent);
                     result.finish();
                 }
             });
         }
     }
 
-    private void handleNotificationBroadcast(Context context, Intent intent) {
+    private void handleNotificationBroadcast(Context context, String authority, Intent intent) {
         String action = intent.getAction();
         if (ACTION_LIST.equals(action)) {
             long[] ids = intent.getLongArrayExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS);
-            sendNotificationClickedIntent(context, ids);
+            sendNotificationClickedIntent(context, authority, ids);
         } else if (ACTION_OPEN.equals(action)) {
             long id = ContentUris.parseId(intent.getData());
             openDownload(context, id);
-            hideNotification(context, id);
+            hideNotification(context, authority, id);
         } else if (ACTION_HIDE.equals(action)) {
             long id = ContentUris.parseId(intent.getData());
-            hideNotification(context, id);
+            hideNotification(context, authority, id);
         } else if (ACTION_CANCEL.equals(action)) {
-            cancelDownloadThroughDatabaseState(context, intent);
+            cancelDownloadThroughDatabaseState(context, authority, intent);
         } else if (ACTION_DELETE.equals(action)) {
-            deleteDownloadThroughDatabaseState(context, intent);
+            deleteDownloadThroughDatabaseState(context, authority, intent);
         }
     }
 
     /**
      * Notify the owner of a running download that its notification was clicked.
      */
-    private void sendNotificationClickedIntent(Context context, long[] ids) {
-        Uri uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, ids[0]);
+    private void sendNotificationClickedIntent(Context context, String authority, long[] ids) {
+        Uri uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI(authority), ids[0]);
 
         Intent appIntent = new Intent(DownloadManager.ACTION_NOTIFICATION_CLICKED);
         appIntent.setPackage(context.getPackageName());
@@ -115,7 +116,7 @@ public class DownloadReceiver extends BroadcastReceiver {
         if (ids.length == 1) {
             appIntent.setData(uri);
         } else {
-            appIntent.setData(Downloads.Impl.CONTENT_URI);
+            appIntent.setData(Downloads.Impl.CONTENT_URI(authority));
         }
 
         context.sendBroadcast(appIntent);
@@ -126,7 +127,8 @@ public class DownloadReceiver extends BroadcastReceiver {
      * {@link DownloadManager#COLUMN_ID}.
      */
     private void openDownload(Context context, long id) {
-        Intent intent = OpenHelper.buildViewIntent(context, id);
+        String authority = DownloadProvider.determineAuthority(context);
+        Intent intent = OpenHelper.buildViewIntent(context, authority, id);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         try {
             context.startActivity(intent);
@@ -140,11 +142,11 @@ public class DownloadReceiver extends BroadcastReceiver {
      * Mark the given {@link DownloadManager#COLUMN_ID} as being acknowledged by
      * user so it's not renewed later.
      */
-    private void hideNotification(Context context, long id) {
+    private void hideNotification(Context context, String authority, long id) {
         int status;
         int visibility;
 
-        Uri uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id);
+        Uri uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI(authority), id);
         Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
         try {
             if (cursor.moveToFirst()) {
@@ -169,31 +171,31 @@ public class DownloadReceiver extends BroadcastReceiver {
      * Mark the given {@link DownloadManager#COLUMN_ID} as being cancelled by
      * user so it will be cancelled by the running thread.
      */
-    private void cancelDownloadThroughDatabaseState(Context context, Intent intent) {
+    private void cancelDownloadThroughDatabaseState(Context context, String authority, Intent intent) {
         ContentValues values = new ContentValues(1);
         values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_CANCELED);
         context.getContentResolver().update(
-                getDownloadUri(context, intent), values, null, null);
+                getDownloadUri(context, authority, intent), values, null, null);
     }
 
     /**
      * Mark the given {@link DownloadManager#COLUMN_ID} as being deleted by
      * user so it will be deleted by the running thread.
      */
-    private void deleteDownloadThroughDatabaseState(Context context, Intent intent) {
+    private void deleteDownloadThroughDatabaseState(Context context, String authority, Intent intent) {
         ContentValues values = new ContentValues(1);
         values.put(Downloads.Impl.COLUMN_DELETED, TRUE_THIS_IS_CLEARER_NOW);
         context.getContentResolver().update(
-                getDownloadUri(context, intent), values, null, null);
+                getDownloadUri(context, authority, intent), values, null, null);
     }
 
-    private Uri getDownloadUri(Context context, Intent intent) {
+    private Uri getDownloadUri(Context context, String authority, Intent intent) {
         long downloadId = -1;
         if (intent.getData() != null) {
             downloadId = ContentUris.parseId(intent.getData());
         } else if (intent.hasExtra(EXTRA_DOWNLOAD_TITLE)) {
             String title = intent.getStringExtra(EXTRA_DOWNLOAD_TITLE);
-            Cursor download = queryDownloads(context, title);
+            Cursor download = queryDownloads(context, authority, title);
             try {
                 if (download.moveToNext()) {
                     downloadId = download.getLong(download.getColumnIndex(BaseColumns._ID));
@@ -204,12 +206,12 @@ public class DownloadReceiver extends BroadcastReceiver {
                 download.close();
             }
         }
-        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, downloadId);
+        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI(authority), downloadId);
     }
 
-    private Cursor queryDownloads(Context context, String title) {
+    private Cursor queryDownloads(Context context, String authority, String title) {
         return context.getContentResolver().query(
-                Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null,
+                Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI(authority), null,
                 Downloads.Impl.COLUMN_TITLE + " = ? AND " +
                     Downloads.Impl.COLUMN_STATUS + " <= ?",
                 new String[] { title.toUpperCase(),

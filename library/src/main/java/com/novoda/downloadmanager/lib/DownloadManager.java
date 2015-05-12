@@ -328,15 +328,18 @@ public class DownloadManager {
             "'placeholder' AS " + COLUMN_LOCAL_URI,
             "'placeholder' AS " + COLUMN_REASON
     };
+    private final String mAuthority;
 
     private ContentResolver mResolver;
-    private Uri mBaseUri = Downloads.Impl.CONTENT_URI;
+    private Uri mBaseUri;
 
     /**
      * @hide
      */
-    public DownloadManager(ContentResolver resolver) {
+    public DownloadManager(ContentResolver resolver, String authority) {
         mResolver = resolver;
+        mAuthority = authority;
+        mBaseUri = Downloads.Impl.CONTENT_URI(authority);
     }
 
     /**
@@ -347,9 +350,9 @@ public class DownloadManager {
      */
     public void setAccessAllDownloads(boolean accessAllDownloads) {
         if (accessAllDownloads) {
-            mBaseUri = Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI;
+            mBaseUri = Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI(mAuthority);
         } else {
-            mBaseUri = Downloads.Impl.CONTENT_URI;
+            mBaseUri = Downloads.Impl.CONTENT_URI(mAuthority);
         }
     }
 
@@ -363,7 +366,7 @@ public class DownloadManager {
      */
     public long enqueue(Request request) {
         ContentValues values = request.toContentValues();
-        Uri downloadUri = mResolver.insert(Downloads.Impl.CONTENT_URI, values);
+        Uri downloadUri = mResolver.insert(Downloads.Impl.CONTENT_URI(mAuthority), values);
         long id = Long.parseLong(downloadUri.getLastPathSegment());
         return id;
     }
@@ -371,7 +374,7 @@ public class DownloadManager {
     public void markDeleted(URI uri) {
         Cursor cursor = null;
         try {
-            cursor = mResolver.query(Downloads.Impl.CONTENT_URI, new String[]{"_id"}, Downloads.Impl.COLUMN_FILE_NAME_HINT + "=?", new String[]{uri.toString()}, null);
+            cursor = mResolver.query(Downloads.Impl.CONTENT_URI(mAuthority), new String[]{"_id"}, Downloads.Impl.COLUMN_FILE_NAME_HINT + "=?", new String[]{uri.toString()}, null);
             if (cursor.moveToFirst()) {
                 long id = cursor.getLong(cursor.getColumnIndexOrThrow("_id"));
                 markRowDeleted(id);
@@ -480,7 +483,7 @@ public class DownloadManager {
                             destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING ||
                             destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE) {
                         // return private uri
-                        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, id);
+                        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI(mAuthority), id);
                     } else {
                         // return public uri
                         String path = cursor.getString(
@@ -659,7 +662,7 @@ public class DownloadManager {
         values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED, (isMediaScannerScannable) ? Request.SCANNABLE_VALUE_YES : Request.SCANNABLE_VALUE_NO);
         values.put(Downloads.Impl.COLUMN_VISIBILITY, (showNotification) ?
                 Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION : Request.VISIBILITY_HIDDEN);
-        Uri downloadUri = mResolver.insert(Downloads.Impl.CONTENT_URI, values);
+        Uri downloadUri = mResolver.insert(Downloads.Impl.CONTENT_URI(mAuthority), values);
         if (downloadUri == null) {
             return -1;
         }

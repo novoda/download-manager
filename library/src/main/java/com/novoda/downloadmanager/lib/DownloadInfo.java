@@ -26,6 +26,7 @@ import java.util.concurrent.Future;
  */
 public class DownloadInfo {
     public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
+    private String mAuthority;
 
     // TODO: move towards these in-memory objects being sources of truth, and
 
@@ -34,14 +35,16 @@ public class DownloadInfo {
     public static class Reader {
         private ContentResolver mResolver;
         private Cursor mCursor;
+        private String mAuthority;
 
-        public Reader(ContentResolver resolver, Cursor cursor) {
+        public Reader(ContentResolver resolver, Cursor cursor, String authority) {
             mResolver = resolver;
             mCursor = cursor;
+            mAuthority = authority;
         }
 
         public DownloadInfo newDownloadInfo(Context context, SystemFacade systemFacade, StorageManager storageManager, DownloadNotifier notifier) {
-            final DownloadInfo info = new DownloadInfo(context, systemFacade, storageManager, notifier);
+            final DownloadInfo info = new DownloadInfo(context, systemFacade, storageManager, notifier, mAuthority);
             updateFromDatabase(info);
             readRequestHeaders(info);
             return info;
@@ -89,7 +92,7 @@ public class DownloadInfo {
 
         private void readRequestHeaders(DownloadInfo info) {
             info.mRequestHeaders.clear();
-            Uri headerUri = Uri.withAppendedPath(info.getAllDownloadsUri(), Downloads.Impl.RequestHeaders.URI_SEGMENT);
+            Uri headerUri = Uri.withAppendedPath(info.getAllDownloadsUri(mAuthority), Downloads.Impl.RequestHeaders.URI_SEGMENT);
             Cursor cursor = mResolver.query(headerUri, null, null, null, null);
             try {
                 int headerIndex =
@@ -234,12 +237,13 @@ public class DownloadInfo {
     private final StorageManager mStorageManager;
     private final DownloadNotifier mNotifier;
 
-    private DownloadInfo(Context context, SystemFacade systemFacade, StorageManager storageManager, DownloadNotifier notifier) {
+    private DownloadInfo(Context context, SystemFacade systemFacade, StorageManager storageManager, DownloadNotifier notifier, String authority) {
         mContext = context;
         mSystemFacade = systemFacade;
         mStorageManager = storageManager;
         mNotifier = notifier;
         mFuzz = Helpers.sRandom.nextInt(1001);
+        mAuthority = authority;
     }
 
     public Collection<Pair<String, String>> getHeaders() {
@@ -251,7 +255,7 @@ public class DownloadInfo {
         intent.setPackage(getPackageName());
         intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, mId);
         intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_STATUS, finalStatus);
-        intent.setData(getMyDownloadsUri());
+        intent.setData(getMyDownloadsUri(mAuthority));
         if (mExtras != null) {
             intent.putExtra(EXTRA_EXTRA, mExtras);
         }
@@ -266,7 +270,7 @@ public class DownloadInfo {
         Intent intent = new Intent(DownloadManager.ACTION_DOWNLOAD_INSUFFICIENT_SPACE);
         intent.setPackage(getPackageName());
         intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, mId);
-        intent.setData(getMyDownloadsUri());
+        intent.setData(getMyDownloadsUri(mAuthority));
         if (mExtras != null) {
             intent.putExtra(EXTRA_EXTRA, mExtras);
         }
@@ -446,7 +450,7 @@ public class DownloadInfo {
                     mStatus = Downloads.Impl.STATUS_RUNNING;
                     ContentValues values = new ContentValues();
                     values.put(Downloads.Impl.COLUMN_STATUS, mStatus);
-                    mContext.getContentResolver().update(getAllDownloadsUri(), values, null, null);
+                    mContext.getContentResolver().update(getAllDownloadsUri(mAuthority), values, null, null);
                 }
 
                 mTask = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier);
@@ -479,12 +483,12 @@ public class DownloadInfo {
                 || mDestination == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
     }
 
-    public Uri getMyDownloadsUri() {
-        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, mId);
+    public Uri getMyDownloadsUri(String authority) {
+        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI(authority), mId);
     }
 
-    public Uri getAllDownloadsUri() {
-        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, mId);
+    public Uri getAllDownloadsUri(String authority) {
+        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI(authority), mId);
     }
 
     /**
@@ -522,7 +526,7 @@ public class DownloadInfo {
 
     void notifyPauseDueToSize(boolean isWifiRequired) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(getAllDownloadsUri());
+        intent.setData(getAllDownloadsUri(mAuthority));
         intent.setClassName(SizeLimitActivity.class.getPackage().getName(), SizeLimitActivity.class.getName());
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(EXTRA_IS_WIFI_REQUIRED, isWifiRequired);
@@ -532,9 +536,9 @@ public class DownloadInfo {
     /**
      * Query and return status of requested download.
      */
-    public static int queryDownloadStatus(ContentResolver resolver, long id) {
+    public static int queryDownloadStatus(ContentResolver resolver, String authority, long id) {
         final Cursor cursor = resolver.query(
-                ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id),
+                ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI(authority), id),
                 new String[]{Downloads.Impl.COLUMN_STATUS}, null, null, null);
         try {
             if (cursor.moveToFirst()) {
