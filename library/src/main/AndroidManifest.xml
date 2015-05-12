@@ -2,8 +2,7 @@
   package="com.novoda.downloadmanager">
 
   <application
-    android:allowBackup="true"
-    android:label="@string/app_name">
+    android:allowBackup="true">
 
     <provider
       android:name="com.novoda.downloadmanager.lib.DownloadProvider"
