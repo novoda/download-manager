@@ -90,7 +90,7 @@ public class DownloadService extends Service {
     private final Map<Long, DownloadInfo> mDownloads = new HashMap<Long, DownloadInfo>();
 
     private final ExecutorService mExecutor = buildDownloadExecutor();
-    private String mAuthority;
+    private String authority;
 
     private static ExecutorService buildDownloadExecutor() {
         final int maxConcurrent = 5;
@@ -147,7 +147,7 @@ public class DownloadService extends Service {
         if (mSystemFacade == null) {
             mSystemFacade = new RealSystemFacade(this);
         }
-        mAuthority = DownloadProvider.determineAuthority(getBaseContext());
+        authority = DownloadProvider.determineAuthority(getBaseContext());
 
         mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         mStorageManager = new StorageManager(this);
@@ -163,7 +163,7 @@ public class DownloadService extends Service {
 
         mObserver = new DownloadManagerContentObserver();
         getContentResolver().registerContentObserver(
-                Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI(mAuthority),
+                Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI(authority),
                 true, mObserver);
     }
 
@@ -299,9 +299,9 @@ public class DownloadService extends Service {
         final Set<Long> staleIds = new HashSet<Long>(mDownloads.keySet());
 
         final ContentResolver resolver = getContentResolver();
-        final Cursor cursor = resolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI(mAuthority), null, null, null, null);
+        final Cursor cursor = resolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI(authority), null, null, null, null);
         try {
-            final DownloadInfo.Reader reader = new DownloadInfo.Reader(resolver, cursor, mAuthority);
+            final DownloadInfo.Reader reader = new DownloadInfo.Reader(resolver, cursor, authority);
             final int idColumn = cursor.getColumnIndexOrThrow(Downloads.Impl._ID);
             while (cursor.moveToNext()) {
                 long id = cursor.getLong(idColumn);

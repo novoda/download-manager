@@ -69,7 +69,7 @@ public class DownloadThread implements Runnable {
     private final SystemFacade mSystemFacade;
     private final StorageManager mStorageManager;
     private final DownloadNotifier mNotifier;
-    private final String mAuthority;
+    private final String authority;
 
     private volatile boolean mPolicyDirty;
 
@@ -80,7 +80,7 @@ public class DownloadThread implements Runnable {
         mInfo = info;
         mStorageManager = storageManager;
         mNotifier = notifier;
-        mAuthority = DownloadProvider.determineAuthority(context);
+        authority = DownloadProvider.determineAuthority(context);
     }
 
     /**
@@ -174,7 +174,7 @@ public class DownloadThread implements Runnable {
 
     private void runInternal() {
         // Skip when download already marked as finished; this download was probably started again while racing with UpdateThread.
-        if (DownloadInfo.queryDownloadStatus(mContext.getContentResolver(), mAuthority, mInfo.mId) == Downloads.Impl.STATUS_SUCCESS) {
+        if (DownloadInfo.queryDownloadStatus(mContext.getContentResolver(), authority, mInfo.mId) == Downloads.Impl.STATUS_SUCCESS) {
             Log.d("Download " + mInfo.mId + " already finished; skipping");
             return;
         }

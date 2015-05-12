@@ -26,7 +26,7 @@ import java.util.concurrent.Future;
  */
 public class DownloadInfo {
     public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
-    private String mAuthority;
+    private String authority;
 
     // TODO: move towards these in-memory objects being sources of truth, and
 
@@ -243,7 +243,7 @@ public class DownloadInfo {
         mStorageManager = storageManager;
         mNotifier = notifier;
         mFuzz = Helpers.sRandom.nextInt(1001);
-        mAuthority = authority;
+        this.authority = authority;
     }
 
     public Collection<Pair<String, String>> getHeaders() {
@@ -484,11 +484,11 @@ public class DownloadInfo {
     }
 
     public Uri getMyDownloadsUri() {
-        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI(mAuthority), mId);
+        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI(authority), mId);
     }
 
     public Uri getAllDownloadsUri() {
-        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI(mAuthority), mId);
+        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI(authority), mId);
     }
 
     /**

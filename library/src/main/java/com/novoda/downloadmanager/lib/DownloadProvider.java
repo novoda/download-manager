@@ -119,7 +119,7 @@ public final class DownloadProvider extends ContentProvider {
      */
     private static final int PUBLIC_DOWNLOAD_ID = 6;
 
-    public static void initURIMatcher(Context context) {
+    private static void initURIMatcher(Context context) {
         if (AUTHORITY == null) {
             AUTHORITY = determineAuthority(context);
             BASE_URIS = new Uri[]{
