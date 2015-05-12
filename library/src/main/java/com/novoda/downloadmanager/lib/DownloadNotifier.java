@@ -199,7 +199,7 @@ public class DownloadNotifier {
             uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, info.mId);
             Intent cancelIntent = new Intent(Constants.ACTION_CANCEL, uri, mContext, DownloadReceiver.class);
             PendingIntent pendingCancelIntent = PendingIntent.getBroadcast(mContext, 0, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            builder.addAction(R.drawable.ic_action_cancel, "Cancel", pendingCancelIntent);
+            builder.addAction(R.drawable.dl__ic_action_cancel, "Cancel", pendingCancelIntent);
 
         } else if (type == TYPE_COMPLETE) {
             final DownloadInfo info = cluster.iterator().next();
@@ -312,13 +312,13 @@ public class DownloadNotifier {
             }
 
             if (type == TYPE_ACTIVE) {
-                builder.setContentTitle(res.getQuantityString(R.plurals.notif_summary_active, cluster.size(), cluster.size()));
+                builder.setContentTitle(res.getQuantityString(R.plurals.dl__notif_summary_active, cluster.size(), cluster.size()));
                 builder.setContentText(remainingText);
                 builder.setContentInfo(percentText);
                 inboxStyle.setSummaryText(remainingText);
 
             } else if (type == TYPE_WAITING) {
-                builder.setContentTitle(res.getQuantityString(R.plurals.notif_summary_waiting, cluster.size(), cluster.size()));
+                builder.setContentTitle(res.getQuantityString(R.plurals.dl__notif_summary_waiting, cluster.size(), cluster.size()));
                 builder.setContentText("Download size requires Wi-Fi.");
                 inboxStyle.setSummaryText("Download size requires Wi-Fi.");
             }
@@ -410,13 +410,13 @@ public class DownloadNotifier {
         final Resources res = mContext.getResources();
         if (millis >= DateUtils.HOUR_IN_MILLIS) {
             final int hours = (int) ((millis + 1800000) / DateUtils.HOUR_IN_MILLIS);
-            return res.getQuantityString(R.plurals.duration_hours, hours, hours);
+            return res.getQuantityString(R.plurals.dl__duration_hours, hours, hours);
         } else if (millis >= DateUtils.MINUTE_IN_MILLIS) {
             final int minutes = (int) ((millis + 30000) / DateUtils.MINUTE_IN_MILLIS);
-            return res.getQuantityString(R.plurals.duration_minutes, minutes, minutes);
+            return res.getQuantityString(R.plurals.dl__duration_minutes, minutes, minutes);
         } else {
             final int seconds = (int) ((millis + 500) / DateUtils.SECOND_IN_MILLIS);
-            return res.getQuantityString(R.plurals.duration_seconds, seconds, seconds);
+            return res.getQuantityString(R.plurals.dl__duration_seconds, seconds, seconds);
         }
     }
 }

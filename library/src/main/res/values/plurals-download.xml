@@ -2,7 +2,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
   <!-- Phrase describing a time duration using seconds [CHAR LIMIT=16] -->
-  <plurals name="duration_seconds">
+  <plurals name="dl__duration_seconds">
     <item quantity="one">1 second</item>
     <item quantity="other">
       <xliff:g id="count">%d</xliff:g>
@@ -10,7 +10,7 @@
     </item>
   </plurals>
   <!-- Phrase describing a time duration using minutes [CHAR LIMIT=16] -->
-  <plurals name="duration_minutes">
+  <plurals name="dl__duration_minutes">
     <item quantity="one">1 minute</item>
     <item quantity="other">
       <xliff:g id="count">%d</xliff:g>
@@ -18,7 +18,7 @@
     </item>
   </plurals>
   <!-- Phrase describing a time duration using hours [CHAR LIMIT=16] -->
-  <plurals name="duration_hours">
+  <plurals name="dl__duration_hours">
     <item quantity="one">1 hour</item>
     <item quantity="other">
       <xliff:g id="count">%d</xliff:g>
@@ -26,7 +26,7 @@
     </item>
   </plurals>
 
-  <plurals name="notif_summary_active">
+  <plurals name="dl__notif_summary_active">
     <item quantity="one">1 file downloading</item>
     <item quantity="other">
       <xliff:g id="number">%d</xliff:g>
@@ -35,7 +35,7 @@
   </plurals>
 
   <!-- Title summarizing waiting downloads. [CHAR LIMIT=32] -->
-  <plurals name="notif_summary_waiting">
+  <plurals name="dl__notif_summary_waiting">
     <item quantity="one">1 file waiting</item>
     <item quantity="other">
       <xliff:g id="number">%d</xliff:g>
