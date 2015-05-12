@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.ListView;
 
 import com.novoda.downloadmanager.lib.DownloadManager;
+import com.novoda.downloadmanager.lib.DownloadProvider;
 import com.novoda.downloadmanager.lib.Query;
 import com.novoda.downloadmanager.lib.Request;
 
@@ -28,7 +29,8 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         com.novoda.notils.logger.simple.Log.setShowLogs(true);
         setContentView(R.layout.activity_main);
         listView = (ListView) findViewById(R.id.main_downloads_list);
-        downloadManager = new DownloadManager(getContentResolver());
+        String authority = DownloadProvider.determineAuthority(this);
+        downloadManager = new DownloadManager(getContentResolver(), authority);
 
         setupDownloadingExample();
         setupQueryingExample();

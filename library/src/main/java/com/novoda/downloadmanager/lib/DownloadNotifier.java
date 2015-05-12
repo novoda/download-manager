@@ -84,11 +84,13 @@ public class DownloadNotifier {
 //    @GuardedBy("mDownloadSpeed")
     // LongSparseLongArray
     private final LongSparseArray<Long> mDownloadTouch = new LongSparseArray<Long>();
+    private String mAuthority;
 
     public DownloadNotifier(Context context, NotificationImageRetriever imageRetriever) {
         this.mContext = context;
         this.imageRetriever = imageRetriever;
         this.mNotifManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        mAuthority = DownloadProvider.determineAuthority(context);
     }
 
     public void cancelAll() {
@@ -196,14 +198,14 @@ public class DownloadNotifier {
             builder.setOngoing(true);
 
             DownloadInfo info = cluster.iterator().next();
-            uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, info.mId);
+            uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI(mAuthority), info.mId);
             Intent cancelIntent = new Intent(Constants.ACTION_CANCEL, uri, mContext, DownloadReceiver.class);
             PendingIntent pendingCancelIntent = PendingIntent.getBroadcast(mContext, 0, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             builder.addAction(R.drawable.dl__ic_action_cancel, "Cancel", pendingCancelIntent);
 
         } else if (type == TYPE_COMPLETE) {
             final DownloadInfo info = cluster.iterator().next();
-            final Uri uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, info.mId);
+            final Uri uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI(mAuthority), info.mId);
             builder.setAutoCancel(true);
 
             final String action;

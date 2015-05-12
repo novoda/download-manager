@@ -39,6 +39,7 @@ public class DownloadScanner implements MediaScannerConnectionClient {
 
     private final Context mContext;
     private final MediaScannerConnection mConnection;
+    private final String authority;
 
     private static class ScanRequest {
         public final long id;
@@ -64,6 +65,7 @@ public class DownloadScanner implements MediaScannerConnectionClient {
     public DownloadScanner(Context context) {
         mContext = context;
         mConnection = new MediaScannerConnection(context, this);
+        authority = DownloadProvider.determineAuthority(context);
     }
 
     /**
@@ -141,7 +143,7 @@ public class DownloadScanner implements MediaScannerConnectionClient {
 
         final ContentResolver resolver = mContext.getContentResolver();
         final Uri downloadUri = ContentUris.withAppendedId(
-                Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, req.id);
+                Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI(authority), req.id);
         final int rows = resolver.update(downloadUri, values, null, null);
         if (rows == 0) {
             // Local row disappeared during scan; download was probably deleted

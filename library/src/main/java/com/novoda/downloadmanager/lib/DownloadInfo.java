@@ -26,6 +26,7 @@ import java.util.concurrent.Future;
  */
 public class DownloadInfo {
     public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
+    private String authority;
 
     // TODO: move towards these in-memory objects being sources of truth, and
 
@@ -34,14 +35,16 @@ public class DownloadInfo {
     public static class Reader {
         private ContentResolver mResolver;
         private Cursor mCursor;
+        private String mAuthority;
 
-        public Reader(ContentResolver resolver, Cursor cursor) {
+        public Reader(ContentResolver resolver, Cursor cursor, String authority) {
             mResolver = resolver;
             mCursor = cursor;
+            mAuthority = authority;
         }
 
         public DownloadInfo newDownloadInfo(Context context, SystemFacade systemFacade, StorageManager storageManager, DownloadNotifier notifier) {
-            final DownloadInfo info = new DownloadInfo(context, systemFacade, storageManager, notifier);
+            final DownloadInfo info = new DownloadInfo(context, systemFacade, storageManager, notifier, mAuthority);
             updateFromDatabase(info);
             readRequestHeaders(info);
             return info;
@@ -234,12 +237,13 @@ public class DownloadInfo {
     private final StorageManager mStorageManager;
     private final DownloadNotifier mNotifier;
 
-    private DownloadInfo(Context context, SystemFacade systemFacade, StorageManager storageManager, DownloadNotifier notifier) {
+    private DownloadInfo(Context context, SystemFacade systemFacade, StorageManager storageManager, DownloadNotifier notifier, String authority) {
         mContext = context;
         mSystemFacade = systemFacade;
         mStorageManager = storageManager;
         mNotifier = notifier;
         mFuzz = Helpers.sRandom.nextInt(1001);
+        this.authority = authority;
     }
 
     public Collection<Pair<String, String>> getHeaders() {
@@ -480,11 +484,11 @@ public class DownloadInfo {
     }
 
     public Uri getMyDownloadsUri() {
-        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, mId);
+        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI(authority), mId);
     }
 
     public Uri getAllDownloadsUri() {
-        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, mId);
+        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI(authority), mId);
     }
 
     /**
@@ -532,9 +536,9 @@ public class DownloadInfo {
     /**
      * Query and return status of requested download.
      */
-    public static int queryDownloadStatus(ContentResolver resolver, long id) {
+    public static int queryDownloadStatus(ContentResolver resolver, String authority, long id) {
         final Cursor cursor = resolver.query(
-                ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id),
+                ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI(authority), id),
                 new String[]{Downloads.Impl.COLUMN_STATUS}, null, null, null);
         try {
             if (cursor.moveToFirst()) {

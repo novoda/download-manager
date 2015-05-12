@@ -35,9 +35,9 @@ import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.provider.OpenableColumns;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import com.novoda.downloadmanager.BuildConfig;
 import com.novoda.notils.logger.simple.Log;
 
 import java.io.File;
@@ -61,7 +61,8 @@ public final class DownloadProvider extends ContentProvider {
     /**
      * Added so we can use our own ContentProvider
      */
-    public static final String AUTHORITY = Reflector.reflectAuthority();
+    @Nullable
+    private static String AUTHORITY;
 
     /**
      * Database filename
@@ -118,27 +119,32 @@ public final class DownloadProvider extends ContentProvider {
      */
     private static final int PUBLIC_DOWNLOAD_ID = 6;
 
-    static {
-        sURIMatcher.addURI(AUTHORITY, "my_downloads", MY_DOWNLOADS);
-        sURIMatcher.addURI(AUTHORITY, "my_downloads/#", MY_DOWNLOADS_ID);
-        sURIMatcher.addURI(AUTHORITY, "all_downloads", ALL_DOWNLOADS);
-        sURIMatcher.addURI(AUTHORITY, "all_downloads/#", ALL_DOWNLOADS_ID);
-        sURIMatcher.addURI(AUTHORITY, "my_downloads/#/" + Downloads.Impl.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
-        sURIMatcher.addURI(AUTHORITY, "all_downloads/#/" + Downloads.Impl.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
-        // temporary, for backwards compatibility
-        sURIMatcher.addURI(AUTHORITY, "download", MY_DOWNLOADS);
-        sURIMatcher.addURI(AUTHORITY, "download/#", MY_DOWNLOADS_ID);
-        sURIMatcher.addURI(AUTHORITY, "download/#/" + Downloads.Impl.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
-        sURIMatcher.addURI(AUTHORITY, Downloads.Impl.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT + "/#", PUBLIC_DOWNLOAD_ID);
+    private static void initURIMatcher(Context context) {
+        if (AUTHORITY == null) {
+            AUTHORITY = determineAuthority(context);
+            BASE_URIS = new Uri[]{
+                    Downloads.Impl.CONTENT_URI(AUTHORITY),
+                    Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI(AUTHORITY),
+            };
+
+            sURIMatcher.addURI(AUTHORITY, "my_downloads", MY_DOWNLOADS);
+            sURIMatcher.addURI(AUTHORITY, "my_downloads/#", MY_DOWNLOADS_ID);
+            sURIMatcher.addURI(AUTHORITY, "all_downloads", ALL_DOWNLOADS);
+            sURIMatcher.addURI(AUTHORITY, "all_downloads/#", ALL_DOWNLOADS_ID);
+            sURIMatcher.addURI(AUTHORITY, "my_downloads/#/" + Downloads.Impl.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
+            sURIMatcher.addURI(AUTHORITY, "all_downloads/#/" + Downloads.Impl.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
+            // temporary, for backwards compatibility
+            sURIMatcher.addURI(AUTHORITY, "download", MY_DOWNLOADS);
+            sURIMatcher.addURI(AUTHORITY, "download/#", MY_DOWNLOADS_ID);
+            sURIMatcher.addURI(AUTHORITY, "download/#/" + Downloads.Impl.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
+            sURIMatcher.addURI(AUTHORITY, Downloads.Impl.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT + "/#", PUBLIC_DOWNLOAD_ID);
+        }
     }
 
     /**
      * Different base URIs that could be used to access an individual download
      */
-    private static final Uri[] BASE_URIS = new Uri[]{
-            Downloads.Impl.CONTENT_URI,
-            Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
-    };
+    private static Uri[] BASE_URIS;
 
     private static final String[] sAppReadableColumnsArray = new String[]{
             Downloads.Impl._ID,
@@ -194,6 +200,10 @@ public final class DownloadProvider extends ContentProvider {
 
     //    @VisibleForTesting
     SystemFacade mSystemFacade;
+
+    public static String determineAuthority(final Context context) {
+        return context.getPackageName() + ".downloads";
+    }
 
     /**
      * This class encapsulates a SQL where clause and its parameters.  It makes it possible for
@@ -438,6 +448,7 @@ public final class DownloadProvider extends ContentProvider {
         if (mSystemFacade == null) {
             mSystemFacade = new RealSystemFacade(getContext());
         }
+        initURIMatcher(getContext());
 
         mOpenHelper = new DatabaseHelper(getContext());
         // Initialize the system uid
@@ -667,7 +678,7 @@ public final class DownloadProvider extends ContentProvider {
             context.startService(new Intent(context, DownloadService.class));
         }
         notifyContentChanged(uri, match);
-        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, rowID);
+        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI(AUTHORITY), rowID);
     }
 
     /**
@@ -1177,7 +1188,7 @@ public final class DownloadProvider extends ContentProvider {
     private void logVerboseOpenFileInfo(Uri uri, String mode) {
         Log.v("openFile uri: " + uri + ", mode: " + mode
                 + ", uid: " + Binder.getCallingUid());
-        Cursor cursor = query(Downloads.Impl.CONTENT_URI,
+        Cursor cursor = query(Downloads.Impl.CONTENT_URI(AUTHORITY),
                 new String[]{"_id"}, null, null, "_id");
         if (cursor == null) {
             Log.v("null cursor in openFile");
