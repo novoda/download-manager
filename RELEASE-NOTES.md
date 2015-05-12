@@ -1,3 +1,8 @@
+0.0.3
+-------
+
+Exposes the `DownloadManager.CONTENT_URI` so clients can query however they want (for example Loaders)
+
 0.0.2
 -------
 
