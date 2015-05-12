@@ -61,24 +61,24 @@ public class DownloadManager {
      * An identifier for a particular download, unique across the system.  Clients use this ID to
      * make subsequent calls related to the download.
      */
-    public final static String COLUMN_ID = Downloads.Impl._ID;
+    public static final String COLUMN_ID = Downloads.Impl._ID;
 
     /**
      * The client-supplied title for this download.  This will be displayed in system notifications.
      * Defaults to the empty string.
      */
-    public final static String COLUMN_TITLE = Downloads.Impl.COLUMN_TITLE;
+    public static final String COLUMN_TITLE = Downloads.Impl.COLUMN_TITLE;
 
     /**
      * The client-supplied description of this download.  This will be displayed in system
      * notifications.  Defaults to the empty string.
      */
-    public final static String COLUMN_DESCRIPTION = Downloads.Impl.COLUMN_DESCRIPTION;
+    public static final String COLUMN_DESCRIPTION = Downloads.Impl.COLUMN_DESCRIPTION;
 
     /**
      * URI to be downloaded.
      */
-    public final static String COLUMN_URI = Downloads.Impl.COLUMN_URI;
+    public static final String COLUMN_URI = Downloads.Impl.COLUMN_URI;
 
     /**
      * Internet Media Type of the downloaded file.  If no value is provided upon creation, this will
@@ -87,30 +87,30 @@ public class DownloadManager {
      *
      * @see <a href="http://www.ietf.org/rfc/rfc1590.txt">RFC 1590, defining Media Types</a>
      */
-    public final static String COLUMN_MEDIA_TYPE = "media_type";
+    public static final String COLUMN_MEDIA_TYPE = "media_type";
 
     /**
      * Total size of the download in bytes.  This will initially be -1 and will be filled in once
      * the download starts.
      */
-    public final static String COLUMN_TOTAL_SIZE_BYTES = "total_size";
+    public static final String COLUMN_TOTAL_SIZE_BYTES = "total_size";
 
     /**
      * Uri where downloaded file will be stored.  If a destination is supplied by client, that URI
      * will be used here.  Otherwise, the value will initially be null and will be filled in with a
      * generated URI once the download has started.
      */
-    public final static String COLUMN_LOCAL_URI = "local_uri";
+    public static final String COLUMN_LOCAL_URI = "local_uri";
 
     /**
      * The pathname of the file where the download is stored.
      */
-    public final static String COLUMN_LOCAL_FILENAME = "local_filename";
+    public static final String COLUMN_LOCAL_FILENAME = "local_filename";
 
     /**
      * Current status of the download, as one of the STATUS_* constants.
      */
-    public final static String COLUMN_STATUS = Downloads.Impl.COLUMN_STATUS;
+    public static final String COLUMN_STATUS = Downloads.Impl.COLUMN_STATUS;
 
     /**
      * Provides more detail on the status of the download.  Its meaning depends on the value of
@@ -129,18 +129,18 @@ public class DownloadManager {
      * @see <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec6.html#sec6.1.1">RFC 2616
      * status codes</a>
      */
-    public final static String COLUMN_REASON = "reason";
+    public static final String COLUMN_REASON = "reason";
 
     /**
      * Number of bytes download so far.
      */
-    public final static String COLUMN_BYTES_DOWNLOADED_SO_FAR = "bytes_so_far";
+    public static final String COLUMN_BYTES_DOWNLOADED_SO_FAR = "bytes_so_far";
 
     /**
      * Timestamp when the download was last modified, in {@link System#currentTimeMillis
      * System.currentTimeMillis()} (wall clock time in UTC).
      */
-    public final static String COLUMN_LAST_MODIFIED_TIMESTAMP = "last_modified_timestamp";
+    public static final String COLUMN_LAST_MODIFIED_TIMESTAMP = "last_modified_timestamp";
 
     /**
      * The URI to the corresponding entry in MediaProvider for this downloaded entry. It is
@@ -152,81 +152,81 @@ public class DownloadManager {
     /**
      * Value of {@link #COLUMN_STATUS} when the download is waiting to start.
      */
-    public final static int STATUS_PENDING = 1 << 0;
+    public static final int STATUS_PENDING = 1 << 0;
 
     /**
      * Value of {@link #COLUMN_STATUS} when the download is currently running.
      */
-    public final static int STATUS_RUNNING = 1 << 1;
+    public static final int STATUS_RUNNING = 1 << 1;
 
     /**
      * Value of {@link #COLUMN_STATUS} when the download is waiting to retry or resume.
      */
-    public final static int STATUS_PAUSED = 1 << 2;
+    public static final int STATUS_PAUSED = 1 << 2;
 
     /**
      * Value of {@link #COLUMN_STATUS} when the download has successfully completed.
      */
-    public final static int STATUS_SUCCESSFUL = 1 << 3;
+    public static final int STATUS_SUCCESSFUL = 1 << 3;
 
     /**
      * Value of {@link #COLUMN_STATUS} when the download has failed (and will not be retried).
      */
-    public final static int STATUS_FAILED = 1 << 4;
+    public static final int STATUS_FAILED = 1 << 4;
 
     /**
      * Value of COLUMN_ERROR_CODE when the download has completed with an error that doesn't fit
      * under any other error code.
      */
-    public final static int ERROR_UNKNOWN = 1000;
+    public static final int ERROR_UNKNOWN = 1000;
 
     /**
      * Value of {@link #COLUMN_REASON} when a storage issue arises which doesn't fit under any
      * other error code. Use the more specific {@link #ERROR_INSUFFICIENT_SPACE} and
      * {@link #ERROR_DEVICE_NOT_FOUND} when appropriate.
      */
-    public final static int ERROR_FILE_ERROR = 1001;
+    public static final int ERROR_FILE_ERROR = 1001;
 
     /**
      * Value of {@link #COLUMN_REASON} when an HTTP code was received that download manager
      * can't handle.
      */
-    public final static int ERROR_UNHANDLED_HTTP_CODE = 1002;
+    public static final int ERROR_UNHANDLED_HTTP_CODE = 1002;
 
     /**
      * Value of {@link #COLUMN_REASON} when an error receiving or processing data occurred at
      * the HTTP level.
      */
-    public final static int ERROR_HTTP_DATA_ERROR = 1004;
+    public static final int ERROR_HTTP_DATA_ERROR = 1004;
 
     /**
      * Value of {@link #COLUMN_REASON} when there were too many redirects.
      */
-    public final static int ERROR_TOO_MANY_REDIRECTS = 1005;
+    public static final int ERROR_TOO_MANY_REDIRECTS = 1005;
 
     /**
      * Value of {@link #COLUMN_REASON} when there was insufficient storage space. Typically,
      * this is because the SD card is full.
      */
-    public final static int ERROR_INSUFFICIENT_SPACE = 1006;
+    public static final int ERROR_INSUFFICIENT_SPACE = 1006;
 
     /**
      * Value of {@link #COLUMN_REASON} when no external storage device was found. Typically,
      * this is because the SD card is not mounted.
      */
-    public final static int ERROR_DEVICE_NOT_FOUND = 1007;
+    public static final int ERROR_DEVICE_NOT_FOUND = 1007;
 
     /**
      * Value of {@link #COLUMN_REASON} when some possibly transient error occurred but we can't
      * resume the download.
      */
-    public final static int ERROR_CANNOT_RESUME = 1008;
+    public static final int ERROR_CANNOT_RESUME = 1008;
 
     /**
      * Value of {@link #COLUMN_REASON} when the requested destination file already exists (the
      * download manager will not overwrite an existing file).
      */
-    public final static int ERROR_FILE_ALREADY_EXISTS = 1009;
+    public static final int ERROR_FILE_ALREADY_EXISTS = 1009;
 
     /**
      * Value of {@link #COLUMN_REASON} when the download has failed because of
@@ -234,57 +234,57 @@ public class DownloadManager {
      *
      * @hide
      */
-    public final static int ERROR_BLOCKED = 1010;
+    public static final int ERROR_BLOCKED = 1010;
 
     /**
      * Value of {@link #COLUMN_REASON} when the download is paused because some network error
      * occurred and the download manager is waiting before retrying the request.
      */
-    public final static int PAUSED_WAITING_TO_RETRY = 1;
+    public static final int PAUSED_WAITING_TO_RETRY = 1;
 
     /**
      * Value of {@link #COLUMN_REASON} when the download is waiting for network connectivity to
      * proceed.
      */
-    public final static int PAUSED_WAITING_FOR_NETWORK = 2;
+    public static final int PAUSED_WAITING_FOR_NETWORK = 2;
 
     /**
      * Value of {@link #COLUMN_REASON} when the download exceeds a size limit for downloads over
      * the mobile network and the download manager is waiting for a Wi-Fi connection to proceed.
      */
-    public final static int PAUSED_QUEUED_FOR_WIFI = 3;
+    public static final int PAUSED_QUEUED_FOR_WIFI = 3;
 
     /**
      * Value of {@link #COLUMN_REASON} when the download is paused for some other reason.
      */
-    public final static int PAUSED_UNKNOWN = 4;
+    public static final int PAUSED_UNKNOWN = 4;
 
     /**
      * Broadcast intent action sent by the download manager when a download completes.
      */
-    public final static String ACTION_DOWNLOAD_COMPLETE = "android.intent.action.SCUBA_DOWNLOAD_COMPLETE";
+    public static final String ACTION_DOWNLOAD_COMPLETE = "android.intent.action.SCUBA_DOWNLOAD_COMPLETE";
 
     /**
      * Broadcast intent action sent by the download manager when a download wasn't started due to insufficient space
      */
-    public final static String ACTION_DOWNLOAD_INSUFFICIENT_SPACE = "android.intent.action.SCUBA_DOWNLOAD_INSUFFICIENT_SPACE";
+    public static final String ACTION_DOWNLOAD_INSUFFICIENT_SPACE = "android.intent.action.SCUBA_DOWNLOAD_INSUFFICIENT_SPACE";
 
     /**
      * Broadcast intent action sent by the download manager when the user clicks on a running
      * download, either from a system notification or from the downloads UI.
      */
-    public final static String ACTION_NOTIFICATION_CLICKED = "android.intent.action.SCUBA_DOWNLOAD_NOTIFICATION_CLICKED";
+    public static final String ACTION_NOTIFICATION_CLICKED = "android.intent.action.SCUBA_DOWNLOAD_NOTIFICATION_CLICKED";
 
     /**
      * Intent action to launch an activity to display all downloads.
      */
-    public final static String ACTION_VIEW_DOWNLOADS = "android.intent.action.SCUBA_VIEW_DOWNLOADS";
+    public static final String ACTION_VIEW_DOWNLOADS = "android.intent.action.SCUBA_VIEW_DOWNLOADS";
 
     /**
      * Intent extra included with {@link #ACTION_VIEW_DOWNLOADS} to start DownloadApp in
      * sort-by-size mode.
      */
-    public final static String INTENT_EXTRAS_SORT_BY_SIZE = "android.app.DownloadManager.extra_sortBySize";
+    public static final String INTENT_EXTRAS_SORT_BY_SIZE = "android.app.DownloadManager.extra_sortBySize";
 
     /**
      * Intent extra included with {@link #ACTION_DOWNLOAD_COMPLETE} intents, indicating the ID (as a
