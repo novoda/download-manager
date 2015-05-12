@@ -92,7 +92,7 @@ public class DownloadInfo {
 
         private void readRequestHeaders(DownloadInfo info) {
             info.mRequestHeaders.clear();
-            Uri headerUri = Uri.withAppendedPath(info.getAllDownloadsUri(mAuthority), Downloads.Impl.RequestHeaders.URI_SEGMENT);
+            Uri headerUri = Uri.withAppendedPath(info.getAllDownloadsUri(), Downloads.Impl.RequestHeaders.URI_SEGMENT);
             Cursor cursor = mResolver.query(headerUri, null, null, null, null);
             try {
                 int headerIndex =
@@ -255,7 +255,7 @@ public class DownloadInfo {
         intent.setPackage(getPackageName());
         intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, mId);
         intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_STATUS, finalStatus);
-        intent.setData(getMyDownloadsUri(mAuthority));
+        intent.setData(getMyDownloadsUri());
         if (mExtras != null) {
             intent.putExtra(EXTRA_EXTRA, mExtras);
         }
@@ -270,7 +270,7 @@ public class DownloadInfo {
         Intent intent = new Intent(DownloadManager.ACTION_DOWNLOAD_INSUFFICIENT_SPACE);
         intent.setPackage(getPackageName());
         intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, mId);
-        intent.setData(getMyDownloadsUri(mAuthority));
+        intent.setData(getMyDownloadsUri());
         if (mExtras != null) {
             intent.putExtra(EXTRA_EXTRA, mExtras);
         }
@@ -450,7 +450,7 @@ public class DownloadInfo {
                     mStatus = Downloads.Impl.STATUS_RUNNING;
                     ContentValues values = new ContentValues();
                     values.put(Downloads.Impl.COLUMN_STATUS, mStatus);
-                    mContext.getContentResolver().update(getAllDownloadsUri(mAuthority), values, null, null);
+                    mContext.getContentResolver().update(getAllDownloadsUri(), values, null, null);
                 }
 
                 mTask = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier);
@@ -483,12 +483,12 @@ public class DownloadInfo {
                 || mDestination == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
     }
 
-    public Uri getMyDownloadsUri(String authority) {
-        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI(authority), mId);
+    public Uri getMyDownloadsUri() {
+        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI(mAuthority), mId);
     }
 
-    public Uri getAllDownloadsUri(String authority) {
-        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI(authority), mId);
+    public Uri getAllDownloadsUri() {
+        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI(mAuthority), mId);
     }
 
     /**
@@ -526,7 +526,7 @@ public class DownloadInfo {
 
     void notifyPauseDueToSize(boolean isWifiRequired) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(getAllDownloadsUri(mAuthority));
+        intent.setData(getAllDownloadsUri());
         intent.setClassName(SizeLimitActivity.class.getPackage().getName(), SizeLimitActivity.class.getName());
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(EXTRA_IS_WIFI_REQUIRED, isWifiRequired);

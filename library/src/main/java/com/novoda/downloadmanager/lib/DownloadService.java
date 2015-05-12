@@ -350,7 +350,7 @@ public class DownloadService extends Service {
         }
 
         deleteFileIfExists(info.mFileName);
-        resolver.delete(info.getAllDownloadsUri(mAuthority), null, null);
+        resolver.delete(info.getAllDownloadsUri(), null, null);
     }
 
     private boolean kickOffDownloadTaskIfReady(boolean isActive, DownloadInfo info) {

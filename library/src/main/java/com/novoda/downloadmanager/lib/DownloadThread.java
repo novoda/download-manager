@@ -547,7 +547,7 @@ public class DownloadThread implements Runnable {
                 now - state.mTimeLastNotification > Constants.MIN_PROGRESS_TIME) {
             ContentValues values = new ContentValues();
             values.put(Downloads.Impl.COLUMN_CURRENT_BYTES, state.mCurrentBytes);
-            mContext.getContentResolver().update(mInfo.getAllDownloadsUri(mAuthority), values, null, null);
+            mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
             state.mBytesNotified = state.mCurrentBytes;
             state.mTimeLastNotification = now;
         }
@@ -591,7 +591,7 @@ public class DownloadThread implements Runnable {
         if (state.mContentLength == -1) {
             values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, state.mCurrentBytes);
         }
-        mContext.getContentResolver().update(mInfo.getAllDownloadsUri(mAuthority), values, null, null);
+        mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
 
         final boolean lengthMismatched = (state.mContentLength != -1)
                 && (state.mCurrentBytes != state.mContentLength);
@@ -627,7 +627,7 @@ public class DownloadThread implements Runnable {
 
             ContentValues values = new ContentValues();
             values.put(Downloads.Impl.COLUMN_CURRENT_BYTES, state.mCurrentBytes);
-            mContext.getContentResolver().update(mInfo.getAllDownloadsUri(mAuthority), values, null, null);
+            mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
             if (cannotResume(state)) {
                 throw new StopRequestException(STATUS_CANNOT_RESUME, "Failed reading response: " + ex + "; unable to resume", ex);
             } else {
@@ -675,7 +675,7 @@ public class DownloadThread implements Runnable {
             values.put(Downloads.Impl.COLUMN_MIME_TYPE, state.mMimeType);
         }
         values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, mInfo.mTotalBytes);
-        mContext.getContentResolver().update(mInfo.getAllDownloadsUri(mAuthority), values, null, null);
+        mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
     }
 
     /**
@@ -820,7 +820,7 @@ public class DownloadThread implements Runnable {
         if (!TextUtils.isEmpty(errorMsg)) {
             values.put(Downloads.Impl.COLUMN_ERROR_MSG, errorMsg);
         }
-        mContext.getContentResolver().update(mInfo.getAllDownloadsUri(mAuthority), values, null, null);
+        mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
     }
 
     public static long getHeaderFieldLong(URLConnection conn, String field, long defaultValue) {
