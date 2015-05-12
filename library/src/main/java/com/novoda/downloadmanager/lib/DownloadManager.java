@@ -55,6 +55,8 @@ import java.net.URI;
  */
 public class DownloadManager {
 
+    public static final Uri CONTENT_URI = Downloads.Impl.CONTENT_URI;
+
     /**
      * An identifier for a particular download, unique across the system.  Clients use this ID to
      * make subsequent calls related to the download.
