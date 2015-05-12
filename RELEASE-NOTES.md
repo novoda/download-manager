@@ -1,3 +1,8 @@
+0.0.4
+-------
+
+Prefixes all resources with `dl__` , fixes but where the `app_name` for some clients would be "DownloadManager"
+
 0.0.3
 -------
 
