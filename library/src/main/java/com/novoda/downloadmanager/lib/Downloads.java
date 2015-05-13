@@ -700,17 +700,6 @@ final class Downloads {
          */
         public static final int STATUS_TOO_MANY_REDIRECTS = 497;
 
-        /**
-         * This download has failed because requesting application has been
-         * blocked by {NetworkPolicyManager}.
-         *
-         * @hide
-         * @deprecated since behavior now uses
-         * {@link #STATUS_WAITING_FOR_NETWORK}
-         */
-        @Deprecated
-        public static final int STATUS_BLOCKED = 498;
-
         public static String statusToString(int status) {
             switch (status) {
                 case STATUS_PENDING:
@@ -759,8 +748,6 @@ final class Downloads {
                     return "HTTP_EXCEPTION";
                 case STATUS_TOO_MANY_REDIRECTS:
                     return "TOO_MANY_REDIRECTS";
-                case STATUS_BLOCKED:
-                    return "BLOCKED";
                 default:
                     return Integer.toString(status);
             }
