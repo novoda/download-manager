@@ -3,7 +3,7 @@ package com.novoda.downloadmanager.lib;
 import android.net.ConnectivityManager;
 import android.os.Build;
 
-public interface NetworkMeter {
+interface NetworkMeter {
     boolean isActiveNetworkMetered();
 
     public static class Factory {

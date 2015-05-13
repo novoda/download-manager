@@ -13,17 +13,13 @@ import java.util.List;
 public class Query {
     /**
      * Constant for use with {@link #orderBy}
-     *
-     * @hide
      */
-    public static final int ORDER_ASCENDING = 1;
+    static final int ORDER_ASCENDING = 1;
 
     /**
      * Constant for use with {@link #orderBy}
-     *
-     * @hide
      */
-    public static final int ORDER_DESCENDING = 2;
+    static final int ORDER_DESCENDING = 2;
 
     private long[] mIds = null;
     private Integer mStatusFlags = null;
@@ -70,7 +66,6 @@ public class Query {
      *              the system's Downloads UI; if false (the default), this query will include
      *              both visible and invisible downloads.
      * @return this object
-     * @hide
      */
     public Query setOnlyIncludeVisibleInDownloadsUi(boolean value) {
         mOnlyIncludeVisibleInDownloadsUi = value;
@@ -85,9 +80,8 @@ public class Query {
      *                  supported.
      * @param direction either {@link #ORDER_ASCENDING} or {@link #ORDER_DESCENDING}
      * @return this object
-     * @hide
      */
-    public Query orderBy(String column, int direction) {
+    Query orderBy(String column, int direction) {
         if (direction != ORDER_ASCENDING && direction != ORDER_DESCENDING) {
             throw new IllegalArgumentException("Invalid direction: " + direction);
         }

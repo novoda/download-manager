@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 /**
  * Some helper functions for the download manager
  */
-public class Helpers {
+class Helpers {
     public static Random sRandom = new Random(SystemClock.uptimeMillis());
 
     /**

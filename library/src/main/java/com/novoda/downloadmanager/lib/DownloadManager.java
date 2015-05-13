@@ -233,14 +233,6 @@ public class DownloadManager {
     public static final int ERROR_FILE_ALREADY_EXISTS = 1009;
 
     /**
-     * Value of {@link #COLUMN_REASON} when the download has failed because of
-     * {NetworkPolicyManager} controls on the requesting application.
-     *
-     * @hide
-     */
-    public static final int ERROR_BLOCKED = 1010;
-
-    /**
      * Value of {@link #COLUMN_REASON} when the download is paused because some network error
      * occurred and the download manager is waiting before retrying the request.
      */
@@ -338,9 +330,6 @@ public class DownloadManager {
     private ContentResolver mResolver;
     private Uri mBaseUri = Downloads.Impl.CONTENT_URI;
 
-    /**
-     * @hide
-     */
     public DownloadManager(ContentResolver resolver) {
         mResolver = resolver;
     }
@@ -348,10 +337,8 @@ public class DownloadManager {
     /**
      * Makes this object access the download provider through /all_downloads URIs rather than
      * /my_downloads URIs, for clients that have permission to do so.
-     *
-     * @hide
      */
-    public void setAccessAllDownloads(boolean accessAllDownloads) {
+    void setAccessAllDownloads(boolean accessAllDownloads) {
         if (accessAllDownloads) {
             mBaseUri = Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI;
         } else {
@@ -600,22 +587,6 @@ public class DownloadManager {
         } catch (SettingNotFoundException exc) {
             return null;
         }
-    }
-
-    /**
-     * {@hide}
-     */
-    public static boolean isActiveNetworkExpensive(Context context) {
-        // TODO: connect to NetworkPolicyManager
-        return false;
-    }
-
-    /**
-     * {@hide}
-     */
-    public static long getActiveNetworkWarningBytes(Context context) {
-        // TODO: connect to NetworkPolicyManager
-        return -1;
     }
 
     /**

@@ -48,7 +48,6 @@ public class Request {
     private boolean mMeteredAllowed = true;
     private boolean mIsVisibleInDownloadsUi = true;
     private boolean mScannable = false;
-    private boolean mUseSystemCache = false;
     private String extraField;
     private String bigPictureUrl;
     /**
@@ -130,24 +129,6 @@ public class Request {
      */
     public Request setDestinationUri(Uri uri) {
         mDestinationUri = uri;
-        return this;
-    }
-
-    /**
-     * Set the local destination for the downloaded file to the system cache dir (/cache).
-     * This is only available to System apps with the permission
-     * { android.Manifest.permission#ACCESS_CACHE_FILESYSTEM}.
-     * <p/>
-     * The downloaded file is not scanned by MediaScanner.
-     * But it can be made scannable by calling {@link #allowScanningByMediaScanner()}.
-     * <p/>
-     * Files downloaded to /cache may be deleted by the system at any time to reclaim space.
-     *
-     * @return this object
-     * @hide
-     */
-    public Request setDestinationToSystemCache() {
-        mUseSystemCache = true;
         return this;
     }
 
@@ -445,7 +426,7 @@ public class Request {
             values.put(Downloads.Impl.COLUMN_FILE_NAME_HINT, mDestinationUri.toString());
         } else {
             values.put(Downloads.Impl.COLUMN_DESTINATION,
-                    (this.mUseSystemCache) ? Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION : Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
+                    Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
         }
         // is the file supposed to be media-scannable?
         values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED, (mScannable) ? SCANNABLE_VALUE_YES : SCANNABLE_VALUE_NO);
