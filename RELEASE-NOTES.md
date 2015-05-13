@@ -1,3 +1,8 @@
+0.0.5
+-------
+
+Removes unused constants & minimises our public API, now we can refactor internally more safely
+
 0.0.4
 -------
 
