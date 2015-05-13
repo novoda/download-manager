@@ -55,6 +55,10 @@ import java.net.URI;
  */
 public class DownloadManager {
 
+    /**
+     * This is the uri for the underlying table
+     * use this at your own risk as many of the constants defined here will not return you what you expect for raw cursor data
+     */
     public static final Uri CONTENT_URI = Downloads.Impl.CONTENT_URI;
 
     /**
