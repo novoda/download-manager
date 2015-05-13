@@ -713,9 +713,6 @@ final class Downloads {
         @Deprecated
         public static final int STATUS_BLOCKED = 498;
 
-        /**
-         * {@hide}
-         */
         public static String statusToString(int status) {
             switch (status) {
                 case STATUS_PENDING:
