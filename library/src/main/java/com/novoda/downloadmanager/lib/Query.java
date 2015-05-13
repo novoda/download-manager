@@ -66,7 +66,6 @@ public class Query {
      *              the system's Downloads UI; if false (the default), this query will include
      *              both visible and invisible downloads.
      * @return this object
-     * @hide
      */
     public Query setOnlyIncludeVisibleInDownloadsUi(boolean value) {
         mOnlyIncludeVisibleInDownloadsUi = value;
