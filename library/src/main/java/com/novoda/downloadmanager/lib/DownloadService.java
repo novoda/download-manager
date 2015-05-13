@@ -58,7 +58,7 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
  * Any database updates important enough to initiate tasks should always be
  * delivered through {Context#startService(Intent)}.
  */
-class DownloadService extends Service {
+public class DownloadService extends Service {
     // TODO: migrate WakeLock from individual DownloadThreads out into
     // DownloadReceiver to protect our entire workflow.
 
