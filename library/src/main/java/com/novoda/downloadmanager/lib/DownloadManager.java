@@ -348,10 +348,8 @@ public class DownloadManager {
     /**
      * Makes this object access the download provider through /all_downloads URIs rather than
      * /my_downloads URIs, for clients that have permission to do so.
-     *
-     * @hide
      */
-    public void setAccessAllDownloads(boolean accessAllDownloads) {
+    void setAccessAllDownloads(boolean accessAllDownloads) {
         if (accessAllDownloads) {
             mBaseUri = Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI;
         } else {
