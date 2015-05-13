@@ -13,17 +13,13 @@ import java.util.List;
 public class Query {
     /**
      * Constant for use with {@link #orderBy}
-     *
-     * @hide
      */
-    public static final int ORDER_ASCENDING = 1;
+    static final int ORDER_ASCENDING = 1;
 
     /**
      * Constant for use with {@link #orderBy}
-     *
-     * @hide
      */
-    public static final int ORDER_DESCENDING = 2;
+    static final int ORDER_DESCENDING = 2;
 
     private long[] mIds = null;
     private Integer mStatusFlags = null;
