@@ -24,7 +24,7 @@ import java.util.concurrent.Future;
 /**
  * Stores information about an individual download.
  */
-public class DownloadInfo {
+class DownloadInfo {
     public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
 
     // TODO: move towards these in-memory objects being sources of truth, and
