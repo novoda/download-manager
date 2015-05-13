@@ -24,7 +24,7 @@ import android.os.Build;
 
 import java.io.File;
 
-public class DownloadDrmHelper {
+class DownloadDrmHelper {
 
     /**
      * The MIME type of special DRM files
