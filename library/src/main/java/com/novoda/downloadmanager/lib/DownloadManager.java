@@ -256,20 +256,24 @@ public class DownloadManager {
     public static final int PAUSED_UNKNOWN = 4;
 
     /**
-     * Broadcast intent action sent by the download manager when a download completes.
+     * Broadcast intent action sent by the download manager when a download completes. The
+     * download's content:// uri is specified in the intent's data.
      */
-    public static final String ACTION_DOWNLOAD_COMPLETE = "android.intent.action.SCUBA_DOWNLOAD_COMPLETE";
+    public static final String ACTION_DOWNLOAD_COMPLETE = "com.novoda.downloadmanager.DOWNLOAD_COMPLETE";
 
     /**
      * Broadcast intent action sent by the download manager when a download wasn't started due to insufficient space
      */
-    public static final String ACTION_DOWNLOAD_INSUFFICIENT_SPACE = "android.intent.action.SCUBA_DOWNLOAD_INSUFFICIENT_SPACE";
+    public static final String ACTION_DOWNLOAD_INSUFFICIENT_SPACE = "com.novoda.downloadmanager.DOWNLOAD_INSUFFICIENT_SPACE";
 
     /**
      * Broadcast intent action sent by the download manager when the user clicks on a running
-     * download, either from a system notification or from the downloads UI.
+     * download, either from a system notification. The download's content: uri is specified
+     * in the intent's data if the click is associated with a single download,
+     * or {@link DownloadManager#CONTENT_URI} if the notification is associated with
+     * multiple downloads.
      */
-    public static final String ACTION_NOTIFICATION_CLICKED = "android.intent.action.SCUBA_DOWNLOAD_NOTIFICATION_CLICKED";
+    public static final String ACTION_NOTIFICATION_CLICKED = "com.novoda.downloadmaanger.DOWNLOAD_NOTIFICATION_CLICKED";
 
     /**
      * Intent action to launch an activity to display all downloads.
