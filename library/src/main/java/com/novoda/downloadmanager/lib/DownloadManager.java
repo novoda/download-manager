@@ -276,17 +276,6 @@ public class DownloadManager {
     public static final String ACTION_NOTIFICATION_CLICKED = "com.novoda.downloadmaanger.DOWNLOAD_NOTIFICATION_CLICKED";
 
     /**
-     * Intent action to launch an activity to display all downloads.
-     */
-    public static final String ACTION_VIEW_DOWNLOADS = "android.intent.action.SCUBA_VIEW_DOWNLOADS";
-
-    /**
-     * Intent extra included with {@link #ACTION_VIEW_DOWNLOADS} to start DownloadApp in
-     * sort-by-size mode.
-     */
-    public static final String INTENT_EXTRAS_SORT_BY_SIZE = "android.app.DownloadManager.extra_sortBySize";
-
-    /**
      * Intent extra included with {@link #ACTION_DOWNLOAD_COMPLETE} intents, indicating the ID (as a
      * long) of the download that just completed.
      */
