@@ -233,14 +233,6 @@ public class DownloadManager {
     public static final int ERROR_FILE_ALREADY_EXISTS = 1009;
 
     /**
-     * Value of {@link #COLUMN_REASON} when the download has failed because of
-     * {NetworkPolicyManager} controls on the requesting application.
-     *
-     * @hide
-     */
-    public static final int ERROR_BLOCKED = 1010;
-
-    /**
      * Value of {@link #COLUMN_REASON} when the download is paused because some network error
      * occurred and the download manager is waiting before retrying the request.
      */
