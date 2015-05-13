@@ -36,10 +36,8 @@ final class Downloads {
      * Exposes constants used to interact with the download manager's
      * content provider.
      * The constants URI ... STATUS are the names of columns in the downloads table.
-     *
-     * @hide
      */
-    public static final class Impl implements BaseColumns {
+    static final class Impl implements BaseColumns {
 
         private Impl() {
         }
