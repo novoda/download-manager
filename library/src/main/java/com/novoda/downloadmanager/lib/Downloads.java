@@ -26,7 +26,7 @@ import android.provider.BaseColumns;
  *
  * @pending
  */
-final class Downloads {
+public final class Downloads {
     private Downloads() {
     }
 
@@ -36,8 +36,10 @@ final class Downloads {
      * Exposes constants used to interact with the download manager's
      * content provider.
      * The constants URI ... STATUS are the names of columns in the downloads table.
+     *
+     * @hide
      */
-    static final class Impl implements BaseColumns {
+    public static final class Impl implements BaseColumns {
 
         private Impl() {
         }
@@ -104,13 +106,6 @@ final class Downloads {
          * permissions to access this downloaded file)
          */
         public static final Uri PUBLICLY_ACCESSIBLE_DOWNLOADS_URI = Uri.parse(AUTHORITY + "/" + PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT);
-
-        /**
-         * Broadcast Action: this is sent by the download manager to the app
-         * that had initiated a download when that download completes. The
-         * download's content: uri is specified in the intent's data.
-         */
-        public static final String ACTION_DOWNLOAD_COMPLETED = "android.intent.action.SCUBA_DOWNLOAD_COMPLETED";
 
         /**
          * Broadcast Action: this is sent by the download manager to the app
@@ -700,6 +695,20 @@ final class Downloads {
          */
         public static final int STATUS_TOO_MANY_REDIRECTS = 497;
 
+        /**
+         * This download has failed because requesting application has been
+         * blocked by {NetworkPolicyManager}.
+         *
+         * @hide
+         * @deprecated since behavior now uses
+         * {@link #STATUS_WAITING_FOR_NETWORK}
+         */
+        @Deprecated
+        public static final int STATUS_BLOCKED = 498;
+
+        /**
+         * {@hide}
+         */
         public static String statusToString(int status) {
             switch (status) {
                 case STATUS_PENDING:
@@ -748,6 +757,8 @@ final class Downloads {
                     return "HTTP_EXCEPTION";
                 case STATUS_TOO_MANY_REDIRECTS:
                     return "TOO_MANY_REDIRECTS";
+                case STATUS_BLOCKED:
+                    return "BLOCKED";
                 default:
                     return Integer.toString(status);
             }
