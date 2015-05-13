@@ -34,7 +34,7 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 /**
  * Manages asynchronous scanning of completed downloads.
  */
-public class DownloadScanner implements MediaScannerConnectionClient {
+class DownloadScanner implements MediaScannerConnectionClient {
     private static final long SCAN_TIMEOUT = MINUTE_IN_MILLIS;
 
     private final Context mContext;

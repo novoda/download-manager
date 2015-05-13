@@ -50,7 +50,7 @@ import static com.novoda.downloadmanager.lib.Request.*;
  * states. Collapses similar downloads into a single notification, and builds
  * {@link PendingIntent} that launch towards {DownloadReceiver}.
  */
-public class DownloadNotifier {
+class DownloadNotifier {
 
     private static final int TYPE_ACTIVE = 1;
     private static final int TYPE_WAITING = 2;

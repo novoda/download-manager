@@ -52,7 +52,7 @@ import static java.net.HttpURLConnection.*;
  * Task which executes a given {@link DownloadInfo}: making network requests,
  * persisting data to disk, and updating {@link DownloadProvider}.
  */
-public class DownloadThread implements Runnable {
+class DownloadThread implements Runnable {
 
     private static final String TAG = "DownloadManager-DownloadThread";
 

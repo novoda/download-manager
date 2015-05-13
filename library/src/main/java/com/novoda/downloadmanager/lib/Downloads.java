@@ -26,7 +26,7 @@ import android.provider.BaseColumns;
  *
  * @pending
  */
-public final class Downloads {
+final class Downloads {
     private Downloads() {
     }
 

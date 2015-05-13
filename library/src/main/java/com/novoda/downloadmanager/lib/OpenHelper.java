@@ -28,7 +28,7 @@ import static android.app.DownloadManager.*;
 import static com.novoda.downloadmanager.lib.Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI;
 import static com.novoda.downloadmanager.lib.Downloads.Impl.RequestHeaders;
 
-public class OpenHelper {
+class OpenHelper {
     /**
      * Build an {@link Intent} to view the download at current {@link Cursor}
      * position, handling subtleties around installing packages.
