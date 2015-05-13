@@ -26,7 +26,7 @@ import android.provider.BaseColumns;
  *
  * @pending
  */
-public final class Downloads {
+final class Downloads {
     private Downloads() {
     }
 
@@ -36,10 +36,8 @@ public final class Downloads {
      * Exposes constants used to interact with the download manager's
      * content provider.
      * The constants URI ... STATUS are the names of columns in the downloads table.
-     *
-     * @hide
      */
-    public static final class Impl implements BaseColumns {
+    static final class Impl implements BaseColumns {
 
         private Impl() {
         }
@@ -683,21 +681,7 @@ public final class Downloads {
          */
         public static final int STATUS_TOO_MANY_REDIRECTS = 497;
 
-        /**
-         * This download has failed because requesting application has been
-         * blocked by {NetworkPolicyManager}.
-         *
-         * @hide
-         * @deprecated since behavior now uses
-         * {@link #STATUS_WAITING_FOR_NETWORK}
-         */
-        @Deprecated
-        public static final int STATUS_BLOCKED = 498;
-
-        /**
-         * {@hide}
-         */
-        public static String statusToString(int status) {
+        static String statusToString(int status) {
             switch (status) {
                 case STATUS_PENDING:
                     return "PENDING";
@@ -745,8 +729,6 @@ public final class Downloads {
                     return "HTTP_EXCEPTION";
                 case STATUS_TOO_MANY_REDIRECTS:
                     return "TOO_MANY_REDIRECTS";
-                case STATUS_BLOCKED:
-                    return "BLOCKED";
                 default:
                     return Integer.toString(status);
             }
