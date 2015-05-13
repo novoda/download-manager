@@ -338,9 +338,6 @@ public class DownloadManager {
     private ContentResolver mResolver;
     private Uri mBaseUri = Downloads.Impl.CONTENT_URI;
 
-    /**
-     * @hide
-     */
     public DownloadManager(ContentResolver resolver) {
         mResolver = resolver;
     }
