@@ -108,18 +108,6 @@ public final class Downloads {
         public static final Uri PUBLICLY_ACCESSIBLE_DOWNLOADS_URI = Uri.parse(AUTHORITY + "/" + PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT);
 
         /**
-         * Broadcast Action: this is sent by the download manager to the app
-         * that had initiated a download when the user selects the notification
-         * associated with that download. The download's content: uri is specified
-         * in the intent's data if the click is associated with a single download,
-         * or Downloads.CONTENT_URI if the notification is associated with
-         * multiple downloads.
-         * Note: this is not currently sent for downloads that have completed
-         * successfully.
-         */
-        public static final String ACTION_NOTIFICATION_CLICKED = "android.intent.action.SCUBA_DOWNLOAD_NOTIFICATION_CLICKED";
-
-        /**
          * The name of the column containing the URI of the data being downloaded.
          * <P>Type: TEXT</P>
          * <P>Owner can Init/Read</P>
