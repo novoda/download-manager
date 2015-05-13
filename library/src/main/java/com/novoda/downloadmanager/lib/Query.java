@@ -85,9 +85,8 @@ public class Query {
      *                  supported.
      * @param direction either {@link #ORDER_ASCENDING} or {@link #ORDER_DESCENDING}
      * @return this object
-     * @hide
      */
-    public Query orderBy(String column, int direction) {
+    Query orderBy(String column, int direction) {
         if (direction != ORDER_ASCENDING && direction != ORDER_DESCENDING) {
             throw new IllegalArgumentException("Invalid direction: " + direction);
         }
