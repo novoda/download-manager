@@ -320,11 +320,17 @@ public class DownloadManager {
             "'placeholder' AS " + COLUMN_REASON
     };
 
-    private ContentResolver mResolver;
+    private final ContentResolver mResolver;
+    private final boolean verboseLogging;
     private Uri mBaseUri = Downloads.Impl.CONTENT_URI;
 
     public DownloadManager(ContentResolver resolver) {
-        mResolver = resolver;
+        this(resolver, false);
+    }
+
+    public DownloadManager(ContentResolver contentResolver, boolean verboseLogging) {
+        this.mResolver = contentResolver;
+        this.verboseLogging = verboseLogging;
     }
 
     /**
