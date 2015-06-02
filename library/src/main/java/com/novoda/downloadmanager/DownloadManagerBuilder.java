@@ -9,7 +9,7 @@ public class DownloadManagerBuilder {
     private ContentResolver contentResolver;
     private boolean verboseLogging;
 
-    public static DownloadManagerBuilder newInstance() {
+    public static DownloadManagerBuilder create() {
         return new DownloadManagerBuilder();
     }
 
