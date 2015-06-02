@@ -1,3 +1,9 @@
+0.0.6
+-------
+
+PERFORMANCE FIX - removes verbose logging by default, this stops extra queries and string concat's that caused unneccessary GC
+You can now set verbose logging on using the new `DownloadManagerBuilder.withVerboseLogging()` it is off by default. (see #20)
+
 0.0.5
 -------
 
