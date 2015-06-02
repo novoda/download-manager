@@ -422,12 +422,13 @@ public final class DownloadProvider extends ContentProvider {
 
         private void createHeadersTable(SQLiteDatabase db) {
             db.execSQL("DROP TABLE IF EXISTS " + Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE);
-            db.execSQL("CREATE TABLE " + Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE + "(" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    Downloads.Impl.RequestHeaders.COLUMN_DOWNLOAD_ID + " INTEGER NOT NULL," +
-                    Downloads.Impl.RequestHeaders.COLUMN_HEADER + " TEXT NOT NULL," +
-                    Downloads.Impl.RequestHeaders.COLUMN_VALUE + " TEXT NOT NULL" +
-                    ");");
+            db.execSQL(
+                    "CREATE TABLE " + Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE + "(" +
+                            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                            Downloads.Impl.RequestHeaders.COLUMN_DOWNLOAD_ID + " INTEGER NOT NULL," +
+                            Downloads.Impl.RequestHeaders.COLUMN_HEADER + " TEXT NOT NULL," +
+                            Downloads.Impl.RequestHeaders.COLUMN_VALUE + " TEXT NOT NULL" +
+                            ");");
         }
     }
 
@@ -535,8 +536,9 @@ public final class DownloadProvider extends ContentProvider {
                     && (dest == Downloads.Impl.DESTINATION_CACHE_PARTITION
                     || dest == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING
                     || dest == Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION)) {
-                throw new SecurityException("setting destination to : " + dest +
-                        " not allowed, unless PERMISSION_ACCESS_ADVANCED is granted");
+                throw new SecurityException(
+                        "setting destination to : " + dest +
+                                " not allowed, unless PERMISSION_ACCESS_ADVANCED is granted");
             }
             // for public API behavior, if an app has CACHE_NON_PURGEABLE permission, automatically
             // switch to non-purgeable download
@@ -728,19 +730,22 @@ public final class DownloadProvider extends ContentProvider {
             values.remove(Downloads.Impl._DATA);
             values.remove(Downloads.Impl.COLUMN_STATUS);
         }
-        enforceAllowedValues(values, Downloads.Impl.COLUMN_DESTINATION,
+        enforceAllowedValues(
+                values, Downloads.Impl.COLUMN_DESTINATION,
                 Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE,
                 Downloads.Impl.DESTINATION_FILE_URI,
                 Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD);
 
         if (getContext().checkCallingOrSelfPermission(Downloads.Impl.PERMISSION_NO_NOTIFICATION) == PackageManager.PERMISSION_GRANTED) {
-            enforceAllowedValues(values, Downloads.Impl.COLUMN_VISIBILITY,
+            enforceAllowedValues(
+                    values, Downloads.Impl.COLUMN_VISIBILITY,
                     Request.VISIBILITY_HIDDEN,
                     Request.VISIBILITY_VISIBLE,
                     Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED,
                     Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION);
         } else {
-            enforceAllowedValues(values, Downloads.Impl.COLUMN_VISIBILITY,
+            enforceAllowedValues(
+                    values, Downloads.Impl.COLUMN_VISIBILITY,
                     Request.VISIBILITY_VISIBLE,
                     Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED,
                     Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION);
@@ -819,8 +824,9 @@ public final class DownloadProvider extends ContentProvider {
 
         if (match == REQUEST_HEADERS_URI) {
             if (projection != null || selection != null || sort != null) {
-                throw new UnsupportedOperationException("Request header queries do not support "
-                        + "projections, selections or sorting");
+                throw new UnsupportedOperationException(
+                        "Request header queries do not support "
+                                + "projections, selections or sorting");
             }
             return queryRequestHeaders(db, uri);
         }
@@ -945,7 +951,8 @@ public final class DownloadProvider extends ContentProvider {
                 + getDownloadIdFromUri(uri);
         String[] projection = new String[]{Downloads.Impl.RequestHeaders.COLUMN_HEADER,
                 Downloads.Impl.RequestHeaders.COLUMN_VALUE};
-        return db.query(Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE, projection, where,
+        return db.query(
+                Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE, projection, where,
                 null, null, null, null);
     }
 
