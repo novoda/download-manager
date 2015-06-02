@@ -28,7 +28,9 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         com.novoda.notils.logger.simple.Log.setShowLogs(true);
         setContentView(R.layout.activity_main);
         listView = (ListView) findViewById(R.id.main_downloads_list);
-        downloadManager = new DownloadManager(getContentResolver());
+        downloadManager = DownloadManagerBuilder.newInstance()
+                .with(getContentResolver())
+                .build();
 
         setupDownloadingExample();
         setupQueryingExample();
