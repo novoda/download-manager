@@ -6,8 +6,11 @@ import com.novoda.downloadmanager.lib.DownloadManager;
 
 public class DownloadManagerBuilder {
 
-    private ContentResolver contentResolver;
     private boolean verboseLogging;
+
+    DownloadManagerBuilder() {
+        // use the create method, Alex's favourite
+    }
 
     public static DownloadManagerBuilder create() {
         return new DownloadManagerBuilder();
@@ -18,14 +21,9 @@ public class DownloadManagerBuilder {
         return this;
     }
 
-    public DownloadManagerBuilder with(ContentResolver contentResolver) {
-        this.contentResolver = contentResolver;
-        return this;
-    }
-
-    public DownloadManager build() {
+    public DownloadManager build(ContentResolver contentResolver) {
         if (contentResolver == null) {
-            throw new IllegalStateException("You must use a ContentResolver with the DownloadManager. (use with(ContentResolver resolver);");
+            throw new IllegalStateException("You must use a ContentResolver with the DownloadManager.");
         }
         return new DownloadManager(contentResolver, verboseLogging);
     }
