@@ -321,7 +321,7 @@ public class DownloadManager {
     };
 
     private final ContentResolver mResolver;
-    private final boolean verboseLogging;
+
     private Uri mBaseUri = Downloads.Impl.CONTENT_URI;
 
     public DownloadManager(ContentResolver resolver) {
@@ -330,7 +330,7 @@ public class DownloadManager {
 
     public DownloadManager(ContentResolver contentResolver, boolean verboseLogging) {
         this.mResolver = contentResolver;
-        this.verboseLogging = verboseLogging;
+        DownloadProvider.VERBOSE_LOGGING = verboseLogging;
     }
 
     /**

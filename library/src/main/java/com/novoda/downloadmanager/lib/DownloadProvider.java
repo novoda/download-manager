@@ -37,7 +37,6 @@ import android.os.Process;
 import android.provider.OpenableColumns;
 import android.text.TextUtils;
 
-import com.novoda.downloadmanager.BuildConfig;
 import com.novoda.notils.logger.simple.Log;
 
 import java.io.File;
@@ -117,6 +116,8 @@ public final class DownloadProvider extends ContentProvider {
      * is publicly accessible.
      */
     private static final int PUBLIC_DOWNLOAD_ID = 6;
+
+    public static boolean VERBOSE_LOGGING;
 
     static {
         sURIMatcher.addURI(AUTHORITY, "my_downloads", MY_DOWNLOADS);
@@ -848,7 +849,9 @@ public final class DownloadProvider extends ContentProvider {
             }
         }
 
-        logVerboseQueryInfo(projection, selection, selectionArgs, sort, db);
+        if (VERBOSE_LOGGING) {
+            logVerboseQueryInfo(projection, selection, selectionArgs, sort, db);
+        }
 
         Cursor ret = db.query(DB_TABLE, projection, fullSelection.getSelection(),
                 fullSelection.getParameters(), null, null, sort);
@@ -863,8 +866,11 @@ public final class DownloadProvider extends ContentProvider {
         return ret;
     }
 
-    private void logVerboseQueryInfo(String[] projection, final String selection,
-                                     final String[] selectionArgs, final String sort, SQLiteDatabase db) {
+    private void logVerboseQueryInfo(String[] projection,
+                                     final String selection,
+                                     final String[] selectionArgs,
+                                     final String sort,
+                                     SQLiteDatabase db) {
         java.lang.StringBuilder sb = new java.lang.StringBuilder();
         sb.append("starting query, database is ");
         if (db != null) {
@@ -1126,7 +1132,9 @@ public final class DownloadProvider extends ContentProvider {
      */
     @Override
     public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
-        logVerboseOpenFileInfo(uri, mode);
+        if (VERBOSE_LOGGING) {
+            logVerboseOpenFileInfo(uri, mode);
+        }
 
         Cursor cursor = query(uri, new String[]{"_data"}, null, null, null);
         String path;
