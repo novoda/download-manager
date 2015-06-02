@@ -37,7 +37,6 @@ import android.os.Process;
 import android.provider.OpenableColumns;
 import android.text.TextUtils;
 
-import com.novoda.downloadmanager.BuildConfig;
 import com.novoda.notils.logger.simple.Log;
 
 import java.io.File;
@@ -117,6 +116,8 @@ public final class DownloadProvider extends ContentProvider {
      * is publicly accessible.
      */
     private static final int PUBLIC_DOWNLOAD_ID = 6;
+
+    public static boolean VERBOSE_LOGGING;
 
     static {
         sURIMatcher.addURI(AUTHORITY, "my_downloads", MY_DOWNLOADS);
@@ -421,12 +422,13 @@ public final class DownloadProvider extends ContentProvider {
 
         private void createHeadersTable(SQLiteDatabase db) {
             db.execSQL("DROP TABLE IF EXISTS " + Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE);
-            db.execSQL("CREATE TABLE " + Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE + "(" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    Downloads.Impl.RequestHeaders.COLUMN_DOWNLOAD_ID + " INTEGER NOT NULL," +
-                    Downloads.Impl.RequestHeaders.COLUMN_HEADER + " TEXT NOT NULL," +
-                    Downloads.Impl.RequestHeaders.COLUMN_VALUE + " TEXT NOT NULL" +
-                    ");");
+            db.execSQL(
+                    "CREATE TABLE " + Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE + "(" +
+                            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                            Downloads.Impl.RequestHeaders.COLUMN_DOWNLOAD_ID + " INTEGER NOT NULL," +
+                            Downloads.Impl.RequestHeaders.COLUMN_HEADER + " TEXT NOT NULL," +
+                            Downloads.Impl.RequestHeaders.COLUMN_VALUE + " TEXT NOT NULL" +
+                            ");");
         }
     }
 
@@ -534,8 +536,9 @@ public final class DownloadProvider extends ContentProvider {
                     && (dest == Downloads.Impl.DESTINATION_CACHE_PARTITION
                     || dest == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING
                     || dest == Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION)) {
-                throw new SecurityException("setting destination to : " + dest +
-                        " not allowed, unless PERMISSION_ACCESS_ADVANCED is granted");
+                throw new SecurityException(
+                        "setting destination to : " + dest +
+                                " not allowed, unless PERMISSION_ACCESS_ADVANCED is granted");
             }
             // for public API behavior, if an app has CACHE_NON_PURGEABLE permission, automatically
             // switch to non-purgeable download
@@ -727,19 +730,22 @@ public final class DownloadProvider extends ContentProvider {
             values.remove(Downloads.Impl._DATA);
             values.remove(Downloads.Impl.COLUMN_STATUS);
         }
-        enforceAllowedValues(values, Downloads.Impl.COLUMN_DESTINATION,
+        enforceAllowedValues(
+                values, Downloads.Impl.COLUMN_DESTINATION,
                 Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE,
                 Downloads.Impl.DESTINATION_FILE_URI,
                 Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD);
 
         if (getContext().checkCallingOrSelfPermission(Downloads.Impl.PERMISSION_NO_NOTIFICATION) == PackageManager.PERMISSION_GRANTED) {
-            enforceAllowedValues(values, Downloads.Impl.COLUMN_VISIBILITY,
+            enforceAllowedValues(
+                    values, Downloads.Impl.COLUMN_VISIBILITY,
                     Request.VISIBILITY_HIDDEN,
                     Request.VISIBILITY_VISIBLE,
                     Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED,
                     Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION);
         } else {
-            enforceAllowedValues(values, Downloads.Impl.COLUMN_VISIBILITY,
+            enforceAllowedValues(
+                    values, Downloads.Impl.COLUMN_VISIBILITY,
                     Request.VISIBILITY_VISIBLE,
                     Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED,
                     Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION);
@@ -818,8 +824,9 @@ public final class DownloadProvider extends ContentProvider {
 
         if (match == REQUEST_HEADERS_URI) {
             if (projection != null || selection != null || sort != null) {
-                throw new UnsupportedOperationException("Request header queries do not support "
-                        + "projections, selections or sorting");
+                throw new UnsupportedOperationException(
+                        "Request header queries do not support "
+                                + "projections, selections or sorting");
             }
             return queryRequestHeaders(db, uri);
         }
@@ -848,7 +855,9 @@ public final class DownloadProvider extends ContentProvider {
             }
         }
 
-        logVerboseQueryInfo(projection, selection, selectionArgs, sort, db);
+        if (VERBOSE_LOGGING) {
+            logVerboseQueryInfo(projection, selection, selectionArgs, sort, db);
+        }
 
         Cursor ret = db.query(DB_TABLE, projection, fullSelection.getSelection(),
                 fullSelection.getParameters(), null, null, sort);
@@ -863,8 +872,11 @@ public final class DownloadProvider extends ContentProvider {
         return ret;
     }
 
-    private void logVerboseQueryInfo(String[] projection, final String selection,
-                                     final String[] selectionArgs, final String sort, SQLiteDatabase db) {
+    private void logVerboseQueryInfo(String[] projection,
+                                     final String selection,
+                                     final String[] selectionArgs,
+                                     final String sort,
+                                     SQLiteDatabase db) {
         java.lang.StringBuilder sb = new java.lang.StringBuilder();
         sb.append("starting query, database is ");
         if (db != null) {
@@ -939,7 +951,8 @@ public final class DownloadProvider extends ContentProvider {
                 + getDownloadIdFromUri(uri);
         String[] projection = new String[]{Downloads.Impl.RequestHeaders.COLUMN_HEADER,
                 Downloads.Impl.RequestHeaders.COLUMN_VALUE};
-        return db.query(Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE, projection, where,
+        return db.query(
+                Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE, projection, where,
                 null, null, null, null);
     }
 
@@ -1126,7 +1139,9 @@ public final class DownloadProvider extends ContentProvider {
      */
     @Override
     public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
-        logVerboseOpenFileInfo(uri, mode);
+        if (VERBOSE_LOGGING) {
+            logVerboseOpenFileInfo(uri, mode);
+        }
 
         Cursor cursor = query(uri, new String[]{"_data"}, null, null, null);
         String path;

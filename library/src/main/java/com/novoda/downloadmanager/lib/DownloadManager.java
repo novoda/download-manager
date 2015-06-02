@@ -320,11 +320,17 @@ public class DownloadManager {
             "'placeholder' AS " + COLUMN_REASON
     };
 
-    private ContentResolver mResolver;
+    private final ContentResolver mResolver;
+
     private Uri mBaseUri = Downloads.Impl.CONTENT_URI;
 
     public DownloadManager(ContentResolver resolver) {
-        mResolver = resolver;
+        this(resolver, false);
+    }
+
+    public DownloadManager(ContentResolver contentResolver, boolean verboseLogging) {
+        this.mResolver = contentResolver;
+        DownloadProvider.VERBOSE_LOGGING = verboseLogging;
     }
 
     /**
@@ -528,8 +534,9 @@ public class DownloadManager {
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
                 int status = cursor.getInt(cursor.getColumnIndex(COLUMN_STATUS));
                 if (status != STATUS_SUCCESSFUL && status != STATUS_FAILED) {
-                    throw new IllegalArgumentException("Cannot restart incomplete download: "
-                            + cursor.getLong(cursor.getColumnIndex(COLUMN_ID)));
+                    throw new IllegalArgumentException(
+                            "Cannot restart incomplete download: "
+                                    + cursor.getLong(cursor.getColumnIndex(COLUMN_ID)));
                 }
             }
         } finally {
@@ -627,8 +634,9 @@ public class DownloadManager {
         values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_SUCCESS);
         values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, length);
         values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED, (isMediaScannerScannable) ? Request.SCANNABLE_VALUE_YES : Request.SCANNABLE_VALUE_NO);
-        values.put(Downloads.Impl.COLUMN_VISIBILITY, (showNotification) ?
-                Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION : Request.VISIBILITY_HIDDEN);
+        values.put(
+                Downloads.Impl.COLUMN_VISIBILITY, (showNotification) ?
+                        Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION : Request.VISIBILITY_HIDDEN);
         Uri downloadUri = mResolver.insert(Downloads.Impl.CONTENT_URI, values);
         if (downloadUri == null) {
             return -1;
