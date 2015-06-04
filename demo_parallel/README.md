@@ -7,5 +7,5 @@ This is a copy of the http://developer.android.com/reference/android/app/Downloa
 
 Here we show two use cases
 
-   - Downloading from a url
+   - Downloading items **in parallel** from a url
    - Querying the download manager for what has been downloaded
