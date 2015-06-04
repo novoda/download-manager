@@ -30,9 +30,9 @@ class DownloadExecutorFactory {
     }
 
     private int getMaximumConcurrentDownloads(Context context) {
+        String packageName = context.getApplicationContext().getPackageName();
+        PackageManager packageManager = context.getPackageManager();
         try {
-            String packageName = context.getApplicationContext().getPackageName();
-            PackageManager packageManager = context.getPackageManager();
             ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
             Bundle bundle = applicationInfo.metaData;
             if (bundle == null) {
@@ -41,7 +41,7 @@ class DownloadExecutorFactory {
 
             return bundle.getInt(METADATA_MAX_CONCURRENT_DOWNLOADS, DEFAULT_MAX_CONCURRENT_DOWNLOADS);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e("Meta data value not found: " + e.getMessage());
+            Log.e("Application info not found for: " + packageName + " " + e.getMessage());
         }
         return DEFAULT_MAX_CONCURRENT_DOWNLOADS;
     }
