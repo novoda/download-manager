@@ -43,9 +43,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
@@ -89,19 +86,7 @@ public class DownloadService extends Service {
 //    @GuardedBy("mDownloads")
     private final Map<Long, DownloadInfo> mDownloads = new HashMap<Long, DownloadInfo>();
 
-    private final ExecutorService mExecutor = buildDownloadExecutor();
-
-    private static ExecutorService buildDownloadExecutor() {
-        final int maxConcurrent = 5;
-
-        // Create a bounded thread pool for executing downloads; it creates
-        // threads as needed (up to maximum) and reclaims them when finished.
-        final ThreadPoolExecutor executor = new ThreadPoolExecutor(
-                maxConcurrent, maxConcurrent, 10, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>());
-        executor.allowCoreThreadTimeOut(true);
-        return executor;
-    }
+    private ExecutorService mExecutor;
 
     private DownloadScanner mScanner;
 
@@ -163,6 +148,8 @@ public class DownloadService extends Service {
         getContentResolver().registerContentObserver(
                 Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
                 true, mObserver);
+
+        mExecutor = new DownloadExecutorFactory().createExecutor(this);
     }
 
     private NotificationImageRetriever getNotificationImageRetriever() {
