@@ -22,6 +22,11 @@ android {
         manifestPlaceholders = [downloadAuthority: "${applicationId}"]
     }
 
+    productFlavors {
+        serial
+        parallel
+    }
+
     lintOptions {
         abortOnError false
     }

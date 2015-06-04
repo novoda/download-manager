@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-  package="com.novoda.downloadmanager.demo"
-  xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.novoda.downloadmanager.demo">
 
   <uses-permission android:name="android.permission.INTERNET" />
 
@@ -19,6 +18,10 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
+
+    <meta-data
+      android:name="com.novoda.downloadmanager.MaxConcurrentDownloads"
+      android:value="@integer/max_concurrent_downloads" />
 
   </application>
 

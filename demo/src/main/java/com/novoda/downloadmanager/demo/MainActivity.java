@@ -17,8 +17,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements QueryForDownloadsAsyncTask.Callback {
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final String BIG_FILE = "http://downloads.bbc.co.uk/podcasts/radio4/fricomedy/fricomedy_20150501-1855a.mp3";
-    private static final String BBC_COMEDY_IMAGE = "http://ichef.bbci.co.uk/podcasts/artwork/266/fricomedy.jpg";
+    private static final String BIG_FILE = "http://open.live.bbc.co.uk/mediaselector/5/redir/version/2.0/mediaset/audio-nondrm-download/proto/http/vpid/p02ss0fm.mp3";
+    private static final String BBC_COMEDY_IMAGE = "http://ichef.bbci.co.uk/images/ic/640x360/p02ss0cf.jpg";
 
     private DownloadManager downloadManager;
     private ListView listView;
@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         request.setDestinationInInternalFilesDir(this, Environment.DIRECTORY_MOVIES, "podcast.mp3");
         request.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
         request.setBigPictureUrl(BBC_COMEDY_IMAGE);
-        request.setTitle("BBC Friday Night Comedy");
+        request.setTitle("BBC Innuendo Bingo");
         request.setDescription("Nothing to do with beards.");
         request.setMimeType("audio/mp3");
 
