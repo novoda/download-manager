@@ -21,7 +21,7 @@
 
     <meta-data
       android:name="com.novoda.downloadmanager.MaxConcurrentDownloads"
-      android:value="1" />
+      android:value="@integer/max_concurrent_downloads" />
 
   </application>
 
