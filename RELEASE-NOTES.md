@@ -1,3 +1,8 @@
+0.0.7
+-------
+
+Adds the ability to configure the maximum concurrent downloads (see #23)
+
 0.0.6
 -------
 

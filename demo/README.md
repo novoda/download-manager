@@ -9,3 +9,8 @@ Here we show two use cases
 
    - Downloading from a url
    - Querying the download manager for what has been downloaded
+
+## Product Flavors
+
+The demo has two flavours: *serial* and *parallel*. Each flavour has a different value set for the maximum number of concurrent downloads.
+The value is set in the `AndroidManifest.xml` file under the `meta-data` tag.
