@@ -55,6 +55,8 @@ You can change the maximum number of concurrent downloads in your application by
   android:value="3" />
 ```
 
+where here `3` represents the maximum number of concurrent downloads.
+
 
 ## Links
 
