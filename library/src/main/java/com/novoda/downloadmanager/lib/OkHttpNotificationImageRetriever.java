@@ -26,16 +26,10 @@ class OkHttpNotificationImageRetriever implements NotificationImageRetriever {
         if (imageUrl.equals(this.imageUrl)) {
             return bitmap;
         }
-
-        this.imageUrl = imageUrl;
-        if (bitmap != null && !bitmap.isRecycled()) {
-            bitmap.recycle();
-            bitmap = null;
-        }
-        return fetchBitmap();
+        return fetchBitmap(imageUrl);
     }
 
-    private Bitmap fetchBitmap() {
+    private Bitmap fetchBitmap(String imageUrl) {
         Request request = new Request.Builder()
                 .get()
                 .url(this.imageUrl)
@@ -44,6 +38,8 @@ class OkHttpNotificationImageRetriever implements NotificationImageRetriever {
             Response response = client.newCall(request).execute();
             InputStream inputStream = response.body().byteStream();
             try {
+                this.imageUrl = imageUrl;
+                cleanupOldBitmap();
                 bitmap = BitmapFactory.decodeStream(inputStream);
                 return bitmap;
             } finally {
@@ -52,5 +48,15 @@ class OkHttpNotificationImageRetriever implements NotificationImageRetriever {
         } catch (IOException e) {
             return null;
         }
+    }
+
+    private void cleanupOldBitmap() {
+        if (bitmap == null) {
+            return;
+        }
+        if (!bitmap.isRecycled()) {
+            bitmap.recycle();
+        }
+        bitmap = null;
     }
 }
