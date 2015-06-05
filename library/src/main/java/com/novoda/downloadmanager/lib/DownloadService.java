@@ -149,7 +149,7 @@ public class DownloadService extends Service {
                 Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
                 true, mObserver);
 
-        mExecutor = new DownloadExecutorFactory().createExecutor(this);
+        mExecutor = DownloadExecutorFactory.newInstance(this).createExecutor();
     }
 
     private NotificationImageRetriever getNotificationImageRetriever() {
