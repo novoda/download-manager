@@ -39,7 +39,6 @@ class OkHttpNotificationImageRetriever implements NotificationImageRetriever {
             InputStream inputStream = response.body().byteStream();
             try {
                 this.imageUrl = imageUrl;
-                cleanupOldBitmap();
                 bitmap = BitmapFactory.decodeStream(inputStream);
                 return bitmap;
             } finally {
@@ -48,15 +47,5 @@ class OkHttpNotificationImageRetriever implements NotificationImageRetriever {
         } catch (IOException e) {
             return null;
         }
-    }
-
-    private void cleanupOldBitmap() {
-        if (bitmap == null) {
-            return;
-        }
-        if (!bitmap.isRecycled()) {
-            bitmap.recycle();
-        }
-        bitmap = null;
     }
 }
