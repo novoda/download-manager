@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class DownloadExecutorFactoryTest {
@@ -22,7 +23,8 @@ public class DownloadExecutorFactoryTest {
     @Test
     public void givenALimitProviderWhenTheExecutorIsCreatedThenTheCorrectLimitIsUsed() throws Exception {
         int expectedLimit = 8;
-        DownloadExecutorFactory factory = new DownloadExecutorFactory(expectedLimit);
+        when(metadataReader.getConcurrentDownloadsLimit()).thenReturn(expectedLimit);
+        DownloadExecutorFactory factory = new DownloadExecutorFactory(metadataReader);
 
         ThreadPoolExecutor executor = factory.createExecutor();
 
