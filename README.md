@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.novoda:download-manager:0.0.6'
+    compile 'com.novoda:download-manager:0.0.7'
 }
 ```
 
@@ -28,8 +28,7 @@ Simple example source code can be found in this demo module: [Android Simple Dem
 You will need to add this to your Android application build.gradle:
 
 ```groovy
-
-android { 
+android {
   defaultConfig {
        // other things
        
@@ -45,6 +44,18 @@ public class Authority {
     public static final String AUTHORITY = "com.your.unique.authority";
 }
 ```
+
+## Advanced Usage
+
+You can change the maximum number of concurrent downloads in your application by adding a the following meta-data element into your `AndroidManifest.xml`:
+
+```xml
+<meta-data
+  android:name="com.novoda.downloadmanager.MaxConcurrentDownloads"
+  android:value="3" />
+```
+
+where here `3` represents the maximum number of concurrent downloads.
 
 
 ## Links
