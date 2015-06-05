@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager.lib;
 
+import android.content.Context;
+
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -8,14 +10,19 @@ class DownloadExecutorFactory {
 
     private static final int KEEP_ALIVE_TIME = 10;
 
-    private final ConcurrentDownloadsLimitProvider concurrentDownloadsLimitProvider;
+    private final int maxConcurrentDownloads;
 
-    DownloadExecutorFactory(ConcurrentDownloadsLimitProvider concurrentDownloadsLimitProvider) {
-        this.concurrentDownloadsLimitProvider = concurrentDownloadsLimitProvider;
+    static DownloadExecutorFactory newInstance(Context context) {
+        ConcurrentDownloadsLimitProvider concurrentDownloadsLimitProvider = ConcurrentDownloadsLimitProvider.newInstance(context);
+        int maxConcurrentDownloads = concurrentDownloadsLimitProvider.getConcurrentDownloadsLimit();
+        return new DownloadExecutorFactory(maxConcurrentDownloads);
+    }
+
+    DownloadExecutorFactory(int maxConcurrentDownloads) {
+        this.maxConcurrentDownloads = maxConcurrentDownloads;
     }
 
     public ThreadPoolExecutor createExecutor() {
-        int maxConcurrentDownloads = concurrentDownloadsLimitProvider.getConcurrentDownloadsLimit();
         ThreadPoolExecutor executor = new ThreadPoolExecutor(
                 maxConcurrentDownloads,
                 maxConcurrentDownloads,
