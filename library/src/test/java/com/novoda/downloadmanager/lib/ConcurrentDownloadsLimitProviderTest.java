@@ -30,7 +30,7 @@ public class ConcurrentDownloadsLimitProviderTest {
     }
 
     @Test
-    public void givenANullMetadataBundleWhenTheLimitIsRetrievedThenItIsTheDefaultValue() throws Exception {
+    public void givenANullMetadataBundleWhenTheLimitIsRetrievedThenTheDefaultValueIsUsed() throws Exception {
         when(packageManager.getApplicationInfo(PACKAGE_NAME, PackageManager.GET_META_DATA)).thenReturn(new StubApplicationInfo(null));
         ConcurrentDownloadsLimitProvider provider = new ConcurrentDownloadsLimitProvider(packageManager, PACKAGE_NAME);
 
