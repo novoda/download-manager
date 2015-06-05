@@ -149,7 +149,8 @@ public class DownloadService extends Service {
                 Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
                 true, mObserver);
 
-        mExecutor = DownloadExecutorFactory.newInstance(this).createExecutor();
+        ConcurrentDownloadsLimitProvider concurrentDownloadsLimitProvider = ConcurrentDownloadsLimitProvider.newInstance(this);
+        mExecutor = new DownloadExecutorFactory(concurrentDownloadsLimitProvider).createExecutor();
     }
 
     private NotificationImageRetriever getNotificationImageRetriever() {
