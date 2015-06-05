@@ -1,4 +1,4 @@
-package com.novoda.downloadmanager.demo;
+package com.novoda.downloadmanager.demo.parallel;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.ListView;
 
 import com.novoda.downloadmanager.DownloadManagerBuilder;
+import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.Query;
 import com.novoda.downloadmanager.lib.Request;

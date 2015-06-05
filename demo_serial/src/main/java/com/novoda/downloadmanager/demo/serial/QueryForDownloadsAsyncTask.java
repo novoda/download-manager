@@ -1,4 +1,4 @@
-package com.novoda.downloadmanager.demo;
+package com.novoda.downloadmanager.demo.serial;
 
 import android.database.Cursor;
 import android.os.AsyncTask;

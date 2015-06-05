@@ -1,9 +1,11 @@
-package com.novoda.downloadmanager.demo;
+package com.novoda.downloadmanager.demo.parallel;
 
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import com.novoda.downloadmanager.demo.R;
 
 import java.util.List;
 
