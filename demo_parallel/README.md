@@ -9,4 +9,3 @@ Here we show two use cases
 
    - Downloading items **in parallel** from a url
    - Querying the download manager for what has been downloaded
-
