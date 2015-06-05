@@ -38,8 +38,8 @@ class OkHttpNotificationImageRetriever implements NotificationImageRetriever {
             Response response = client.newCall(request).execute();
             InputStream inputStream = response.body().byteStream();
             try {
-                this.imageUrl = imageUrl;
                 bitmap = BitmapFactory.decodeStream(inputStream);
+                this.imageUrl = imageUrl;
                 return bitmap;
             } finally {
                 inputStream.close();
