@@ -14,12 +14,22 @@ class OkHttpNotificationImageRetriever implements NotificationImageRetriever {
 
     private final OkHttpClient client;
 
+    private String imageUrl;
+    private Bitmap bitmap;
+
     public OkHttpNotificationImageRetriever() {
         client = new OkHttpClient();
     }
 
     @Override
     public Bitmap retrieveImage(String imageUrl) {
+        if (imageUrl.equals(this.imageUrl)) {
+            return bitmap;
+        }
+        return fetchBitmap(imageUrl);
+    }
+
+    private Bitmap fetchBitmap(String imageUrl) {
         Request request = new Request.Builder()
                 .get()
                 .url(imageUrl)
@@ -28,7 +38,9 @@ class OkHttpNotificationImageRetriever implements NotificationImageRetriever {
             Response response = client.newCall(request).execute();
             InputStream inputStream = response.body().byteStream();
             try {
-                return BitmapFactory.decodeStream(inputStream);
+                bitmap = BitmapFactory.decodeStream(inputStream);
+                this.imageUrl = imageUrl;
+                return bitmap;
             } finally {
                 inputStream.close();
             }
