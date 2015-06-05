@@ -2,6 +2,7 @@
 -------
 
 Adds the ability to configure the maximum concurrent downloads (see #23)
+Improves performance of notification image fetching (#27)
 
 0.0.6
 -------
