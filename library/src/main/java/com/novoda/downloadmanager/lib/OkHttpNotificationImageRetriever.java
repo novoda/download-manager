@@ -32,6 +32,10 @@ class OkHttpNotificationImageRetriever implements NotificationImageRetriever {
             bitmap.recycle();
             bitmap = null;
         }
+        return fetchBitmap();
+    }
+
+    private Bitmap fetchBitmap() {
         Request request = new Request.Builder()
                 .get()
                 .url(this.imageUrl)
