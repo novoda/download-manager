@@ -32,7 +32,7 @@ class OkHttpNotificationImageRetriever implements NotificationImageRetriever {
     private Bitmap fetchBitmap(String imageUrl) {
         Request request = new Request.Builder()
                 .get()
-                .url(this.imageUrl)
+                .url(imageUrl)
                 .build();
         try {
             Response response = client.newCall(request).execute();
