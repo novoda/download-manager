@@ -117,8 +117,6 @@ public final class DownloadProvider extends ContentProvider {
      */
     private static final int PUBLIC_DOWNLOAD_ID = 6;
 
-    public static boolean VERBOSE_LOGGING;
-
     static {
         sURIMatcher.addURI(AUTHORITY, "my_downloads", MY_DOWNLOADS);
         sURIMatcher.addURI(AUTHORITY, "my_downloads/#", MY_DOWNLOADS_ID);
@@ -855,7 +853,7 @@ public final class DownloadProvider extends ContentProvider {
             }
         }
 
-        if (VERBOSE_LOGGING) {
+        if (GlobalState.hasVerboseLogging()) {
             logVerboseQueryInfo(projection, selection, selectionArgs, sort, db);
         }
 
@@ -1139,7 +1137,7 @@ public final class DownloadProvider extends ContentProvider {
      */
     @Override
     public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
-        if (VERBOSE_LOGGING) {
+        if (GlobalState.hasVerboseLogging()) {
             logVerboseOpenFileInfo(uri, mode);
         }
 
@@ -1223,29 +1221,28 @@ public final class DownloadProvider extends ContentProvider {
         }
     }
 
-    private static final void copyInteger(String key, ContentValues from, ContentValues to) {
+    private static void copyInteger(String key, ContentValues from, ContentValues to) {
         Integer i = from.getAsInteger(key);
         if (i != null) {
             to.put(key, i);
         }
     }
 
-    private static final void copyBoolean(String key, ContentValues from, ContentValues to) {
+    private static void copyBoolean(String key, ContentValues from, ContentValues to) {
         Boolean b = from.getAsBoolean(key);
         if (b != null) {
             to.put(key, b);
         }
     }
 
-    private static final void copyString(String key, ContentValues from, ContentValues to) {
+    private static void copyString(String key, ContentValues from, ContentValues to) {
         String s = from.getAsString(key);
         if (s != null) {
             to.put(key, s);
         }
     }
 
-    private static final void copyStringWithDefault(String key, ContentValues from,
-                                                    ContentValues to, String defaultValue) {
+    private static void copyStringWithDefault(String key, ContentValues from, ContentValues to, String defaultValue) {
         copyString(key, from, to);
         if (!to.containsKey(key)) {
             to.put(key, defaultValue);

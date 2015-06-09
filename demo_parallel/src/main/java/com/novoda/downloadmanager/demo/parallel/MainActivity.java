@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         com.novoda.notils.logger.simple.Log.setShowLogs(true);
         setContentView(R.layout.activity_main);
         listView = (ListView) findViewById(R.id.main_downloads_list);
-        downloadManager = DownloadManagerBuilder.create()
+        downloadManager = DownloadManagerBuilder.from(this)
                 .withVerboseLogging()
                 .build(getContentResolver());
 
@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
     private void setupDownloadingExample() {
         Uri uri = Uri.parse(BIG_FILE);
         final Request request = new Request(uri);
-        request.setDestinationInInternalFilesDir(this, Environment.DIRECTORY_MOVIES, "podcast.mp3");
+        request.setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "podcast.mp3");
         request.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
         request.setBigPictureUrl(BBC_COMEDY_IMAGE);
         request.setTitle("BBC Innuendo Bingo");

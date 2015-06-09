@@ -140,19 +140,16 @@ public class Request {
      * The downloaded file is not scanned by MediaScanner. But it can be
      * made scannable by calling {@link #allowScanningByMediaScanner()}.
      *
-     * @param context the {@link android.content.Context} to use in determining the external
-     *                files directory
      * @param dirType the directory type to pass to
-     *                {@link android.content.Context#getExternalFilesDir(String)}
+     *                {@link Context#getExternalFilesDir(String)}
      * @param subPath the path within the external directory, including the
      *                destination filename
      * @return this object
      * @throws IllegalStateException If the external storage directory
      *                               cannot be found or created.
      */
-    public Request setDestinationInExternalFilesDir(Context context, String dirType,
-                                                    String subPath) {
-        final File file = context.getExternalFilesDir(dirType);
+    public Request setDestinationInExternalFilesDir(String dirType, String subPath) {
+        final File file = GlobalState.getContext().getExternalFilesDir(dirType);
         if (file == null) {
             throw new IllegalStateException("Failed to get external storage files directory");
         } else if (file.exists()) {
@@ -176,21 +173,17 @@ public class Request {
      * The downloaded file is not scanned by MediaScanner. But it can be
      * made scannable by calling {@link #allowScanningByMediaScanner()}.
      *
-     * @param context the {@link android.content.Context} to use in determining the external
-     *                files directory
      * @param dirType the directory type to pass to
-     *                {@link android.content.Context#getExternalFilesDir(String)}
+     *                {@link Context#getExternalFilesDir(String)}
      * @param subPath the path within the external directory, including the
      *                destination filename
      * @return this object
      * @throws IllegalStateException If the external storage directory
      *                               cannot be found or created.
      */
-    public Request setDestinationInInternalFilesDir(Context context, String dirType, String subPath) {
-        final File file = new File(context.getFilesDir(), dirType);
-        if (file == null) {
-            throw new IllegalStateException("Failed to get external storage files directory");
-        } else if (file.exists()) {
+    public Request setDestinationInInternalFilesDir(String dirType, String subPath) {
+        final File file = new File(GlobalState.getContext().getFilesDir(), dirType);
+        if (file.exists()) {
             if (!file.isDirectory()) {
                 throw new IllegalStateException(file.getAbsolutePath() + " already exists and is not a directory");
             }
