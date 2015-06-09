@@ -117,8 +117,6 @@ public final class DownloadProvider extends ContentProvider {
      */
     private static final int PUBLIC_DOWNLOAD_ID = 6;
 
-    public static boolean VERBOSE_LOGGING;
-
     static {
         sURIMatcher.addURI(AUTHORITY, "my_downloads", MY_DOWNLOADS);
         sURIMatcher.addURI(AUTHORITY, "my_downloads/#", MY_DOWNLOADS_ID);
@@ -855,7 +853,7 @@ public final class DownloadProvider extends ContentProvider {
             }
         }
 
-        if (VERBOSE_LOGGING) {
+        if (GlobalState.hasVerboseLogging()) {
             logVerboseQueryInfo(projection, selection, selectionArgs, sort, db);
         }
 
@@ -1139,7 +1137,7 @@ public final class DownloadProvider extends ContentProvider {
      */
     @Override
     public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
-        if (VERBOSE_LOGGING) {
+        if (GlobalState.hasVerboseLogging()) {
             logVerboseOpenFileInfo(uri, mode);
         }
 

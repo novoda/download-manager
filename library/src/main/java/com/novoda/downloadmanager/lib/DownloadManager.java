@@ -324,13 +324,14 @@ public class DownloadManager {
 
     private Uri mBaseUri = Downloads.Impl.CONTENT_URI;
 
-    public DownloadManager(ContentResolver resolver) {
-        this(resolver, false);
+    public DownloadManager(Context context, ContentResolver resolver) {
+        this(context, resolver, false);
     }
 
-    public DownloadManager(ContentResolver contentResolver, boolean verboseLogging) {
+    public DownloadManager(Context context, ContentResolver contentResolver, boolean verboseLogging) {
         this.mResolver = contentResolver;
-        DownloadProvider.VERBOSE_LOGGING = verboseLogging;
+        GlobalState.setContext(context);
+        GlobalState.setVerboseLogging(verboseLogging);
     }
 
     /**
