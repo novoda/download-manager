@@ -1,3 +1,10 @@
+0.0.8
+-------
+
+Enforces passing a Context via the DownloadManagerBuilder this allows Requests created later on to not need to pass Context as a parameter. (#28)
+It will also allow us to make further refactorings behind the scenes now we haz your Context bwahaha.
+THIS IS AN API BREAKING CHANGE FOR DownloadManagerBuilder, DownloadManager and Request (see https://thechive.files.wordpress.com/2013/01/gifs_201.gif)
+
 0.0.7
 -------
 
