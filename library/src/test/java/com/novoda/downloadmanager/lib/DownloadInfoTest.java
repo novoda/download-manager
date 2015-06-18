@@ -5,11 +5,11 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 
+import java.util.concurrent.ExecutorService;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-
-import java.util.concurrent.ExecutorService;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -37,14 +37,14 @@ public class DownloadInfoTest {
 
     private static final DownloadClientReadyChecker IS_READY = new DownloadClientReadyChecker() {
         @Override
-        public boolean isReadyToDownload() {
+        public boolean isAllowedToDownload() {
             return true;
         }
     };
 
     private static final DownloadClientReadyChecker IS_NOT_READY = new DownloadClientReadyChecker() {
         @Override
-        public boolean isReadyToDownload() {
+        public boolean isAllowedToDownload() {
             return false;
         }
     };
