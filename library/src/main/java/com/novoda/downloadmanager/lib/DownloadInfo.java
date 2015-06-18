@@ -478,7 +478,7 @@ class DownloadInfo {
      */
     public boolean startDownloadIfReady(ExecutorService executor) {
         synchronized (this) {
-            final boolean isReady = isDownloadManagerReadyToDownload() && isClientIsReadyToDownload();
+            final boolean isReady = isDownloadManagerReadyToDownload() && isClientReadyToDownload();
             final boolean isActive = mSubmittedTask != null && !mSubmittedTask.isDone();
             if (isReady && !isActive) {
                 if (mStatus != Downloads.Impl.STATUS_RUNNING) {
@@ -495,7 +495,7 @@ class DownloadInfo {
         }
     }
 
-    private boolean isClientIsReadyToDownload() {
+    private boolean isClientReadyToDownload() {
         return downloadClientReadyChecker.isReadyToDownload();
     }
 
