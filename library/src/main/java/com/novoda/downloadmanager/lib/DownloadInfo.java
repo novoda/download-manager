@@ -496,7 +496,7 @@ class DownloadInfo {
     }
 
     private boolean isClientReadyToDownload() {
-        return downloadClientReadyChecker.isReadyToDownload();
+        return downloadClientReadyChecker.isAllowedToDownload();
     }
 
     /**

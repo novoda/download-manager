@@ -3,7 +3,7 @@ package com.novoda.downloadmanager.lib;
 public interface DownloadClientReadyChecker {
     Ready READY = new Ready();
 
-    boolean isReadyToDownload();
+    boolean isAllowedToDownload();
 
     /**
      * Ready specifies that it is always ready to download
@@ -11,7 +11,7 @@ public interface DownloadClientReadyChecker {
     class Ready implements DownloadClientReadyChecker {
 
         @Override
-        public boolean isReadyToDownload() {
+        public boolean isAllowedToDownload() {
             return true;
         }
     }
