@@ -47,14 +47,14 @@ class DownloadInfo {
                 DownloadNotifier notifier,
                 DownloadClientReadyChecker downloadClientReadyChecker) {
 
-            Fuzz fuzz = new Fuzz();
+            RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
 
             final DownloadInfo info = new DownloadInfo(
                     context,
                     systemFacade,
                     storageManager,
                     notifier,
-                    fuzz,
+                    randomNumberGenerator,
                     downloadClientReadyChecker);
 
             updateFromDatabase(info);
@@ -241,8 +241,7 @@ class DownloadInfo {
 
     private Uri allDownloadsUri;
     private Uri myDownloadsUri;
-
-    public Fuzz mFuzz;
+    private RandomNumberGenerator randomNumberGenerator;
 
     private List<Pair<String, String>> mRequestHeaders = new ArrayList<Pair<String, String>>();
 
@@ -265,14 +264,15 @@ class DownloadInfo {
             SystemFacade systemFacade,
             StorageManager storageManager,
             DownloadNotifier notifier,
-            Fuzz fuzz,
+            RandomNumberGenerator randomNumberGenerator,
             DownloadClientReadyChecker downloadClientReadyChecker) {
 
         mContext = context;
         mSystemFacade = systemFacade;
         mStorageManager = storageManager;
         mNotifier = notifier;
-        mFuzz = fuzz;
+
+        this.randomNumberGenerator = randomNumberGenerator;
         this.downloadClientReadyChecker = downloadClientReadyChecker;
     }
 
@@ -317,7 +317,7 @@ class DownloadInfo {
         if (mRetryAfter > 0) {
             return mLastMod + mRetryAfter;
         }
-        return mLastMod + Constants.RETRY_FIRST_DELAY * (1000 + mFuzz.getFuzz()) * (1 << (mNumFailed - 1));
+        return mLastMod + Constants.RETRY_FIRST_DELAY * (1000 + randomNumberGenerator.getFuzz()) * (1 << (mNumFailed - 1));
     }
 
     /**

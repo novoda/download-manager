@@ -29,7 +29,7 @@ public class DownloadInfoTest {
     @Mock
     private ExecutorService mockExecutorService;
     @Mock
-    private Fuzz mockFuzz;
+    private RandomNumberGenerator mockRandomNumberGenerator;
     @Mock
     private ContentResolver mockContentResolver;
 
@@ -51,7 +51,7 @@ public class DownloadInfoTest {
     public void setUp() {
         initMocks(this);
 
-        when(mockFuzz.getFuzz()).thenReturn(1);
+        when(mockRandomNumberGenerator.getFuzz()).thenReturn(1);
         when(mockContext.getContentResolver()).thenReturn(mockContentResolver);
         when(mockContentResolver.update(any(Uri.class), any(ContentValues.class), any(String.class), any(String[].class))).thenReturn(0);
     }
@@ -64,7 +64,7 @@ public class DownloadInfoTest {
                 mockSystemFacade,
                 mockStorageManager,
                 mockNotifier,
-                mockFuzz,
+                mockRandomNumberGenerator,
                 IS_READY);
 
         boolean isReady = downloadInfo.startDownloadIfReady(mockExecutorService);
@@ -79,7 +79,7 @@ public class DownloadInfoTest {
                 mockSystemFacade,
                 mockStorageManager,
                 mockNotifier,
-                mockFuzz,
+                mockRandomNumberGenerator,
                 IS_NOT_READY);
 
         boolean isReady = downloadInfo.startDownloadIfReady(mockExecutorService);
