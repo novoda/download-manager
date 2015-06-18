@@ -60,7 +60,6 @@ class DownloadInfo {
                     contentValues);
 
             updateFromDatabase(info);
-            setDownloadUris(info);
             readRequestHeaders(info);
 
             return info;
@@ -132,11 +131,6 @@ class DownloadInfo {
 
         private void addHeader(DownloadInfo info, String header, String value) {
             info.mRequestHeaders.add(Pair.create(header, value));
-        }
-
-        private void setDownloadUris(DownloadInfo info) {
-            info.allDownloadsUri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, info.mId);
-            info.myDownloadsUri = ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, info.mId);
         }
 
         private String getString(String column) {
@@ -241,8 +235,6 @@ class DownloadInfo {
     public int mBypassRecommendedSizeLimit;
     public String bigPictureResourceUrl;
 
-    private Uri allDownloadsUri;
-    private Uri myDownloadsUri;
     private RandomNumberGenerator randomNumberGenerator;
     private ContentValues downloadStatusContentValues;
 
@@ -523,11 +515,11 @@ class DownloadInfo {
     }
 
     public Uri getMyDownloadsUri() {
-        return myDownloadsUri;
+        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, mId);
     }
 
     public Uri getAllDownloadsUri() {
-        return allDownloadsUri;
+        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, mId);
     }
 
     /**
