@@ -50,7 +50,7 @@ class DownloadInfo {
             RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
             ContentValues contentValues = new ContentValues();
 
-            final DownloadInfo info = new DownloadInfo(
+            DownloadInfo info = new DownloadInfo(
                     context,
                     systemFacade,
                     storageManager,
@@ -525,7 +525,6 @@ class DownloadInfo {
     public Uri getMyDownloadsUri() {
         return myDownloadsUri;
     }
-
 
     public Uri getAllDownloadsUri() {
         return allDownloadsUri;
