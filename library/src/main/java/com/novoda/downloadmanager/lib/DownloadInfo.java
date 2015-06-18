@@ -236,7 +236,7 @@ class DownloadInfo {
 
     /**
      * Result of last {DownloadThread} started by
-     * {@link #startDownloadIfReady(ExecutorService)}.
+     * {@link #startDownloadIfReady()} && {@link #startDownloadIfNotActive(ExecutorService)}.
      */
     private Future<?> mSubmittedTask;
 
@@ -462,11 +462,16 @@ class DownloadInfo {
      *
      * @return If actively downloading.
      */
-    public boolean startDownloadIfReady(ExecutorService executor) {
+    public boolean startDownloadIfReady() {
         synchronized (this) {
-            final boolean isReady = isDownloadManagerReadyToDownload() && isClientReadyToDownload();
+            return isDownloadManagerReadyToDownload() && isClientReadyToDownload();
+        }
+    }
+
+    public boolean startDownloadIfNotActive(ExecutorService executor) {
+        synchronized (this) {
             final boolean isActive = mSubmittedTask != null && !mSubmittedTask.isDone();
-            if (isReady && !isActive) {
+            if (!isActive) {
                 if (mStatus != Downloads.Impl.STATUS_RUNNING) {
                     mStatus = Downloads.Impl.STATUS_RUNNING;
                     downloadStatusContentValues.clear();
@@ -477,7 +482,7 @@ class DownloadInfo {
                 mTask = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier);
                 mSubmittedTask = executor.submit(mTask);
             }
-            return isReady;
+            return isActive;
         }
     }
 

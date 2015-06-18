@@ -1,39 +1,10 @@
 package com.novoda.downloadmanager.lib;
 
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Context;
-import android.net.Uri;
-
-import java.util.concurrent.ExecutorService;
-
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class DownloadInfoTest {
-
-    @Mock
-    private Context mockContext;
-    @Mock
-    private SystemFacade mockSystemFacade;
-    @Mock
-    private StorageManager mockStorageManager;
-    @Mock
-    private DownloadNotifier mockNotifier;
-    @Mock
-    private ExecutorService mockExecutorService;
-    @Mock
-    private RandomNumberGenerator mockRandomNumberGenerator;
-    @Mock
-    private ContentResolver mockContentResolver;
-    @Mock
-    private ContentValues mockContentValues;
 
     private static final DownloadClientReadyChecker IS_READY = new DownloadClientReadyChecker() {
         @Override
@@ -49,44 +20,35 @@ public class DownloadInfoTest {
         }
     };
 
-    @Before
-    public void setUp() {
-        initMocks(this);
-
-        when(mockRandomNumberGenerator.generate()).thenReturn(1);
-        when(mockContext.getContentResolver()).thenReturn(mockContentResolver);
-        when(mockContentResolver.update(any(Uri.class), any(ContentValues.class), any(String.class), any(String[].class))).thenReturn(0);
-    }
-
     @Test
     public void givenClientIsReadyToDownloadThenStartDownload() {
-
         DownloadInfo downloadInfo = new DownloadInfo(
-                mockContext,
-                mockSystemFacade,
-                mockStorageManager,
-                mockNotifier,
-                mockRandomNumberGenerator,
+                null,
+                null,
+                null,
+                null,
+                null,
                 IS_READY,
-                mockContentValues);
+                null);
 
-        boolean isReady = downloadInfo.startDownloadIfReady(mockExecutorService);
+        boolean isReady = downloadInfo.startDownloadIfReady();
+
         assertThat(isReady).isTrue();
     }
 
     @Test
     public void givenClientIsNotReadyToDownloadThenDownloadDoesNotStart() {
-
         DownloadInfo downloadInfo = new DownloadInfo(
-                mockContext,
-                mockSystemFacade,
-                mockStorageManager,
-                mockNotifier,
-                mockRandomNumberGenerator,
+                null,
+                null,
+                null,
+                null,
+                null,
                 IS_NOT_READY,
-                mockContentValues);
+                null);
 
-        boolean isReady = downloadInfo.startDownloadIfReady(mockExecutorService);
+        boolean isReady = downloadInfo.startDownloadIfReady();
+
         assertThat(isReady).isFalse();
     }
 }
