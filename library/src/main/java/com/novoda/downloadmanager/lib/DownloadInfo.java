@@ -40,8 +40,14 @@ class DownloadInfo {
             mCursor = cursor;
         }
 
-        public DownloadInfo newDownloadInfo(Context context, SystemFacade systemFacade, StorageManager storageManager, DownloadNotifier notifier) {
-            final DownloadInfo info = new DownloadInfo(context, systemFacade, storageManager, notifier);
+        public DownloadInfo newDownloadInfo(
+                Context context,
+                SystemFacade systemFacade,
+                StorageManager storageManager,
+                DownloadNotifier notifier,
+                DownloadClientReadyChecker downloadClientReadyChecker) {
+
+            final DownloadInfo info = new DownloadInfo(context, systemFacade, storageManager, notifier, downloadClientReadyChecker);
             updateFromDatabase(info);
             readRequestHeaders(info);
             return info;
@@ -233,13 +239,21 @@ class DownloadInfo {
     private final SystemFacade mSystemFacade;
     private final StorageManager mStorageManager;
     private final DownloadNotifier mNotifier;
+    private final DownloadClientReadyChecker mDownloadClientReadyChecker;
 
-    private DownloadInfo(Context context, SystemFacade systemFacade, StorageManager storageManager, DownloadNotifier notifier) {
+    private DownloadInfo(
+            Context context,
+            SystemFacade systemFacade,
+            StorageManager storageManager,
+            DownloadNotifier notifier,
+            DownloadClientReadyChecker downloadClientReadyChecker) {
+
         mContext = context;
         mSystemFacade = systemFacade;
         mStorageManager = storageManager;
         mNotifier = notifier;
         mFuzz = Helpers.sRandom.nextInt(1001);
+        mDownloadClientReadyChecker = downloadClientReadyChecker;
     }
 
     public Collection<Pair<String, String>> getHeaders() {
@@ -289,7 +303,7 @@ class DownloadInfo {
     /**
      * Returns whether this download should be enqueued.
      */
-    private boolean isReadyToDownload() {
+    private boolean isDownloadManagerReadyToDownload() {
         if (mControl == Downloads.Impl.CONTROL_PAUSED) {
             // the download is paused, so it's not going to start
             return false;
@@ -439,7 +453,7 @@ class DownloadInfo {
      */
     public boolean startDownloadIfReady(ExecutorService executor) {
         synchronized (this) {
-            final boolean isReady = isReadyToDownload();
+            final boolean isReady = isDownloadManagerReadyToDownload() && isClientIsReadyToDownload();
             final boolean isActive = mSubmittedTask != null && !mSubmittedTask.isDone();
             if (isReady && !isActive) {
                 if (mStatus != Downloads.Impl.STATUS_RUNNING) {
@@ -454,6 +468,10 @@ class DownloadInfo {
             }
             return isReady;
         }
+    }
+
+    private boolean isClientIsReadyToDownload() {
+        return mDownloadClientReadyChecker.isReadyToDownload();
     }
 
     /**

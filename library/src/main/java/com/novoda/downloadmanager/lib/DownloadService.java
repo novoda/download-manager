@@ -94,6 +94,7 @@ public class DownloadService extends Service {
     private Handler mUpdateHandler;
 
     private volatile int mLastStartId;
+    private DownloadClientReadyChecker mDownloadClientReadyChecker;
 
     /**
      * Receives notifications when the data in the content provider changes
@@ -141,6 +142,8 @@ public class DownloadService extends Service {
 
         mScanner = new DownloadScanner(this);
 
+        mDownloadClientReadyChecker = getClientDownloadCheckRules();
+
         mNotifier = new DownloadNotifier(this, getNotificationImageRetriever());
         mNotifier.cancelAll();
 
@@ -152,6 +155,13 @@ public class DownloadService extends Service {
         ConcurrentDownloadsLimitProvider concurrentDownloadsLimitProvider = ConcurrentDownloadsLimitProvider.newInstance(this);
         DownloadExecutorFactory factory = new DownloadExecutorFactory(concurrentDownloadsLimitProvider);
         mExecutor = factory.createExecutor();
+    }
+
+    private DownloadClientReadyChecker getClientDownloadCheckRules() {
+        if (!(getApplication() instanceof DownloadClientReadyChecker)) {
+            return DownloadClientReadyChecker.READY;
+        }
+        return (DownloadClientReadyChecker) getApplication();
     }
 
     private NotificationImageRetriever getNotificationImageRetriever() {
@@ -368,7 +378,7 @@ public class DownloadService extends Service {
      * download if appropriate.
      */
     private DownloadInfo insertDownloadLocked(DownloadInfo.Reader reader, long now) {
-        final DownloadInfo info = reader.newDownloadInfo(this, mSystemFacade, mStorageManager, mNotifier);
+        final DownloadInfo info = reader.newDownloadInfo(this, mSystemFacade, mStorageManager, mNotifier, mDownloadClientReadyChecker);
         mDownloads.put(info.mId, info);
 
         Log.v("processing inserted download " + info.mId);

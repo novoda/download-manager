@@ -5,7 +5,8 @@ This is a copy of the http://developer.android.com/reference/android/app/Downloa
 
 ## Demo explanation
 
-Here we show two use cases
+Here we show the following use cases
 
    - Downloading items **serially** from a url (this means the second will not start till the first completes)
    - Querying the download manager for what has been downloaded
+   - Client has rules that determine if downloads should start / resume
