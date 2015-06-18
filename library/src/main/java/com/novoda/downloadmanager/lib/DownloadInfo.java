@@ -480,7 +480,7 @@ class DownloadInfo {
                     mStatus = Downloads.Impl.STATUS_RUNNING;
                     ContentValues values = new ContentValues();
                     values.put(Downloads.Impl.COLUMN_STATUS, mStatus);
-                    mContext.getContentResolver().update(allDownloadsUri, values, null, null);
+                    mContext.getContentResolver().update(getAllDownloadsUri(), values, null, null);
                 }
 
                 mTask = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier);
