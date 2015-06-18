@@ -37,14 +37,14 @@ public class DownloadInfoTest {
 
     private static final DownloadClientReadyChecker IS_READY = new DownloadClientReadyChecker() {
         @Override
-        public boolean isReadyToDownload() {
+        public boolean isAllowedToDownload() {
             return true;
         }
     };
 
     private static final DownloadClientReadyChecker IS_NOT_READY = new DownloadClientReadyChecker() {
         @Override
-        public boolean isReadyToDownload() {
+        public boolean isAllowedToDownload() {
             return false;
         }
     };
