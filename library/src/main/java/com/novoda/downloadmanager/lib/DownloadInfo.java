@@ -46,10 +46,8 @@ class DownloadInfo {
                 StorageManager storageManager,
                 DownloadNotifier notifier,
                 DownloadClientReadyChecker downloadClientReadyChecker) {
-
             RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
             ContentValues contentValues = new ContentValues();
-
             DownloadInfo info = new DownloadInfo(
                     context,
                     systemFacade,
@@ -58,7 +56,6 @@ class DownloadInfo {
                     randomNumberGenerator,
                     downloadClientReadyChecker,
                     contentValues);
-
             updateFromDatabase(info);
             readRequestHeaders(info);
 
@@ -261,12 +258,10 @@ class DownloadInfo {
             RandomNumberGenerator randomNumberGenerator,
             DownloadClientReadyChecker downloadClientReadyChecker,
             ContentValues downloadStatusContentValues) {
-
-        mContext = context;
-        mSystemFacade = systemFacade;
-        mStorageManager = storageManager;
-        mNotifier = notifier;
-
+        this.mContext = context;
+        this.mSystemFacade = systemFacade;
+        this.mStorageManager = storageManager;
+        this.mNotifier = notifier;
         this.randomNumberGenerator = randomNumberGenerator;
         this.downloadClientReadyChecker = downloadClientReadyChecker;
         this.downloadStatusContentValues = downloadStatusContentValues;
