@@ -239,8 +239,8 @@ class DownloadInfo {
     public int mBypassRecommendedSizeLimit;
     public String bigPictureResourceUrl;
 
-    public Uri allDownloadsUri;
-    public Uri myDownloadsUri;
+    private Uri allDownloadsUri;
+    private Uri myDownloadsUri;
 
     public Fuzz mFuzz;
 
@@ -518,7 +518,7 @@ class DownloadInfo {
     }
 
     public Uri getMyDownloadsUri() {
-        return allDownloadsUri;
+        return myDownloadsUri;
     }
 
 
