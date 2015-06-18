@@ -235,9 +235,6 @@ class DownloadInfo {
     public int mBypassRecommendedSizeLimit;
     public String bigPictureResourceUrl;
 
-    private RandomNumberGenerator randomNumberGenerator;
-    private ContentValues downloadStatusContentValues;
-
     private List<Pair<String, String>> mRequestHeaders = new ArrayList<Pair<String, String>>();
 
     /**
@@ -253,6 +250,8 @@ class DownloadInfo {
     private final StorageManager mStorageManager;
     private final DownloadNotifier mNotifier;
     private final DownloadClientReadyChecker downloadClientReadyChecker;
+    private final RandomNumberGenerator randomNumberGenerator;
+    private final ContentValues downloadStatusContentValues;
 
     DownloadInfo(
             Context context,
