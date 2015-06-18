@@ -48,6 +48,7 @@ class DownloadInfo {
                 DownloadClientReadyChecker downloadClientReadyChecker) {
 
             RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
+            ContentValues contentValues = new ContentValues();
 
             final DownloadInfo info = new DownloadInfo(
                     context,
@@ -55,7 +56,8 @@ class DownloadInfo {
                     storageManager,
                     notifier,
                     randomNumberGenerator,
-                    downloadClientReadyChecker);
+                    downloadClientReadyChecker,
+                    contentValues);
 
             updateFromDatabase(info);
             setDownloadUris(info);
@@ -242,6 +244,7 @@ class DownloadInfo {
     private Uri allDownloadsUri;
     private Uri myDownloadsUri;
     private RandomNumberGenerator randomNumberGenerator;
+    private ContentValues downloadStatusContentValues;
 
     private List<Pair<String, String>> mRequestHeaders = new ArrayList<Pair<String, String>>();
 
@@ -265,7 +268,8 @@ class DownloadInfo {
             StorageManager storageManager,
             DownloadNotifier notifier,
             RandomNumberGenerator randomNumberGenerator,
-            DownloadClientReadyChecker downloadClientReadyChecker) {
+            DownloadClientReadyChecker downloadClientReadyChecker,
+            ContentValues downloadStatusContentValues) {
 
         mContext = context;
         mSystemFacade = systemFacade;
@@ -274,6 +278,7 @@ class DownloadInfo {
 
         this.randomNumberGenerator = randomNumberGenerator;
         this.downloadClientReadyChecker = downloadClientReadyChecker;
+        this.downloadStatusContentValues = downloadStatusContentValues;
     }
 
     public Collection<Pair<String, String>> getHeaders() {
@@ -478,9 +483,9 @@ class DownloadInfo {
             if (isReady && !isActive) {
                 if (mStatus != Downloads.Impl.STATUS_RUNNING) {
                     mStatus = Downloads.Impl.STATUS_RUNNING;
-                    ContentValues values = new ContentValues();
-                    values.put(Downloads.Impl.COLUMN_STATUS, mStatus);
-                    mContext.getContentResolver().update(getAllDownloadsUri(), values, null, null);
+                    downloadStatusContentValues.clear();
+                    downloadStatusContentValues.put(Downloads.Impl.COLUMN_STATUS, mStatus);
+                    mContext.getContentResolver().update(getAllDownloadsUri(), downloadStatusContentValues, null, null);
                 }
 
                 mTask = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier);

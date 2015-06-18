@@ -32,6 +32,8 @@ public class DownloadInfoTest {
     private RandomNumberGenerator mockRandomNumberGenerator;
     @Mock
     private ContentResolver mockContentResolver;
+    @Mock
+    private ContentValues mockContentValues;
 
     private static final DownloadClientReadyChecker IS_READY = new DownloadClientReadyChecker() {
         @Override
@@ -65,7 +67,8 @@ public class DownloadInfoTest {
                 mockStorageManager,
                 mockNotifier,
                 mockRandomNumberGenerator,
-                IS_READY);
+                IS_READY,
+                mockContentValues);
 
         boolean isReady = downloadInfo.startDownloadIfReady(mockExecutorService);
         assertThat(isReady).isTrue();
@@ -80,7 +83,8 @@ public class DownloadInfoTest {
                 mockStorageManager,
                 mockNotifier,
                 mockRandomNumberGenerator,
-                IS_NOT_READY);
+                IS_NOT_READY,
+                mockContentValues);
 
         boolean isReady = downloadInfo.startDownloadIfReady(mockExecutorService);
         assertThat(isReady).isFalse();
