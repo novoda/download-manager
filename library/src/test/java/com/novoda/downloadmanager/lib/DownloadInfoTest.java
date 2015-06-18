@@ -31,7 +31,7 @@ public class DownloadInfoTest {
                 IS_READY,
                 null);
 
-        boolean isReady = downloadInfo.startDownloadIfReady();
+        boolean isReady = downloadInfo.isReadyToDownload();
 
         assertThat(isReady).isTrue();
     }
@@ -47,7 +47,7 @@ public class DownloadInfoTest {
                 IS_NOT_READY,
                 null);
 
-        boolean isReady = downloadInfo.startDownloadIfReady();
+        boolean isReady = downloadInfo.isReadyToDownload();
 
         assertThat(isReady).isFalse();
     }

@@ -351,7 +351,7 @@ public class DownloadService extends Service {
     }
 
     private boolean kickOffDownloadTaskIfReady(boolean isActive, DownloadInfo info) {
-        boolean readyToDownload = info.startDownloadIfReady();
+        boolean readyToDownload = info.isReadyToDownload();
         if (readyToDownload) {
             isActive |= info.startDownloadIfNotActive(mExecutor);
         }

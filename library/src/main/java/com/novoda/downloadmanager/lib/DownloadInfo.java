@@ -236,7 +236,7 @@ class DownloadInfo {
 
     /**
      * Result of last {DownloadThread} started by
-     * {@link #startDownloadIfReady()} && {@link #startDownloadIfNotActive(ExecutorService)}.
+     * {@link #isReadyToDownload()} && {@link #startDownloadIfNotActive(ExecutorService)}.
      */
     private Future<?> mSubmittedTask;
 
@@ -462,7 +462,7 @@ class DownloadInfo {
      *
      * @return If actively downloading.
      */
-    public boolean startDownloadIfReady() {
+    public boolean isReadyToDownload() {
         synchronized (this) {
             return isDownloadManagerReadyToDownload() && isClientReadyToDownload();
         }
