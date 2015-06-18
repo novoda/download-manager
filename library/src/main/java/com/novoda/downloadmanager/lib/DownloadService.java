@@ -142,7 +142,7 @@ public class DownloadService extends Service {
 
         mScanner = new DownloadScanner(this);
 
-        mDownloadClientReadyChecker = getClientDownloadCheckRules();
+        mDownloadClientReadyChecker = getDownloadClientReadyChecker();
 
         mNotifier = new DownloadNotifier(this, getNotificationImageRetriever());
         mNotifier.cancelAll();
@@ -157,7 +157,7 @@ public class DownloadService extends Service {
         mExecutor = factory.createExecutor();
     }
 
-    private DownloadClientReadyChecker getClientDownloadCheckRules() {
+    private DownloadClientReadyChecker getDownloadClientReadyChecker() {
         if (!(getApplication() instanceof DownloadClientReadyChecker)) {
             return DownloadClientReadyChecker.READY;
         }

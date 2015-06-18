@@ -47,7 +47,6 @@ public class DownloadInfoTest {
         }
     };
 
-
     @Before
     public void setUp() {
         initMocks(this);
