@@ -70,7 +70,7 @@ public final class DownloadProvider extends ContentProvider {
     /**
      * Current database version
      */
-    private static final int DB_VERSION = 109;
+    private static final int DB_VERSION = 110;
 
     /**
      * Name of table in the database
@@ -326,6 +326,9 @@ public final class DownloadProvider extends ContentProvider {
 
                 case 109:
                     addColumn(db, DB_TABLE, Downloads.Impl.COLUMN_BIG_PICTURE, "TEXT");
+                    break;
+                case 110:
+                    addColumn(db, DB_TABLE, Downloads.Impl.COLUMN_BATCH_ID, "INTEGER");
                     break;
 
                 default:

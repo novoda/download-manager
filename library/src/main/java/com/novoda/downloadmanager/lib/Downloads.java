@@ -224,6 +224,12 @@ final class Downloads {
         public static final String COLUMN_BIG_PICTURE = "notificationBigPictureResourceId";
 
         /**
+         * The ID of the batch that the download belongs to
+         * <P>Type: INTEGER</P>
+         */
+        public static final String COLUMN_BATCH_ID = "batch_id";
+
+        /**
          * The name of the column contain the values of the cookie to be used for
          * the download. This is used directly as the value for the Cookie: HTTP
          * header that gets sent with the request.
