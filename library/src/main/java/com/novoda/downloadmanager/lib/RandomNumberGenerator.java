@@ -5,7 +5,7 @@ package com.novoda.downloadmanager.lib;
  * for the server queries
  */
 class RandomNumberGenerator {
-    int getFuzz() {
+    int generate() {
         return Helpers.sRandom.nextInt(1001);
     }
 }

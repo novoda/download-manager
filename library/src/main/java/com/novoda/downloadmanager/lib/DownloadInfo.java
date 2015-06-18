@@ -322,7 +322,7 @@ class DownloadInfo {
         if (mRetryAfter > 0) {
             return mLastMod + mRetryAfter;
         }
-        return mLastMod + Constants.RETRY_FIRST_DELAY * (1000 + randomNumberGenerator.getFuzz()) * (1 << (mNumFailed - 1));
+        return mLastMod + Constants.RETRY_FIRST_DELAY * (1000 + randomNumberGenerator.generate()) * (1 << (mNumFailed - 1));
     }
 
     /**

@@ -53,7 +53,7 @@ public class DownloadInfoTest {
     public void setUp() {
         initMocks(this);
 
-        when(mockRandomNumberGenerator.getFuzz()).thenReturn(1);
+        when(mockRandomNumberGenerator.generate()).thenReturn(1);
         when(mockContext.getContentResolver()).thenReturn(mockContentResolver);
         when(mockContentResolver.update(any(Uri.class), any(ContentValues.class), any(String.class), any(String[].class))).thenReturn(0);
     }
