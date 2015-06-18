@@ -133,8 +133,8 @@ class DownloadInfo {
         }
 
         private void setDownloadUris(DownloadInfo info) {
-            info.mAllDownloadsUri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, info.mId);
-            info.mMyDownloadsUri = ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, info.mId);
+            info.allDownloadsUri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, info.mId);
+            info.myDownloadsUri = ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, info.mId);
         }
 
         private String getString(String column) {
@@ -239,8 +239,8 @@ class DownloadInfo {
     public int mBypassRecommendedSizeLimit;
     public String bigPictureResourceUrl;
 
-    public Uri mAllDownloadsUri;
-    public Uri mMyDownloadsUri;
+    public Uri allDownloadsUri;
+    public Uri myDownloadsUri;
 
     public Fuzz mFuzz;
 
@@ -258,7 +258,7 @@ class DownloadInfo {
     private final SystemFacade mSystemFacade;
     private final StorageManager mStorageManager;
     private final DownloadNotifier mNotifier;
-    private final DownloadClientReadyChecker mDownloadClientReadyChecker;
+    private final DownloadClientReadyChecker downloadClientReadyChecker;
 
     DownloadInfo(
             Context context,
@@ -273,7 +273,7 @@ class DownloadInfo {
         mStorageManager = storageManager;
         mNotifier = notifier;
         mFuzz = fuzz;
-        mDownloadClientReadyChecker = downloadClientReadyChecker;
+        this.downloadClientReadyChecker = downloadClientReadyChecker;
     }
 
     public Collection<Pair<String, String>> getHeaders() {
@@ -480,7 +480,7 @@ class DownloadInfo {
                     mStatus = Downloads.Impl.STATUS_RUNNING;
                     ContentValues values = new ContentValues();
                     values.put(Downloads.Impl.COLUMN_STATUS, mStatus);
-                    mContext.getContentResolver().update(mAllDownloadsUri, values, null, null);
+                    mContext.getContentResolver().update(allDownloadsUri, values, null, null);
                 }
 
                 mTask = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier);
@@ -491,7 +491,7 @@ class DownloadInfo {
     }
 
     private boolean isClientIsReadyToDownload() {
-        return mDownloadClientReadyChecker.isReadyToDownload();
+        return downloadClientReadyChecker.isReadyToDownload();
     }
 
     /**
@@ -518,12 +518,12 @@ class DownloadInfo {
     }
 
     public Uri getMyDownloadsUri() {
-        return mAllDownloadsUri;
+        return allDownloadsUri;
     }
 
 
     public Uri getAllDownloadsUri() {
-        return mAllDownloadsUri;
+        return allDownloadsUri;
     }
 
     /**
