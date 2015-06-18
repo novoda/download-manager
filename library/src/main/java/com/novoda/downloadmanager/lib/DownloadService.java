@@ -94,7 +94,7 @@ public class DownloadService extends Service {
     private Handler mUpdateHandler;
 
     private volatile int mLastStartId;
-    private DownloadClientReadyChecker mDownloadClientReadyChecker;
+    private DownloadClientReadyChecker downloadClientReadyChecker;
 
     /**
      * Receives notifications when the data in the content provider changes
@@ -142,7 +142,7 @@ public class DownloadService extends Service {
 
         mScanner = new DownloadScanner(this);
 
-        mDownloadClientReadyChecker = getDownloadClientReadyChecker();
+        downloadClientReadyChecker = getDownloadClientReadyChecker();
 
         mNotifier = new DownloadNotifier(this, getNotificationImageRetriever());
         mNotifier.cancelAll();
@@ -378,7 +378,7 @@ public class DownloadService extends Service {
      * download if appropriate.
      */
     private DownloadInfo insertDownloadLocked(DownloadInfo.Reader reader, long now) {
-        final DownloadInfo info = reader.newDownloadInfo(this, mSystemFacade, mStorageManager, mNotifier, mDownloadClientReadyChecker);
+        DownloadInfo info = reader.newDownloadInfo(this, mSystemFacade, mStorageManager, mNotifier, downloadClientReadyChecker);
         mDownloads.put(info.mId, info);
 
         Log.v("processing inserted download " + info.mId);
