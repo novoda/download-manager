@@ -47,9 +47,20 @@ class DownloadInfo {
                 DownloadNotifier notifier,
                 DownloadClientReadyChecker downloadClientReadyChecker) {
 
-            final DownloadInfo info = new DownloadInfo(context, systemFacade, storageManager, notifier, downloadClientReadyChecker);
+            Fuzz fuzz = new Fuzz();
+
+            final DownloadInfo info = new DownloadInfo(
+                    context,
+                    systemFacade,
+                    storageManager,
+                    notifier,
+                    fuzz,
+                    downloadClientReadyChecker);
+
             updateFromDatabase(info);
+            setDownloadUris(info);
             readRequestHeaders(info);
+
             return info;
         }
 
@@ -119,6 +130,11 @@ class DownloadInfo {
 
         private void addHeader(DownloadInfo info, String header, String value) {
             info.mRequestHeaders.add(Pair.create(header, value));
+        }
+
+        private void setDownloadUris(DownloadInfo info) {
+            info.mAllDownloadsUri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, info.mId);
+            info.mMyDownloadsUri = ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, info.mId);
         }
 
         private String getString(String column) {
@@ -223,7 +239,10 @@ class DownloadInfo {
     public int mBypassRecommendedSizeLimit;
     public String bigPictureResourceUrl;
 
-    public int mFuzz;
+    public Uri mAllDownloadsUri;
+    public Uri mMyDownloadsUri;
+
+    public Fuzz mFuzz;
 
     private List<Pair<String, String>> mRequestHeaders = new ArrayList<Pair<String, String>>();
 
@@ -241,18 +260,19 @@ class DownloadInfo {
     private final DownloadNotifier mNotifier;
     private final DownloadClientReadyChecker mDownloadClientReadyChecker;
 
-    private DownloadInfo(
+    DownloadInfo(
             Context context,
             SystemFacade systemFacade,
             StorageManager storageManager,
             DownloadNotifier notifier,
+            Fuzz fuzz,
             DownloadClientReadyChecker downloadClientReadyChecker) {
 
         mContext = context;
         mSystemFacade = systemFacade;
         mStorageManager = storageManager;
         mNotifier = notifier;
-        mFuzz = Helpers.sRandom.nextInt(1001);
+        mFuzz = fuzz;
         mDownloadClientReadyChecker = downloadClientReadyChecker;
     }
 
@@ -297,7 +317,7 @@ class DownloadInfo {
         if (mRetryAfter > 0) {
             return mLastMod + mRetryAfter;
         }
-        return mLastMod + Constants.RETRY_FIRST_DELAY * (1000 + mFuzz) * (1 << (mNumFailed - 1));
+        return mLastMod + Constants.RETRY_FIRST_DELAY * (1000 + mFuzz.getFuzz()) * (1 << (mNumFailed - 1));
     }
 
     /**
@@ -460,7 +480,7 @@ class DownloadInfo {
                     mStatus = Downloads.Impl.STATUS_RUNNING;
                     ContentValues values = new ContentValues();
                     values.put(Downloads.Impl.COLUMN_STATUS, mStatus);
-                    mContext.getContentResolver().update(getAllDownloadsUri(), values, null, null);
+                    mContext.getContentResolver().update(mAllDownloadsUri, values, null, null);
                 }
 
                 mTask = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier);
@@ -498,11 +518,12 @@ class DownloadInfo {
     }
 
     public Uri getMyDownloadsUri() {
-        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, mId);
+        return mAllDownloadsUri;
     }
 
+
     public Uri getAllDownloadsUri() {
-        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, mId);
+        return mAllDownloadsUri;
     }
 
     /**
