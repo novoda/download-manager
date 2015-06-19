@@ -83,10 +83,16 @@ final class Downloads {
          * Added so we can use our own ContentProvider - Matches: DownloadProvider.java
          */
         private static final String AUTHORITY = "content://" + DownloadProvider.AUTHORITY;
+
         /**
          * The content:// URI to access downloads owned by the caller's UID.
          */
         public static final Uri CONTENT_URI = Uri.parse(AUTHORITY + "/my_downloads");
+
+        /**
+         * The content:// URI to access downloads owned by the caller's UID.
+         */
+        public static final Uri BATCH_CONTENT_URI = Uri.parse(AUTHORITY + "/batches");
 
         /**
          * The content URI for accessing all downloads across all UIDs (requires the
@@ -777,6 +783,36 @@ final class Downloads {
              * DownloadProvider.insert().
              */
             public static final String INSERT_KEY_PREFIX = "http_header_";
+        }
+
+        /**
+         * Constants related to batches associated with each download.
+         */
+        public static class Batches implements BaseColumns {
+            public static final String BATCHES_DB_TABLE = "batches";
+
+            /**
+             * The name of the column where the initiating application can provided the
+             * title of this batch. The title will be displayed ito the user in the
+             * list of batches.
+             * <P>Type: TEXT</P>
+             * <P>Owner can Init/Read/Write</P>
+             */
+            public static final String COLUMN_TITLE = "title";
+
+            /**
+             * The name of the column where the initiating application can provide the
+             * description of this batch. The description will be displayed to the
+             * user in the list of batches.
+             * <P>Type: TEXT</P>
+             * <P>Owner can Init/Read/Write</P>
+             */
+            public static final String COLUMN_DESCRIPTION = "description";
+
+            /**
+             * A URL that will be used to show a big picture style notification
+             */
+            public static final String COLUMN_BIG_PICTURE = "notificationBigPictureResourceId";
         }
     }
 
