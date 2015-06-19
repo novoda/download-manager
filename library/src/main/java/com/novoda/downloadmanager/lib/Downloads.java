@@ -778,6 +778,36 @@ final class Downloads {
              */
             public static final String INSERT_KEY_PREFIX = "http_header_";
         }
+
+        /**
+         * Constants related to batches associated with each download.
+         */
+        public static class Batches implements BaseColumns {
+            public static final String BATCHES_DB_TABLE = "batches";
+
+            /**
+             * The name of the column where the initiating application can provided the
+             * title of this batch. The title will be displayed ito the user in the
+             * list of batches.
+             * <P>Type: TEXT</P>
+             * <P>Owner can Init/Read/Write</P>
+             */
+            public static final String COLUMN_TITLE = "title";
+
+            /**
+             * The name of the column where the initiating application can provide the
+             * description of this batch. The description will be displayed to the
+             * user in the list of batches.
+             * <P>Type: TEXT</P>
+             * <P>Owner can Init/Read/Write</P>
+             */
+            public static final String COLUMN_DESCRIPTION = "description";
+
+            /**
+             * A URL that will be used to show a big picture style notification
+             */
+            public static final String COLUMN_BIG_PICTURE = "notificationBigPictureResourceId";
+        }
     }
 
     /**

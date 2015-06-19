@@ -113,6 +113,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
                 addColumn(db, tableName, Downloads.Impl.COLUMN_BIG_PICTURE, "TEXT");
                 break;
             case 110:
+                createBatchesTable(db);
                 addColumn(db, tableName, Downloads.Impl.COLUMN_BATCH_ID, "INTEGER");
                 break;
 
@@ -214,6 +215,17 @@ final class DatabaseHelper extends SQLiteOpenHelper {
                         Downloads.Impl.RequestHeaders.COLUMN_DOWNLOAD_ID + " INTEGER NOT NULL," +
                         Downloads.Impl.RequestHeaders.COLUMN_HEADER + " TEXT NOT NULL," +
                         Downloads.Impl.RequestHeaders.COLUMN_VALUE + " TEXT NOT NULL" +
+                        ");");
+    }
+
+    private void createBatchesTable(SQLiteDatabase db) {
+        db.execSQL("DROP TABLE IF EXISTS " + Downloads.Impl.Batches.BATCHES_DB_TABLE);
+        db.execSQL(
+                "CREATE TABLE " + Downloads.Impl.Batches.BATCHES_DB_TABLE + "(" +
+                        Downloads.Impl.Batches._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                        Downloads.Impl.Batches.COLUMN_TITLE + " TEXT NOT NULL," +
+                        Downloads.Impl.Batches.COLUMN_DESCRIPTION + " TEXT NOT NULL" +
+                        Downloads.Impl.Batches.COLUMN_BIG_PICTURE + " TEXT NOT NULL" +
                         ");");
     }
 }
