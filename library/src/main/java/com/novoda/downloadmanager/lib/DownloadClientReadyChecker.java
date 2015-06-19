@@ -4,7 +4,7 @@ public interface DownloadClientReadyChecker {
     Ready READY = new Ready();
 
     /**
-     * Warning: This method is executed on a background thread
+     * This method is executed on a background thread
      */
     boolean isAllowedToDownload();
 
