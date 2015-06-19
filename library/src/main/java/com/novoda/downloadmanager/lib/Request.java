@@ -50,7 +50,7 @@ public class Request {
     private boolean mScannable = false;
     private String extraField;
     private String bigPictureUrl;
-    private int batchId = -1;
+    private long batchId = -1L;
     /**
      * if a file is designated as a MediaScanner scannable file, the following value is
      * stored in the database column {@link com.novoda.downloadmanager.lib.Downloads.Impl#COLUMN_MEDIA_SCANNED}.
@@ -307,7 +307,7 @@ public class Request {
      * @param batchId the batch id
      * @return this object
      */
-    public Request setBatchId(int batchId) {
+    public Request setBatchId(long batchId) {
         this.batchId = batchId;
         return this;
     }
