@@ -151,6 +151,7 @@ public final class DownloadProvider extends ContentProvider {
     private static final Uri[] BASE_URIS = new Uri[]{
             Downloads.Impl.CONTENT_URI,
             Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
+            Downloads.Impl.BATCH_CONTENT_URI
     };
 
     private static final String[] sAppReadableColumnsArray = new String[]{
@@ -343,7 +344,6 @@ public final class DownloadProvider extends ContentProvider {
         }
         Log.d("calling insert on an unknown/invalid URI: " + uri);
         throw new IllegalArgumentException("Unknown/Invalid URI " + uri);
-
 
     }
 
@@ -649,27 +649,38 @@ public final class DownloadProvider extends ContentProvider {
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
 
         int match = sURIMatcher.match(uri);
-        if (match == -1) {
-            Log.v("querying unknown URI: " + uri);
-            throw new IllegalArgumentException("Unknown URI: " + uri);
+        switch (match) {
+            case ALL_DOWNLOADS:
+            case ALL_DOWNLOADS_ID:
+            case MY_DOWNLOADS:
+            case MY_DOWNLOADS_ID:
+                return queryDownloads(uri, projection, selection, selectionArgs, sort, db, match);
+            case BATCHES:
+            case BATCHES_ID:
+                return db.query(Downloads.Impl.Batches.BATCHES_DB_TABLE, projection, selection,
+                        selectionArgs, null, null, sort);
+            case REQUEST_HEADERS_URI:
+                if (projection != null || selection != null || sort != null) {
+                    throw new UnsupportedOperationException(
+                            "Request header queries do not support "
+                                    + "projections, selections or sorting");
+                }
+                return queryRequestHeaders(db, uri);
+            default:
+                Log.v("querying unknown URI: " + uri);
+                throw new IllegalArgumentException("Unknown URI: " + uri);
         }
+    }
 
-        if (match == REQUEST_HEADERS_URI) {
-            if (projection != null || selection != null || sort != null) {
-                throw new UnsupportedOperationException(
-                        "Request header queries do not support "
-                                + "projections, selections or sorting");
-            }
-            return queryRequestHeaders(db, uri);
-        }
-
+    @Nullable
+    private Cursor queryDownloads(Uri uri, String[] projection, String selection, String[] selectionArgs, String sort, SQLiteDatabase db, int match) {
         SqlSelection fullSelection = getWhereClause(uri, selection, selectionArgs, match);
 
         if (shouldRestrictVisibility()) {
             if (projection == null) {
                 projection = sAppReadableColumnsArray.clone();
             } else {
-                // check the validity of the columns in projection 
+                // check the validity of the columns in projection
                 for (int i = 0; i < projection.length; ++i) {
                     if (!sAppReadableColumnsSet.contains(projection[i]) &&
                             !downloadManagerColumnsList.contains(projection[i])) {
@@ -700,7 +711,6 @@ public final class DownloadProvider extends ContentProvider {
         } else {
             Log.v("query failed in downloads database");
         }
-
         return ret;
     }
 
@@ -885,7 +895,10 @@ public final class DownloadProvider extends ContentProvider {
                     count = 0;
                 }
                 break;
-
+            case BATCHES:
+            case BATCHES_ID:
+                count = db.update(Downloads.Impl.Batches.BATCHES_DB_TABLE, values, where, whereArgs);
+                break;
             default:
                 Log.d("updating unknown/invalid URI: " + uri);
                 throw new UnsupportedOperationException("Cannot update URI: " + uri);

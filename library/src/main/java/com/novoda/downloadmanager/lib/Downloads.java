@@ -798,7 +798,7 @@ final class Downloads {
              * <P>Type: TEXT</P>
              * <P>Owner can Init/Read/Write</P>
              */
-            public static final String COLUMN_TITLE = "title";
+            public static final String COLUMN_TITLE = "batch_title";
 
             /**
              * The name of the column where the initiating application can provide the
@@ -807,12 +807,12 @@ final class Downloads {
              * <P>Type: TEXT</P>
              * <P>Owner can Init/Read/Write</P>
              */
-            public static final String COLUMN_DESCRIPTION = "description";
+            public static final String COLUMN_DESCRIPTION = "batch_description";
 
             /**
              * A URL that will be used to show a big picture style notification
              */
-            public static final String COLUMN_BIG_PICTURE = "notificationBigPictureResourceId";
+            public static final String COLUMN_BIG_PICTURE = "batch_notificationBigPictureResourceId";
         }
     }
 
