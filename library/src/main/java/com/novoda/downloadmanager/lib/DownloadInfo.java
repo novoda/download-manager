@@ -27,6 +27,10 @@ import java.util.concurrent.Future;
 class DownloadInfo {
     public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
 
+    public ContentValues getDownloadStatusContentValues() {
+        return downloadStatusContentValues;
+    }
+
     // TODO: move towards these in-memory objects being sources of truth, and
 
     // periodically pushing to provider.
@@ -472,13 +476,6 @@ class DownloadInfo {
         synchronized (this) {
             final boolean isActive = mSubmittedTask != null && !mSubmittedTask.isDone();
             if (!isActive) {
-                if (mStatus != Downloads.Impl.STATUS_RUNNING) {
-                    mStatus = Downloads.Impl.STATUS_RUNNING;
-                    downloadStatusContentValues.clear();
-                    downloadStatusContentValues.put(Downloads.Impl.COLUMN_STATUS, mStatus);
-                    mContext.getContentResolver().update(getAllDownloadsUri(), downloadStatusContentValues, null, null);
-                }
-
                 mTask = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier);
                 mSubmittedTask = executor.submit(mTask);
             }
