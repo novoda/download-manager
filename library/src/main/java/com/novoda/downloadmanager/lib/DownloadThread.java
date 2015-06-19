@@ -165,7 +165,7 @@ class DownloadThread implements Runnable {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         try {
             if (mInfo.mStatus != Downloads.Impl.STATUS_RUNNING) {
-                mInfo.updateStatus(DownloadManager.STATUS_RUNNING);
+                mInfo.updateStatus(Downloads.Impl.STATUS_RUNNING);
             }
             runInternal();
         } finally {
