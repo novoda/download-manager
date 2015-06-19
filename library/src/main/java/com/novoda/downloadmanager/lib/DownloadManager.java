@@ -361,6 +361,19 @@ public class DownloadManager {
         return id;
     }
 
+    /**
+	 * Create a new download batch. The batch ID can then be supplied to new requests.
+     *
+     * @param batch the parameters specifying this batch
+     * @return an ID for the batch, unique across the system.  This ID is used to make future
+     * calls related to this batch.
+     */
+    public long create(DownloadBatch batch) {
+        ContentValues values = batch.toContentValues();
+        Uri batchUri = mResolver.insert(Downloads.Impl.BATCH_CONTENT_URI, values);
+        return Long.parseLong(batchUri.getLastPathSegment());
+    }
+
     public void markDeleted(URI uri) {
         Cursor cursor = null;
         try {

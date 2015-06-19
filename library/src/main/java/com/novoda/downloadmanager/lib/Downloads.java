@@ -83,10 +83,16 @@ final class Downloads {
          * Added so we can use our own ContentProvider - Matches: DownloadProvider.java
          */
         private static final String AUTHORITY = "content://" + DownloadProvider.AUTHORITY;
+
         /**
          * The content:// URI to access downloads owned by the caller's UID.
          */
         public static final Uri CONTENT_URI = Uri.parse(AUTHORITY + "/my_downloads");
+
+        /**
+         * The content:// URI to access downloads owned by the caller's UID.
+         */
+        public static final Uri BATCH_CONTENT_URI = Uri.parse(AUTHORITY + "/batches");
 
         /**
          * The content URI for accessing all downloads across all UIDs (requires the
