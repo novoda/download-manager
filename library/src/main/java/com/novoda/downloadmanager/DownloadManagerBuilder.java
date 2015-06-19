@@ -5,6 +5,11 @@ import android.content.Context;
 
 import com.novoda.downloadmanager.lib.DownloadManager;
 
+/**
+ * A client can specify whether the downloads are allowed to proceed by implementing
+ * {@link com.novoda.downloadmanager.lib.DownloadClientReadyChecker} on your Activity class
+ *
+ */
 public class DownloadManagerBuilder {
 
     private final Context context;
