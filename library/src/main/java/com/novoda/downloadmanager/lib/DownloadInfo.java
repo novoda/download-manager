@@ -96,6 +96,7 @@ class DownloadInfo {
             info.mDescription = getString(Downloads.Impl.COLUMN_DESCRIPTION);
             info.mBypassRecommendedSizeLimit = getInt(Downloads.Impl.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
             info.bigPictureResourceUrl = getString(Downloads.Impl.COLUMN_BIG_PICTURE);
+            info.batchId = getLong(Downloads.Impl.COLUMN_BATCH_ID);
 
             synchronized (this) {
                 info.mControl = getInt(Downloads.Impl.COLUMN_CONTROL);
@@ -231,6 +232,7 @@ class DownloadInfo {
     public String mDescription;
     public int mBypassRecommendedSizeLimit;
     public String bigPictureResourceUrl;
+    public long batchId;
 
     private List<Pair<String, String>> mRequestHeaders = new ArrayList<Pair<String, String>>();
 

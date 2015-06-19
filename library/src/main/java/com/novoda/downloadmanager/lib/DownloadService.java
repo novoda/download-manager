@@ -84,7 +84,9 @@ public class DownloadService extends Service {
      * content provider changes or disappears.
      */
 //    @GuardedBy("mDownloads")
-    private final Map<Long, DownloadInfo> mDownloads = new HashMap<Long, DownloadInfo>();
+    private final Map<Long, DownloadInfo> mDownloads = new HashMap<>();
+
+    private final Map<Long, DownloadBatch> batches = new HashMap<>();
 
     private ExecutorService mExecutor;
 
@@ -293,16 +295,16 @@ public class DownloadService extends Service {
         boolean isActive = false;
         long nextActionMillis = Long.MAX_VALUE;
 
-        final Set<Long> staleIds = new HashSet<Long>(mDownloads.keySet());
+        final Set<Long> staleDownloadIds = new HashSet<Long>(mDownloads.keySet());
 
         final ContentResolver resolver = getContentResolver();
-        final Cursor cursor = resolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
+        final Cursor downloadsCursor = resolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
         try {
-            final DownloadInfo.Reader reader = new DownloadInfo.Reader(resolver, cursor);
-            final int idColumn = cursor.getColumnIndexOrThrow(Downloads.Impl._ID);
-            while (cursor.moveToNext()) {
-                long id = cursor.getLong(idColumn);
-                staleIds.remove(id);
+            final DownloadInfo.Reader reader = new DownloadInfo.Reader(resolver, downloadsCursor);
+            final int idColumn = downloadsCursor.getColumnIndexOrThrow(Downloads.Impl._ID);
+            while (downloadsCursor.moveToNext()) {
+                long id = downloadsCursor.getLong(idColumn);
+                staleDownloadIds.remove(id);
 
                 DownloadInfo info = mDownloads.get(id);
                 if (info != null) {
@@ -322,9 +324,26 @@ public class DownloadService extends Service {
                 nextActionMillis = Math.min(info.nextActionMillis(now), nextActionMillis);
             }
         } finally {
-            cursor.close();
+            downloadsCursor.close();
         }
-        cleanUpStaleDownloadsThatDisappeared(staleIds);
+
+        Cursor batchesCursor = resolver.query(Downloads.Impl.BATCH_CONTENT_URI, null, null, null, null);
+        batches.clear();
+        try {
+            int idColumn = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches._ID);
+            while (batchesCursor.moveToNext()) {
+                long id = batchesCursor.getLong(idColumn);
+
+                String title = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_TITLE));
+                String description = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_DESCRIPTION));
+                String bigPictureUrl = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_BIG_PICTURE));
+                batches.put(id, new DownloadBatch(title, description, bigPictureUrl));
+            }
+        } finally {
+            batchesCursor.close();
+        }
+
+        cleanUpStaleDownloadsThatDisappeared(staleDownloadIds);
 
         updateUserVisibleNotification();
 
@@ -372,7 +391,7 @@ public class DownloadService extends Service {
     }
 
     private void updateUserVisibleNotification() {
-        mNotifier.updateWith(mDownloads.values());
+        mNotifier.updateWith(batches, mDownloads.values());
     }
 
     /**

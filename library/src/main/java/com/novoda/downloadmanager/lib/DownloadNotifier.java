@@ -39,9 +39,11 @@ import com.novoda.notils.logger.simple.Log;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.novoda.downloadmanager.lib.Request.*;
 
@@ -115,16 +117,16 @@ class DownloadNotifier {
      * Update {@link NotificationManager} to reflect the given set of
      * {@link DownloadInfo}, adding, collapsing, and removing as needed.
      */
-    public void updateWith(Collection<DownloadInfo> downloads) {
+    public void updateWith(Map<Long, DownloadBatch> batches, Collection<DownloadInfo> downloads) {
         synchronized (mActiveNotifs) {
-            updateWithLocked(downloads);
+            updateWithLocked(batches, downloads);
         }
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    private void updateWithLocked(Collection<DownloadInfo> downloads) {
-        final Resources res = mContext.getResources();
-        final Map<String, List<DownloadInfo>> clustered = new HashMap<String, List<DownloadInfo>>();
+    private void updateWithLocked(Map<Long, DownloadBatch> batches, Collection<DownloadInfo> downloads) {
+        Resources res = mContext.getResources();
+        Map<String, List<DownloadInfo>> clustered = new HashMap<>();
 
         for (DownloadInfo info : downloads) {
             final String tag = buildNotificationTag(info);
@@ -141,7 +143,7 @@ class DownloadNotifier {
             buildIcon(type, builder);
             buildActionIntents(tag, type, cluster, builder);
 
-            Notification notification = buildTitlesAndDescription(res, type, cluster, builder);
+            Notification notification = buildTitlesAndDescription(res, type, cluster, builder, batches);
             mNotifManager.notify(tag.hashCode(), notification);
         }
 
@@ -226,7 +228,7 @@ class DownloadNotifier {
         }
     }
 
-    private Notification buildTitlesAndDescription(Resources res, int type, Collection<DownloadInfo> cluster, NotificationCompat.Builder builder) {
+    private Notification buildTitlesAndDescription(Resources res, int type, Collection<DownloadInfo> cluster, NotificationCompat.Builder builder, Map<Long, DownloadBatch> batches) {
         String remainingText = null;
         String percentText = null;
         if (type == TYPE_ACTIVE) {
@@ -263,20 +265,23 @@ class DownloadNotifier {
 
         if (cluster.size() == 1) {
             final DownloadInfo info = cluster.iterator().next();
+            DownloadBatch batch = batches.get(info.batchId);
 
             final NotificationCompat.BigPictureStyle style = new NotificationCompat.BigPictureStyle();
-            String imageUrl = info.bigPictureResourceUrl;
+            String imageUrl = batch.getBigPictureUrl();
             if (!TextUtils.isEmpty(imageUrl)) {
                 Bitmap bitmap = imageRetriever.retrieveImage(imageUrl);
                 style.bigPicture(bitmap);
             }
-            builder.setContentTitle(getDownloadTitle(res, info));
-            style.setBigContentTitle(getDownloadTitle(res, info));
+            CharSequence title = getDownloadTitle(batch);
+            builder.setContentTitle(title);
+            style.setBigContentTitle(title);
 
             if (type == TYPE_ACTIVE) {
-                if (!TextUtils.isEmpty(info.mDescription)) {
-                    builder.setContentText(info.mDescription);
-                    style.setSummaryText(info.mDescription);
+                String description = batch.getDescription();
+                if (!TextUtils.isEmpty(description)) {
+                    builder.setContentText(description);
+                    style.setSummaryText(description);
                 } else {
                     builder.setContentText(remainingText);
                     style.setSummaryText(remainingText);
@@ -307,12 +312,19 @@ class DownloadNotifier {
         {
             final NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(builder);
 
+            Set<DownloadBatch> currentBatches = new HashSet<>();
+
             for (DownloadInfo info : cluster) {
-                inboxStyle.addLine(getDownloadTitle(res, info));
+                DownloadBatch batch = batches.get(info.batchId);
+                currentBatches.add(batch);
+            }
+
+            for (DownloadBatch batch : currentBatches) {
+                inboxStyle.addLine(getDownloadTitle(batch));
             }
 
             if (type == TYPE_ACTIVE) {
-                builder.setContentTitle(res.getQuantityString(R.plurals.dl__notif_summary_active, cluster.size(), cluster.size()));
+                builder.setContentTitle(res.getQuantityString(R.plurals.dl__notif_summary_active, batches.size(), batches.size()));
                 builder.setContentText(remainingText);
                 builder.setContentInfo(percentText);
                 inboxStyle.setSummaryText(remainingText);
@@ -339,11 +351,12 @@ class DownloadNotifier {
         }
     }
 
-    private static CharSequence getDownloadTitle(Resources res, DownloadInfo info) {
-        if (!TextUtils.isEmpty(info.mTitle)) {
-            return info.mTitle;
-        } else {
+    private static CharSequence getDownloadTitle(DownloadBatch batch) {
+        String title = batch.getTitle();
+        if (TextUtils.isEmpty(title)) {
             return "unknown";
+        } else {
+            return title;
         }
     }
 
@@ -371,7 +384,7 @@ class DownloadNotifier {
             return TYPE_ACTIVE + ":" + getPackageName();
         } else if (isCompleteAndVisible(info)) {
             // Complete downloads always have unique notifs
-            return TYPE_COMPLETE + ":" + info.mId;
+            return TYPE_COMPLETE + ":" + info.batchId;
         } else {
             return null;
         }
