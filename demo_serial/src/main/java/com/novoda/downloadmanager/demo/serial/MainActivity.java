@@ -10,6 +10,7 @@ import android.widget.ListView;
 
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
+import com.novoda.downloadmanager.lib.DownloadBatch;
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.Query;
 import com.novoda.downloadmanager.lib.Request;
@@ -18,7 +19,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements QueryForDownloadsAsyncTask.Callback {
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final String BIG_FILE = "http://open.live.bbc.co.uk/mediaselector/5/redir/version/2.0/mediaset/audio-nondrm-download/proto/http/vpid/p02ss0fm.mp3";
+    private static final String BIG_FILE = "http://feeds.soundcloud.com/stream/179716429-coltcabana-aow-226-cm-punk.mp3";
     private static final String BBC_COMEDY_IMAGE = "http://ichef.bbci.co.uk/images/ic/640x360/p02ss0cf.jpg";
 
     private DownloadManager downloadManager;
@@ -40,6 +41,10 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
 
     private void setupDownloadingExample() {
         Uri uri = Uri.parse(BIG_FILE);
+
+        final DownloadBatch batch = new DownloadBatch("Title woo", "Description lols", BBC_COMEDY_IMAGE);
+        long batchId = downloadManager.create(batch);
+
         final Request request = new Request(uri);
         request.setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "podcast.mp3");
         request.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
@@ -47,13 +52,15 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         request.setTitle("BBC Innuendo Bingo");
         request.setDescription("Nothing to do with beards.");
         request.setMimeType("audio/mp3");
+        request.setBatchId(batchId);
 
         findViewById(R.id.main_download_button).setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        long id = downloadManager.enqueue(request);
-                        Log.d(TAG, "Download starting with id: " + id);
+                        long firstId = downloadManager.enqueue(request);
+                        long secondId = downloadManager.enqueue(request);
+                        Log.d(TAG, "Download starting with batch id: " + batch);
                     }
                 });
     }
