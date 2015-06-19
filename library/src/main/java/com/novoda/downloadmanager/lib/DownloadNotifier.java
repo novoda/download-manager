@@ -307,9 +307,7 @@ class DownloadNotifier {
             }
             return builder.build();
 
-        } else
-
-        {
+        } else {
             final NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(builder);
 
             Set<DownloadBatch> currentBatches = new HashSet<>();
