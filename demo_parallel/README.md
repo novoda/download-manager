@@ -5,7 +5,7 @@ This is a copy of the http://developer.android.com/reference/android/app/Downloa
 
 ## Demo explanation
 
-Here we show two use cases
+Here we show two use cases (for other use cases see demo_serial)
 
    - Downloading items **in parallel** from a url
    - Querying the download manager for what has been downloaded

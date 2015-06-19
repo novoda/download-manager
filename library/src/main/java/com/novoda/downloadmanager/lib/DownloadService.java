@@ -94,6 +94,7 @@ public class DownloadService extends Service {
     private Handler mUpdateHandler;
 
     private volatile int mLastStartId;
+    private DownloadClientReadyChecker downloadClientReadyChecker;
 
     /**
      * Receives notifications when the data in the content provider changes
@@ -141,6 +142,8 @@ public class DownloadService extends Service {
 
         mScanner = new DownloadScanner(this);
 
+        downloadClientReadyChecker = getDownloadClientReadyChecker();
+
         mNotifier = new DownloadNotifier(this, getNotificationImageRetriever());
         mNotifier.cancelAll();
 
@@ -152,6 +155,13 @@ public class DownloadService extends Service {
         ConcurrentDownloadsLimitProvider concurrentDownloadsLimitProvider = ConcurrentDownloadsLimitProvider.newInstance(this);
         DownloadExecutorFactory factory = new DownloadExecutorFactory(concurrentDownloadsLimitProvider);
         mExecutor = factory.createExecutor();
+    }
+
+    private DownloadClientReadyChecker getDownloadClientReadyChecker() {
+        if (!(getApplication() instanceof DownloadClientReadyChecker)) {
+            return DownloadClientReadyChecker.READY;
+        }
+        return (DownloadClientReadyChecker) getApplication();
     }
 
     private NotificationImageRetriever getNotificationImageRetriever() {
@@ -341,8 +351,10 @@ public class DownloadService extends Service {
     }
 
     private boolean kickOffDownloadTaskIfReady(boolean isActive, DownloadInfo info) {
-        final boolean activeDownload = info.startDownloadIfReady(mExecutor);
-        isActive |= activeDownload;
+        boolean readyToDownload = info.isReadyToDownload();
+        if (readyToDownload) {
+            isActive |= info.startDownloadIfNotActive(mExecutor);
+        }
         return isActive;
     }
 
@@ -368,7 +380,7 @@ public class DownloadService extends Service {
      * download if appropriate.
      */
     private DownloadInfo insertDownloadLocked(DownloadInfo.Reader reader, long now) {
-        final DownloadInfo info = reader.newDownloadInfo(this, mSystemFacade, mStorageManager, mNotifier);
+        DownloadInfo info = reader.newDownloadInfo(this, mSystemFacade, mStorageManager, mNotifier, downloadClientReadyChecker);
         mDownloads.put(info.mId, info);
 
         Log.v("processing inserted download " + info.mId);

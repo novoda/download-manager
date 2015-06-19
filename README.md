@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.novoda:download-manager:0.0.8'
+    compile 'com.novoda:download-manager:0.0.9'
 }
 ```
 

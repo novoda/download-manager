@@ -40,10 +40,25 @@ class DownloadInfo {
             mCursor = cursor;
         }
 
-        public DownloadInfo newDownloadInfo(Context context, SystemFacade systemFacade, StorageManager storageManager, DownloadNotifier notifier) {
-            final DownloadInfo info = new DownloadInfo(context, systemFacade, storageManager, notifier);
+        public DownloadInfo newDownloadInfo(
+                Context context,
+                SystemFacade systemFacade,
+                StorageManager storageManager,
+                DownloadNotifier notifier,
+                DownloadClientReadyChecker downloadClientReadyChecker) {
+            RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
+            ContentValues contentValues = new ContentValues();
+            DownloadInfo info = new DownloadInfo(
+                    context,
+                    systemFacade,
+                    storageManager,
+                    notifier,
+                    randomNumberGenerator,
+                    downloadClientReadyChecker,
+                    contentValues);
             updateFromDatabase(info);
             readRequestHeaders(info);
+
             return info;
         }
 
@@ -217,13 +232,11 @@ class DownloadInfo {
     public int mBypassRecommendedSizeLimit;
     public String bigPictureResourceUrl;
 
-    public int mFuzz;
-
     private List<Pair<String, String>> mRequestHeaders = new ArrayList<Pair<String, String>>();
 
     /**
      * Result of last {DownloadThread} started by
-     * {@link #startDownloadIfReady(ExecutorService)}.
+     * {@link #isReadyToDownload()} && {@link #startDownloadIfNotActive(ExecutorService)}.
      */
     private Future<?> mSubmittedTask;
 
@@ -233,13 +246,25 @@ class DownloadInfo {
     private final SystemFacade mSystemFacade;
     private final StorageManager mStorageManager;
     private final DownloadNotifier mNotifier;
+    private final DownloadClientReadyChecker downloadClientReadyChecker;
+    private final RandomNumberGenerator randomNumberGenerator;
+    private final ContentValues downloadStatusContentValues;
 
-    private DownloadInfo(Context context, SystemFacade systemFacade, StorageManager storageManager, DownloadNotifier notifier) {
-        mContext = context;
-        mSystemFacade = systemFacade;
-        mStorageManager = storageManager;
-        mNotifier = notifier;
-        mFuzz = Helpers.sRandom.nextInt(1001);
+    DownloadInfo(
+            Context context,
+            SystemFacade systemFacade,
+            StorageManager storageManager,
+            DownloadNotifier notifier,
+            RandomNumberGenerator randomNumberGenerator,
+            DownloadClientReadyChecker downloadClientReadyChecker,
+            ContentValues downloadStatusContentValues) {
+        this.mContext = context;
+        this.mSystemFacade = systemFacade;
+        this.mStorageManager = storageManager;
+        this.mNotifier = notifier;
+        this.randomNumberGenerator = randomNumberGenerator;
+        this.downloadClientReadyChecker = downloadClientReadyChecker;
+        this.downloadStatusContentValues = downloadStatusContentValues;
     }
 
     public Collection<Pair<String, String>> getHeaders() {
@@ -283,13 +308,13 @@ class DownloadInfo {
         if (mRetryAfter > 0) {
             return mLastMod + mRetryAfter;
         }
-        return mLastMod + Constants.RETRY_FIRST_DELAY * (1000 + mFuzz) * (1 << (mNumFailed - 1));
+        return mLastMod + Constants.RETRY_FIRST_DELAY * (1000 + randomNumberGenerator.generate()) * (1 << (mNumFailed - 1));
     }
 
     /**
      * Returns whether this download should be enqueued.
      */
-    private boolean isReadyToDownload() {
+    private boolean isDownloadManagerReadyToDownload() {
         if (mControl == Downloads.Impl.CONTROL_PAUSED) {
             // the download is paused, so it's not going to start
             return false;
@@ -437,23 +462,32 @@ class DownloadInfo {
      *
      * @return If actively downloading.
      */
-    public boolean startDownloadIfReady(ExecutorService executor) {
+    public boolean isReadyToDownload() {
         synchronized (this) {
-            final boolean isReady = isReadyToDownload();
+            return isDownloadManagerReadyToDownload() && isClientReadyToDownload();
+        }
+    }
+
+    public boolean startDownloadIfNotActive(ExecutorService executor) {
+        synchronized (this) {
             final boolean isActive = mSubmittedTask != null && !mSubmittedTask.isDone();
-            if (isReady && !isActive) {
+            if (!isActive) {
                 if (mStatus != Downloads.Impl.STATUS_RUNNING) {
                     mStatus = Downloads.Impl.STATUS_RUNNING;
-                    ContentValues values = new ContentValues();
-                    values.put(Downloads.Impl.COLUMN_STATUS, mStatus);
-                    mContext.getContentResolver().update(getAllDownloadsUri(), values, null, null);
+                    downloadStatusContentValues.clear();
+                    downloadStatusContentValues.put(Downloads.Impl.COLUMN_STATUS, mStatus);
+                    mContext.getContentResolver().update(getAllDownloadsUri(), downloadStatusContentValues, null, null);
                 }
 
                 mTask = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier);
                 mSubmittedTask = executor.submit(mTask);
             }
-            return isReady;
+            return isActive;
         }
+    }
+
+    private boolean isClientReadyToDownload() {
+        return downloadClientReadyChecker.isAllowedToDownload();
     }
 
     /**
