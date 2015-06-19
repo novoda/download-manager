@@ -476,11 +476,19 @@ class DownloadInfo {
         synchronized (this) {
             final boolean isActive = mSubmittedTask != null && !mSubmittedTask.isDone();
             if (!isActive) {
+                updateStatus(DownloadManager.STATUS_PENDING);
                 mTask = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier);
                 mSubmittedTask = executor.submit(mTask);
             }
             return isActive;
         }
+    }
+
+    public void updateStatus(int status) {
+        mStatus = status;
+        getDownloadStatusContentValues().clear();
+        getDownloadStatusContentValues().put(Downloads.Impl.COLUMN_STATUS, mStatus);
+        mContext.getContentResolver().update(getAllDownloadsUri(), getDownloadStatusContentValues(), null, null);
     }
 
     private boolean isClientReadyToDownload() {
