@@ -1,3 +1,8 @@
+0.0.9
+-------
+
+Now allows clients to have a say if a download should go ahead or not. See #29 You hook into this through your Application class.
+
 0.0.8
 -------
 
