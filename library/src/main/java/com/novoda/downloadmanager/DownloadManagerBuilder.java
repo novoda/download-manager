@@ -7,7 +7,7 @@ import com.novoda.downloadmanager.lib.DownloadManager;
 
 /**
  * A client can specify whether the downloads are allowed to proceed by implementing
- * {@link com.novoda.downloadmanager.lib.DownloadClientReadyChecker} on your Activity class
+ * {@link com.novoda.downloadmanager.lib.DownloadClientReadyChecker} on your Application class
  *
  */
 public class DownloadManagerBuilder {
