@@ -63,10 +63,8 @@ If you want to use proguard you need to protect the AUTHORITY constant from bein
 is in class ```com.novoda.downloadmanager.Authority``` you can use this in your proguard config:
 
 ```
--keep public class com.novoda.downloadmanager.Authority
 -keepclassmembers class com.novoda.downloadmanager.Authority {
-    static final %                *;
-    static final java.lang.String *;
+    static final java.lang.String AUTHORITY;
 }
 ```
 
