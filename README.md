@@ -20,6 +20,7 @@ dependencies {
 }
 ```
 
+If using [Proguard](http://proguard.sourceforge.net/) follow the instructions [here](https://github.com/novoda/download-manager/wiki/Proguard)
 
 ## Simple usage
 
@@ -44,19 +45,6 @@ public class Authority {
     public static final String AUTHORITY = "com.your.unique.authority";
 }
 ```
-
-## Advanced Usage
-
-You can change the maximum number of concurrent downloads in your application by adding a the following meta-data element into your `AndroidManifest.xml`:
-
-```xml
-<meta-data
-  android:name="com.novoda.downloadmanager.MaxConcurrentDownloads"
-  android:value="3" />
-```
-
-where here `3` represents the maximum number of concurrent downloads.
-
 
 ## Links
 
