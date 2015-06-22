@@ -355,6 +355,15 @@ public class DownloadManager {
      * calls related to this download.
      */
     public long enqueue(Request request) {
+        if (request.getBatchId() == -1) {
+            RequestBatch batch = request.asBatch();
+            long batchId = insert(batch);
+            request.setBatchId(batchId);
+        }
+        return insert(request);
+    }
+
+    private long insert(Request request) {
         ContentValues values = request.toContentValues();
         Uri downloadUri = mResolver.insert(Downloads.Impl.CONTENT_URI, values);
         return Long.parseLong(downloadUri.getLastPathSegment());
@@ -699,7 +708,7 @@ public class DownloadManager {
         long batchId = insert(batch);
         for (Request request : batch.getRequests()) {
             request.setBatchId(batchId);
-            enqueue(request);
+            insert(request);
         }
         return batchId;
     }

@@ -418,6 +418,10 @@ public class Request {
         extraField = extra;
     }
 
+    long getBatchId() {
+        return batchId;
+    }
+
     /**
      * @return ContentValues to be passed to DownloadProvider.insert()
      */
@@ -469,5 +473,11 @@ public class Request {
         if (value != null) {
             contentValues.put(key, value.toString());
         }
+    }
+
+    RequestBatch asBatch() {
+        RequestBatch batch = RequestBatch.newInstance(mTitle.toString(), mDescription.toString(), bigPictureUrl);
+        batch.addRequest(this);
+        return batch;
     }
 }
