@@ -149,7 +149,7 @@ public class DownloadService extends Service {
 
         downloadClientReadyChecker = getDownloadClientReadyChecker();
 
-        mNotifier = new DownloadNotifier(this, getNotificationImageRetriever());
+        mNotifier = new DownloadNotifier(this, getNotificationImageRetriever(), getResources());
         mNotifier.cancelAll();
 
         mObserver = new DownloadManagerContentObserver();

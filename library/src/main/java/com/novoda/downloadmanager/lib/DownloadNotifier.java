@@ -28,6 +28,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.util.LongSparseArray;
 import android.text.TextUtils;
@@ -44,6 +45,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static com.novoda.downloadmanager.lib.Request.*;
 
@@ -89,8 +91,11 @@ class DownloadNotifier {
     // LongSparseLongArray
     private final LongSparseArray<Long> mDownloadTouch = new LongSparseArray<Long>();
 
-    public DownloadNotifier(Context context, NotificationImageRetriever imageRetriever) {
+    private final Resources resources;
+
+    public DownloadNotifier(Context context, NotificationImageRetriever imageRetriever, Resources resources) {
         this.mContext = context;
+        this.resources = resources;
         this.imageRetriever = imageRetriever;
         this.mNotifManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     }
@@ -127,8 +132,46 @@ class DownloadNotifier {
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void updateWithLocked(Map<Long, DownloadBatch> batches, Collection<DownloadInfo> downloads) {
-        Resources res = mContext.getResources();
+        Map<Long, List<DownloadInfo>> batchDownloads = getDownloadsPerBatch(downloads);
+        Map<String, List<DownloadInfo>> clustered = getClustersByNotificationTag(batchDownloads);
+
+        showNotificationPerCluster(batches, clustered);
+
+        removeStaleTagsThatWereNotRenewed(clustered);
+    }
+
+    private void showNotificationPerCluster(Map<Long, DownloadBatch> batches, Map<String, List<DownloadInfo>> clustered) {
+        for (String tag : clustered.keySet()) {
+            int type = getNotificationTagType(tag);
+            List<DownloadInfo> cluster = clustered.get(tag);
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
+            useTimeWhenClusterFirstShownToAvoidShuffling(tag, builder);
+            buildIcon(type, builder);
+            buildActionIntents(tag, type, cluster, builder);
+
+            Notification notification = buildTitlesAndDescription(type, cluster, builder, batches);
+            mNotifManager.notify(tag.hashCode(), notification);
+        }
+    }
+
+    @NonNull
+    private Map<String, List<DownloadInfo>> getClustersByNotificationTag(Map<Long, List<DownloadInfo>> batchDownloads) {
         Map<String, List<DownloadInfo>> clustered = new HashMap<>();
+
+        for (Map.Entry<Long, List<DownloadInfo>> batch : batchDownloads.entrySet()) {
+            List<DownloadInfo> downloadsInBatch = batch.getValue();
+            final String tag = buildNotificationTag(downloadsInBatch, batch.getKey());
+
+            for (DownloadInfo download : downloadsInBatch) {
+                addDownloadToCluster(tag, clustered, download);
+            }
+        }
+        return clustered;
+    }
+
+    @NonNull
+    private Map<Long, List<DownloadInfo>> getDownloadsPerBatch(Collection<DownloadInfo> downloads) {
         Map<Long, List<DownloadInfo>> batchDownloads = new HashMap<>();
 
         for (DownloadInfo download : downloads) {
@@ -141,34 +184,10 @@ class DownloadNotifier {
                 batchDownloads.put(batchId, downloadsInBatch);
             }
         }
-
-        for (Map.Entry<Long, List<DownloadInfo>> batch : batchDownloads.entrySet()) {
-            List<DownloadInfo> downloadsInBatch = batch.getValue();
-            final String tag = buildNotificationTag(downloadsInBatch, batch.getKey());
-
-            for (DownloadInfo download : downloadsInBatch) {
-                addDownloadToCluster(tag, clustered, download);
-            }
-        }
-
-        // Build notification for each cluster
-        for (String tag : clustered.keySet()) {
-            final int type = getNotificationTagType(tag);
-            final Collection<DownloadInfo> cluster = clustered.get(tag);
-
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
-            useTimeWhenClusterFirstShownToAvoidShuffling(tag, builder);
-            buildIcon(type, builder);
-            buildActionIntents(tag, type, cluster, builder);
-
-            Notification notification = buildTitlesAndDescription(res, type, cluster, builder, batches);
-            mNotifManager.notify(tag.hashCode(), notification);
-        }
-
-        removeStaleTagsThatWerentRenewed(clustered);
+        return batchDownloads;
     }
 
-    private void addDownloadToCluster(final String tag, final Map<String, List<DownloadInfo>> cluster, final DownloadInfo info) {
+    private void addDownloadToCluster(String tag, Map<String, List<DownloadInfo>> cluster, DownloadInfo info) {
         if (tag == null) {
             return;
         }
@@ -197,12 +216,17 @@ class DownloadNotifier {
     }
 
     private void buildIcon(int type, NotificationCompat.Builder builder) {
-        if (type == TYPE_ACTIVE) {
-            builder.setSmallIcon(android.R.drawable.stat_sys_download);
-        } else if (type == TYPE_WAITING) {
-            builder.setSmallIcon(android.R.drawable.stat_sys_warning);
-        } else if (type == TYPE_SUCCESS) {
-            builder.setSmallIcon(android.R.drawable.stat_sys_download_done);
+        switch (type) {
+            case TYPE_ACTIVE:
+                builder.setSmallIcon(android.R.drawable.stat_sys_download);
+                break;
+            case TYPE_WAITING:
+            case TYPE_FAILED:
+                builder.setSmallIcon(android.R.drawable.stat_sys_warning);
+                break;
+            case TYPE_SUCCESS:
+                builder.setSmallIcon(android.R.drawable.stat_sys_download_done);
+                break;
         }
     }
 
@@ -229,12 +253,10 @@ class DownloadNotifier {
             final String action;
             if (Downloads.Impl.isStatusError(info.mStatus)) {
                 action = Constants.ACTION_LIST;
+            } else if (info.mDestination != Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION) {
+                action = Constants.ACTION_OPEN;
             } else {
-                if (info.mDestination != Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION) {
-                    action = Constants.ACTION_OPEN;
-                } else {
-                    action = Constants.ACTION_LIST;
-                }
+                action = Constants.ACTION_LIST;
             }
 
             final Intent intent = new Intent(action, uri, mContext, DownloadReceiver.class);
@@ -247,39 +269,36 @@ class DownloadNotifier {
     }
 
     private Notification buildTitlesAndDescription(
-            Resources res,
             int type,
-            Collection<DownloadInfo> cluster,
+            List<DownloadInfo> cluster,
             NotificationCompat.Builder builder,
             Map<Long, DownloadBatch> batches) {
+
         String remainingText = null;
         String percentText = null;
         if (type == TYPE_ACTIVE) {
-            long current = 0;
-            long total = 0;
-            long speed = 0;
+            long currentBytes = 0;
+            long totalBytes = 0;
+            long totalSpeed = 0;
             synchronized (mDownloadSpeed) {
                 for (DownloadInfo info : cluster) {
-//                    if (mDownloadSpeed.get(info.mId) == null) {
-//                        continue;
-//                    }
                     if (info.mTotalBytes != -1) {
-                        current += info.mCurrentBytes;
-                        total += info.mTotalBytes;
-                        Long newSpeed = mDownloadSpeed.get(info.batchId);
-                        if (newSpeed != null) {
-                            speed += newSpeed;
+                        currentBytes += info.mCurrentBytes;
+                        totalBytes += info.mTotalBytes;
+                        Long speed = mDownloadSpeed.get(info.batchId);
+                        if (speed != null) {
+                            totalSpeed += speed;
                         }
                     }
                 }
             }
 
-            if (total > 0) {
-                final int percent = (int) ((current * 100) / total);
+            if (totalBytes > 0) {
+                int percent = (int) ((currentBytes * 100) / totalBytes);
                 percentText = percent + "%";//res.getString(R.string.download_percent, percent);
 
-                if (speed > 0) {
-                    final long remainingMillis = ((total - current) * 1000) / speed;
+                if (totalSpeed > 0) {
+                    long remainingMillis = ((totalBytes - currentBytes) * 1000) / totalSpeed;
                     remainingText = "Duration " + formatDuration(remainingMillis);
                 }
 
@@ -290,97 +309,103 @@ class DownloadNotifier {
         }
 
         if (cluster.size() == 1) {
-            final DownloadInfo info = cluster.iterator().next();
-            DownloadBatch batch = batches.get(info.batchId);
-
-            final NotificationCompat.BigPictureStyle style = new NotificationCompat.BigPictureStyle();
-            String imageUrl = batch.getBigPictureUrl();
-            if (!TextUtils.isEmpty(imageUrl)) {
-                Bitmap bitmap = imageRetriever.retrieveImage(imageUrl);
-                style.bigPicture(bitmap);
-            }
-            CharSequence title = getDownloadTitle(batch);
-            builder.setContentTitle(title);
-            style.setBigContentTitle(title);
-
-            if (type == TYPE_ACTIVE) {
-                String description = batch.getDescription();
-                if (!TextUtils.isEmpty(description)) {
-                    builder.setContentText(description);
-                    style.setSummaryText(description);
-                } else {
-                    builder.setContentText(remainingText);
-                    style.setSummaryText(remainingText);
-                }
-                builder.setContentInfo(percentText);
-
-            } else if (type == TYPE_WAITING) {
-                builder.setContentText("Download size requires Wi-Fi.");
-                style.setSummaryText("Download size requires Wi-Fi.");
-
-            } else if (type == TYPE_SUCCESS) {
-                builder.setContentText("Download complete.");
-                style.setSummaryText("Download complete.");
-            } else if (type == TYPE_FAILED) {
-                builder.setContentText("Download unsuccessful.");
-                style.setSummaryText("Download unsuccessful.");
-            } else if (type == TYPE_CANCELLED) {
-                builder.setContentText("Download cancelled.");
-                style.setSummaryText("Download cancelled.");
-            }
-
-            if (!TextUtils.isEmpty(imageUrl)) {
-                builder.setStyle(style);
-            }
-            return builder.build();
+            return buildSingleNotification(type, cluster, builder, batches, remainingText, percentText);
 
         } else {
-            final NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(builder);
-
-            Set<DownloadBatch> currentBatches = new HashSet<>();
-
-            for (DownloadInfo info : cluster) {
-                DownloadBatch batch = batches.get(info.batchId);
-                currentBatches.add(batch);
-            }
-
-            for (DownloadBatch batch : currentBatches) {
-                inboxStyle.addLine(getDownloadTitle(batch));
-            }
-
-            if (type == TYPE_ACTIVE) {
-                builder.setContentTitle(res.getQuantityString(R.plurals.dl__notif_summary_active, batches.size(), batches.size()));
-                builder.setContentText(remainingText);
-                builder.setContentInfo(percentText);
-                inboxStyle.setSummaryText(remainingText);
-
-            } else if (type == TYPE_WAITING) {
-                builder.setContentTitle(res.getQuantityString(R.plurals.dl__notif_summary_waiting, cluster.size(), cluster.size()));
-                builder.setContentText("Download size requires Wi-Fi.");
-                inboxStyle.setSummaryText("Download size requires Wi-Fi.");
-            } else if (type == TYPE_SUCCESS) {
-                builder.setContentText("Download complete.");
-                inboxStyle.setSummaryText("Download complete.");
-            } else if (type == TYPE_FAILED) {
-                builder.setContentText("Download unsuccessful.");
-                inboxStyle.setSummaryText("Download unsuccessful.");
-            } else if (type == TYPE_CANCELLED) {
-                builder.setContentText("Download cancelled.");
-                inboxStyle.setSummaryText("Download cancelled.");
-            }
-
-            return inboxStyle.build();
+            return buildStackedNotification(type, cluster, builder, batches, remainingText, percentText);
         }
 
     }
 
-    private void removeStaleTagsThatWerentRenewed(Map<String, List<DownloadInfo>> clustered) {
-        final Iterator<String> it = mActiveNotifs.keySet().iterator();
-        while (it.hasNext()) {
-            final String tag = it.next();
+    private Notification buildSingleNotification(int type, List<DownloadInfo> cluster, NotificationCompat.Builder builder, Map<Long, DownloadBatch> batches, String remainingText, String percentText) {
+        DownloadInfo info = cluster.get(0);
+        DownloadBatch batch = batches.get(info.batchId);
+
+        NotificationCompat.BigPictureStyle style = new NotificationCompat.BigPictureStyle();
+        String imageUrl = batch.getBigPictureUrl();
+        if (!TextUtils.isEmpty(imageUrl)) {
+            Bitmap bitmap = imageRetriever.retrieveImage(imageUrl);
+            style.bigPicture(bitmap);
+        }
+        CharSequence title = getDownloadTitle(batch);
+        builder.setContentTitle(title);
+        style.setBigContentTitle(title);
+
+        if (type == TYPE_ACTIVE) {
+            String description = batch.getDescription();
+            if (TextUtils.isEmpty(description)) {
+                setSecondaryNotificationText(builder, style, remainingText);
+            } else {
+                setSecondaryNotificationText(builder, style, description);
+            }
+            builder.setContentInfo(percentText);
+
+        } else if (type == TYPE_WAITING) {
+            setSecondaryNotificationText(builder, style, "Download size requires Wi-Fi.");
+
+        } else if (type == TYPE_SUCCESS) {
+            setSecondaryNotificationText(builder, style, "Download complete.");
+        } else if (type == TYPE_FAILED) {
+            setSecondaryNotificationText(builder, style, "Download unsuccessful.");
+        } else if (type == TYPE_CANCELLED) {
+            setSecondaryNotificationText(builder, style, "Download cancelled.");
+        }
+
+        if (!TextUtils.isEmpty(imageUrl)) {
+            builder.setStyle(style);
+        }
+        return builder.build();
+    }
+
+    private void setSecondaryNotificationText(NotificationCompat.Builder builder, NotificationCompat.BigPictureStyle style, String description) {
+        builder.setContentText(description);
+        style.setSummaryText(description);
+    }
+
+    private Notification buildStackedNotification(int type, List<DownloadInfo> cluster, NotificationCompat.Builder builder, Map<Long, DownloadBatch> batches, String remainingText, String percentText) {
+        final NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(builder);
+
+        Set<DownloadBatch> currentBatches = new HashSet<>();
+
+        for (DownloadInfo info : cluster) {
+            DownloadBatch batch = batches.get(info.batchId);
+            currentBatches.add(batch);
+        }
+
+        for (DownloadBatch batch : currentBatches) {
+            inboxStyle.addLine(getDownloadTitle(batch));
+        }
+
+        if (type == TYPE_ACTIVE) {
+            builder.setContentTitle(resources.getQuantityString(R.plurals.dl__notif_summary_active, batches.size(), batches.size()));
+            builder.setContentInfo(percentText);
+            setSecondaryNotificationText(builder, inboxStyle, remainingText);
+        } else if (type == TYPE_WAITING) {
+            builder.setContentTitle(resources.getQuantityString(R.plurals.dl__notif_summary_waiting, cluster.size(), cluster.size()));
+            setSecondaryNotificationText(builder, inboxStyle, "Download size requires Wi-Fi.");
+        } else if (type == TYPE_SUCCESS) {
+            setSecondaryNotificationText(builder, inboxStyle, "Download complete.");
+        } else if (type == TYPE_FAILED) {
+            setSecondaryNotificationText(builder, inboxStyle, "Download unsuccessful.");
+        } else if (type == TYPE_CANCELLED) {
+            setSecondaryNotificationText(builder, inboxStyle, "Download cancelled.");
+        }
+
+        return inboxStyle.build();
+    }
+
+    private void setSecondaryNotificationText(NotificationCompat.Builder builder, NotificationCompat.InboxStyle style, String description) {
+        builder.setContentText(description);
+        style.setSummaryText(description);
+    }
+
+    private void removeStaleTagsThatWereNotRenewed(Map<String, List<DownloadInfo>> clustered) {
+        final Iterator<String> tags = mActiveNotifs.keySet().iterator();
+        while (tags.hasNext()) {
+            final String tag = tags.next();
             if (!clustered.containsKey(tag)) {
                 mNotifManager.cancel(tag.hashCode());
-                it.remove();
+                tags.remove();
             }
         }
     }
@@ -435,7 +460,8 @@ class DownloadNotifier {
 
     private static boolean areAllDownloadsQueued(List<DownloadInfo> downloads) {
         for (DownloadInfo download : downloads) {
-            if (download.mStatus != Downloads.Impl.STATUS_QUEUED_FOR_WIFI) {
+            boolean isNotQueuedForWiFi = download.mStatus != Downloads.Impl.STATUS_QUEUED_FOR_WIFI;
+            if (isNotQueuedForWiFi) {
                 return false;
             }
         }
@@ -444,9 +470,10 @@ class DownloadNotifier {
 
     private static boolean areAnyFailedAndVisible(List<DownloadInfo> downloads) {
         for (DownloadInfo download : downloads) {
-            if ((Downloads.Impl.isStatusError(download.mStatus) && !Downloads.Impl.isStatusCancelled(download.mStatus) &&
-                    (download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION
-                            || download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED))) {
+            boolean isFailed = Downloads.Impl.isStatusError(download.mStatus) && !Downloads.Impl.isStatusCancelled(download.mStatus);
+            boolean isVisible = download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION
+                    || download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED;
+            if (isFailed && isVisible) {
                 return true;
             }
         }
@@ -455,9 +482,10 @@ class DownloadNotifier {
 
     private static boolean areAnyCancelledAndVisible(List<DownloadInfo> downloads) {
         for (DownloadInfo download : downloads) {
-            if (Downloads.Impl.isStatusCancelled(download.mStatus) &&
-                    (download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION
-                            || download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED)) {
+            boolean isCancelled = Downloads.Impl.isStatusCancelled(download.mStatus);
+            boolean isVisible = download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION
+                    || download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED;
+            if (isCancelled && isVisible) {
                 return true;
             }
         }
@@ -478,9 +506,10 @@ class DownloadNotifier {
 
     private static boolean areAnyActiveAndVisible(List<DownloadInfo> downloads) {
         for (DownloadInfo download : downloads) {
-            if (download.mStatus == Downloads.Impl.STATUS_RUNNING &&
-                    (download.mVisibility == VISIBILITY_VISIBLE
-                            || download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED)) {
+            boolean isActive = download.mStatus == Downloads.Impl.STATUS_RUNNING;
+            boolean isVisible = download.mVisibility == VISIBILITY_VISIBLE
+                    || download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED;
+            if (isActive && isVisible) {
                 return true;
             }
         }
@@ -490,9 +519,10 @@ class DownloadNotifier {
 
     private static boolean areAllSuccessfulAndVisible(List<DownloadInfo> downloads) {
         for (DownloadInfo download : downloads) {
-            if (!(Downloads.Impl.isStatusSuccess(download.mStatus) &&
-                    (download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION
-                            || download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED))) {
+            boolean isSuccessful = Downloads.Impl.isStatusSuccess(download.mStatus);
+            boolean isVisible = download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION
+                    || download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED;
+            if (!(isSuccessful && isVisible)) {
                 return false;
             }
         }
@@ -505,16 +535,15 @@ class DownloadNotifier {
      * from seconds up to hours.
      */
     public CharSequence formatDuration(long millis) {
-        final Resources res = mContext.getResources();
         if (millis >= DateUtils.HOUR_IN_MILLIS) {
-            final int hours = (int) ((millis + 1800000) / DateUtils.HOUR_IN_MILLIS);
-            return res.getQuantityString(R.plurals.dl__duration_hours, hours, hours);
+            int hours = (int) TimeUnit.MILLISECONDS.toHours(millis + TimeUnit.MINUTES.toMillis(30));
+            return resources.getQuantityString(R.plurals.dl__duration_hours, hours, hours);
         } else if (millis >= DateUtils.MINUTE_IN_MILLIS) {
-            final int minutes = (int) ((millis + 30000) / DateUtils.MINUTE_IN_MILLIS);
-            return res.getQuantityString(R.plurals.dl__duration_minutes, minutes, minutes);
+            int minutes = (int) TimeUnit.MILLISECONDS.toMinutes(millis + TimeUnit.SECONDS.toMillis(30));
+            return resources.getQuantityString(R.plurals.dl__duration_minutes, minutes, minutes);
         } else {
-            final int seconds = (int) ((millis + 500) / DateUtils.SECOND_IN_MILLIS);
-            return res.getQuantityString(R.plurals.dl__duration_seconds, seconds, seconds);
+            int seconds = (int) TimeUnit.MILLISECONDS.toSeconds(millis + 500);
+            return resources.getQuantityString(R.plurals.dl__duration_seconds, seconds, seconds);
         }
     }
 }
