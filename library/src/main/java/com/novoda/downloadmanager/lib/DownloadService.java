@@ -20,6 +20,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
@@ -60,6 +61,7 @@ public class DownloadService extends Service {
     // DownloadReceiver to protect our entire workflow.
 
     private static final boolean DEBUG_LIFECYCLE = false;
+    private final ContentLengthFetcher contentLengthFetcher = new ContentLengthFetcher();
 
     //    @VisibleForTesting
     SystemFacade mSystemFacade;
@@ -97,6 +99,7 @@ public class DownloadService extends Service {
 
     private volatile int mLastStartId;
     private DownloadClientReadyChecker downloadClientReadyChecker;
+    private ContentResolver resolver;
 
     /**
      * Receives notifications when the data in the content provider changes
@@ -157,6 +160,7 @@ public class DownloadService extends Service {
         ConcurrentDownloadsLimitProvider concurrentDownloadsLimitProvider = ConcurrentDownloadsLimitProvider.newInstance(this);
         DownloadExecutorFactory factory = new DownloadExecutorFactory(concurrentDownloadsLimitProvider);
         mExecutor = factory.createExecutor();
+        resolver = getContentResolver();
     }
 
     private DownloadClientReadyChecker getDownloadClientReadyChecker() {
@@ -297,7 +301,6 @@ public class DownloadService extends Service {
 
         final Set<Long> staleDownloadIds = new HashSet<Long>(mDownloads.keySet());
 
-        final ContentResolver resolver = getContentResolver();
         final Cursor downloadsCursor = resolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
         try {
             final DownloadInfo.Reader reader = new DownloadInfo.Reader(resolver, downloadsCursor);
@@ -314,8 +317,9 @@ public class DownloadService extends Service {
                 }
 
                 if (info.mDeleted) {
-                    afterCleanUpDeleteDownload(resolver, info);
+                    afterCleanUpDeleteDownload(info);
                 } else {
+                    updateTotalBytesFor(info);
                     isActive = kickOffDownloadTaskIfReady(isActive, info);
                     isActive = kickOffMediaScanIfCompleted(isActive, info);
                 }
@@ -360,7 +364,15 @@ public class DownloadService extends Service {
         return isActive;
     }
 
-    private void afterCleanUpDeleteDownload(ContentResolver resolver, DownloadInfo info) {
+    private void updateTotalBytesFor(DownloadInfo info) {
+        if (info.mTotalBytes == -1) {
+            ContentValues values = new ContentValues();
+            info.mTotalBytes = contentLengthFetcher.fetchContentLengthFor(info);
+            resolver.update(info.getAllDownloadsUri(), values, null, null);
+        }
+    }
+
+    private void afterCleanUpDeleteDownload(DownloadInfo info) {
         if (!TextUtils.isEmpty(info.mMediaProviderUri)) {
             resolver.delete(Uri.parse(info.mMediaProviderUri), null, null);
         }
