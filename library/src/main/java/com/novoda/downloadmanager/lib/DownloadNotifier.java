@@ -227,6 +227,8 @@ class DownloadNotifier {
             case TYPE_SUCCESS:
                 builder.setSmallIcon(android.R.drawable.stat_sys_download_done);
                 break;
+            default:
+                //don't set an icon if none matches
         }
     }
 
