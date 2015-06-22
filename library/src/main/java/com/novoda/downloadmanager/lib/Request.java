@@ -307,7 +307,7 @@ public class Request {
      * @param batchId the batch id
      * @return this object
      */
-    public Request setBatchId(long batchId) {
+    Request setBatchId(long batchId) {
         this.batchId = batchId;
         return this;
     }

@@ -355,11 +355,9 @@ public class DownloadManager {
      * calls related to this download.
      */
     public long enqueue(Request request) {
-        if (request.getBatchId() == -1) {
-            RequestBatch batch = request.asBatch();
-            long batchId = insert(batch);
-            request.setBatchId(batchId);
-        }
+        RequestBatch batch = request.asBatch();
+        long batchId = insert(batch);
+        request.setBatchId(batchId);
         return insert(request);
     }
 
