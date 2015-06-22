@@ -88,7 +88,7 @@ public class DownloadService extends Service {
 //    @GuardedBy("mDownloads")
     private final Map<Long, DownloadInfo> mDownloads = new HashMap<>();
 
-    private final Map<Long, DownloadBatch> batches = new HashMap<>();
+    private final Map<Long, BatchInfo> batches = new HashMap<>();
 
     private ExecutorService mExecutor;
 
@@ -301,6 +301,23 @@ public class DownloadService extends Service {
 
         final Set<Long> staleDownloadIds = new HashSet<Long>(mDownloads.keySet());
 
+        Cursor batchesCursor = resolver.query(Downloads.Impl.BATCH_CONTENT_URI, null, null, null, null);
+        batches.clear();
+        try {
+            int idColumn = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches._ID);
+            while (batchesCursor.moveToNext()) {
+                long id = batchesCursor.getLong(idColumn);
+
+                String title = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_TITLE));
+                String description = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_DESCRIPTION));
+                String bigPictureUrl = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_BIG_PICTURE));
+
+                batches.put(id, new BatchInfo(title, description, bigPictureUrl));
+            }
+        } finally {
+            batchesCursor.close();
+        }
+
         final Cursor downloadsCursor = resolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
         try {
             final DownloadInfo.Reader reader = new DownloadInfo.Reader(resolver, downloadsCursor);
@@ -329,22 +346,6 @@ public class DownloadService extends Service {
             }
         } finally {
             downloadsCursor.close();
-        }
-
-        Cursor batchesCursor = resolver.query(Downloads.Impl.BATCH_CONTENT_URI, null, null, null, null);
-        batches.clear();
-        try {
-            int idColumn = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches._ID);
-            while (batchesCursor.moveToNext()) {
-                long id = batchesCursor.getLong(idColumn);
-
-                String title = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_TITLE));
-                String description = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_DESCRIPTION));
-                String bigPictureUrl = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_BIG_PICTURE));
-                batches.put(id, new DownloadBatch(title, description, bigPictureUrl));
-            }
-        } finally {
-            batchesCursor.close();
         }
 
         cleanUpStaleDownloadsThatDisappeared(staleDownloadIds);

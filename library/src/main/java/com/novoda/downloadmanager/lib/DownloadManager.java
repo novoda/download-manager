@@ -360,19 +360,6 @@ public class DownloadManager {
         return Long.parseLong(downloadUri.getLastPathSegment());
     }
 
-    /**
-     * Create a new download batch. The batch ID can then be supplied to new requests.
-     *
-     * @param batch the parameters specifying this batch
-     * @return an ID for the batch, unique across the system.  This ID is used to make future
-     * calls related to this batch.
-     */
-    public long create(DownloadBatch batch) {
-        ContentValues values = batch.toContentValues();
-        Uri batchUri = mResolver.insert(Downloads.Impl.BATCH_CONTENT_URI, values);
-        return Long.parseLong(batchUri.getLastPathSegment());
-    }
-
     public void markDeleted(URI uri) {
         Cursor cursor = null;
         try {
@@ -699,6 +686,28 @@ public class DownloadManager {
             whereArgs[i] = Long.toString(ids[i]);
         }
         return whereArgs;
+    }
+
+    /**
+     * Enqueue a new download batch.
+     *
+     * @param batch the parameters specifying this batch
+     * @return an ID for the batch, unique across the system.  This ID is used to make future
+     * calls related to this batch.
+     */
+    public long enqueue(RequestBatch batch) {
+        long batchId = insert(batch);
+        for (Request request : batch.getRequests()) {
+            request.setBatchId(batchId);
+            enqueue(request);
+        }
+        return batchId;
+    }
+
+    private long insert(RequestBatch batch) {
+        ContentValues values = batch.toContentValues();
+        Uri batchUri = mResolver.insert(Downloads.Impl.BATCH_CONTENT_URI, values);
+        return Long.parseLong(batchUri.getLastPathSegment());
     }
 
     /**

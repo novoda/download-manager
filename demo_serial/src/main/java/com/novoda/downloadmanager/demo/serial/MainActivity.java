@@ -10,10 +10,10 @@ import android.widget.ListView;
 
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
-import com.novoda.downloadmanager.lib.DownloadBatch;
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.Query;
 import com.novoda.downloadmanager.lib.Request;
+import com.novoda.downloadmanager.lib.RequestBatch;
 
 import java.util.List;
 
@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
 
     private void setupDownloadingExample() {
         Uri uri = Uri.parse(BIG_FILE);
-        final DownloadBatch batch = new DownloadBatch("Title woo", "Description lols", BBC_COMEDY_IMAGE);
+        final RequestBatch batch = RequestBatch.newInstance("Title woo", "Description lols", BBC_COMEDY_IMAGE);
         final Request request = new Request(uri);
         request.setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "podcast.mp3");
         request.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
@@ -49,16 +49,17 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         request.setTitle("BBC Innuendo Bingo");
         request.setDescription("Nothing to do with beards.");
         request.setMimeType("audio/mp3");
+        request.setExtra("req_1");
 
+        batch.addRequest(request);
+        request.setExtra("req_2");
+        batch.addRequest(request);
         findViewById(R.id.main_download_button).setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        long batchId = downloadManager.create(batch);
-                        request.setBatchId(batchId);
-                        downloadManager.enqueue(request);
-                        downloadManager.enqueue(request);
-                        Log.d(TAG, "Download starting with batch id: " + batch);
+                        long batchId = downloadManager.enqueue(batch);
+                        Log.d(TAG, "Download starting with batch id: " + batchId);
                     }
                 });
     }
