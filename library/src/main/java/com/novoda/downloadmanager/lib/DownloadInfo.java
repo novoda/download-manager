@@ -242,8 +242,6 @@ class DownloadInfo {
      */
     private Future<?> mSubmittedTask;
 
-    private DownloadThread mTask;
-
     private final Context mContext;
     private final SystemFacade mSystemFacade;
     private final StorageManager mStorageManager;
@@ -475,8 +473,8 @@ class DownloadInfo {
             final boolean isActive = mSubmittedTask != null && !mSubmittedTask.isDone();
             if (!isActive) {
                 updateStatus(Downloads.Impl.STATUS_PENDING);
-                mTask = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier);
-                mSubmittedTask = executor.submit(mTask);
+                DownloadThread downloadThread = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier);
+                mSubmittedTask = executor.submit(downloadThread);
             }
             return isActive;
         }
