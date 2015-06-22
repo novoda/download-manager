@@ -19,7 +19,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements QueryForDownloadsAsyncTask.Callback {
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final String BIG_FILE = "http://feeds.soundcloud.com/stream/179716429-coltcabana-aow-226-cm-punk.mp3";
+    private static final String BIG_FILE = "http://ipv4.download.thinkbroadband.com/200MB.zip";
     private static final String BBC_COMEDY_IMAGE = "http://ichef.bbci.co.uk/images/ic/640x360/p02ss0cf.jpg";
 
     private DownloadManager downloadManager;

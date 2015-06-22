@@ -164,6 +164,9 @@ class DownloadThread implements Runnable {
     public void run() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         try {
+            if (mInfo.mStatus != Downloads.Impl.STATUS_RUNNING) {
+                mInfo.updateStatus(Downloads.Impl.STATUS_RUNNING);
+            }
             runInternal();
         } finally {
             mNotifier.notifyDownloadSpeed(mInfo.mId, 0);
@@ -353,7 +356,9 @@ class DownloadThread implements Runnable {
                 throw new StopRequestException(STATUS_HTTP_DATA_ERROR, e);
 
             } finally {
-                if (conn != null) conn.disconnect();
+                if (conn != null) {
+                    conn.disconnect();
+                }
             }
         }
 
