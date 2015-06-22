@@ -379,11 +379,11 @@ class DownloadNotifier {
         }
 
         if (type == TYPE_ACTIVE) {
-            builder.setContentTitle(resources.getQuantityString(R.plurals.dl__notif_summary_active, batches.size(), batches.size()));
+            builder.setContentTitle(resources.getQuantityString(R.plurals.dl__notif_summary_active, currentBatches.size(), currentBatches.size()));
             builder.setContentInfo(percentText);
             setSecondaryNotificationText(builder, inboxStyle, remainingText);
         } else if (type == TYPE_WAITING) {
-            builder.setContentTitle(resources.getQuantityString(R.plurals.dl__notif_summary_waiting, cluster.size(), cluster.size()));
+            builder.setContentTitle(resources.getQuantityString(R.plurals.dl__notif_summary_waiting, currentBatches.size(), currentBatches.size()));
             setSecondaryNotificationText(builder, inboxStyle, "Download size requires Wi-Fi.");
         } else if (type == TYPE_SUCCESS) {
             setSecondaryNotificationText(builder, inboxStyle, "Download complete.");
