@@ -57,6 +57,16 @@ You can change the maximum number of concurrent downloads in your application by
 
 where here `3` represents the maximum number of concurrent downloads.
 
+## Proguard
+
+If you want to use proguard you need to protect the AUTHORITY constant from being inlined. Assuming your Authority
+is in class ```com.novoda.downloadmanager.Authority``` you can use this in your proguard config:
+
+```
+-keepclassmembers class com.novoda.downloadmanager.Authority {
+    static final java.lang.String AUTHORITY;
+}
+```
 
 ## Links
 
