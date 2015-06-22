@@ -357,12 +357,11 @@ public class DownloadManager {
     public long enqueue(Request request) {
         ContentValues values = request.toContentValues();
         Uri downloadUri = mResolver.insert(Downloads.Impl.CONTENT_URI, values);
-        long id = Long.parseLong(downloadUri.getLastPathSegment());
-        return id;
+        return Long.parseLong(downloadUri.getLastPathSegment());
     }
 
     /**
-	 * Create a new download batch. The batch ID can then be supplied to new requests.
+     * Create a new download batch. The batch ID can then be supplied to new requests.
      *
      * @param batch the parameters specifying this batch
      * @return an ID for the batch, unique across the system.  This ID is used to make future
