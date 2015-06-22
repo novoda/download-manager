@@ -535,7 +535,14 @@ final class Downloads {
          * Returns whether the download has completed (either with success or error).
          */
         public static boolean isStatusCompleted(int status) {
-            return (status >= 200 && status < 300) || (status >= 400 && status < 600 && status != STATUS_CANCELED);
+            return isStatusSuccess(status) || (isStatusError(status) && !isStatusCancelled(status));
+        }
+
+        /**
+         * Returns whether the download has been cancelled.
+         */
+        public static boolean isStatusCancelled(int status) {
+            return status == STATUS_CANCELED;
         }
 
         /**
