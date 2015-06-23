@@ -42,18 +42,19 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
 
     private void setupDownloadingExample() {
         Uri uri = Uri.parse(BIG_FILE);
-        final RequestBatch batch = RequestBatch.newInstance("Family of Penguins", "These are not the beards you're looking for", PENGUINS_IMAGE);
         final Request request = new Request(uri);
         request.setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "penguins.dat");
         request.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        batch.addRequest(request);
+        request.setTitle("Family of Penguins");
+        request.setDescription("These are not the beards you're looking for");
+        request.setBigPictureUrl(PENGUINS_IMAGE);
 
         findViewById(R.id.main_download_button).setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        long batchId = downloadManager.enqueue(batch);
-                        Log.d(TAG, "Download starting with id: " + batchId);
+                        long requestId = downloadManager.enqueue(request);
+                        Log.d(TAG, "Download starting with id: " + requestId);
                     }
                 });
     }

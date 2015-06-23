@@ -311,18 +311,23 @@ class DownloadNotifier {
             }
         }
 
-        if (batches.size() == 1) {
-            return buildSingleNotification(type, cluster, builder, batches, remainingText, percentText);
+        Set<BatchInfo> currentBatches = new HashSet<>();
+        for (DownloadInfo info : cluster) {
+            BatchInfo batch = batches.get(info.batchId);
+            currentBatches.add(batch);
+        }
+
+        if (currentBatches.size() == 1) {
+            BatchInfo batch = currentBatches.iterator().next();
+            return buildSingleNotification(type, builder, batch, remainingText, percentText);
 
         } else {
-            return buildStackedNotification(type, cluster, builder, batches, remainingText, percentText);
+            return buildStackedNotification(type, builder, currentBatches, remainingText, percentText);
         }
 
     }
 
-    private Notification buildSingleNotification(int type, List<DownloadInfo> cluster, NotificationCompat.Builder builder, Map<Long, BatchInfo> batches, String remainingText, String percentText) {
-        DownloadInfo info = cluster.get(0);
-        BatchInfo batch = batches.get(info.batchId);
+    private Notification buildSingleNotification(int type, NotificationCompat.Builder builder, BatchInfo batch, String remainingText, String percentText) {
 
         NotificationCompat.BigPictureStyle style = new NotificationCompat.BigPictureStyle();
         String imageUrl = batch.getBigPictureUrl();
@@ -365,15 +370,8 @@ class DownloadNotifier {
         style.setSummaryText(description);
     }
 
-    private Notification buildStackedNotification(int type, List<DownloadInfo> cluster, NotificationCompat.Builder builder, Map<Long, BatchInfo> batches, String remainingText, String percentText) {
+    private Notification buildStackedNotification(int type, NotificationCompat.Builder builder, Set<BatchInfo> currentBatches, String remainingText, String percentText) {
         final NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(builder);
-
-        Set<BatchInfo> currentBatches = new HashSet<>();
-
-        for (DownloadInfo info : cluster) {
-            BatchInfo batch = batches.get(info.batchId);
-            currentBatches.add(batch);
-        }
 
         for (BatchInfo batch : currentBatches) {
             inboxStyle.addLine(getDownloadTitle(batch));

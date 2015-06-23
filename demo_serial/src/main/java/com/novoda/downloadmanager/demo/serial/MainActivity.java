@@ -40,16 +40,16 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
     }
 
     private void setupDownloadingExample() {
-        Uri uri = Uri.parse(BIG_FILE);s
+        Uri uri = Uri.parse(BIG_FILE);
         final RequestBatch batch = RequestBatch.newInstance("Large Beard Shipment", "Goatees galore", BEARD_IMAGE);
 
         final Request request = new Request(uri);
         request.setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "beard.shipment");
         request.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        request.setExtra("req_1");
+        request.setExtra("beard_1");
 
         batch.addRequest(request);
-        request.setExtra("req_2");
+        request.setExtra("beard_2");
         batch.addRequest(request);
         findViewById(R.id.main_download_button).setOnClickListener(
                 new View.OnClickListener() {
