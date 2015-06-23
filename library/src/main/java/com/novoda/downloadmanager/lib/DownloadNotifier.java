@@ -229,6 +229,7 @@ class DownloadNotifier {
                 break;
             default:
                 //don't set an icon if none matches
+                break;
         }
     }
 
