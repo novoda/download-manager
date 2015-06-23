@@ -364,7 +364,7 @@ public class DownloadManager {
     private long insert(Request request) {
         ContentValues values = request.toContentValues();
         Uri downloadUri = mResolver.insert(Downloads.Impl.CONTENT_URI, values);
-        return Long.parseLong(downloadUri.getLastPathSegment());
+        return ContentUris.parseId(downloadUri);
     }
 
     public void markDeleted(URI uri) {
@@ -648,7 +648,7 @@ public class DownloadManager {
         if (downloadUri == null) {
             return -1;
         }
-        return Long.parseLong(downloadUri.getLastPathSegment());
+        return ContentUris.parseId(downloadUri);
     }
 
     private static final String NON_DOWNLOADMANAGER_DOWNLOAD =
@@ -714,7 +714,7 @@ public class DownloadManager {
     private long insert(RequestBatch batch) {
         ContentValues values = batch.toContentValues();
         Uri batchUri = mResolver.insert(Downloads.Impl.BATCH_CONTENT_URI, values);
-        return Long.parseLong(batchUri.getLastPathSegment());
+        return ContentUris.parseId(batchUri);
     }
 
     /**
