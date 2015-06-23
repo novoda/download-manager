@@ -20,6 +20,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
@@ -60,6 +61,7 @@ public class DownloadService extends Service {
     // DownloadReceiver to protect our entire workflow.
 
     private static final boolean DEBUG_LIFECYCLE = false;
+    private final ContentLengthFetcher contentLengthFetcher = new ContentLengthFetcher();
 
     //    @VisibleForTesting
     SystemFacade mSystemFacade;
@@ -84,7 +86,9 @@ public class DownloadService extends Service {
      * content provider changes or disappears.
      */
 //    @GuardedBy("mDownloads")
-    private final Map<Long, DownloadInfo> mDownloads = new HashMap<Long, DownloadInfo>();
+    private final Map<Long, DownloadInfo> mDownloads = new HashMap<>();
+
+    private final Map<Long, DownloadBatch> batches = new HashMap<>();
 
     private ExecutorService mExecutor;
 
@@ -95,6 +99,7 @@ public class DownloadService extends Service {
 
     private volatile int mLastStartId;
     private DownloadClientReadyChecker downloadClientReadyChecker;
+    private ContentResolver resolver;
 
     /**
      * Receives notifications when the data in the content provider changes
@@ -144,7 +149,7 @@ public class DownloadService extends Service {
 
         downloadClientReadyChecker = getDownloadClientReadyChecker();
 
-        mNotifier = new DownloadNotifier(this, getNotificationImageRetriever());
+        mNotifier = new DownloadNotifier(this, getNotificationImageRetriever(), getResources());
         mNotifier.cancelAll();
 
         mObserver = new DownloadManagerContentObserver();
@@ -155,6 +160,7 @@ public class DownloadService extends Service {
         ConcurrentDownloadsLimitProvider concurrentDownloadsLimitProvider = ConcurrentDownloadsLimitProvider.newInstance(this);
         DownloadExecutorFactory factory = new DownloadExecutorFactory(concurrentDownloadsLimitProvider);
         mExecutor = factory.createExecutor();
+        resolver = getContentResolver();
     }
 
     private DownloadClientReadyChecker getDownloadClientReadyChecker() {
@@ -293,16 +299,15 @@ public class DownloadService extends Service {
         boolean isActive = false;
         long nextActionMillis = Long.MAX_VALUE;
 
-        final Set<Long> staleIds = new HashSet<Long>(mDownloads.keySet());
+        final Set<Long> staleDownloadIds = new HashSet<Long>(mDownloads.keySet());
 
-        final ContentResolver resolver = getContentResolver();
-        final Cursor cursor = resolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
+        final Cursor downloadsCursor = resolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
         try {
-            final DownloadInfo.Reader reader = new DownloadInfo.Reader(resolver, cursor);
-            final int idColumn = cursor.getColumnIndexOrThrow(Downloads.Impl._ID);
-            while (cursor.moveToNext()) {
-                long id = cursor.getLong(idColumn);
-                staleIds.remove(id);
+            final DownloadInfo.Reader reader = new DownloadInfo.Reader(resolver, downloadsCursor);
+            final int idColumn = downloadsCursor.getColumnIndexOrThrow(Downloads.Impl._ID);
+            while (downloadsCursor.moveToNext()) {
+                long id = downloadsCursor.getLong(idColumn);
+                staleDownloadIds.remove(id);
 
                 DownloadInfo info = mDownloads.get(id);
                 if (info != null) {
@@ -312,8 +317,9 @@ public class DownloadService extends Service {
                 }
 
                 if (info.mDeleted) {
-                    afterCleanUpDeleteDownload(resolver, info);
+                    afterCleanUpDeleteDownload(info);
                 } else {
+                    updateTotalBytesFor(info);
                     isActive = kickOffDownloadTaskIfReady(isActive, info);
                     isActive = kickOffMediaScanIfCompleted(isActive, info);
                 }
@@ -322,9 +328,26 @@ public class DownloadService extends Service {
                 nextActionMillis = Math.min(info.nextActionMillis(now), nextActionMillis);
             }
         } finally {
-            cursor.close();
+            downloadsCursor.close();
         }
-        cleanUpStaleDownloadsThatDisappeared(staleIds);
+
+        Cursor batchesCursor = resolver.query(Downloads.Impl.BATCH_CONTENT_URI, null, null, null, null);
+        batches.clear();
+        try {
+            int idColumn = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches._ID);
+            while (batchesCursor.moveToNext()) {
+                long id = batchesCursor.getLong(idColumn);
+
+                String title = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_TITLE));
+                String description = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_DESCRIPTION));
+                String bigPictureUrl = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_BIG_PICTURE));
+                batches.put(id, new DownloadBatch(title, description, bigPictureUrl));
+            }
+        } finally {
+            batchesCursor.close();
+        }
+
+        cleanUpStaleDownloadsThatDisappeared(staleDownloadIds);
 
         updateUserVisibleNotification();
 
@@ -341,7 +364,15 @@ public class DownloadService extends Service {
         return isActive;
     }
 
-    private void afterCleanUpDeleteDownload(ContentResolver resolver, DownloadInfo info) {
+    private void updateTotalBytesFor(DownloadInfo info) {
+        if (info.mTotalBytes == -1) {
+            ContentValues values = new ContentValues();
+            info.mTotalBytes = contentLengthFetcher.fetchContentLengthFor(info);
+            resolver.update(info.getAllDownloadsUri(), values, null, null);
+        }
+    }
+
+    private void afterCleanUpDeleteDownload(DownloadInfo info) {
         if (!TextUtils.isEmpty(info.mMediaProviderUri)) {
             resolver.delete(Uri.parse(info.mMediaProviderUri), null, null);
         }
@@ -372,7 +403,7 @@ public class DownloadService extends Service {
     }
 
     private void updateUserVisibleNotification() {
-        mNotifier.updateWith(mDownloads.values());
+        mNotifier.updateWith(batches, mDownloads.values());
     }
 
     /**

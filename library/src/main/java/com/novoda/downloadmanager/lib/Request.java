@@ -50,6 +50,7 @@ public class Request {
     private boolean mScannable = false;
     private String extraField;
     private String bigPictureUrl;
+    private long batchId = -1L;
     /**
      * if a file is designated as a MediaScanner scannable file, the following value is
      * stored in the database column {@link com.novoda.downloadmanager.lib.Downloads.Impl#COLUMN_MEDIA_SCANNED}.
@@ -301,6 +302,17 @@ public class Request {
     }
 
     /**
+     * Set the ID of the batch that this request belongs to
+     *
+     * @param batchId the batch id
+     * @return this object
+     */
+    public Request setBatchId(long batchId) {
+        this.batchId = batchId;
+        return this;
+    }
+
+    /**
      * Set the MIME content type of this download.  This will override the content type declared
      * in the server's response.
      *
@@ -439,6 +451,7 @@ public class Request {
         values.put(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, mIsVisibleInDownloadsUi);
         values.put(Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS, extraField);
         values.put(Downloads.Impl.COLUMN_BIG_PICTURE, bigPictureUrl);
+        values.put(Downloads.Impl.COLUMN_BATCH_ID, batchId);
 
         return values;
     }
