@@ -112,6 +112,11 @@ final class Downloads {
         public static final Uri PUBLICLY_ACCESSIBLE_DOWNLOADS_URI = Uri.parse(AUTHORITY + "/" + PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT);
 
         /**
+         * Name of table in the database
+         */
+        public static final String TABLE_NAME = "Downloads";
+
+        /**
          * The name of the column containing the URI of the data being downloaded.
          * <P>Type: TEXT</P>
          * <P>Owner can Init/Read</P>
@@ -774,7 +779,7 @@ final class Downloads {
         /**
          * Constants related to HTTP request headers associated with each download.
          */
-        public static class RequestHeaders {
+        public static class RequestHeaders implements BaseColumns {
             public static final String HEADERS_DB_TABLE = "request_headers";
             public static final String COLUMN_DOWNLOAD_ID = "download_id";
             public static final String COLUMN_HEADER = "header";
