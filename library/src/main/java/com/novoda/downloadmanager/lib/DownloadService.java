@@ -299,23 +299,23 @@ public class DownloadService extends Service {
         updateBatches();
 
         boolean isActive = false;
-        final Set<Long> staleDownloadIds = new HashSet<>(mDownloads.keySet());
+        Set<Long> staleDownloadIds = new HashSet<>(mDownloads.keySet());
         long nextActionMillis = Long.MAX_VALUE;
-        final long now = mSystemFacade.currentTimeMillis();
+        long now = mSystemFacade.currentTimeMillis();
 
-        final Cursor downloadsCursor = resolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
+        Cursor downloadsCursor = resolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
         try {
-            final DownloadInfo.Reader reader = new DownloadInfo.Reader(resolver, downloadsCursor);
-            final int idColumn = downloadsCursor.getColumnIndexOrThrow(Downloads.Impl._ID);
+            DownloadInfo.Reader reader = new DownloadInfo.Reader(resolver, downloadsCursor);
+            int idColumn = downloadsCursor.getColumnIndexOrThrow(Downloads.Impl._ID);
             while (downloadsCursor.moveToNext()) {
                 long id = downloadsCursor.getLong(idColumn);
                 staleDownloadIds.remove(id);
 
                 DownloadInfo info = mDownloads.get(id);
                 if (info == null) {
-                    info = insertDownloadLocked(reader, now);
+                    info = insertDownloadLocked(reader);
                 } else {
-                    updateDownload(reader, info, now);
+                    updateDownload(reader, info);
                 }
 
                 if (info.mDeleted) {
@@ -342,7 +342,7 @@ public class DownloadService extends Service {
         if (nextActionMillis > 0 && nextActionMillis < Long.MAX_VALUE) {
             Log.v("scheduling start in " + nextActionMillis + "ms");
 
-            final Intent intent = new Intent(Constants.ACTION_RETRY);
+            Intent intent = new Intent(Constants.ACTION_RETRY);
             intent.setClass(this, DownloadReceiver.class);
             mAlarmManager.set(AlarmManager.RTC_WAKEUP, now + nextActionMillis, PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_ONE_SHOT));
         }
@@ -413,7 +413,7 @@ public class DownloadService extends Service {
      * Keeps a local copy of the info about a download, and initiates the
      * download if appropriate.
      */
-    private DownloadInfo insertDownloadLocked(DownloadInfo.Reader reader, long now) {
+    private DownloadInfo insertDownloadLocked(DownloadInfo.Reader reader) {
         DownloadInfo info = reader.newDownloadInfo(this, mSystemFacade, mStorageManager, mNotifier, downloadClientReadyChecker);
         mDownloads.put(info.mId, info);
 
@@ -425,7 +425,7 @@ public class DownloadService extends Service {
     /**
      * Updates the local copy of the info about a download.
      */
-    private void updateDownload(DownloadInfo.Reader reader, DownloadInfo info, long now) {
+    private void updateDownload(DownloadInfo.Reader reader, DownloadInfo info) {
         reader.updateFromDatabase(info);
         Log.v("processing updated download " + info.mId + ", status: " + info.mStatus);
     }
