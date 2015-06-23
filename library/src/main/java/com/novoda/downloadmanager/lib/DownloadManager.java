@@ -367,6 +367,7 @@ public class DownloadManager {
         return ContentUris.parseId(downloadUri);
     }
 
+
     public void markDeleted(URI uri) {
         Cursor cursor = null;
         try {

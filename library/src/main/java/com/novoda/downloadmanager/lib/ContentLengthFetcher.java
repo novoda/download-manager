@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 
-public class ContentLengthFetcher {
+class ContentLengthFetcher {
 
     private static final String HEADER_CONTENT_LENGTH = "Content-Length";
     private static final int UNKNOWN_CONTENT_LENGTH = -1;
@@ -29,12 +29,11 @@ public class ContentLengthFetcher {
             conn.setReadTimeout(TIMEOUT_MILLIS);
             conn.setRequestMethod(METHOD_HEAD);
             addRequestHeaders(info, conn);
-            int responseCode = conn.getResponseCode();
-            switch (responseCode) {
-                case HTTP_OK:
-                    return getHeaderFieldLong(conn, HEADER_CONTENT_LENGTH, UNKNOWN_CONTENT_LENGTH);
-                default:
-                    return UNKNOWN_CONTENT_LENGTH;
+
+            if (conn.getResponseCode() == HTTP_OK) {
+                return getHeaderFieldLong(conn, HEADER_CONTENT_LENGTH, UNKNOWN_CONTENT_LENGTH);
+            } else {
+                return UNKNOWN_CONTENT_LENGTH;
             }
 
         } catch (IOException e) {
