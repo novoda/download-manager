@@ -370,7 +370,7 @@ public class DownloadManager {
     public long create(DownloadBatch batch) {
         ContentValues values = batch.toContentValues();
         Uri batchUri = mResolver.insert(Downloads.Impl.BATCH_CONTENT_URI, values);
-        return Long.parseLong(batchUri.getLastPathSegment());
+        return ContentUris.parseId(batchUri);
     }
 
     public void markDeleted(URI uri) {
