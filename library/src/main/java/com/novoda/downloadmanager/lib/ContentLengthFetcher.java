@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 
-public class ContentLengthFetcher {
+class ContentLengthFetcher {
 
     private static final String HEADER_CONTENT_LENGTH = "Content-Length";
     private static final int UNKNOWN_CONTENT_LENGTH = -1;
