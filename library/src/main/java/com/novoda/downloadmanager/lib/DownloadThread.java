@@ -16,6 +16,7 @@
 
 package com.novoda.downloadmanager.lib;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.drm.DrmManagerClient;
@@ -176,7 +177,7 @@ class DownloadThread implements Runnable {
 
     private void runInternal() {
         // Skip when download already marked as finished; this download was probably started again while racing with UpdateThread.
-        if (DownloadInfo.queryDownloadStatus(mContext.getContentResolver(), mInfo.mId) == Downloads.Impl.STATUS_SUCCESS) {
+        if (DownloadInfo.queryDownloadStatus(getContentResolver(), mInfo.mId) == Downloads.Impl.STATUS_SUCCESS) {
             Log.d("Download " + mInfo.mId + " already finished; skipping");
             return;
         }
@@ -551,7 +552,7 @@ class DownloadThread implements Runnable {
                 now - state.mTimeLastNotification > Constants.MIN_PROGRESS_TIME) {
             ContentValues values = new ContentValues();
             values.put(Downloads.Impl.COLUMN_CURRENT_BYTES, state.mCurrentBytes);
-            mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
+            getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
             state.mBytesNotified = state.mCurrentBytes;
             state.mTimeLastNotification = now;
         }
@@ -595,7 +596,7 @@ class DownloadThread implements Runnable {
         if (state.mContentLength == -1) {
             values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, state.mCurrentBytes);
         }
-        mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
+        getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
 
         final boolean lengthMismatched = (state.mContentLength != -1)
                 && (state.mCurrentBytes != state.mContentLength);
@@ -631,7 +632,7 @@ class DownloadThread implements Runnable {
 
             ContentValues values = new ContentValues();
             values.put(Downloads.Impl.COLUMN_CURRENT_BYTES, state.mCurrentBytes);
-            mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
+            getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
             if (cannotResume(state)) {
                 throw new StopRequestException(STATUS_CANNOT_RESUME, "Failed reading response: " + ex + "; unable to resume", ex);
             } else {
@@ -678,7 +679,7 @@ class DownloadThread implements Runnable {
             values.put(Downloads.Impl.COLUMN_MIME_TYPE, state.mMimeType);
         }
         values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, mInfo.mTotalBytes);
-        mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
+        getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
     }
 
     /**
@@ -823,17 +824,27 @@ class DownloadThread implements Runnable {
         if (!TextUtils.isEmpty(errorMsg)) {
             values.put(Downloads.Impl.COLUMN_ERROR_MSG, errorMsg);
         }
-        mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
+        getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
 
         updateBatchStatus(mInfo.batchId);
     }
 
+    private ContentResolver getContentResolver() {
+        return mContext.getContentResolver();
+    }
+
     private void updateBatchStatus(long batchId) {
-        BatchStatusUpdater batchStatusUpdater = new BatchStatusUpdater(mContext.getContentResolver());
+        BatchStatusUpdater batchStatusUpdater = new BatchStatusUpdater(getContentResolver());
         int batchStatus = batchStatusUpdater.getBatchStatus(batchId);
         batchStatusUpdater.updateBatchStatus(batchId, batchStatus);
 
         Log.d("Batch " + batchId + " status: " + batchStatus);
+
+        if (Downloads.Impl.isStatusCancelled(batchStatus)) {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_STATUS, STATUS_CANCELED);
+            getContentResolver().update(ALL_DOWNLOADS_CONTENT_URI, values, COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
+        }
     }
 
     public static long getHeaderFieldLong(URLConnection conn, String field, long defaultValue) {

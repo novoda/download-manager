@@ -243,8 +243,8 @@ class DownloadNotifier {
             builder.setOngoing(true);
 
             DownloadInfo info = cluster.iterator().next();
-            uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, info.mId);
-            Intent cancelIntent = new Intent(Constants.ACTION_CANCEL, uri, mContext, DownloadReceiver.class);
+            Intent cancelIntent = new Intent(Constants.ACTION_CANCEL, null, mContext, DownloadReceiver.class);
+            cancelIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, info.batchId);
             PendingIntent pendingCancelIntent = PendingIntent.getBroadcast(mContext, 0, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             builder.addAction(R.drawable.dl__ic_action_cancel, "Cancel", pendingCancelIntent);
 

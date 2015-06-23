@@ -32,6 +32,7 @@ public class DownloadReceiver extends BroadcastReceiver {
     private static final String TAG = "DownloadReceiver";
 
     public static final String EXTRA_DOWNLOAD_TITLE = "com.novoda.extra.DOWNLOAD_TITLE";
+    public static final String EXTRA_BATCH_ID = "com.novoda.extra.BATCH_ID";
     public static final int TRUE_THIS_IS_CLEARER_NOW = 1;
 
     private static Handler sAsyncHandler;
@@ -96,7 +97,7 @@ public class DownloadReceiver extends BroadcastReceiver {
             long id = ContentUris.parseId(intent.getData());
             hideNotification(context, id);
         } else if (ACTION_CANCEL.equals(action)) {
-            cancelDownloadThroughDatabaseState(context, intent);
+            cancelBatchThroughDatabaseState(context, intent);
         } else if (ACTION_DELETE.equals(action)) {
             deleteDownloadThroughDatabaseState(context, intent);
         }
@@ -165,14 +166,18 @@ public class DownloadReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Mark the given {@link DownloadManager#COLUMN_ID} as being cancelled by
-     * user so it will be cancelled by the running thread.
+     * Mark the given batch as being cancelled by user so it will be cancelled by the running thread.
      */
-    private void cancelDownloadThroughDatabaseState(Context context, Intent intent) {
+    private void cancelBatchThroughDatabaseState(Context context, Intent intent) {
         ContentValues values = new ContentValues(1);
         values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_CANCELED);
+        long batchId = getBatchId(intent);
         context.getContentResolver().update(
-                getDownloadUri(context, intent), values, null, null);
+                Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
+                values,
+                Downloads.Impl.COLUMN_BATCH_ID + " = ?",
+                new String[]{String.valueOf(batchId)}
+        );
     }
 
     /**
@@ -204,6 +209,10 @@ public class DownloadReceiver extends BroadcastReceiver {
             }
         }
         return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, downloadId);
+    }
+
+    private long getBatchId(Intent intent) {
+        return intent.getLongExtra(EXTRA_BATCH_ID, -1);
     }
 
     private Cursor queryDownloads(Context context, String title) {
