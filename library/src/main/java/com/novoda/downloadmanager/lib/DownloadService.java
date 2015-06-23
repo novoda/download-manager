@@ -31,6 +31,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.novoda.notils.logger.simple.Log;
@@ -178,7 +179,7 @@ public class DownloadService extends Service {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public int onStartCommand(@NonNull Intent intent, int flags, int startId) {
         int returnValue = super.onStartCommand(intent, flags, startId);
         Log.v("Service onStart");
         mLastStartId = startId;
@@ -294,29 +295,13 @@ public class DownloadService extends Service {
      * snapshot taken in this update.
      */
     private boolean updateLocked() {
-        final long now = mSystemFacade.currentTimeMillis();
+
+        updateBatches();
 
         boolean isActive = false;
+        final Set<Long> staleDownloadIds = new HashSet<>(mDownloads.keySet());
         long nextActionMillis = Long.MAX_VALUE;
-
-        final Set<Long> staleDownloadIds = new HashSet<Long>(mDownloads.keySet());
-
-        Cursor batchesCursor = resolver.query(Downloads.Impl.BATCH_CONTENT_URI, null, null, null, null);
-        batches.clear();
-        try {
-            int idColumn = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches._ID);
-            while (batchesCursor.moveToNext()) {
-                long id = batchesCursor.getLong(idColumn);
-
-                String title = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_TITLE));
-                String description = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_DESCRIPTION));
-                String bigPictureUrl = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_BIG_PICTURE));
-
-                batches.put(id, new BatchInfo(title, description, bigPictureUrl));
-            }
-        } finally {
-            batchesCursor.close();
-        }
+        final long now = mSystemFacade.currentTimeMillis();
 
         final Cursor downloadsCursor = resolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
         try {
@@ -327,10 +312,10 @@ public class DownloadService extends Service {
                 staleDownloadIds.remove(id);
 
                 DownloadInfo info = mDownloads.get(id);
-                if (info != null) {
-                    updateDownload(reader, info, now);
-                } else {
+                if (info == null) {
                     info = insertDownloadLocked(reader, now);
+                } else {
+                    updateDownload(reader, info, now);
                 }
 
                 if (info.mDeleted) {
@@ -365,6 +350,25 @@ public class DownloadService extends Service {
         return isActive;
     }
 
+    private void updateBatches() {
+        Cursor batchesCursor = resolver.query(Downloads.Impl.BATCH_CONTENT_URI, null, null, null, null);
+        batches.clear();
+        try {
+            int idColumn = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches._ID);
+            while (batchesCursor.moveToNext()) {
+                long id = batchesCursor.getLong(idColumn);
+
+                String title = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_TITLE));
+                String description = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_DESCRIPTION));
+                String bigPictureUrl = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_BIG_PICTURE));
+
+                batches.put(id, new BatchInfo(title, description, bigPictureUrl));
+            }
+        } finally {
+            batchesCursor.close();
+        }
+    }
+
     private void updateTotalBytesFor(DownloadInfo info) {
         if (info.mTotalBytes == -1) {
             ContentValues values = new ContentValues();
@@ -383,8 +387,7 @@ public class DownloadService extends Service {
     }
 
     private boolean kickOffDownloadTaskIfReady(boolean isActive, DownloadInfo info) {
-        boolean readyToDownload = info.isReadyToDownload();
-        if (readyToDownload) {
+        if (info.isReadyToDownload()) {
             isActive |= info.startDownloadIfNotActive(mExecutor);
         }
         return isActive;
@@ -392,7 +395,6 @@ public class DownloadService extends Service {
 
     private boolean kickOffMediaScanIfCompleted(boolean isActive, DownloadInfo info) {
         final boolean activeScan = info.startScanIfReady(mScanner);
-
         isActive |= activeScan;
         return isActive;
     }

@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.provider.BaseColumns;
+import android.support.annotation.NonNull;
 import android.widget.Toast;
 
 import com.novoda.notils.logger.simple.Log;
@@ -42,16 +43,14 @@ public class DownloadReceiver extends BroadcastReceiver {
     }
 
     @Override
-    public void onReceive(final Context context, final Intent intent) {
+    public void onReceive(@NonNull Context context, @NonNull Intent intent) {
         String action = intent.getAction();
-        if (ACTION_BOOT_COMPLETED.equals(action)) {
-            startService(context);
-        } else if (ACTION_MEDIA_MOUNTED.equals(action)) {
+        if (ACTION_BOOT_COMPLETED.equals(action)
+                || ACTION_MEDIA_MOUNTED.equals(action)
+                || ACTION_RETRY.equals(action)) {
             startService(context);
         } else if (CONNECTIVITY_ACTION.equals(action)) {
             checkConnectivityToStartService(context);
-        } else if (ACTION_RETRY.equals(action)) {
-            startService(context);
         } else if (ACTION_OPEN.equals(action)
                 || ACTION_LIST.equals(action)
                 || ACTION_HIDE.equals(action)
@@ -211,9 +210,9 @@ public class DownloadReceiver extends BroadcastReceiver {
         return context.getContentResolver().query(
                 Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null,
                 Downloads.Impl.COLUMN_TITLE + " = ? AND " +
-                    Downloads.Impl.COLUMN_STATUS + " <= ?",
-                new String[] { title.toUpperCase(),
-                        String.valueOf(Downloads.Impl.STATUS_SUCCESS) }, null);
+                        Downloads.Impl.COLUMN_STATUS + " <= ?",
+                new String[]{title.toUpperCase(),
+                        String.valueOf(Downloads.Impl.STATUS_SUCCESS)}, null);
     }
 
     private static int getInt(Cursor cursor, String col) {
