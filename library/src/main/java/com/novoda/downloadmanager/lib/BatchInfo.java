@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager.lib;
 
-public class BatchInfo {
+class BatchInfo {
     private final String title;
     private final String description;
     private final String bigPictureUrl;

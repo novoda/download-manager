@@ -32,19 +32,19 @@ public class RequestBatch {
         return batchInfo.getBigPictureUrl();
     }
 
-    public ContentValues toContentValues() {
-        ContentValues values = new ContentValues();
-        values.put(Downloads.Impl.Batches.COLUMN_TITLE, batchInfo.getTitle());
-        values.put(Downloads.Impl.Batches.COLUMN_DESCRIPTION, batchInfo.getDescription());
-        values.put(Downloads.Impl.Batches.COLUMN_BIG_PICTURE, batchInfo.getBigPictureUrl());
-        return values;
-    }
-
     public List<Request> getRequests() {
         return requests;
     }
 
     public void addRequest(Request request) {
         requests.add(request);
+    }
+
+    ContentValues toContentValues() {
+        ContentValues values = new ContentValues();
+        values.put(Downloads.Impl.Batches.COLUMN_TITLE, batchInfo.getTitle());
+        values.put(Downloads.Impl.Batches.COLUMN_DESCRIPTION, batchInfo.getDescription());
+        values.put(Downloads.Impl.Batches.COLUMN_BIG_PICTURE, batchInfo.getBigPictureUrl());
+        return values;
     }
 }
