@@ -311,7 +311,7 @@ class DownloadNotifier {
             }
         }
 
-        if (cluster.size() == 1) {
+        if (batches.size() == 1) {
             return buildSingleNotification(type, cluster, builder, batches, remainingText, percentText);
 
         } else {
