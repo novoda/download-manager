@@ -166,6 +166,7 @@ class DownloadThread implements Runnable {
         try {
             if (mInfo.mStatus != Downloads.Impl.STATUS_RUNNING) {
                 mInfo.updateStatus(Downloads.Impl.STATUS_RUNNING);
+                updateBatchStatus(mInfo.batchId);
             }
             runInternal();
         } finally {
@@ -187,7 +188,7 @@ class DownloadThread implements Runnable {
         String errorMsg = null;
 
 //        final NetworkPolicyManager netPolicy = NetworkPolicyManager.from(mContext);
-        final PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
 
         try {
             wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
@@ -823,6 +824,16 @@ class DownloadThread implements Runnable {
             values.put(Downloads.Impl.COLUMN_ERROR_MSG, errorMsg);
         }
         mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
+
+        updateBatchStatus(mInfo.batchId);
+    }
+
+    private void updateBatchStatus(long batchId) {
+        BatchStatusUpdater batchStatusUpdater = new BatchStatusUpdater(mContext.getContentResolver());
+        int batchStatus = batchStatusUpdater.getBatchStatus(batchId);
+        batchStatusUpdater.updateBatchStatus(batchId, batchStatus);
+
+        Log.d("Batch " + batchId + " status: " + batchStatus);
     }
 
     public static long getHeaderFieldLong(URLConnection conn, String field, long defaultValue) {

@@ -171,6 +171,12 @@ public final class DownloadProvider extends ContentProvider {
             Downloads.Impl.COLUMN_DELETED,
             Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS,
             Downloads.Impl.COLUMN_BIG_PICTURE,
+            Downloads.Impl.COLUMN_BATCH_ID,
+            Downloads.Impl.Batches._ID,
+            Downloads.Impl.Batches.COLUMN_STATUS,
+            Downloads.Impl.Batches.COLUMN_TITLE,
+            Downloads.Impl.Batches.COLUMN_DESCRIPTION,
+            Downloads.Impl.Batches.COLUMN_BIG_PICTURE,
             OpenableColumns.DISPLAY_NAME,
             OpenableColumns.SIZE,
     };
@@ -635,9 +641,7 @@ public final class DownloadProvider extends ContentProvider {
      * Starts a database query
      */
     @Override
-    public Cursor query(final Uri uri, String[] projection,
-                        final String selection, final String[] selectionArgs,
-                        final String sort) {
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sort) {
 
         Helpers.validateSelection(selection, sAppReadableColumnsSet);
 

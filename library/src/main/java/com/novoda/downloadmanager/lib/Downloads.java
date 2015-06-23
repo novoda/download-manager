@@ -825,6 +825,13 @@ final class Downloads {
              * A URL that will be used to show a big picture style notification
              */
             public static final String COLUMN_BIG_PICTURE = "batch_notificationBigPictureResourceId";
+
+            /**
+             * The status of the batch.
+             * <P>Type: INTEGER</P>
+             * <P>Owner can Read</P>
+             */
+            public static final String COLUMN_STATUS = "batch_status";
         }
     }
 
