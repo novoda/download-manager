@@ -649,7 +649,6 @@ class DownloadThread implements Runnable {
         readResponseHeaders(state, conn);
 
         state.mFilename = Helpers.generateSaveFile(
-                mContext,
                 mInfo.mUri,
                 mInfo.mHint,
                 state.mContentDisposition,

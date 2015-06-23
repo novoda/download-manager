@@ -70,7 +70,7 @@ class Helpers {
     /**
      * Creates a filename (where the file should be saved) from info about a download.
      */
-    static String generateSaveFile(Context context, String url, String hint, String contentDisposition,
+    static String generateSaveFile(String url, String hint, String contentDisposition,
                                    String contentLocation, String mimeType, int destination, long contentLength,
                                    StorageManager storageManager) throws StopRequestException {
         if (contentLength < 0) {
