@@ -282,15 +282,15 @@ class DownloadNotifier {
         if (type == TYPE_ACTIVE) {
             long currentBytes = 0;
             long totalBytes = 0;
-            long totalSpeed = 0;
+            long totalBytesPerSecond = 0;
             synchronized (mDownloadSpeed) {
                 for (DownloadInfo info : cluster) {
                     if (info.mTotalBytes != -1) {
                         currentBytes += info.mCurrentBytes;
                         totalBytes += info.mTotalBytes;
-                        Long speed = mDownloadSpeed.get(info.batchId);
-                        if (speed != null) {
-                            totalSpeed += speed;
+                        Long bytesPerSecond = mDownloadSpeed.get(info.batchId);
+                        if (bytesPerSecond != null) {
+                            totalBytesPerSecond += bytesPerSecond;
                         }
                     }
                 }
@@ -300,8 +300,8 @@ class DownloadNotifier {
                 int percent = (int) ((currentBytes * 100) / totalBytes);
                 percentText = percent + "%";//res.getString(R.string.download_percent, percent);
 
-                if (totalSpeed > 0) {
-                    long remainingMillis = ((totalBytes - currentBytes) * 1000) / totalSpeed;
+                if (totalBytesPerSecond > 0) {
+                    long remainingMillis = ((totalBytes - currentBytes) * 1000) / totalBytesPerSecond;
                     remainingText = "Duration " + formatDuration(remainingMillis);
                 }
 
