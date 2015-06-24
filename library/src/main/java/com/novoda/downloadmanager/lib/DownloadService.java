@@ -364,7 +364,7 @@ public class DownloadService extends Service {
                 String description = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_DESCRIPTION));
                 String bigPictureUrl = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_BIG_PICTURE));
 
-                batches.put(id, new BatchInfo(title, description, bigPictureUrl, visibility));
+                batches.put(id, new BatchInfo(title, description, bigPictureUrl));
             }
         } finally {
             batchesCursor.close();
