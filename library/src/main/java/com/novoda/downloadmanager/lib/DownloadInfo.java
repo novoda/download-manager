@@ -472,7 +472,6 @@ class DownloadInfo {
         synchronized (this) {
             final boolean isActive = mSubmittedTask != null && !mSubmittedTask.isDone();
             if (!isActive) {
-                updateStatus(Downloads.Impl.STATUS_PENDING);
                 DownloadThread downloadThread = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier);
                 mSubmittedTask = executor.submit(downloadThread);
             }
