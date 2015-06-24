@@ -13,23 +13,6 @@ import static com.novoda.downloadmanager.lib.Downloads.Impl.*;
 class BatchStatusUpdater {
 
     private static final List<Integer> PRIORITISED_STATUSES = Arrays.asList(
-            // Failed
-            STATUS_INSUFFICIENT_SPACE_ERROR,
-            STATUS_DEVICE_NOT_FOUND_ERROR,
-            STATUS_BAD_REQUEST,
-            STATUS_NOT_ACCEPTABLE,
-            STATUS_LENGTH_REQUIRED,
-            STATUS_PRECONDITION_FAILED,
-            STATUS_FILE_ALREADY_EXISTS_ERROR,
-            STATUS_CANNOT_RESUME,
-            STATUS_UNKNOWN_ERROR,
-            STATUS_FILE_ERROR,
-            STATUS_UNHANDLED_REDIRECT,
-            STATUS_UNHANDLED_HTTP_CODE,
-            STATUS_HTTP_DATA_ERROR,
-            STATUS_HTTP_EXCEPTION,
-            STATUS_TOO_MANY_REDIRECTS,
-
             // Cancelled
             STATUS_CANCELED,
 
@@ -80,6 +63,14 @@ class BatchStatusUpdater {
                 statusCounts.put(status, statusCounts.get(status) + 1);
             }
 
+            // check for error statuses first
+            for (int i = 0; i < statusCounts.size(); i++) {
+                int statusCode = statusCounts.keyAt(i);
+                if (Downloads.Impl.isStatusError(statusCode) && statusCounts.get(statusCode) > 0) {
+                    return statusCode;
+                }
+            }
+
             for (Integer status : PRIORITISED_STATUSES) {
                 if (statusCounts.get(status) > 0) {
                     return status;
@@ -94,5 +85,4 @@ class BatchStatusUpdater {
             }
         }
     }
-
 }
