@@ -705,6 +705,11 @@ final class Downloads {
          */
         public static final int STATUS_TOO_MANY_REDIRECTS = 497;
 
+        /**
+         * This download couldn't be completed because another download in the batch failed.
+         */
+        public static final int STATUS_BATCH_FAILED = 498;
+
         static String statusToString(int status) {
             switch (status) {
                 case STATUS_PENDING:

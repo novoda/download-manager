@@ -42,6 +42,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.util.Locale;
 
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
@@ -165,10 +166,6 @@ class DownloadThread implements Runnable {
     public void run() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         try {
-            if (mInfo.mStatus != Downloads.Impl.STATUS_RUNNING) {
-                mInfo.updateStatus(Downloads.Impl.STATUS_RUNNING);
-                updateBatchStatus(mInfo.batchId);
-            }
             runInternal();
         } finally {
             mNotifier.notifyDownloadSpeed(mInfo.batchId, 0);
@@ -177,9 +174,23 @@ class DownloadThread implements Runnable {
 
     private void runInternal() {
         // Skip when download already marked as finished; this download was probably started again while racing with UpdateThread.
-        if (DownloadInfo.queryDownloadStatus(getContentResolver(), mInfo.mId) == Downloads.Impl.STATUS_SUCCESS) {
+        int downloadStatus = DownloadInfo.queryDownloadStatus(getContentResolver(), mInfo.mId);
+        Log.d("Queried DB for status of download " + mInfo.mId + ": " + downloadStatus);
+        if (downloadStatus == Downloads.Impl.STATUS_SUCCESS) {
             Log.d("Download " + mInfo.mId + " already finished; skipping");
             return;
+        }
+        if (Downloads.Impl.isStatusCancelled(downloadStatus)) {
+            Log.d("Download " + mInfo.mId + " already cancelled; skipping");
+            return;
+        }
+        if (Downloads.Impl.isStatusError(downloadStatus)) {
+            Log.d("Download " + mInfo.mId + " already failed: status = " + downloadStatus + "; skipping");
+            return;
+        }
+        if (downloadStatus != Downloads.Impl.STATUS_RUNNING) {
+            mInfo.updateStatus(Downloads.Impl.STATUS_RUNNING);
+            updateBatchStatus(mInfo.batchId, mInfo.mId);
         }
 
         State state = new State(mInfo);
@@ -353,6 +364,9 @@ class DownloadThread implements Runnable {
                     default:
                         StopRequestException.throwUnhandledHttpError(responseCode, conn.getResponseMessage());
                 }
+            } catch (UnknownHostException e) {
+                // Unable to resolve host request
+                throw new StopRequestException(HTTP_NOT_FOUND, e);
             } catch (IOException e) {
                 // Trouble with low-level sockets
                 throw new StopRequestException(STATUS_HTTP_DATA_ERROR, e);
@@ -826,14 +840,14 @@ class DownloadThread implements Runnable {
         }
         getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
 
-        updateBatchStatus(mInfo.batchId);
+        updateBatchStatus(mInfo.batchId, mInfo.mId);
     }
 
     private ContentResolver getContentResolver() {
         return mContext.getContentResolver();
     }
 
-    private void updateBatchStatus(long batchId) {
+    private void updateBatchStatus(long batchId, long downloadId) {
         BatchStatusUpdater batchStatusUpdater = new BatchStatusUpdater(getContentResolver());
         int batchStatus = batchStatusUpdater.getBatchStatus(batchId);
         batchStatusUpdater.updateBatchStatus(batchId, batchStatus);
@@ -844,6 +858,16 @@ class DownloadThread implements Runnable {
             ContentValues values = new ContentValues();
             values.put(COLUMN_STATUS, STATUS_CANCELED);
             getContentResolver().update(ALL_DOWNLOADS_CONTENT_URI, values, COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
+        } else if (Downloads.Impl.isStatusError(batchStatus)) {
+            Log.d("Setting error code on batch for download " + downloadId);
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_STATUS, STATUS_BATCH_FAILED);
+            getContentResolver().update(
+                    ALL_DOWNLOADS_CONTENT_URI,
+                    values,
+                    COLUMN_BATCH_ID + " = ? AND " + _ID + " <> ? ",
+                    new String[]{String.valueOf(batchId), String.valueOf(downloadId)}
+            );
         }
     }
 

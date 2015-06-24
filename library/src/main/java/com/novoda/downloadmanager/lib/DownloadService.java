@@ -300,7 +300,7 @@ public class DownloadService extends Service {
 
         boolean isActive = false;
         Set<Long> staleDownloadIds = new HashSet<>(mDownloads.keySet());
-        long nextActionMillis = Long.MAX_VALUE;
+        long nextRetryTimeMillis = Long.MAX_VALUE;
         long now = mSystemFacade.currentTimeMillis();
 
         Cursor downloadsCursor = resolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
@@ -319,7 +319,9 @@ public class DownloadService extends Service {
                 }
 
                 if (info.mDeleted) {
-                    afterCleanUpDeleteDownload(info);
+                    deleteFileAndDatabaseRow(info);
+                } else if (Downloads.Impl.isStatusCancelled(info.mStatus) || Downloads.Impl.isStatusError(info.mStatus)) {
+                    deleteFileAndMediaReference(info);
                 } else {
                     updateTotalBytesFor(info);
                     isActive = kickOffDownloadTaskIfReady(isActive, info);
@@ -327,7 +329,7 @@ public class DownloadService extends Service {
                 }
 
                 // Keep track of nearest next action
-                nextActionMillis = Math.min(info.nextActionMillis(now), nextActionMillis);
+                nextRetryTimeMillis = Math.min(info.nextActionMillis(now), nextRetryTimeMillis);
             }
         } finally {
             downloadsCursor.close();
@@ -339,12 +341,12 @@ public class DownloadService extends Service {
 
         // Set alarm when next action is in future. It's okay if the service
         // continues to run in meantime, since it will kick off an update pass.
-        if (nextActionMillis > 0 && nextActionMillis < Long.MAX_VALUE) {
-            Log.v("scheduling start in " + nextActionMillis + "ms");
+        if (nextRetryTimeMillis > 0 && nextRetryTimeMillis < Long.MAX_VALUE) {
+            Log.v("scheduling start in " + nextRetryTimeMillis + "ms");
 
             Intent intent = new Intent(Constants.ACTION_RETRY);
             intent.setClass(this, DownloadReceiver.class);
-            mAlarmManager.set(AlarmManager.RTC_WAKEUP, now + nextActionMillis, PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_ONE_SHOT));
+            mAlarmManager.set(AlarmManager.RTC_WAKEUP, now + nextRetryTimeMillis, PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_ONE_SHOT));
         }
 
         return isActive;
@@ -362,7 +364,7 @@ public class DownloadService extends Service {
                 String description = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_DESCRIPTION));
                 String bigPictureUrl = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_BIG_PICTURE));
 
-                batches.put(id, new BatchInfo(title, description, bigPictureUrl));
+                batches.put(id, new BatchInfo(title, description, bigPictureUrl, visibility));
             }
         } finally {
             batchesCursor.close();
@@ -377,16 +379,27 @@ public class DownloadService extends Service {
         }
     }
 
-    private void afterCleanUpDeleteDownload(DownloadInfo info) {
+    private void deleteFileAndDatabaseRow(DownloadInfo info) {
+        deleteFileAndMediaReference(info);
+        resolver.delete(info.getAllDownloadsUri(), null, null);
+    }
+
+    private void deleteFileAndMediaReference(DownloadInfo info) {
         if (!TextUtils.isEmpty(info.mMediaProviderUri)) {
             resolver.delete(Uri.parse(info.mMediaProviderUri), null, null);
         }
 
-        deleteFileIfExists(info.mFileName);
-        resolver.delete(info.getAllDownloadsUri(), null, null);
+        if (!TextUtils.isEmpty(info.mFileName)) {
+            deleteFileIfExists(info.mFileName);
+            ContentValues blankData = new ContentValues();
+            blankData.put(Downloads.Impl._DATA, (String) null);
+            resolver.update(info.getAllDownloadsUri(), blankData, null, null);
+            info.mFileName = null;
+        }
     }
 
     private boolean kickOffDownloadTaskIfReady(boolean isActive, DownloadInfo info) {
+        Log.e("Ready to download: " + info.isReadyToDownload() + " received isActive: " + isActive + " for id: " + info.mId);
         if (info.isReadyToDownload()) {
             isActive |= info.startDownloadIfNotActive(mExecutor);
         }
