@@ -40,6 +40,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -88,8 +89,6 @@ public class DownloadService extends Service {
      */
 //    @GuardedBy("mDownloads")
     private final Map<Long, DownloadInfo> mDownloads = new HashMap<>();
-
-    private final Map<Long, BatchInfo> batches = new HashMap<>();
 
     private ExecutorService mExecutor;
 
@@ -296,8 +295,6 @@ public class DownloadService extends Service {
      */
     private boolean updateLocked() {
 
-        updateBatches();
-
         boolean isActive = false;
         Set<Long> staleDownloadIds = new HashSet<>(mDownloads.keySet());
         long nextRetryTimeMillis = Long.MAX_VALUE;
@@ -313,9 +310,10 @@ public class DownloadService extends Service {
 
                 DownloadInfo info = mDownloads.get(id);
                 if (info == null) {
-                    info = insertDownloadLocked(reader);
+                    info = createNewDownloadInfo(reader);
+                    mDownloads.put(info.mId, info);
                 } else {
-                    updateDownload(reader, info);
+                    updateDownloadFromDatabase(reader, info);
                 }
 
                 if (info.mDeleted) {
@@ -335,9 +333,10 @@ public class DownloadService extends Service {
             downloadsCursor.close();
         }
 
-        cleanUpStaleDownloadsThatDisappeared(staleDownloadIds);
+        cleanUpStaleDownloadsThatDisappeared(staleDownloadIds, mDownloads);
 
-        updateUserVisibleNotification();
+        Map<Long, BatchInfo> batches = fetchBatches();
+        updateUserVisibleNotification(batches, mDownloads.values());
 
         // Set alarm when next action is in future. It's okay if the service
         // continues to run in meantime, since it will kick off an update pass.
@@ -352,7 +351,8 @@ public class DownloadService extends Service {
         return isActive;
     }
 
-    private void updateBatches() {
+    private Map<Long, BatchInfo> fetchBatches() {
+        Map<Long, BatchInfo> batches = new HashMap<>();
         Cursor batchesCursor = resolver.query(Downloads.Impl.BATCH_CONTENT_URI, null, null, null, null);
         batches.clear();
         try {
@@ -369,6 +369,7 @@ public class DownloadService extends Service {
         } finally {
             batchesCursor.close();
         }
+        return batches;
     }
 
     private void updateTotalBytesFor(DownloadInfo info) {
@@ -412,33 +413,30 @@ public class DownloadService extends Service {
         return isActive;
     }
 
-    private void cleanUpStaleDownloadsThatDisappeared(Set<Long> staleIds) {
+    private void cleanUpStaleDownloadsThatDisappeared(Set<Long> staleIds, Map<Long, DownloadInfo> downloads) {
         for (Long id : staleIds) {
-            deleteDownloadLocked(id);
+            deleteDownloadLocked(id, downloads);
         }
     }
 
-    private void updateUserVisibleNotification() {
-        mNotifier.updateWith(batches, mDownloads.values());
+    private void updateUserVisibleNotification(Map<Long, BatchInfo> batches, Collection<DownloadInfo> downloads) {
+        mNotifier.updateWith(batches, downloads);
     }
 
     /**
      * Keeps a local copy of the info about a download, and initiates the
      * download if appropriate.
      */
-    private DownloadInfo insertDownloadLocked(DownloadInfo.Reader reader) {
+    private DownloadInfo createNewDownloadInfo(DownloadInfo.Reader reader) {
         DownloadInfo info = reader.newDownloadInfo(this, mSystemFacade, mStorageManager, mNotifier, downloadClientReadyChecker);
-        mDownloads.put(info.mId, info);
-
         Log.v("processing inserted download " + info.mId);
-
         return info;
     }
 
     /**
      * Updates the local copy of the info about a download.
      */
-    private void updateDownload(DownloadInfo.Reader reader, DownloadInfo info) {
+    private void updateDownloadFromDatabase(DownloadInfo.Reader reader, DownloadInfo info) {
         reader.updateFromDatabase(info);
         Log.v("processing updated download " + info.mId + ", status: " + info.mStatus);
     }
@@ -446,8 +444,8 @@ public class DownloadService extends Service {
     /**
      * Removes the local copy of the info about a download.
      */
-    private void deleteDownloadLocked(long id) {
-        DownloadInfo info = mDownloads.get(id);
+    private void deleteDownloadLocked(long id, Map<Long, DownloadInfo> downloads) {
+        DownloadInfo info = downloads.get(id);
         if (info.mStatus == Downloads.Impl.STATUS_RUNNING) {
             info.mStatus = Downloads.Impl.STATUS_CANCELED;
         }
@@ -455,7 +453,7 @@ public class DownloadService extends Service {
             Log.d("deleteDownloadLocked() deleting " + info.mFileName);
             deleteFileIfExists(info.mFileName);
         }
-        mDownloads.remove(info.mId);
+        downloads.remove(info.mId);
     }
 
     private void deleteFileIfExists(String path) {
