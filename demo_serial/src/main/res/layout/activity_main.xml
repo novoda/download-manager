@@ -10,10 +10,16 @@
   tools:context=".MainActivity">
 
   <Button
-    android:id="@+id/main_download_button"
+    android:id="@+id/single_download_button"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="@string/button_download_text" />
+    android:text="@string/button_single_download_text" />
+
+  <Button
+    android:id="@+id/batch_download_button"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/button_batch_download_text" />
 
   <Button
     android:id="@+id/main_refresh_button"

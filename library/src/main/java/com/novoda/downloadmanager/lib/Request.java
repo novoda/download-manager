@@ -307,7 +307,7 @@ public class Request {
      * @param batchId the batch id
      * @return this object
      */
-    public Request setBatchId(long batchId) {
+    Request setBatchId(long batchId) {
         this.batchId = batchId;
         return this;
     }
@@ -418,6 +418,10 @@ public class Request {
         extraField = extra;
     }
 
+    long getBatchId() {
+        return batchId;
+    }
+
     /**
      * @return ContentValues to be passed to DownloadProvider.insert()
      */
@@ -469,5 +473,15 @@ public class Request {
         if (value != null) {
             contentValues.put(key, value.toString());
         }
+    }
+
+    RequestBatch asBatch() {
+        RequestBatch requestBatch = new RequestBatch.Builder()
+                .withTitle(mTitle.toString())
+                .withDescription(mDescription.toString())
+                .withBigPictureUrl(bigPictureUrl)
+                .build();
+        requestBatch.addRequest(this);
+        return requestBatch;
     }
 }

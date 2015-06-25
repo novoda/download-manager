@@ -124,14 +124,14 @@ class DownloadNotifier {
      * Update {@link NotificationManager} to reflect the given set of
      * {@link DownloadInfo}, adding, collapsing, and removing as needed.
      */
-    public void updateWith(Map<Long, DownloadBatch> batches, Collection<DownloadInfo> downloads) {
+    public void updateWith(Map<Long, BatchInfo> batches, Collection<DownloadInfo> downloads) {
         synchronized (mActiveNotifs) {
             updateWithLocked(batches, downloads);
         }
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    private void updateWithLocked(Map<Long, DownloadBatch> batches, Collection<DownloadInfo> downloads) {
+    private void updateWithLocked(Map<Long, BatchInfo> batches, Collection<DownloadInfo> downloads) {
         Map<Long, List<DownloadInfo>> batchDownloads = getDownloadsPerBatch(downloads);
         Map<String, List<DownloadInfo>> clustered = getClustersByNotificationTag(batchDownloads);
 
@@ -140,7 +140,7 @@ class DownloadNotifier {
         removeStaleTagsThatWereNotRenewed(clustered);
     }
 
-    private void showNotificationPerCluster(Map<Long, DownloadBatch> batches, Map<String, List<DownloadInfo>> clustered) {
+    private void showNotificationPerCluster(Map<Long, BatchInfo> batches, Map<String, List<DownloadInfo>> clustered) {
         for (String tag : clustered.keySet()) {
             int type = getNotificationTagType(tag);
             List<DownloadInfo> cluster = clustered.get(tag);
@@ -275,7 +275,7 @@ class DownloadNotifier {
             int type,
             List<DownloadInfo> cluster,
             NotificationCompat.Builder builder,
-            Map<Long, DownloadBatch> batches) {
+            Map<Long, BatchInfo> batches) {
 
         String remainingText = null;
         String percentText = null;
@@ -311,18 +311,23 @@ class DownloadNotifier {
             }
         }
 
-        if (batches.size() == 1) {
-            return buildSingleNotification(type, cluster, builder, batches, remainingText, percentText);
+        Set<BatchInfo> currentBatches = new HashSet<>();
+        for (DownloadInfo info : cluster) {
+            BatchInfo batch = batches.get(info.batchId);
+            currentBatches.add(batch);
+        }
+
+        if (currentBatches.size() == 1) {
+            BatchInfo batch = currentBatches.iterator().next();
+            return buildSingleNotification(type, builder, batch, remainingText, percentText);
 
         } else {
-            return buildStackedNotification(type, cluster, builder, batches, remainingText, percentText);
+            return buildStackedNotification(type, builder, currentBatches, remainingText, percentText);
         }
 
     }
 
-    private Notification buildSingleNotification(int type, List<DownloadInfo> cluster, NotificationCompat.Builder builder, Map<Long, DownloadBatch> batches, String remainingText, String percentText) {
-        DownloadInfo info = cluster.get(0);
-        DownloadBatch batch = batches.get(info.batchId);
+    private Notification buildSingleNotification(int type, NotificationCompat.Builder builder, BatchInfo batch, String remainingText, String percentText) {
 
         NotificationCompat.BigPictureStyle style = new NotificationCompat.BigPictureStyle();
         String imageUrl = batch.getBigPictureUrl();
@@ -365,17 +370,10 @@ class DownloadNotifier {
         style.setSummaryText(description);
     }
 
-    private Notification buildStackedNotification(int type, List<DownloadInfo> cluster, NotificationCompat.Builder builder, Map<Long, DownloadBatch> batches, String remainingText, String percentText) {
+    private Notification buildStackedNotification(int type, NotificationCompat.Builder builder, Set<BatchInfo> currentBatches, String remainingText, String percentText) {
         final NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(builder);
 
-        Set<DownloadBatch> currentBatches = new HashSet<>();
-
-        for (DownloadInfo info : cluster) {
-            DownloadBatch batch = batches.get(info.batchId);
-            currentBatches.add(batch);
-        }
-
-        for (DownloadBatch batch : currentBatches) {
+        for (BatchInfo batch : currentBatches) {
             inboxStyle.addLine(getDownloadTitle(batch));
         }
 
@@ -413,7 +411,7 @@ class DownloadNotifier {
         }
     }
 
-    private static CharSequence getDownloadTitle(DownloadBatch batch) {
+    private static CharSequence getDownloadTitle(BatchInfo batch) {
         String title = batch.getTitle();
         if (TextUtils.isEmpty(title)) {
             return "unknown";

@@ -355,23 +355,18 @@ public class DownloadManager {
      * calls related to this download.
      */
     public long enqueue(Request request) {
-        ContentValues values = request.toContentValues();
-        Uri downloadUri = mResolver.insert(Downloads.Impl.CONTENT_URI, values);
-        return Long.parseLong(downloadUri.getLastPathSegment());
+        RequestBatch batch = request.asBatch();
+        long batchId = insert(batch);
+        request.setBatchId(batchId);
+        return insert(request);
     }
 
-    /**
-     * Create a new download batch. The batch ID can then be supplied to new requests.
-     *
-     * @param batch the parameters specifying this batch
-     * @return an ID for the batch, unique across the system.  This ID is used to make future
-     * calls related to this batch.
-     */
-    public long create(DownloadBatch batch) {
-        ContentValues values = batch.toContentValues();
-        Uri batchUri = mResolver.insert(Downloads.Impl.BATCH_CONTENT_URI, values);
-        return ContentUris.parseId(batchUri);
+    private long insert(Request request) {
+        ContentValues values = request.toContentValues();
+        Uri downloadUri = mResolver.insert(Downloads.Impl.CONTENT_URI, values);
+        return ContentUris.parseId(downloadUri);
     }
+
 
     public void markDeleted(URI uri) {
         Cursor cursor = null;
@@ -654,7 +649,7 @@ public class DownloadManager {
         if (downloadUri == null) {
             return -1;
         }
-        return Long.parseLong(downloadUri.getLastPathSegment());
+        return ContentUris.parseId(downloadUri);
     }
 
     private static final String NON_DOWNLOADMANAGER_DOWNLOAD =
@@ -699,6 +694,28 @@ public class DownloadManager {
             whereArgs[i] = Long.toString(ids[i]);
         }
         return whereArgs;
+    }
+
+    /**
+     * Enqueue a new download batch.
+     *
+     * @param batch the parameters specifying this batch
+     * @return an ID for the batch, unique across the system.  This ID is used to make future
+     * calls related to this batch.
+     */
+    public long enqueue(RequestBatch batch) {
+        long batchId = insert(batch);
+        for (Request request : batch.getRequests()) {
+            request.setBatchId(batchId);
+            insert(request);
+        }
+        return batchId;
+    }
+
+    private long insert(RequestBatch batch) {
+        ContentValues values = batch.toContentValues();
+        Uri batchUri = mResolver.insert(Downloads.Impl.BATCH_CONTENT_URI, values);
+        return ContentUris.parseId(batchUri);
     }
 
     /**
