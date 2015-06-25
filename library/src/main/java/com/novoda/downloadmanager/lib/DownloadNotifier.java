@@ -16,7 +16,6 @@
 
 package com.novoda.downloadmanager.lib;
 
-import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -26,7 +25,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Build;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
@@ -125,17 +123,12 @@ class DownloadNotifier {
      */
     public void updateWith(List<ActiveBatch> batches) {
         synchronized (mActiveNotifs) {
-            updateWithLocked(batches);
+            Map<String, List<ActiveBatch>> clusters = getClustersByNotificationTag(batches);
+
+            showNotificationPerCluster(clusters);
+
+            removeStaleTagsThatWereNotRenewed(clusters);
         }
-    }
-
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    private void updateWithLocked(List<ActiveBatch> batches) {
-        Map<String, List<ActiveBatch>> clusters = getClustersByNotificationTag(batches);
-
-        showNotificationPerCluster(clusters);
-
-        removeStaleTagsThatWereNotRenewed(clusters);
     }
 
     private void showNotificationPerCluster(Map<String, List<ActiveBatch>> clusters) {
