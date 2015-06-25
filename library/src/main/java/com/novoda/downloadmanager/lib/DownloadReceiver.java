@@ -22,8 +22,8 @@ import static android.content.Intent.ACTION_BOOT_COMPLETED;
 import static android.content.Intent.ACTION_MEDIA_MOUNTED;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static com.novoda.downloadmanager.lib.Constants.*;
-import static com.novoda.downloadmanager.lib.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED;
-import static com.novoda.downloadmanager.lib.Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION;
+import static com.novoda.downloadmanager.lib.NotificationVisibility.ACTIVE_OR_COMPLETE;
+import static com.novoda.downloadmanager.lib.NotificationVisibility.ONLY_WHEN_COMPLETE;
 
 /**
  * Receives system broadcasts (boot, network connectivity)
@@ -158,9 +158,9 @@ public class DownloadReceiver extends BroadcastReceiver {
             cursor.close();
         }
 
-        if (Downloads.Impl.isStatusCompleted(status) && (visibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED || visibility == VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION)) {
+        if (Downloads.Impl.isStatusCompleted(status) && (visibility == ACTIVE_OR_COMPLETE || visibility == ONLY_WHEN_COMPLETE)) {
             ContentValues values = new ContentValues();
-            values.put(Downloads.Impl.COLUMN_VISIBILITY, Request.VISIBILITY_VISIBLE_ONLY_WHEN_ACTIVE);
+            values.put(Downloads.Impl.COLUMN_VISIBILITY, NotificationVisibility.ONLY_WHEN_ACTIVE);
             context.getContentResolver().update(uri, values, null, null);
         }
     }

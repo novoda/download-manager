@@ -43,8 +43,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static com.novoda.downloadmanager.lib.Request.*;
-
 /**
  * Update {@link NotificationManager} to reflect current {@link DownloadInfo}
  * states. Collapses similar downloads into a single notification, and builds
@@ -464,8 +462,8 @@ class DownloadNotifier {
     private static boolean areAnyFailedAndVisible(List<DownloadInfo> downloads) {
         for (DownloadInfo download : downloads) {
             boolean isFailed = Downloads.Impl.isStatusError(download.mStatus) && !Downloads.Impl.isStatusCancelled(download.mStatus);
-            boolean isVisible = download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION
-                    || download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED;
+            boolean isVisible = download.mVisibility == NotificationVisibility.ONLY_WHEN_COMPLETE
+                    || download.mVisibility == NotificationVisibility.ACTIVE_OR_COMPLETE;
             if (isFailed && isVisible) {
                 return true;
             }
@@ -476,8 +474,8 @@ class DownloadNotifier {
     private static boolean areAnyCancelledAndVisible(List<DownloadInfo> downloads) {
         for (DownloadInfo download : downloads) {
             boolean isCancelled = Downloads.Impl.isStatusCancelled(download.mStatus);
-            boolean isVisible = download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION
-                    || download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED;
+            boolean isVisible = download.mVisibility == NotificationVisibility.ONLY_WHEN_COMPLETE
+                    || download.mVisibility == NotificationVisibility.ACTIVE_OR_COMPLETE;
             if (isCancelled && isVisible) {
                 return true;
             }
@@ -488,8 +486,8 @@ class DownloadNotifier {
     private static boolean areAnyActiveAndVisible(List<DownloadInfo> downloads) {
         for (DownloadInfo download : downloads) {
             boolean isActive = download.mStatus == Downloads.Impl.STATUS_RUNNING;
-            boolean isVisible = download.mVisibility == VISIBILITY_VISIBLE_ONLY_WHEN_ACTIVE
-                    || download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED;
+            boolean isVisible = download.mVisibility == NotificationVisibility.ONLY_WHEN_ACTIVE
+                    || download.mVisibility == NotificationVisibility.ACTIVE_OR_COMPLETE;
             if (isActive && isVisible) {
                 return true;
             }
@@ -501,8 +499,8 @@ class DownloadNotifier {
     private static boolean areAllSuccessfulAndVisible(List<DownloadInfo> downloads) {
         for (DownloadInfo download : downloads) {
             boolean isSuccessful = Downloads.Impl.isStatusSuccess(download.mStatus);
-            boolean isVisible = download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION
-                    || download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED;
+            boolean isVisible = download.mVisibility == NotificationVisibility.ONLY_WHEN_COMPLETE
+                    || download.mVisibility == NotificationVisibility.ACTIVE_OR_COMPLETE;
             if (!(isSuccessful && isVisible)) {
                 return false;
             }

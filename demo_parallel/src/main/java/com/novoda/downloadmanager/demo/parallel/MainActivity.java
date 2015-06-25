@@ -11,9 +11,9 @@ import android.widget.ListView;
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.lib.DownloadManager;
+import com.novoda.downloadmanager.lib.NotificationVisibility;
 import com.novoda.downloadmanager.lib.Query;
 import com.novoda.downloadmanager.lib.Request;
-import com.novoda.downloadmanager.lib.RequestBatch;
 
 import java.util.List;
 
@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         Uri uri = Uri.parse(BIG_FILE);
         final Request request = new Request(uri);
         request.setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "penguins.dat");
-        request.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        request.setNotificationVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE);
         request.setTitle("Family of Penguins");
         request.setDescription("These are not the beards you're looking for");
         request.setBigPictureUrl(PENGUINS_IMAGE);

@@ -12,6 +12,7 @@ import android.widget.ListView;
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.lib.DownloadManager;
+import com.novoda.downloadmanager.lib.NotificationVisibility;
 import com.novoda.downloadmanager.lib.Query;
 import com.novoda.downloadmanager.lib.Request;
 import com.novoda.downloadmanager.lib.RequestBatch;
@@ -62,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
                 .setDescription("Fine facial hair")
                 .setBigPictureUrl(BEARD_IMAGE);
         request.setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "example.beard");
-        request.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        request.setNotificationVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE);
 
         long requestId = downloadManager.enqueue(request);
         Log.d(TAG, "Download enqueued with request ID: " + requestId);
@@ -78,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         Uri uri = Uri.parse(BIG_FILE);
         final Request request = new Request(uri);
         request.setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "beard.shipment");
-        request.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        request.setNotificationVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE);
         request.setExtra("beard_1");
 
         batch.addRequest(request);

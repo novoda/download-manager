@@ -392,9 +392,9 @@ public final class DownloadProvider extends ContentProvider {
         Integer vis = values.getAsInteger(Downloads.Impl.COLUMN_VISIBILITY);
         if (vis == null) {
             if (dest == Downloads.Impl.DESTINATION_EXTERNAL) {
-                filteredValues.put(Downloads.Impl.COLUMN_VISIBILITY, Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                filteredValues.put(Downloads.Impl.COLUMN_VISIBILITY, NotificationVisibility.ACTIVE_OR_COMPLETE);
             } else {
-                filteredValues.put(Downloads.Impl.COLUMN_VISIBILITY, Request.VISIBILITY_HIDDEN);
+                filteredValues.put(Downloads.Impl.COLUMN_VISIBILITY, NotificationVisibility.HIDDEN);
             }
         } else {
             filteredValues.put(Downloads.Impl.COLUMN_VISIBILITY, vis);
@@ -571,16 +571,16 @@ public final class DownloadProvider extends ContentProvider {
         if (getContext().checkCallingOrSelfPermission(Downloads.Impl.PERMISSION_NO_NOTIFICATION) == PackageManager.PERMISSION_GRANTED) {
             enforceAllowedValues(
                     values, Downloads.Impl.COLUMN_VISIBILITY,
-                    Request.VISIBILITY_HIDDEN,
-                    Request.VISIBILITY_VISIBLE_ONLY_WHEN_ACTIVE,
-                    Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED,
-                    Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION);
+                    NotificationVisibility.HIDDEN,
+                    NotificationVisibility.ONLY_WHEN_ACTIVE,
+                    NotificationVisibility.ACTIVE_OR_COMPLETE,
+                    NotificationVisibility.ONLY_WHEN_COMPLETE);
         } else {
             enforceAllowedValues(
                     values, Downloads.Impl.COLUMN_VISIBILITY,
-                    Request.VISIBILITY_VISIBLE_ONLY_WHEN_ACTIVE,
-                    Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED,
-                    Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION);
+                    NotificationVisibility.ONLY_WHEN_ACTIVE,
+                    NotificationVisibility.ACTIVE_OR_COMPLETE,
+                    NotificationVisibility.ONLY_WHEN_COMPLETE);
         }
 
         // remove the rest of the columns that are allowed (with any value)
