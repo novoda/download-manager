@@ -27,7 +27,7 @@ public class RequestBatch {
         return batchInfo.getBigPictureUrl();
     }
 
-    public List<Request> getRequests() {
+    List<Request> getRequests() {
         return requests;
     }
 
