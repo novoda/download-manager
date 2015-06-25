@@ -3,6 +3,7 @@ package com.novoda.downloadmanager.demo.parallel;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -42,17 +43,17 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
 
     private void setupDownloadingExample() {
         Uri uri = Uri.parse(BIG_FILE);
-        final Request request = new Request(uri);
-        request.setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "penguins.dat");
-        request.setNotificationVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE);
-        request.setTitle("Family of Penguins");
-        request.setDescription("These are not the beards you're looking for");
-        request.setBigPictureUrl(PENGUINS_IMAGE);
+        final Request request = new Request(uri)
+                .setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "penguins.dat")
+                .setNotificationVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE)
+                .setTitle("Family of Penguins")
+                .setDescription("These are not the beards you're looking for")
+                .setBigPictureUrl(PENGUINS_IMAGE);
 
         findViewById(R.id.main_download_button).setOnClickListener(
                 new View.OnClickListener() {
                     @Override
-                    public void onClick(View v) {
+                    public void onClick(@NonNull View v) {
                         long requestId = downloadManager.enqueue(request);
                         Log.d(TAG, "Download starting with id: " + requestId);
                     }
@@ -60,15 +61,19 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
     }
 
     private void setupQueryingExample() {
-        QueryForDownloadsAsyncTask.newInstance(downloadManager, this).execute(new Query());
+        queryForDownloads();
         findViewById(R.id.main_refresh_button).setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        QueryForDownloadsAsyncTask.newInstance(downloadManager, MainActivity.this).execute(new Query());
+                        queryForDownloads();
                     }
                 });
         listView.setEmptyView(findViewById(R.id.main_no_downloads_view));
+    }
+
+    private void queryForDownloads() {
+        QueryForDownloadsAsyncTask.newInstance(downloadManager, MainActivity.this).execute(new Query());
     }
 
     @Override
