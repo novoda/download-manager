@@ -764,24 +764,6 @@ final class Downloads {
         }
 
         /**
-         * This download is visible but only shows in the notifications
-         * while it's in progress.
-         */
-        public static final int VISIBILITY_VISIBLE = DownloadManager.Request.VISIBILITY_VISIBLE;
-
-        /**
-         * This download is visible and shows in the notifications while
-         * in progress and after completion.
-         */
-        public static final int VISIBILITY_VISIBLE_NOTIFY_COMPLETED =
-                DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED;
-
-        /**
-         * This download doesn't show in the UI or in the notifications.
-         */
-        public static final int VISIBILITY_HIDDEN = DownloadManager.Request.VISIBILITY_HIDDEN;
-
-        /**
          * Constants related to HTTP request headers associated with each download.
          */
         public static class RequestHeaders implements BaseColumns {

@@ -69,7 +69,7 @@ public class Request {
      * This download is visible but only shows in the notifications
      * while it's in progress.
      */
-    public static final int VISIBILITY_VISIBLE = 0;
+    public static final int VISIBILITY_VISIBLE_ONLY_WHEN_ACTIVE = 0;
 
     /**
      * This download is visible and shows in the notifications while
@@ -92,10 +92,10 @@ public class Request {
 
     /**
      * can take any of the following values: {@link #VISIBILITY_HIDDEN}
-     * {@link #VISIBILITY_VISIBLE_NOTIFY_COMPLETED}, {@link #VISIBILITY_VISIBLE},
+     * {@link #VISIBILITY_VISIBLE_NOTIFY_COMPLETED}, {@link #VISIBILITY_VISIBLE_ONLY_WHEN_ACTIVE},
      * {@link #VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION}
      */
-    private int mNotificationVisibility = VISIBILITY_VISIBLE;
+    private int mNotificationVisibility = VISIBILITY_VISIBLE_ONLY_WHEN_ACTIVE;
 
     /**
      * @param uri the HTTP URI to download.
@@ -340,7 +340,7 @@ public class Request {
      */
     @Deprecated
     public Request setShowRunningNotification(boolean show) {
-        return (show) ? setNotificationVisibility(VISIBILITY_VISIBLE) : setNotificationVisibility(VISIBILITY_HIDDEN);
+        return (show) ? setNotificationVisibility(VISIBILITY_VISIBLE_ONLY_WHEN_ACTIVE) : setNotificationVisibility(VISIBILITY_HIDDEN);
     }
 
     /**
@@ -351,7 +351,7 @@ public class Request {
      * By default, a notification is shown only when the download is in progress.
      * <p/>
      * It can take the following values: {@link #VISIBILITY_HIDDEN},
-     * {@link #VISIBILITY_VISIBLE},
+     * {@link #VISIBILITY_VISIBLE_ONLY_WHEN_ACTIVE},
      * {@link #VISIBILITY_VISIBLE_NOTIFY_COMPLETED}.
      * <p/>
      * If set to {@link #VISIBILITY_HIDDEN}, this requires the permission

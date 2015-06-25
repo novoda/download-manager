@@ -160,7 +160,7 @@ public class DownloadReceiver extends BroadcastReceiver {
 
         if (Downloads.Impl.isStatusCompleted(status) && (visibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED || visibility == VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION)) {
             ContentValues values = new ContentValues();
-            values.put(Downloads.Impl.COLUMN_VISIBILITY, Downloads.Impl.VISIBILITY_VISIBLE);
+            values.put(Downloads.Impl.COLUMN_VISIBILITY, Request.VISIBILITY_VISIBLE_ONLY_WHEN_ACTIVE);
             context.getContentResolver().update(uri, values, null, null);
         }
     }

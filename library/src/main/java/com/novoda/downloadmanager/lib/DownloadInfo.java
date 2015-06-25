@@ -352,7 +352,7 @@ class DownloadInfo {
         if (!Downloads.Impl.isStatusCompleted(mStatus)) {
             return false;
         }
-        if (mVisibility == Downloads.Impl.VISIBILITY_VISIBLE_NOTIFY_COMPLETED) {
+        if (mVisibility == Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED) {
             return true;
         }
         return false;

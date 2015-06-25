@@ -488,7 +488,7 @@ class DownloadNotifier {
     private static boolean areAnyActiveAndVisible(List<DownloadInfo> downloads) {
         for (DownloadInfo download : downloads) {
             boolean isActive = download.mStatus == Downloads.Impl.STATUS_RUNNING;
-            boolean isVisible = download.mVisibility == VISIBILITY_VISIBLE
+            boolean isVisible = download.mVisibility == VISIBILITY_VISIBLE_ONLY_WHEN_ACTIVE
                     || download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED;
             if (isActive && isVisible) {
                 return true;
