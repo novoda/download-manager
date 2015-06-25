@@ -476,8 +476,12 @@ public class Request {
     }
 
     RequestBatch asBatch() {
-        RequestBatch batch = RequestBatch.newInstance(mTitle.toString(), mDescription.toString(), bigPictureUrl);
-        batch.addRequest(this);
-        return batch;
+        RequestBatch requestBatch = new RequestBatch.Builder()
+                .withTitle(mTitle.toString())
+                .withDescription(mDescription.toString())
+                .withBigPictureUrl(bigPictureUrl)
+                .build();
+        requestBatch.addRequest(this);
+        return requestBatch;
     }
 }
