@@ -131,6 +131,42 @@ class DownloadNotifier {
         return clustered;
     }
 
+    /**
+     * Build tag used for collapsing several {@link DownloadInfo} into a single
+     * {@link Notification}.
+     */
+    private String buildNotificationTag(ActiveBatch batch) {
+        int status = batch.getStatus();
+        int visibility = batch.getInfo().getVisibility();
+        if (status == Downloads.Impl.STATUS_QUEUED_FOR_WIFI) {
+            return TYPE_WAITING + ":" + mContext.getPackageName();
+        } else if (status == Downloads.Impl.STATUS_RUNNING && shouldShowActiveItem(visibility)) {
+            return TYPE_ACTIVE + ":" + mContext.getPackageName();
+        } else if (Downloads.Impl.isStatusError(status) && !Downloads.Impl.isStatusCancelled(status)
+                && shouldShowCompletedItem(visibility)) {
+            // Failed downloads always have unique notifs
+            return TYPE_FAILED + ":" + batch.getBatchId();
+        } else if (Downloads.Impl.isStatusCancelled(status) && shouldShowCompletedItem(visibility)) {
+            // Cancelled downloads always have unique notifs
+            return TYPE_CANCELLED + ":" + batch.getBatchId();
+        } else if (Downloads.Impl.isStatusSuccess(status) && shouldShowCompletedItem(visibility)) {
+            // Complete downloads always have unique notifs
+            return TYPE_SUCCESS + ":" + batch.getBatchId();
+        } else {
+            return null;
+        }
+    }
+
+    private boolean shouldShowActiveItem(int visibility) {
+        return visibility == NotificationVisibility.ONLY_WHEN_ACTIVE
+                || visibility == NotificationVisibility.ACTIVE_OR_COMPLETE;
+    }
+
+    private boolean shouldShowCompletedItem(int visibility) {
+        return visibility == NotificationVisibility.ONLY_WHEN_COMPLETE
+                || visibility == NotificationVisibility.ACTIVE_OR_COMPLETE;
+    }
+
     private void addBatchToCluster(String tag, Map<String, List<ActiveBatch>> cluster, ActiveBatch batch) {
         if (tag == null) {
             return;
@@ -425,86 +461,4 @@ class DownloadNotifier {
         Log.e("dump at speed");
     }
 
-    /**
-     * Build tag used for collapsing several {@link DownloadInfo} into a single
-     * {@link Notification}.
-     */
-    private String buildNotificationTag(ActiveBatch batch) {
-        int status = batch.getStatus();
-        if (status == Downloads.Impl.STATUS_QUEUED_FOR_WIFI) {
-            return TYPE_WAITING + ":" + mContext.getPackageName();
-        } else if (status == Downloads.Impl.STATUS_RUNNING) {
-            return TYPE_ACTIVE + ":" + mContext.getPackageName();
-        } else if (Downloads.Impl.isStatusError(status) && !Downloads.Impl.isStatusCancelled(status)) {
-            // Failed downloads always have unique notifs
-            return TYPE_FAILED + ":" + batch.getBatchId();
-        } else if (Downloads.Impl.isStatusCancelled(status)) {
-            // Cancelled downloads always have unique notifs
-            return TYPE_CANCELLED + ":" + batch.getBatchId();
-        } else if (Downloads.Impl.isStatusSuccess(status)) {
-            // Complete downloads always have unique notifs
-            return TYPE_SUCCESS + ":" + batch.getBatchId();
-        } else {
-            return null;
-        }
-    }
-
-    private static boolean areAllDownloadsQueued(List<DownloadInfo> downloads) {
-        for (DownloadInfo download : downloads) {
-            boolean isNotQueuedForWiFi = download.mStatus != Downloads.Impl.STATUS_QUEUED_FOR_WIFI;
-            if (isNotQueuedForWiFi) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static boolean areAnyFailedAndVisible(List<DownloadInfo> downloads) {
-        for (DownloadInfo download : downloads) {
-            boolean isFailed = Downloads.Impl.isStatusError(download.mStatus) && !Downloads.Impl.isStatusCancelled(download.mStatus);
-            boolean isVisible = download.mVisibility == NotificationVisibility.ONLY_WHEN_COMPLETE
-                    || download.mVisibility == NotificationVisibility.ACTIVE_OR_COMPLETE;
-            if (isFailed && isVisible) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean areAnyCancelledAndVisible(List<DownloadInfo> downloads) {
-        for (DownloadInfo download : downloads) {
-            boolean isCancelled = Downloads.Impl.isStatusCancelled(download.mStatus);
-            boolean isVisible = download.mVisibility == NotificationVisibility.ONLY_WHEN_COMPLETE
-                    || download.mVisibility == NotificationVisibility.ACTIVE_OR_COMPLETE;
-            if (isCancelled && isVisible) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean areAnyActiveAndVisible(List<DownloadInfo> downloads) {
-        for (DownloadInfo download : downloads) {
-            boolean isActive = download.mStatus == Downloads.Impl.STATUS_RUNNING;
-            boolean isVisible = download.mVisibility == NotificationVisibility.ONLY_WHEN_ACTIVE
-                    || download.mVisibility == NotificationVisibility.ACTIVE_OR_COMPLETE;
-            if (isActive && isVisible) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static boolean areAllSuccessfulAndVisible(List<DownloadInfo> downloads) {
-        for (DownloadInfo download : downloads) {
-            boolean isSuccessful = Downloads.Impl.isStatusSuccess(download.mStatus);
-            boolean isVisible = download.mVisibility == NotificationVisibility.ONLY_WHEN_COMPLETE
-                    || download.mVisibility == NotificationVisibility.ACTIVE_OR_COMPLETE;
-            if (!(isSuccessful && isVisible)) {
-                return false;
-            }
-        }
-        return true;
-    }
 }
