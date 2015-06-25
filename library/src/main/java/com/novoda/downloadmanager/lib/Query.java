@@ -21,7 +21,8 @@ public class Query {
      */
     static final int ORDER_DESCENDING = 2;
 
-    private long[] mIds = null;
+    private long[] downloadIds = null;
+    private long[] batchIds = null;
     private Integer mStatusFlags = null;
     private String mOrderByColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
     private int mOrderDirection = ORDER_DESCENDING;
@@ -33,8 +34,18 @@ public class Query {
      *
      * @return this object
      */
-    public Query setFilterById(long... ids) {
-        mIds = ids;
+    public Query setFilterById(long... downloadIds) {
+        this.downloadIds = downloadIds;
+        return this;
+    }
+
+    /**
+     * Include only the downloads with the given batch IDs.
+     *
+     * @return this object
+     */
+    public Query setFilterByBatchId(long... batchIds) {
+        this.batchIds = batchIds;
         return this;
     }
 
@@ -104,10 +115,11 @@ public class Query {
      * @return the Cursor returned by ContentResolver.query()
      */
     Cursor runQuery(ContentResolver resolver, String[] projection, Uri baseUri) {
-        List<String> selectionParts = new ArrayList<String>();
-        String[] selectionArgs = getSelectionArgsFromIds();
+        List<String> selectionParts = new ArrayList<>();
+        String[] selectionArgs = getIdsAsStringArray(downloadIds);
 
-        filterByIds(selectionParts);
+        filterByDownloadIds(selectionParts);
+        filterByBatchIds(selectionParts);
         filterByExtras(selectionParts);
         filterByStatus(selectionParts);
 
@@ -125,25 +137,51 @@ public class Query {
         return resolver.query(baseUri, projection, selection, selectionArgs, orderBy);
     }
 
-    private String[] getSelectionArgsFromIds() {
-        if (mIds == null) {
+    private String[] getIdsAsStringArray(long[] ids) {
+        if (ids == null) {
             return null;
         }
-        return DownloadManager.getWhereArgsForIds(mIds);
+        return DownloadManager.longArrayToStringArray(ids);
     }
 
-    private void filterByIds(List<String> selectionParts) {
-        if (mIds == null) {
+    private void filterByDownloadIds(List<String> selectionParts) {
+        if (downloadIds == null) {
             return;
         }
-        selectionParts.add(DownloadManager.getWhereClauseForIds(mIds));
+        selectionParts.add(DownloadManager.getWhereClauseForIds(downloadIds));
+    }
+
+    private void filterByBatchIds(List<String> selectionParts) {
+        if (batchIds == null) {
+            return;
+        }
+        selectionParts.add(getWhereClauseForBatchIds(batchIds));
+    }
+
+    /**
+     * Get a SQL WHERE clause to select a bunch of IDs.
+     */
+    private String getWhereClauseForBatchIds(long[] ids) {
+        StringBuilder whereClause = new StringBuilder();
+        whereClause.append("(");
+        for (int i = 0; i < ids.length; i++) {
+            if (i > 0) {
+                whereClause.append("OR ");
+            }
+            whereClause.append(Downloads.Impl.COLUMN_BATCH_ID)
+                    .append(" = ")
+                    .append(ids[i])
+                    .append(" ");
+        }
+        whereClause.append(")");
+        return whereClause.toString();
     }
 
     private void filterByExtras(List<String> selectionParts) {
         if (filterExtras == null) {
             return;
         }
-        List<String> parts = new ArrayList<String>();
+        List<String> parts = new ArrayList<>();
         for (String filterExtra : filterExtras) {
             parts.add(extrasClause(filterExtra));
         }
@@ -155,7 +193,7 @@ public class Query {
             return;
         }
 
-        List<String> parts = new ArrayList<String>();
+        List<String> parts = new ArrayList<>();
         if ((mStatusFlags & DownloadManager.STATUS_PENDING) != 0) {
             parts.add(statusClause("=", Downloads.Impl.STATUS_PENDING));
         }

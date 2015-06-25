@@ -71,13 +71,13 @@ public class DownloadManager {
      * The client-supplied title for this download.  This will be displayed in system notifications.
      * Defaults to the empty string.
      */
-    public static final String COLUMN_TITLE = Downloads.Impl.COLUMN_TITLE;
+    public static final String COLUMN_TITLE = Downloads.Impl.Batches.COLUMN_TITLE;
 
     /**
      * The client-supplied description of this download.  This will be displayed in system
      * notifications.  Defaults to the empty string.
      */
-    public static final String COLUMN_DESCRIPTION = Downloads.Impl.COLUMN_DESCRIPTION;
+    public static final String COLUMN_DESCRIPTION = Downloads.Impl.Batches.COLUMN_DESCRIPTION;
 
     /**
      * URI to be downloaded.
@@ -302,16 +302,20 @@ public class DownloadManager {
             Downloads.Impl._DATA + " AS " + COLUMN_LOCAL_FILENAME,
             Downloads.Impl.COLUMN_MEDIAPROVIDER_URI,
             Downloads.Impl.COLUMN_DESTINATION,
-            Downloads.Impl.COLUMN_TITLE,
-            Downloads.Impl.COLUMN_DESCRIPTION,
-            Downloads.Impl.COLUMN_BIG_PICTURE,
             Downloads.Impl.COLUMN_URI,
             Downloads.Impl.COLUMN_STATUS,
+            Downloads.Impl.COLUMN_DELETED,
             Downloads.Impl.COLUMN_FILE_NAME_HINT,
             Downloads.Impl.COLUMN_MIME_TYPE + " AS " + COLUMN_MEDIA_TYPE,
             Downloads.Impl.COLUMN_TOTAL_BYTES + " AS " + COLUMN_TOTAL_SIZE_BYTES,
             Downloads.Impl.COLUMN_LAST_MODIFICATION + " AS " + COLUMN_LAST_MODIFIED_TIMESTAMP,
             Downloads.Impl.COLUMN_CURRENT_BYTES + " AS " + COLUMN_BYTES_DOWNLOADED_SO_FAR,
+            Downloads.Impl.COLUMN_BATCH_ID,
+            Downloads.Impl.Batches.COLUMN_TITLE,
+            Downloads.Impl.Batches.COLUMN_DESCRIPTION,
+            Downloads.Impl.Batches.COLUMN_BIG_PICTURE,
+            Downloads.Impl.Batches.COLUMN_VISIBILITY,
+            Downloads.Impl.Batches.COLUMN_STATUS,
         /* add the following 'computed' columns to the cursor.
          * they are not 'returned' by the database, but their inclusion
          * eliminates need to have lot of methods in CursorTranslator
@@ -404,7 +408,7 @@ public class DownloadManager {
         if (ids.length == 1) {
             return mResolver.update(ContentUris.withAppendedId(mBaseUri, ids[0]), values, null, null);
         }
-        return mResolver.update(mBaseUri, values, getWhereClauseForIds(ids), getWhereArgsForIds(ids));
+        return mResolver.update(mBaseUri, values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
     }
 
     /**
@@ -427,11 +431,11 @@ public class DownloadManager {
      * COLUMN_* constants.
      */
     public Cursor query(Query query) {
-        Cursor underlyingCursor = query.runQuery(mResolver, UNDERLYING_COLUMNS, mBaseUri);
+        Cursor underlyingCursor = query.runQuery(mResolver, UNDERLYING_COLUMNS, Downloads.Impl.DOWNLOADS_BY_BATCH_URI);
         if (underlyingCursor == null) {
             return null;
         }
-        return new CursorTranslator(underlyingCursor, mBaseUri);
+        return new CursorTranslator(underlyingCursor, Downloads.Impl.DOWNLOADS_BY_BATCH_URI);
     }
 
     /**
@@ -557,7 +561,7 @@ public class DownloadManager {
         values.putNull(Downloads.Impl._DATA);
         values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
         values.put(Downloads.Impl.COLUMN_FAILED_CONNECTIONS, 0);
-        mResolver.update(mBaseUri, values, getWhereClauseForIds(ids), getWhereArgsForIds(ids));
+        mResolver.update(mBaseUri, values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
     }
 
     /**
@@ -619,6 +623,7 @@ public class DownloadManager {
      * @return an ID for the download entry added to the downloads app, unique across the system
      * This ID is used to make future calls related to this download.
      */
+    // TODO: Add batch to request
     public long addCompletedDownload(String title, String description,
                                      boolean isMediaScannerScannable, String mimeType, String path, long length,
                                      boolean showNotification) {
@@ -635,16 +640,15 @@ public class DownloadManager {
         Request request = new Request(NON_DOWNLOADMANAGER_DOWNLOAD)
                 .setTitle(title)
                 .setDescription(description)
-                .setMimeType(mimeType);
+                .setMimeType(mimeType)
+                .setNotificationVisibility((showNotification) ? NotificationVisibility.ONLY_WHEN_COMPLETE : NotificationVisibility.HIDDEN);
+
         ContentValues values = request.toContentValues();
         values.put(Downloads.Impl.COLUMN_DESTINATION, Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD);
         values.put(Downloads.Impl._DATA, path);
         values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_SUCCESS);
         values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, length);
         values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED, (isMediaScannerScannable) ? Request.SCANNABLE_VALUE_YES : Request.SCANNABLE_VALUE_NO);
-        values.put(
-                Downloads.Impl.COLUMN_VISIBILITY, (showNotification) ?
-                        NotificationVisibility.ONLY_WHEN_COMPLETE : NotificationVisibility.HIDDEN);
         Uri downloadUri = mResolver.insert(Downloads.Impl.CONTENT_URI, values);
         if (downloadUri == null) {
             return -1;
@@ -688,7 +692,7 @@ public class DownloadManager {
     /**
      * Get the selection args for a clause returned by {@link #getWhereClauseForIds(long[])}.
      */
-    static String[] getWhereArgsForIds(long[] ids) {
+    static String[] longArrayToStringArray(long[] ids) {
         String[] whereArgs = new String[ids.length];
         for (int i = 0; i < ids.length; i++) {
             whereArgs[i] = Long.toString(ids[i]);
