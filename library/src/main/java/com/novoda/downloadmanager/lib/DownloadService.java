@@ -190,11 +190,16 @@ public class DownloadService extends Service {
 
     @Override
     public void onDestroy() {
+        shutDown();
+        Log.v("Service onDestroy");
+        super.onDestroy();
+    }
+
+    private void shutDown() {
+        Log.d("Shutting down service");
         getContentResolver().unregisterContentObserver(mObserver);
         mScanner.shutdown();
         mUpdateThread.quit();
-        Log.v("Service onDestroy");
-        super.onDestroy();
     }
 
     /**
@@ -273,9 +278,7 @@ public class DownloadService extends Service {
                     if (DEBUG_LIFECYCLE) {
                         Log.v("Nothing left; stopped");
                     }
-                    getContentResolver().unregisterContentObserver(mObserver);
-                    mScanner.shutdown();
-                    mUpdateThread.quit();
+                    shutDown();
                 }
             }
 
