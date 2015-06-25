@@ -16,7 +16,6 @@
 
 package com.novoda.downloadmanager.lib;
 
-import android.content.Context;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.SystemClock;
