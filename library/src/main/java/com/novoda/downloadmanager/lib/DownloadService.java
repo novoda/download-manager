@@ -39,10 +39,12 @@ import com.novoda.notils.logger.simple.Log;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -335,8 +337,9 @@ public class DownloadService extends Service {
 
         cleanUpStaleDownloadsThatDisappeared(staleDownloadIds, mDownloads);
 
-        Map<Long, BatchInfo> batches = fetchBatches();
-        updateUserVisibleNotification(batches, mDownloads.values());
+        List<ActiveBatch> batches = fetchBatches(mDownloads.values());
+        updateUserVisibleNotification(batches);
+
 
         // Set alarm when next action is in future. It's okay if the service
         // continues to run in meantime, since it will kick off an update pass.
@@ -351,8 +354,8 @@ public class DownloadService extends Service {
         return isActive;
     }
 
-    private Map<Long, BatchInfo> fetchBatches() {
-        Map<Long, BatchInfo> batches = new HashMap<>();
+    private List<ActiveBatch> fetchBatches(Collection<DownloadInfo> downloads) {
+        List<ActiveBatch> batches = new ArrayList<>();
         Cursor batchesCursor = resolver.query(Downloads.Impl.BATCH_CONTENT_URI, null, null, null, null);
         batches.clear();
         try {
@@ -363,8 +366,17 @@ public class DownloadService extends Service {
                 String title = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_TITLE));
                 String description = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_DESCRIPTION));
                 String bigPictureUrl = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_BIG_PICTURE));
+                int status = batchesCursor.getInt(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_STATUS));
 
-                batches.put(id, new BatchInfo(title, description, bigPictureUrl));
+                BatchInfo batchInfo = new BatchInfo(title, description, bigPictureUrl);
+
+                List<DownloadInfo> batchDownloads = new ArrayList<>();
+                for (DownloadInfo downloadInfo : downloads) {
+                    if (downloadInfo.batchId == id) {
+                        batchDownloads.add(downloadInfo);
+                    }
+                }
+                batches.add(new ActiveBatch(id, batchInfo, batchDownloads, status));
             }
         } finally {
             batchesCursor.close();
@@ -419,8 +431,8 @@ public class DownloadService extends Service {
         }
     }
 
-    private void updateUserVisibleNotification(Map<Long, BatchInfo> batches, Collection<DownloadInfo> downloads) {
-        mNotifier.updateWith(batches, downloads);
+    private void updateUserVisibleNotification(List<ActiveBatch> batches) {
+        mNotifier.updateWith(batches);
     }
 
     /**

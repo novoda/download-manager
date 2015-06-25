@@ -168,7 +168,7 @@ class DownloadThread implements Runnable {
         try {
             runInternal();
         } finally {
-            mNotifier.notifyDownloadSpeed(mInfo.batchId, 0);
+            mNotifier.notifyDownloadSpeed(mInfo.mId, 0);
         }
     }
 
@@ -555,7 +555,7 @@ class DownloadThread implements Runnable {
 
             // Only notify once we have a full sample window
             if (state.mSpeedSampleStart != 0) {
-                mNotifier.notifyDownloadSpeed(mInfo.batchId, state.mSpeed);
+                mNotifier.notifyDownloadSpeed(mInfo.mId, state.mSpeed);
             }
 
             state.mSpeedSampleStart = now;
