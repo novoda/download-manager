@@ -80,14 +80,6 @@ class DownloadNotifier {
     // LongSparseLongArray
     private final LongSparseArray<Long> mDownloadSpeed = new LongSparseArray<>();
 
-    /**
-     * Last time speed was reproted, mapped from {@link DownloadInfo#batchId} to
-     * {@link SystemClock#elapsedRealtime()}.
-     */
-//    @GuardedBy("mDownloadSpeed")
-    // LongSparseLongArray
-    private final LongSparseArray<Long> mDownloadTouch = new LongSparseArray<>();
-
     private final Resources resources;
 
     public DownloadNotifier(Context context, NotificationImageRetriever imageRetriever, Resources resources) {
@@ -109,10 +101,8 @@ class DownloadNotifier {
         synchronized (mDownloadSpeed) {
             if (bytesPerSecond != 0) {
                 mDownloadSpeed.put(id, bytesPerSecond);
-                mDownloadTouch.put(id, SystemClock.elapsedRealtime());
             } else {
                 mDownloadSpeed.remove(id);
-                mDownloadTouch.remove(id);
             }
         }
     }
