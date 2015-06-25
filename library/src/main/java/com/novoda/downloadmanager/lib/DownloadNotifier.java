@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.util.LongSparseArray;
@@ -126,7 +125,7 @@ class DownloadNotifier {
         Map<String, List<ActiveBatch>> clustered = new HashMap<>();
 
         for (ActiveBatch batch : batches) {
-            final String tag = buildNotificationTag(batch);
+            String tag = buildNotificationTag(batch);
 
             addBatchToCluster(tag, clustered, batch);
         }
