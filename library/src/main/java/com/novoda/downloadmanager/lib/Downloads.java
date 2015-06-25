@@ -819,6 +819,15 @@ final class Downloads {
              * <P>Owner can Read</P>
              */
             public static final String COLUMN_STATUS = "batch_status";
+
+            /**
+             * The name of the column containing the flags that controls whether the
+             * batch is displayed by the UI. See the {@link NotificationVisibility} constants for
+             * a list of legal values.
+             * <P>Type: INTEGER</P>
+             * <P>Owner can Init/Read/Write</P>
+             */
+            public static final String COLUMN_VISIBILITY = "visibility";
         }
     }
 

@@ -34,6 +34,7 @@ import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.provider.OpenableColumns;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
@@ -177,6 +178,7 @@ public final class DownloadProvider extends ContentProvider {
             Downloads.Impl.Batches.COLUMN_TITLE,
             Downloads.Impl.Batches.COLUMN_DESCRIPTION,
             Downloads.Impl.Batches.COLUMN_BIG_PICTURE,
+            Downloads.Impl.Batches.COLUMN_VISIBILITY,
             OpenableColumns.DISPLAY_NAME,
             OpenableColumns.SIZE,
     };
@@ -641,7 +643,7 @@ public final class DownloadProvider extends ContentProvider {
      * Starts a database query
      */
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sort) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sort) {
 
         Helpers.validateSelection(selection, sAppReadableColumnsSet);
 
@@ -952,8 +954,7 @@ public final class DownloadProvider extends ContentProvider {
      * Deletes a row in the database
      */
     @Override
-    public int delete(final Uri uri, final String where,
-                      final String[] whereArgs) {
+    public int delete(@NonNull Uri uri, String where, String[] whereArgs) {
 
         Helpers.validateSelection(where, sAppReadableColumnsSet);
 

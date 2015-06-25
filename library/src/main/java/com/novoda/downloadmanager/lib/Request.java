@@ -455,6 +455,7 @@ public class Request {
                 .withTitle(mTitle.toString())
                 .withDescription(mDescription.toString())
                 .withBigPictureUrl(bigPictureUrl)
+                .withVisibility(mNotificationVisibility)
                 .build();
         requestBatch.addRequest(this);
         return requestBatch;

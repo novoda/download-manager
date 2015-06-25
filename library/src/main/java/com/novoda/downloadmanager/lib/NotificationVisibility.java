@@ -1,5 +1,10 @@
 package com.novoda.downloadmanager.lib;
 
+import android.support.annotation.IntDef;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 public class NotificationVisibility {
     /**
      * This download is visible but only shows in the notifications
@@ -22,4 +27,9 @@ public class NotificationVisibility {
      * boolean, String, String, long, boolean)}.
      */
     public static final int ONLY_WHEN_COMPLETE = 3;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({ONLY_WHEN_ACTIVE, ACTIVE_OR_COMPLETE, HIDDEN, ONLY_WHEN_COMPLETE})
+    public @interface Value {
+    }
 }

@@ -360,6 +360,7 @@ public class DownloadService extends Service {
         batches.clear();
         try {
             int idColumn = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches._ID);
+            int visibilityColumn = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_VISIBILITY);
             while (batchesCursor.moveToNext()) {
                 long id = batchesCursor.getLong(idColumn);
 
@@ -367,8 +368,9 @@ public class DownloadService extends Service {
                 String description = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_DESCRIPTION));
                 String bigPictureUrl = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_BIG_PICTURE));
                 int status = batchesCursor.getInt(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_STATUS));
+                @NotificationVisibility.Value int visibility = batchesCursor.getInt(visibilityColumn);
 
-                BatchInfo batchInfo = new BatchInfo(title, description, bigPictureUrl);
+                BatchInfo batchInfo = new BatchInfo(title, description, bigPictureUrl, visibility);
 
                 List<DownloadInfo> batchDownloads = new ArrayList<>();
                 for (DownloadInfo downloadInfo : downloads) {

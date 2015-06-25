@@ -61,9 +61,9 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         final Request request = new Request(uri)
                 .setTitle("A Single Beard")
                 .setDescription("Fine facial hair")
-                .setBigPictureUrl(BEARD_IMAGE);
-        request.setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "example.beard");
-        request.setNotificationVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE);
+                .setBigPictureUrl(BEARD_IMAGE)
+                .setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "example.beard")
+                .setNotificationVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE);
 
         long requestId = downloadManager.enqueue(request);
         Log.d(TAG, "Download enqueued with request ID: " + requestId);
@@ -74,12 +74,12 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
                 .withTitle("Large Beard Shipment")
                 .withDescription("Goatees galore")
                 .withBigPictureUrl(BEARD_IMAGE)
+                .withVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE)
                 .build();
 
         Uri uri = Uri.parse(BIG_FILE);
         final Request request = new Request(uri);
         request.setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "beard.shipment");
-        request.setNotificationVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE);
         request.setExtra("beard_1");
 
         batch.addRequest(request);
