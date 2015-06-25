@@ -658,8 +658,9 @@ public final class DownloadProvider extends ContentProvider {
                 return queryDownloads(uri, projection, selection, selectionArgs, sort, db, match);
             case BATCHES:
             case BATCHES_ID:
-                return db.query(Downloads.Impl.Batches.BATCHES_DB_TABLE, projection, selection,
-                        selectionArgs, null, null, sort);
+                SqlSelection batchSelection = getWhereClause(uri, selection, selectionArgs, match);
+                return db.query(Downloads.Impl.Batches.BATCHES_DB_TABLE, projection, batchSelection.getSelection(),
+                        batchSelection.getParameters(), null, null, sort);
             case REQUEST_HEADERS_URI:
                 if (projection != null || selection != null || sort != null) {
                     throw new UnsupportedOperationException(
@@ -898,7 +899,9 @@ public final class DownloadProvider extends ContentProvider {
                 break;
             case BATCHES:
             case BATCHES_ID:
-                count = db.update(Downloads.Impl.Batches.BATCHES_DB_TABLE, values, where, whereArgs);
+                SqlSelection batchSelection = getWhereClause(uri, where, whereArgs, match);
+                count = db.update(Downloads.Impl.Batches.BATCHES_DB_TABLE, values, batchSelection.getSelection(),
+                        batchSelection.getParameters());
                 break;
             default:
                 Log.d("updating unknown/invalid URI: " + uri);
@@ -940,6 +943,9 @@ public final class DownloadProvider extends ContentProvider {
                 uriMatch == PUBLIC_DOWNLOAD_ID) {
             selection.appendClause(Downloads.Impl._ID + " = ?", getDownloadIdFromUri(uri));
         }
+        if (uriMatch == BATCHES_ID) {
+            selection.appendClause(Downloads.Impl.Batches._ID + " = ?", ContentUris.parseId(uri));
+        }
         if ((uriMatch == MY_DOWNLOADS || uriMatch == MY_DOWNLOADS_ID)
                 && getContext().checkCallingPermission(Downloads.Impl.PERMISSION_ACCESS_ALL)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -969,6 +975,11 @@ public final class DownloadProvider extends ContentProvider {
                 SqlSelection selection = getWhereClause(uri, where, whereArgs, match);
                 deleteRequestHeaders(db, selection.getSelection(), selection.getParameters());
                 count = db.delete(Downloads.Impl.TABLE_NAME, selection.getSelection(), selection.getParameters());
+                break;
+            case BATCHES:
+            case BATCHES_ID:
+                SqlSelection batchSelection = getWhereClause(uri, where, whereArgs, match);
+                count = db.delete(Downloads.Impl.Batches.BATCHES_DB_TABLE, batchSelection.getSelection(), batchSelection.getParameters());
                 break;
 
             default:
