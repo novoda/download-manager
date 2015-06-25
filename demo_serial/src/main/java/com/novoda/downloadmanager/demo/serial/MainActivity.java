@@ -40,9 +40,13 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
     }
 
     private void setupDownloadingExample() {
-        Uri uri = Uri.parse(BIG_FILE);
-        final RequestBatch batch = RequestBatch.newInstance("Large Beard Shipment", "Goatees galore", BEARD_IMAGE);
+        final RequestBatch batch = new RequestBatch.Builder()
+                .withTitle("Large Beard Shipment")
+                .withDescription("Goatees galore")
+                .withBigPictureUrl(BEARD_IMAGE)
+                .build();
 
+        Uri uri = Uri.parse(BIG_FILE);
         final Request request = new Request(uri);
         request.setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "beard.shipment");
         request.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
