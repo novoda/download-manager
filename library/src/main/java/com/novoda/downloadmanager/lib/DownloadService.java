@@ -415,7 +415,7 @@ public class DownloadService extends Service {
 
     private boolean kickOffDownloadTaskIfReady(boolean isActive, DownloadInfo info) {
         boolean isReadyToDownload = info.isReadyToDownload();
-        Log.e("Ready to download: " + isReadyToDownload + " received isActive: " + isActive + " for id: " + info.mId);
+        Log.v("Ready to download: " + isReadyToDownload + " received isActive: " + isActive + " for id: " + info.mId);
         if (isReadyToDownload) {
             isActive |= info.startDownloadIfNotActive(mExecutor);
         }
