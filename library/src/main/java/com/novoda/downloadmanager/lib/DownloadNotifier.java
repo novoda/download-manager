@@ -131,21 +131,6 @@ class DownloadNotifier {
         }
     }
 
-    private void showNotificationPerCluster(Map<String, List<ActiveBatch>> clusters) {
-        for (String tag : clusters.keySet()) {
-            int type = getNotificationTagType(tag);
-            List<ActiveBatch> cluster = clusters.get(tag);
-
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
-            useTimeWhenClusterFirstShownToAvoidShuffling(tag, builder);
-            buildIcon(type, builder);
-            buildActionIntents(tag, type, cluster, builder);
-
-            Notification notification = buildTitlesAndDescription(type, cluster, builder);
-            mNotifManager.notify(tag.hashCode(), notification);
-        }
-    }
-
     @NonNull
     private Map<String, List<ActiveBatch>> getClustersByNotificationTag(List<ActiveBatch> batches) {
         Map<String, List<ActiveBatch>> clustered = new HashMap<>();
@@ -174,6 +159,29 @@ class DownloadNotifier {
         }
 
         batches.add(batch);
+    }
+
+    private void showNotificationPerCluster(Map<String, List<ActiveBatch>> clusters) {
+        for (String tag : clusters.keySet()) {
+            int type = getNotificationTagType(tag);
+            List<ActiveBatch> cluster = clusters.get(tag);
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
+            useTimeWhenClusterFirstShownToAvoidShuffling(tag, builder);
+            buildIcon(type, builder);
+            buildActionIntents(tag, type, cluster, builder);
+
+            Notification notification = buildTitlesAndDescription(type, cluster, builder);
+            mNotifManager.notify(tag.hashCode(), notification);
+        }
+    }
+
+    /**
+     * Return the cluster type of the given as created by
+     * {@link #buildNotificationTag(ActiveBatch)}.
+     */
+    private static int getNotificationTagType(String tag) {
+        return Integer.parseInt(tag.substring(0, tag.indexOf(':')));
     }
 
     private void useTimeWhenClusterFirstShownToAvoidShuffling(String tag, NotificationCompat.Builder builder) {
@@ -299,6 +307,24 @@ class DownloadNotifier {
 
     }
 
+    /**
+     * Return given duration in a human-friendly format. For example, "4
+     * minutes" or "1 second". Returns only largest meaningful unit of time,
+     * from seconds up to hours.
+     */
+    public CharSequence formatDuration(long millis) {
+        if (millis >= DateUtils.HOUR_IN_MILLIS) {
+            int hours = (int) TimeUnit.MILLISECONDS.toHours(millis + TimeUnit.MINUTES.toMillis(30));
+            return resources.getQuantityString(R.plurals.dl__duration_hours, hours, hours);
+        } else if (millis >= DateUtils.MINUTE_IN_MILLIS) {
+            int minutes = (int) TimeUnit.MILLISECONDS.toMinutes(millis + TimeUnit.SECONDS.toMillis(30));
+            return resources.getQuantityString(R.plurals.dl__duration_minutes, minutes, minutes);
+        } else {
+            int seconds = (int) TimeUnit.MILLISECONDS.toSeconds(millis + 500);
+            return resources.getQuantityString(R.plurals.dl__duration_seconds, seconds, seconds);
+        }
+    }
+
     private Notification buildSingleNotification(int type, NotificationCompat.Builder builder, ActiveBatch batch, String remainingText, String percentText) {
 
         NotificationCompat.BigPictureStyle style = new NotificationCompat.BigPictureStyle();
@@ -419,9 +445,9 @@ class DownloadNotifier {
     private String buildNotificationTag(ActiveBatch batch) {
         int status = batch.getStatus();
         if (status == Downloads.Impl.STATUS_QUEUED_FOR_WIFI) {
-            return TYPE_WAITING + ":" + getPackageName();
+            return TYPE_WAITING + ":" + mContext.getPackageName();
         } else if (status == Downloads.Impl.STATUS_RUNNING) {
-            return TYPE_ACTIVE + ":" + getPackageName();
+            return TYPE_ACTIVE + ":" + mContext.getPackageName();
         } else if (Downloads.Impl.isStatusError(status) && !Downloads.Impl.isStatusCancelled(status)) {
             // Failed downloads always have unique notifs
             return TYPE_FAILED + ":" + batch.getBatchId();
@@ -470,18 +496,6 @@ class DownloadNotifier {
         return false;
     }
 
-    private String getPackageName() {
-        return mContext.getPackageName();
-    }
-
-    /**
-     * Return the cluster type of the given as created by
-     * {@link #buildNotificationTag(ActiveBatch)}.
-     */
-    private static int getNotificationTagType(String tag) {
-        return Integer.parseInt(tag.substring(0, tag.indexOf(':')));
-    }
-
     private static boolean areAnyActiveAndVisible(List<DownloadInfo> downloads) {
         for (DownloadInfo download : downloads) {
             boolean isActive = download.mStatus == Downloads.Impl.STATUS_RUNNING;
@@ -505,23 +519,5 @@ class DownloadNotifier {
             }
         }
         return true;
-    }
-
-    /**
-     * Return given duration in a human-friendly format. For example, "4
-     * minutes" or "1 second". Returns only largest meaningful unit of time,
-     * from seconds up to hours.
-     */
-    public CharSequence formatDuration(long millis) {
-        if (millis >= DateUtils.HOUR_IN_MILLIS) {
-            int hours = (int) TimeUnit.MILLISECONDS.toHours(millis + TimeUnit.MINUTES.toMillis(30));
-            return resources.getQuantityString(R.plurals.dl__duration_hours, hours, hours);
-        } else if (millis >= DateUtils.MINUTE_IN_MILLIS) {
-            int minutes = (int) TimeUnit.MILLISECONDS.toMinutes(millis + TimeUnit.SECONDS.toMillis(30));
-            return resources.getQuantityString(R.plurals.dl__duration_minutes, minutes, minutes);
-        } else {
-            int seconds = (int) TimeUnit.MILLISECONDS.toSeconds(millis + 500);
-            return resources.getQuantityString(R.plurals.dl__duration_seconds, seconds, seconds);
-        }
     }
 }
