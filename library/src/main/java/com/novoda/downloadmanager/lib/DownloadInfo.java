@@ -13,6 +13,8 @@ import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Pair;
 
+import com.novoda.notils.logger.simple.Log;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -470,10 +472,13 @@ class DownloadInfo {
 
     public boolean startDownloadIfNotActive(ExecutorService executor) {
         synchronized (this) {
-            final boolean isActive = mSubmittedTask != null && !mSubmittedTask.isDone();
-            if (!isActive) {
+            boolean isActive;
+            if (mSubmittedTask == null) {
                 DownloadThread downloadThread = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier);
                 mSubmittedTask = executor.submit(downloadThread);
+                isActive = true;
+            } else {
+                isActive = !mSubmittedTask.isDone();
             }
             return isActive;
         }
