@@ -714,6 +714,7 @@ public class DownloadManager {
 
     private long insert(RequestBatch batch) {
         ContentValues values = batch.toContentValues();
+        values.put(Downloads.Impl.Batches.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
         Uri batchUri = mResolver.insert(Downloads.Impl.BATCH_CONTENT_URI, values);
         return ContentUris.parseId(batchUri);
     }
