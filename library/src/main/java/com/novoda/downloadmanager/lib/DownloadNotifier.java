@@ -267,9 +267,11 @@ class DownloadNotifier {
 
             final Intent intent = new Intent(action, uri, mContext, DownloadReceiver.class);
             intent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, getDownloadIds(cluster));
+            intent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getBatchId());
             builder.setContentIntent(PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
 
             final Intent hideIntent = new Intent(Constants.ACTION_HIDE, uri, mContext, DownloadReceiver.class);
+            hideIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getBatchId());
             builder.setDeleteIntent(PendingIntent.getBroadcast(mContext, 0, hideIntent, 0));
         }
     }

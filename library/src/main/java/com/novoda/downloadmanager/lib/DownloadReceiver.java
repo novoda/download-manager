@@ -92,10 +92,11 @@ public class DownloadReceiver extends BroadcastReceiver {
         } else if (ACTION_OPEN.equals(action)) {
             long id = ContentUris.parseId(intent.getData());
             openDownload(context, id);
-            hideNotification(context, id);
+            long batchId = getBatchId(intent);
+            hideNotification(context, batchId);
         } else if (ACTION_HIDE.equals(action)) {
-            long id = ContentUris.parseId(intent.getData());
-            hideNotification(context, id);
+            long batchId = getBatchId(intent);
+            hideNotification(context, batchId);
         } else if (ACTION_CANCEL.equals(action)) {
             cancelBatchThroughDatabaseState(context, intent);
         } else if (ACTION_DELETE.equals(action)) {
@@ -140,28 +141,28 @@ public class DownloadReceiver extends BroadcastReceiver {
      * Mark the given {@link DownloadManager#COLUMN_ID} as being acknowledged by
      * user so it's not renewed later.
      */
-    private void hideNotification(Context context, long id) {
+    private void hideNotification(Context context, long batchId) {
         int status;
-        int visibility;
+        @NotificationVisibility.Value int visibility;
 
-        Uri uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id);
+        Uri uri = ContentUris.withAppendedId(Downloads.Impl.BATCH_CONTENT_URI, batchId);
         Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
         try {
             if (cursor.moveToFirst()) {
-                status = getInt(cursor, Downloads.Impl.COLUMN_STATUS);
-                visibility = getInt(cursor, Downloads.Impl.COLUMN_VISIBILITY);
+                status = getInt(cursor, Downloads.Impl.Batches.COLUMN_STATUS);
+                visibility = getInt(cursor, Downloads.Impl.Batches.COLUMN_VISIBILITY);
+
+                if ((Downloads.Impl.isStatusCancelled(status) || Downloads.Impl.isStatusCompleted(status))
+                        && (visibility == ACTIVE_OR_COMPLETE || visibility == ONLY_WHEN_COMPLETE)) {
+                    ContentValues values = new ContentValues(1);
+                    values.put(Downloads.Impl.Batches.COLUMN_VISIBILITY, NotificationVisibility.ONLY_WHEN_ACTIVE);
+                    context.getContentResolver().update(uri, values, null, null);
+                }
             } else {
-                Log.w("Missing details for download " + id);
-                return;
+                Log.w("Missing details for download " + batchId);
             }
         } finally {
             cursor.close();
-        }
-
-        if (Downloads.Impl.isStatusCompleted(status) && (visibility == ACTIVE_OR_COMPLETE || visibility == ONLY_WHEN_COMPLETE)) {
-            ContentValues values = new ContentValues();
-            values.put(Downloads.Impl.COLUMN_VISIBILITY, NotificationVisibility.ONLY_WHEN_ACTIVE);
-            context.getContentResolver().update(uri, values, null, null);
         }
     }
 
@@ -169,14 +170,22 @@ public class DownloadReceiver extends BroadcastReceiver {
      * Mark the given batch as being cancelled by user so it will be cancelled by the running thread.
      */
     private void cancelBatchThroughDatabaseState(Context context, Intent intent) {
-        ContentValues values = new ContentValues(1);
-        values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_CANCELED);
+        ContentValues downloadValues = new ContentValues(1);
+        downloadValues.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_CANCELED);
         long batchId = getBatchId(intent);
         context.getContentResolver().update(
                 Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
-                values,
+                downloadValues,
                 Downloads.Impl.COLUMN_BATCH_ID + " = ?",
                 new String[]{String.valueOf(batchId)}
+        );
+        ContentValues batchValues = new ContentValues(1);
+        batchValues.put(Downloads.Impl.Batches.COLUMN_STATUS, Downloads.Impl.STATUS_CANCELED);
+        context.getContentResolver().update(
+                ContentUris.withAppendedId(Downloads.Impl.BATCH_CONTENT_URI, batchId),
+                batchValues,
+                null,
+                null
         );
     }
 
