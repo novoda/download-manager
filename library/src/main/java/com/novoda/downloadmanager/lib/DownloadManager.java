@@ -80,6 +80,11 @@ public class DownloadManager {
     public static final String COLUMN_DESCRIPTION = Downloads.Impl.Batches.COLUMN_DESCRIPTION;
 
     /**
+     * The ID of the batch that contains this download.
+     */
+    public static final String COLUMN_BATCH_ID = Downloads.Impl.COLUMN_BATCH_ID;
+
+    /**
      * URI to be downloaded.
      */
     public static final String COLUMN_URI = Downloads.Impl.COLUMN_URI;
@@ -370,7 +375,6 @@ public class DownloadManager {
         Uri downloadUri = mResolver.insert(Downloads.Impl.CONTENT_URI, values);
         return ContentUris.parseId(downloadUri);
     }
-
 
     public void markDeleted(URI uri) {
         Cursor cursor = null;
