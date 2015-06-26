@@ -340,7 +340,7 @@ public class DownloadService extends Service {
 
         cleanUpStaleDownloadsThatDisappeared(staleDownloadIds, mDownloads);
 
-        List<ActiveBatch> batches = fetchBatches(mDownloads.values());
+        List<DownloadBatch> batches = fetchBatches(mDownloads.values());
         updateUserVisibleNotification(batches);
 
 
@@ -357,8 +357,8 @@ public class DownloadService extends Service {
         return isActive;
     }
 
-    private List<ActiveBatch> fetchBatches(Collection<DownloadInfo> downloads) {
-        List<ActiveBatch> batches = new ArrayList<>();
+    private List<DownloadBatch> fetchBatches(Collection<DownloadInfo> downloads) {
+        List<DownloadBatch> batches = new ArrayList<>();
         Cursor batchesCursor = resolver.query(Downloads.Impl.BATCH_CONTENT_URI, null, null, null, null);
         batches.clear();
         try {
@@ -381,7 +381,7 @@ public class DownloadService extends Service {
                         batchDownloads.add(downloadInfo);
                     }
                 }
-                batches.add(new ActiveBatch(id, batchInfo, batchDownloads, status));
+                batches.add(new DownloadBatch(id, batchInfo, batchDownloads, status));
             }
         } finally {
             batchesCursor.close();
@@ -437,7 +437,7 @@ public class DownloadService extends Service {
         }
     }
 
-    private void updateUserVisibleNotification(List<ActiveBatch> batches) {
+    private void updateUserVisibleNotification(List<DownloadBatch> batches) {
         mNotifier.updateWith(batches);
     }
 
