@@ -26,6 +26,7 @@ import java.util.concurrent.Future;
  */
 class DownloadInfo {
     public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
+    private static final int UNKNOWN_BYTES = -1;
 
     // TODO: move towards these in-memory objects being sources of truth, and
 
@@ -584,5 +585,9 @@ class DownloadInfo {
         } finally {
             cursor.close();
         }
+    }
+
+    public boolean hasTotalBytes() {
+        return mTotalBytes != UNKNOWN_BYTES;
     }
 }

@@ -290,7 +290,7 @@ class DownloadNotifier {
             synchronized (mDownloadSpeed) {
                 for (DownloadBatch batch : cluster) {
                     for (DownloadInfo info : batch.getDownloads()) {
-                        if (info.mTotalBytes != -1) {
+                        if (info.hasTotalBytes()) {
                             currentBytes += info.mCurrentBytes;
                             totalBytes += info.mTotalBytes;
                             Long bytesPerSecond = mDownloadSpeed.get(info.mId);
