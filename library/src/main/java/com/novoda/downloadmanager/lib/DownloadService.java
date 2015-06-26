@@ -393,6 +393,7 @@ public class DownloadService extends Service {
         if (info.mTotalBytes == -1) {
             ContentValues values = new ContentValues();
             info.mTotalBytes = contentLengthFetcher.fetchContentLengthFor(info);
+            values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, info.mTotalBytes);
             resolver.update(info.getAllDownloadsUri(), values, null, null);
         }
     }
