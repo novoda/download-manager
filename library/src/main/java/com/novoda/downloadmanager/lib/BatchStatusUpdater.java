@@ -13,22 +13,16 @@ import static com.novoda.downloadmanager.lib.Downloads.Impl.*;
 class BatchStatusUpdater {
 
     private static final List<Integer> PRIORITISED_STATUSES = Arrays.asList(
-            // Cancelled
             STATUS_CANCELED,
-
-            // Running
             STATUS_RUNNING,
 
-            // Paused
+            // Paused statuses
             STATUS_PAUSED_BY_APP,
             STATUS_WAITING_TO_RETRY,
             STATUS_WAITING_FOR_NETWORK,
             STATUS_QUEUED_FOR_WIFI,
 
-            // Pending
             STATUS_PENDING,
-
-            // Success
             STATUS_SUCCESS
     );
 
