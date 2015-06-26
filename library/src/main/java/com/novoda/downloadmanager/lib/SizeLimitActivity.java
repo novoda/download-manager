@@ -88,7 +88,7 @@ public class SizeLimitActivity extends Activity implements DialogInterface.OnCan
         } else {
             builder.setTitle("Queue for download later?") // R.string.wifi_recommended_title
                     .setMessage("Starting this " + sizeString + " download now may shorten your batter life and/or result in " +
-                            "excessive useage of your mobile data connection. Which can lead to charges by your mobile operator " +
+                            "excessive usage of your mobile data connection. Which can lead to charges by your mobile operator " +
                             "depending on your data plan." +
                             "\n\n Touch " + queueText + " to start this download the next time you're connected to a Wi-Fi network.") // getString(R.string.wifi_recommended_body, sizeString, queueText)
                     .setPositiveButton("", this) // R.string.button_start_now

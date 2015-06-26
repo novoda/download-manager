@@ -66,36 +66,11 @@ public class Request {
     static final int SCANNABLE_VALUE_NO = 2;
 
     /**
-     * This download is visible but only shows in the notifications
-     * while it's in progress.
+     * can take any of the following values: {@link NotificationVisibility#HIDDEN}
+     * {@link NotificationVisibility#ACTIVE_OR_COMPLETE}, {@link NotificationVisibility#ONLY_WHEN_ACTIVE},
+     * {@link NotificationVisibility#ONLY_WHEN_COMPLETE}
      */
-    public static final int VISIBILITY_VISIBLE = 0;
-
-    /**
-     * This download is visible and shows in the notifications while
-     * in progress and after completion.
-     */
-    public static final int VISIBILITY_VISIBLE_NOTIFY_COMPLETED = 1;
-
-    /**
-     * This download doesn't show in the UI or in the notifications.
-     */
-    public static final int VISIBILITY_HIDDEN = 2;
-
-    /**
-     * This download shows in the notifications after completion ONLY.
-     * It is usuable only with
-     * {@link DownloadManager#addCompletedDownload(String, String,
-     * boolean, String, String, long, boolean)}.
-     */
-    public static final int VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION = 3;
-
-    /**
-     * can take any of the following values: {@link #VISIBILITY_HIDDEN}
-     * {@link #VISIBILITY_VISIBLE_NOTIFY_COMPLETED}, {@link #VISIBILITY_VISIBLE},
-     * {@link #VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION}
-     */
-    private int mNotificationVisibility = VISIBILITY_VISIBLE;
+    private int mNotificationVisibility = NotificationVisibility.ONLY_WHEN_ACTIVE;
 
     /**
      * @param uri the HTTP URI to download.
@@ -340,7 +315,7 @@ public class Request {
      */
     @Deprecated
     public Request setShowRunningNotification(boolean show) {
-        return (show) ? setNotificationVisibility(VISIBILITY_VISIBLE) : setNotificationVisibility(VISIBILITY_HIDDEN);
+        return (show) ? setNotificationVisibility(NotificationVisibility.ONLY_WHEN_ACTIVE) : setNotificationVisibility(NotificationVisibility.HIDDEN);
     }
 
     /**
@@ -350,11 +325,11 @@ public class Request {
      * through the system {@link android.app.NotificationManager}.
      * By default, a notification is shown only when the download is in progress.
      * <p/>
-     * It can take the following values: {@link #VISIBILITY_HIDDEN},
-     * {@link #VISIBILITY_VISIBLE},
-     * {@link #VISIBILITY_VISIBLE_NOTIFY_COMPLETED}.
+     * It can take the following values: {@link NotificationVisibility#HIDDEN},
+     * {@link NotificationVisibility#ONLY_WHEN_ACTIVE},
+     * {@link NotificationVisibility#ONLY_WHEN_COMPLETE}.
      * <p/>
-     * If set to {@link #VISIBILITY_HIDDEN}, this requires the permission
+     * If set to {@link NotificationVisibility#HIDDEN}, this requires the permission
      * android.permission.DOWNLOAD_WITHOUT_NOTIFICATION.
      *
      * @param visibility the visibility setting value
@@ -480,6 +455,7 @@ public class Request {
                 .withTitle(mTitle.toString())
                 .withDescription(mDescription.toString())
                 .withBigPictureUrl(bigPictureUrl)
+                .withVisibility(mNotificationVisibility)
                 .build();
         requestBatch.addRequest(this);
         return requestBatch;

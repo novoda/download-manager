@@ -40,6 +40,7 @@ public class RequestBatch {
         values.put(Downloads.Impl.Batches.COLUMN_TITLE, batchInfo.getTitle());
         values.put(Downloads.Impl.Batches.COLUMN_DESCRIPTION, batchInfo.getDescription());
         values.put(Downloads.Impl.Batches.COLUMN_BIG_PICTURE, batchInfo.getBigPictureUrl());
+        values.put(Downloads.Impl.Batches.COLUMN_VISIBILITY, batchInfo.getVisibility());
         return values;
     }
 
@@ -48,6 +49,8 @@ public class RequestBatch {
         private String title;
         private String description;
         private String bigPictureUrl;
+        @NotificationVisibility.Value
+        private int visibility;
 
         public Builder withTitle(String title) {
             this.title = title;
@@ -64,9 +67,13 @@ public class RequestBatch {
             return this;
         }
 
+        public Builder withVisibility(@NotificationVisibility.Value int visibility) {
+            this.visibility = visibility;
+            return this;
+        }
 
         public RequestBatch build() {
-            BatchInfo batchInfo = new BatchInfo(title, description, bigPictureUrl);
+            BatchInfo batchInfo = new BatchInfo(title, description, bigPictureUrl, visibility);
             return new RequestBatch(batchInfo, new ArrayList<Request>());
         }
 

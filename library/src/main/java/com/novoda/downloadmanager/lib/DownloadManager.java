@@ -644,7 +644,7 @@ public class DownloadManager {
         values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED, (isMediaScannerScannable) ? Request.SCANNABLE_VALUE_YES : Request.SCANNABLE_VALUE_NO);
         values.put(
                 Downloads.Impl.COLUMN_VISIBILITY, (showNotification) ?
-                        Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION : Request.VISIBILITY_HIDDEN);
+                        NotificationVisibility.ONLY_WHEN_COMPLETE : NotificationVisibility.HIDDEN);
         Uri downloadUri = mResolver.insert(Downloads.Impl.CONTENT_URI, values);
         if (downloadUri == null) {
             return -1;
@@ -714,6 +714,7 @@ public class DownloadManager {
 
     private long insert(RequestBatch batch) {
         ContentValues values = batch.toContentValues();
+        values.put(Downloads.Impl.Batches.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
         Uri batchUri = mResolver.insert(Downloads.Impl.BATCH_CONTENT_URI, values);
         return ContentUris.parseId(batchUri);
     }

@@ -26,6 +26,7 @@ import java.util.concurrent.Future;
  */
 class DownloadInfo {
     public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
+    private static final int UNKNOWN_BYTES = -1;
 
     // TODO: move towards these in-memory objects being sources of truth, and
 
@@ -352,7 +353,7 @@ class DownloadInfo {
         if (!Downloads.Impl.isStatusCompleted(mStatus)) {
             return false;
         }
-        if (mVisibility == Downloads.Impl.VISIBILITY_VISIBLE_NOTIFY_COMPLETED) {
+        if (mVisibility == NotificationVisibility.ACTIVE_OR_COMPLETE) {
             return true;
         }
         return false;
@@ -470,11 +471,13 @@ class DownloadInfo {
 
     public boolean startDownloadIfNotActive(ExecutorService executor) {
         synchronized (this) {
-            final boolean isActive = mSubmittedTask != null && !mSubmittedTask.isDone();
-            if (!isActive) {
-                updateStatus(Downloads.Impl.STATUS_PENDING);
+            boolean isActive;
+            if (mSubmittedTask == null) {
                 DownloadThread downloadThread = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier);
                 mSubmittedTask = executor.submit(downloadThread);
+                isActive = true;
+            } else {
+                isActive = !mSubmittedTask.isDone();
             }
             return isActive;
         }
@@ -582,5 +585,9 @@ class DownloadInfo {
         } finally {
             cursor.close();
         }
+    }
+
+    public boolean hasTotalBytes() {
+        return mTotalBytes != UNKNOWN_BYTES;
     }
 }

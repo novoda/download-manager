@@ -34,6 +34,7 @@ import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.provider.OpenableColumns;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
@@ -171,6 +172,13 @@ public final class DownloadProvider extends ContentProvider {
             Downloads.Impl.COLUMN_DELETED,
             Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS,
             Downloads.Impl.COLUMN_BIG_PICTURE,
+            Downloads.Impl.COLUMN_BATCH_ID,
+            Downloads.Impl.Batches._ID,
+            Downloads.Impl.Batches.COLUMN_STATUS,
+            Downloads.Impl.Batches.COLUMN_TITLE,
+            Downloads.Impl.Batches.COLUMN_DESCRIPTION,
+            Downloads.Impl.Batches.COLUMN_BIG_PICTURE,
+            Downloads.Impl.Batches.COLUMN_VISIBILITY,
             OpenableColumns.DISPLAY_NAME,
             OpenableColumns.SIZE,
     };
@@ -386,9 +394,9 @@ public final class DownloadProvider extends ContentProvider {
         Integer vis = values.getAsInteger(Downloads.Impl.COLUMN_VISIBILITY);
         if (vis == null) {
             if (dest == Downloads.Impl.DESTINATION_EXTERNAL) {
-                filteredValues.put(Downloads.Impl.COLUMN_VISIBILITY, Downloads.Impl.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                filteredValues.put(Downloads.Impl.COLUMN_VISIBILITY, NotificationVisibility.ACTIVE_OR_COMPLETE);
             } else {
-                filteredValues.put(Downloads.Impl.COLUMN_VISIBILITY, Downloads.Impl.VISIBILITY_HIDDEN);
+                filteredValues.put(Downloads.Impl.COLUMN_VISIBILITY, NotificationVisibility.HIDDEN);
             }
         } else {
             filteredValues.put(Downloads.Impl.COLUMN_VISIBILITY, vis);
@@ -565,16 +573,16 @@ public final class DownloadProvider extends ContentProvider {
         if (getContext().checkCallingOrSelfPermission(Downloads.Impl.PERMISSION_NO_NOTIFICATION) == PackageManager.PERMISSION_GRANTED) {
             enforceAllowedValues(
                     values, Downloads.Impl.COLUMN_VISIBILITY,
-                    Request.VISIBILITY_HIDDEN,
-                    Request.VISIBILITY_VISIBLE,
-                    Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED,
-                    Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION);
+                    NotificationVisibility.HIDDEN,
+                    NotificationVisibility.ONLY_WHEN_ACTIVE,
+                    NotificationVisibility.ACTIVE_OR_COMPLETE,
+                    NotificationVisibility.ONLY_WHEN_COMPLETE);
         } else {
             enforceAllowedValues(
                     values, Downloads.Impl.COLUMN_VISIBILITY,
-                    Request.VISIBILITY_VISIBLE,
-                    Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED,
-                    Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION);
+                    NotificationVisibility.ONLY_WHEN_ACTIVE,
+                    NotificationVisibility.ACTIVE_OR_COMPLETE,
+                    NotificationVisibility.ONLY_WHEN_COMPLETE);
         }
 
         // remove the rest of the columns that are allowed (with any value)
@@ -635,9 +643,7 @@ public final class DownloadProvider extends ContentProvider {
      * Starts a database query
      */
     @Override
-    public Cursor query(final Uri uri, String[] projection,
-                        final String selection, final String[] selectionArgs,
-                        final String sort) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sort) {
 
         Helpers.validateSelection(selection, sAppReadableColumnsSet);
 
@@ -652,8 +658,9 @@ public final class DownloadProvider extends ContentProvider {
                 return queryDownloads(uri, projection, selection, selectionArgs, sort, db, match);
             case BATCHES:
             case BATCHES_ID:
-                return db.query(Downloads.Impl.Batches.BATCHES_DB_TABLE, projection, selection,
-                        selectionArgs, null, null, sort);
+                SqlSelection batchSelection = getWhereClause(uri, selection, selectionArgs, match);
+                return db.query(Downloads.Impl.Batches.BATCHES_DB_TABLE, projection, batchSelection.getSelection(),
+                        batchSelection.getParameters(), null, null, sort);
             case REQUEST_HEADERS_URI:
                 if (projection != null || selection != null || sort != null) {
                     throw new UnsupportedOperationException(
@@ -892,7 +899,9 @@ public final class DownloadProvider extends ContentProvider {
                 break;
             case BATCHES:
             case BATCHES_ID:
-                count = db.update(Downloads.Impl.Batches.BATCHES_DB_TABLE, values, where, whereArgs);
+                SqlSelection batchSelection = getWhereClause(uri, where, whereArgs, match);
+                count = db.update(Downloads.Impl.Batches.BATCHES_DB_TABLE, values, batchSelection.getSelection(),
+                        batchSelection.getParameters());
                 break;
             default:
                 Log.d("updating unknown/invalid URI: " + uri);
@@ -934,6 +943,9 @@ public final class DownloadProvider extends ContentProvider {
                 uriMatch == PUBLIC_DOWNLOAD_ID) {
             selection.appendClause(Downloads.Impl._ID + " = ?", getDownloadIdFromUri(uri));
         }
+        if (uriMatch == BATCHES_ID) {
+            selection.appendClause(Downloads.Impl.Batches._ID + " = ?", ContentUris.parseId(uri));
+        }
         if ((uriMatch == MY_DOWNLOADS || uriMatch == MY_DOWNLOADS_ID)
                 && getContext().checkCallingPermission(Downloads.Impl.PERMISSION_ACCESS_ALL)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -948,8 +960,7 @@ public final class DownloadProvider extends ContentProvider {
      * Deletes a row in the database
      */
     @Override
-    public int delete(final Uri uri, final String where,
-                      final String[] whereArgs) {
+    public int delete(@NonNull Uri uri, String where, String[] whereArgs) {
 
         Helpers.validateSelection(where, sAppReadableColumnsSet);
 
@@ -964,6 +975,11 @@ public final class DownloadProvider extends ContentProvider {
                 SqlSelection selection = getWhereClause(uri, where, whereArgs, match);
                 deleteRequestHeaders(db, selection.getSelection(), selection.getParameters());
                 count = db.delete(Downloads.Impl.TABLE_NAME, selection.getSelection(), selection.getParameters());
+                break;
+            case BATCHES:
+            case BATCHES_ID:
+                SqlSelection batchSelection = getWhereClause(uri, where, whereArgs, match);
+                count = db.delete(Downloads.Impl.Batches.BATCHES_DB_TABLE, batchSelection.getSelection(), batchSelection.getParameters());
                 break;
 
             default:

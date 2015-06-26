@@ -12,6 +12,7 @@ import android.widget.ListView;
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.lib.DownloadManager;
+import com.novoda.downloadmanager.lib.NotificationVisibility;
 import com.novoda.downloadmanager.lib.Query;
 import com.novoda.downloadmanager.lib.Request;
 import com.novoda.downloadmanager.lib.RequestBatch;
@@ -20,7 +21,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements QueryForDownloadsAsyncTask.Callback {
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final String BIG_FILE = "http://download.thinkbroadband.com/100MB.zip";
+    private static final String BIG_FILE = "http://download.thinkbroadband.com/50MB.zip";
     private static final String BEARD_IMAGE = "http://i.imgur.com/9JL2QVl.jpg";
 
     private DownloadManager downloadManager;
@@ -60,9 +61,9 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         final Request request = new Request(uri)
                 .setTitle("A Single Beard")
                 .setDescription("Fine facial hair")
-                .setBigPictureUrl(BEARD_IMAGE);
-        request.setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "example.beard");
-        request.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                .setBigPictureUrl(BEARD_IMAGE)
+                .setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "example.beard")
+                .setNotificationVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE);
 
         long requestId = downloadManager.enqueue(request);
         Log.d(TAG, "Download enqueued with request ID: " + requestId);
@@ -73,12 +74,12 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
                 .withTitle("Large Beard Shipment")
                 .withDescription("Goatees galore")
                 .withBigPictureUrl(BEARD_IMAGE)
+                .withVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE)
                 .build();
 
         Uri uri = Uri.parse(BIG_FILE);
         final Request request = new Request(uri);
         request.setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "beard.shipment");
-        request.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
         request.setExtra("beard_1");
 
         batch.addRequest(request);

@@ -4,11 +4,14 @@ class BatchInfo {
     private final String title;
     private final String description;
     private final String bigPictureUrl;
+    @NotificationVisibility.Value
+    private final int visibility;
 
-    public BatchInfo(String title, String description, String bigPictureUrl) {
+    public BatchInfo(String title, String description, String bigPictureUrl, @NotificationVisibility.Value int visibility) {
         this.title = title;
         this.description = description;
         this.bigPictureUrl = bigPictureUrl;
+        this.visibility = visibility;
     }
 
     public String getTitle() {
@@ -21,5 +24,10 @@ class BatchInfo {
 
     public String getBigPictureUrl() {
         return bigPictureUrl;
+    }
+
+    @NotificationVisibility.Value
+    public int getVisibility() {
+        return visibility;
     }
 }

@@ -705,6 +705,11 @@ final class Downloads {
          */
         public static final int STATUS_TOO_MANY_REDIRECTS = 497;
 
+        /**
+         * This download couldn't be completed because another download in the batch failed.
+         */
+        public static final int STATUS_BATCH_FAILED = 498;
+
         static String statusToString(int status) {
             switch (status) {
                 case STATUS_PENDING:
@@ -759,24 +764,6 @@ final class Downloads {
         }
 
         /**
-         * This download is visible but only shows in the notifications
-         * while it's in progress.
-         */
-        public static final int VISIBILITY_VISIBLE = DownloadManager.Request.VISIBILITY_VISIBLE;
-
-        /**
-         * This download is visible and shows in the notifications while
-         * in progress and after completion.
-         */
-        public static final int VISIBILITY_VISIBLE_NOTIFY_COMPLETED =
-                DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED;
-
-        /**
-         * This download doesn't show in the UI or in the notifications.
-         */
-        public static final int VISIBILITY_HIDDEN = DownloadManager.Request.VISIBILITY_HIDDEN;
-
-        /**
          * Constants related to HTTP request headers associated with each download.
          */
         public static class RequestHeaders implements BaseColumns {
@@ -825,6 +812,22 @@ final class Downloads {
              * A URL that will be used to show a big picture style notification
              */
             public static final String COLUMN_BIG_PICTURE = "batch_notificationBigPictureResourceId";
+
+            /**
+             * The status of the batch.
+             * <P>Type: INTEGER</P>
+             * <P>Owner can Read</P>
+             */
+            public static final String COLUMN_STATUS = "batch_status";
+
+            /**
+             * The name of the column containing the flags that controls whether the
+             * batch is displayed by the UI. See the {@link NotificationVisibility} constants for
+             * a list of legal values.
+             * <P>Type: INTEGER</P>
+             * <P>Owner can Init/Read/Write</P>
+             */
+            public static final String COLUMN_VISIBILITY = "visibility";
         }
     }
 

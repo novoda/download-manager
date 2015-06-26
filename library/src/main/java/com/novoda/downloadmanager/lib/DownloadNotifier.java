@@ -16,7 +16,6 @@
 
 package com.novoda.downloadmanager.lib;
 
-import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -26,8 +25,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Build;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.util.LongSparseArray;
@@ -38,7 +35,6 @@ import com.novoda.downloadmanager.R;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -46,8 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
-import static com.novoda.downloadmanager.lib.Request.*;
 
 /**
  * Update {@link NotificationManager} to reflect current {@link DownloadInfo}
@@ -70,10 +64,10 @@ class DownloadNotifier {
      * Currently active notifications, mapped from clustering tag to timestamp
      * when first shown.
      *
-     * @see #buildNotificationTag(List, long)
+     * @see #buildNotificationTag(DownloadBatch)
      */
 //    @GuardedBy("mActiveNotifs")
-    private final HashMap<String, Long> mActiveNotifs = new HashMap<String, Long>();
+    private final HashMap<String, Long> mActiveNotifs = new HashMap<>();
 
     /**
      * Current speed of active downloads, mapped from {@link DownloadInfo#batchId}
@@ -81,15 +75,7 @@ class DownloadNotifier {
      */
 //    @GuardedBy("mDownloadSpeed")
     // LongSparseLongArray
-    private final LongSparseArray<Long> mDownloadSpeed = new LongSparseArray<Long>();
-
-    /**
-     * Last time speed was reproted, mapped from {@link DownloadInfo#batchId} to
-     * {@link SystemClock#elapsedRealtime()}.
-     */
-//    @GuardedBy("mDownloadSpeed")
-    // LongSparseLongArray
-    private final LongSparseArray<Long> mDownloadTouch = new LongSparseArray<Long>();
+    private final LongSparseArray<Long> mDownloadSpeed = new LongSparseArray<>();
 
     private final Resources resources;
 
@@ -112,10 +98,8 @@ class DownloadNotifier {
         synchronized (mDownloadSpeed) {
             if (bytesPerSecond != 0) {
                 mDownloadSpeed.put(id, bytesPerSecond);
-                mDownloadTouch.put(id, SystemClock.elapsedRealtime());
             } else {
                 mDownloadSpeed.remove(id);
-                mDownloadTouch.remove(id);
             }
         }
     }
@@ -124,84 +108,103 @@ class DownloadNotifier {
      * Update {@link NotificationManager} to reflect the given set of
      * {@link DownloadInfo}, adding, collapsing, and removing as needed.
      */
-    public void updateWith(Map<Long, BatchInfo> batches, Collection<DownloadInfo> downloads) {
+    public void updateWith(List<DownloadBatch> batches) {
         synchronized (mActiveNotifs) {
-            updateWithLocked(batches, downloads);
-        }
-    }
+            Map<String, List<DownloadBatch>> clusters = getClustersByNotificationTag(batches);
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    private void updateWithLocked(Map<Long, BatchInfo> batches, Collection<DownloadInfo> downloads) {
-        Map<Long, List<DownloadInfo>> batchDownloads = getDownloadsPerBatch(downloads);
-        Map<String, List<DownloadInfo>> clustered = getClustersByNotificationTag(batchDownloads);
+            showNotificationPerCluster(clusters);
 
-        showNotificationPerCluster(batches, clustered);
-
-        removeStaleTagsThatWereNotRenewed(clustered);
-    }
-
-    private void showNotificationPerCluster(Map<Long, BatchInfo> batches, Map<String, List<DownloadInfo>> clustered) {
-        for (String tag : clustered.keySet()) {
-            int type = getNotificationTagType(tag);
-            List<DownloadInfo> cluster = clustered.get(tag);
-
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
-            useTimeWhenClusterFirstShownToAvoidShuffling(tag, builder);
-            buildIcon(type, builder);
-            buildActionIntents(tag, type, cluster, builder);
-
-            Notification notification = buildTitlesAndDescription(type, cluster, builder, batches);
-            mNotifManager.notify(tag.hashCode(), notification);
+            removeStaleTagsThatWereNotRenewed(clusters);
         }
     }
 
     @NonNull
-    private Map<String, List<DownloadInfo>> getClustersByNotificationTag(Map<Long, List<DownloadInfo>> batchDownloads) {
-        Map<String, List<DownloadInfo>> clustered = new HashMap<>();
+    private Map<String, List<DownloadBatch>> getClustersByNotificationTag(List<DownloadBatch> batches) {
+        Map<String, List<DownloadBatch>> clustered = new HashMap<>();
 
-        for (Map.Entry<Long, List<DownloadInfo>> batch : batchDownloads.entrySet()) {
-            List<DownloadInfo> downloadsInBatch = batch.getValue();
-            final String tag = buildNotificationTag(downloadsInBatch, batch.getKey());
+        for (DownloadBatch batch : batches) {
+            String tag = buildNotificationTag(batch);
 
-            for (DownloadInfo download : downloadsInBatch) {
-                addDownloadToCluster(tag, clustered, download);
-            }
+            addBatchToCluster(tag, clustered, batch);
         }
+
         return clustered;
     }
 
-    @NonNull
-    private Map<Long, List<DownloadInfo>> getDownloadsPerBatch(Collection<DownloadInfo> downloads) {
-        Map<Long, List<DownloadInfo>> batchDownloads = new HashMap<>();
-
-        for (DownloadInfo download : downloads) {
-            long batchId = download.batchId;
-            if (batchDownloads.containsKey(batchId)) {
-                batchDownloads.get(batchId).add(download);
-            } else {
-                List<DownloadInfo> downloadsInBatch = new ArrayList<>();
-                downloadsInBatch.add(download);
-                batchDownloads.put(batchId, downloadsInBatch);
-            }
+    /**
+     * Build tag used for collapsing several {@link DownloadInfo} into a single
+     * {@link Notification}.
+     */
+    private String buildNotificationTag(DownloadBatch batch) {
+        int status = batch.getStatus();
+        int visibility = batch.getInfo().getVisibility();
+        if (status == Downloads.Impl.STATUS_QUEUED_FOR_WIFI) {
+            return TYPE_WAITING + ":" + mContext.getPackageName();
+        } else if (status == Downloads.Impl.STATUS_RUNNING && shouldShowActiveItem(visibility)) {
+            return TYPE_ACTIVE + ":" + mContext.getPackageName();
+        } else if (Downloads.Impl.isStatusError(status) && !Downloads.Impl.isStatusCancelled(status)
+                && shouldShowCompletedItem(visibility)) {
+            // Failed downloads always have unique notifs
+            return TYPE_FAILED + ":" + batch.getBatchId();
+        } else if (Downloads.Impl.isStatusCancelled(status) && shouldShowCompletedItem(visibility)) {
+            // Cancelled downloads always have unique notifs
+            return TYPE_CANCELLED + ":" + batch.getBatchId();
+        } else if (Downloads.Impl.isStatusSuccess(status) && shouldShowCompletedItem(visibility)) {
+            // Complete downloads always have unique notifs
+            return TYPE_SUCCESS + ":" + batch.getBatchId();
+        } else {
+            return null;
         }
-        return batchDownloads;
     }
 
-    private void addDownloadToCluster(String tag, Map<String, List<DownloadInfo>> cluster, DownloadInfo info) {
+    private boolean shouldShowActiveItem(int visibility) {
+        return visibility == NotificationVisibility.ONLY_WHEN_ACTIVE
+                || visibility == NotificationVisibility.ACTIVE_OR_COMPLETE;
+    }
+
+    private boolean shouldShowCompletedItem(int visibility) {
+        return visibility == NotificationVisibility.ONLY_WHEN_COMPLETE
+                || visibility == NotificationVisibility.ACTIVE_OR_COMPLETE;
+    }
+
+    private void addBatchToCluster(String tag, Map<String, List<DownloadBatch>> cluster, DownloadBatch batch) {
         if (tag == null) {
             return;
         }
 
-        List<DownloadInfo> downloadInfos;
+        List<DownloadBatch> batches;
 
         if (cluster.containsKey(tag)) {
-            downloadInfos = cluster.get(tag);
+            batches = cluster.get(tag);
         } else {
-            downloadInfos = new ArrayList<DownloadInfo>();
-            cluster.put(tag, downloadInfos); // TODO not sure if this is right compared to ArrayListMultiMap
+            batches = new ArrayList<>();
+            cluster.put(tag, batches); // TODO not sure if this is right compared to ArrayListMultiMap
         }
 
-        downloadInfos.add(info);
+        batches.add(batch);
+    }
+
+    private void showNotificationPerCluster(Map<String, List<DownloadBatch>> clusters) {
+        for (String notificationId : clusters.keySet()) {
+            int type = getNotificationTagType(notificationId);
+            List<DownloadBatch> cluster = clusters.get(notificationId);
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
+            useTimeWhenClusterFirstShownToAvoidShuffling(notificationId, builder);
+            buildIcon(type, builder);
+            buildActionIntents(notificationId, type, cluster, builder);
+
+            Notification notification = buildTitlesAndDescription(type, cluster, builder);
+            mNotifManager.notify(notificationId.hashCode(), notification);
+        }
+    }
+
+    /**
+     * Return the cluster type of the given as created by
+     * {@link #buildNotificationTag(DownloadBatch)}.
+     */
+    private static int getNotificationTagType(String tag) {
+        return Integer.parseInt(tag.substring(0, tag.indexOf(':')));
     }
 
     private void useTimeWhenClusterFirstShownToAvoidShuffling(String tag, NotificationCompat.Builder builder) {
@@ -233,7 +236,7 @@ class DownloadNotifier {
         }
     }
 
-    private void buildActionIntents(String tag, int type, Collection<DownloadInfo> cluster, NotificationCompat.Builder builder) {
+    private void buildActionIntents(String tag, int type, List<DownloadBatch> cluster, NotificationCompat.Builder builder) {
         if (type == TYPE_ACTIVE || type == TYPE_WAITING) {
             // build a synthetic uri for intent identification purposes
             Uri uri = new Uri.Builder().scheme("active-dl").appendPath(tag).build();
@@ -242,40 +245,41 @@ class DownloadNotifier {
             builder.setContentIntent(PendingIntent.getBroadcast(mContext, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
             builder.setOngoing(true);
 
-            DownloadInfo info = cluster.iterator().next();
-            uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, info.mId);
-            Intent cancelIntent = new Intent(Constants.ACTION_CANCEL, uri, mContext, DownloadReceiver.class);
+            DownloadBatch batch = cluster.iterator().next();
+            Intent cancelIntent = new Intent(Constants.ACTION_CANCEL, null, mContext, DownloadReceiver.class);
+            cancelIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getBatchId());
             PendingIntent pendingCancelIntent = PendingIntent.getBroadcast(mContext, 0, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             builder.addAction(R.drawable.dl__ic_action_cancel, "Cancel", pendingCancelIntent);
 
         } else if (type == TYPE_SUCCESS) {
-            final DownloadInfo info = cluster.iterator().next();
-            final Uri uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, info.mId);
+            DownloadBatch batch = cluster.iterator().next();
+            // TODO: Decide how we handle notification clicks
+            DownloadInfo downloadInfo = batch.getDownloads().get(0);
+            Uri uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, downloadInfo.mId);
             builder.setAutoCancel(true);
 
             final String action;
-            if (Downloads.Impl.isStatusError(info.mStatus)) {
+            if (Downloads.Impl.isStatusError(batch.getStatus())) {
                 action = Constants.ACTION_LIST;
-            } else if (info.mDestination != Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION) {
-                action = Constants.ACTION_OPEN;
             } else {
-                action = Constants.ACTION_LIST;
+                action = Constants.ACTION_OPEN;
             }
 
             final Intent intent = new Intent(action, uri, mContext, DownloadReceiver.class);
             intent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, getDownloadIds(cluster));
+            intent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getBatchId());
             builder.setContentIntent(PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
 
             final Intent hideIntent = new Intent(Constants.ACTION_HIDE, uri, mContext, DownloadReceiver.class);
+            hideIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getBatchId());
             builder.setDeleteIntent(PendingIntent.getBroadcast(mContext, 0, hideIntent, 0));
         }
     }
 
     private Notification buildTitlesAndDescription(
             int type,
-            List<DownloadInfo> cluster,
-            NotificationCompat.Builder builder,
-            Map<Long, BatchInfo> batches) {
+            List<DownloadBatch> cluster,
+            NotificationCompat.Builder builder) {
 
         String remainingText = null;
         String percentText = null;
@@ -284,13 +288,15 @@ class DownloadNotifier {
             long totalBytes = 0;
             long totalBytesPerSecond = 0;
             synchronized (mDownloadSpeed) {
-                for (DownloadInfo info : cluster) {
-                    if (info.mTotalBytes != -1) {
-                        currentBytes += info.mCurrentBytes;
-                        totalBytes += info.mTotalBytes;
-                        Long bytesPerSecond = mDownloadSpeed.get(info.batchId);
-                        if (bytesPerSecond != null) {
-                            totalBytesPerSecond += bytesPerSecond;
+                for (DownloadBatch batch : cluster) {
+                    for (DownloadInfo info : batch.getDownloads()) {
+                        if (info.hasTotalBytes()) {
+                            currentBytes += info.mCurrentBytes;
+                            totalBytes += info.mTotalBytes;
+                            Long bytesPerSecond = mDownloadSpeed.get(info.mId);
+                            if (bytesPerSecond != null) {
+                                totalBytesPerSecond += bytesPerSecond;
+                            }
                         }
                     }
                 }
@@ -311,14 +317,13 @@ class DownloadNotifier {
             }
         }
 
-        Set<BatchInfo> currentBatches = new HashSet<>();
-        for (DownloadInfo info : cluster) {
-            BatchInfo batch = batches.get(info.batchId);
+        Set<DownloadBatch> currentBatches = new HashSet<>();
+        for (DownloadBatch batch : cluster) {
             currentBatches.add(batch);
         }
 
         if (currentBatches.size() == 1) {
-            BatchInfo batch = currentBatches.iterator().next();
+            DownloadBatch batch = currentBatches.iterator().next();
             return buildSingleNotification(type, builder, batch, remainingText, percentText);
 
         } else {
@@ -327,20 +332,38 @@ class DownloadNotifier {
 
     }
 
-    private Notification buildSingleNotification(int type, NotificationCompat.Builder builder, BatchInfo batch, String remainingText, String percentText) {
+    /**
+     * Return given duration in a human-friendly format. For example, "4
+     * minutes" or "1 second". Returns only largest meaningful unit of time,
+     * from seconds up to hours.
+     */
+    public CharSequence formatDuration(long millis) {
+        if (millis >= DateUtils.HOUR_IN_MILLIS) {
+            int hours = (int) TimeUnit.MILLISECONDS.toHours(millis + TimeUnit.MINUTES.toMillis(30));
+            return resources.getQuantityString(R.plurals.dl__duration_hours, hours, hours);
+        } else if (millis >= DateUtils.MINUTE_IN_MILLIS) {
+            int minutes = (int) TimeUnit.MILLISECONDS.toMinutes(millis + TimeUnit.SECONDS.toMillis(30));
+            return resources.getQuantityString(R.plurals.dl__duration_minutes, minutes, minutes);
+        } else {
+            int seconds = (int) TimeUnit.MILLISECONDS.toSeconds(millis + 500);
+            return resources.getQuantityString(R.plurals.dl__duration_seconds, seconds, seconds);
+        }
+    }
+
+    private Notification buildSingleNotification(int type, NotificationCompat.Builder builder, DownloadBatch batch, String remainingText, String percentText) {
 
         NotificationCompat.BigPictureStyle style = new NotificationCompat.BigPictureStyle();
-        String imageUrl = batch.getBigPictureUrl();
+        String imageUrl = batch.getInfo().getBigPictureUrl();
         if (!TextUtils.isEmpty(imageUrl)) {
             Bitmap bitmap = imageRetriever.retrieveImage(imageUrl);
             style.bigPicture(bitmap);
         }
-        CharSequence title = getDownloadTitle(batch);
+        CharSequence title = getDownloadTitle(batch.getInfo());
         builder.setContentTitle(title);
         style.setBigContentTitle(title);
 
         if (type == TYPE_ACTIVE) {
-            String description = batch.getDescription();
+            String description = batch.getInfo().getDescription();
             if (TextUtils.isEmpty(description)) {
                 setSecondaryNotificationText(builder, style, remainingText);
             } else {
@@ -370,11 +393,11 @@ class DownloadNotifier {
         style.setSummaryText(description);
     }
 
-    private Notification buildStackedNotification(int type, NotificationCompat.Builder builder, Set<BatchInfo> currentBatches, String remainingText, String percentText) {
+    private Notification buildStackedNotification(int type, NotificationCompat.Builder builder, Set<DownloadBatch> currentBatches, String remainingText, String percentText) {
         final NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(builder);
 
-        for (BatchInfo batch : currentBatches) {
-            inboxStyle.addLine(getDownloadTitle(batch));
+        for (DownloadBatch batch : currentBatches) {
+            inboxStyle.addLine(getDownloadTitle(batch.getInfo()));
         }
 
         if (type == TYPE_ACTIVE) {
@@ -400,7 +423,7 @@ class DownloadNotifier {
         style.setSummaryText(description);
     }
 
-    private void removeStaleTagsThatWereNotRenewed(Map<String, List<DownloadInfo>> clustered) {
+    private void removeStaleTagsThatWereNotRenewed(Map<String, List<DownloadBatch>> clustered) {
         final Iterator<String> tags = mActiveNotifs.keySet().iterator();
         while (tags.hasNext()) {
             final String tag = tags.next();
@@ -420,131 +443,24 @@ class DownloadNotifier {
         }
     }
 
-    private long[] getDownloadIds(Collection<DownloadInfo> infos) {
-        final long[] ids = new long[infos.size()];
-        int i = 0;
-        for (DownloadInfo info : infos) {
-            ids[i++] = info.mId;
+    private long[] getDownloadIds(List<DownloadBatch> batches) {
+        List<Long> ids = new ArrayList<>();
+        for (DownloadBatch batch : batches) {
+            for (DownloadInfo downloadInfo : batch.getDownloads()) {
+                ids.add(downloadInfo.mId);
+            }
         }
-        return ids;
+
+        long[] idArray = new long[ids.size()];
+
+        for (int i = 0, idsSize = ids.size(); i < idsSize; i++) {
+            idArray[i] = ids.get(i);
+        }
+        return idArray;
     }
 
     public void dumpSpeeds() {
         Log.e("dump at speed");
     }
 
-    /**
-     * Build tag used for collapsing several {@link DownloadInfo} into a single
-     * {@link Notification}.
-     *
-     * @param downloads
-     * @param batchId
-     */
-    private String buildNotificationTag(List<DownloadInfo> downloads, long batchId) {
-        if (areAllDownloadsQueued(downloads)) {
-            return TYPE_WAITING + ":" + getPackageName();
-        } else if (areAnyActiveAndVisible(downloads)) {
-            return TYPE_ACTIVE + ":" + getPackageName();
-        } else if (areAnyFailedAndVisible(downloads)) {
-            // Failed downloads always have unique notifs
-            return TYPE_FAILED + ":" + batchId;
-        } else if (areAnyCancelledAndVisible(downloads)) {
-            // Cancelled downloads always have unique notifs
-            return TYPE_CANCELLED + ":" + batchId;
-        } else if (areAllSuccessfulAndVisible(downloads)) {
-            // Complete downloads always have unique notifs
-            return TYPE_SUCCESS + ":" + batchId;
-        } else {
-            return null;
-        }
-    }
-
-    private static boolean areAllDownloadsQueued(List<DownloadInfo> downloads) {
-        for (DownloadInfo download : downloads) {
-            boolean isNotQueuedForWiFi = download.mStatus != Downloads.Impl.STATUS_QUEUED_FOR_WIFI;
-            if (isNotQueuedForWiFi) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static boolean areAnyFailedAndVisible(List<DownloadInfo> downloads) {
-        for (DownloadInfo download : downloads) {
-            boolean isFailed = Downloads.Impl.isStatusError(download.mStatus) && !Downloads.Impl.isStatusCancelled(download.mStatus);
-            boolean isVisible = download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION
-                    || download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED;
-            if (isFailed && isVisible) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean areAnyCancelledAndVisible(List<DownloadInfo> downloads) {
-        for (DownloadInfo download : downloads) {
-            boolean isCancelled = Downloads.Impl.isStatusCancelled(download.mStatus);
-            boolean isVisible = download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION
-                    || download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED;
-            if (isCancelled && isVisible) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private String getPackageName() {
-        return mContext.getPackageName();
-    }
-
-    /**
-     * Return the cluster type of the given as created by
-     * {@link #buildNotificationTag(List, long)}.
-     */
-    private static int getNotificationTagType(String tag) {
-        return Integer.parseInt(tag.substring(0, tag.indexOf(':')));
-    }
-
-    private static boolean areAnyActiveAndVisible(List<DownloadInfo> downloads) {
-        for (DownloadInfo download : downloads) {
-            boolean isActive = download.mStatus == Downloads.Impl.STATUS_RUNNING;
-            boolean isVisible = download.mVisibility == VISIBILITY_VISIBLE
-                    || download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED;
-            if (isActive && isVisible) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static boolean areAllSuccessfulAndVisible(List<DownloadInfo> downloads) {
-        for (DownloadInfo download : downloads) {
-            boolean isSuccessful = Downloads.Impl.isStatusSuccess(download.mStatus);
-            boolean isVisible = download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION
-                    || download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED;
-            if (!(isSuccessful && isVisible)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Return given duration in a human-friendly format. For example, "4
-     * minutes" or "1 second". Returns only largest meaningful unit of time,
-     * from seconds up to hours.
-     */
-    public CharSequence formatDuration(long millis) {
-        if (millis >= DateUtils.HOUR_IN_MILLIS) {
-            int hours = (int) TimeUnit.MILLISECONDS.toHours(millis + TimeUnit.MINUTES.toMillis(30));
-            return resources.getQuantityString(R.plurals.dl__duration_hours, hours, hours);
-        } else if (millis >= DateUtils.MINUTE_IN_MILLIS) {
-            int minutes = (int) TimeUnit.MILLISECONDS.toMinutes(millis + TimeUnit.SECONDS.toMillis(30));
-            return resources.getQuantityString(R.plurals.dl__duration_minutes, minutes, minutes);
-        } else {
-            int seconds = (int) TimeUnit.MILLISECONDS.toSeconds(millis + 500);
-            return resources.getQuantityString(R.plurals.dl__duration_seconds, seconds, seconds);
-        }
-    }
 }
