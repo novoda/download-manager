@@ -125,8 +125,8 @@ final class DatabaseHelper extends SQLiteOpenHelper {
                 "CREATE TABLE " + Downloads.Impl.Batches.BATCHES_TABLE_NAME + "(" +
                         Downloads.Impl.Batches._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                         Downloads.Impl.Batches.COLUMN_TITLE + " TEXT NOT NULL," +
-                        Downloads.Impl.Batches.COLUMN_DESCRIPTION + " TEXT NOT NULL," +
-                        Downloads.Impl.Batches.COLUMN_BIG_PICTURE + " TEXT NOT NULL," +
+                        Downloads.Impl.Batches.COLUMN_DESCRIPTION + " TEXT," +
+                        Downloads.Impl.Batches.COLUMN_BIG_PICTURE + " TEXT," +
                         Downloads.Impl.Batches.COLUMN_STATUS + " INTEGER," +
                         Downloads.Impl.Batches.COLUMN_VISIBILITY + " INTEGER" +
                         ");");
