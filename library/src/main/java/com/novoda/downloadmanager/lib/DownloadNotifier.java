@@ -185,17 +185,17 @@ class DownloadNotifier {
     }
 
     private void showNotificationPerCluster(Map<String, List<DownloadBatch>> clusters) {
-        for (String tag : clusters.keySet()) {
-            int type = getNotificationTagType(tag);
-            List<DownloadBatch> cluster = clusters.get(tag);
+        for (String notificationId : clusters.keySet()) {
+            int type = getNotificationTagType(notificationId);
+            List<DownloadBatch> cluster = clusters.get(notificationId);
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
-            useTimeWhenClusterFirstShownToAvoidShuffling(tag, builder);
+            useTimeWhenClusterFirstShownToAvoidShuffling(notificationId, builder);
             buildIcon(type, builder);
-            buildActionIntents(tag, type, cluster, builder);
+            buildActionIntents(notificationId, type, cluster, builder);
 
             Notification notification = buildTitlesAndDescription(type, cluster, builder);
-            mNotifManager.notify(tag.hashCode(), notification);
+            mNotifManager.notify(notificationId.hashCode(), notification);
         }
     }
 
