@@ -85,6 +85,11 @@ public class DownloadManager {
     public static final String COLUMN_BATCH_ID = Downloads.Impl.COLUMN_BATCH_ID;
 
     /**
+     * The status of the batch that contains this download.
+     */
+    public static final String COLUMN_BATCH_STATUS = Downloads.Impl.Batches.COLUMN_STATUS;
+
+    /**
      * URI to be downloaded.
      */
     public static final String COLUMN_URI = Downloads.Impl.COLUMN_URI;
@@ -748,18 +753,22 @@ public class DownloadManager {
 
         @Override
         public long getLong(int columnIndex) {
-            if (getColumnName(columnIndex).equals(COLUMN_REASON)) {
-                return getReason(super.getInt(getColumnIndex(Downloads.Impl.COLUMN_STATUS)));
-            } else if (getColumnName(columnIndex).equals(COLUMN_STATUS)) {
-                return translateStatus(super.getInt(getColumnIndex(Downloads.Impl.COLUMN_STATUS)));
-            } else {
-                return super.getLong(columnIndex);
+            String columnName = getColumnName(columnIndex);
+            switch (columnName) {
+                case COLUMN_REASON:
+                    return getReason(super.getInt(getColumnIndex(Downloads.Impl.COLUMN_STATUS)));
+                case COLUMN_STATUS:
+                    return translateStatus(super.getInt(getColumnIndex(Downloads.Impl.COLUMN_STATUS)));
+                case COLUMN_BATCH_STATUS:
+                    return translateStatus(super.getInt(getColumnIndex(Downloads.Impl.Batches.COLUMN_STATUS)));
+                default:
+                    return super.getLong(columnIndex);
             }
         }
 
         @Override
         public String getString(int columnIndex) {
-            return (getColumnName(columnIndex).equals(COLUMN_LOCAL_URI)) ? getLocalUri() : super.getString(columnIndex);
+            return getColumnName(columnIndex).equals(COLUMN_LOCAL_URI) ? getLocalUri() : super.getString(columnIndex);
         }
 
         private String getLocalUri() {
