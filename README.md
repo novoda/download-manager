@@ -48,31 +48,7 @@ public class Authority {
 
 ## Database Filename
 
-By default the downloads database will be stored in your application data in a file named 'downloads.db'. Power users can override this
-by specifying a value for `com.novoda.downloadmanager.DatabaseFilename` in the metadata within the manifest.
-
-```xml
-<manifest
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.myorg.myapp" >
-
-  <uses-permission android:name="android.permission.INTERNET" />
-
-  <application
-    android:allowBackup="true"
-    android:icon="@mipmap/ic_launcher"
-    android:label="@string/app_name"
-    android:theme="@style/AppTheme">
-    .
-    .
-    .
-    <meta-data
-      android:name="com.novoda.downloadmanager.DatabaseFilename"
-      android:value="my_database.db" />
-  </application>
-
-</manifest>
-```
+It is possible to override the database filename. See [Advanced Usage](https://github.com/novoda/download-manager/wiki/Advanced-Useage) for details.
 
 ## Links
 
