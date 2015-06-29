@@ -35,6 +35,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
         createDownloadsTable(db);
         createHeadersTable(db);
         createBatchesTable(db);
+        createDownloadsByBatchView(db);
         makeCacheDownloadsInvisible(db);
     }
 
@@ -55,20 +56,18 @@ final class DatabaseHelper extends SQLiteOpenHelper {
      */
     private void createDownloadsTable(SQLiteDatabase db) {
         try {
-            db.execSQL("DROP TABLE IF EXISTS " + Downloads.Impl.TABLE_NAME);
-            db.execSQL("CREATE TABLE " + Downloads.Impl.TABLE_NAME + "(" +
+            db.execSQL("DROP TABLE IF EXISTS " + Downloads.Impl.DOWNLOADS_TABLE_NAME);
+            db.execSQL("CREATE TABLE " + Downloads.Impl.DOWNLOADS_TABLE_NAME + "(" +
                     Downloads.Impl._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                     Downloads.Impl.COLUMN_URI + " TEXT, " +
                     Constants.RETRY_AFTER_X_REDIRECT_COUNT + " INTEGER, " +
                     Downloads.Impl.COLUMN_APP_DATA + " TEXT, " +
                     Downloads.Impl.COLUMN_NO_INTEGRITY + " BOOLEAN, " +
                     Downloads.Impl.COLUMN_FILE_NAME_HINT + " TEXT, " +
-                    Constants.OTA_UPDATE + " BOOLEAN, " +
                     Downloads.Impl._DATA + " TEXT, " +
                     Downloads.Impl.COLUMN_MIME_TYPE + " TEXT, " +
                     Downloads.Impl.COLUMN_DESTINATION + " INTEGER, " +
                     Constants.NO_SYSTEM_FILES + " BOOLEAN, " +
-                    Downloads.Impl.COLUMN_VISIBILITY + " INTEGER, " +
                     Downloads.Impl.COLUMN_CONTROL + " INTEGER, " +
                     Downloads.Impl.COLUMN_STATUS + " INTEGER, " +
                     Downloads.Impl.COLUMN_FAILED_CONNECTIONS + " INTEGER, " +
@@ -83,12 +82,6 @@ final class DatabaseHelper extends SQLiteOpenHelper {
                     Constants.ETAG + " TEXT, " +
                     Constants.UID + " INTEGER, " +
                     Downloads.Impl.COLUMN_OTHER_UID + " INTEGER, " +
-
-                    // these 3 columns should be on the batch table only
-                    Downloads.Impl.COLUMN_TITLE + " TEXT NOT NULL DEFAULT '', " +
-                    Downloads.Impl.COLUMN_DESCRIPTION + " TEXT NOT NULL DEFAULT '', " +
-                    Downloads.Impl.COLUMN_BIG_PICTURE + " TEXT, " +
-
                     Downloads.Impl.COLUMN_ALLOW_ROAMING + " INTEGER NOT NULL DEFAULT 0, " +
                     Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES + " INTEGER NOT NULL DEFAULT 0, " +
                     Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI + " INTEGER NOT NULL DEFAULT 1, " +
@@ -112,7 +105,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, false);
         String cacheSelection = Downloads.Impl.COLUMN_DESTINATION + " != " + Downloads.Impl.DESTINATION_EXTERNAL;
-        db.update(Downloads.Impl.TABLE_NAME, values, cacheSelection, null);
+        db.update(Downloads.Impl.DOWNLOADS_TABLE_NAME, values, cacheSelection, null);
     }
 
     private void createHeadersTable(SQLiteDatabase db) {
@@ -127,15 +120,67 @@ final class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     private void createBatchesTable(SQLiteDatabase db) {
-        db.execSQL("DROP TABLE IF EXISTS " + Downloads.Impl.Batches.BATCHES_DB_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + Downloads.Impl.Batches.BATCHES_TABLE_NAME);
         db.execSQL(
-                "CREATE TABLE " + Downloads.Impl.Batches.BATCHES_DB_TABLE + "(" +
+                "CREATE TABLE " + Downloads.Impl.Batches.BATCHES_TABLE_NAME + "(" +
                         Downloads.Impl.Batches._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                         Downloads.Impl.Batches.COLUMN_TITLE + " TEXT NOT NULL," +
-                        Downloads.Impl.Batches.COLUMN_DESCRIPTION + " TEXT NOT NULL," +
-                        Downloads.Impl.Batches.COLUMN_BIG_PICTURE + " TEXT NOT NULL," +
+                        Downloads.Impl.Batches.COLUMN_DESCRIPTION + " TEXT," +
+                        Downloads.Impl.Batches.COLUMN_BIG_PICTURE + " TEXT," +
                         Downloads.Impl.Batches.COLUMN_STATUS + " INTEGER," +
                         Downloads.Impl.Batches.COLUMN_VISIBILITY + " INTEGER" +
                         ");");
+    }
+
+    private void createDownloadsByBatchView(SQLiteDatabase db) {
+        db.execSQL("DROP VIEW IF EXISTS " + Downloads.Impl.VIEW_NAME_DOWNLOADS_BY_BATCH);
+        db.execSQL("CREATE VIEW " + Downloads.Impl.VIEW_NAME_DOWNLOADS_BY_BATCH
+                        + " AS SELECT DISTINCT "
+                        + projectionFrom(DOWNLOAD_BY_BATCH_VIEW_COLUMNS)
+                        + " FROM " + Downloads.Impl.DOWNLOADS_TABLE_NAME
+                        + " INNER JOIN " + Downloads.Impl.Batches.BATCHES_TABLE_NAME
+                        + " ON " + Downloads.Impl.DOWNLOADS_TABLE_NAME + "." + Downloads.Impl.COLUMN_BATCH_ID
+                        + " = " + Downloads.Impl.Batches.BATCHES_TABLE_NAME + "." + Downloads.Impl.Batches._ID + ";"
+        );
+    }
+
+    /**
+     * columns to request from DownloadProvider.
+     */
+    public static final String[] DOWNLOAD_BY_BATCH_VIEW_COLUMNS = new String[]{
+            Downloads.Impl.DOWNLOADS_TABLE_NAME + "." + Downloads.Impl._ID + " AS _id",
+            Downloads.Impl._DATA,
+            Downloads.Impl.COLUMN_MEDIAPROVIDER_URI,
+            Downloads.Impl.COLUMN_DESTINATION,
+            Downloads.Impl.COLUMN_URI,
+            Downloads.Impl.COLUMN_STATUS,
+            Downloads.Impl.COLUMN_DELETED,
+            Downloads.Impl.COLUMN_FILE_NAME_HINT,
+            Downloads.Impl.COLUMN_MIME_TYPE,
+            Downloads.Impl.COLUMN_TOTAL_BYTES,
+            Downloads.Impl.COLUMN_LAST_MODIFICATION,
+            Downloads.Impl.COLUMN_CURRENT_BYTES,
+            Downloads.Impl.COLUMN_BATCH_ID,
+            Downloads.Impl.Batches.COLUMN_TITLE,
+            Downloads.Impl.Batches.COLUMN_DESCRIPTION,
+            Downloads.Impl.Batches.COLUMN_BIG_PICTURE,
+            Downloads.Impl.Batches.COLUMN_VISIBILITY,
+            Downloads.Impl.Batches.COLUMN_STATUS
+    };
+
+    private String projectionFrom(String[] array) {
+        if (array == null) {
+            return "null";
+        }
+        if (array.length == 0) {
+            return "[]";
+        }
+        StringBuilder sb = new StringBuilder(array.length * 7);
+        sb.append(array[0]);
+        for (int i = 1; i < array.length; i++) {
+            sb.append(", ");
+            sb.append(array[i]);
+        }
+        return sb.toString();
     }
 }

@@ -12,11 +12,6 @@ class Constants {
     public static final String RETRY_AFTER_X_REDIRECT_COUNT = "method";
 
     /**
-     * The column that used to be used for the magic OTA update filename
-     */
-    public static final String OTA_UPDATE = "otaupdate";
-
-    /**
      * The column that used to be used to reject system filetypes
      */
     public static final String NO_SYSTEM_FILES = "no_system";

@@ -72,7 +72,6 @@ class DownloadInfo {
             info.mFileName = getString(Downloads.Impl._DATA);
             info.mMimeType = getString(Downloads.Impl.COLUMN_MIME_TYPE);
             info.mDestination = getInt(Downloads.Impl.COLUMN_DESTINATION);
-            info.mVisibility = getInt(Downloads.Impl.COLUMN_VISIBILITY);
             info.mStatus = getInt(Downloads.Impl.COLUMN_STATUS);
             info.mNumFailed = getInt(Downloads.Impl.COLUMN_FAILED_CONNECTIONS);
             int retryRedirect = getInt(Constants.RETRY_AFTER_X_REDIRECT_COUNT);
@@ -93,10 +92,7 @@ class DownloadInfo {
             info.mAllowedNetworkTypes = getInt(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES);
             info.mAllowRoaming = getInt(Downloads.Impl.COLUMN_ALLOW_ROAMING) != 0;
             info.mAllowMetered = getInt(Downloads.Impl.COLUMN_ALLOW_METERED) != 0;
-            info.mTitle = getString(Downloads.Impl.COLUMN_TITLE);
-            info.mDescription = getString(Downloads.Impl.COLUMN_DESCRIPTION);
             info.mBypassRecommendedSizeLimit = getInt(Downloads.Impl.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
-            info.bigPictureResourceUrl = getString(Downloads.Impl.COLUMN_BIG_PICTURE);
             info.batchId = getLong(Downloads.Impl.COLUMN_BATCH_ID);
 
             synchronized (this) {
@@ -229,10 +225,7 @@ class DownloadInfo {
     public int mAllowedNetworkTypes;
     public boolean mAllowRoaming;
     public boolean mAllowMetered;
-    public String mTitle;
-    public String mDescription;
     public int mBypassRecommendedSizeLimit;
-    public String bigPictureResourceUrl;
     public long batchId;
 
     private List<Pair<String, String>> mRequestHeaders = new ArrayList<Pair<String, String>>();
@@ -341,20 +334,6 @@ class DownloadInfo {
             case Downloads.Impl.STATUS_INSUFFICIENT_SPACE_ERROR:
                 // avoids repetition of retrying download
                 return false;
-        }
-        return false;
-    }
-
-    /**
-     * Returns whether this download has a visible notification after
-     * completion.
-     */
-    public boolean hasCompletionNotification() {
-        if (!Downloads.Impl.isStatusCompleted(mStatus)) {
-            return false;
-        }
-        if (mVisibility == NotificationVisibility.ACTIVE_OR_COMPLETE) {
-            return true;
         }
         return false;
     }

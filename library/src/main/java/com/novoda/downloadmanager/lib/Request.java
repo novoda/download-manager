@@ -39,7 +39,7 @@ public class Request {
 
     private Uri mUri;
     private Uri mDestinationUri;
-    private List<Pair<String, String>> mRequestHeaders = new ArrayList<Pair<String, String>>();
+    private List<Pair<String, String>> mRequestHeaders = new ArrayList<>();
     private CharSequence mTitle;
     private CharSequence mDescription;
     private String mMimeType;
@@ -419,17 +419,13 @@ public class Request {
             encodeHttpHeaders(values);
         }
 
-        putIfNonNull(values, Downloads.Impl.COLUMN_TITLE, mTitle);
-        putIfNonNull(values, Downloads.Impl.COLUMN_DESCRIPTION, mDescription);
         putIfNonNull(values, Downloads.Impl.COLUMN_MIME_TYPE, mMimeType);
 
-        values.put(Downloads.Impl.COLUMN_VISIBILITY, mNotificationVisibility);
         values.put(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES, mAllowedNetworkTypes);
         values.put(Downloads.Impl.COLUMN_ALLOW_ROAMING, mRoamingAllowed);
         values.put(Downloads.Impl.COLUMN_ALLOW_METERED, mMeteredAllowed);
         values.put(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, mIsVisibleInDownloadsUi);
         values.put(Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS, extraField);
-        values.put(Downloads.Impl.COLUMN_BIG_PICTURE, bigPictureUrl);
         values.put(Downloads.Impl.COLUMN_BATCH_ID, batchId);
 
         return values;

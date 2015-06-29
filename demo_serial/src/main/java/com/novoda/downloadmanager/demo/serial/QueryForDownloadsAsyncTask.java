@@ -2,6 +2,7 @@ package com.novoda.downloadmanager.demo.serial;
 
 import android.database.Cursor;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.Query;
@@ -25,7 +26,7 @@ public class QueryForDownloadsAsyncTask extends AsyncTask<Query, Void, List<Down
     }
 
     @Override
-    protected List<Download> doInBackground(Query... params) {
+    protected List<Download> doInBackground(@NonNull Query... params) {
         Cursor cursor = downloadManager.query(params[0]);
         List<Download> downloads = new ArrayList<>();
         try {
@@ -42,7 +43,7 @@ public class QueryForDownloadsAsyncTask extends AsyncTask<Query, Void, List<Down
     }
 
     @Override
-    protected void onPostExecute(List<Download> downloads) {
+    protected void onPostExecute(@NonNull List<Download> downloads) {
         super.onPostExecute(downloads);
         Callback callback = weakCallback.get();
         if (callback == null) {

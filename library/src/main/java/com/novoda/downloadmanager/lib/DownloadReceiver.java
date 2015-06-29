@@ -12,7 +12,6 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.provider.BaseColumns;
 import android.support.annotation.NonNull;
 import android.widget.Toast;
 
@@ -31,7 +30,6 @@ import static com.novoda.downloadmanager.lib.NotificationVisibility.ONLY_WHEN_CO
 public class DownloadReceiver extends BroadcastReceiver {
     private static final String TAG = "DownloadReceiver";
 
-    public static final String EXTRA_DOWNLOAD_TITLE = "com.novoda.extra.DOWNLOAD_TITLE";
     public static final String EXTRA_BATCH_ID = "com.novoda.extra.BATCH_ID";
     public static final int TRUE_THIS_IS_CLEARER_NOW = 1;
 
@@ -142,15 +140,12 @@ public class DownloadReceiver extends BroadcastReceiver {
      * user so it's not renewed later.
      */
     private void hideNotification(Context context, long batchId) {
-        int status;
-        @NotificationVisibility.Value int visibility;
-
         Uri uri = ContentUris.withAppendedId(Downloads.Impl.BATCH_CONTENT_URI, batchId);
         Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
         try {
             if (cursor.moveToFirst()) {
-                status = getInt(cursor, Downloads.Impl.Batches.COLUMN_STATUS);
-                visibility = getInt(cursor, Downloads.Impl.Batches.COLUMN_VISIBILITY);
+                int status = getInt(cursor, Downloads.Impl.Batches.COLUMN_STATUS);
+                @NotificationVisibility.Value int visibility = getInt(cursor, Downloads.Impl.Batches.COLUMN_VISIBILITY);
 
                 if ((Downloads.Impl.isStatusCancelled(status) || Downloads.Impl.isStatusCompleted(status))
                         && (visibility == ACTIVE_OR_COMPLETE || visibility == ONLY_WHEN_COMPLETE)) {
@@ -196,41 +191,19 @@ public class DownloadReceiver extends BroadcastReceiver {
     private void deleteDownloadThroughDatabaseState(Context context, Intent intent) {
         ContentValues values = new ContentValues(1);
         values.put(Downloads.Impl.COLUMN_DELETED, TRUE_THIS_IS_CLEARER_NOW);
-        context.getContentResolver().update(
-                getDownloadUri(context, intent), values, null, null);
+        context.getContentResolver().update(getDownloadUri(intent), values, null, null);
     }
 
-    private Uri getDownloadUri(Context context, Intent intent) {
+    private Uri getDownloadUri(Intent intent) {
         long downloadId = -1;
         if (intent.getData() != null) {
             downloadId = ContentUris.parseId(intent.getData());
-        } else if (intent.hasExtra(EXTRA_DOWNLOAD_TITLE)) {
-            String title = intent.getStringExtra(EXTRA_DOWNLOAD_TITLE);
-            Cursor download = queryDownloads(context, title);
-            try {
-                if (download.moveToNext()) {
-                    downloadId = download.getLong(download.getColumnIndex(BaseColumns._ID));
-                } else {
-                    Log.e("title to download does not exist as a download");
-                }
-            } finally {
-                download.close();
-            }
         }
         return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, downloadId);
     }
 
     private long getBatchId(Intent intent) {
         return intent.getLongExtra(EXTRA_BATCH_ID, -1);
-    }
-
-    private Cursor queryDownloads(Context context, String title) {
-        return context.getContentResolver().query(
-                Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null,
-                Downloads.Impl.COLUMN_TITLE + " = ? AND " +
-                        Downloads.Impl.COLUMN_STATUS + " <= ?",
-                new String[]{title.toUpperCase(),
-                        String.valueOf(Downloads.Impl.STATUS_SUCCESS)}, null);
     }
 
     private static int getInt(Cursor cursor, String col) {

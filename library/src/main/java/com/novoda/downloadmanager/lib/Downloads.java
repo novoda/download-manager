@@ -101,6 +101,11 @@ final class Downloads {
         public static final Uri ALL_DOWNLOADS_CONTENT_URI = Uri.parse(AUTHORITY + "/all_downloads");
 
         /**
+         * The content:// URI to access downloads and their batch data.
+         */
+        public static final Uri DOWNLOADS_BY_BATCH_URI = Uri.parse(AUTHORITY + "/downloads_by_batch");
+
+        /**
          * URI segment to access a publicly accessible downloaded file
          */
         public static final String PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT = "public_downloads";
@@ -112,9 +117,14 @@ final class Downloads {
         public static final Uri PUBLICLY_ACCESSIBLE_DOWNLOADS_URI = Uri.parse(AUTHORITY + "/" + PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT);
 
         /**
-         * Name of table in the database
+         * Name of downloadstable in the database
          */
-        public static final String TABLE_NAME = "Downloads";
+        public static final String DOWNLOADS_TABLE_NAME = "Downloads";
+
+        /**
+         * Name of downloadstable in the database
+         */
+        public static final String VIEW_NAME_DOWNLOADS_BY_BATCH = "DownloadsByBatch";
 
         /**
          * The name of the column containing the URI of the data being downloaded.
@@ -176,15 +186,6 @@ final class Downloads {
         public static final String COLUMN_DESTINATION = "destination";
 
         /**
-         * The name of the column containing the flags that controls whether the
-         * download is displayed by the UI. See the VISIBILITY_* constants for
-         * a list of legal values.
-         * <P>Type: INTEGER</P>
-         * <P>Owner can Init/Read/Write</P>
-         */
-        public static final String COLUMN_VISIBILITY = "visibility";
-
-        /**
          * The name of the column containing the current control state  of the download.
          * Applications can write to this to control (pause/resume) the download.
          * the CONTROL_* constants for a list of legal values.
@@ -228,11 +229,6 @@ final class Downloads {
          * <P>Owner can Init</P>
          */
         public static final String COLUMN_NOTIFICATION_EXTRAS = "notificationextras";
-
-        /**
-         * A resource ID that will be used to show a big picture style notification
-         */
-        public static final String COLUMN_BIG_PICTURE = "notificationBigPictureResourceId";
 
         /**
          * The ID of the batch that the download belongs to
@@ -292,24 +288,6 @@ final class Downloads {
          * <P>Owner can Init</P>
          */
         public static final String COLUMN_OTHER_UID = "otheruid";
-
-        /**
-         * The name of the column where the initiating application can provided the
-         * title of this download. The title will be displayed ito the user in the
-         * list of downloads.
-         * <P>Type: TEXT</P>
-         * <P>Owner can Init/Read/Write</P>
-         */
-        public static final String COLUMN_TITLE = "title";
-
-        /**
-         * The name of the column where the initiating application can provide the
-         * description of this download. The description will be displayed to the
-         * user in the list of downloads.
-         * <P>Type: TEXT</P>
-         * <P>Owner can Init/Read/Write</P>
-         */
-        public static final String COLUMN_DESCRIPTION = "description";
 
         /**
          * The name of the column holding a bitmask of allowed network types.  This is only used for
@@ -788,7 +766,7 @@ final class Downloads {
          * Constants related to batches associated with each download.
          */
         public static class Batches implements BaseColumns {
-            public static final String BATCHES_DB_TABLE = "batches";
+            public static final String BATCHES_TABLE_NAME = "batches";
 
             /**
              * The name of the column where the initiating application can provided the
