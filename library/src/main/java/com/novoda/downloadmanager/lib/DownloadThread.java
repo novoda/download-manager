@@ -852,14 +852,11 @@ class DownloadThread implements Runnable {
         int batchStatus = batchStatusUpdater.getBatchStatus(batchId);
         batchStatusUpdater.updateBatchStatus(batchId, batchStatus);
 
-        Log.d("Batch " + batchId + " status: " + batchStatus);
-
         if (Downloads.Impl.isStatusCancelled(batchStatus)) {
             ContentValues values = new ContentValues();
             values.put(COLUMN_STATUS, STATUS_CANCELED);
             getContentResolver().update(ALL_DOWNLOADS_CONTENT_URI, values, COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
         } else if (Downloads.Impl.isStatusError(batchStatus)) {
-            Log.d("Setting error code on batch for download " + downloadId);
             ContentValues values = new ContentValues();
             values.put(COLUMN_STATUS, STATUS_BATCH_FAILED);
             getContentResolver().update(
