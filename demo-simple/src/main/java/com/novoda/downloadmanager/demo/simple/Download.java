@@ -1,4 +1,4 @@
-package com.novoda.downloadmanager.demo.parallel;
+package com.novoda.downloadmanager.demo.simple;
 
 import com.novoda.downloadmanager.lib.DownloadManager;
 

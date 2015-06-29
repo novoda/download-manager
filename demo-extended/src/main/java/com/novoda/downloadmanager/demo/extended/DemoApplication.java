@@ -1,10 +1,10 @@
-package com.novoda.downloadmanager.demo.serial;
+package com.novoda.downloadmanager.demo.extended;
 
 import android.app.Application;
 
 import com.novoda.downloadmanager.lib.DownloadClientReadyChecker;
 
-public class DemoSerialApplication extends Application implements DownloadClientReadyChecker {
+public class DemoApplication extends Application implements DownloadClientReadyChecker {
     @Override
     public boolean isAllowedToDownload() {
         // Here you would add any reasons you may not want to download

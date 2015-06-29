@@ -1,4 +1,4 @@
-package com.novoda.downloadmanager.demo.serial;
+package com.novoda.downloadmanager.demo.extended;
 
 import com.novoda.downloadmanager.lib.DownloadManager;
 
