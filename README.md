@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.novoda:download-manager:0.0.9'
+    compile 'com.novoda:download-manager:0.0.12'
 }
 ```
 
@@ -45,6 +45,11 @@ public class Authority {
     public static final String AUTHORITY = "com.your.unique.authority";
 }
 ```
+
+## Database Filename
+
+It is possible to override the database filename. See [Advanced Usage](https://github.com/novoda/download-manager/wiki/Advanced-Useage),
+ or take a look at the `demo_parallel` sample app for details.
 
 ## Links
 

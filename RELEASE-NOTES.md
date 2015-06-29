@@ -1,3 +1,7 @@
+0.0.12
+-------
+Now allows power users to override the default database filename.
+
 0.0.9
 -------
 

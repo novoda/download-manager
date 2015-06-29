@@ -238,8 +238,8 @@ public final class DownloadProvider extends ContentProvider {
      * an updated version of the database.
      */
     private final class DatabaseHelper extends SQLiteOpenHelper {
-        public DatabaseHelper(final Context context) {
-            super(context, DB_NAME, null, DB_VERSION);
+        public DatabaseHelper(final Context context, String databaseFilename) {
+            super(context, databaseFilename, null, DB_VERSION);
         }
 
         /**
@@ -439,7 +439,10 @@ public final class DownloadProvider extends ContentProvider {
             mSystemFacade = new RealSystemFacade(getContext());
         }
 
-        mOpenHelper = new DatabaseHelper(getContext());
+        Context context = getContext();
+        DatabaseFilenameProvider databaseFilenameProvider = DatabaseFilenameProvider.newInstance(context, DB_NAME);
+        String databaseFilename = databaseFilenameProvider.getDatabaseFilename();
+        mOpenHelper = new DatabaseHelper(context, databaseFilename);
         // Initialize the system uid
         mSystemUid = Process.SYSTEM_UID;
         // Initialize the default container uid. Package name hardcoded
@@ -456,7 +459,6 @@ public final class DownloadProvider extends ContentProvider {
         }
         // start the DownloadService class. don't wait for the 1st download to be issued.
         // saves us by getting some initialization code in DownloadService out of the way.
-        Context context = getContext();
         context.startService(new Intent(context, DownloadService.class));
 //        mDownloadsDataDir = StorageManager.getDownloadDataDirectory(getContext());
         mDownloadsDataDir = context.getCacheDir();
