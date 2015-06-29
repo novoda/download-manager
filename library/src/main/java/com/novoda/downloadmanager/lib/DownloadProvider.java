@@ -264,7 +264,10 @@ public final class DownloadProvider extends ContentProvider {
             mSystemFacade = new RealSystemFacade(getContext());
         }
 
-        mOpenHelper = new DatabaseHelper(getContext(), DB_NAME);
+        Context context = getContext();
+        DatabaseFilenameProvider databaseFilenameProvider = DatabaseFilenameProvider.newInstance(context, DB_NAME);
+        String databaseFilename = databaseFilenameProvider.getDatabaseFilename();
+        mOpenHelper = new DatabaseHelper(context, databaseFilename);
         // Initialize the system uid
         mSystemUid = Process.SYSTEM_UID;
         // Initialize the default container uid. Package name hardcoded
@@ -281,7 +284,6 @@ public final class DownloadProvider extends ContentProvider {
         }
         // start the DownloadService class. don't wait for the 1st download to be issued.
         // saves us by getting some initialization code in DownloadService out of the way.
-        Context context = getContext();
         context.startService(new Intent(context, DownloadService.class));
 //        mDownloadsDataDir = StorageManager.getDownloadDataDirectory(getContext());
         mDownloadsDataDir = context.getCacheDir();
