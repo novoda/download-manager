@@ -46,8 +46,7 @@ public class Authority {
 }
 ```
 
-It is possible to override the database filename. See [Advanced Usage](https://github.com/novoda/download-manager/wiki/Advanced-Useage),
- or take a look at the `demo_parallel` sample app for details.
+There are many more features. See [Advanced Usage](https://github.com/novoda/download-manager/wiki/Advanced-Usage), or take a look at the `demo-extended` sample app for details.
 
 ## Links
 
@@ -60,4 +59,4 @@ Here are a list of useful links:
 
 
  [1]: http://developer.android.com/reference/android/net/Uri.html
- [2]: https://github.com/novoda/download-manager/tree/master/demo
+ [2]: https://github.com/novoda/download-manager/tree/master/demo-simple
