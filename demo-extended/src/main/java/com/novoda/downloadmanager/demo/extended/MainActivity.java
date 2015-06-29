@@ -1,5 +1,9 @@
 package com.novoda.downloadmanager.demo.extended;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -8,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
@@ -54,7 +59,19 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
                 });
 
         setupQueryingExample();
+
+        IntentFilter batchIntentFilter = new IntentFilter(DownloadManager.ACTION_BATCH_COMPLETE);
+        registerReceiver(batchCompletedReceiver, batchIntentFilter);
     }
+
+    private final BroadcastReceiver batchCompletedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            long batchId = intent.getLongExtra(DownloadManager.EXTRA_BATCH_ID, -1);
+            Toast.makeText(context, "Batch completed with id: " + batchId, Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "BATCH COMPLETED: " + batchId);
+        }
+    };
 
     private void enqueueSingleDownload() {
         Uri uri = Uri.parse(BIG_FILE);
@@ -87,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         batch.addRequest(request);
         long batchId = downloadManager.enqueue(batch);
         Log.d(TAG, "Download enqueued with batch ID: " + batchId);
+
     }
 
     private void setupQueryingExample() {
@@ -108,5 +126,11 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
     @Override
     public void onQueryResult(List<Download> downloads) {
         listView.setAdapter(new DownloadAdapter(downloads));
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(batchCompletedReceiver);
+        super.onDestroy();
     }
 }
