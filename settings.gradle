@@ -1,2 +1,3 @@
 include ':library'
-include ':demo_serial', ':demo_parallel'
+include ':demo-simple'
+include ':demo-extended'
