@@ -24,6 +24,10 @@
       android:name="com.novoda.downloadmanager.MaxConcurrentDownloads"
       android:value="@integer/max_concurrent_downloads" />
 
+    <meta-data
+      android:name="com.novoda.downloadmanager.DatabaseFilename"
+      android:value="@string/database_filename" />
+
   </application>
 
 </manifest>
