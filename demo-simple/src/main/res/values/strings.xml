@@ -2,6 +2,6 @@
   <string name="app_name">Beard Downloader</string>
 
   <string name="no_downloads">No downloads yet.\nTap download and then refresh to query the download manager!</string>
-  <string name="button_download_text">Download a podcast</string>
   <string name="button_refresh_text">Refresh</string>
+  <string name="button_download_text">Download a podcast</string>
 </resources>

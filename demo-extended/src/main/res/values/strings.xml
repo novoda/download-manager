@@ -4,6 +4,8 @@
   <string name="no_downloads">No downloads yet.\nTap download and then refresh to query the download manager!</string>
   <string name="button_download_text">Download a podcast</string>
   <string name="button_refresh_text">Refresh</string>
+  <string name="button_single_download_text">Download a single item</string>
+  <string name="button_batch_download_text">Download a batch of items</string>
 
   <string name="database_filename" translate="false">my_database.db</string>
 </resources>
