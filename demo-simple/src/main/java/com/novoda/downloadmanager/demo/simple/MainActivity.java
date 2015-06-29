@@ -4,7 +4,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 
@@ -17,7 +16,6 @@ import com.novoda.downloadmanager.lib.Request;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements QueryForDownloadsAsyncTask.Callback {
-    private static final String TAG = MainActivity.class.getSimpleName();
     private static final String BIG_FILE = "http://ipv4.download.thinkbroadband.com/200MB.zip";
     private static final String BBC_COMEDY_IMAGE = "http://ichef.bbci.co.uk/images/ic/640x360/p02ss0cf.jpg";
 
@@ -27,12 +25,9 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        com.novoda.notils.logger.simple.Log.setShowLogs(true);
         setContentView(R.layout.activity_main);
         listView = (ListView) findViewById(R.id.main_downloads_list);
-        downloadManager = DownloadManagerBuilder.from(this)
-                .withVerboseLogging()
-                .build(getContentResolver());
+        downloadManager = DownloadManagerBuilder.from(this).build(getContentResolver());
 
         setupDownloadingExample();
         setupQueryingExample();
@@ -44,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         request.setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "podcast.mp3");
         request.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
         request.setBigPictureUrl(BBC_COMEDY_IMAGE);
-        request.setTitle("BBC Innuendo Bingo");
+        request.setTitle("Simple file download");
         request.setDescription("Nothing to do with beards.");
         request.setMimeType("audio/mp3");
 
@@ -52,8 +47,7 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        long id = downloadManager.enqueue(request);
-                        Log.d(TAG, "Download starting with id: " + id);
+                        downloadManager.enqueue(request);
                     }
                 });
     }
