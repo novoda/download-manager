@@ -27,19 +27,19 @@
   </plurals>
 
   <plurals name="dl__notif_summary_active">
-    <item quantity="one">1 file downloading</item>
+    <item quantity="one">1 download occurring</item>
     <item quantity="other">
       <xliff:g id="number">%d</xliff:g>
-      files downloading
+      downloads occurring
     </item>
   </plurals>
 
   <!-- Title summarizing waiting downloads. [CHAR LIMIT=32] -->
   <plurals name="dl__notif_summary_waiting">
-    <item quantity="one">1 file waiting</item>
+    <item quantity="one">1 download waiting</item>
     <item quantity="other">
       <xliff:g id="number">%d</xliff:g>
-      files waiting
+      downloads waiting
     </item>
   </plurals>
 

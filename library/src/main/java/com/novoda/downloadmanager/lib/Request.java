@@ -39,7 +39,7 @@ public class Request {
 
     private Uri mUri;
     private Uri mDestinationUri;
-    private List<Pair<String, String>> mRequestHeaders = new ArrayList<Pair<String, String>>();
+    private List<Pair<String, String>> mRequestHeaders = new ArrayList<>();
     private CharSequence mTitle;
     private CharSequence mDescription;
     private String mMimeType;
@@ -50,6 +50,7 @@ public class Request {
     private boolean mScannable = false;
     private String extraField;
     private String bigPictureUrl;
+    private long batchId = -1L;
     /**
      * if a file is designated as a MediaScanner scannable file, the following value is
      * stored in the database column {@link com.novoda.downloadmanager.lib.Downloads.Impl#COLUMN_MEDIA_SCANNED}.
@@ -65,36 +66,11 @@ public class Request {
     static final int SCANNABLE_VALUE_NO = 2;
 
     /**
-     * This download is visible but only shows in the notifications
-     * while it's in progress.
+     * can take any of the following values: {@link NotificationVisibility#HIDDEN}
+     * {@link NotificationVisibility#ACTIVE_OR_COMPLETE}, {@link NotificationVisibility#ONLY_WHEN_ACTIVE},
+     * {@link NotificationVisibility#ONLY_WHEN_COMPLETE}
      */
-    public static final int VISIBILITY_VISIBLE = 0;
-
-    /**
-     * This download is visible and shows in the notifications while
-     * in progress and after completion.
-     */
-    public static final int VISIBILITY_VISIBLE_NOTIFY_COMPLETED = 1;
-
-    /**
-     * This download doesn't show in the UI or in the notifications.
-     */
-    public static final int VISIBILITY_HIDDEN = 2;
-
-    /**
-     * This download shows in the notifications after completion ONLY.
-     * It is usuable only with
-     * {@link DownloadManager#addCompletedDownload(String, String,
-     * boolean, String, String, long, boolean)}.
-     */
-    public static final int VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION = 3;
-
-    /**
-     * can take any of the following values: {@link #VISIBILITY_HIDDEN}
-     * {@link #VISIBILITY_VISIBLE_NOTIFY_COMPLETED}, {@link #VISIBILITY_VISIBLE},
-     * {@link #VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION}
-     */
-    private int mNotificationVisibility = VISIBILITY_VISIBLE;
+    private int mNotificationVisibility = NotificationVisibility.ONLY_WHEN_ACTIVE;
 
     /**
      * @param uri the HTTP URI to download.
@@ -301,6 +277,17 @@ public class Request {
     }
 
     /**
+     * Set the ID of the batch that this request belongs to
+     *
+     * @param batchId the batch id
+     * @return this object
+     */
+    Request setBatchId(long batchId) {
+        this.batchId = batchId;
+        return this;
+    }
+
+    /**
      * Set the MIME content type of this download.  This will override the content type declared
      * in the server's response.
      *
@@ -328,7 +315,7 @@ public class Request {
      */
     @Deprecated
     public Request setShowRunningNotification(boolean show) {
-        return (show) ? setNotificationVisibility(VISIBILITY_VISIBLE) : setNotificationVisibility(VISIBILITY_HIDDEN);
+        return (show) ? setNotificationVisibility(NotificationVisibility.ONLY_WHEN_ACTIVE) : setNotificationVisibility(NotificationVisibility.HIDDEN);
     }
 
     /**
@@ -338,11 +325,11 @@ public class Request {
      * through the system {@link android.app.NotificationManager}.
      * By default, a notification is shown only when the download is in progress.
      * <p/>
-     * It can take the following values: {@link #VISIBILITY_HIDDEN},
-     * {@link #VISIBILITY_VISIBLE},
-     * {@link #VISIBILITY_VISIBLE_NOTIFY_COMPLETED}.
+     * It can take the following values: {@link NotificationVisibility#HIDDEN},
+     * {@link NotificationVisibility#ONLY_WHEN_ACTIVE},
+     * {@link NotificationVisibility#ONLY_WHEN_COMPLETE}.
      * <p/>
-     * If set to {@link #VISIBILITY_HIDDEN}, this requires the permission
+     * If set to {@link NotificationVisibility#HIDDEN}, this requires the permission
      * android.permission.DOWNLOAD_WITHOUT_NOTIFICATION.
      *
      * @param visibility the visibility setting value
@@ -406,6 +393,10 @@ public class Request {
         extraField = extra;
     }
 
+    long getBatchId() {
+        return batchId;
+    }
+
     /**
      * @return ContentValues to be passed to DownloadProvider.insert()
      */
@@ -428,17 +419,14 @@ public class Request {
             encodeHttpHeaders(values);
         }
 
-        putIfNonNull(values, Downloads.Impl.COLUMN_TITLE, mTitle);
-        putIfNonNull(values, Downloads.Impl.COLUMN_DESCRIPTION, mDescription);
         putIfNonNull(values, Downloads.Impl.COLUMN_MIME_TYPE, mMimeType);
 
-        values.put(Downloads.Impl.COLUMN_VISIBILITY, mNotificationVisibility);
         values.put(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES, mAllowedNetworkTypes);
         values.put(Downloads.Impl.COLUMN_ALLOW_ROAMING, mRoamingAllowed);
         values.put(Downloads.Impl.COLUMN_ALLOW_METERED, mMeteredAllowed);
         values.put(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, mIsVisibleInDownloadsUi);
         values.put(Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS, extraField);
-        values.put(Downloads.Impl.COLUMN_BIG_PICTURE, bigPictureUrl);
+        values.put(Downloads.Impl.COLUMN_BATCH_ID, batchId);
 
         return values;
     }
@@ -456,5 +444,16 @@ public class Request {
         if (value != null) {
             contentValues.put(key, value.toString());
         }
+    }
+
+    RequestBatch asBatch() {
+        RequestBatch requestBatch = new RequestBatch.Builder()
+                .withTitle(mTitle.toString())
+                .withDescription(mDescription.toString())
+                .withBigPictureUrl(bigPictureUrl)
+                .withVisibility(mNotificationVisibility)
+                .build();
+        requestBatch.addRequest(this);
+        return requestBatch;
     }
 }

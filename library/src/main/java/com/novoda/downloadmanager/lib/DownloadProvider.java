@@ -27,7 +27,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
@@ -35,6 +34,8 @@ import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.provider.OpenableColumns;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.novoda.notils.logger.simple.Log;
@@ -68,16 +69,6 @@ public final class DownloadProvider extends ContentProvider {
     private static final String DB_NAME = "downloads.db";
 
     /**
-     * Current database version
-     */
-    private static final int DB_VERSION = 109;
-
-    /**
-     * Name of table in the database
-     */
-    private static final String DB_TABLE = "Downloads";
-
-    /**
      * MIME type for the entire download list
      */
     private static final String DOWNLOAD_LIST_TYPE = "vnd.android.cursor.dir/download";
@@ -85,6 +76,20 @@ public final class DownloadProvider extends ContentProvider {
      * MIME type for an individual download
      */
     private static final String DOWNLOAD_TYPE = "vnd.android.cursor.item/download";
+
+    /**
+     * MIME type for the entire batch list
+     */
+    private static final String BATCH_LIST_TYPE = "vnd.android.cursor.dir/batch";
+    /**
+     * MIME type for an individual batch
+     */
+    private static final String BATCH_TYPE = "vnd.android.cursor.item/batch";
+
+    /**
+     * MIME type for the list of download by batch
+     */
+    private static final String DOWNLOADS_BY_BATCH_TYPE = "vnd.android.cursor.dir/download_by_batch";
 
     /**
      * URI matcher used to recognize URIs sent by applications
@@ -116,12 +121,27 @@ public final class DownloadProvider extends ContentProvider {
      * is publicly accessible.
      */
     private static final int PUBLIC_DOWNLOAD_ID = 6;
+    /**
+     * URI matcher constant for the URI of a download's request headers
+     */
+    private static final int BATCHES = 7;
+    /**
+     * URI matcher constant for the URI of a download's request headers
+     */
+    private static final int BATCHES_ID = 8;
+    /**
+     * URI matcher constant for the URI of downloads with their batch data
+     */
+    private static final int DOWNLOADS_BY_BATCH = 9;
 
     static {
         sURIMatcher.addURI(AUTHORITY, "my_downloads", MY_DOWNLOADS);
         sURIMatcher.addURI(AUTHORITY, "my_downloads/#", MY_DOWNLOADS_ID);
         sURIMatcher.addURI(AUTHORITY, "all_downloads", ALL_DOWNLOADS);
         sURIMatcher.addURI(AUTHORITY, "all_downloads/#", ALL_DOWNLOADS_ID);
+        sURIMatcher.addURI(AUTHORITY, "batches", BATCHES);
+        sURIMatcher.addURI(AUTHORITY, "batches/#", BATCHES_ID);
+        sURIMatcher.addURI(AUTHORITY, "downloads_by_batch", DOWNLOADS_BY_BATCH);
         sURIMatcher.addURI(AUTHORITY, "my_downloads/#/" + Downloads.Impl.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
         sURIMatcher.addURI(AUTHORITY, "all_downloads/#/" + Downloads.Impl.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
         // temporary, for backwards compatibility
@@ -137,6 +157,7 @@ public final class DownloadProvider extends ContentProvider {
     private static final Uri[] BASE_URIS = new Uri[]{
             Downloads.Impl.CONTENT_URI,
             Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
+            Downloads.Impl.BATCH_CONTENT_URI
     };
 
     private static final String[] sAppReadableColumnsArray = new String[]{
@@ -144,7 +165,6 @@ public final class DownloadProvider extends ContentProvider {
             Downloads.Impl.COLUMN_APP_DATA,
             Downloads.Impl._DATA,
             Downloads.Impl.COLUMN_MIME_TYPE,
-            Downloads.Impl.COLUMN_VISIBILITY,
             Downloads.Impl.COLUMN_DESTINATION,
             Downloads.Impl.COLUMN_CONTROL,
             Downloads.Impl.COLUMN_STATUS,
@@ -152,15 +172,19 @@ public final class DownloadProvider extends ContentProvider {
             Downloads.Impl.COLUMN_NOTIFICATION_CLASS,
             Downloads.Impl.COLUMN_TOTAL_BYTES,
             Downloads.Impl.COLUMN_CURRENT_BYTES,
-            Downloads.Impl.COLUMN_TITLE,
-            Downloads.Impl.COLUMN_DESCRIPTION,
             Downloads.Impl.COLUMN_URI,
             Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI,
             Downloads.Impl.COLUMN_FILE_NAME_HINT,
             Downloads.Impl.COLUMN_MEDIAPROVIDER_URI,
             Downloads.Impl.COLUMN_DELETED,
             Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS,
-            Downloads.Impl.COLUMN_BIG_PICTURE,
+            Downloads.Impl.COLUMN_BATCH_ID,
+            Downloads.Impl.Batches._ID,
+            Downloads.Impl.Batches.COLUMN_STATUS,
+            Downloads.Impl.Batches.COLUMN_TITLE,
+            Downloads.Impl.Batches.COLUMN_DESCRIPTION,
+            Downloads.Impl.Batches.COLUMN_BIG_PICTURE,
+            Downloads.Impl.Batches.COLUMN_VISIBILITY,
             OpenableColumns.DISPLAY_NAME,
             OpenableColumns.SIZE,
     };
@@ -169,11 +193,11 @@ public final class DownloadProvider extends ContentProvider {
     private static final HashMap<String, String> sColumnsMap;
 
     static {
-        sAppReadableColumnsSet = new HashSet<String>();
+        sAppReadableColumnsSet = new HashSet<>();
         Collections.addAll(sAppReadableColumnsSet, sAppReadableColumnsArray);
 
-        sColumnsMap = new HashMap<String, String>();
-        sColumnsMap.put(OpenableColumns.DISPLAY_NAME, Downloads.Impl.COLUMN_TITLE + " AS " + OpenableColumns.DISPLAY_NAME);
+        sColumnsMap = new HashMap<>();
+        sColumnsMap.put(OpenableColumns.DISPLAY_NAME, Downloads.Impl.Batches.COLUMN_TITLE + " AS " + OpenableColumns.DISPLAY_NAME);
         sColumnsMap.put(OpenableColumns.SIZE, Downloads.Impl.COLUMN_TOTAL_BYTES + " AS " + OpenableColumns.SIZE);
     }
 
@@ -202,7 +226,7 @@ public final class DownloadProvider extends ContentProvider {
      */
     private static class SqlSelection {
         public StringBuilder mWhereClause = new StringBuilder();
-        public List<String> mParameters = new ArrayList<String>();
+        public List<String> mParameters = new ArrayList<>();
 
         public <T> void appendClause(String newClause, final T... parameters) {
             if (newClause == null || newClause.isEmpty()) {
@@ -228,205 +252,6 @@ public final class DownloadProvider extends ContentProvider {
         public String[] getParameters() {
             String[] array = new String[mParameters.size()];
             return mParameters.toArray(array);
-        }
-    }
-
-    /**
-     * Creates and updated database on demand when opening it.
-     * Helper class to create database the first time the provider is
-     * initialized and upgrade it when a new version of the provider needs
-     * an updated version of the database.
-     */
-    private final class DatabaseHelper extends SQLiteOpenHelper {
-        public DatabaseHelper(final Context context, String databaseFilename) {
-            super(context, databaseFilename, null, DB_VERSION);
-        }
-
-        /**
-         * Creates database the first time we try to open it.
-         */
-        @Override
-        public void onCreate(final SQLiteDatabase db) {
-            Log.v("populating new database");
-            onUpgrade(db, 0, DB_VERSION);
-        }
-
-        /**
-         * Updates the database format when a content provider is used
-         * with a database that was created with a different format.
-         * <p/>
-         * Note: to support downgrades, creating a table should always drop it first if it already
-         * exists.
-         */
-        @Override
-        public void onUpgrade(final SQLiteDatabase db, int oldV, final int newV) {
-            if (oldV == 31) {
-                // 31 and 100 are identical, just in different codelines. Upgrading from 31 is the
-                // same as upgrading from 100.
-                oldV = 100;
-            } else if (oldV < 100) {
-                // no logic to upgrade from these older version, just recreate the DB
-                Log.i("Upgrading downloads database from version " + oldV + " to version " + newV + ", which will destroy all old data");
-                oldV = 99;
-            } else if (oldV > newV) {
-                // user must have downgraded software; we have no way to know how to downgrade the
-                // DB, so just recreate it
-                Log.i("Downgrading downloads database from version " + oldV + " (current version is " + newV + "), destroying all old data");
-                oldV = 99;
-            }
-
-            for (int version = oldV + 1; version <= newV; version++) {
-                upgradeTo(db, version);
-            }
-        }
-
-        /**
-         * Upgrade database from (version - 1) to version.
-         */
-        private void upgradeTo(SQLiteDatabase db, int version) {
-            switch (version) {
-                case 100:
-                    createDownloadsTable(db);
-                    break;
-
-                case 101:
-                    createHeadersTable(db);
-                    break;
-
-                case 102:
-                    addColumn(db, DB_TABLE, Downloads.Impl.COLUMN_ALLOW_ROAMING, "INTEGER NOT NULL DEFAULT 0");
-                    addColumn(db, DB_TABLE, Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES, "INTEGER NOT NULL DEFAULT 0");
-                    break;
-
-                case 103:
-                    addColumn(db, DB_TABLE, Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, "INTEGER NOT NULL DEFAULT 1");
-                    makeCacheDownloadsInvisible(db);
-                    break;
-
-                case 104:
-                    addColumn(db, DB_TABLE, Downloads.Impl.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT, "INTEGER NOT NULL DEFAULT 0");
-                    break;
-
-                case 105:
-                    fillNullValues(db);
-                    break;
-
-                case 106:
-                    addColumn(db, DB_TABLE, Downloads.Impl.COLUMN_MEDIAPROVIDER_URI, "TEXT");
-                    addColumn(db, DB_TABLE, Downloads.Impl.COLUMN_DELETED, "BOOLEAN NOT NULL DEFAULT 0");
-                    break;
-
-                case 107:
-                    addColumn(db, DB_TABLE, Downloads.Impl.COLUMN_ERROR_MSG, "TEXT");
-                    break;
-
-                case 108:
-                    addColumn(db, DB_TABLE, Downloads.Impl.COLUMN_ALLOW_METERED, "INTEGER NOT NULL DEFAULT 1");
-                    break;
-
-                case 109:
-                    addColumn(db, DB_TABLE, Downloads.Impl.COLUMN_BIG_PICTURE, "TEXT");
-                    break;
-
-                default:
-                    throw new IllegalStateException("Don't know how to upgrade to " + version);
-            }
-        }
-
-        /**
-         * insert() now ensures these four columns are never null for new downloads, so this method
-         * makes that true for existing columns, so that code can rely on this assumption.
-         */
-        private void fillNullValues(SQLiteDatabase db) {
-            ContentValues values = new ContentValues();
-            values.put(Downloads.Impl.COLUMN_CURRENT_BYTES, 0);
-            fillNullValuesForColumn(db, values);
-            values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, -1);
-            fillNullValuesForColumn(db, values);
-            values.put(Downloads.Impl.COLUMN_TITLE, "");
-            fillNullValuesForColumn(db, values);
-            values.put(Downloads.Impl.COLUMN_DESCRIPTION, "");
-            fillNullValuesForColumn(db, values);
-        }
-
-        private void fillNullValuesForColumn(SQLiteDatabase db, ContentValues values) {
-            String column = values.valueSet().iterator().next().getKey();
-            db.update(DB_TABLE, values, column + " is null", null);
-            values.clear();
-        }
-
-        /**
-         * Set all existing downloads to the cache partition to be invisible in the downloads UI.
-         */
-        private void makeCacheDownloadsInvisible(SQLiteDatabase db) {
-            ContentValues values = new ContentValues();
-            values.put(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, false);
-            String cacheSelection = Downloads.Impl.COLUMN_DESTINATION + " != " + Downloads.Impl.DESTINATION_EXTERNAL;
-            db.update(DB_TABLE, values, cacheSelection, null);
-        }
-
-        /**
-         * Add a column to a table using ALTER TABLE.
-         *
-         * @param dbTable          name of the table
-         * @param columnName       name of the column to add
-         * @param columnDefinition SQL for the column definition
-         */
-        private void addColumn(SQLiteDatabase db, String dbTable, String columnName, String columnDefinition) {
-            db.execSQL("ALTER TABLE " + dbTable + " ADD COLUMN " + columnName + " " + columnDefinition);
-        }
-
-        /**
-         * Creates the table that'll hold the download information.
-         */
-        private void createDownloadsTable(SQLiteDatabase db) {
-            try {
-                db.execSQL("DROP TABLE IF EXISTS " + DB_TABLE);
-                db.execSQL("CREATE TABLE " + DB_TABLE + "(" +
-                        Downloads.Impl._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                        Downloads.Impl.COLUMN_URI + " TEXT, " +
-                        Constants.RETRY_AFTER_X_REDIRECT_COUNT + " INTEGER, " +
-                        Downloads.Impl.COLUMN_APP_DATA + " TEXT, " +
-                        Downloads.Impl.COLUMN_NO_INTEGRITY + " BOOLEAN, " +
-                        Downloads.Impl.COLUMN_FILE_NAME_HINT + " TEXT, " +
-                        Constants.OTA_UPDATE + " BOOLEAN, " +
-                        Downloads.Impl._DATA + " TEXT, " +
-                        Downloads.Impl.COLUMN_MIME_TYPE + " TEXT, " +
-                        Downloads.Impl.COLUMN_DESTINATION + " INTEGER, " +
-                        Constants.NO_SYSTEM_FILES + " BOOLEAN, " +
-                        Downloads.Impl.COLUMN_VISIBILITY + " INTEGER, " +
-                        Downloads.Impl.COLUMN_CONTROL + " INTEGER, " +
-                        Downloads.Impl.COLUMN_STATUS + " INTEGER, " +
-                        Downloads.Impl.COLUMN_FAILED_CONNECTIONS + " INTEGER, " +
-                        Downloads.Impl.COLUMN_LAST_MODIFICATION + " BIGINT, " +
-                        Downloads.Impl.COLUMN_NOTIFICATION_CLASS + " TEXT, " +
-                        Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS + " TEXT, " +
-                        Downloads.Impl.COLUMN_COOKIE_DATA + " TEXT, " +
-                        Downloads.Impl.COLUMN_USER_AGENT + " TEXT, " +
-                        Downloads.Impl.COLUMN_REFERER + " TEXT, " +
-                        Downloads.Impl.COLUMN_TOTAL_BYTES + " INTEGER, " +
-                        Downloads.Impl.COLUMN_CURRENT_BYTES + " INTEGER, " +
-                        Constants.ETAG + " TEXT, " +
-                        Constants.UID + " INTEGER, " +
-                        Downloads.Impl.COLUMN_OTHER_UID + " INTEGER, " +
-                        Downloads.Impl.COLUMN_TITLE + " TEXT, " +
-                        Downloads.Impl.COLUMN_DESCRIPTION + " TEXT, " +
-                        Constants.MEDIA_SCANNED + " BOOLEAN);");
-            } catch (SQLException ex) {
-                Log.e("couldn't create table in downloads database");
-                throw ex;
-            }
-        }
-
-        private void createHeadersTable(SQLiteDatabase db) {
-            db.execSQL("DROP TABLE IF EXISTS " + Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE);
-            db.execSQL(
-                    "CREATE TABLE " + Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE + "(" +
-                            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                            Downloads.Impl.RequestHeaders.COLUMN_DOWNLOAD_ID + " INTEGER NOT NULL," +
-                            Downloads.Impl.RequestHeaders.COLUMN_HEADER + " TEXT NOT NULL," +
-                            Downloads.Impl.RequestHeaders.COLUMN_VALUE + " TEXT NOT NULL" +
-                            ");");
         }
     }
 
@@ -489,7 +314,7 @@ public final class DownloadProvider extends ContentProvider {
                 final String id = getDownloadIdFromUri(uri);
                 final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
                 final String mimeType = DatabaseUtils.stringForQuery(db,
-                        "SELECT " + Downloads.Impl.COLUMN_MIME_TYPE + " FROM " + DB_TABLE +
+                        "SELECT " + Downloads.Impl.COLUMN_MIME_TYPE + " FROM " + Downloads.Impl.DOWNLOADS_TABLE_NAME +
                                 " WHERE " + Downloads.Impl._ID + " = ?",
                         new String[]{id});
                 if (TextUtils.isEmpty(mimeType)) {
@@ -497,6 +322,15 @@ public final class DownloadProvider extends ContentProvider {
                 } else {
                     return mimeType;
                 }
+            }
+            case BATCHES: {
+                return BATCH_LIST_TYPE;
+            }
+            case BATCHES_ID: {
+                return BATCH_TYPE;
+            }
+            case DOWNLOADS_BY_BATCH: {
+                return DOWNLOADS_BY_BATCH_TYPE;
             }
             default: {
                 Log.v("calling getType on an unknown URI: " + uri);
@@ -510,16 +344,25 @@ public final class DownloadProvider extends ContentProvider {
      */
     @Override
     public Uri insert(final Uri uri, final ContentValues values) {
-        checkInsertPermissions(values);
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
         // note we disallow inserting into ALL_DOWNLOADS
         int match = sURIMatcher.match(uri);
-        if (match != MY_DOWNLOADS) {
-            Log.d("calling insert on an unknown/invalid URI: " + uri);
-            throw new IllegalArgumentException("Unknown/Invalid URI " + uri);
+        if (match == MY_DOWNLOADS) {
+            checkDownloadInsertPermissions(values);
+            return insertDownload(uri, values, db, match);
         }
+        if (match == BATCHES) {
+            long rowId = db.insert(Downloads.Impl.Batches.BATCHES_TABLE_NAME, null, values);
+            return ContentUris.withAppendedId(Downloads.Impl.BATCH_CONTENT_URI, rowId);
+        }
+        Log.d("calling insert on an unknown/invalid URI: " + uri);
+        throw new IllegalArgumentException("Unknown/Invalid URI " + uri);
 
+    }
+
+    @Nullable
+    private Uri insertDownload(Uri uri, ContentValues values, SQLiteDatabase db, int match) {
         // copy some of the input values as it
         ContentValues filteredValues = new ContentValues();
         copyString(Downloads.Impl.COLUMN_URI, values, filteredValues);
@@ -558,17 +401,6 @@ public final class DownloadProvider extends ContentProvider {
             filteredValues.put(Downloads.Impl.COLUMN_DESTINATION, dest);
         }
 
-        // validate the visibility column
-        Integer vis = values.getAsInteger(Downloads.Impl.COLUMN_VISIBILITY);
-        if (vis == null) {
-            if (dest == Downloads.Impl.DESTINATION_EXTERNAL) {
-                filteredValues.put(Downloads.Impl.COLUMN_VISIBILITY, Downloads.Impl.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-            } else {
-                filteredValues.put(Downloads.Impl.COLUMN_VISIBILITY, Downloads.Impl.VISIBILITY_HIDDEN);
-            }
-        } else {
-            filteredValues.put(Downloads.Impl.COLUMN_VISIBILITY, vis);
-        }
         // copy the control column as is
         copyInteger(Downloads.Impl.COLUMN_CONTROL, values, filteredValues);
 
@@ -604,14 +436,13 @@ public final class DownloadProvider extends ContentProvider {
                         filteredValues.put(Downloads.Impl.COLUMN_NOTIFICATION_CLASS, clazz);
                     }
                 }
-            } catch (PackageManager.NameNotFoundException ex) {
+            } catch (NameNotFoundException ex) {
                 /* ignored for now */
             }
         }
 
         // copy some more columns as is
         copyString(Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS, values, filteredValues);
-        copyString(Downloads.Impl.COLUMN_BIG_PICTURE, values, filteredValues);
         copyString(Downloads.Impl.COLUMN_COOKIE_DATA, values, filteredValues);
         copyString(Downloads.Impl.COLUMN_USER_AGENT, values, filteredValues);
         copyString(Downloads.Impl.COLUMN_REFERER, values, filteredValues);
@@ -624,10 +455,6 @@ public final class DownloadProvider extends ContentProvider {
         if (Binder.getCallingUid() == 0) {
             copyInteger(Constants.UID, values, filteredValues);
         }
-
-        // copy some more columns as is
-        copyStringWithDefault(Downloads.Impl.COLUMN_TITLE, values, filteredValues, "");
-        copyStringWithDefault(Downloads.Impl.COLUMN_DESCRIPTION, values, filteredValues, "");
 
         // is_visible_in_downloads_ui column
         if (values.containsKey(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI)) {
@@ -643,12 +470,14 @@ public final class DownloadProvider extends ContentProvider {
         copyBoolean(Downloads.Impl.COLUMN_ALLOW_ROAMING, values, filteredValues);
         copyBoolean(Downloads.Impl.COLUMN_ALLOW_METERED, values, filteredValues);
 
+        copyInteger(Downloads.Impl.COLUMN_BATCH_ID, values, filteredValues);
+
         Log.v("initiating download with UID " + filteredValues.getAsInteger(Constants.UID));
         if (filteredValues.containsKey(Downloads.Impl.COLUMN_OTHER_UID)) {
             Log.v("other UID " + filteredValues.getAsInteger(Downloads.Impl.COLUMN_OTHER_UID));
         }
 
-        long rowID = db.insert(DB_TABLE, null, filteredValues);
+        long rowID = db.insert(Downloads.Impl.DOWNLOADS_TABLE_NAME, null, filteredValues);
         if (rowID == -1) {
             Log.d("couldn't insert into downloads database");
             return null;
@@ -661,14 +490,7 @@ public final class DownloadProvider extends ContentProvider {
          * boolean, String, String, long) need special treatment
          */
         Context context = getContext();
-        if (values.getAsInteger(Downloads.Impl.COLUMN_DESTINATION) == Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
-            // When notification is requested, kick off service to process all relevant downloads.
-            if (Downloads.Impl.isNotificationToBeDisplayed(vis)) {
-                context.startService(new Intent(context, DownloadService.class));
-            }
-        } else {
-            context.startService(new Intent(context, DownloadService.class));
-        }
+        context.startService(new Intent(context, DownloadService.class));
         notifyContentChanged(uri, match);
         return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, rowID);
     }
@@ -710,7 +532,7 @@ public final class DownloadProvider extends ContentProvider {
      * @param values ContentValues provided to insert()
      * @throws SecurityException if the caller has insufficient permissions
      */
-    private void checkInsertPermissions(ContentValues values) {
+    private void checkDownloadInsertPermissions(ContentValues values) {
         if (getContext().checkCallingOrSelfPermission(Downloads.Impl.PERMISSION_ACCESS) == PackageManager.PERMISSION_GRANTED) {
             return;
         }
@@ -736,27 +558,11 @@ public final class DownloadProvider extends ContentProvider {
                 Downloads.Impl.DESTINATION_FILE_URI,
                 Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD);
 
-        if (getContext().checkCallingOrSelfPermission(Downloads.Impl.PERMISSION_NO_NOTIFICATION) == PackageManager.PERMISSION_GRANTED) {
-            enforceAllowedValues(
-                    values, Downloads.Impl.COLUMN_VISIBILITY,
-                    Request.VISIBILITY_HIDDEN,
-                    Request.VISIBILITY_VISIBLE,
-                    Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED,
-                    Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION);
-        } else {
-            enforceAllowedValues(
-                    values, Downloads.Impl.COLUMN_VISIBILITY,
-                    Request.VISIBILITY_VISIBLE,
-                    Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED,
-                    Request.VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION);
-        }
 
         // remove the rest of the columns that are allowed (with any value)
         values.remove(Downloads.Impl.COLUMN_URI);
-        values.remove(Downloads.Impl.COLUMN_TITLE);
-        values.remove(Downloads.Impl.COLUMN_DESCRIPTION);
         values.remove(Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS);
-        values.remove(Downloads.Impl.COLUMN_BIG_PICTURE);
+        values.remove(Downloads.Impl.COLUMN_BATCH_ID);
         values.remove(Downloads.Impl.COLUMN_MIME_TYPE);
         values.remove(Downloads.Impl.COLUMN_FILE_NAME_HINT); // checked later in insert()
         values.remove(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES);
@@ -808,36 +614,48 @@ public final class DownloadProvider extends ContentProvider {
      * Starts a database query
      */
     @Override
-    public Cursor query(final Uri uri, String[] projection,
-                        final String selection, final String[] selectionArgs,
-                        final String sort) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sort) {
 
         Helpers.validateSelection(selection, sAppReadableColumnsSet);
 
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
 
         int match = sURIMatcher.match(uri);
-        if (match == -1) {
-            Log.v("querying unknown URI: " + uri);
-            throw new IllegalArgumentException("Unknown URI: " + uri);
+        switch (match) {
+            case ALL_DOWNLOADS:
+            case ALL_DOWNLOADS_ID:
+            case MY_DOWNLOADS:
+            case MY_DOWNLOADS_ID:
+                return queryDownloads(uri, projection, selection, selectionArgs, sort, db, match);
+            case BATCHES:
+            case BATCHES_ID:
+                SqlSelection batchSelection = getWhereClause(uri, selection, selectionArgs, match);
+                return db.query(Downloads.Impl.Batches.BATCHES_TABLE_NAME, projection, batchSelection.getSelection(),
+                        batchSelection.getParameters(), null, null, sort);
+            case DOWNLOADS_BY_BATCH:
+                return db.query(Downloads.Impl.VIEW_NAME_DOWNLOADS_BY_BATCH, projection, selection, selectionArgs, null, null, sort);
+            case REQUEST_HEADERS_URI:
+                if (projection != null || selection != null || sort != null) {
+                    throw new UnsupportedOperationException(
+                            "Request header queries do not support "
+                                    + "projections, selections or sorting");
+                }
+                return queryRequestHeaders(db, uri);
+            default:
+                Log.v("querying unknown URI: " + uri);
+                throw new IllegalArgumentException("Unknown URI: " + uri);
         }
+    }
 
-        if (match == REQUEST_HEADERS_URI) {
-            if (projection != null || selection != null || sort != null) {
-                throw new UnsupportedOperationException(
-                        "Request header queries do not support "
-                                + "projections, selections or sorting");
-            }
-            return queryRequestHeaders(db, uri);
-        }
-
+    @Nullable
+    private Cursor queryDownloads(Uri uri, String[] projection, String selection, String[] selectionArgs, String sort, SQLiteDatabase db, int match) {
         SqlSelection fullSelection = getWhereClause(uri, selection, selectionArgs, match);
 
         if (shouldRestrictVisibility()) {
             if (projection == null) {
                 projection = sAppReadableColumnsArray.clone();
             } else {
-                // check the validity of the columns in projection 
+                // check the validity of the columns in projection
                 for (int i = 0; i < projection.length; ++i) {
                     if (!sAppReadableColumnsSet.contains(projection[i]) &&
                             !downloadManagerColumnsList.contains(projection[i])) {
@@ -859,7 +677,7 @@ public final class DownloadProvider extends ContentProvider {
             logVerboseQueryInfo(projection, selection, selectionArgs, sort, db);
         }
 
-        Cursor ret = db.query(DB_TABLE, projection, fullSelection.getSelection(),
+        Cursor ret = db.query(Downloads.Impl.DOWNLOADS_TABLE_NAME, projection, fullSelection.getSelection(),
                 fullSelection.getParameters(), null, null, sort);
 
         if (ret != null) {
@@ -868,7 +686,6 @@ public final class DownloadProvider extends ContentProvider {
         } else {
             Log.v("query failed in downloads database");
         }
-
         return ret;
     }
 
@@ -961,7 +778,7 @@ public final class DownloadProvider extends ContentProvider {
      */
     private void deleteRequestHeaders(SQLiteDatabase db, String where, String[] whereArgs) {
         String[] projection = new String[]{Downloads.Impl._ID};
-        Cursor cursor = db.query(DB_TABLE, projection, where, whereArgs, null, null, null, null);
+        Cursor cursor = db.query(Downloads.Impl.DOWNLOADS_TABLE_NAME, projection, where, whereArgs, null, null, null, null);
         try {
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
                 long id = cursor.getLong(0);
@@ -1007,7 +824,6 @@ public final class DownloadProvider extends ContentProvider {
         if (Binder.getCallingPid() != Process.myPid()) {
             filteredValues = new ContentValues();
             copyString(Downloads.Impl.COLUMN_APP_DATA, values, filteredValues);
-            copyInteger(Downloads.Impl.COLUMN_VISIBILITY, values, filteredValues);
             Integer i = values.getAsInteger(Downloads.Impl.COLUMN_CONTROL);
             if (i != null) {
                 filteredValues.put(Downloads.Impl.COLUMN_CONTROL, i);
@@ -1015,20 +831,10 @@ public final class DownloadProvider extends ContentProvider {
             }
 
             copyInteger(Downloads.Impl.COLUMN_CONTROL, values, filteredValues);
-            copyString(Downloads.Impl.COLUMN_TITLE, values, filteredValues);
             copyString(Downloads.Impl.COLUMN_MEDIAPROVIDER_URI, values, filteredValues);
-            copyString(Downloads.Impl.COLUMN_DESCRIPTION, values, filteredValues);
             copyInteger(Downloads.Impl.COLUMN_DELETED, values, filteredValues);
         } else {
             filteredValues = values;
-            String filename = values.getAsString(Downloads.Impl._DATA);
-            if (filename != null) {
-                Cursor c = query(uri, new String[]{Downloads.Impl.COLUMN_TITLE}, null, null, null);
-                if (!c.moveToFirst() || c.getString(0).isEmpty()) {
-                    values.put(Downloads.Impl.COLUMN_TITLE, new File(filename).getName());
-                }
-                c.close();
-            }
 
             Integer status = values.getAsInteger(Downloads.Impl.COLUMN_STATUS);
             boolean isRestart = status != null && status == Downloads.Impl.STATUS_PENDING;
@@ -1047,13 +853,18 @@ public final class DownloadProvider extends ContentProvider {
             case ALL_DOWNLOADS_ID:
                 SqlSelection selection = getWhereClause(uri, where, whereArgs, match);
                 if (filteredValues.size() > 0) {
-                    count = db.update(DB_TABLE, filteredValues, selection.getSelection(),
+                    count = db.update(Downloads.Impl.DOWNLOADS_TABLE_NAME, filteredValues, selection.getSelection(),
                             selection.getParameters());
                 } else {
                     count = 0;
                 }
                 break;
-
+            case BATCHES:
+            case BATCHES_ID:
+                SqlSelection batchSelection = getWhereClause(uri, where, whereArgs, match);
+                count = db.update(Downloads.Impl.Batches.BATCHES_TABLE_NAME, values, batchSelection.getSelection(),
+                        batchSelection.getParameters());
+                break;
             default:
                 Log.d("updating unknown/invalid URI: " + uri);
                 throw new UnsupportedOperationException("Cannot update URI: " + uri);
@@ -1094,6 +905,9 @@ public final class DownloadProvider extends ContentProvider {
                 uriMatch == PUBLIC_DOWNLOAD_ID) {
             selection.appendClause(Downloads.Impl._ID + " = ?", getDownloadIdFromUri(uri));
         }
+        if (uriMatch == BATCHES_ID) {
+            selection.appendClause(Downloads.Impl.Batches._ID + " = ?", ContentUris.parseId(uri));
+        }
         if ((uriMatch == MY_DOWNLOADS || uriMatch == MY_DOWNLOADS_ID)
                 && getContext().checkCallingPermission(Downloads.Impl.PERMISSION_ACCESS_ALL)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -1108,8 +922,7 @@ public final class DownloadProvider extends ContentProvider {
      * Deletes a row in the database
      */
     @Override
-    public int delete(final Uri uri, final String where,
-                      final String[] whereArgs) {
+    public int delete(@NonNull Uri uri, String where, String[] whereArgs) {
 
         Helpers.validateSelection(where, sAppReadableColumnsSet);
 
@@ -1123,7 +936,12 @@ public final class DownloadProvider extends ContentProvider {
             case ALL_DOWNLOADS_ID:
                 SqlSelection selection = getWhereClause(uri, where, whereArgs, match);
                 deleteRequestHeaders(db, selection.getSelection(), selection.getParameters());
-                count = db.delete(DB_TABLE, selection.getSelection(), selection.getParameters());
+                count = db.delete(Downloads.Impl.DOWNLOADS_TABLE_NAME, selection.getSelection(), selection.getParameters());
+                break;
+            case BATCHES:
+            case BATCHES_ID:
+                SqlSelection batchSelection = getWhereClause(uri, where, whereArgs, match);
+                count = db.delete(Downloads.Impl.Batches.BATCHES_TABLE_NAME, batchSelection.getSelection(), batchSelection.getParameters());
                 break;
 
             default:

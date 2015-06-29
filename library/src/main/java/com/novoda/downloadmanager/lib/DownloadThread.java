@@ -16,6 +16,7 @@
 
 package com.novoda.downloadmanager.lib;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.drm.DrmManagerClient;
@@ -41,6 +42,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.util.Locale;
 
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
@@ -164,9 +166,6 @@ class DownloadThread implements Runnable {
     public void run() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         try {
-            if (mInfo.mStatus != Downloads.Impl.STATUS_RUNNING) {
-                mInfo.updateStatus(Downloads.Impl.STATUS_RUNNING);
-            }
             runInternal();
         } finally {
             mNotifier.notifyDownloadSpeed(mInfo.mId, 0);
@@ -175,9 +174,22 @@ class DownloadThread implements Runnable {
 
     private void runInternal() {
         // Skip when download already marked as finished; this download was probably started again while racing with UpdateThread.
-        if (DownloadInfo.queryDownloadStatus(mContext.getContentResolver(), mInfo.mId) == Downloads.Impl.STATUS_SUCCESS) {
+        int downloadStatus = DownloadInfo.queryDownloadStatus(getContentResolver(), mInfo.mId);
+        if (downloadStatus == Downloads.Impl.STATUS_SUCCESS) {
             Log.d("Download " + mInfo.mId + " already finished; skipping");
             return;
+        }
+        if (Downloads.Impl.isStatusCancelled(downloadStatus)) {
+            Log.d("Download " + mInfo.mId + " already cancelled; skipping");
+            return;
+        }
+        if (Downloads.Impl.isStatusError(downloadStatus)) {
+            Log.d("Download " + mInfo.mId + " already failed: status = " + downloadStatus + "; skipping");
+            return;
+        }
+        if (downloadStatus != Downloads.Impl.STATUS_RUNNING) {
+            mInfo.updateStatus(Downloads.Impl.STATUS_RUNNING);
+            updateBatchStatus(mInfo.batchId, mInfo.mId);
         }
 
         State state = new State(mInfo);
@@ -187,7 +199,7 @@ class DownloadThread implements Runnable {
         String errorMsg = null;
 
 //        final NetworkPolicyManager netPolicy = NetworkPolicyManager.from(mContext);
-        final PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
 
         try {
             wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
@@ -351,6 +363,9 @@ class DownloadThread implements Runnable {
                     default:
                         StopRequestException.throwUnhandledHttpError(responseCode, conn.getResponseMessage());
                 }
+            } catch (UnknownHostException e) {
+                // Unable to resolve host request
+                throw new StopRequestException(HTTP_NOT_FOUND, e);
             } catch (IOException e) {
                 // Trouble with low-level sockets
                 throw new StopRequestException(STATUS_HTTP_DATA_ERROR, e);
@@ -550,7 +565,7 @@ class DownloadThread implements Runnable {
                 now - state.mTimeLastNotification > Constants.MIN_PROGRESS_TIME) {
             ContentValues values = new ContentValues();
             values.put(Downloads.Impl.COLUMN_CURRENT_BYTES, state.mCurrentBytes);
-            mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
+            getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
             state.mBytesNotified = state.mCurrentBytes;
             state.mTimeLastNotification = now;
         }
@@ -594,7 +609,7 @@ class DownloadThread implements Runnable {
         if (state.mContentLength == -1) {
             values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, state.mCurrentBytes);
         }
-        mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
+        getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
 
         final boolean lengthMismatched = (state.mContentLength != -1)
                 && (state.mCurrentBytes != state.mContentLength);
@@ -630,7 +645,7 @@ class DownloadThread implements Runnable {
 
             ContentValues values = new ContentValues();
             values.put(Downloads.Impl.COLUMN_CURRENT_BYTES, state.mCurrentBytes);
-            mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
+            getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
             if (cannotResume(state)) {
                 throw new StopRequestException(STATUS_CANNOT_RESUME, "Failed reading response: " + ex + "; unable to resume", ex);
             } else {
@@ -649,7 +664,6 @@ class DownloadThread implements Runnable {
         readResponseHeaders(state, conn);
 
         state.mFilename = Helpers.generateSaveFile(
-                mContext,
                 mInfo.mUri,
                 mInfo.mHint,
                 state.mContentDisposition,
@@ -678,7 +692,7 @@ class DownloadThread implements Runnable {
             values.put(Downloads.Impl.COLUMN_MIME_TYPE, state.mMimeType);
         }
         values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, mInfo.mTotalBytes);
-        mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
+        getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
     }
 
     /**
@@ -807,6 +821,7 @@ class DownloadThread implements Runnable {
     }
 
     private void notifyThroughDatabase(State state, int finalStatus, String errorMsg, int numFailed) {
+        mInfo.mStatus = finalStatus;
         ContentValues values = new ContentValues();
         values.put(Downloads.Impl.COLUMN_STATUS, finalStatus);
         values.put(Downloads.Impl._DATA, state.mFilename);
@@ -823,7 +838,34 @@ class DownloadThread implements Runnable {
         if (!TextUtils.isEmpty(errorMsg)) {
             values.put(Downloads.Impl.COLUMN_ERROR_MSG, errorMsg);
         }
-        mContext.getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
+        getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
+
+        updateBatchStatus(mInfo.batchId, mInfo.mId);
+    }
+
+    private ContentResolver getContentResolver() {
+        return mContext.getContentResolver();
+    }
+
+    private void updateBatchStatus(long batchId, long downloadId) {
+        BatchStatusUpdater batchStatusUpdater = new BatchStatusUpdater(getContentResolver());
+        int batchStatus = batchStatusUpdater.getBatchStatus(batchId);
+        batchStatusUpdater.updateBatchStatus(batchId, batchStatus);
+
+        if (Downloads.Impl.isStatusCancelled(batchStatus)) {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_STATUS, STATUS_CANCELED);
+            getContentResolver().update(ALL_DOWNLOADS_CONTENT_URI, values, COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
+        } else if (Downloads.Impl.isStatusError(batchStatus)) {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_STATUS, STATUS_BATCH_FAILED);
+            getContentResolver().update(
+                    ALL_DOWNLOADS_CONTENT_URI,
+                    values,
+                    COLUMN_BATCH_ID + " = ? AND " + _ID + " <> ? ",
+                    new String[]{String.valueOf(batchId), String.valueOf(downloadId)}
+            );
+        }
     }
 
     public static long getHeaderFieldLong(URLConnection conn, String field, long defaultValue) {

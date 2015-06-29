@@ -83,16 +83,27 @@ final class Downloads {
          * Added so we can use our own ContentProvider - Matches: DownloadProvider.java
          */
         private static final String AUTHORITY = "content://" + DownloadProvider.AUTHORITY;
+
         /**
          * The content:// URI to access downloads owned by the caller's UID.
          */
         public static final Uri CONTENT_URI = Uri.parse(AUTHORITY + "/my_downloads");
 
         /**
+         * The content:// URI to access downloads owned by the caller's UID.
+         */
+        public static final Uri BATCH_CONTENT_URI = Uri.parse(AUTHORITY + "/batches");
+
+        /**
          * The content URI for accessing all downloads across all UIDs (requires the
          * ACCESS_ALL_DOWNLOADS permission).
          */
         public static final Uri ALL_DOWNLOADS_CONTENT_URI = Uri.parse(AUTHORITY + "/all_downloads");
+
+        /**
+         * The content:// URI to access downloads and their batch data.
+         */
+        public static final Uri DOWNLOADS_BY_BATCH_URI = Uri.parse(AUTHORITY + "/downloads_by_batch");
 
         /**
          * URI segment to access a publicly accessible downloaded file
@@ -104,6 +115,16 @@ final class Downloads {
          * permissions to access this downloaded file)
          */
         public static final Uri PUBLICLY_ACCESSIBLE_DOWNLOADS_URI = Uri.parse(AUTHORITY + "/" + PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT);
+
+        /**
+         * Name of downloadstable in the database
+         */
+        public static final String DOWNLOADS_TABLE_NAME = "Downloads";
+
+        /**
+         * Name of downloadstable in the database
+         */
+        public static final String VIEW_NAME_DOWNLOADS_BY_BATCH = "DownloadsByBatch";
 
         /**
          * The name of the column containing the URI of the data being downloaded.
@@ -165,15 +186,6 @@ final class Downloads {
         public static final String COLUMN_DESTINATION = "destination";
 
         /**
-         * The name of the column containing the flags that controls whether the
-         * download is displayed by the UI. See the VISIBILITY_* constants for
-         * a list of legal values.
-         * <P>Type: INTEGER</P>
-         * <P>Owner can Init/Read/Write</P>
-         */
-        public static final String COLUMN_VISIBILITY = "visibility";
-
-        /**
          * The name of the column containing the current control state  of the download.
          * Applications can write to this to control (pause/resume) the download.
          * the CONTROL_* constants for a list of legal values.
@@ -219,9 +231,10 @@ final class Downloads {
         public static final String COLUMN_NOTIFICATION_EXTRAS = "notificationextras";
 
         /**
-         * A resource ID that will be used to show a big picture style notification
+         * The ID of the batch that the download belongs to
+         * <P>Type: INTEGER</P>
          */
-        public static final String COLUMN_BIG_PICTURE = "notificationBigPictureResourceId";
+        public static final String COLUMN_BATCH_ID = "batch_id";
 
         /**
          * The name of the column contain the values of the cookie to be used for
@@ -275,24 +288,6 @@ final class Downloads {
          * <P>Owner can Init</P>
          */
         public static final String COLUMN_OTHER_UID = "otheruid";
-
-        /**
-         * The name of the column where the initiating application can provided the
-         * title of this download. The title will be displayed ito the user in the
-         * list of downloads.
-         * <P>Type: TEXT</P>
-         * <P>Owner can Init/Read/Write</P>
-         */
-        public static final String COLUMN_TITLE = "title";
-
-        /**
-         * The name of the column where the initiating application can provide the
-         * description of this download. The description will be displayed to the
-         * user in the list of downloads.
-         * <P>Type: TEXT</P>
-         * <P>Owner can Init/Read/Write</P>
-         */
-        public static final String COLUMN_DESCRIPTION = "description";
 
         /**
          * The name of the column holding a bitmask of allowed network types.  This is only used for
@@ -523,7 +518,14 @@ final class Downloads {
          * Returns whether the download has completed (either with success or error).
          */
         public static boolean isStatusCompleted(int status) {
-            return (status >= 200 && status < 300) || (status >= 400 && status < 600 && status != STATUS_CANCELED);
+            return isStatusSuccess(status) || (isStatusError(status) && !isStatusCancelled(status));
+        }
+
+        /**
+         * Returns whether the download has been cancelled.
+         */
+        public static boolean isStatusCancelled(int status) {
+            return status == STATUS_CANCELED;
         }
 
         /**
@@ -681,6 +683,11 @@ final class Downloads {
          */
         public static final int STATUS_TOO_MANY_REDIRECTS = 497;
 
+        /**
+         * This download couldn't be completed because another download in the batch failed.
+         */
+        public static final int STATUS_BATCH_FAILED = 498;
+
         static String statusToString(int status) {
             switch (status) {
                 case STATUS_PENDING:
@@ -735,27 +742,9 @@ final class Downloads {
         }
 
         /**
-         * This download is visible but only shows in the notifications
-         * while it's in progress.
-         */
-        public static final int VISIBILITY_VISIBLE = DownloadManager.Request.VISIBILITY_VISIBLE;
-
-        /**
-         * This download is visible and shows in the notifications while
-         * in progress and after completion.
-         */
-        public static final int VISIBILITY_VISIBLE_NOTIFY_COMPLETED =
-                DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED;
-
-        /**
-         * This download doesn't show in the UI or in the notifications.
-         */
-        public static final int VISIBILITY_HIDDEN = DownloadManager.Request.VISIBILITY_HIDDEN;
-
-        /**
          * Constants related to HTTP request headers associated with each download.
          */
-        public static class RequestHeaders {
+        public static class RequestHeaders implements BaseColumns {
             public static final String HEADERS_DB_TABLE = "request_headers";
             public static final String COLUMN_DOWNLOAD_ID = "download_id";
             public static final String COLUMN_HEADER = "header";
@@ -771,6 +760,52 @@ final class Downloads {
              * DownloadProvider.insert().
              */
             public static final String INSERT_KEY_PREFIX = "http_header_";
+        }
+
+        /**
+         * Constants related to batches associated with each download.
+         */
+        public static class Batches implements BaseColumns {
+            public static final String BATCHES_TABLE_NAME = "batches";
+
+            /**
+             * The name of the column where the initiating application can provided the
+             * title of this batch. The title will be displayed ito the user in the
+             * list of batches.
+             * <P>Type: TEXT</P>
+             * <P>Owner can Init/Read/Write</P>
+             */
+            public static final String COLUMN_TITLE = "batch_title";
+
+            /**
+             * The name of the column where the initiating application can provide the
+             * description of this batch. The description will be displayed to the
+             * user in the list of batches.
+             * <P>Type: TEXT</P>
+             * <P>Owner can Init/Read/Write</P>
+             */
+            public static final String COLUMN_DESCRIPTION = "batch_description";
+
+            /**
+             * A URL that will be used to show a big picture style notification
+             */
+            public static final String COLUMN_BIG_PICTURE = "batch_notificationBigPictureResourceId";
+
+            /**
+             * The status of the batch.
+             * <P>Type: INTEGER</P>
+             * <P>Owner can Read</P>
+             */
+            public static final String COLUMN_STATUS = "batch_status";
+
+            /**
+             * The name of the column containing the flags that controls whether the
+             * batch is displayed by the UI. See the {@link NotificationVisibility} constants for
+             * a list of legal values.
+             * <P>Type: INTEGER</P>
+             * <P>Owner can Init/Read/Write</P>
+             */
+            public static final String COLUMN_VISIBILITY = "visibility";
         }
     }
 

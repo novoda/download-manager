@@ -16,7 +16,6 @@
 
 package com.novoda.downloadmanager.lib;
 
-import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -26,8 +25,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Build;
-import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.util.LongSparseArray;
 import android.text.TextUtils;
@@ -37,13 +35,13 @@ import com.novoda.downloadmanager.R;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import static com.novoda.downloadmanager.lib.Request.*;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Update {@link NotificationManager} to reflect current {@link DownloadInfo}
@@ -54,7 +52,9 @@ class DownloadNotifier {
 
     private static final int TYPE_ACTIVE = 1;
     private static final int TYPE_WAITING = 2;
-    private static final int TYPE_COMPLETE = 3;
+    private static final int TYPE_SUCCESS = 3;
+    private static final int TYPE_FAILED = 4;
+    private static final int TYPE_CANCELLED = 5;
 
     private final Context mContext;
     private final NotificationImageRetriever imageRetriever;
@@ -64,29 +64,24 @@ class DownloadNotifier {
      * Currently active notifications, mapped from clustering tag to timestamp
      * when first shown.
      *
-     * @see #buildNotificationTag(DownloadInfo)
+     * @see #buildNotificationTag(DownloadBatch)
      */
 //    @GuardedBy("mActiveNotifs")
-    private final HashMap<String, Long> mActiveNotifs = new HashMap<String, Long>();
+    private final HashMap<String, Long> mActiveNotifs = new HashMap<>();
 
     /**
-     * Current speed of active downloads, mapped from {@link DownloadInfo#mId}
+     * Current speed of active downloads, mapped from {@link DownloadInfo#batchId}
      * to speed in bytes per second.
      */
 //    @GuardedBy("mDownloadSpeed")
     // LongSparseLongArray
-    private final LongSparseArray<Long> mDownloadSpeed = new LongSparseArray<Long>();
+    private final LongSparseArray<Long> mDownloadSpeed = new LongSparseArray<>();
 
-    /**
-     * Last time speed was reproted, mapped from {@link DownloadInfo#mId} to
-     * {@link SystemClock#elapsedRealtime()}.
-     */
-//    @GuardedBy("mDownloadSpeed")
-    // LongSparseLongArray
-    private final LongSparseArray<Long> mDownloadTouch = new LongSparseArray<Long>();
+    private final Resources resources;
 
-    public DownloadNotifier(Context context, NotificationImageRetriever imageRetriever) {
+    public DownloadNotifier(Context context, NotificationImageRetriever imageRetriever, Resources resources) {
         this.mContext = context;
+        this.resources = resources;
         this.imageRetriever = imageRetriever;
         this.mNotifManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     }
@@ -103,10 +98,8 @@ class DownloadNotifier {
         synchronized (mDownloadSpeed) {
             if (bytesPerSecond != 0) {
                 mDownloadSpeed.put(id, bytesPerSecond);
-                mDownloadTouch.put(id, SystemClock.elapsedRealtime());
             } else {
                 mDownloadSpeed.remove(id);
-                mDownloadTouch.remove(id);
             }
         }
     }
@@ -115,54 +108,103 @@ class DownloadNotifier {
      * Update {@link NotificationManager} to reflect the given set of
      * {@link DownloadInfo}, adding, collapsing, and removing as needed.
      */
-    public void updateWith(Collection<DownloadInfo> downloads) {
+    public void updateWith(List<DownloadBatch> batches) {
         synchronized (mActiveNotifs) {
-            updateWithLocked(downloads);
+            Map<String, List<DownloadBatch>> clusters = getClustersByNotificationTag(batches);
+
+            showNotificationPerCluster(clusters);
+
+            removeStaleTagsThatWereNotRenewed(clusters);
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    private void updateWithLocked(Collection<DownloadInfo> downloads) {
-        final Resources res = mContext.getResources();
-        final Map<String, List<DownloadInfo>> clustered = new HashMap<String, List<DownloadInfo>>();
+    @NonNull
+    private Map<String, List<DownloadBatch>> getClustersByNotificationTag(List<DownloadBatch> batches) {
+        Map<String, List<DownloadBatch>> clustered = new HashMap<>();
 
-        for (DownloadInfo info : downloads) {
-            final String tag = buildNotificationTag(info);
-            addInfoToCluster(tag, clustered, info);
+        for (DownloadBatch batch : batches) {
+            String tag = buildNotificationTag(batch);
+
+            addBatchToCluster(tag, clustered, batch);
         }
 
-        // Build notification for each cluster
-        for (String tag : clustered.keySet()) {
-            final int type = getNotificationTagType(tag);
-            final Collection<DownloadInfo> cluster = clustered.get(tag);
-
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
-            useTimeWhenClusterFirstShownToAvoidShuffling(tag, builder);
-            buildIcon(type, builder);
-            buildActionIntents(tag, type, cluster, builder);
-
-            Notification notification = buildTitlesAndDescription(res, type, cluster, builder);
-            mNotifManager.notify(tag.hashCode(), notification);
-        }
-
-        removeStaleTagsThatWerentRenewed(clustered);
+        return clustered;
     }
 
-    private void addInfoToCluster(final String tag, final Map<String, List<DownloadInfo>> cluster, final DownloadInfo info) {
+    /**
+     * Build tag used for collapsing several {@link DownloadInfo} into a single
+     * {@link Notification}.
+     */
+    private String buildNotificationTag(DownloadBatch batch) {
+        int status = batch.getStatus();
+        int visibility = batch.getInfo().getVisibility();
+        if (status == Downloads.Impl.STATUS_QUEUED_FOR_WIFI) {
+            return TYPE_WAITING + ":" + mContext.getPackageName();
+        } else if (status == Downloads.Impl.STATUS_RUNNING && shouldShowActiveItem(visibility)) {
+            return TYPE_ACTIVE + ":" + mContext.getPackageName();
+        } else if (Downloads.Impl.isStatusError(status) && !Downloads.Impl.isStatusCancelled(status)
+                && shouldShowCompletedItem(visibility)) {
+            // Failed downloads always have unique notifs
+            return TYPE_FAILED + ":" + batch.getBatchId();
+        } else if (Downloads.Impl.isStatusCancelled(status) && shouldShowCompletedItem(visibility)) {
+            // Cancelled downloads always have unique notifs
+            return TYPE_CANCELLED + ":" + batch.getBatchId();
+        } else if (Downloads.Impl.isStatusSuccess(status) && shouldShowCompletedItem(visibility)) {
+            // Complete downloads always have unique notifs
+            return TYPE_SUCCESS + ":" + batch.getBatchId();
+        } else {
+            return null;
+        }
+    }
+
+    private boolean shouldShowActiveItem(int visibility) {
+        return visibility == NotificationVisibility.ONLY_WHEN_ACTIVE
+                || visibility == NotificationVisibility.ACTIVE_OR_COMPLETE;
+    }
+
+    private boolean shouldShowCompletedItem(int visibility) {
+        return visibility == NotificationVisibility.ONLY_WHEN_COMPLETE
+                || visibility == NotificationVisibility.ACTIVE_OR_COMPLETE;
+    }
+
+    private void addBatchToCluster(String tag, Map<String, List<DownloadBatch>> cluster, DownloadBatch batch) {
         if (tag == null) {
             return;
         }
 
-        List<DownloadInfo> downloadInfos;
+        List<DownloadBatch> batches;
 
         if (cluster.containsKey(tag)) {
-            downloadInfos = cluster.get(tag);
+            batches = cluster.get(tag);
         } else {
-            downloadInfos = new ArrayList<DownloadInfo>();
-            cluster.put(tag, downloadInfos); // TODO not sure if this is right compared to ArrayListMultiMap
+            batches = new ArrayList<>();
+            cluster.put(tag, batches); // TODO not sure if this is right compared to ArrayListMultiMap
         }
 
-        downloadInfos.add(info);
+        batches.add(batch);
+    }
+
+    private void showNotificationPerCluster(Map<String, List<DownloadBatch>> clusters) {
+        for (String notificationId : clusters.keySet()) {
+            int type = getNotificationTagType(notificationId);
+            List<DownloadBatch> cluster = clusters.get(notificationId);
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
+            useTimeWhenClusterFirstShownToAvoidShuffling(notificationId, builder);
+            buildIcon(type, builder);
+            buildActionIntents(notificationId, type, cluster, builder);
+
+            Notification notification = buildTitlesAndDescription(type, cluster, builder);
+            mNotifManager.notify(notificationId.hashCode(), notification);
+        }
+    }
+
+    /**
+     * Return the cluster type of the given as created by
+     * {@link #buildNotificationTag(DownloadBatch)}.
+     */
+    private static int getNotificationTagType(String tag) {
+        return Integer.parseInt(tag.substring(0, tag.indexOf(':')));
     }
 
     private void useTimeWhenClusterFirstShownToAvoidShuffling(String tag, NotificationCompat.Builder builder) {
@@ -177,16 +219,24 @@ class DownloadNotifier {
     }
 
     private void buildIcon(int type, NotificationCompat.Builder builder) {
-        if (type == TYPE_ACTIVE) {
-            builder.setSmallIcon(android.R.drawable.stat_sys_download);
-        } else if (type == TYPE_WAITING) {
-            builder.setSmallIcon(android.R.drawable.stat_sys_warning);
-        } else if (type == TYPE_COMPLETE) {
-            builder.setSmallIcon(android.R.drawable.stat_sys_download_done);
+        switch (type) {
+            case TYPE_ACTIVE:
+                builder.setSmallIcon(android.R.drawable.stat_sys_download);
+                break;
+            case TYPE_WAITING:
+            case TYPE_FAILED:
+                builder.setSmallIcon(android.R.drawable.stat_sys_warning);
+                break;
+            case TYPE_SUCCESS:
+                builder.setSmallIcon(android.R.drawable.stat_sys_download_done);
+                break;
+            default:
+                //don't set an icon if none matches
+                break;
         }
     }
 
-    private void buildActionIntents(String tag, int type, Collection<DownloadInfo> cluster, NotificationCompat.Builder builder) {
+    private void buildActionIntents(String tag, int type, List<DownloadBatch> cluster, NotificationCompat.Builder builder) {
         if (type == TYPE_ACTIVE || type == TYPE_WAITING) {
             // build a synthetic uri for intent identification purposes
             Uri uri = new Uri.Builder().scheme("active-dl").appendPath(tag).build();
@@ -195,63 +245,69 @@ class DownloadNotifier {
             builder.setContentIntent(PendingIntent.getBroadcast(mContext, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
             builder.setOngoing(true);
 
-            DownloadInfo info = cluster.iterator().next();
-            uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, info.mId);
-            Intent cancelIntent = new Intent(Constants.ACTION_CANCEL, uri, mContext, DownloadReceiver.class);
+            DownloadBatch batch = cluster.iterator().next();
+            Intent cancelIntent = new Intent(Constants.ACTION_CANCEL, null, mContext, DownloadReceiver.class);
+            cancelIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getBatchId());
             PendingIntent pendingCancelIntent = PendingIntent.getBroadcast(mContext, 0, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             builder.addAction(R.drawable.dl__ic_action_cancel, "Cancel", pendingCancelIntent);
 
-        } else if (type == TYPE_COMPLETE) {
-            final DownloadInfo info = cluster.iterator().next();
-            final Uri uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, info.mId);
+        } else if (type == TYPE_SUCCESS) {
+            DownloadBatch batch = cluster.iterator().next();
+            // TODO: Decide how we handle notification clicks
+            DownloadInfo downloadInfo = batch.getDownloads().get(0);
+            Uri uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, downloadInfo.mId);
             builder.setAutoCancel(true);
 
             final String action;
-            if (Downloads.Impl.isStatusError(info.mStatus)) {
+            if (Downloads.Impl.isStatusError(batch.getStatus())) {
                 action = Constants.ACTION_LIST;
             } else {
-                if (info.mDestination != Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION) {
-                    action = Constants.ACTION_OPEN;
-                } else {
-                    action = Constants.ACTION_LIST;
-                }
+                action = Constants.ACTION_OPEN;
             }
 
             final Intent intent = new Intent(action, uri, mContext, DownloadReceiver.class);
             intent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, getDownloadIds(cluster));
+            intent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getBatchId());
             builder.setContentIntent(PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
 
             final Intent hideIntent = new Intent(Constants.ACTION_HIDE, uri, mContext, DownloadReceiver.class);
+            hideIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getBatchId());
             builder.setDeleteIntent(PendingIntent.getBroadcast(mContext, 0, hideIntent, 0));
         }
     }
 
-    private Notification buildTitlesAndDescription(Resources res, int type, Collection<DownloadInfo> cluster, NotificationCompat.Builder builder) {
+    private Notification buildTitlesAndDescription(
+            int type,
+            List<DownloadBatch> cluster,
+            NotificationCompat.Builder builder) {
+
         String remainingText = null;
         String percentText = null;
         if (type == TYPE_ACTIVE) {
-            long current = 0;
-            long total = 0;
-            long speed = 0;
+            long currentBytes = 0;
+            long totalBytes = 0;
+            long totalBytesPerSecond = 0;
             synchronized (mDownloadSpeed) {
-                for (DownloadInfo info : cluster) {
-                    if (mDownloadSpeed.get(info.mId) == null) {
-                        continue;
-                    }
-                    if (info.mTotalBytes != -1) {
-                        current += info.mCurrentBytes;
-                        total += info.mTotalBytes;
-                        speed += mDownloadSpeed.get(info.mId);
+                for (DownloadBatch batch : cluster) {
+                    for (DownloadInfo info : batch.getDownloads()) {
+                        if (info.hasTotalBytes()) {
+                            currentBytes += info.mCurrentBytes;
+                            totalBytes += info.mTotalBytes;
+                            Long bytesPerSecond = mDownloadSpeed.get(info.mId);
+                            if (bytesPerSecond != null) {
+                                totalBytesPerSecond += bytesPerSecond;
+                            }
+                        }
                     }
                 }
             }
 
-            if (total > 0) {
-                final int percent = (int) ((current * 100) / total);
+            if (totalBytes > 0) {
+                int percent = (int) ((currentBytes * 100) / totalBytes);
                 percentText = percent + "%";//res.getString(R.string.download_percent, percent);
 
-                if (speed > 0) {
-                    final long remainingMillis = ((total - current) * 1000) / speed;
+                if (totalBytesPerSecond > 0) {
+                    long remainingMillis = ((totalBytes - currentBytes) * 1000) / totalBytesPerSecond;
                     remainingText = "Duration " + formatDuration(remainingMillis);
                 }
 
@@ -261,144 +317,19 @@ class DownloadNotifier {
             }
         }
 
-        if (cluster.size() == 1) {
-            final DownloadInfo info = cluster.iterator().next();
-
-            final NotificationCompat.BigPictureStyle style = new NotificationCompat.BigPictureStyle();
-            String imageUrl = info.bigPictureResourceUrl;
-            if (!TextUtils.isEmpty(imageUrl)) {
-                Bitmap bitmap = imageRetriever.retrieveImage(imageUrl);
-                style.bigPicture(bitmap);
-            }
-            builder.setContentTitle(getDownloadTitle(res, info));
-            style.setBigContentTitle(getDownloadTitle(res, info));
-
-            if (type == TYPE_ACTIVE) {
-                if (!TextUtils.isEmpty(info.mDescription)) {
-                    builder.setContentText(info.mDescription);
-                    style.setSummaryText(info.mDescription);
-                } else {
-                    builder.setContentText(remainingText);
-                    style.setSummaryText(remainingText);
-                }
-                builder.setContentInfo(percentText);
-
-            } else if (type == TYPE_WAITING) {
-                builder.setContentText("Download size requires Wi-Fi.");
-                style.setSummaryText("Download size requires Wi-Fi.");
-
-            } else if (type == TYPE_COMPLETE) {
-                if (Downloads.Impl.isStatusError(info.mStatus)) {
-                    builder.setContentText("Download unsuccessful.");
-                    style.setSummaryText("Download unsuccessful.");
-                } else if (Downloads.Impl.isStatusSuccess(info.mStatus)) {
-                    builder.setContentText("Download complete.");
-                    style.setSummaryText("Download complete.");
-                }
-            }
-
-            if (!TextUtils.isEmpty(imageUrl)) {
-                builder.setStyle(style);
-            }
-            return builder.build();
-
-        } else
-
-        {
-            final NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(builder);
-
-            for (DownloadInfo info : cluster) {
-                inboxStyle.addLine(getDownloadTitle(res, info));
-            }
-
-            if (type == TYPE_ACTIVE) {
-                builder.setContentTitle(res.getQuantityString(R.plurals.dl__notif_summary_active, cluster.size(), cluster.size()));
-                builder.setContentText(remainingText);
-                builder.setContentInfo(percentText);
-                inboxStyle.setSummaryText(remainingText);
-
-            } else if (type == TYPE_WAITING) {
-                builder.setContentTitle(res.getQuantityString(R.plurals.dl__notif_summary_waiting, cluster.size(), cluster.size()));
-                builder.setContentText("Download size requires Wi-Fi.");
-                inboxStyle.setSummaryText("Download size requires Wi-Fi.");
-            }
-
-            return inboxStyle.build();
+        Set<DownloadBatch> currentBatches = new HashSet<>();
+        for (DownloadBatch batch : cluster) {
+            currentBatches.add(batch);
         }
 
-    }
+        if (currentBatches.size() == 1) {
+            DownloadBatch batch = currentBatches.iterator().next();
+            return buildSingleNotification(type, builder, batch, remainingText, percentText);
 
-    private void removeStaleTagsThatWerentRenewed(Map<String, List<DownloadInfo>> clustered) {
-        final Iterator<String> it = mActiveNotifs.keySet().iterator();
-        while (it.hasNext()) {
-            final String tag = it.next();
-            if (!clustered.containsKey(tag)) {
-                mNotifManager.cancel(tag.hashCode());
-                it.remove();
-            }
-        }
-    }
-
-    private static CharSequence getDownloadTitle(Resources res, DownloadInfo info) {
-        if (!TextUtils.isEmpty(info.mTitle)) {
-            return info.mTitle;
         } else {
-            return "unknown";
+            return buildStackedNotification(type, builder, currentBatches, remainingText, percentText);
         }
-    }
 
-    private long[] getDownloadIds(Collection<DownloadInfo> infos) {
-        final long[] ids = new long[infos.size()];
-        int i = 0;
-        for (DownloadInfo info : infos) {
-            ids[i++] = info.mId;
-        }
-        return ids;
-    }
-
-    public void dumpSpeeds() {
-        Log.e("dump at speed");
-    }
-
-    /**
-     * Build tag used for collapsing several {@link DownloadInfo} into a single
-     * {@link Notification}.
-     */
-    private String buildNotificationTag(DownloadInfo info) {
-        if (info.mStatus == Downloads.Impl.STATUS_QUEUED_FOR_WIFI) {
-            return TYPE_WAITING + ":" + getPackageName();
-        } else if (isActiveAndVisible(info)) {
-            return TYPE_ACTIVE + ":" + getPackageName();
-        } else if (isCompleteAndVisible(info)) {
-            // Complete downloads always have unique notifs
-            return TYPE_COMPLETE + ":" + info.mId;
-        } else {
-            return null;
-        }
-    }
-
-    private String getPackageName() {
-        return mContext.getPackageName();
-    }
-
-    /**
-     * Return the cluster type of the given as created by
-     * {@link #buildNotificationTag(DownloadInfo)}.
-     */
-    private static int getNotificationTagType(String tag) {
-        return Integer.parseInt(tag.substring(0, tag.indexOf(':')));
-    }
-
-    private static boolean isActiveAndVisible(DownloadInfo download) {
-        return download.mStatus == Downloads.Impl.STATUS_RUNNING &&
-                (download.mVisibility == VISIBILITY_VISIBLE
-                        || download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-    }
-
-    private static boolean isCompleteAndVisible(DownloadInfo download) {
-        return Downloads.Impl.isStatusCompleted(download.mStatus) &&
-                (download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_COMPLETED
-                        || download.mVisibility == VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION);
     }
 
     /**
@@ -407,16 +338,129 @@ class DownloadNotifier {
      * from seconds up to hours.
      */
     public CharSequence formatDuration(long millis) {
-        final Resources res = mContext.getResources();
         if (millis >= DateUtils.HOUR_IN_MILLIS) {
-            final int hours = (int) ((millis + 1800000) / DateUtils.HOUR_IN_MILLIS);
-            return res.getQuantityString(R.plurals.dl__duration_hours, hours, hours);
+            int hours = (int) TimeUnit.MILLISECONDS.toHours(millis + TimeUnit.MINUTES.toMillis(30));
+            return resources.getQuantityString(R.plurals.dl__duration_hours, hours, hours);
         } else if (millis >= DateUtils.MINUTE_IN_MILLIS) {
-            final int minutes = (int) ((millis + 30000) / DateUtils.MINUTE_IN_MILLIS);
-            return res.getQuantityString(R.plurals.dl__duration_minutes, minutes, minutes);
+            int minutes = (int) TimeUnit.MILLISECONDS.toMinutes(millis + TimeUnit.SECONDS.toMillis(30));
+            return resources.getQuantityString(R.plurals.dl__duration_minutes, minutes, minutes);
         } else {
-            final int seconds = (int) ((millis + 500) / DateUtils.SECOND_IN_MILLIS);
-            return res.getQuantityString(R.plurals.dl__duration_seconds, seconds, seconds);
+            int seconds = (int) TimeUnit.MILLISECONDS.toSeconds(millis + 500);
+            return resources.getQuantityString(R.plurals.dl__duration_seconds, seconds, seconds);
         }
     }
+
+    private Notification buildSingleNotification(int type, NotificationCompat.Builder builder, DownloadBatch batch, String remainingText, String percentText) {
+
+        NotificationCompat.BigPictureStyle style = new NotificationCompat.BigPictureStyle();
+        String imageUrl = batch.getInfo().getBigPictureUrl();
+        if (!TextUtils.isEmpty(imageUrl)) {
+            Bitmap bitmap = imageRetriever.retrieveImage(imageUrl);
+            style.bigPicture(bitmap);
+        }
+        CharSequence title = getDownloadTitle(batch.getInfo());
+        builder.setContentTitle(title);
+        style.setBigContentTitle(title);
+
+        if (type == TYPE_ACTIVE) {
+            String description = batch.getInfo().getDescription();
+            if (TextUtils.isEmpty(description)) {
+                setSecondaryNotificationText(builder, style, remainingText);
+            } else {
+                setSecondaryNotificationText(builder, style, description);
+            }
+            builder.setContentInfo(percentText);
+
+        } else if (type == TYPE_WAITING) {
+            setSecondaryNotificationText(builder, style, "Download size requires Wi-Fi.");
+
+        } else if (type == TYPE_SUCCESS) {
+            setSecondaryNotificationText(builder, style, "Download complete.");
+        } else if (type == TYPE_FAILED) {
+            setSecondaryNotificationText(builder, style, "Download unsuccessful.");
+        } else if (type == TYPE_CANCELLED) {
+            setSecondaryNotificationText(builder, style, "Download cancelled.");
+        }
+
+        if (!TextUtils.isEmpty(imageUrl)) {
+            builder.setStyle(style);
+        }
+        return builder.build();
+    }
+
+    private void setSecondaryNotificationText(NotificationCompat.Builder builder, NotificationCompat.BigPictureStyle style, String description) {
+        builder.setContentText(description);
+        style.setSummaryText(description);
+    }
+
+    private Notification buildStackedNotification(int type, NotificationCompat.Builder builder, Set<DownloadBatch> currentBatches, String remainingText, String percentText) {
+        final NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(builder);
+
+        for (DownloadBatch batch : currentBatches) {
+            inboxStyle.addLine(getDownloadTitle(batch.getInfo()));
+        }
+
+        if (type == TYPE_ACTIVE) {
+            builder.setContentTitle(resources.getQuantityString(R.plurals.dl__notif_summary_active, currentBatches.size(), currentBatches.size()));
+            builder.setContentInfo(percentText);
+            setSecondaryNotificationText(builder, inboxStyle, remainingText);
+        } else if (type == TYPE_WAITING) {
+            builder.setContentTitle(resources.getQuantityString(R.plurals.dl__notif_summary_waiting, currentBatches.size(), currentBatches.size()));
+            setSecondaryNotificationText(builder, inboxStyle, "Download size requires Wi-Fi.");
+        } else if (type == TYPE_SUCCESS) {
+            setSecondaryNotificationText(builder, inboxStyle, "Download complete.");
+        } else if (type == TYPE_FAILED) {
+            setSecondaryNotificationText(builder, inboxStyle, "Download unsuccessful.");
+        } else if (type == TYPE_CANCELLED) {
+            setSecondaryNotificationText(builder, inboxStyle, "Download cancelled.");
+        }
+
+        return inboxStyle.build();
+    }
+
+    private void setSecondaryNotificationText(NotificationCompat.Builder builder, NotificationCompat.InboxStyle style, String description) {
+        builder.setContentText(description);
+        style.setSummaryText(description);
+    }
+
+    private void removeStaleTagsThatWereNotRenewed(Map<String, List<DownloadBatch>> clustered) {
+        final Iterator<String> tags = mActiveNotifs.keySet().iterator();
+        while (tags.hasNext()) {
+            final String tag = tags.next();
+            if (!clustered.containsKey(tag)) {
+                mNotifManager.cancel(tag.hashCode());
+                tags.remove();
+            }
+        }
+    }
+
+    private static CharSequence getDownloadTitle(BatchInfo batch) {
+        String title = batch.getTitle();
+        if (TextUtils.isEmpty(title)) {
+            return "unknown";
+        } else {
+            return title;
+        }
+    }
+
+    private long[] getDownloadIds(List<DownloadBatch> batches) {
+        List<Long> ids = new ArrayList<>();
+        for (DownloadBatch batch : batches) {
+            for (DownloadInfo downloadInfo : batch.getDownloads()) {
+                ids.add(downloadInfo.mId);
+            }
+        }
+
+        long[] idArray = new long[ids.size()];
+
+        for (int i = 0, idsSize = ids.size(); i < idsSize; i++) {
+            idArray[i] = ids.get(i);
+        }
+        return idArray;
+    }
+
+    public void dumpSpeeds() {
+        Log.e("dump at speed");
+    }
+
 }

@@ -26,6 +26,7 @@ import java.util.concurrent.Future;
  */
 class DownloadInfo {
     public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
+    private static final int UNKNOWN_BYTES = -1;
 
     // TODO: move towards these in-memory objects being sources of truth, and
 
@@ -71,7 +72,6 @@ class DownloadInfo {
             info.mFileName = getString(Downloads.Impl._DATA);
             info.mMimeType = getString(Downloads.Impl.COLUMN_MIME_TYPE);
             info.mDestination = getInt(Downloads.Impl.COLUMN_DESTINATION);
-            info.mVisibility = getInt(Downloads.Impl.COLUMN_VISIBILITY);
             info.mStatus = getInt(Downloads.Impl.COLUMN_STATUS);
             info.mNumFailed = getInt(Downloads.Impl.COLUMN_FAILED_CONNECTIONS);
             int retryRedirect = getInt(Constants.RETRY_AFTER_X_REDIRECT_COUNT);
@@ -92,10 +92,8 @@ class DownloadInfo {
             info.mAllowedNetworkTypes = getInt(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES);
             info.mAllowRoaming = getInt(Downloads.Impl.COLUMN_ALLOW_ROAMING) != 0;
             info.mAllowMetered = getInt(Downloads.Impl.COLUMN_ALLOW_METERED) != 0;
-            info.mTitle = getString(Downloads.Impl.COLUMN_TITLE);
-            info.mDescription = getString(Downloads.Impl.COLUMN_DESCRIPTION);
             info.mBypassRecommendedSizeLimit = getInt(Downloads.Impl.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
-            info.bigPictureResourceUrl = getString(Downloads.Impl.COLUMN_BIG_PICTURE);
+            info.batchId = getLong(Downloads.Impl.COLUMN_BATCH_ID);
 
             synchronized (this) {
                 info.mControl = getInt(Downloads.Impl.COLUMN_CONTROL);
@@ -227,10 +225,8 @@ class DownloadInfo {
     public int mAllowedNetworkTypes;
     public boolean mAllowRoaming;
     public boolean mAllowMetered;
-    public String mTitle;
-    public String mDescription;
     public int mBypassRecommendedSizeLimit;
-    public String bigPictureResourceUrl;
+    public long batchId;
 
     private List<Pair<String, String>> mRequestHeaders = new ArrayList<Pair<String, String>>();
 
@@ -239,8 +235,6 @@ class DownloadInfo {
      * {@link #isReadyToDownload()} && {@link #startDownloadIfNotActive(ExecutorService)}.
      */
     private Future<?> mSubmittedTask;
-
-    private DownloadThread mTask;
 
     private final Context mContext;
     private final SystemFacade mSystemFacade;
@@ -340,20 +334,6 @@ class DownloadInfo {
             case Downloads.Impl.STATUS_INSUFFICIENT_SPACE_ERROR:
                 // avoids repetition of retrying download
                 return false;
-        }
-        return false;
-    }
-
-    /**
-     * Returns whether this download has a visible notification after
-     * completion.
-     */
-    public boolean hasCompletionNotification() {
-        if (!Downloads.Impl.isStatusCompleted(mStatus)) {
-            return false;
-        }
-        if (mVisibility == Downloads.Impl.VISIBILITY_VISIBLE_NOTIFY_COMPLETED) {
-            return true;
         }
         return false;
     }
@@ -470,11 +450,13 @@ class DownloadInfo {
 
     public boolean startDownloadIfNotActive(ExecutorService executor) {
         synchronized (this) {
-            final boolean isActive = mSubmittedTask != null && !mSubmittedTask.isDone();
-            if (!isActive) {
-                updateStatus(Downloads.Impl.STATUS_PENDING);
-                mTask = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier);
-                mSubmittedTask = executor.submit(mTask);
+            boolean isActive;
+            if (mSubmittedTask == null) {
+                DownloadThread downloadThread = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier);
+                mSubmittedTask = executor.submit(downloadThread);
+                isActive = true;
+            } else {
+                isActive = !mSubmittedTask.isDone();
             }
             return isActive;
         }
@@ -582,5 +564,9 @@ class DownloadInfo {
         } finally {
             cursor.close();
         }
+    }
+
+    public boolean hasTotalBytes() {
+        return mTotalBytes != UNKNOWN_BYTES;
     }
 }
