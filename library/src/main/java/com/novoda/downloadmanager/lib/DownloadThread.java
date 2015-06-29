@@ -71,16 +71,18 @@ class DownloadThread implements Runnable {
     private final SystemFacade mSystemFacade;
     private final StorageManager mStorageManager;
     private final DownloadNotifier mNotifier;
+    private final BatchCompletionBroadcaster batchCompletionBroadcaster;
 
     private volatile boolean mPolicyDirty;
 
     public DownloadThread(Context context, SystemFacade systemFacade, DownloadInfo info,
-                          StorageManager storageManager, DownloadNotifier notifier) {
+                          StorageManager storageManager, DownloadNotifier notifier, BatchCompletionBroadcaster batchCompletionBroadcaster) {
         mContext = context;
         mSystemFacade = systemFacade;
         mInfo = info;
         mStorageManager = storageManager;
         mNotifier = notifier;
+        this.batchCompletionBroadcaster = batchCompletionBroadcaster;
     }
 
     /**
@@ -865,6 +867,8 @@ class DownloadThread implements Runnable {
                     COLUMN_BATCH_ID + " = ? AND " + _ID + " <> ? ",
                     new String[]{String.valueOf(batchId), String.valueOf(downloadId)}
             );
+        } else if (Downloads.Impl.isStatusSuccess(batchStatus)) {
+            batchCompletionBroadcaster.notifyBatchCompletedFor(batchId);
         }
     }
 

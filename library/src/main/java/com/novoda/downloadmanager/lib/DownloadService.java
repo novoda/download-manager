@@ -261,6 +261,7 @@ public class DownloadService extends Service {
                 Log.wtf("Final update pass triggered, isActive=" + isActive, new IllegalStateException("someone didn't update correctly"));
             }
 
+            Log.e("DOWNLOAD IS ACTIVE: " + isActive);
             if (isActive) {
                 // Still doing useful work, keep service alive. These active
                 // tasks will trigger another update pass when they're finished.
@@ -342,7 +343,6 @@ public class DownloadService extends Service {
 
         List<DownloadBatch> batches = fetchBatches(mDownloads.values());
         updateUserVisibleNotification(batches);
-
 
         // Set alarm when next action is in future. It's okay if the service
         // continues to run in meantime, since it will kick off an update pass.
