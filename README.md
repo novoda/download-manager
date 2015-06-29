@@ -48,7 +48,8 @@ public class Authority {
 
 ## Database Filename
 
-It is possible to override the database filename. See [Advanced Usage](https://github.com/novoda/download-manager/wiki/Advanced-Useage) for details.
+It is possible to override the database filename. See [Advanced Usage](https://github.com/novoda/download-manager/wiki/Advanced-Useage),
+ or take a look at the `demo_parallel` sample app for details.
 
 ## Links
 
