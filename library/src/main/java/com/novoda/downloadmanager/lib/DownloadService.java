@@ -343,7 +343,6 @@ public class DownloadService extends Service {
         List<DownloadBatch> batches = fetchBatches(mDownloads.values());
         updateUserVisibleNotification(batches);
 
-
         // Set alarm when next action is in future. It's okay if the service
         // continues to run in meantime, since it will kick off an update pass.
         if (nextRetryTimeMillis > 0 && nextRetryTimeMillis < Long.MAX_VALUE) {
@@ -418,8 +417,8 @@ public class DownloadService extends Service {
     }
 
     private boolean kickOffDownloadTaskIfReady(boolean isActive, DownloadInfo info) {
-        CollatedDownloadInfo collatedDownloadInfo = CollatedDownloadInfo.collateInfo(mDownloads, info);        
-	boolean isReadyToDownload = info.isReadyToDownload(collatedDownloadInfo);
+        CollatedDownloadInfo collatedDownloadInfo = CollatedDownloadInfo.collateInfo(mDownloads, info);
+        boolean isReadyToDownload = info.isReadyToDownload(collatedDownloadInfo);
         boolean downloadIsActive = info.isActive();
 
         if (isReadyToDownload || downloadIsActive) {
