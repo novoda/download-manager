@@ -462,6 +462,10 @@ class DownloadInfo {
         }
     }
 
+    public boolean isActive() {
+        return mSubmittedTask != null && !mSubmittedTask.isDone();
+    }
+
     public void updateStatus(int status) {
         mStatus = status;
         downloadStatusContentValues.clear();
@@ -470,14 +474,7 @@ class DownloadInfo {
     }
 
     private boolean isClientReadyToDownload() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        if (networkInfo != null && networkInfo.isConnected()) {
-            return true;
-        } else {
-            return false;
-        }
-        //return downloadClientReadyChecker.isAllowedToDownload();
+        return downloadClientReadyChecker.isAllowedToDownload();
     }
 
     /**
