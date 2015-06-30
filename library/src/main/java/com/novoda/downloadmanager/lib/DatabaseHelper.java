@@ -160,6 +160,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             Downloads.Impl.COLUMN_TOTAL_BYTES,
             Downloads.Impl.COLUMN_LAST_MODIFICATION,
             Downloads.Impl.COLUMN_CURRENT_BYTES,
+            Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS,
             Downloads.Impl.COLUMN_BATCH_ID,
             Downloads.Impl.Batches.COLUMN_TITLE,
             Downloads.Impl.Batches.COLUMN_DESCRIPTION,
