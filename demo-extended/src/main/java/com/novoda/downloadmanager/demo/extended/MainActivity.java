@@ -101,7 +101,6 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         batch.addRequest(request);
         long batchId = downloadManager.enqueue(batch);
         Log.d(TAG, "Download enqueued with batch ID: " + batchId);
-
     }
 
     private void setupQueryingExample() {
