@@ -11,12 +11,13 @@ public class CollatedDownloadInfo {
     static CollatedDownloadInfo collateInfo(Map<Long, DownloadInfo> downloadsMap, DownloadInfo info) {
         List<DownloadInfo> downloadInfosForBatch = new ArrayList<>();
         downloadInfosForBatch.add(info);
-        for (Map.Entry<Long, DownloadInfo> entry : downloadsMap.entrySet()) {
-            DownloadInfo otherInfo = entry.getValue();
-            if (info.mId == otherInfo.mId) {
-                downloadInfosForBatch.add(otherInfo);
+
+        for (DownloadInfo entry : downloadsMap.values()) {
+            if (info.mId == entry.mId) {
+                downloadInfosForBatch.add(entry);
             }
         }
+
         return new CollatedDownloadInfo(sumTotalSizeFrom(downloadInfosForBatch));
     }
 
