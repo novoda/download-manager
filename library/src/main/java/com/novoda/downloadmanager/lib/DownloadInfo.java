@@ -444,7 +444,7 @@ class DownloadInfo {
      */
     public boolean isReadyToDownload() {
         synchronized (this) {
-            return isDownloadManagerReadyToDownload() && isClientReadyToDownload();
+            return isClientReadyToDownload() && isDownloadManagerReadyToDownload();
         }
     }
 
@@ -460,6 +460,10 @@ class DownloadInfo {
             }
             return isActive;
         }
+    }
+
+    public boolean isActive() {
+        return mSubmittedTask != null && !mSubmittedTask.isDone();
     }
 
     public void updateStatus(int status) {
