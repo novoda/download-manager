@@ -85,6 +85,11 @@ public class DownloadManager {
     public static final String COLUMN_BATCH_ID = Downloads.Impl.COLUMN_BATCH_ID;
 
     /**
+     * The extra supplied information for this download.
+     */
+    public static final String COLUMN_NOTIFICATION_EXTRAS = Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS;
+
+    /**
      * The status of the batch that contains this download.
      */
     public static final String COLUMN_BATCH_STATUS = Downloads.Impl.Batches.COLUMN_STATUS;
