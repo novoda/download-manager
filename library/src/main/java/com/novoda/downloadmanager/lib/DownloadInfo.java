@@ -444,7 +444,7 @@ class DownloadInfo {
      */
     public boolean isReadyToDownload() {
         synchronized (this) {
-            return isDownloadManagerReadyToDownload() && isClientReadyToDownload();
+            return isClientReadyToDownload() && isDownloadManagerReadyToDownload();
         }
     }
 
@@ -470,7 +470,14 @@ class DownloadInfo {
     }
 
     private boolean isClientReadyToDownload() {
-        return downloadClientReadyChecker.isAllowedToDownload();
+        ConnectivityManager connectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        if (networkInfo != null && networkInfo.isConnected()) {
+            return true;
+        } else {
+            return false;
+        }
+        //return downloadClientReadyChecker.isAllowedToDownload();
     }
 
     /**

@@ -187,6 +187,12 @@ class DownloadThread implements Runnable {
             Log.d("Download " + mInfo.mId + " already failed: status = " + downloadStatus + "; skipping");
             return;
         }
+
+        if (!mInfo.isReadyToDownload()) {
+            Log.d("Download " + mInfo.mId + " is not ready to download: skipping");
+            return;
+        }
+
         if (downloadStatus != Downloads.Impl.STATUS_RUNNING) {
             mInfo.updateStatus(Downloads.Impl.STATUS_RUNNING);
             updateBatchStatus(mInfo.batchId, mInfo.mId);
