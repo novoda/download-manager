@@ -375,7 +375,6 @@ class DownloadNotifier {
             setSecondaryNotificationText(builder, style, "Download size requires Wi-Fi.");
 
         } else if (type == TYPE_SUCCESS) {
-            Log.e("BATCH HAS COMPLETED!!");
             setSecondaryNotificationText(builder, style, "Download complete.");
         } else if (type == TYPE_FAILED) {
             setSecondaryNotificationText(builder, style, "Download unsuccessful.");
