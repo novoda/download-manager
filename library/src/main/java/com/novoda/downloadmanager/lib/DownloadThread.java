@@ -71,16 +71,18 @@ class DownloadThread implements Runnable {
     private final SystemFacade mSystemFacade;
     private final StorageManager mStorageManager;
     private final DownloadNotifier mNotifier;
+    private final BatchStatusRepository batchStatusRepository;
 
     private volatile boolean mPolicyDirty;
 
     public DownloadThread(Context context, SystemFacade systemFacade, DownloadInfo info,
-                          StorageManager storageManager, DownloadNotifier notifier) {
+                          StorageManager storageManager, DownloadNotifier notifier, BatchStatusRepository batchStatusRepository) {
         mContext = context;
         mSystemFacade = systemFacade;
         mInfo = info;
         mStorageManager = storageManager;
         mNotifier = notifier;
+        this.batchStatusRepository = batchStatusRepository;
     }
 
     /**
@@ -175,7 +177,6 @@ class DownloadThread implements Runnable {
     private void runInternal() {
         // Skip when download already marked as finished; this download was probably started again while racing with UpdateThread.
         int downloadStatus = DownloadInfo.queryDownloadStatus(getContentResolver(), mInfo.mId);
-        Log.d("Queried DB for status of download " + mInfo.mId + ": " + downloadStatus);
         if (downloadStatus == Downloads.Impl.STATUS_SUCCESS) {
             Log.d("Download " + mInfo.mId + " already finished; skipping");
             return;
@@ -188,6 +189,12 @@ class DownloadThread implements Runnable {
             Log.d("Download " + mInfo.mId + " already failed: status = " + downloadStatus + "; skipping");
             return;
         }
+
+        if (!mInfo.isReadyToDownload(new CollatedDownloadInfo(batchStatusRepository.getBatchSizeInBytes(mInfo.batchId)))) {
+            Log.d("Download " + mInfo.mId + " is not ready to download: skipping");
+            return;
+        }
+
         if (downloadStatus != Downloads.Impl.STATUS_RUNNING) {
             mInfo.updateStatus(Downloads.Impl.STATUS_RUNNING);
             updateBatchStatus(mInfo.batchId, mInfo.mId);
@@ -849,18 +856,14 @@ class DownloadThread implements Runnable {
     }
 
     private void updateBatchStatus(long batchId, long downloadId) {
-        BatchStatusUpdater batchStatusUpdater = new BatchStatusUpdater(getContentResolver());
-        int batchStatus = batchStatusUpdater.getBatchStatus(batchId);
-        batchStatusUpdater.updateBatchStatus(batchId, batchStatus);
-
-        Log.d("Batch " + batchId + " status: " + batchStatus);
+        int batchStatus = batchStatusRepository.getBatchStatus(batchId);
+        batchStatusRepository.updateBatchStatus(batchId, batchStatus);
 
         if (Downloads.Impl.isStatusCancelled(batchStatus)) {
             ContentValues values = new ContentValues();
             values.put(COLUMN_STATUS, STATUS_CANCELED);
             getContentResolver().update(ALL_DOWNLOADS_CONTENT_URI, values, COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
         } else if (Downloads.Impl.isStatusError(batchStatus)) {
-            Log.d("Setting error code on batch for download " + downloadId);
             ContentValues values = new ContentValues();
             values.put(COLUMN_STATUS, STATUS_BATCH_FAILED);
             getContentResolver().update(

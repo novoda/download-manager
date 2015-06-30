@@ -5,29 +5,22 @@ import java.util.List;
 import java.util.Map;
 
 public final class CollatedDownloadInfo {
-    private final List<DownloadInfo> downloadInfos;
+
+    private final long totalSize;
 
     static CollatedDownloadInfo collateInfo(Map<Long, DownloadInfo> mDownloads, DownloadInfo info) {
-        CollatedDownloadInfo collatedDownloadInfo = new CollatedDownloadInfo(new ArrayList<DownloadInfo>());
-        collatedDownloadInfo.add(info);
+        List<DownloadInfo> downloadInfosForBatch = new ArrayList<>();
+        downloadInfosForBatch.add(info);
         for (Map.Entry<Long, DownloadInfo> entry : mDownloads.entrySet()) {
             DownloadInfo otherInfo = entry.getValue();
             if (info.mId == otherInfo.mId) {
-                collatedDownloadInfo.add(otherInfo);
+                downloadInfosForBatch.add(otherInfo);
             }
         }
-        return collatedDownloadInfo;
+        return new CollatedDownloadInfo(sumTotalSizeFrom(downloadInfosForBatch));
     }
 
-    private CollatedDownloadInfo(List<DownloadInfo> downloadInfos) {
-        this.downloadInfos = downloadInfos;
-    }
-
-    public void add(DownloadInfo info) {
-        downloadInfos.add(info);
-    }
-
-    public long getTotalSizeInBytes() {
+    private static long sumTotalSizeFrom(List<DownloadInfo> downloadInfos) {
         long size = 0L;
         int downloadCount = downloadInfos.size();
         for (int i = 0; i < downloadCount; i++) {
@@ -35,5 +28,13 @@ public final class CollatedDownloadInfo {
             size += downloadInfo.mTotalBytes;
         }
         return size;
+    }
+
+    public CollatedDownloadInfo(long totalSize) {
+        this.totalSize = totalSize;
+    }
+
+    public long getTotalSizeInBytes() {
+        return totalSize;
     }
 }

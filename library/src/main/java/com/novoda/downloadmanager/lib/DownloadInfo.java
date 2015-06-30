@@ -445,7 +445,7 @@ class DownloadInfo {
      */
     public boolean isReadyToDownload(CollatedDownloadInfo collatedDownloadInfo) {
         synchronized (this) {
-            return isDownloadManagerReadyToDownload() && isClientReadyToDownload(collatedDownloadInfo);
+            return isClientReadyToDownload(collatedDownloadInfo) && isDownloadManagerReadyToDownload();
         }
     }
 
@@ -453,7 +453,9 @@ class DownloadInfo {
         synchronized (this) {
             boolean isActive;
             if (mSubmittedTask == null) {
-                DownloadThread downloadThread = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier);
+                ContentResolver contentResolver = mContext.getContentResolver();
+                BatchStatusRepository batchStatusRepository = new BatchStatusRepository(contentResolver);
+                DownloadThread downloadThread = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier, batchStatusRepository);
                 mSubmittedTask = executor.submit(downloadThread);
                 isActive = true;
             } else {
@@ -461,6 +463,10 @@ class DownloadInfo {
             }
             return isActive;
         }
+    }
+
+    public boolean isActive() {
+        return mSubmittedTask != null && !mSubmittedTask.isDone();
     }
 
     public void updateStatus(int status) {
