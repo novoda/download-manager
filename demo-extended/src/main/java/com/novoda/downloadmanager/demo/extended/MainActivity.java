@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
 
     private void showBatchComplete(long batchId) {
         Toast.makeText(this, "Batch completed with id: " + batchId, Toast.LENGTH_SHORT).show();
-        Log.e(TAG, "BATCH COMPLETED: " + batchId);
+        Log.d(TAG, "Batch completed: " + batchId);
     }
 
     private void enqueueSingleDownload() {
