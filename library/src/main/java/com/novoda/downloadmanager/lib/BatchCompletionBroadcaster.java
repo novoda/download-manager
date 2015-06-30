@@ -21,9 +21,9 @@ class BatchCompletionBroadcaster {
     }
 
     public void notifyBatchCompletedFor(long batchId) {
-        Intent intent = new Intent(DownloadManager.ACTION_BATCH_COMPLETE);
+        Intent intent = new Intent(ACTION_BATCH_COMPLETE);
         intent.setPackage(packageName);
-        intent.putExtra(DownloadManager.EXTRA_BATCH_ID, batchId);
+        intent.putExtra(EXTRA_BATCH_ID, batchId);
         localBroadcastManager.sendBroadcast(intent);
     }
 }
