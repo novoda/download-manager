@@ -8,14 +8,14 @@ public class DownloadInfoTest {
 
     private static final DownloadClientReadyChecker IS_READY = new DownloadClientReadyChecker() {
         @Override
-        public boolean isAllowedToDownload() {
+        public boolean isAllowedToDownload(CollatedDownloadInfo collatedDownloadInfo) {
             return true;
         }
     };
 
     private static final DownloadClientReadyChecker IS_NOT_READY = new DownloadClientReadyChecker() {
         @Override
-        public boolean isAllowedToDownload() {
+        public boolean isAllowedToDownload(CollatedDownloadInfo collatedDownloadInfo) {
             return false;
         }
     };
@@ -31,7 +31,7 @@ public class DownloadInfoTest {
                 IS_READY,
                 null);
 
-        boolean isReady = downloadInfo.isReadyToDownload();
+        boolean isReady = downloadInfo.isReadyToDownload(null);
 
         assertThat(isReady).isTrue();
     }
@@ -47,7 +47,7 @@ public class DownloadInfoTest {
                 IS_NOT_READY,
                 null);
 
-        boolean isReady = downloadInfo.isReadyToDownload();
+        boolean isReady = downloadInfo.isReadyToDownload(null);
 
         assertThat(isReady).isFalse();
     }

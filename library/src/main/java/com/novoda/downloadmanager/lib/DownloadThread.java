@@ -71,16 +71,18 @@ class DownloadThread implements Runnable {
     private final SystemFacade mSystemFacade;
     private final StorageManager mStorageManager;
     private final DownloadNotifier mNotifier;
+    private final BatchStatusRepository batchStatusRepository;
 
     private volatile boolean mPolicyDirty;
 
     public DownloadThread(Context context, SystemFacade systemFacade, DownloadInfo info,
-                          StorageManager storageManager, DownloadNotifier notifier) {
+                          StorageManager storageManager, DownloadNotifier notifier, BatchStatusRepository batchStatusRepository) {
         mContext = context;
         mSystemFacade = systemFacade;
         mInfo = info;
         mStorageManager = storageManager;
         mNotifier = notifier;
+        this.batchStatusRepository = batchStatusRepository;
     }
 
     /**
@@ -188,7 +190,7 @@ class DownloadThread implements Runnable {
             return;
         }
 
-        if (!mInfo.isReadyToDownload()) {
+        if (!mInfo.isReadyToDownload(new CollatedDownloadInfo(batchStatusRepository.getBatchSizeInBytes(mInfo.batchId)))) {
             Log.d("Download " + mInfo.mId + " is not ready to download: skipping");
             return;
         }
@@ -854,9 +856,8 @@ class DownloadThread implements Runnable {
     }
 
     private void updateBatchStatus(long batchId, long downloadId) {
-        BatchStatusUpdater batchStatusUpdater = new BatchStatusUpdater(getContentResolver());
-        int batchStatus = batchStatusUpdater.getBatchStatus(batchId);
-        batchStatusUpdater.updateBatchStatus(batchId, batchStatus);
+        int batchStatus = batchStatusRepository.getBatchStatus(batchId);
+        batchStatusRepository.updateBatchStatus(batchId, batchStatus);
 
         if (Downloads.Impl.isStatusCancelled(batchStatus)) {
             ContentValues values = new ContentValues();

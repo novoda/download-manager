@@ -232,7 +232,7 @@ class DownloadInfo {
 
     /**
      * Result of last {DownloadThread} started by
-     * {@link #isReadyToDownload()} && {@link #startDownloadIfNotActive(ExecutorService)}.
+     * {@link #isReadyToDownload(CollatedDownloadInfo)} && {@link #startDownloadIfNotActive(ExecutorService)}.
      */
     private Future<?> mSubmittedTask;
 
@@ -440,11 +440,12 @@ class DownloadInfo {
      * create a {DownloadThread} and enqueue it into given
      * {@link Executor}.
      *
+     * @param collatedDownloadInfo
      * @return If actively downloading.
      */
-    public boolean isReadyToDownload() {
+    public boolean isReadyToDownload(CollatedDownloadInfo collatedDownloadInfo) {
         synchronized (this) {
-            return isClientReadyToDownload() && isDownloadManagerReadyToDownload();
+            return isClientReadyToDownload(collatedDownloadInfo) && isDownloadManagerReadyToDownload();
         }
     }
 
@@ -452,7 +453,9 @@ class DownloadInfo {
         synchronized (this) {
             boolean isActive;
             if (mSubmittedTask == null) {
-                DownloadThread downloadThread = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier);
+                ContentResolver contentResolver = mContext.getContentResolver();
+                BatchStatusRepository batchStatusRepository = new BatchStatusRepository(contentResolver);
+                DownloadThread downloadThread = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier, batchStatusRepository);
                 mSubmittedTask = executor.submit(downloadThread);
                 isActive = true;
             } else {
@@ -473,8 +476,8 @@ class DownloadInfo {
         mContext.getContentResolver().update(getAllDownloadsUri(), downloadStatusContentValues, null, null);
     }
 
-    private boolean isClientReadyToDownload() {
-        return downloadClientReadyChecker.isAllowedToDownload();
+    private boolean isClientReadyToDownload(CollatedDownloadInfo collatedDownloadInfo) {
+        return downloadClientReadyChecker.isAllowedToDownload(collatedDownloadInfo);
     }
 
     /**

@@ -5,8 +5,9 @@ public interface DownloadClientReadyChecker {
 
     /**
      * This method is executed on a background thread
+     * @param collatedDownloadInfo
      */
-    boolean isAllowedToDownload();
+    boolean isAllowedToDownload(CollatedDownloadInfo collatedDownloadInfo);
 
     /**
      * Ready specifies that it is always ready to download
@@ -14,7 +15,7 @@ public interface DownloadClientReadyChecker {
     class Ready implements DownloadClientReadyChecker {
 
         @Override
-        public boolean isAllowedToDownload() {
+        public boolean isAllowedToDownload(CollatedDownloadInfo collatedDownloadInfo) {
             return true;
         }
     }
