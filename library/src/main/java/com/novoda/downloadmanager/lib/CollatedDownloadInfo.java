@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public final class CollatedDownloadInfo {
+public class CollatedDownloadInfo {
 
     private final long totalSize;
 
