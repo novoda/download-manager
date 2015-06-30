@@ -1,9 +1,5 @@
 package com.novoda.downloadmanager.demo.extended;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -16,6 +12,7 @@ import android.widget.Toast;
 
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
+import com.novoda.downloadmanager.lib.BatchCompletionListener;
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.NotificationVisibility;
 import com.novoda.downloadmanager.lib.Query;
@@ -26,7 +23,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements QueryForDownloadsAsyncTask.Callback {
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final String BIG_FILE = "http://download.thinkbroadband.com/50MB.zip";
+    private static final String BIG_FILE = "http://download.thinkbroadband.com/5MB.zip";
     private static final String BEARD_IMAGE = "http://i.imgur.com/9JL2QVl.jpg";
 
     private DownloadManager downloadManager;
@@ -60,18 +57,18 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
 
         setupQueryingExample();
 
-        IntentFilter batchIntentFilter = new IntentFilter(DownloadManager.ACTION_BATCH_COMPLETE);
-        registerReceiver(batchCompletedReceiver, batchIntentFilter);
+        downloadManager.registerBatchCompletionListener(new BatchCompletionListener() {
+            @Override
+            public void onBatchComplete(long batchId) {
+                showBatchComplete(batchId);
+            }
+        });
     }
 
-    private final BroadcastReceiver batchCompletedReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            long batchId = intent.getLongExtra(DownloadManager.EXTRA_BATCH_ID, -1);
-            Toast.makeText(context, "Batch completed with id: " + batchId, Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "BATCH COMPLETED: " + batchId);
-        }
-    };
+    private void showBatchComplete(long batchId) {
+        Toast.makeText(this, "Batch completed with id: " + batchId, Toast.LENGTH_SHORT).show();
+        Log.e(TAG, "BATCH COMPLETED: " + batchId);
+    }
 
     private void enqueueSingleDownload() {
         Uri uri = Uri.parse(BIG_FILE);
@@ -130,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
 
     @Override
     protected void onDestroy() {
-        unregisterReceiver(batchCompletedReceiver);
+        downloadManager.unregisterBatchCompletionListener();
         super.onDestroy();
     }
 }

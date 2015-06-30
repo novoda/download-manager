@@ -3,6 +3,7 @@ package com.novoda.downloadmanager;
 import android.content.ContentResolver;
 import android.content.Context;
 
+import com.novoda.downloadmanager.lib.BatchCompletionBroadcaster;
 import com.novoda.downloadmanager.lib.DownloadManager;
 
 /**
@@ -30,10 +31,11 @@ public class DownloadManagerBuilder {
     }
 
     public DownloadManager build(ContentResolver contentResolver) {
+        // TODO: is the parameter need here any more? Could use context.getContentResolver()
         if (contentResolver == null) {
             throw new IllegalStateException("You must use a ContentResolver with the DownloadManager.");
         }
-        return new DownloadManager(context, contentResolver, verboseLogging);
+        return new DownloadManager(context, contentResolver, verboseLogging, BatchCompletionBroadcaster.newInstance(context));
     }
 
 }
