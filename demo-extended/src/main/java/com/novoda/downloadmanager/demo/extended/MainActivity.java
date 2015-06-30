@@ -23,7 +23,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements QueryForDownloadsAsyncTask.Callback {
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final String BIG_FILE = "http://download.thinkbroadband.com/5MB.zip";
+    private static final String BIG_FILE = "http://download.thinkbroadband.com/20MB.zip";
     private static final String BEARD_IMAGE = "http://i.imgur.com/9JL2QVl.jpg";
 
     private DownloadManager downloadManager;
