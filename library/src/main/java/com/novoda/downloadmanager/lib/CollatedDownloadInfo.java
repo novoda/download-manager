@@ -8,10 +8,10 @@ public class CollatedDownloadInfo {
 
     private final long totalSize;
 
-    static CollatedDownloadInfo collateInfo(Map<Long, DownloadInfo> mDownloads, DownloadInfo info) {
+    static CollatedDownloadInfo collateInfo(Map<Long, DownloadInfo> downloadsMap, DownloadInfo info) {
         List<DownloadInfo> downloadInfosForBatch = new ArrayList<>();
         downloadInfosForBatch.add(info);
-        for (Map.Entry<Long, DownloadInfo> entry : mDownloads.entrySet()) {
+        for (Map.Entry<Long, DownloadInfo> entry : downloadsMap.entrySet()) {
             DownloadInfo otherInfo = entry.getValue();
             if (info.mId == otherInfo.mId) {
                 downloadInfosForBatch.add(otherInfo);
