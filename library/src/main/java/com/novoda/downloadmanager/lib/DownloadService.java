@@ -166,17 +166,17 @@ public class DownloadService extends Service {
     }
 
     private DownloadClientReadyChecker getDownloadClientReadyChecker() {
-        if (!(getApplication() instanceof DownloadClientReadyChecker)) {
-            return DownloadClientReadyChecker.READY;
+        if (getApplication() instanceof DownloadClientReadyChecker) {
+            return (DownloadClientReadyChecker) getApplication();
         }
-        return (DownloadClientReadyChecker) getApplication();
+        return DownloadClientReadyChecker.READY;
     }
 
     private NotificationImageRetriever getNotificationImageRetriever() {
-        if (!(getApplication() instanceof NotificationImageRetrieverFactory)) {
-            return new OkHttpNotificationImageRetriever();
+        if (getApplication() instanceof NotificationImageRetrieverFactory) {
+            return ((NotificationImageRetrieverFactory) getApplication()).createNotificationImageRetriever();
         }
-        return ((NotificationImageRetrieverFactory) getApplication()).createNotificationImageRetriever();
+        return new OkHttpNotificationImageRetriever();
     }
 
     @Override
