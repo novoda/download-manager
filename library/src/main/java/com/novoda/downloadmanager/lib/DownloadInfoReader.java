@@ -39,39 +39,39 @@ public class DownloadInfoReader {
     }
 
     public void updateFromDatabase(DownloadInfo info) {
-        info.id = getLong(Downloads.Impl._ID);
-        info.uri = getString(Downloads.Impl.COLUMN_URI);
-        info.scannable = getInt(Downloads.Impl.COLUMN_MEDIA_SCANNED) == 1;
-        info.noIntegrity = getInt(Downloads.Impl.COLUMN_NO_INTEGRITY) == 1;
-        info.hint = getString(Downloads.Impl.COLUMN_FILE_NAME_HINT);
-        info.fileName = getString(Downloads.Impl._DATA);
-        info.mimeType = getString(Downloads.Impl.COLUMN_MIME_TYPE);
-        info.destination = getInt(Downloads.Impl.COLUMN_DESTINATION);
-        info.status = getInt(Downloads.Impl.COLUMN_STATUS);
-        info.numFailed = getInt(Downloads.Impl.COLUMN_FAILED_CONNECTIONS);
+        info.setId(getLong(Downloads.Impl._ID));
+        info.setUri(getString(Downloads.Impl.COLUMN_URI));
+        info.setScannable(getInt(Downloads.Impl.COLUMN_MEDIA_SCANNED) == 1);
+        info.setNoIntegrity(getInt(Downloads.Impl.COLUMN_NO_INTEGRITY) == 1);
+        info.setHint(getString(Downloads.Impl.COLUMN_FILE_NAME_HINT));
+        info.setFileName(getString(Downloads.Impl._DATA));
+        info.setMimeType(getString(Downloads.Impl.COLUMN_MIME_TYPE));
+        info.setDestination(getInt(Downloads.Impl.COLUMN_DESTINATION));
+        info.setStatus(getInt(Downloads.Impl.COLUMN_STATUS));
+        info.setNumFailed(getInt(Downloads.Impl.COLUMN_FAILED_CONNECTIONS));
         int retryRedirect = getInt(Constants.RETRY_AFTER_X_REDIRECT_COUNT);
-        info.retryAfter = retryRedirect & 0xfffffff;
-        info.lastMod = getLong(Downloads.Impl.COLUMN_LAST_MODIFICATION);
-        info.notificationClassName = getString(Downloads.Impl.COLUMN_NOTIFICATION_CLASS);
-        info.extras = getString(Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS);
-        info.cookies = getString(Downloads.Impl.COLUMN_COOKIE_DATA);
-        info.userAgent = getString(Downloads.Impl.COLUMN_USER_AGENT);
-        info.referer = getString(Downloads.Impl.COLUMN_REFERER);
-        info.totalBytes = getLong(Downloads.Impl.COLUMN_TOTAL_BYTES);
-        info.currentBytes = getLong(Downloads.Impl.COLUMN_CURRENT_BYTES);
-        info.eTag = getString(Constants.ETAG);
-        info.uid = getInt(Constants.UID);
-        info.mediaScanned = getInt(Constants.MEDIA_SCANNED);
-        info.deleted = getInt(Downloads.Impl.COLUMN_DELETED) == 1;
-        info.mediaProviderUri = getString(Downloads.Impl.COLUMN_MEDIAPROVIDER_URI);
-        info.allowedNetworkTypes = getInt(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES);
-        info.allowRoaming = getInt(Downloads.Impl.COLUMN_ALLOW_ROAMING) != 0;
-        info.allowMetered = getInt(Downloads.Impl.COLUMN_ALLOW_METERED) != 0;
-        info.bypassRecommendedSizeLimit = getInt(Downloads.Impl.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
-        info.batchId = getLong(Downloads.Impl.COLUMN_BATCH_ID);
+        info.setRetryAfter(retryRedirect & 0xfffffff);
+        info.setLastMod(getLong(Downloads.Impl.COLUMN_LAST_MODIFICATION));
+        info.setNotificationClassName(getString(Downloads.Impl.COLUMN_NOTIFICATION_CLASS));
+        info.setExtras(getString(Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS));
+        info.setCookies(getString(Downloads.Impl.COLUMN_COOKIE_DATA));
+        info.setUserAgent(getString(Downloads.Impl.COLUMN_USER_AGENT));
+        info.setReferer(getString(Downloads.Impl.COLUMN_REFERER));
+        info.setTotalBytes(getLong(Downloads.Impl.COLUMN_TOTAL_BYTES));
+        info.setCurrentBytes(getLong(Downloads.Impl.COLUMN_CURRENT_BYTES));
+        info.seteTag(getString(Constants.ETAG));
+        info.setUid(getInt(Constants.UID));
+        info.setMediaScanned(getInt(Constants.MEDIA_SCANNED));
+        info.setDeleted(getInt(Downloads.Impl.COLUMN_DELETED) == 1);
+        info.setMediaProviderUri(getString(Downloads.Impl.COLUMN_MEDIAPROVIDER_URI));
+        info.setAllowedNetworkTypes(getInt(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES));
+        info.setAllowRoaming(getInt(Downloads.Impl.COLUMN_ALLOW_ROAMING) != 0);
+        info.setAllowMetered(getInt(Downloads.Impl.COLUMN_ALLOW_METERED) != 0);
+        info.setBypassRecommendedSizeLimit(getInt(Downloads.Impl.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT));
+        info.setBatchId(getLong(Downloads.Impl.COLUMN_BATCH_ID));
 
         synchronized (this) {
-            info.control = getInt(Downloads.Impl.COLUMN_CONTROL);
+            info.setControl(getInt(Downloads.Impl.COLUMN_CONTROL));
         }
     }
 
@@ -91,11 +91,11 @@ public class DownloadInfoReader {
             cursor.close();
         }
 
-        if (info.cookies != null) {
-            info.addHeader("Cookie", info.cookies);
+        if (info.getCookies() != null) {
+            info.addHeader("Cookie", info.getCookies());
         }
-        if (info.referer != null) {
-            info.addHeader("Referer", info.referer);
+        if (info.getReferer() != null) {
+            info.addHeader("Referer", info.getReferer());
         }
     }
 

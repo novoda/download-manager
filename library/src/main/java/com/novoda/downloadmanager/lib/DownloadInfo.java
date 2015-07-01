@@ -27,6 +27,249 @@ class DownloadInfo {
     public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
     private static final int UNKNOWN_BYTES = -1;
 
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
+
+    /**
+     * Add to check if scannable i.e. we don't want internal files to be scanned
+     */
+    public boolean isScannable() {
+        return scannable;
+    }
+
+    public void setScannable(boolean scannable) {
+        this.scannable = scannable;
+    }
+
+    public boolean isNoIntegrity() {
+        return noIntegrity;
+    }
+
+    public void setNoIntegrity(boolean noIntegrity) {
+        this.noIntegrity = noIntegrity;
+    }
+
+    public String getHint() {
+        return hint;
+    }
+
+    public void setHint(String hint) {
+        this.hint = hint;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    public int getDestination() {
+        return destination;
+    }
+
+    public void setDestination(int destination) {
+        this.destination = destination;
+    }
+
+    public int getControl() {
+        return control;
+    }
+
+    public void setControl(int control) {
+        this.control = control;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public int getNumFailed() {
+        return numFailed;
+    }
+
+    public void setNumFailed(int numFailed) {
+        this.numFailed = numFailed;
+    }
+
+    public int getRetryAfter() {
+        return retryAfter;
+    }
+
+    public void setRetryAfter(int retryAfter) {
+        this.retryAfter = retryAfter;
+    }
+
+    public long getLastMod() {
+        return lastMod;
+    }
+
+    public void setLastMod(long lastMod) {
+        this.lastMod = lastMod;
+    }
+
+    public String getNotificationClassName() {
+        return notificationClassName;
+    }
+
+    public void setNotificationClassName(String notificationClassName) {
+        this.notificationClassName = notificationClassName;
+    }
+
+    public String getExtras() {
+        return extras;
+    }
+
+    public void setExtras(String extras) {
+        this.extras = extras;
+    }
+
+    public String getCookies() {
+        return cookies;
+    }
+
+    public void setCookies(String cookies) {
+        this.cookies = cookies;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+
+    public String getReferer() {
+        return referer;
+    }
+
+    public void setReferer(String referer) {
+        this.referer = referer;
+    }
+
+    public long getTotalBytes() {
+        return totalBytes;
+    }
+
+    public void setTotalBytes(long totalBytes) {
+        this.totalBytes = totalBytes;
+    }
+
+    public long getCurrentBytes() {
+        return currentBytes;
+    }
+
+    public void setCurrentBytes(long currentBytes) {
+        this.currentBytes = currentBytes;
+    }
+
+    public String geteTag() {
+        return eTag;
+    }
+
+    public void seteTag(String eTag) {
+        this.eTag = eTag;
+    }
+
+    public int getUid() {
+        return uid;
+    }
+
+    public void setUid(int uid) {
+        this.uid = uid;
+    }
+
+    public int getMediaScanned() {
+        return mediaScanned;
+    }
+
+    public void setMediaScanned(int mediaScanned) {
+        this.mediaScanned = mediaScanned;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public String getMediaProviderUri() {
+        return mediaProviderUri;
+    }
+
+    public void setMediaProviderUri(String mediaProviderUri) {
+        this.mediaProviderUri = mediaProviderUri;
+    }
+
+    public int getAllowedNetworkTypes() {
+        return allowedNetworkTypes;
+    }
+
+    public void setAllowedNetworkTypes(int allowedNetworkTypes) {
+        this.allowedNetworkTypes = allowedNetworkTypes;
+    }
+
+    public boolean isAllowRoaming() {
+        return allowRoaming;
+    }
+
+    public void setAllowRoaming(boolean allowRoaming) {
+        this.allowRoaming = allowRoaming;
+    }
+
+    public boolean isAllowMetered() {
+        return allowMetered;
+    }
+
+    public void setAllowMetered(boolean allowMetered) {
+        this.allowMetered = allowMetered;
+    }
+
+    public int getBypassRecommendedSizeLimit() {
+        return bypassRecommendedSizeLimit;
+    }
+
+    public void setBypassRecommendedSizeLimit(int bypassRecommendedSizeLimit) {
+        this.bypassRecommendedSizeLimit = bypassRecommendedSizeLimit;
+    }
+
+    public long getBatchId() {
+        return batchId;
+    }
+
+    public void setBatchId(long batchId) {
+        this.batchId = batchId;
+    }
+
     // TODO: move towards these in-memory objects being sources of truth, and periodically pushing to provider.
 
     /**
@@ -79,39 +322,36 @@ class DownloadInfo {
      */
     public static final String EXTRA_IS_WIFI_REQUIRED = "isWifiRequired";
 
-    public long id;
-    public String uri;
-    /**
-     * Add to check if scannable i.e. we don't want internal files to be scanned
-     */
-    public boolean scannable;
-    public boolean noIntegrity;
-    public String hint;
-    public String fileName;
-    public String mimeType;
-    public int destination;
-    public int control;
-    public int status;
-    public int numFailed;
-    public int retryAfter;
-    public long lastMod;
-    public String notificationClassName;
-    public String extras;
-    public String cookies;
-    public String userAgent;
-    public String referer;
-    public long totalBytes;
-    public long currentBytes;
-    public String eTag;
-    public int uid;
-    public int mediaScanned;
-    public boolean deleted;
-    public String mediaProviderUri;
-    public int allowedNetworkTypes;
-    public boolean allowRoaming;
-    public boolean allowMetered;
-    public int bypassRecommendedSizeLimit;
-    public long batchId;
+    private long id;
+    private String uri;
+    private boolean scannable;
+    private boolean noIntegrity;
+    private String hint;
+    private String fileName;
+    private String mimeType;
+    private int destination;
+    private int control;
+    private int status;
+    private int numFailed;
+    private int retryAfter;
+    private long lastMod;
+    private String notificationClassName;
+    private String extras;
+    private String cookies;
+    private String userAgent;
+    private String referer;
+    private long totalBytes;
+    private long currentBytes;
+    private String eTag;
+    private int uid;
+    private int mediaScanned;
+    private boolean deleted;
+    private String mediaProviderUri;
+    private int allowedNetworkTypes;
+    private boolean allowRoaming;
+    private boolean allowMetered;
+    private int bypassRecommendedSizeLimit;
+    private long batchId;
 
     /**
      * Result of last {DownloadThread} started by
@@ -152,11 +392,11 @@ class DownloadInfo {
     public void broadcastIntentDownloadComplete(int finalStatus) {
         Intent intent = new Intent(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
         intent.setPackage(getPackageName());
-        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, id);
+        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, getId());
         intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_STATUS, finalStatus);
         intent.setData(getMyDownloadsUri());
-        if (extras != null) {
-            intent.putExtra(EXTRA_EXTRA, extras);
+        if (getExtras() != null) {
+            intent.putExtra(EXTRA_EXTRA, getExtras());
         }
         context.sendBroadcast(intent);
     }
@@ -168,10 +408,10 @@ class DownloadInfo {
     public void broadcastIntentDownloadFailedInsufficientSpace() {
         Intent intent = new Intent(DownloadManager.ACTION_DOWNLOAD_INSUFFICIENT_SPACE);
         intent.setPackage(getPackageName());
-        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, id);
+        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, getId());
         intent.setData(getMyDownloadsUri());
-        if (extras != null) {
-            intent.putExtra(EXTRA_EXTRA, extras);
+        if (getExtras() != null) {
+            intent.putExtra(EXTRA_EXTRA, getExtras());
         }
         context.sendBroadcast(intent);
     }
@@ -180,24 +420,24 @@ class DownloadInfo {
      * Returns the time when a download should be restarted.
      */
     public long restartTime(long now) {
-        if (numFailed == 0) {
+        if (getNumFailed() == 0) {
             return now;
         }
-        if (retryAfter > 0) {
-            return lastMod + retryAfter;
+        if (getRetryAfter() > 0) {
+            return getLastMod() + getRetryAfter();
         }
-        return lastMod + Constants.RETRY_FIRST_DELAY * (1000 + randomNumberGenerator.generate()) * (1 << (numFailed - 1));
+        return getLastMod() + Constants.RETRY_FIRST_DELAY * (1000 + randomNumberGenerator.generate()) * (1 << (getNumFailed() - 1));
     }
 
     /**
      * Returns whether this download should be enqueued.
      */
     private boolean isDownloadManagerReadyToDownload() {
-        if (control == Downloads.Impl.CONTROL_PAUSED) {
+        if (getControl() == Downloads.Impl.CONTROL_PAUSED) {
             // the download is paused, so it's not going to start
             return false;
         }
-        switch (status) {
+        switch (getStatus()) {
             case 0: // status hasn't been initialized yet, this is a new download
             case Downloads.Impl.STATUS_PENDING: // download is explicit marked as ready to start
             case Downloads.Impl.STATUS_RUNNING: // download interrupted (process killed etc) while
@@ -236,14 +476,14 @@ class DownloadInfo {
         if (systemFacade.isNetworkRoaming() && !isRoamingAllowed()) {
             return NetworkState.CANNOT_USE_ROAMING;
         }
-        if (systemFacade.isActiveNetworkMetered() && !allowMetered) {
+        if (systemFacade.isActiveNetworkMetered() && !isAllowMetered()) {
             return NetworkState.TYPE_DISALLOWED_BY_REQUESTOR;
         }
         return checkIsNetworkTypeAllowed(info.getType());
     }
 
     private boolean isRoamingAllowed() {
-        return allowRoaming;
+        return isAllowRoaming();
     }
 
     /**
@@ -253,20 +493,20 @@ class DownloadInfo {
      * @return one of the NETWORK_* constants
      */
     private NetworkState checkIsNetworkTypeAllowed(int networkType) {
-        if (totalBytes <= 0) {
+        if (getTotalBytes() <= 0) {
             return NetworkState.OK; // we don't know the size yet
         }
         if (networkType == ConnectivityManager.TYPE_WIFI) {
             return NetworkState.OK; // anything goes over wifi
         }
         Long maxBytesOverMobile = systemFacade.getMaxBytesOverMobile();
-        if (maxBytesOverMobile != null && totalBytes > maxBytesOverMobile) {
+        if (maxBytesOverMobile != null && getTotalBytes() > maxBytesOverMobile) {
             return NetworkState.UNUSABLE_DUE_TO_SIZE;
         }
-        if (bypassRecommendedSizeLimit == 0) {
+        if (getBypassRecommendedSizeLimit() == 0) {
             Long recommendedMaxBytesOverMobile = systemFacade.getRecommendedMaxBytesOverMobile();
             if (recommendedMaxBytesOverMobile != null
-                    && totalBytes > recommendedMaxBytesOverMobile) {
+                    && getTotalBytes() > recommendedMaxBytesOverMobile) {
                 return NetworkState.RECOMMENDED_UNUSABLE_DUE_TO_SIZE;
             }
         }
@@ -299,20 +539,20 @@ class DownloadInfo {
      * @return one of the NETWORK_* constants
      */
     private NetworkState checkSizeAllowedForNetwork(int networkType) {
-        if (totalBytes <= 0) {
+        if (getTotalBytes() <= 0) {
             return NetworkState.OK; // we don't know the size yet
         }
         if (networkType == ConnectivityManager.TYPE_WIFI) {
             return NetworkState.OK; // anything goes over wifi
         }
         Long maxBytesOverMobile = systemFacade.getMaxBytesOverMobile();
-        if (maxBytesOverMobile != null && totalBytes > maxBytesOverMobile) {
+        if (maxBytesOverMobile != null && getTotalBytes() > maxBytesOverMobile) {
             return NetworkState.UNUSABLE_DUE_TO_SIZE;
         }
-        if (bypassRecommendedSizeLimit == 0) {
+        if (getBypassRecommendedSizeLimit() == 0) {
             Long recommendedMaxBytesOverMobile = systemFacade.getRecommendedMaxBytesOverMobile();
             if (recommendedMaxBytesOverMobile != null
-                    && totalBytes > recommendedMaxBytesOverMobile) {
+                    && getTotalBytes() > recommendedMaxBytesOverMobile) {
                 return NetworkState.RECOMMENDED_UNUSABLE_DUE_TO_SIZE;
             }
         }
@@ -354,9 +594,9 @@ class DownloadInfo {
     }
 
     public void updateStatus(int status) {
-        this.status = status;
+        this.setStatus(status);
         downloadStatusContentValues.clear();
-        downloadStatusContentValues.put(Downloads.Impl.COLUMN_STATUS, this.status);
+        downloadStatusContentValues.put(Downloads.Impl.COLUMN_STATUS, this.getStatus());
         context.getContentResolver().update(getAllDownloadsUri(), downloadStatusContentValues, null, null);
     }
 
@@ -381,18 +621,18 @@ class DownloadInfo {
     }
 
     public boolean isOnCache() {
-        return (destination == Downloads.Impl.DESTINATION_CACHE_PARTITION
-                || destination == Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION
-                || destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING
-                || destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
+        return (getDestination() == Downloads.Impl.DESTINATION_CACHE_PARTITION
+                || getDestination() == Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION
+                || getDestination() == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING
+                || getDestination() == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
     }
 
     public Uri getMyDownloadsUri() {
-        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, id);
+        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, getId());
     }
 
     public Uri getAllDownloadsUri() {
-        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id);
+        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, getId());
     }
 
     /**
@@ -403,10 +643,10 @@ class DownloadInfo {
      * {@link Long#MAX_VALUE}, then download has no future actions.
      */
     public long nextActionMillis(long now) {
-        if (Downloads.Impl.isStatusCompleted(status)) {
+        if (Downloads.Impl.isStatusCompleted(getStatus())) {
             return Long.MAX_VALUE;
         }
-        if (status != Downloads.Impl.STATUS_WAITING_TO_RETRY) {
+        if (getStatus() != Downloads.Impl.STATUS_WAITING_TO_RETRY) {
             return 0;
         }
         long when = restartTime(now);
@@ -420,12 +660,12 @@ class DownloadInfo {
      * Returns whether a file should be scanned
      */
     public boolean shouldScanFile() {
-        return (mediaScanned == 0)
-                && (destination == Downloads.Impl.DESTINATION_EXTERNAL ||
-                destination == Downloads.Impl.DESTINATION_FILE_URI ||
-                destination == Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD)
-                && Downloads.Impl.isStatusSuccess(status)
-                && scannable;
+        return (getMediaScanned() == 0)
+                && (getDestination() == Downloads.Impl.DESTINATION_EXTERNAL ||
+                getDestination() == Downloads.Impl.DESTINATION_FILE_URI ||
+                getDestination() == Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD)
+                && Downloads.Impl.isStatusSuccess(getStatus())
+                && isScannable();
     }
 
     void notifyPauseDueToSize(boolean isWifiRequired) {
@@ -458,7 +698,7 @@ class DownloadInfo {
     }
 
     public boolean hasTotalBytes() {
-        return totalBytes != UNKNOWN_BYTES;
+        return getTotalBytes() != UNKNOWN_BYTES;
     }
 
     void addHeader(String header, String value) {

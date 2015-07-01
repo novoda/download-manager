@@ -316,14 +316,14 @@ public class DownloadService extends Service {
                 DownloadInfo info = downloads.get(id);
                 if (info == null) {
                     info = createNewDownloadInfo(reader);
-                    downloads.put(info.id, info);
+                    downloads.put(info.getId(), info);
                 } else {
                     updateDownloadFromDatabase(reader, info);
                 }
 
-                if (info.deleted) {
+                if (info.isDeleted()) {
                     deleteFileAndDatabaseRow(info);
-                } else if (Downloads.Impl.isStatusCancelled(info.status) || Downloads.Impl.isStatusError(info.status)) {
+                } else if (Downloads.Impl.isStatusCancelled(info.getStatus()) || Downloads.Impl.isStatusError(info.getStatus())) {
                     deleteFileAndMediaReference(info);
                 } else {
                     updateTotalBytesFor(info);
@@ -376,7 +376,7 @@ public class DownloadService extends Service {
 
                 List<DownloadInfo> batchDownloads = new ArrayList<>();
                 for (DownloadInfo downloadInfo : downloads) {
-                    if (downloadInfo.batchId == id) {
+                    if (downloadInfo.getBatchId() == id) {
                         batchDownloads.add(downloadInfo);
                     }
                 }
@@ -389,10 +389,10 @@ public class DownloadService extends Service {
     }
 
     private void updateTotalBytesFor(DownloadInfo info) {
-        if (info.totalBytes == -1) {
+        if (info.getTotalBytes() == -1) {
             ContentValues values = new ContentValues();
-            info.totalBytes = contentLengthFetcher.fetchContentLengthFor(info);
-            values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, info.totalBytes);
+            info.setTotalBytes(contentLengthFetcher.fetchContentLengthFor(info));
+            values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, info.getTotalBytes());
             resolver.update(info.getAllDownloadsUri(), values, null, null);
         }
     }
@@ -403,16 +403,16 @@ public class DownloadService extends Service {
     }
 
     private void deleteFileAndMediaReference(DownloadInfo info) {
-        if (!TextUtils.isEmpty(info.mediaProviderUri)) {
-            resolver.delete(Uri.parse(info.mediaProviderUri), null, null);
+        if (!TextUtils.isEmpty(info.getMediaProviderUri())) {
+            resolver.delete(Uri.parse(info.getMediaProviderUri()), null, null);
         }
 
-        if (!TextUtils.isEmpty(info.fileName)) {
-            deleteFileIfExists(info.fileName);
+        if (!TextUtils.isEmpty(info.getFileName())) {
+            deleteFileIfExists(info.getFileName());
             ContentValues blankData = new ContentValues();
             blankData.put(Downloads.Impl._DATA, (String) null);
             resolver.update(info.getAllDownloadsUri(), blankData, null, null);
-            info.fileName = null;
+            info.setFileName(null);
         }
     }
 
@@ -449,7 +449,7 @@ public class DownloadService extends Service {
      */
     private DownloadInfo createNewDownloadInfo(DownloadInfoReader reader) {
         DownloadInfo info = reader.newDownloadInfo(this, systemFacade, storageManager, downloadNotifier, downloadClientReadyChecker);
-        Log.v("processing inserted download " + info.id);
+        Log.v("processing inserted download " + info.getId());
         return info;
     }
 
@@ -458,7 +458,7 @@ public class DownloadService extends Service {
      */
     private void updateDownloadFromDatabase(DownloadInfoReader reader, DownloadInfo info) {
         reader.updateFromDatabase(info);
-        Log.v("processing updated download " + info.id + ", status: " + info.status);
+        Log.v("processing updated download " + info.getId() + ", status: " + info.getStatus());
     }
 
     /**
@@ -466,14 +466,14 @@ public class DownloadService extends Service {
      */
     private void deleteDownloadLocked(long id, Map<Long, DownloadInfo> downloads) {
         DownloadInfo info = downloads.get(id);
-        if (info.status == Downloads.Impl.STATUS_RUNNING) {
-            info.status = Downloads.Impl.STATUS_CANCELED;
+        if (info.getStatus() == Downloads.Impl.STATUS_RUNNING) {
+            info.setStatus(Downloads.Impl.STATUS_CANCELED);
         }
-        if (info.destination != Downloads.Impl.DESTINATION_EXTERNAL && info.fileName != null) {
-            Log.d("deleteDownloadLocked() deleting " + info.fileName);
-            deleteFileIfExists(info.fileName);
+        if (info.getDestination() != Downloads.Impl.DESTINATION_EXTERNAL && info.getFileName() != null) {
+            Log.d("deleteDownloadLocked() deleting " + info.getFileName());
+            deleteFileIfExists(info.getFileName());
         }
-        downloads.remove(info.id);
+        downloads.remove(info.getId());
     }
 
     private void deleteFileIfExists(String path) {
