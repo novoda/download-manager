@@ -88,15 +88,15 @@ class StorageManager {
         File externalStorageDir = Environment.getExternalStorageDirectory();
         File internalStorageDir = Environment.getDataDirectory();
         File systemCacheDir = Environment.getDownloadCacheDirectory();
-        return new StorageManager(externalStorageDir, internalStorageDir, systemCacheDir, downloadDataDir, contentResolver);
+        return new StorageManager(contentResolver, externalStorageDir, internalStorageDir, systemCacheDir, downloadDataDir);
     }
 
-    StorageManager(File externalStorageDir, File internalStorageDir, File systemCacheDir, File downloadDataDir, ContentResolver contentResolver) {
+    StorageManager(ContentResolver contentResolver, File externalStorageDir, File internalStorageDir, File systemCacheDir, File downloadDataDir) {
+        this.contentResolver = contentResolver;
         this.externalStorageDir = externalStorageDir;
         this.internalStorageDir = internalStorageDir;
         this.systemCacheDir = systemCacheDir;
         this.downloadDataDir = downloadDataDir;
-        this.contentResolver = contentResolver;
         startThreadToCleanupDatabaseAndPurgeFileSystem();
     }
 
