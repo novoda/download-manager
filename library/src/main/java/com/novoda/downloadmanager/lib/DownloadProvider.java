@@ -299,8 +299,9 @@ public final class DownloadProvider extends ContentProvider {
      * Returns the content-provider-style MIME types of the various
      * types accessible through this content provider.
      */
+    @NonNull
     @Override
-    public String getType(final Uri uri) {
+    public String getType(@NonNull Uri uri) {
         int match = URI_MATCHER.match(uri);
         switch (match) {
             case MY_DOWNLOADS:
@@ -343,7 +344,7 @@ public final class DownloadProvider extends ContentProvider {
      * Inserts a row in the database
      */
     @Override
-    public Uri insert(final Uri uri, final ContentValues values) {
+    public Uri insert(@NonNull Uri uri, ContentValues values) {
         SQLiteDatabase db = openHelper.getWritableDatabase();
 
         // note we disallow inserting into ALL_DOWNLOADS
@@ -611,6 +612,7 @@ public final class DownloadProvider extends ContentProvider {
     /**
      * Starts a database query
      */
+    @NonNull
     @Override
     public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sort) {
 
@@ -1002,7 +1004,7 @@ public final class DownloadProvider extends ContentProvider {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+    public void dump(FileDescriptor fd, @NonNull PrintWriter writer, String[] args) {
         Log.e("I want dump, but nothing to dump into");
     }
 
@@ -1061,10 +1063,4 @@ public final class DownloadProvider extends ContentProvider {
         }
     }
 
-    private static void copyStringWithDefault(String key, ContentValues from, ContentValues to, String defaultValue) {
-        copyString(key, from, to);
-        if (!to.containsKey(key)) {
-            to.put(key, defaultValue);
-        }
-    }
 }
