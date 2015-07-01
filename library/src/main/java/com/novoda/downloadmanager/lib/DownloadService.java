@@ -145,7 +145,7 @@ public class DownloadService extends Service {
 
         updateThread = new HandlerThread("DownloadManager-UpdateThread");
         updateThread.start();
-        updateHandler = new Handler(updateThread.getLooper(), mUpdateCallback);
+        updateHandler = new Handler(updateThread.getLooper(), updateCallback);
 
         downloadScanner = DownloadScanner.newInstance(this);
 
@@ -224,7 +224,7 @@ public class DownloadService extends Service {
     private static final int MSG_UPDATE = 1;
     private static final int MSG_FINAL_UPDATE = 2;
 
-    private final Handler.Callback mUpdateCallback = new Handler.Callback() {
+    private final Handler.Callback updateCallback = new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull Message msg) {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);

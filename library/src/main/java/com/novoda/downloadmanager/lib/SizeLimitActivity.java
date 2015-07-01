@@ -21,7 +21,7 @@ import java.util.Queue;
  * size is discovered to be exceeded one of these thresholds.
  */
 public class SizeLimitActivity extends Activity implements DialogInterface.OnCancelListener, DialogInterface.OnClickListener {
-    private final Queue<Intent> mDownloadsToShow = new LinkedList<Intent>();
+    private final Queue<Intent> mDownloadsToShow = new LinkedList<>();
 
     private Dialog mDialog;
     private Uri mCurrentUri;

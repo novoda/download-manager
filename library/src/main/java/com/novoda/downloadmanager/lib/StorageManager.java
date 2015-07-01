@@ -349,7 +349,7 @@ class StorageManager {
     private void removeSpuriousFiles() {
         Log.i("in removeSpuriousFiles");
         // get a list of all files in system cache dir and downloads data dir
-        List<File> files = new ArrayList<File>();
+        List<File> files = new ArrayList<>();
         File[] listOfFiles = systemCacheDir.listFiles();
         if (listOfFiles != null) {
             files.addAll(Arrays.asList(listOfFiles));
