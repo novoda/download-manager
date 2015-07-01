@@ -94,7 +94,7 @@ public final class DownloadProvider extends ContentProvider {
     /**
      * URI matcher used to recognize URIs sent by applications
      */
-    private static final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+    private static final UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
     /**
      * URI matcher constant for the URI of all downloads belonging to the calling UID
      */
@@ -135,20 +135,20 @@ public final class DownloadProvider extends ContentProvider {
     private static final int DOWNLOADS_BY_BATCH = 9;
 
     static {
-        sURIMatcher.addURI(AUTHORITY, "my_downloads", MY_DOWNLOADS);
-        sURIMatcher.addURI(AUTHORITY, "my_downloads/#", MY_DOWNLOADS_ID);
-        sURIMatcher.addURI(AUTHORITY, "all_downloads", ALL_DOWNLOADS);
-        sURIMatcher.addURI(AUTHORITY, "all_downloads/#", ALL_DOWNLOADS_ID);
-        sURIMatcher.addURI(AUTHORITY, "batches", BATCHES);
-        sURIMatcher.addURI(AUTHORITY, "batches/#", BATCHES_ID);
-        sURIMatcher.addURI(AUTHORITY, "downloads_by_batch", DOWNLOADS_BY_BATCH);
-        sURIMatcher.addURI(AUTHORITY, "my_downloads/#/" + Downloads.Impl.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
-        sURIMatcher.addURI(AUTHORITY, "all_downloads/#/" + Downloads.Impl.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
+        URI_MATCHER.addURI(AUTHORITY, "my_downloads", MY_DOWNLOADS);
+        URI_MATCHER.addURI(AUTHORITY, "my_downloads/#", MY_DOWNLOADS_ID);
+        URI_MATCHER.addURI(AUTHORITY, "all_downloads", ALL_DOWNLOADS);
+        URI_MATCHER.addURI(AUTHORITY, "all_downloads/#", ALL_DOWNLOADS_ID);
+        URI_MATCHER.addURI(AUTHORITY, "batches", BATCHES);
+        URI_MATCHER.addURI(AUTHORITY, "batches/#", BATCHES_ID);
+        URI_MATCHER.addURI(AUTHORITY, "downloads_by_batch", DOWNLOADS_BY_BATCH);
+        URI_MATCHER.addURI(AUTHORITY, "my_downloads/#/" + Downloads.Impl.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
+        URI_MATCHER.addURI(AUTHORITY, "all_downloads/#/" + Downloads.Impl.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
         // temporary, for backwards compatibility
-        sURIMatcher.addURI(AUTHORITY, "download", MY_DOWNLOADS);
-        sURIMatcher.addURI(AUTHORITY, "download/#", MY_DOWNLOADS_ID);
-        sURIMatcher.addURI(AUTHORITY, "download/#/" + Downloads.Impl.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
-        sURIMatcher.addURI(AUTHORITY, Downloads.Impl.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT + "/#", PUBLIC_DOWNLOAD_ID);
+        URI_MATCHER.addURI(AUTHORITY, "download", MY_DOWNLOADS);
+        URI_MATCHER.addURI(AUTHORITY, "download/#", MY_DOWNLOADS_ID);
+        URI_MATCHER.addURI(AUTHORITY, "download/#/" + Downloads.Impl.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
+        URI_MATCHER.addURI(AUTHORITY, Downloads.Impl.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT + "/#", PUBLIC_DOWNLOAD_ID);
     }
 
     /**
@@ -160,7 +160,7 @@ public final class DownloadProvider extends ContentProvider {
             Downloads.Impl.BATCH_CONTENT_URI
     };
 
-    private static final String[] sAppReadableColumnsArray = new String[]{
+    private static final String[] APP_READABLE_COLUMNS_ARRAY = new String[]{
             Downloads.Impl._ID,
             Downloads.Impl.COLUMN_APP_DATA,
             Downloads.Impl._DATA,
@@ -189,34 +189,34 @@ public final class DownloadProvider extends ContentProvider {
             OpenableColumns.SIZE,
     };
 
-    private static final HashSet<String> sAppReadableColumnsSet;
-    private static final HashMap<String, String> sColumnsMap;
+    private static final HashSet<String> APP_READABLE_COLUMNS_SET;
+    private static final HashMap<String, String> COLUMNS_MAP;
 
     static {
-        sAppReadableColumnsSet = new HashSet<>();
-        Collections.addAll(sAppReadableColumnsSet, sAppReadableColumnsArray);
+        APP_READABLE_COLUMNS_SET = new HashSet<>();
+        Collections.addAll(APP_READABLE_COLUMNS_SET, APP_READABLE_COLUMNS_ARRAY);
 
-        sColumnsMap = new HashMap<>();
-        sColumnsMap.put(OpenableColumns.DISPLAY_NAME, Downloads.Impl.Batches.COLUMN_TITLE + " AS " + OpenableColumns.DISPLAY_NAME);
-        sColumnsMap.put(OpenableColumns.SIZE, Downloads.Impl.COLUMN_TOTAL_BYTES + " AS " + OpenableColumns.SIZE);
+        COLUMNS_MAP = new HashMap<>();
+        COLUMNS_MAP.put(OpenableColumns.DISPLAY_NAME, Downloads.Impl.Batches.COLUMN_TITLE + " AS " + OpenableColumns.DISPLAY_NAME);
+        COLUMNS_MAP.put(OpenableColumns.SIZE, Downloads.Impl.COLUMN_TOTAL_BYTES + " AS " + OpenableColumns.SIZE);
     }
 
-    private static final List<String> downloadManagerColumnsList = Arrays.asList(DownloadManager.UNDERLYING_COLUMNS);
+    private static final List<String> DOWNLOAD_MANAGER_COLUMNS_LIST = Arrays.asList(DownloadManager.UNDERLYING_COLUMNS);
 
     /**
      * The database that lies underneath this content provider
      */
-    private SQLiteOpenHelper mOpenHelper = null;
+    private SQLiteOpenHelper openHelper = null;
 
     /**
      * List of uids that can access the downloads
      */
-    private int mSystemUid = -1;
-    private int mDefContainerUid = -1;
-    private File mDownloadsDataDir;
+    private int systemUid = -1;
+    private int defcontaineruid = -1;
+    private File downloadsDataDir;
 
     //    @VisibleForTesting
-    SystemFacade mSystemFacade;
+    SystemFacade systemFacade;
 
     /**
      * This class encapsulates a SQL where clause and its parameters.  It makes it possible for
@@ -225,33 +225,33 @@ public final class DownloadProvider extends ContentProvider {
      * construction of selections.
      */
     private static class SqlSelection {
-        public final StringBuilder mWhereClause = new StringBuilder();
-        public final List<String> mParameters = new ArrayList<>();
+        public final StringBuilder whereClause = new StringBuilder();
+        public final List<String> Parameters = new ArrayList<>();
 
         public <T> void appendClause(String newClause, final T... parameters) {
             if (newClause == null || newClause.isEmpty()) {
                 return;
             }
-            if (mWhereClause.length() != 0) {
-                mWhereClause.append(" AND ");
+            if (whereClause.length() != 0) {
+                whereClause.append(" AND ");
             }
-            mWhereClause.append("(");
-            mWhereClause.append(newClause);
-            mWhereClause.append(")");
+            whereClause.append("(");
+            whereClause.append(newClause);
+            whereClause.append(")");
             if (parameters != null) {
                 for (Object parameter : parameters) {
-                    mParameters.add(parameter.toString());
+                    Parameters.add(parameter.toString());
                 }
             }
         }
 
         public String getSelection() {
-            return mWhereClause.toString();
+            return whereClause.toString();
         }
 
         public String[] getParameters() {
-            String[] array = new String[mParameters.size()];
-            return mParameters.toArray(array);
+            String[] array = new String[Parameters.size()];
+            return Parameters.toArray(array);
         }
     }
 
@@ -260,16 +260,16 @@ public final class DownloadProvider extends ContentProvider {
      */
     @Override
     public boolean onCreate() {
-        if (mSystemFacade == null) {
-            mSystemFacade = new RealSystemFacade(getContext());
+        if (systemFacade == null) {
+            systemFacade = new RealSystemFacade(getContext());
         }
 
         Context context = getContext();
         DatabaseFilenameProvider databaseFilenameProvider = DatabaseFilenameProvider.newInstance(context, DB_NAME);
         String databaseFilename = databaseFilenameProvider.getDatabaseFilename();
-        mOpenHelper = new DatabaseHelper(context, databaseFilename);
+        openHelper = new DatabaseHelper(context, databaseFilename);
         // Initialize the system uid
-        mSystemUid = Process.SYSTEM_UID;
+        systemUid = Process.SYSTEM_UID;
         // Initialize the default container uid. Package name hardcoded
         // for now.
         ApplicationInfo appInfo = null;
@@ -280,15 +280,15 @@ public final class DownloadProvider extends ContentProvider {
             Log.wtf("Could not get ApplicationInfo for com.android.defconatiner", e);
         }
         if (appInfo != null) {
-            mDefContainerUid = appInfo.uid;
+            defcontaineruid = appInfo.uid;
         }
         // start the DownloadService class. don't wait for the 1st download to be issued.
         // saves us by getting some initialization code in DownloadService out of the way.
         context.startService(new Intent(context, DownloadService.class));
-//        mDownloadsDataDir = StorageManager.getDownloadDataDirectory(getContext());
-        mDownloadsDataDir = context.getCacheDir();
+//        downloadsDataDir = StorageManager.getDownloadDataDirectory(getContext());
+        downloadsDataDir = context.getCacheDir();
 //        try {
-//            android.os.SELinux.restorecon(mDownloadsDataDir.getCanonicalPath());
+//            android.os.SELinux.restorecon(downloadsDataDir.getCanonicalPath());
 //        } catch (IOException e) {
 //            Log.wtf("Could not get canonical path for download directory", e);
 //        }
@@ -301,7 +301,7 @@ public final class DownloadProvider extends ContentProvider {
      */
     @Override
     public String getType(final Uri uri) {
-        int match = sURIMatcher.match(uri);
+        int match = URI_MATCHER.match(uri);
         switch (match) {
             case MY_DOWNLOADS:
             case ALL_DOWNLOADS: {
@@ -312,7 +312,7 @@ public final class DownloadProvider extends ContentProvider {
             case PUBLIC_DOWNLOAD_ID: {
                 // return the mimetype of this id from the database
                 final String id = getDownloadIdFromUri(uri);
-                final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+                final SQLiteDatabase db = openHelper.getReadableDatabase();
                 final String mimeType = DatabaseUtils.stringForQuery(db,
                         "SELECT " + Downloads.Impl.COLUMN_MIME_TYPE + " FROM " + Downloads.Impl.DOWNLOADS_TABLE_NAME +
                                 " WHERE " + Downloads.Impl._ID + " = ?",
@@ -344,10 +344,10 @@ public final class DownloadProvider extends ContentProvider {
      */
     @Override
     public Uri insert(final Uri uri, final ContentValues values) {
-        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        SQLiteDatabase db = openHelper.getWritableDatabase();
 
         // note we disallow inserting into ALL_DOWNLOADS
-        int match = sURIMatcher.match(uri);
+        int match = URI_MATCHER.match(uri);
         if (match == MY_DOWNLOADS) {
             checkDownloadInsertPermissions(values);
             return insertDownload(uri, values, db, match);
@@ -423,7 +423,7 @@ public final class DownloadProvider extends ContentProvider {
         }
 
         // set lastupdate to current time
-        long lastMod = mSystemFacade.currentTimeMillis();
+        long lastMod = systemFacade.currentTimeMillis();
         filteredValues.put(Downloads.Impl.COLUMN_LAST_MODIFICATION, lastMod);
 
         // use packagename of the caller to set the notification columns
@@ -431,7 +431,7 @@ public final class DownloadProvider extends ContentProvider {
         if (clazz != null) {
             int uid = Binder.getCallingUid();
             try {
-                if ((uid == 0) || mSystemFacade.userOwnsPackage(uid, getContext().getPackageName())) {
+                if ((uid == 0) || systemFacade.userOwnsPackage(uid, getContext().getPackageName())) {
                     if (clazz != null) {
                         filteredValues.put(Downloads.Impl.COLUMN_NOTIFICATION_CLASS, clazz);
                     }
@@ -616,11 +616,11 @@ public final class DownloadProvider extends ContentProvider {
     @Override
     public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sort) {
 
-        Helpers.validateSelection(selection, sAppReadableColumnsSet);
+        Helpers.validateSelection(selection, APP_READABLE_COLUMNS_SET);
 
-        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        SQLiteDatabase db = openHelper.getReadableDatabase();
 
-        int match = sURIMatcher.match(uri);
+        int match = URI_MATCHER.match(uri);
         switch (match) {
             case ALL_DOWNLOADS:
             case ALL_DOWNLOADS_ID:
@@ -653,12 +653,12 @@ public final class DownloadProvider extends ContentProvider {
 
         if (shouldRestrictVisibility()) {
             if (projection == null) {
-                projection = sAppReadableColumnsArray.clone();
+                projection = APP_READABLE_COLUMNS_ARRAY.clone();
             } else {
                 // check the validity of the columns in projection
                 for (int i = 0; i < projection.length; ++i) {
-                    if (!sAppReadableColumnsSet.contains(projection[i]) &&
-                            !downloadManagerColumnsList.contains(projection[i])) {
+                    if (!APP_READABLE_COLUMNS_SET.contains(projection[i]) &&
+                            !DOWNLOAD_MANAGER_COLUMNS_LIST.contains(projection[i])) {
                         throw new IllegalArgumentException(
                                 "column " + projection[i] + " is not allowed in queries");
                     }
@@ -666,7 +666,7 @@ public final class DownloadProvider extends ContentProvider {
             }
 
             for (int i = 0; i < projection.length; i++) {
-                final String newColumn = sColumnsMap.get(projection[i]);
+                final String newColumn = COLUMNS_MAP.get(projection[i]);
                 if (newColumn != null) {
                     projection[i] = newColumn;
                 }
@@ -796,8 +796,8 @@ public final class DownloadProvider extends ContentProvider {
     private boolean shouldRestrictVisibility() {
         int callingUid = Binder.getCallingUid();
         return Binder.getCallingPid() != Process.myPid() &&
-                callingUid != mSystemUid &&
-                callingUid != mDefContainerUid;
+                callingUid != systemUid &&
+                callingUid != defcontaineruid;
     }
 
     /**
@@ -806,9 +806,9 @@ public final class DownloadProvider extends ContentProvider {
     @Override
     public int update(final Uri uri, final ContentValues values, final String where, final String[] whereArgs) {
 
-        Helpers.validateSelection(where, sAppReadableColumnsSet);
+        Helpers.validateSelection(where, APP_READABLE_COLUMNS_SET);
 
-        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        SQLiteDatabase db = openHelper.getWritableDatabase();
 
         int count;
         boolean startService = false;
@@ -845,7 +845,7 @@ public final class DownloadProvider extends ContentProvider {
             }
         }
 
-        int match = sURIMatcher.match(uri);
+        int match = URI_MATCHER.match(uri);
         switch (match) {
             case MY_DOWNLOADS:
             case MY_DOWNLOADS_ID:
@@ -882,7 +882,7 @@ public final class DownloadProvider extends ContentProvider {
      * Notify of a change through both URIs (/my_downloads and /all_downloads)
      *
      * @param uri      either URI for the changed download(s)
-     * @param uriMatch the match ID from {@link #sURIMatcher}
+     * @param uriMatch the match ID from {@link #URI_MATCHER}
      */
     private void notifyContentChanged(final Uri uri, int uriMatch) {
         Long downloadId = null;
@@ -924,11 +924,11 @@ public final class DownloadProvider extends ContentProvider {
     @Override
     public int delete(@NonNull Uri uri, String where, String[] whereArgs) {
 
-        Helpers.validateSelection(where, sAppReadableColumnsSet);
+        Helpers.validateSelection(where, APP_READABLE_COLUMNS_SET);
 
-        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        SQLiteDatabase db = openHelper.getWritableDatabase();
         int count;
-        int match = sURIMatcher.match(uri);
+        int match = URI_MATCHER.match(uri);
         switch (match) {
             case MY_DOWNLOADS:
             case MY_DOWNLOADS_ID:
@@ -984,7 +984,7 @@ public final class DownloadProvider extends ContentProvider {
         if (path == null) {
             throw new FileNotFoundException("No filename found.");
         }
-        if (!Helpers.isFilenameValid(path, mDownloadsDataDir)) {
+        if (!Helpers.isFilenameValid(path, downloadsDataDir)) {
             Log.d("INTERNAL FILE DOWNLOAD LOL COMMENTED EXCEPTION");
 //            throw new FileNotFoundException("Invalid filename: " + path);
         }
