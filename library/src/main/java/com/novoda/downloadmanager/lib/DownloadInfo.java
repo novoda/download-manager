@@ -92,7 +92,6 @@ class DownloadInfo {
     public String mFileName;
     public String mMimeType;
     public int mDestination;
-    public int mVisibility;
     public int mControl;
     public int mStatus;
     public int mNumFailed;
