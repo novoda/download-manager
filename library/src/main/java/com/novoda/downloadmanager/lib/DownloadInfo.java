@@ -33,8 +33,8 @@ class DownloadInfo {
     // periodically pushing to provider.
 
     public static class Reader {
-        private ContentResolver mResolver;
-        private Cursor mCursor;
+        private final ContentResolver mResolver;
+        private final Cursor mCursor;
 
         public Reader(ContentResolver resolver, Cursor cursor) {
             mResolver = resolver;
@@ -228,14 +228,13 @@ class DownloadInfo {
     public int mBypassRecommendedSizeLimit;
     public long batchId;
 
-    private List<Pair<String, String>> mRequestHeaders = new ArrayList<Pair<String, String>>();
-
     /**
      * Result of last {DownloadThread} started by
      * {@link #isReadyToDownload(CollatedDownloadInfo)} && {@link #startDownloadIfNotActive(ExecutorService)}.
      */
     private Future<?> mSubmittedTask;
 
+    private final List<Pair<String, String>> mRequestHeaders = new ArrayList<>();
     private final Context mContext;
     private final SystemFacade mSystemFacade;
     private final StorageManager mStorageManager;

@@ -225,8 +225,8 @@ public final class DownloadProvider extends ContentProvider {
      * construction of selections.
      */
     private static class SqlSelection {
-        public StringBuilder mWhereClause = new StringBuilder();
-        public List<String> mParameters = new ArrayList<>();
+        public final StringBuilder mWhereClause = new StringBuilder();
+        public final List<String> mParameters = new ArrayList<>();
 
         public <T> void appendClause(String newClause, final T... parameters) {
             if (newClause == null || newClause.isEmpty()) {

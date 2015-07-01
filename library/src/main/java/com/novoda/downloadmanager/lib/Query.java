@@ -97,12 +97,15 @@ public class Query {
             throw new IllegalArgumentException("Invalid direction: " + direction);
         }
 
-        if (column.equals(DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP)) {
-            mOrderByColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
-        } else if (column.equals(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)) {
-            mOrderByColumn = Downloads.Impl.COLUMN_TOTAL_BYTES;
-        } else {
-            throw new IllegalArgumentException("Cannot order by " + column);
+        switch (column) {
+            case DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP:
+                mOrderByColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
+                break;
+            case DownloadManager.COLUMN_TOTAL_SIZE_BYTES:
+                mOrderByColumn = Downloads.Impl.COLUMN_TOTAL_BYTES;
+                break;
+            default:
+                throw new IllegalArgumentException("Cannot order by " + column);
         }
         mOrderDirection = direction;
         return this;

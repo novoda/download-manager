@@ -744,7 +744,7 @@ public class DownloadManager {
      * underlying data.
      */
     private static class CursorTranslator extends CursorWrapper {
-        private Uri mBaseUri;
+        private final Uri mBaseUri;
 
         public CursorTranslator(Cursor cursor, Uri baseUri) {
             super(cursor);

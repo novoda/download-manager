@@ -27,7 +27,7 @@ import android.telephony.TelephonyManager;
 import com.novoda.notils.logger.simple.Log;
 
 class RealSystemFacade implements SystemFacade {
-    private Context mContext;
+    private final Context mContext;
 
     public RealSystemFacade(Context context) {
         mContext = context;

@@ -224,7 +224,7 @@ public class DownloadService extends Service {
     private static final int MSG_UPDATE = 1;
     private static final int MSG_FINAL_UPDATE = 2;
 
-    private Handler.Callback mUpdateCallback = new Handler.Callback() {
+    private final Handler.Callback mUpdateCallback = new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);

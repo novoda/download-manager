@@ -37,9 +37,10 @@ public class Request {
      */
     public static final int NETWORK_BLUETOOTH = 1 << 2;
 
+    private final List<Pair<String, String>> mRequestHeaders = new ArrayList<>();
+
     private Uri mUri;
     private Uri mDestinationUri;
-    private List<Pair<String, String>> mRequestHeaders = new ArrayList<>();
     private CharSequence mTitle;
     private CharSequence mDescription;
     private String mMimeType;

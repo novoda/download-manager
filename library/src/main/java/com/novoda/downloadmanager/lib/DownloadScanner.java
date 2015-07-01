@@ -59,7 +59,7 @@ class DownloadScanner implements MediaScannerConnectionClient {
     }
 
     //    @GuardedBy("mConnection")
-    private HashMap<String, ScanRequest> mPending = new HashMap<String, ScanRequest>();
+    private HashMap<String, ScanRequest> mPending = new HashMap<>();
 
     public DownloadScanner(Context context) {
         mContext = context;
