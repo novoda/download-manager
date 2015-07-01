@@ -877,7 +877,7 @@ class DownloadThread implements Runnable {
         }
     }
 
-    public static long getHeaderFieldLong(URLConnection conn, String field, long defaultValue) {
+    private static long getHeaderFieldLong(URLConnection conn, String field, long defaultValue) {
         try {
             return Long.parseLong(conn.getHeaderField(field));
         } catch (NumberFormatException e) {
@@ -889,7 +889,7 @@ class DownloadThread implements Runnable {
      * Return if given status is eligible to be treated as
      * {@link Downloads.Impl#STATUS_WAITING_TO_RETRY}.
      */
-    public static boolean isStatusRetryable(int status) {
+    private static boolean isStatusRetryable(int status) {
         switch (status) {
             case STATUS_HTTP_DATA_ERROR:
             case HTTP_UNAVAILABLE:
@@ -910,7 +910,7 @@ class DownloadThread implements Runnable {
         }
     }
 
-    public void setPermissions(String fileName, int mode, int uid, int gid) {
+    private void setPermissions(String fileName, int mode, int uid, int gid) {
         try {
             Class<?> fileUtils = Class.forName("android.os.FileUtils");
             Method setPermissions = fileUtils.getMethod("setPermissions", String.class, int.class, int.class, int.class);
