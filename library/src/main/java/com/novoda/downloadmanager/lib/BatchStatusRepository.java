@@ -84,18 +84,15 @@ class BatchStatusRepository {
         long totalSize = 0;
         try {
             String[] selectionArgs = {String.valueOf(batchId)};
-            cursor = resolver.query(ALL_DOWNLOADS_CONTENT_URI,
-                    null,
+            cursor = resolver.query(
+                    ALL_DOWNLOADS_CONTENT_URI,
+                    new String[]{"sum(" + COLUMN_TOTAL_BYTES + ")"},
                     COLUMN_BATCH_ID + " = ?",
                     selectionArgs,
                     null);
 
-            int totalBytesColumnIndex = cursor.getColumnIndexOrThrow(COLUMN_TOTAL_BYTES);
-
-            while (cursor.moveToNext()) {
-                int individualDownloadSize = cursor.getInt(totalBytesColumnIndex);
-                totalSize += individualDownloadSize;
-            }
+            cursor.moveToFirst();
+            totalSize = cursor.getLong(0);
         } finally {
             if (cursor != null) {
                 cursor.close();

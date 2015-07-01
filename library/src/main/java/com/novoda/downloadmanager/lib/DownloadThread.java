@@ -190,7 +190,9 @@ class DownloadThread implements Runnable {
             return;
         }
 
-        if (!downloadInfo.isReadyToDownload(new CollatedDownloadInfo(batchStatusRepository.getBatchSizeInBytes(downloadInfo.getBatchId())))) {
+        long batchSizeInBytes = batchStatusRepository.getBatchSizeInBytes(downloadInfo.getBatchId());
+
+        if (!downloadInfo.isReadyToDownload(new CollatedDownloadInfo(batchSizeInBytes))) {
             Log.d("Download " + downloadInfo.getId() + " is not ready to download: skipping");
             return;
         }
