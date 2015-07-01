@@ -124,7 +124,7 @@ public class DownloadService extends Service {
      * @throws UnsupportedOperationException
      */
     @Override
-    public IBinder onBind(Intent i) {
+    public IBinder onBind(@NonNull Intent intent) {
         throw new UnsupportedOperationException("Cannot bind to Download Manager Service");
     }
 
@@ -226,7 +226,7 @@ public class DownloadService extends Service {
 
     private final Handler.Callback mUpdateCallback = new Handler.Callback() {
         @Override
-        public boolean handleMessage(Message msg) {
+        public boolean handleMessage(@NonNull Message msg) {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
             final int startId = msg.arg1;
@@ -487,7 +487,7 @@ public class DownloadService extends Service {
     }
 
     @Override
-    protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+    protected void dump(FileDescriptor fd, @NonNull PrintWriter writer, String[] args) {
         Log.e("I want to dump but nothing to dump into");
     }
 }
