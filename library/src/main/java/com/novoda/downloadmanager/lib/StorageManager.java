@@ -16,6 +16,7 @@
 
 package com.novoda.downloadmanager.lib;
 
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
@@ -52,23 +53,23 @@ class StorageManager {
     /**
      * see {@link Environment#getExternalStorageDirectory()}
      */
-    private final File mExternalStorageDir;
+    private final File externalStorageDir;
 
     /**
      * see {@link android.os.Environment#getDataDirectory()}
      */
-    private final File mInternalStorageDir;
+    private final File internalStorageDir;
 
     /**
      * see {@link Environment#getDownloadCacheDirectory()}
      */
-    private final File mSystemCacheDir;
+    private final File systemCacheDir;
 
     /**
      * The downloaded files are saved to this dir. it is the value returned by
      * {@link Context#getCacheDir()}.
      */
-    private final File mDownloadDataDir;
+    private final File downloadDataDir;
 
     /**
      * how often do we need to perform checks on space to make sure space is available
@@ -79,14 +80,23 @@ class StorageManager {
     /**
      * misc members
      */
-    private final Context mContext;
+    private final ContentResolver contentResolver;
 
-    public StorageManager(Context context) {
-        mContext = context;
-        mDownloadDataDir = getDownloadDataDirectory(context);
-        mExternalStorageDir = Environment.getExternalStorageDirectory();
-        mInternalStorageDir = Environment.getDataDirectory();
-        mSystemCacheDir = Environment.getDownloadCacheDirectory();
+    public static StorageManager newInstance(Context context) {
+        ContentResolver contentResolver = context.getContentResolver();
+        File downloadDataDir = getDownloadDataDirectory(context);
+        File externalStorageDir = Environment.getExternalStorageDirectory();
+        File internalStorageDir = Environment.getDataDirectory();
+        File systemCacheDir = Environment.getDownloadCacheDirectory();
+        return new StorageManager(externalStorageDir, internalStorageDir, systemCacheDir, downloadDataDir, contentResolver);
+    }
+
+    StorageManager(File externalStorageDir, File internalStorageDir, File systemCacheDir, File downloadDataDir, ContentResolver contentResolver) {
+        this.externalStorageDir = externalStorageDir;
+        this.internalStorageDir = internalStorageDir;
+        this.systemCacheDir = systemCacheDir;
+        this.downloadDataDir = downloadDataDir;
+        this.contentResolver = contentResolver;
         startThreadToCleanupDatabaseAndPurgeFileSystem();
     }
 
@@ -144,23 +154,23 @@ class StorageManager {
             case Downloads.Impl.DESTINATION_CACHE_PARTITION:
             case Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING:
             case Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE:
-                dir = mDownloadDataDir;
+                dir = downloadDataDir;
                 break;
             case Downloads.Impl.DESTINATION_EXTERNAL:
-                dir = mExternalStorageDir;
+                dir = externalStorageDir;
                 break;
             case Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION:
-                dir = mSystemCacheDir;
+                dir = systemCacheDir;
                 break;
             case Downloads.Impl.DESTINATION_FILE_URI:
-                if (path.startsWith(mExternalStorageDir.getPath())) {
-                    dir = mExternalStorageDir;
-                } else if (path.startsWith(mDownloadDataDir.getPath())) {
-                    dir = mDownloadDataDir;
-                } else if (path.startsWith(mSystemCacheDir.getPath())) {
-                    dir = mSystemCacheDir;
-                } else if (path.startsWith(mInternalStorageDir.getPath())) {
-                    dir = mInternalStorageDir;
+                if (path.startsWith(externalStorageDir.getPath())) {
+                    dir = externalStorageDir;
+                } else if (path.startsWith(downloadDataDir.getPath())) {
+                    dir = downloadDataDir;
+                } else if (path.startsWith(systemCacheDir.getPath())) {
+                    dir = systemCacheDir;
+                } else if (path.startsWith(internalStorageDir.getPath())) {
+                    dir = internalStorageDir;
                 }
                 break;
         }
@@ -204,7 +214,7 @@ class StorageManager {
                  * is available because downloadmanager shouldn't end up taking those last
                  * few MB of space left on the filesystem.
                  */
-                if (root.equals(mSystemCacheDir)) {
+                if (root.equals(systemCacheDir)) {
                     Log.w("System cache dir ('/cache') is running low on space." + "space available (in bytes): " + bytesAvailable);
                 } else {
                     throw new StopRequestException(Downloads.Impl.STATUS_INSUFFICIENT_SPACE_ERROR,
@@ -212,9 +222,9 @@ class StorageManager {
                 }
             }
         }
-        if (root.equals(mDownloadDataDir)) {
+        if (root.equals(downloadDataDir)) {
             // this download is going into downloads data dir. check space in that specific dir.
-            bytesAvailable = getAvailableBytesInDownloadsDataDir(mDownloadDataDir);
+            bytesAvailable = getAvailableBytesInDownloadsDataDir(downloadDataDir);
             if (bytesAvailable < sDownloadDataDirLowSpaceThreshold) {
                 // print a warning
                 Log.w("Downloads data dir: " + root + " is running low on space. space available (in bytes): " + bytesAvailable);
@@ -223,7 +233,7 @@ class StorageManager {
                 // Insufficient space; make space.
                 discardPurgeableFiles(destination, sDownloadDataDirLowSpaceThreshold);
                 removeSpuriousFiles();
-                bytesAvailable = getAvailableBytesInDownloadsDataDir(mDownloadDataDir);
+                bytesAvailable = getAvailableBytesInDownloadsDataDir(downloadDataDir);
             }
         }
         if (bytesAvailable < targetBytes) {
@@ -262,11 +272,11 @@ class StorageManager {
             case Downloads.Impl.DESTINATION_CACHE_PARTITION:
             case Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE:
             case Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING:
-                return mDownloadDataDir;
+                return downloadDataDir;
             case Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION:
-                return mSystemCacheDir;
+                return systemCacheDir;
             case Downloads.Impl.DESTINATION_EXTERNAL:
-                File base = new File(mExternalStorageDir.getPath() + Constants.DEFAULT_DL_SUBDIR);
+                File base = new File(externalStorageDir.getPath() + Constants.DEFAULT_DL_SUBDIR);
                 if (!base.isDirectory() && !base.mkdir()) {
                     // Can't create download directory, e.g. because a file called "download"
                     // already exists at the root level, or the SD card filesystem is read-only.
@@ -279,7 +289,7 @@ class StorageManager {
     }
 
     File getDownloadDataDirectory() {
-        return mDownloadDataDir;
+        return downloadDataDir;
     }
 
     public static File getDownloadDataDirectory(Context context) {
@@ -297,7 +307,7 @@ class StorageManager {
                 String.valueOf(destination) :
                 String.valueOf(Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
         String[] bindArgs = new String[]{destStr};
-        Cursor cursor = mContext.getContentResolver().query(
+        Cursor cursor = contentResolver.query(
                 Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
                 null,
                 "( " +
@@ -320,7 +330,7 @@ class StorageManager {
                 totalFreed += file.length();
                 file.delete();
                 long id = cursor.getLong(cursor.getColumnIndex(Downloads.Impl._ID));
-                mContext.getContentResolver().delete(ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id), null, null);
+                contentResolver.delete(ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id), null, null);
             }
         } finally {
             cursor.close();
@@ -340,18 +350,18 @@ class StorageManager {
         Log.i("in removeSpuriousFiles");
         // get a list of all files in system cache dir and downloads data dir
         List<File> files = new ArrayList<File>();
-        File[] listOfFiles = mSystemCacheDir.listFiles();
+        File[] listOfFiles = systemCacheDir.listFiles();
         if (listOfFiles != null) {
             files.addAll(Arrays.asList(listOfFiles));
         }
-        listOfFiles = mDownloadDataDir.listFiles();
+        listOfFiles = downloadDataDir.listFiles();
         if (listOfFiles != null) {
             files.addAll(Arrays.asList(listOfFiles));
         }
         if (files.size() == 0) {
             return;
         }
-        Cursor cursor = mContext.getContentResolver()
+        Cursor cursor = contentResolver
                 .query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, new String[]{Downloads.Impl._DATA}, null, null, null);
         try {
             if (cursor != null) {
@@ -396,7 +406,7 @@ class StorageManager {
         Log.i("in trimDatabase");
         Cursor cursor = null;
         try {
-            cursor = mContext.getContentResolver().query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
+            cursor = contentResolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
                     new String[]{Downloads.Impl._ID},
                     Downloads.Impl.COLUMN_STATUS + " >= '200'", null,
                     Downloads.Impl.COLUMN_LAST_MODIFICATION);
@@ -411,7 +421,7 @@ class StorageManager {
                 while (numDelete > 0) {
                     Uri downloadUri = ContentUris.withAppendedId(
                             Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, cursor.getLong(columnId));
-                    mContext.getContentResolver().delete(downloadUri, null, null);
+                    contentResolver.delete(downloadUri, null, null);
                     if (!cursor.moveToNext()) {
                         break;
                     }

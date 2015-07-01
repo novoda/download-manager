@@ -141,7 +141,7 @@ public class DownloadService extends Service {
         }
 
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        storageManager = new StorageManager(this);
+        storageManager = StorageManager.newInstance(this);
 
         updateThread = new HandlerThread("DownloadManager-UpdateThread");
         updateThread.start();
