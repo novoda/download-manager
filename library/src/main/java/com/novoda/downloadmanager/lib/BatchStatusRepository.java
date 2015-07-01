@@ -26,6 +26,8 @@ class BatchStatusRepository {
             STATUS_SUCCESS
     );
 
+    private static final int PRIORITISED_STATUSES_SIZE = PRIORITISED_STATUSES.size();
+
     private final ContentResolver resolver;
 
     public BatchStatusRepository(ContentResolver resolver) {
@@ -40,7 +42,7 @@ class BatchStatusRepository {
 
     int getBatchStatus(long batchId) {
         Cursor cursor = null;
-        SparseIntArray statusCounts = new SparseIntArray(8);
+        SparseIntArray statusCounts = new SparseIntArray(PRIORITISED_STATUSES_SIZE);
         try {
             String[] selectionArgs = {String.valueOf(batchId)};
             cursor = resolver.query(ALL_DOWNLOADS_CONTENT_URI,
