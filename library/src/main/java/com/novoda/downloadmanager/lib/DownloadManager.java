@@ -536,7 +536,7 @@ public class DownloadManager {
             if (cursor == null) {
                 return null;
             }
-            while (cursor.moveToFirst()) {
+            if (cursor.moveToFirst()) {
                 return cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MEDIA_TYPE));
             }
         } finally {
