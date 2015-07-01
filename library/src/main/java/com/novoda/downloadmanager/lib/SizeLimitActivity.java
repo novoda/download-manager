@@ -22,7 +22,8 @@ import java.util.Queue;
  * size is discovered to be exceeded one of these thresholds.
  */
 public class SizeLimitActivity extends Activity implements DialogInterface.OnCancelListener, DialogInterface.OnClickListener {
-    private final Queue<Intent> mDownloadsToShow = new LinkedList<>();
+
+    private final Queue<Intent> downloadsToShow = new LinkedList<>();
 
     private Dialog dialog;
     private Uri currentUri;
@@ -39,7 +40,7 @@ public class SizeLimitActivity extends Activity implements DialogInterface.OnCan
         super.onResume();
         Intent intent = getIntent();
         if (intent != null) {
-            mDownloadsToShow.add(intent);
+            downloadsToShow.add(intent);
             setIntent(null);
             showNextDialog();
         }
@@ -53,12 +54,12 @@ public class SizeLimitActivity extends Activity implements DialogInterface.OnCan
             return;
         }
 
-        if (mDownloadsToShow.isEmpty()) {
+        if (downloadsToShow.isEmpty()) {
             finish();
             return;
         }
 
-        currentIntent = mDownloadsToShow.poll();
+        currentIntent = downloadsToShow.poll();
         currentUri = currentIntent.getData();
         Cursor cursor = getContentResolver().query(currentUri, null, null, null, null);
         try {
