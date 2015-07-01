@@ -772,7 +772,7 @@ class DownloadThread implements Runnable {
                     f.delete();
                     state.filename = null;
                     Log.i("resuming download for id: " + downloadInfo.getId() + ", BUT starting from scratch again: ");
-                } else if (downloadInfo.geteTag() == null && !downloadInfo.isNoIntegrity()) {
+                } else if (downloadInfo.getETag() == null && !downloadInfo.isNoIntegrity()) {
                     // This should've been caught upon failure
                     Log.d("setupDestinationFile() unable to resume download, deleting "
                             + state.filename);
@@ -785,7 +785,7 @@ class DownloadThread implements Runnable {
                     if (downloadInfo.getTotalBytes() != -1) {
                         state.contentLength = downloadInfo.getTotalBytes();
                     }
-                    state.headerETag = downloadInfo.geteTag();
+                    state.headerETag = downloadInfo.getETag();
                     state.continuingDownload = true;
                     Log.i("resuming download for id: " + downloadInfo.getId() + ", state.currentBytes: " + state.currentBytes + ", and setting continuingDownload to true: ");
                 }

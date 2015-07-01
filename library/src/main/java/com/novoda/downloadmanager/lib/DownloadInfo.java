@@ -10,6 +10,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Environment;
+import android.text.TextUtils;
 import android.util.Pair;
 
 import java.util.ArrayList;
@@ -24,250 +25,91 @@ import java.util.concurrent.Future;
  * Stores information about an individual download.
  */
 class DownloadInfo {
-    public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
+    private static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
     private static final int UNKNOWN_BYTES = -1;
 
     public long getId() {
         return id;
     }
 
-    public void setId(long id) {
-        this.id = id;
-    }
-
     public String getUri() {
         return uri;
     }
 
-    public void setUri(String uri) {
-        this.uri = uri;
-    }
-
-    /**
-     * Add to check if scannable i.e. we don't want internal files to be scanned
-     */
-    public boolean isScannable() {
-        return scannable;
-    }
-
-    public void setScannable(boolean scannable) {
-        this.scannable = scannable;
-    }
-
-    public boolean isNoIntegrity() {
+    boolean isNoIntegrity() {
         return noIntegrity;
     }
 
-    public void setNoIntegrity(boolean noIntegrity) {
-        this.noIntegrity = noIntegrity;
-    }
-
-    public String getHint() {
+    String getHint() {
         return hint;
     }
 
-    public void setHint(String hint) {
-        this.hint = hint;
-    }
-
-    public String getFileName() {
+    String getFileName() {
         return fileName;
     }
 
-    public void setFileName(String fileName) {
+    void setFileName(String fileName) {
         this.fileName = fileName;
     }
 
-    public String getMimeType() {
+    String getMimeType() {
         return mimeType;
     }
 
-    public void setMimeType(String mimeType) {
-        this.mimeType = mimeType;
-    }
-
-    public int getDestination() {
+    int getDestination() {
         return destination;
     }
 
-    public void setDestination(int destination) {
-        this.destination = destination;
-    }
-
-    public int getControl() {
+    int getControl() {
         return control;
     }
 
-    public void setControl(int control) {
-        this.control = control;
-    }
-
-    public int getStatus() {
+    int getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    void setStatus(int status) {
         this.status = status;
     }
 
-    public int getNumFailed() {
+    int getNumFailed() {
         return numFailed;
     }
 
-    public void setNumFailed(int numFailed) {
-        this.numFailed = numFailed;
-    }
-
-    public int getRetryAfter() {
-        return retryAfter;
-    }
-
-    public void setRetryAfter(int retryAfter) {
-        this.retryAfter = retryAfter;
-    }
-
-    public long getLastMod() {
-        return lastMod;
-    }
-
-    public void setLastMod(long lastMod) {
-        this.lastMod = lastMod;
-    }
-
-    public String getNotificationClassName() {
+    String getNotificationClassName() {
         return notificationClassName;
     }
 
-    public void setNotificationClassName(String notificationClassName) {
-        this.notificationClassName = notificationClassName;
-    }
-
-    public String getExtras() {
-        return extras;
-    }
-
-    public void setExtras(String extras) {
-        this.extras = extras;
-    }
-
-    public String getCookies() {
-        return cookies;
-    }
-
-    public void setCookies(String cookies) {
-        this.cookies = cookies;
-    }
-
-    public String getUserAgent() {
+    String getUserAgent() {
         return userAgent;
     }
 
-    public void setUserAgent(String userAgent) {
-        this.userAgent = userAgent;
-    }
-
-    public String getReferer() {
-        return referer;
-    }
-
-    public void setReferer(String referer) {
-        this.referer = referer;
-    }
-
-    public long getTotalBytes() {
+    long getTotalBytes() {
         return totalBytes;
     }
 
-    public void setTotalBytes(long totalBytes) {
+    void setTotalBytes(long totalBytes) {
         this.totalBytes = totalBytes;
     }
 
-    public long getCurrentBytes() {
+    long getCurrentBytes() {
         return currentBytes;
     }
 
-    public void setCurrentBytes(long currentBytes) {
-        this.currentBytes = currentBytes;
-    }
-
-    public String geteTag() {
+    String getETag() {
         return eTag;
     }
 
-    public void seteTag(String eTag) {
-        this.eTag = eTag;
-    }
-
-    public int getUid() {
-        return uid;
-    }
-
-    public void setUid(int uid) {
-        this.uid = uid;
-    }
-
-    public int getMediaScanned() {
-        return mediaScanned;
-    }
-
-    public void setMediaScanned(int mediaScanned) {
-        this.mediaScanned = mediaScanned;
-    }
-
-    public boolean isDeleted() {
+    boolean isDeleted() {
         return deleted;
     }
 
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
-    }
-
-    public String getMediaProviderUri() {
+    String getMediaProviderUri() {
         return mediaProviderUri;
     }
 
-    public void setMediaProviderUri(String mediaProviderUri) {
-        this.mediaProviderUri = mediaProviderUri;
-    }
-
-    public int getAllowedNetworkTypes() {
-        return allowedNetworkTypes;
-    }
-
-    public void setAllowedNetworkTypes(int allowedNetworkTypes) {
-        this.allowedNetworkTypes = allowedNetworkTypes;
-    }
-
-    public boolean isAllowRoaming() {
-        return allowRoaming;
-    }
-
-    public void setAllowRoaming(boolean allowRoaming) {
-        this.allowRoaming = allowRoaming;
-    }
-
-    public boolean isAllowMetered() {
-        return allowMetered;
-    }
-
-    public void setAllowMetered(boolean allowMetered) {
-        this.allowMetered = allowMetered;
-    }
-
-    public int getBypassRecommendedSizeLimit() {
-        return bypassRecommendedSizeLimit;
-    }
-
-    public void setBypassRecommendedSizeLimit(int bypassRecommendedSizeLimit) {
-        this.bypassRecommendedSizeLimit = bypassRecommendedSizeLimit;
-    }
-
-    public long getBatchId() {
+    long getBatchId() {
         return batchId;
-    }
-
-    public void setBatchId(long batchId) {
-        this.batchId = batchId;
     }
 
     // TODO: move towards these in-memory objects being sources of truth, and periodically pushing to provider.
@@ -395,8 +237,8 @@ class DownloadInfo {
         intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, getId());
         intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_STATUS, finalStatus);
         intent.setData(getMyDownloadsUri());
-        if (getExtras() != null) {
-            intent.putExtra(EXTRA_EXTRA, getExtras());
+        if (extras != null) {
+            intent.putExtra(EXTRA_EXTRA, extras);
         }
         context.sendBroadcast(intent);
     }
@@ -410,8 +252,8 @@ class DownloadInfo {
         intent.setPackage(getPackageName());
         intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, getId());
         intent.setData(getMyDownloadsUri());
-        if (getExtras() != null) {
-            intent.putExtra(EXTRA_EXTRA, getExtras());
+        if (extras != null) {
+            intent.putExtra(EXTRA_EXTRA, extras);
         }
         context.sendBroadcast(intent);
     }
@@ -419,14 +261,14 @@ class DownloadInfo {
     /**
      * Returns the time when a download should be restarted.
      */
-    public long restartTime(long now) {
+    private long restartTime(long now) {
         if (getNumFailed() == 0) {
             return now;
         }
-        if (getRetryAfter() > 0) {
-            return getLastMod() + getRetryAfter();
+        if (retryAfter > 0) {
+            return lastMod + retryAfter;
         }
-        return getLastMod() + Constants.RETRY_FIRST_DELAY * (1000 + randomNumberGenerator.generate()) * (1 << (getNumFailed() - 1));
+        return lastMod + Constants.RETRY_FIRST_DELAY * (1000 + randomNumberGenerator.generate()) * (1 << (getNumFailed() - 1));
     }
 
     /**
@@ -476,14 +318,14 @@ class DownloadInfo {
         if (systemFacade.isNetworkRoaming() && !isRoamingAllowed()) {
             return NetworkState.CANNOT_USE_ROAMING;
         }
-        if (systemFacade.isActiveNetworkMetered() && !isAllowMetered()) {
+        if (systemFacade.isActiveNetworkMetered() && !allowMetered) {
             return NetworkState.TYPE_DISALLOWED_BY_REQUESTOR;
         }
         return checkIsNetworkTypeAllowed(info.getType());
     }
 
     private boolean isRoamingAllowed() {
-        return isAllowRoaming();
+        return allowRoaming;
     }
 
     /**
@@ -503,7 +345,7 @@ class DownloadInfo {
         if (maxBytesOverMobile != null && getTotalBytes() > maxBytesOverMobile) {
             return NetworkState.UNUSABLE_DUE_TO_SIZE;
         }
-        if (getBypassRecommendedSizeLimit() == 0) {
+        if (bypassRecommendedSizeLimit == 0) {
             Long recommendedMaxBytesOverMobile = systemFacade.getRecommendedMaxBytesOverMobile();
             if (recommendedMaxBytesOverMobile != null
                     && getTotalBytes() > recommendedMaxBytesOverMobile) {
@@ -549,7 +391,7 @@ class DownloadInfo {
         if (maxBytesOverMobile != null && getTotalBytes() > maxBytesOverMobile) {
             return NetworkState.UNUSABLE_DUE_TO_SIZE;
         }
-        if (getBypassRecommendedSizeLimit() == 0) {
+        if (bypassRecommendedSizeLimit == 0) {
             Long recommendedMaxBytesOverMobile = systemFacade.getRecommendedMaxBytesOverMobile();
             if (recommendedMaxBytesOverMobile != null
                     && getTotalBytes() > recommendedMaxBytesOverMobile) {
@@ -627,7 +469,7 @@ class DownloadInfo {
                 || getDestination() == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
     }
 
-    public Uri getMyDownloadsUri() {
+    private Uri getMyDownloadsUri() {
         return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, getId());
     }
 
@@ -659,13 +501,13 @@ class DownloadInfo {
     /**
      * Returns whether a file should be scanned
      */
-    public boolean shouldScanFile() {
-        return (getMediaScanned() == 0)
+    private boolean shouldScanFile() {
+        return (mediaScanned == 0)
                 && (getDestination() == Downloads.Impl.DESTINATION_EXTERNAL ||
                 getDestination() == Downloads.Impl.DESTINATION_FILE_URI ||
                 getDestination() == Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD)
                 && Downloads.Impl.isStatusSuccess(getStatus())
-                && isScannable();
+                && scannable;
     }
 
     void notifyPauseDueToSize(boolean isWifiRequired) {
@@ -701,12 +543,118 @@ class DownloadInfo {
         return getTotalBytes() != UNKNOWN_BYTES;
     }
 
-    void addHeader(String header, String value) {
+    private void addHeader(String header, String value) {
         requestHeaders.add(Pair.create(header, value));
     }
 
-    void clearHeaders() {
+    private void clearHeaders() {
         requestHeaders.clear();
     }
 
+    public static class Reader {
+        private final ContentResolver resolver;
+        private final Cursor cursor;
+
+        public Reader(ContentResolver resolver, Cursor cursor) {
+            this.resolver = resolver;
+            this.cursor = cursor;
+        }
+
+        public DownloadInfo newDownloadInfo(
+                Context context,
+                SystemFacade systemFacade,
+                StorageManager storageManager,
+                DownloadNotifier notifier,
+                DownloadClientReadyChecker downloadClientReadyChecker) {
+            RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
+            ContentValues contentValues = new ContentValues();
+            DownloadInfo info = new DownloadInfo(
+                    context,
+                    systemFacade,
+                    storageManager,
+                    notifier,
+                    randomNumberGenerator,
+                    downloadClientReadyChecker,
+                    contentValues);
+            updateFromDatabase(info);
+            readRequestHeaders(info);
+
+            return info;
+        }
+
+        public void updateFromDatabase(DownloadInfo info) {
+            info.id = getLong(Downloads.Impl._ID);
+            info.uri = getString(Downloads.Impl.COLUMN_URI);
+            info.scannable = getInt(Downloads.Impl.COLUMN_MEDIA_SCANNED) == 1;
+            info.noIntegrity = getInt(Downloads.Impl.COLUMN_NO_INTEGRITY) == 1;
+            info.hint = getString(Downloads.Impl.COLUMN_FILE_NAME_HINT);
+            info.fileName = getString(Downloads.Impl._DATA);
+            info.mimeType = getString(Downloads.Impl.COLUMN_MIME_TYPE);
+            info.destination = getInt(Downloads.Impl.COLUMN_DESTINATION);
+            info.status = getInt(Downloads.Impl.COLUMN_STATUS);
+            info.numFailed = getInt(Downloads.Impl.COLUMN_FAILED_CONNECTIONS);
+            int retryRedirect = getInt(Constants.RETRY_AFTER_X_REDIRECT_COUNT);
+            info.retryAfter = retryRedirect & 0xfffffff;
+            info.lastMod = getLong(Downloads.Impl.COLUMN_LAST_MODIFICATION);
+            info.notificationClassName = getString(Downloads.Impl.COLUMN_NOTIFICATION_CLASS);
+            info.extras = getString(Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS);
+            info.cookies = getString(Downloads.Impl.COLUMN_COOKIE_DATA);
+            info.userAgent = getString(Downloads.Impl.COLUMN_USER_AGENT);
+            info.referer = getString(Downloads.Impl.COLUMN_REFERER);
+            info.totalBytes = getLong(Downloads.Impl.COLUMN_TOTAL_BYTES);
+            info.currentBytes = getLong(Downloads.Impl.COLUMN_CURRENT_BYTES);
+            info.eTag = getString(Constants.ETAG);
+            info.uid = getInt(Constants.UID);
+            info.mediaScanned = getInt(Constants.MEDIA_SCANNED);
+            info.deleted = getInt(Downloads.Impl.COLUMN_DELETED) == 1;
+            info.mediaProviderUri = getString(Downloads.Impl.COLUMN_MEDIAPROVIDER_URI);
+            info.allowedNetworkTypes = getInt(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES);
+            info.allowRoaming = getInt(Downloads.Impl.COLUMN_ALLOW_ROAMING) != 0;
+            info.allowMetered = getInt(Downloads.Impl.COLUMN_ALLOW_METERED) != 0;
+            info.bypassRecommendedSizeLimit = getInt(Downloads.Impl.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
+            info.batchId = getLong(Downloads.Impl.COLUMN_BATCH_ID);
+
+            synchronized (this) {
+                info.control = getInt(Downloads.Impl.COLUMN_CONTROL);
+            }
+        }
+
+        private void readRequestHeaders(DownloadInfo info) {
+            info.clearHeaders();
+            Uri headerUri = Uri.withAppendedPath(info.getAllDownloadsUri(), Downloads.Impl.RequestHeaders.URI_SEGMENT);
+            Cursor cursor = resolver.query(headerUri, null, null, null, null);
+            try {
+                int headerIndex =
+                        cursor.getColumnIndexOrThrow(Downloads.Impl.RequestHeaders.COLUMN_HEADER);
+                int valueIndex =
+                        cursor.getColumnIndexOrThrow(Downloads.Impl.RequestHeaders.COLUMN_VALUE);
+                for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                    info.addHeader(cursor.getString(headerIndex), cursor.getString(valueIndex));
+                }
+            } finally {
+                cursor.close();
+            }
+
+            if (info.cookies != null) {
+                info.addHeader("Cookie", info.cookies);
+            }
+            if (info.referer != null) {
+                info.addHeader("Referer", info.referer);
+            }
+        }
+
+        private String getString(String column) {
+            int index = cursor.getColumnIndexOrThrow(column);
+            String s = cursor.getString(index);
+            return (TextUtils.isEmpty(s)) ? null : s;
+        }
+
+        private Integer getInt(String column) {
+            return cursor.getInt(cursor.getColumnIndexOrThrow(column));
+        }
+
+        private Long getLong(String column) {
+            return cursor.getLong(cursor.getColumnIndexOrThrow(column));
+        }
+    }
 }
