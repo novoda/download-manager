@@ -417,13 +417,13 @@ public class DownloadService extends Service {
     }
 
     private boolean kickOffDownloadTaskIfReady(boolean isActive, DownloadInfo info) {
-        boolean isReadyToDownload = info.isReadyToDownload();
+        CollatedDownloadInfo collatedDownloadInfo = CollatedDownloadInfo.collateInfo(mDownloads, info);
+        boolean isReadyToDownload = info.isReadyToDownload(collatedDownloadInfo);
         boolean downloadIsActive = info.isActive();
 
         if (isReadyToDownload || downloadIsActive) {
             isActive |= info.startDownloadIfNotActive(mExecutor);
         }
-
         return isActive;
     }
 

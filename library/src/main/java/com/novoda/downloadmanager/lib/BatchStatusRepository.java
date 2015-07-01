@@ -10,7 +10,7 @@ import java.util.List;
 
 import static com.novoda.downloadmanager.lib.Downloads.Impl.*;
 
-class BatchStatusUpdater {
+class BatchStatusRepository {
 
     private static final List<Integer> PRIORITISED_STATUSES = Arrays.asList(
             STATUS_CANCELED,
@@ -28,7 +28,7 @@ class BatchStatusUpdater {
 
     private final ContentResolver resolver;
 
-    public BatchStatusUpdater(ContentResolver resolver) {
+    public BatchStatusRepository(ContentResolver resolver) {
         this.resolver = resolver;
     }
 
@@ -78,4 +78,31 @@ class BatchStatusUpdater {
         return STATUS_UNKNOWN_ERROR;
 
     }
+
+    long getBatchSizeInBytes(long batchId) {
+        Cursor cursor = null;
+        long totalSize = 0;
+        try {
+            String[] selectionArgs = {String.valueOf(batchId)};
+            cursor = resolver.query(ALL_DOWNLOADS_CONTENT_URI,
+                    null,
+                    COLUMN_BATCH_ID + " = ?",
+                    selectionArgs,
+                    null);
+
+            int totalBytesColumnIndex = cursor.getColumnIndexOrThrow(COLUMN_TOTAL_BYTES);
+
+            while (cursor.moveToNext()) {
+                int individualDownloadSize = cursor.getInt(totalBytesColumnIndex);
+                totalSize += individualDownloadSize;
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+
+        return totalSize;
+    }
+
 }

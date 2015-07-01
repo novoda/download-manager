@@ -1,5 +1,11 @@
 0.0.12
 -------
+
+BUG FIX - Queues all downloading tasks when the downloads cannot continue
+
+0.0.12
+-------
+
 Now allows power users to override the default database filename.
 
 0.0.9
