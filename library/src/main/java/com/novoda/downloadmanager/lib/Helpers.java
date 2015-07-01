@@ -143,7 +143,7 @@ class Helpers {
         String filename = null;
 
         // First, try to use the hint from the application, if there's one
-        if (filename == null && hint != null && !hint.endsWith("/")) {
+        if (hint != null && !hint.endsWith("/")) {
             Log.v("getting filename from hint");
             int index = hint.lastIndexOf('/') + 1;
             if (index > 0) {
