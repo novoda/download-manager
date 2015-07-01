@@ -56,9 +56,9 @@ class DownloadNotifier {
     private static final int TYPE_FAILED = 4;
     private static final int TYPE_CANCELLED = 5;
 
-    private final Context mContext;
+    private final Context context;
     private final NotificationImageRetriever imageRetriever;
-    private final NotificationManager mNotifManager;
+    private final NotificationManager notificationManager;
 
     /**
      * Currently active notifications, mapped from clustering tag to timestamp
@@ -66,8 +66,8 @@ class DownloadNotifier {
      *
      * @see #buildNotificationTag(DownloadBatch)
      */
-//    @GuardedBy("mActiveNotifs")
-    private final HashMap<String, Long> mActiveNotifs = new HashMap<>();
+//    @GuardedBy("activeNotifications")
+    private final HashMap<String, Long> activeNotifications = new HashMap<>();
 
     /**
      * Current speed of active downloads, mapped from {@link DownloadInfo#batchId}
@@ -80,14 +80,14 @@ class DownloadNotifier {
     private final Resources resources;
 
     public DownloadNotifier(Context context, NotificationImageRetriever imageRetriever, Resources resources) {
-        this.mContext = context;
+        this.context = context;
         this.resources = resources;
         this.imageRetriever = imageRetriever;
-        this.mNotifManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
     public void cancelAll() {
-        mNotifManager.cancelAll();
+        notificationManager.cancelAll();
     }
 
     /**
@@ -109,7 +109,7 @@ class DownloadNotifier {
      * {@link DownloadInfo}, adding, collapsing, and removing as needed.
      */
     public void updateWith(List<DownloadBatch> batches) {
-        synchronized (mActiveNotifs) {
+        synchronized (activeNotifications) {
             Map<String, List<DownloadBatch>> clusters = getClustersByNotificationTag(batches);
 
             showNotificationPerCluster(clusters);
@@ -139,18 +139,18 @@ class DownloadNotifier {
         int status = batch.getStatus();
         int visibility = batch.getInfo().getVisibility();
         if (status == Downloads.Impl.STATUS_QUEUED_FOR_WIFI) {
-            return TYPE_WAITING + ":" + mContext.getPackageName();
+            return TYPE_WAITING + ":" + context.getPackageName();
         } else if (status == Downloads.Impl.STATUS_RUNNING && shouldShowActiveItem(visibility)) {
-            return TYPE_ACTIVE + ":" + mContext.getPackageName();
+            return TYPE_ACTIVE + ":" + context.getPackageName();
         } else if (Downloads.Impl.isStatusError(status) && !Downloads.Impl.isStatusCancelled(status)
                 && shouldShowCompletedItem(visibility)) {
-            // Failed downloads always have unique notifs
+            // Failed downloads always have unique notifications
             return TYPE_FAILED + ":" + batch.getBatchId();
         } else if (Downloads.Impl.isStatusCancelled(status) && shouldShowCompletedItem(visibility)) {
-            // Cancelled downloads always have unique notifs
+            // Cancelled downloads always have unique notifications
             return TYPE_CANCELLED + ":" + batch.getBatchId();
         } else if (Downloads.Impl.isStatusSuccess(status) && shouldShowCompletedItem(visibility)) {
-            // Complete downloads always have unique notifs
+            // Complete downloads always have unique notifications
             return TYPE_SUCCESS + ":" + batch.getBatchId();
         } else {
             return null;
@@ -189,13 +189,13 @@ class DownloadNotifier {
             int type = getNotificationTagType(notificationId);
             List<DownloadBatch> cluster = clusters.get(notificationId);
 
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(mContext);
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
             useTimeWhenClusterFirstShownToAvoidShuffling(notificationId, builder);
             buildIcon(type, builder);
             buildActionIntents(notificationId, type, cluster, builder);
 
             Notification notification = buildTitlesAndDescription(type, cluster, builder);
-            mNotifManager.notify(notificationId.hashCode(), notification);
+            notificationManager.notify(notificationId.hashCode(), notification);
         }
     }
 
@@ -209,11 +209,11 @@ class DownloadNotifier {
 
     private void useTimeWhenClusterFirstShownToAvoidShuffling(String tag, NotificationCompat.Builder builder) {
         final long firstShown;
-        if (mActiveNotifs.containsKey(tag)) {
-            firstShown = mActiveNotifs.get(tag);
+        if (activeNotifications.containsKey(tag)) {
+            firstShown = activeNotifications.get(tag);
         } else {
             firstShown = System.currentTimeMillis();
-            mActiveNotifs.put(tag, firstShown);
+            activeNotifications.put(tag, firstShown);
         }
         builder.setWhen(firstShown);
     }
@@ -240,15 +240,15 @@ class DownloadNotifier {
         if (type == TYPE_ACTIVE || type == TYPE_WAITING) {
             // build a synthetic uri for intent identification purposes
             Uri uri = new Uri.Builder().scheme("active-dl").appendPath(tag).build();
-            Intent clickIntent = new Intent(Constants.ACTION_LIST, uri, mContext, DownloadReceiver.class);
+            Intent clickIntent = new Intent(Constants.ACTION_LIST, uri, context, DownloadReceiver.class);
             clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, getDownloadIds(cluster));
-            builder.setContentIntent(PendingIntent.getBroadcast(mContext, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
+            builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
             builder.setOngoing(true);
 
             DownloadBatch batch = cluster.iterator().next();
-            Intent cancelIntent = new Intent(Constants.ACTION_CANCEL, null, mContext, DownloadReceiver.class);
+            Intent cancelIntent = new Intent(Constants.ACTION_CANCEL, null, context, DownloadReceiver.class);
             cancelIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getBatchId());
-            PendingIntent pendingCancelIntent = PendingIntent.getBroadcast(mContext, 0, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent pendingCancelIntent = PendingIntent.getBroadcast(context, 0, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             builder.addAction(R.drawable.dl__ic_action_cancel, "Cancel", pendingCancelIntent);
 
         } else if (type == TYPE_SUCCESS) {
@@ -265,14 +265,14 @@ class DownloadNotifier {
                 action = Constants.ACTION_OPEN;
             }
 
-            final Intent intent = new Intent(action, uri, mContext, DownloadReceiver.class);
+            final Intent intent = new Intent(action, uri, context, DownloadReceiver.class);
             intent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, getDownloadIds(cluster));
             intent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getBatchId());
-            builder.setContentIntent(PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
+            builder.setContentIntent(PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
 
-            final Intent hideIntent = new Intent(Constants.ACTION_HIDE, uri, mContext, DownloadReceiver.class);
+            final Intent hideIntent = new Intent(Constants.ACTION_HIDE, uri, context, DownloadReceiver.class);
             hideIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getBatchId());
-            builder.setDeleteIntent(PendingIntent.getBroadcast(mContext, 0, hideIntent, 0));
+            builder.setDeleteIntent(PendingIntent.getBroadcast(context, 0, hideIntent, 0));
         }
     }
 
@@ -424,11 +424,11 @@ class DownloadNotifier {
     }
 
     private void removeStaleTagsThatWereNotRenewed(Map<String, List<DownloadBatch>> clustered) {
-        final Iterator<String> tags = mActiveNotifs.keySet().iterator();
+        final Iterator<String> tags = activeNotifications.keySet().iterator();
         while (tags.hasNext()) {
             final String tag = tags.next();
             if (!clustered.containsKey(tag)) {
-                mNotifManager.cancel(tag.hashCode());
+                notificationManager.cancel(tag.hashCode());
                 tags.remove();
             }
         }
