@@ -352,16 +352,13 @@ public class DownloadManager {
     };
 
     private final ContentResolver mResolver;
-    private final BatchCompletionBroadcaster batchCompletionBroadcaster;
 
     private Uri mBaseUri = Downloads.Impl.CONTENT_URI;
 
     public DownloadManager(Context context,
                            ContentResolver contentResolver,
-                           boolean verboseLogging,
-                           BatchCompletionBroadcaster batchCompletionBroadcaster) {
+                           boolean verboseLogging) {
         this.mResolver = contentResolver;
-        this.batchCompletionBroadcaster = batchCompletionBroadcaster;
         GlobalState.setContext(context);
         GlobalState.setVerboseLogging(verboseLogging);
     }
@@ -748,14 +745,6 @@ public class DownloadManager {
         values.put(Downloads.Impl.Batches.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
         Uri batchUri = mResolver.insert(Downloads.Impl.BATCH_CONTENT_URI, values);
         return ContentUris.parseId(batchUri);
-    }
-
-    public void registerBatchCompletionListener(BatchCompletionListener batchCompletionListener) {
-        batchCompletionBroadcaster.registerReceiver(batchCompletionListener);
-    }
-
-    public void unregisterBatchCompletionListener() {
-        batchCompletionBroadcaster.unregisterReceiver();
     }
 
     /**

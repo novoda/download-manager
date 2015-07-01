@@ -3,7 +3,6 @@ package com.novoda.downloadmanager;
 import android.content.ContentResolver;
 import android.content.Context;
 
-import com.novoda.downloadmanager.lib.BatchCompletionBroadcaster;
 import com.novoda.downloadmanager.lib.DownloadManager;
 
 /**
@@ -35,7 +34,7 @@ public class DownloadManagerBuilder {
         if (contentResolver == null) {
             throw new IllegalStateException("You must use a ContentResolver with the DownloadManager.");
         }
-        return new DownloadManager(context, contentResolver, verboseLogging, BatchCompletionBroadcaster.newInstance(context));
+        return new DownloadManager(context, contentResolver, verboseLogging);
     }
 
 }

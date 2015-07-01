@@ -8,11 +8,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
-import com.novoda.downloadmanager.lib.BatchCompletionListener;
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.NotificationVisibility;
 import com.novoda.downloadmanager.lib.Query;
@@ -56,18 +54,9 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
                 });
 
         setupQueryingExample();
-
-        downloadManager.registerBatchCompletionListener(new BatchCompletionListener() {
-            @Override
-            public void onBatchComplete(long batchId) {
-                showBatchComplete(batchId);
-            }
-        });
     }
 
     private void showBatchComplete(long batchId) {
-        Toast.makeText(this, "Batch completed with id: " + batchId, Toast.LENGTH_SHORT).show();
-        Log.d(TAG, "Batch completed: " + batchId);
     }
 
     private void enqueueSingleDownload() {
@@ -126,7 +115,6 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
 
     @Override
     protected void onDestroy() {
-        downloadManager.unregisterBatchCompletionListener();
         super.onDestroy();
     }
 }
