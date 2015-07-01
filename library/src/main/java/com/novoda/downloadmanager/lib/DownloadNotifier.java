@@ -96,10 +96,10 @@ class DownloadNotifier {
      */
     public void notifyDownloadSpeed(long id, long bytesPerSecond) {
         synchronized (downloadSpeeds) {
-            if (bytesPerSecond != 0) {
-                downloadSpeeds.put(id, bytesPerSecond);
-            } else {
+            if (bytesPerSecond == 0) {
                 downloadSpeeds.remove(id);
+            } else {
+                downloadSpeeds.put(id, bytesPerSecond);
             }
         }
     }
@@ -317,7 +317,7 @@ class DownloadNotifier {
             }
         }
 
-        Set<DownloadBatch> currentBatches = new HashSet<>();
+        Set<DownloadBatch> currentBatches = new HashSet<>(cluster.size());
         for (DownloadBatch batch : cluster) {
             currentBatches.add(batch);
         }
@@ -444,7 +444,7 @@ class DownloadNotifier {
     }
 
     private long[] getDownloadIds(List<DownloadBatch> batches) {
-        List<Long> ids = new ArrayList<>();
+        List<Long> ids = new ArrayList<>(batches.size() * 3);
         for (DownloadBatch batch : batches) {
             for (DownloadInfo downloadInfo : batch.getDownloads()) {
                 ids.add(downloadInfo.getId());
