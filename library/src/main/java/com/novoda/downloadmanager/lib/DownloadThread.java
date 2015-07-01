@@ -614,7 +614,7 @@ class DownloadThread implements Runnable {
      * check for consistency.
      */
     private void handleEndOfStream(State state) throws StopRequestException {
-        ContentValues values = new ContentValues();
+        ContentValues values = new ContentValues(2);
         values.put(Downloads.Impl.COLUMN_CURRENT_BYTES, state.currentBytes);
         if (state.contentLength == -1) {
             values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, state.currentBytes);
@@ -653,7 +653,7 @@ class DownloadThread implements Runnable {
                 return -1;
             }
 
-            ContentValues values = new ContentValues();
+            ContentValues values = new ContentValues(1);
             values.put(Downloads.Impl.COLUMN_CURRENT_BYTES, state.currentBytes);
             getContentResolver().update(downloadInfo.getAllDownloadsUri(), values, null, null);
             if (cannotResume(state)) {
@@ -693,7 +693,7 @@ class DownloadThread implements Runnable {
      * read.
      */
     private void updateDatabaseFromHeaders(State state) {
-        ContentValues values = new ContentValues();
+        ContentValues values = new ContentValues(4);
         values.put(Downloads.Impl._DATA, state.filename);
         if (state.headerETag != null) {
             values.put(Constants.ETAG, state.headerETag);
@@ -833,7 +833,7 @@ class DownloadThread implements Runnable {
 
     private void notifyThroughDatabase(State state, int finalStatus, String errorMsg, int numFailed) {
         downloadInfo.setStatus(finalStatus);
-        ContentValues values = new ContentValues();
+        ContentValues values = new ContentValues(8);
         values.put(Downloads.Impl.COLUMN_STATUS, finalStatus);
         values.put(Downloads.Impl._DATA, state.filename);
         values.put(Downloads.Impl.COLUMN_MIME_TYPE, state.mimeType);
@@ -863,11 +863,11 @@ class DownloadThread implements Runnable {
         batchStatusRepository.updateBatchStatus(batchId, batchStatus);
 
         if (Downloads.Impl.isStatusCancelled(batchStatus)) {
-            ContentValues values = new ContentValues();
+            ContentValues values = new ContentValues(1);
             values.put(COLUMN_STATUS, STATUS_CANCELED);
             getContentResolver().update(ALL_DOWNLOADS_CONTENT_URI, values, COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
         } else if (Downloads.Impl.isStatusError(batchStatus)) {
-            ContentValues values = new ContentValues();
+            ContentValues values = new ContentValues(1);
             values.put(COLUMN_STATUS, STATUS_BATCH_FAILED);
             getContentResolver().update(
                     ALL_DOWNLOADS_CONTENT_URI,
