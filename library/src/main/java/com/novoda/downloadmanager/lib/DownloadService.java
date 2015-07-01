@@ -307,7 +307,7 @@ public class DownloadService extends Service {
 
         Cursor downloadsCursor = resolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
         try {
-            DownloadInfo.Reader reader = new DownloadInfo.Reader(resolver, downloadsCursor);
+            DownloadInfoReader reader = new DownloadInfoReader(resolver, downloadsCursor);
             int idColumn = downloadsCursor.getColumnIndexOrThrow(Downloads.Impl._ID);
             while (downloadsCursor.moveToNext()) {
                 long id = downloadsCursor.getLong(idColumn);
@@ -447,7 +447,7 @@ public class DownloadService extends Service {
      * Keeps a local copy of the info about a download, and initiates the
      * download if appropriate.
      */
-    private DownloadInfo createNewDownloadInfo(DownloadInfo.Reader reader) {
+    private DownloadInfo createNewDownloadInfo(DownloadInfoReader reader) {
         DownloadInfo info = reader.newDownloadInfo(this, systemFacade, storageManager, downloadNotifier, downloadClientReadyChecker);
         Log.v("processing inserted download " + info.mId);
         return info;
@@ -456,7 +456,7 @@ public class DownloadService extends Service {
     /**
      * Updates the local copy of the info about a download.
      */
-    private void updateDownloadFromDatabase(DownloadInfo.Reader reader, DownloadInfo info) {
+    private void updateDownloadFromDatabase(DownloadInfoReader reader, DownloadInfo info) {
         reader.updateFromDatabase(info);
         Log.v("processing updated download " + info.mId + ", status: " + info.mStatus);
     }
