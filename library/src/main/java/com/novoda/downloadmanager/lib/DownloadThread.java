@@ -66,22 +66,22 @@ class DownloadThread implements Runnable {
 
     private static final int DEFAULT_TIMEOUT = (int) (20 * SECOND_IN_MILLIS);
 
-    private final Context mContext;
-    private final DownloadInfo mInfo;
-    private final SystemFacade mSystemFacade;
-    private final StorageManager mStorageManager;
-    private final DownloadNotifier mNotifier;
+    private final Context context;
+    private final DownloadInfo downloadInfo;
+    private final SystemFacade systemFacade;
+    private final StorageManager storageManager;
+    private final DownloadNotifier downloadNotifier;
     private final BatchStatusRepository batchStatusRepository;
 
-    private volatile boolean mPolicyDirty;
+    private volatile boolean policyDirty;
 
-    public DownloadThread(Context context, SystemFacade systemFacade, DownloadInfo info,
-                          StorageManager storageManager, DownloadNotifier notifier, BatchStatusRepository batchStatusRepository) {
-        mContext = context;
-        mSystemFacade = systemFacade;
-        mInfo = info;
-        mStorageManager = storageManager;
-        mNotifier = notifier;
+    public DownloadThread(Context context, SystemFacade systemFacade, DownloadInfo downloadInfo,
+                          StorageManager storageManager, DownloadNotifier downloadNotifier, BatchStatusRepository batchStatusRepository) {
+        this.context = context;
+        this.systemFacade = systemFacade;
+        this.downloadInfo = downloadInfo;
+        this.storageManager = storageManager;
+        this.downloadNotifier = downloadNotifier;
         this.batchStatusRepository = batchStatusRepository;
     }
 
@@ -89,7 +89,7 @@ class DownloadThread implements Runnable {
      * Returns the user agent provided by the initiating app, or use the default one
      */
     private String userAgent() {
-        String userAgent = mInfo.mUserAgent;
+        String userAgent = downloadInfo.mUserAgent;
         if (userAgent == null) {
             userAgent = Constants.DEFAULT_USER_AGENT;
         }
@@ -170,65 +170,65 @@ class DownloadThread implements Runnable {
         try {
             runInternal();
         } finally {
-            mNotifier.notifyDownloadSpeed(mInfo.mId, 0);
+            downloadNotifier.notifyDownloadSpeed(downloadInfo.mId, 0);
         }
     }
 
     private void runInternal() {
         // Skip when download already marked as finished; this download was probably started again while racing with UpdateThread.
-        int downloadStatus = DownloadInfo.queryDownloadStatus(getContentResolver(), mInfo.mId);
+        int downloadStatus = DownloadInfo.queryDownloadStatus(getContentResolver(), downloadInfo.mId);
         if (downloadStatus == Downloads.Impl.STATUS_SUCCESS) {
-            Log.d("Download " + mInfo.mId + " already finished; skipping");
+            Log.d("Download " + downloadInfo.mId + " already finished; skipping");
             return;
         }
         if (Downloads.Impl.isStatusCancelled(downloadStatus)) {
-            Log.d("Download " + mInfo.mId + " already cancelled; skipping");
+            Log.d("Download " + downloadInfo.mId + " already cancelled; skipping");
             return;
         }
         if (Downloads.Impl.isStatusError(downloadStatus)) {
-            Log.d("Download " + mInfo.mId + " already failed: status = " + downloadStatus + "; skipping");
+            Log.d("Download " + downloadInfo.mId + " already failed: status = " + downloadStatus + "; skipping");
             return;
         }
 
-        if (!mInfo.isReadyToDownload(new CollatedDownloadInfo(batchStatusRepository.getBatchSizeInBytes(mInfo.batchId)))) {
-            Log.d("Download " + mInfo.mId + " is not ready to download: skipping");
+        if (!downloadInfo.isReadyToDownload(new CollatedDownloadInfo(batchStatusRepository.getBatchSizeInBytes(downloadInfo.batchId)))) {
+            Log.d("Download " + downloadInfo.mId + " is not ready to download: skipping");
             return;
         }
 
         if (downloadStatus != Downloads.Impl.STATUS_RUNNING) {
-            mInfo.updateStatus(Downloads.Impl.STATUS_RUNNING);
-            updateBatchStatus(mInfo.batchId, mInfo.mId);
+            downloadInfo.updateStatus(Downloads.Impl.STATUS_RUNNING);
+            updateBatchStatus(downloadInfo.batchId, downloadInfo.mId);
         }
 
-        State state = new State(mInfo);
+        State state = new State(downloadInfo);
         PowerManager.WakeLock wakeLock = null;
         int finalStatus = STATUS_UNKNOWN_ERROR;
-        int numFailed = mInfo.mNumFailed;
+        int numFailed = downloadInfo.mNumFailed;
         String errorMsg = null;
 
-//        final NetworkPolicyManager netPolicy = NetworkPolicyManager.from(mContext);
-        PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+//        final NetworkPolicyManager netPolicy = NetworkPolicyManager.from(context);
+        PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
 
         try {
-            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
             wakeLock.acquire();
 
             // while performing download, register for rules updates
 //            netPolicy.registerListener(mPolicyListener);
 
-            Log.i("Download " + mInfo.mId + " starting");
+            Log.i("Download " + downloadInfo.mId + " starting");
 
             // Remember which network this download started on; used to
             // determine if errors were due to network changes.
-            final NetworkInfo info = mSystemFacade.getActiveNetworkInfo(); // Param mInfo.mUid removed TODO
-            if (info != null) {
-                state.mNetworkType = info.getType();
+            final NetworkInfo networkInfo = systemFacade.getActiveNetworkInfo(); // Param downloadInfo.mUid removed TODO
+            if (networkInfo != null) {
+                state.mNetworkType = networkInfo.getType();
             }
 
             // Network traffic on this thread should be counted against the
             // requesting UID, and is tagged with well-known value.
             TrafficStats.setThreadStatsTag(0xFFFFFF01); // TrafficStats.TAG_SYSTEM_DOWNLOAD
-//            TrafficStats.setThreadStatsUid(mInfo.mUid); Won't need this as we will be an Android library (doing own work)
+//            TrafficStats.setThreadStatsUid(downloadInfo.mUid); Won't need this as we will be an Android library (doing own work)
 
             try {
                 // TODO: migrate URL sanity checking into client side of API
@@ -244,7 +244,7 @@ class DownloadThread implements Runnable {
         } catch (StopRequestException error) {
             // remove the cause before printing, in case it contains PII
             errorMsg = error.getMessage();
-            String msg = "Aborting request for download " + mInfo.mId + ": " + errorMsg;
+            String msg = "Aborting request for download " + downloadInfo.mId + ": " + errorMsg;
             Log.w(msg, error);
             finalStatus = error.getFinalStatus();
 
@@ -263,7 +263,7 @@ class DownloadThread implements Runnable {
                 }
 
                 if (numFailed < Constants.MAX_RETRIES) {
-                    final NetworkInfo info = mSystemFacade.getActiveNetworkInfo(); // Param mInfo.mUid removed TODO
+                    final NetworkInfo info = systemFacade.getActiveNetworkInfo(); // Param downloadInfo.mUid removed TODO
                     if (info != null && info.getType() == state.mNetworkType && info.isConnected()) {
                         // Underlying network is still intact, use normal backoff
                         finalStatus = STATUS_WAITING_TO_RETRY;
@@ -277,7 +277,7 @@ class DownloadThread implements Runnable {
             // fall through to finally block
         } catch (Throwable ex) {
             errorMsg = ex.getMessage();
-            String msg = "Exception for id " + mInfo.mId + ": " + errorMsg;
+            String msg = "Exception for id " + downloadInfo.mId + ": " + errorMsg;
             Log.w(msg, ex);
             finalStatus = STATUS_UNKNOWN_ERROR;
             // falls through to the code that reports an error
@@ -288,7 +288,7 @@ class DownloadThread implements Runnable {
             cleanupDestination(state, finalStatus);
             notifyDownloadCompleted(state, finalStatus, errorMsg, numFailed);
 
-            Log.i("Download " + mInfo.mId + " finished with status " + Downloads.Impl.statusToString(finalStatus));
+            Log.i("Download " + downloadInfo.mId + " finished with status " + Downloads.Impl.statusToString(finalStatus));
 
 //            netPolicy.unregisterListener(mPolicyListener);
 
@@ -296,7 +296,7 @@ class DownloadThread implements Runnable {
                 wakeLock.release();
             }
         }
-        mStorageManager.incrementNumDownloadsSoFar();
+        storageManager.incrementNumDownloadsSoFar();
     }
 
     /**
@@ -310,7 +310,7 @@ class DownloadThread implements Runnable {
         // skip when already finished; remove after fixing race in 5217390
         if (state.mCurrentBytes == state.mTotalBytes) {
             Log.i("Skipping initiating request for download " +
-                    mInfo.mId + "; already completed");
+                    downloadInfo.mId + "; already completed");
             return;
         }
 
@@ -405,7 +405,7 @@ class DownloadThread implements Runnable {
 
             try {
                 if (DownloadDrmHelper.isDrmConvertNeeded(state.mMimeType)) {
-//                    drmClient = new DrmManagerClient(mContext);
+//                    drmClient = new DrmManagerClient(context);
 //                    final RandomAccessFile file = new RandomAccessFile(new File(state.mFilename), "rw");
 //                    out = new DrmOutputStream(drmClient, file, state.mMimeType);
 //                    outFd = file.getFD();
@@ -457,17 +457,17 @@ class DownloadThread implements Runnable {
      */
     private void checkConnectivity() throws StopRequestException {
         // checking connectivity will apply current policy
-        mPolicyDirty = false;
+        policyDirty = false;
 
-        final NetworkState networkUsable = mInfo.checkCanUseNetwork();
+        final NetworkState networkUsable = downloadInfo.checkCanUseNetwork();
         if (networkUsable != NetworkState.OK) {
             int status = STATUS_WAITING_FOR_NETWORK;
             if (networkUsable == NetworkState.UNUSABLE_DUE_TO_SIZE) {
                 status = Downloads.Impl.STATUS_QUEUED_FOR_WIFI;
-                mInfo.notifyPauseDueToSize(true);
+                downloadInfo.notifyPauseDueToSize(true);
             } else if (networkUsable == NetworkState.RECOMMENDED_UNUSABLE_DUE_TO_SIZE) {
                 status = Downloads.Impl.STATUS_QUEUED_FOR_WIFI;
-                mInfo.notifyPauseDueToSize(false);
+                downloadInfo.notifyPauseDueToSize(false);
             }
             throw new StopRequestException(status, networkUsable.name());
         }
@@ -491,7 +491,7 @@ class DownloadThread implements Runnable {
             state.mCurrentBytes += bytesRead;
             reportProgress(state);
 
-//            Log.v("downloaded " + state.mCurrentBytes + " for " + mInfo.mUri);
+//            Log.v("downloaded " + state.mCurrentBytes + " for " + downloadInfo.mUri);
 
             checkPausedOrCanceled();
         }
@@ -529,17 +529,17 @@ class DownloadThread implements Runnable {
      * has been.
      */
     private void checkPausedOrCanceled() throws StopRequestException {
-        synchronized (mInfo) {
-            if (mInfo.mControl == Downloads.Impl.CONTROL_PAUSED) {
+        synchronized (downloadInfo) {
+            if (downloadInfo.mControl == Downloads.Impl.CONTROL_PAUSED) {
                 throw new StopRequestException(Downloads.Impl.STATUS_PAUSED_BY_APP, "download paused by owner");
             }
-            if (mInfo.mStatus == Downloads.Impl.STATUS_CANCELED) {
+            if (downloadInfo.mStatus == Downloads.Impl.STATUS_CANCELED) {
                 throw new StopRequestException(Downloads.Impl.STATUS_CANCELED, "download canceled");
             }
         }
 
         // if policy has been changed, trigger connectivity check
-        if (mPolicyDirty) {
+        if (policyDirty) {
             checkConnectivity();
         }
     }
@@ -562,7 +562,7 @@ class DownloadThread implements Runnable {
 
             // Only notify once we have a full sample window
             if (state.mSpeedSampleStart != 0) {
-                mNotifier.notifyDownloadSpeed(mInfo.mId, state.mSpeed);
+                downloadNotifier.notifyDownloadSpeed(downloadInfo.mId, state.mSpeed);
             }
 
             state.mSpeedSampleStart = now;
@@ -573,7 +573,7 @@ class DownloadThread implements Runnable {
                 now - state.mTimeLastNotification > Constants.MIN_PROGRESS_TIME) {
             ContentValues values = new ContentValues();
             values.put(Downloads.Impl.COLUMN_CURRENT_BYTES, state.mCurrentBytes);
-            getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
+            getContentResolver().update(downloadInfo.getAllDownloadsUri(), values, null, null);
             state.mBytesNotified = state.mCurrentBytes;
             state.mTimeLastNotification = now;
         }
@@ -586,7 +586,7 @@ class DownloadThread implements Runnable {
      * @param bytesRead how many bytes to write from the buffer
      */
     private void writeDataToDestination(State state, byte[] data, int bytesRead, OutputStream out) throws StopRequestException {
-        mStorageManager.verifySpaceBeforeWritingToFile(mInfo.mDestination, state.mFilename, bytesRead);
+        storageManager.verifySpaceBeforeWritingToFile(downloadInfo.mDestination, state.mFilename, bytesRead);
 
         boolean forceVerified = false;
         while (true) {
@@ -597,7 +597,7 @@ class DownloadThread implements Runnable {
                 // TODO: better differentiate between DRM and disk failures
                 if (!forceVerified) {
                     // couldn't write to file. are we out of space? check.
-                    mStorageManager.verifySpace(mInfo.mDestination, state.mFilename, bytesRead);
+                    storageManager.verifySpace(downloadInfo.mDestination, state.mFilename, bytesRead);
                     forceVerified = true;
                 } else {
                     throw new StopRequestException(STATUS_FILE_ERROR,
@@ -617,7 +617,7 @@ class DownloadThread implements Runnable {
         if (state.mContentLength == -1) {
             values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, state.mCurrentBytes);
         }
-        getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
+        getContentResolver().update(downloadInfo.getAllDownloadsUri(), values, null, null);
 
         final boolean lengthMismatched = (state.mContentLength != -1)
                 && (state.mCurrentBytes != state.mContentLength);
@@ -631,7 +631,7 @@ class DownloadThread implements Runnable {
     }
 
     private boolean cannotResume(State state) {
-        return (state.mCurrentBytes > 0 && !mInfo.mNoIntegrity && state.mHeaderETag == null) || DownloadDrmHelper.isDrmConvertNeeded(state.mMimeType);
+        return (state.mCurrentBytes > 0 && !downloadInfo.mNoIntegrity && state.mHeaderETag == null) || DownloadDrmHelper.isDrmConvertNeeded(state.mMimeType);
     }
 
     /**
@@ -653,7 +653,7 @@ class DownloadThread implements Runnable {
 
             ContentValues values = new ContentValues();
             values.put(Downloads.Impl.COLUMN_CURRENT_BYTES, state.mCurrentBytes);
-            getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
+            getContentResolver().update(downloadInfo.getAllDownloadsUri(), values, null, null);
             if (cannotResume(state)) {
                 throw new StopRequestException(STATUS_CANNOT_RESUME, "Failed reading response: " + ex + "; unable to resume", ex);
             } else {
@@ -672,14 +672,14 @@ class DownloadThread implements Runnable {
         readResponseHeaders(state, conn);
 
         state.mFilename = Helpers.generateSaveFile(
-                mInfo.mUri,
-                mInfo.mHint,
+                downloadInfo.mUri,
+                downloadInfo.mHint,
                 state.mContentDisposition,
                 state.mContentLocation,
                 state.mMimeType,
-                mInfo.mDestination,
+                downloadInfo.mDestination,
                 state.mContentLength,
-                mStorageManager);
+                storageManager);
 
         updateDatabaseFromHeaders(state);
         // check connectivity again now that we know the total size
@@ -699,8 +699,8 @@ class DownloadThread implements Runnable {
         if (state.mMimeType != null) {
             values.put(Downloads.Impl.COLUMN_MIME_TYPE, state.mMimeType);
         }
-        values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, mInfo.mTotalBytes);
-        getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
+        values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, downloadInfo.mTotalBytes);
+        getContentResolver().update(downloadInfo.getAllDownloadsUri(), values, null, null);
     }
 
     /**
@@ -725,10 +725,10 @@ class DownloadThread implements Runnable {
         }
 
         state.mTotalBytes = state.mContentLength;
-        mInfo.mTotalBytes = state.mContentLength;
+        downloadInfo.mTotalBytes = state.mContentLength;
 
         final boolean noSizeInfo = state.mContentLength == -1 && (transferEncoding == null || !transferEncoding.equalsIgnoreCase("chunked"));
-        if (!mInfo.mNoIntegrity && noSizeInfo) {
+        if (!downloadInfo.mNoIntegrity && noSizeInfo) {
             throw new StopRequestException(STATUS_CANNOT_RESUME, "can't know size of download, giving up");
         }
     }
@@ -754,23 +754,23 @@ class DownloadThread implements Runnable {
      */
     private void setupDestinationFile(State state) throws StopRequestException {
         if (!TextUtils.isEmpty(state.mFilename)) { // only true if we've already run a thread for this download
-            Log.i("have run thread before for id: " + mInfo.mId + ", and state.mFilename: " + state.mFilename);
-            if (!Helpers.isFilenameValid(state.mFilename, mStorageManager.getDownloadDataDirectory())) {
+            Log.i("have run thread before for id: " + downloadInfo.mId + ", and state.mFilename: " + state.mFilename);
+            if (!Helpers.isFilenameValid(state.mFilename, storageManager.getDownloadDataDirectory())) {
                 Log.d("Yeah we know we are bad for downloading to internal storage");
 //                throw new StopRequestException(Downloads.Impl.STATUS_FILE_ERROR, "found invalid internal destination filename");
             }
             // We're resuming a download that got interrupted
             File f = new File(state.mFilename);
             if (f.exists()) {
-                Log.i("resuming download for id: " + mInfo.mId + ", and state.mFilename: " + state.mFilename);
+                Log.i("resuming download for id: " + downloadInfo.mId + ", and state.mFilename: " + state.mFilename);
                 long fileLength = f.length();
                 if (fileLength == 0) {
                     // The download hadn't actually started, we can restart from scratch
                     Log.d("setupDestinationFile() found fileLength=0, deleting " + state.mFilename);
                     f.delete();
                     state.mFilename = null;
-                    Log.i("resuming download for id: " + mInfo.mId + ", BUT starting from scratch again: ");
-                } else if (mInfo.mETag == null && !mInfo.mNoIntegrity) {
+                    Log.i("resuming download for id: " + downloadInfo.mId + ", BUT starting from scratch again: ");
+                } else if (downloadInfo.mETag == null && !downloadInfo.mNoIntegrity) {
                     // This should've been caught upon failure
                     Log.d("setupDestinationFile() unable to resume download, deleting "
                             + state.mFilename);
@@ -778,14 +778,14 @@ class DownloadThread implements Runnable {
                     throw new StopRequestException(STATUS_CANNOT_RESUME, "Trying to resume a download that can't be resumed");
                 } else {
                     // All right, we'll be able to resume this download
-                    Log.i("resuming download for id: " + mInfo.mId + ", and starting with file of length: " + fileLength);
+                    Log.i("resuming download for id: " + downloadInfo.mId + ", and starting with file of length: " + fileLength);
                     state.mCurrentBytes = (int) fileLength;
-                    if (mInfo.mTotalBytes != -1) {
-                        state.mContentLength = mInfo.mTotalBytes;
+                    if (downloadInfo.mTotalBytes != -1) {
+                        state.mContentLength = downloadInfo.mTotalBytes;
                     }
-                    state.mHeaderETag = mInfo.mETag;
+                    state.mHeaderETag = downloadInfo.mETag;
                     state.mContinuingDownload = true;
-                    Log.i("resuming download for id: " + mInfo.mId + ", state.mCurrentBytes: " + state.mCurrentBytes + ", and setting mContinuingDownload to true: ");
+                    Log.i("resuming download for id: " + downloadInfo.mId + ", state.mCurrentBytes: " + state.mCurrentBytes + ", and setting mContinuingDownload to true: ");
                 }
             }
         }
@@ -795,7 +795,7 @@ class DownloadThread implements Runnable {
      * Add custom headers for this download to the HTTP request.
      */
     private void addRequestHeaders(State state, HttpURLConnection conn) {
-        for (Pair<String, String> header : mInfo.getHeaders()) {
+        for (Pair<String, String> header : downloadInfo.getHeaders()) {
             conn.addRequestProperty(header.first, header.second);
         }
 
@@ -822,23 +822,23 @@ class DownloadThread implements Runnable {
     private void notifyDownloadCompleted(State state, int finalStatus, String errorMsg, int numFailed) {
         notifyThroughDatabase(state, finalStatus, errorMsg, numFailed);
         if (Downloads.Impl.isStatusCompleted(finalStatus)) {
-            mInfo.broadcastIntentDownloadComplete(finalStatus);
+            downloadInfo.broadcastIntentDownloadComplete(finalStatus);
         } else if (Downloads.Impl.isStatusInsufficientSpace(finalStatus)) {
-            mInfo.broadcastIntentDownloadFailedInsufficientSpace();
+            downloadInfo.broadcastIntentDownloadFailedInsufficientSpace();
         }
     }
 
     private void notifyThroughDatabase(State state, int finalStatus, String errorMsg, int numFailed) {
-        mInfo.mStatus = finalStatus;
+        downloadInfo.mStatus = finalStatus;
         ContentValues values = new ContentValues();
         values.put(Downloads.Impl.COLUMN_STATUS, finalStatus);
         values.put(Downloads.Impl._DATA, state.mFilename);
         values.put(Downloads.Impl.COLUMN_MIME_TYPE, state.mMimeType);
-        values.put(Downloads.Impl.COLUMN_LAST_MODIFICATION, mSystemFacade.currentTimeMillis());
+        values.put(Downloads.Impl.COLUMN_LAST_MODIFICATION, systemFacade.currentTimeMillis());
         values.put(Downloads.Impl.COLUMN_FAILED_CONNECTIONS, numFailed);
         values.put(Constants.RETRY_AFTER_X_REDIRECT_COUNT, state.mRetryAfter);
 
-        if (!TextUtils.equals(mInfo.mUri, state.mRequestUri)) {
+        if (!TextUtils.equals(downloadInfo.mUri, state.mRequestUri)) {
             values.put(Downloads.Impl.COLUMN_URI, state.mRequestUri);
         }
 
@@ -846,13 +846,13 @@ class DownloadThread implements Runnable {
         if (!TextUtils.isEmpty(errorMsg)) {
             values.put(Downloads.Impl.COLUMN_ERROR_MSG, errorMsg);
         }
-        getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
+        getContentResolver().update(downloadInfo.getAllDownloadsUri(), values, null, null);
 
-        updateBatchStatus(mInfo.batchId, mInfo.mId);
+        updateBatchStatus(downloadInfo.batchId, downloadInfo.mId);
     }
 
     private ContentResolver getContentResolver() {
-        return mContext.getContentResolver();
+        return context.getContentResolver();
     }
 
     private void updateBatchStatus(long batchId, long downloadId) {
