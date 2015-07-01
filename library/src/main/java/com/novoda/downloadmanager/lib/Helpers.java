@@ -81,7 +81,7 @@ class Helpers {
             path = Uri.parse(hint).getPath();
         } else {
             base = storageManager.locateDestinationDirectory(mimeType, destination, contentLength);
-            path = chooseFilename(url, hint, contentDisposition, contentLocation, destination);
+            path = chooseFilename(url, hint, contentDisposition, contentLocation);
         }
         storageManager.verifySpace(destination, path, contentLength);
         if (DownloadDrmHelper.isDrmConvertNeeded(mimeType)) {
@@ -110,7 +110,7 @@ class Helpers {
             if (missingExtension) {
                 extension = chooseExtensionFromMimeType(mimeType, true);
             } else {
-                extension = chooseExtensionFromFilename(mimeType, destination, filename, dotIndex);
+                extension = chooseExtensionFromFilename(mimeType, filename, dotIndex);
                 filename = filename.substring(0, dotIndex);
             }
         }
@@ -139,7 +139,7 @@ class Helpers {
     }
 
     private static String chooseFilename(String url, String hint, String contentDisposition,
-                                         String contentLocation, int destination) {
+                                         String contentLocation) {
         String filename = null;
 
         // First, try to use the hint from the application, if there's one
@@ -235,7 +235,7 @@ class Helpers {
         return extension;
     }
 
-    private static String chooseExtensionFromFilename(String mimeType, int destination,
+    private static String chooseExtensionFromFilename(String mimeType,
                                                       String filename, int lastDotIndex) {
         String extension = null;
         if (mimeType != null) {

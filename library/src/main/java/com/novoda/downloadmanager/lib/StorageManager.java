@@ -242,7 +242,6 @@ class StorageManager {
         if (files == null) {
             return space;
         }
-        int size = files.length;
         for (File file : files) {
             space -= file.length();
         }
