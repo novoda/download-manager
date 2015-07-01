@@ -432,9 +432,7 @@ public final class DownloadProvider extends ContentProvider {
             int uid = Binder.getCallingUid();
             try {
                 if ((uid == 0) || systemFacade.userOwnsPackage(uid, getContext().getPackageName())) {
-                    if (clazz != null) {
-                        filteredValues.put(Downloads.Impl.COLUMN_NOTIFICATION_CLASS, clazz);
-                    }
+                    filteredValues.put(Downloads.Impl.COLUMN_NOTIFICATION_CLASS, clazz);
                 }
             } catch (NameNotFoundException ex) {
                 /* ignored for now */

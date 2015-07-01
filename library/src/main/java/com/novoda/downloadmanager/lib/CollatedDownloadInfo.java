@@ -13,7 +13,7 @@ public class CollatedDownloadInfo {
         downloadInfosForBatch.add(info);
 
         for (DownloadInfo entry : downloadsMap.values()) {
-            if (info.mId == entry.mId) {
+            if (info.id == entry.id) {
                 downloadInfosForBatch.add(entry);
             }
         }
@@ -26,7 +26,7 @@ public class CollatedDownloadInfo {
         int downloadCount = downloadInfos.size();
         for (int i = 0; i < downloadCount; i++) {
             DownloadInfo downloadInfo = downloadInfos.get(i);
-            size += downloadInfo.mTotalBytes;
+            size += downloadInfo.totalBytes;
         }
         return size;
     }

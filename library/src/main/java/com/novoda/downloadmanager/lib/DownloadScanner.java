@@ -98,9 +98,9 @@ class DownloadScanner implements MediaScannerConnectionClient {
      * @see #hasPendingScans()
      */
     public void requestScan(DownloadInfo info) {
-        Log.v("requestScan() for " + info.mFileName);
+        Log.v("requestScan() for " + info.fileName);
         synchronized (mediaScannerConnection) {
-            final ScanRequest req = new ScanRequest(info.mId, info.mFileName, info.mMimeType);
+            final ScanRequest req = new ScanRequest(info.id, info.fileName, info.mimeType);
             mPending.put(req.path, req);
 
             if (mediaScannerConnection.isConnected()) {
