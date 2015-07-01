@@ -147,7 +147,7 @@ public class DownloadService extends Service {
         updateThread.start();
         updateHandler = new Handler(updateThread.getLooper(), mUpdateCallback);
 
-        downloadScanner = new DownloadScanner(this);
+        downloadScanner = DownloadScanner.newInstance(this);
 
         downloadClientReadyChecker = getDownloadClientReadyChecker();
 

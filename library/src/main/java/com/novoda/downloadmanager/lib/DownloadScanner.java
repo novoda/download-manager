@@ -37,8 +37,8 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 class DownloadScanner implements MediaScannerConnectionClient {
     private static final long SCAN_TIMEOUT = MINUTE_IN_MILLIS;
 
-    private final Context mContext;
-    private final MediaScannerConnection mConnection;
+    private final ContentResolver resolver;
+    private final MediaScannerConnection mediaScannerConnection;
 
     private static class ScanRequest {
         public final long id;
@@ -58,12 +58,16 @@ class DownloadScanner implements MediaScannerConnectionClient {
         }
     }
 
-    //    @GuardedBy("mConnection")
+    //    @GuardedBy("mediaScannerConnection")
     private HashMap<String, ScanRequest> mPending = new HashMap<>();
 
-    public DownloadScanner(Context context) {
-        mContext = context;
-        mConnection = new MediaScannerConnection(context, this);
+    public static DownloadScanner newInstance(Context context){
+        return new DownloadScanner(context.getContentResolver(), context);
+    }
+
+    public DownloadScanner(ContentResolver resolver, Context context) {
+        this.resolver = resolver;
+        mediaScannerConnection = new MediaScannerConnection(context, this);
     }
 
     /**
@@ -71,7 +75,7 @@ class DownloadScanner implements MediaScannerConnectionClient {
      * internal duration.
      */
     public boolean hasPendingScans() {
-        synchronized (mConnection) {
+        synchronized (mediaScannerConnection) {
             if (mPending.isEmpty()) {
                 return false;
             } else {
@@ -95,27 +99,27 @@ class DownloadScanner implements MediaScannerConnectionClient {
      */
     public void requestScan(DownloadInfo info) {
         Log.v("requestScan() for " + info.mFileName);
-        synchronized (mConnection) {
+        synchronized (mediaScannerConnection) {
             final ScanRequest req = new ScanRequest(info.mId, info.mFileName, info.mMimeType);
             mPending.put(req.path, req);
 
-            if (mConnection.isConnected()) {
-                req.exec(mConnection);
+            if (mediaScannerConnection.isConnected()) {
+                req.exec(mediaScannerConnection);
             } else {
-                mConnection.connect();
+                mediaScannerConnection.connect();
             }
         }
     }
 
     public void shutdown() {
-        mConnection.disconnect();
+        mediaScannerConnection.disconnect();
     }
 
     @Override
     public void onMediaScannerConnected() {
-        synchronized (mConnection) {
+        synchronized (mediaScannerConnection) {
             for (ScanRequest req : mPending.values()) {
-                req.exec(mConnection);
+                req.exec(mediaScannerConnection);
             }
         }
     }
@@ -123,7 +127,7 @@ class DownloadScanner implements MediaScannerConnectionClient {
     @Override
     public void onScanCompleted(String path, Uri uri) {
         final ScanRequest req;
-        synchronized (mConnection) {
+        synchronized (mediaScannerConnection) {
             req = mPending.remove(path);
         }
         if (req == null) {
@@ -139,7 +143,6 @@ class DownloadScanner implements MediaScannerConnectionClient {
             values.put(Downloads.Impl.COLUMN_MEDIAPROVIDER_URI, uri.toString());
         }
 
-        final ContentResolver resolver = mContext.getContentResolver();
         final Uri downloadUri = ContentUris.withAppendedId(
                 Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, req.id);
         final int rows = resolver.update(downloadUri, values, null, null);
