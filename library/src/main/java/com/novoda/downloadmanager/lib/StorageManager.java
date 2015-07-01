@@ -42,13 +42,13 @@ class StorageManager {
     /**
      * the max amount of space allowed to be taken up by the downloads data dir
      */
-    private static final long sMaxdownloadDataDirSize = 100 * 1024 * 1024;
+    private static final long MAX_DOWNLOAD_DATA_DIR_SIZE = 100 * 1024 * 1024;
 
     /**
      * threshold (in bytes) beyond which the low space warning kicks in and attempt is made to
      * purge some downloaded files to make space
      */
-    private static final long sDownloadDataDirLowSpaceThreshold = 10 * sMaxdownloadDataDirSize / 100;
+    private static final long DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD = 10 * MAX_DOWNLOAD_DATA_DIR_SIZE / 100;
 
     /**
      * see {@link Environment#getExternalStorageDirectory()}
@@ -75,7 +75,7 @@ class StorageManager {
      * how often do we need to perform checks on space to make sure space is available
      */
     private static final int FREQUENCY_OF_CHECKS_ON_SPACE_AVAILABILITY = 1024 * 1024; // 1MB
-    private int mBytesDownloadedSinceLastCheckOnSpace = 0;
+    private int bytesDownloadedSinceLastCheckOnSpace = 0;
 
     /**
      * misc members
@@ -106,10 +106,10 @@ class StorageManager {
      * The value is specified in terms of num of downloads since last time the cleanup was done.
      */
     private static final int FREQUENCY_OF_DATABASE_N_FILESYSTEM_CLEANUP = 250;
-    private int mNumDownloadsSoFar = 0;
+    private int numDownloadsSoFar = 0;
 
     synchronized void incrementNumDownloadsSoFar() {
-        if (++mNumDownloadsSoFar % FREQUENCY_OF_DATABASE_N_FILESYSTEM_CLEANUP == 0) {
+        if (++numDownloadsSoFar % FREQUENCY_OF_DATABASE_N_FILESYSTEM_CLEANUP == 0) {
             startThreadToCleanupDatabaseAndPurgeFileSystem();
         }
     }
@@ -118,20 +118,20 @@ class StorageManager {
      *      remove spurious files from the file system
      *      remove excess entries from the database
      */
-    private Thread mCleanupThread = null;
+    private Thread cleanupThread = null;
 
     private synchronized void startThreadToCleanupDatabaseAndPurgeFileSystem() {
-        if (mCleanupThread != null && mCleanupThread.isAlive()) {
+        if (cleanupThread != null && cleanupThread.isAlive()) {
             return;
         }
-        mCleanupThread = new Thread() {
+        cleanupThread = new Thread() {
             @Override
             public void run() {
                 removeSpuriousFiles();
                 trimDatabase();
             }
         };
-        mCleanupThread.start();
+        cleanupThread.start();
     }
 
     void verifySpaceBeforeWritingToFile(int destination, String path, long length)
@@ -197,15 +197,15 @@ class StorageManager {
         }
         // is there enough space in the file system of the given param 'root'.
         long bytesAvailable = getAvailableBytesInFileSystemAtGivenRoot(root);
-        if (bytesAvailable < sDownloadDataDirLowSpaceThreshold) {
+        if (bytesAvailable < DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD) {
             /* filesystem's available space is below threshold for low space warning.
              * threshold typically is 10% of download data dir space quota.
              * try to cleanup and see if the low space situation goes away.
              */
-            discardPurgeableFiles(destination, sDownloadDataDirLowSpaceThreshold);
+            discardPurgeableFiles(destination, DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD);
             removeSpuriousFiles();
             bytesAvailable = getAvailableBytesInFileSystemAtGivenRoot(root);
-            if (bytesAvailable < sDownloadDataDirLowSpaceThreshold) {
+            if (bytesAvailable < DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD) {
                 /*
                  * available space is still below the threshold limit.
                  *
@@ -225,13 +225,13 @@ class StorageManager {
         if (root.equals(downloadDataDir)) {
             // this download is going into downloads data dir. check space in that specific dir.
             bytesAvailable = getAvailableBytesInDownloadsDataDir(downloadDataDir);
-            if (bytesAvailable < sDownloadDataDirLowSpaceThreshold) {
+            if (bytesAvailable < DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD) {
                 // print a warning
                 Log.w("Downloads data dir: " + root + " is running low on space. space available (in bytes): " + bytesAvailable);
             }
             if (bytesAvailable < targetBytes) {
                 // Insufficient space; make space.
-                discardPurgeableFiles(destination, sDownloadDataDirLowSpaceThreshold);
+                discardPurgeableFiles(destination, DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD);
                 removeSpuriousFiles();
                 bytesAvailable = getAvailableBytesInDownloadsDataDir(downloadDataDir);
             }
@@ -248,7 +248,7 @@ class StorageManager {
      */
     private long getAvailableBytesInDownloadsDataDir(File root) {
         File[] files = root.listFiles();
-        long space = sMaxdownloadDataDirSize;
+        long space = MAX_DOWNLOAD_DATA_DIR_SIZE;
         if (files == null) {
             return space;
         }
@@ -442,11 +442,11 @@ class StorageManager {
     }
 
     private synchronized int incrementBytesDownloadedSinceLastCheckOnSpace(long val) {
-        mBytesDownloadedSinceLastCheckOnSpace += val;
-        return mBytesDownloadedSinceLastCheckOnSpace;
+        bytesDownloadedSinceLastCheckOnSpace += val;
+        return bytesDownloadedSinceLastCheckOnSpace;
     }
 
     private synchronized void resetBytesDownloadedSinceLastCheckOnSpace() {
-        mBytesDownloadedSinceLastCheckOnSpace = 0;
+        bytesDownloadedSinceLastCheckOnSpace = 0;
     }
 }

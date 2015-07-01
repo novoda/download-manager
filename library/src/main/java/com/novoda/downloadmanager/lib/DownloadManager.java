@@ -744,11 +744,11 @@ public class DownloadManager {
      * underlying data.
      */
     private static class CursorTranslator extends CursorWrapper {
-        private final Uri mBaseUri;
+        private final Uri baseUri;
 
         public CursorTranslator(Cursor cursor, Uri baseUri) {
             super(cursor);
-            mBaseUri = baseUri;
+            this.baseUri = baseUri;
         }
 
         @Override
@@ -790,7 +790,7 @@ public class DownloadManager {
 
             // return content URI for cache download
             long downloadId = getLong(getColumnIndex(Downloads.Impl._ID));
-            return ContentUris.withAppendedId(mBaseUri, downloadId).toString();
+            return ContentUris.withAppendedId(baseUri, downloadId).toString();
         }
 
         private long getReason(int status) {

@@ -73,9 +73,9 @@ class DownloadNotifier {
      * Current speed of active downloads, mapped from {@link DownloadInfo#batchId}
      * to speed in bytes per second.
      */
-//    @GuardedBy("mDownloadSpeed")
+//    @GuardedBy("downloadSpeeds")
     // LongSparseLongArray
-    private final LongSparseArray<Long> mDownloadSpeed = new LongSparseArray<>();
+    private final LongSparseArray<Long> downloadSpeeds = new LongSparseArray<>();
 
     private final Resources resources;
 
@@ -95,11 +95,11 @@ class DownloadNotifier {
      * estimated remaining time.
      */
     public void notifyDownloadSpeed(long id, long bytesPerSecond) {
-        synchronized (mDownloadSpeed) {
+        synchronized (downloadSpeeds) {
             if (bytesPerSecond != 0) {
-                mDownloadSpeed.put(id, bytesPerSecond);
+                downloadSpeeds.put(id, bytesPerSecond);
             } else {
-                mDownloadSpeed.remove(id);
+                downloadSpeeds.remove(id);
             }
         }
     }
@@ -287,13 +287,13 @@ class DownloadNotifier {
             long currentBytes = 0;
             long totalBytes = 0;
             long totalBytesPerSecond = 0;
-            synchronized (mDownloadSpeed) {
+            synchronized (downloadSpeeds) {
                 for (DownloadBatch batch : cluster) {
                     for (DownloadInfo info : batch.getDownloads()) {
                         if (info.hasTotalBytes()) {
                             currentBytes += info.getCurrentBytes();
                             totalBytes += info.getTotalBytes();
-                            Long bytesPerSecond = mDownloadSpeed.get(info.getId());
+                            Long bytesPerSecond = downloadSpeeds.get(info.getId());
                             if (bytesPerSecond != null) {
                                 totalBytesPerSecond += bytesPerSecond;
                             }

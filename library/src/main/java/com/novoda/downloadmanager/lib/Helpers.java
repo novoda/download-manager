@@ -43,7 +43,7 @@ class Helpers {
     private static final Pattern CONTENT_DISPOSITION_PATTERN =
             Pattern.compile("attachment;\\s*filename\\s*=\\s*\"([^\"]*)\"");
 
-    private static final Object sUniqueLock = new Object();
+    private static final Object UNIQUE_LOCK = new Object();
 
     private Helpers() {
     }
@@ -123,7 +123,7 @@ class Helpers {
 
         Log.v("target file: " + filename + extension);
 
-        synchronized (sUniqueLock) {
+        synchronized (UNIQUE_LOCK) {
             final String path = chooseUniqueFilenameLocked(
                     destination, filename, extension, recoveryDir);
 

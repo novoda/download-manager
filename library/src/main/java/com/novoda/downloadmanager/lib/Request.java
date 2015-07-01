@@ -37,17 +37,17 @@ public class Request {
      */
     public static final int NETWORK_BLUETOOTH = 1 << 2;
 
-    private final List<Pair<String, String>> mRequestHeaders = new ArrayList<>();
+    private final List<Pair<String, String>> requestHeaders = new ArrayList<>();
 
     private Uri uri;
-    private Uri mDestinationUri;
+    private Uri destinationUri;
     private CharSequence title;
     private CharSequence description;
-    private String mMimeType;
-    private int mAllowedNetworkTypes = ~0; // default to all network types allowed
-    private boolean mRoamingAllowed = true;
-    private boolean mMeteredAllowed = true;
-    private boolean mIsVisibleInDownloadsUi = true;
+    private String mimeType;
+    private int allowedNetworkTypes = ~0; // default to all network types allowed
+    private boolean roamingAllowed = true;
+    private boolean meteredAllowed = true;
+    private boolean isVisibleInDownloadsUi = true;
     private boolean scannable = false;
     private String extraField;
     private String bigPictureUrl;
@@ -71,7 +71,7 @@ public class Request {
      * {@link NotificationVisibility#ACTIVE_OR_COMPLETE}, {@link NotificationVisibility#ONLY_WHEN_ACTIVE},
      * {@link NotificationVisibility#ONLY_WHEN_COMPLETE}
      */
-    private int mNotificationVisibility = NotificationVisibility.ONLY_WHEN_ACTIVE;
+    private int notificationVisibility = NotificationVisibility.ONLY_WHEN_ACTIVE;
 
     /**
      * @param uri the HTTP URI to download.
@@ -105,7 +105,7 @@ public class Request {
      * @return this object
      */
     public Request setDestinationUri(Uri uri) {
-        mDestinationUri = uri;
+        destinationUri = uri;
         return this;
     }
 
@@ -209,7 +209,7 @@ public class Request {
         if (subPath == null) {
             throw new NullPointerException("subPath cannot be null");
         }
-        mDestinationUri = Uri.withAppendedPath(Uri.fromFile(base), subPath);
+        destinationUri = Uri.withAppendedPath(Uri.fromFile(base), subPath);
     }
 
     /**
@@ -240,7 +240,7 @@ public class Request {
         if (value == null) {
             value = "";
         }
-        mRequestHeaders.add(Pair.create(header, value));
+        requestHeaders.add(Pair.create(header, value));
         return this;
     }
 
@@ -297,7 +297,7 @@ public class Request {
      * Media Types</a>
      */
     public Request setMimeType(String mimeType) {
-        mMimeType = mimeType;
+        this.mimeType = mimeType;
         return this;
     }
 
@@ -337,7 +337,7 @@ public class Request {
      * @return this object
      */
     public Request setNotificationVisibility(int visibility) {
-        mNotificationVisibility = visibility;
+        notificationVisibility = visibility;
         return this;
     }
 
@@ -351,7 +351,7 @@ public class Request {
      * @return this object
      */
     public Request setAllowedNetworkTypes(int flags) {
-        mAllowedNetworkTypes = flags;
+        allowedNetworkTypes = flags;
         return this;
     }
 
@@ -363,7 +363,7 @@ public class Request {
      * @return this object
      */
     public Request setAllowedOverRoaming(boolean allowed) {
-        mRoamingAllowed = allowed;
+        roamingAllowed = allowed;
         return this;
     }
 
@@ -374,7 +374,7 @@ public class Request {
      * @see android.net.ConnectivityManager#isActiveNetworkMetered()
      */
     public Request setAllowedOverMetered(boolean allow) {
-        mMeteredAllowed = allow;
+        meteredAllowed = allow;
         return this;
     }
 
@@ -386,7 +386,7 @@ public class Request {
      * @return this object
      */
     public Request setVisibleInDownloadsUi(boolean isVisible) {
-        mIsVisibleInDownloadsUi = isVisible;
+        isVisibleInDownloadsUi = isVisible;
         return this;
     }
 
@@ -406,9 +406,9 @@ public class Request {
         assert uri != null;
         values.put(Downloads.Impl.COLUMN_URI, uri.toString());
 
-        if (mDestinationUri != null) {
+        if (destinationUri != null) {
             values.put(Downloads.Impl.COLUMN_DESTINATION, Downloads.Impl.DESTINATION_FILE_URI);
-            values.put(Downloads.Impl.COLUMN_FILE_NAME_HINT, mDestinationUri.toString());
+            values.put(Downloads.Impl.COLUMN_FILE_NAME_HINT, destinationUri.toString());
         } else {
             values.put(Downloads.Impl.COLUMN_DESTINATION,
                     Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
@@ -416,16 +416,16 @@ public class Request {
         // is the file supposed to be media-scannable?
         values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED, (scannable) ? SCANNABLE_VALUE_YES : SCANNABLE_VALUE_NO);
 
-        if (!mRequestHeaders.isEmpty()) {
+        if (!requestHeaders.isEmpty()) {
             encodeHttpHeaders(values);
         }
 
-        putIfNonNull(values, Downloads.Impl.COLUMN_MIME_TYPE, mMimeType);
+        putIfNonNull(values, Downloads.Impl.COLUMN_MIME_TYPE, mimeType);
 
-        values.put(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES, mAllowedNetworkTypes);
-        values.put(Downloads.Impl.COLUMN_ALLOW_ROAMING, mRoamingAllowed);
-        values.put(Downloads.Impl.COLUMN_ALLOW_METERED, mMeteredAllowed);
-        values.put(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, mIsVisibleInDownloadsUi);
+        values.put(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES, allowedNetworkTypes);
+        values.put(Downloads.Impl.COLUMN_ALLOW_ROAMING, roamingAllowed);
+        values.put(Downloads.Impl.COLUMN_ALLOW_METERED, meteredAllowed);
+        values.put(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, isVisibleInDownloadsUi);
         values.put(Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS, extraField);
         values.put(Downloads.Impl.COLUMN_BATCH_ID, batchId);
 
@@ -434,7 +434,7 @@ public class Request {
 
     private void encodeHttpHeaders(ContentValues values) {
         int index = 0;
-        for (Pair<String, String> header : mRequestHeaders) {
+        for (Pair<String, String> header : requestHeaders) {
             String headerString = header.first + ": " + header.second;
             values.put(Downloads.Impl.RequestHeaders.INSERT_KEY_PREFIX + index, headerString);
             index++;
@@ -452,7 +452,7 @@ public class Request {
                 .withTitle(title.toString())
                 .withDescription(description.toString())
                 .withBigPictureUrl(bigPictureUrl)
-                .withVisibility(mNotificationVisibility)
+                .withVisibility(notificationVisibility)
                 .build();
         requestBatch.addRequest(this);
         return requestBatch;
