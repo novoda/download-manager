@@ -755,40 +755,41 @@ class DownloadThread implements Runnable {
      * appropriately for resumption.
      */
     private void setupDestinationFile(State state) throws StopRequestException {
-        if (!TextUtils.isEmpty(state.filename)) { // only true if we've already run a thread for this download
-            Log.i("have run thread before for id: " + downloadInfo.getId() + ", and state.filename: " + state.filename);
-            if (!Helpers.isFilenameValid(state.filename, storageManager.getDownloadDataDirectory())) {
-                Log.d("Yeah we know we are bad for downloading to internal storage");
+        if (TextUtils.isEmpty(state.filename)) {
+            // only true if we've already run a thread for this download
+            return;
+        }
+        Log.i("have run thread before for id: " + downloadInfo.getId() + ", and state.filename: " + state.filename);
+        if (!Helpers.isFilenameValid(state.filename, storageManager.getDownloadDataDirectory())) {
+            Log.d("Yeah we know we are bad for downloading to internal storage");
 //                throw new StopRequestException(Downloads.Impl.STATUS_FILE_ERROR, "found invalid internal destination filename");
-            }
-            // We're resuming a download that got interrupted
-            File f = new File(state.filename);
-            if (f.exists()) {
-                Log.i("resuming download for id: " + downloadInfo.getId() + ", and state.filename: " + state.filename);
-                long fileLength = f.length();
-                if (fileLength == 0) {
-                    // The download hadn't actually started, we can restart from scratch
-                    Log.d("setupDestinationFile() found fileLength=0, deleting " + state.filename);
-                    f.delete();
-                    state.filename = null;
-                    Log.i("resuming download for id: " + downloadInfo.getId() + ", BUT starting from scratch again: ");
-                } else if (downloadInfo.getETag() == null && !downloadInfo.isNoIntegrity()) {
-                    // This should've been caught upon failure
-                    Log.d("setupDestinationFile() unable to resume download, deleting "
-                            + state.filename);
-                    f.delete();
-                    throw new StopRequestException(STATUS_CANNOT_RESUME, "Trying to resume a download that can't be resumed");
-                } else {
-                    // All right, we'll be able to resume this download
-                    Log.i("resuming download for id: " + downloadInfo.getId() + ", and starting with file of length: " + fileLength);
-                    state.currentBytes = (int) fileLength;
-                    if (downloadInfo.getTotalBytes() != -1) {
-                        state.contentLength = downloadInfo.getTotalBytes();
-                    }
-                    state.headerETag = downloadInfo.getETag();
-                    state.continuingDownload = true;
-                    Log.i("resuming download for id: " + downloadInfo.getId() + ", state.currentBytes: " + state.currentBytes + ", and setting continuingDownload to true: ");
+        }
+        // We're resuming a download that got interrupted
+        File destinationFile = new File(state.filename);
+        if (destinationFile.exists()) {
+            Log.i("resuming download for id: " + downloadInfo.getId() + ", and state.filename: " + state.filename);
+            long fileLength = destinationFile.length();
+            if (fileLength == 0) {
+                // The download hadn't actually started, we can restart from scratch
+                Log.d("setupDestinationFile() found fileLength=0, deleting " + state.filename);
+                destinationFile.delete();
+                state.filename = null;
+                Log.i("resuming download for id: " + downloadInfo.getId() + ", BUT starting from scratch again: ");
+            } else if (downloadInfo.getETag() == null && !downloadInfo.isNoIntegrity()) {
+                // This should've been caught upon failure
+                Log.d("setupDestinationFile() unable to resume download, deleting " + state.filename);
+                destinationFile.delete();
+                throw new StopRequestException(STATUS_CANNOT_RESUME, "Trying to resume a download that can't be resumed");
+            } else {
+                // All right, we'll be able to resume this download
+                Log.i("resuming download for id: " + downloadInfo.getId() + ", and starting with file of length: " + fileLength);
+                state.currentBytes = (int) fileLength;
+                if (downloadInfo.getTotalBytes() != -1) {
+                    state.contentLength = downloadInfo.getTotalBytes();
                 }
+                state.headerETag = downloadInfo.getETag();
+                state.continuingDownload = true;
+                Log.i("resuming download for id: " + downloadInfo.getId() + ", state.currentBytes: " + state.currentBytes + ", and setting continuingDownload to true: ");
             }
         }
     }
