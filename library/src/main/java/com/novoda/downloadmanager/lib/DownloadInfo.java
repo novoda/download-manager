@@ -28,90 +28,6 @@ class DownloadInfo {
     private static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
     private static final int UNKNOWN_BYTES = -1;
 
-    public long getId() {
-        return id;
-    }
-
-    public String getUri() {
-        return uri;
-    }
-
-    boolean isNoIntegrity() {
-        return noIntegrity;
-    }
-
-    String getHint() {
-        return hint;
-    }
-
-    String getFileName() {
-        return fileName;
-    }
-
-    void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    String getMimeType() {
-        return mimeType;
-    }
-
-    int getDestination() {
-        return destination;
-    }
-
-    int getControl() {
-        return control;
-    }
-
-    int getStatus() {
-        return status;
-    }
-
-    void setStatus(int status) {
-        this.status = status;
-    }
-
-    int getNumFailed() {
-        return numFailed;
-    }
-
-    String getNotificationClassName() {
-        return notificationClassName;
-    }
-
-    String getUserAgent() {
-        return userAgent;
-    }
-
-    long getTotalBytes() {
-        return totalBytes;
-    }
-
-    void setTotalBytes(long totalBytes) {
-        this.totalBytes = totalBytes;
-    }
-
-    long getCurrentBytes() {
-        return currentBytes;
-    }
-
-    String getETag() {
-        return eTag;
-    }
-
-    boolean isDeleted() {
-        return deleted;
-    }
-
-    String getMediaProviderUri() {
-        return mediaProviderUri;
-    }
-
-    long getBatchId() {
-        return batchId;
-    }
-
     // TODO: move towards these in-memory objects being sources of truth, and periodically pushing to provider.
 
     /**
@@ -219,6 +135,91 @@ class DownloadInfo {
         this.randomNumberGenerator = randomNumberGenerator;
         this.downloadClientReadyChecker = downloadClientReadyChecker;
         this.downloadStatusContentValues = downloadStatusContentValues;
+    }
+
+
+    public long getId() {
+        return id;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    boolean isNoIntegrity() {
+        return noIntegrity;
+    }
+
+    String getHint() {
+        return hint;
+    }
+
+    String getFileName() {
+        return fileName;
+    }
+
+    void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    String getMimeType() {
+        return mimeType;
+    }
+
+    int getDestination() {
+        return destination;
+    }
+
+    int getControl() {
+        return control;
+    }
+
+    int getStatus() {
+        return status;
+    }
+
+    void setStatus(int status) {
+        this.status = status;
+    }
+
+    int getNumFailed() {
+        return numFailed;
+    }
+
+    String getNotificationClassName() {
+        return notificationClassName;
+    }
+
+    String getUserAgent() {
+        return userAgent;
+    }
+
+    long getTotalBytes() {
+        return totalBytes;
+    }
+
+    void setTotalBytes(long totalBytes) {
+        this.totalBytes = totalBytes;
+    }
+
+    long getCurrentBytes() {
+        return currentBytes;
+    }
+
+    String getETag() {
+        return eTag;
+    }
+
+    boolean isDeleted() {
+        return deleted;
+    }
+
+    String getMediaProviderUri() {
+        return mediaProviderUri;
+    }
+
+    long getBatchId() {
+        return batchId;
     }
 
     public Collection<Pair<String, String>> getHeaders() {
