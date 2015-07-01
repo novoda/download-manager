@@ -552,13 +552,13 @@ class Helpers {
             throw new IllegalArgumentException("illegal character: " + chars[offset]);
         }
 
-        private static final boolean isIdentifierStart(char c) {
+        private static boolean isIdentifierStart(char c) {
             return c == '_' ||
                     (c >= 'A' && c <= 'Z') ||
                     (c >= 'a' && c <= 'z');
         }
 
-        private static final boolean isIdentifierChar(char c) {
+        private static boolean isIdentifierChar(char c) {
             return c == '_' ||
                     (c >= 'A' && c <= 'Z') ||
                     (c >= 'a' && c <= 'z') ||
