@@ -43,19 +43,22 @@ public class DownloadReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(@NonNull Context context, @NonNull Intent intent) {
-        String action = intent.getAction();
-        if (ACTION_BOOT_COMPLETED.equals(action)
-                || ACTION_MEDIA_MOUNTED.equals(action)
-                || ACTION_RETRY.equals(action)) {
-            startService(context);
-        } else if (CONNECTIVITY_ACTION.equals(action)) {
-            checkConnectivityToStartService(context);
-        } else if (ACTION_OPEN.equals(action)
-                || ACTION_LIST.equals(action)
-                || ACTION_HIDE.equals(action)
-                || ACTION_DELETE.equals(action)
-                || ACTION_CANCEL.equals(action)) {
-            handleSystemNotificationAction(context, intent);
+        switch (intent.getAction()) {
+            case ACTION_BOOT_COMPLETED:
+            case ACTION_MEDIA_MOUNTED:
+            case ACTION_RETRY:
+                startService(context);
+                break;
+            case CONNECTIVITY_ACTION:
+                checkConnectivityToStartService(context);
+                break;
+            case ACTION_OPEN:
+            case ACTION_LIST:
+            case ACTION_HIDE:
+            case ACTION_DELETE:
+            case ACTION_CANCEL:
+                handleSystemNotificationAction(context, intent);
+                break;
         }
     }
 
