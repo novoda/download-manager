@@ -204,8 +204,6 @@ class DownloadInfo {
     private final List<Pair<String, String>> requestHeaders = new ArrayList<>();
     private final Context context;
     private final SystemFacade systemFacade;
-    private final StorageManager storageManager;
-    private final DownloadNotifier downloadNotifier;
     private final DownloadClientReadyChecker downloadClientReadyChecker;
     private final RandomNumberGenerator randomNumberGenerator;
     private final ContentValues downloadStatusContentValues;
@@ -213,15 +211,11 @@ class DownloadInfo {
     DownloadInfo(
             Context context,
             SystemFacade systemFacade,
-            StorageManager storageManager,
-            DownloadNotifier notifier,
             RandomNumberGenerator randomNumberGenerator,
             DownloadClientReadyChecker downloadClientReadyChecker,
             ContentValues downloadStatusContentValues) {
         this.context = context;
         this.systemFacade = systemFacade;
-        this.storageManager = storageManager;
-        this.downloadNotifier = notifier;
         this.randomNumberGenerator = randomNumberGenerator;
         this.downloadClientReadyChecker = downloadClientReadyChecker;
         this.downloadStatusContentValues = downloadStatusContentValues;
@@ -415,7 +409,7 @@ class DownloadInfo {
         }
     }
 
-    public boolean startDownloadIfNotActive(ExecutorService executor) {
+    public boolean startDownloadIfNotActive(ExecutorService executor, StorageManager storageManager, DownloadNotifier downloadNotifier) {
         synchronized (this) {
             boolean isActive;
             if (submittedThread == null) {
@@ -563,16 +557,12 @@ class DownloadInfo {
         public DownloadInfo newDownloadInfo(
                 Context context,
                 SystemFacade systemFacade,
-                StorageManager storageManager,
-                DownloadNotifier notifier,
                 DownloadClientReadyChecker downloadClientReadyChecker) {
             RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
             ContentValues contentValues = new ContentValues();
             DownloadInfo info = new DownloadInfo(
                     context,
                     systemFacade,
-                    storageManager,
-                    notifier,
                     randomNumberGenerator,
                     downloadClientReadyChecker,
                     contentValues);

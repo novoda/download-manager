@@ -422,7 +422,7 @@ public class DownloadService extends Service {
         boolean downloadIsActive = info.isActive();
 
         if (isReadyToDownload || downloadIsActive) {
-            isActive |= info.startDownloadIfNotActive(executor);
+            isActive |= info.startDownloadIfNotActive(executor, storageManager, downloadNotifier);
         }
         return isActive;
     }
@@ -448,7 +448,7 @@ public class DownloadService extends Service {
      * download if appropriate.
      */
     private DownloadInfo createNewDownloadInfo(DownloadInfo.Reader reader) {
-        DownloadInfo info = reader.newDownloadInfo(this, systemFacade, storageManager, downloadNotifier, downloadClientReadyChecker);
+        DownloadInfo info = reader.newDownloadInfo(this, systemFacade, downloadClientReadyChecker);
         Log.v("processing inserted download " + info.getId());
         return info;
     }
