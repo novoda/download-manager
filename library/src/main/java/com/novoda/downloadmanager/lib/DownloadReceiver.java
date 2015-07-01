@@ -87,21 +87,29 @@ public class DownloadReceiver extends BroadcastReceiver {
 
     private void handleNotificationBroadcast(Context context, Intent intent) {
         String action = intent.getAction();
-        if (ACTION_LIST.equals(action)) {
-            long[] ids = intent.getLongArrayExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS);
-            sendNotificationClickedIntent(context, ids);
-        } else if (ACTION_OPEN.equals(action)) {
-            long id = ContentUris.parseId(intent.getData());
-            openDownload(context, id);
-            long batchId = getBatchId(intent);
-            hideNotification(context, batchId);
-        } else if (ACTION_HIDE.equals(action)) {
-            long batchId = getBatchId(intent);
-            hideNotification(context, batchId);
-        } else if (ACTION_CANCEL.equals(action)) {
-            cancelBatchThroughDatabaseState(context, intent);
-        } else if (ACTION_DELETE.equals(action)) {
-            deleteDownloadThroughDatabaseState(context, intent);
+        switch (action) {
+            case ACTION_LIST:
+                long[] ids = intent.getLongArrayExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS);
+                sendNotificationClickedIntent(context, ids);
+                break;
+            case ACTION_OPEN: {
+                long id = ContentUris.parseId(intent.getData());
+                openDownload(context, id);
+                long batchId = getBatchId(intent);
+                hideNotification(context, batchId);
+                break;
+            }
+            case ACTION_HIDE: {
+                long batchId = getBatchId(intent);
+                hideNotification(context, batchId);
+                break;
+            }
+            case ACTION_CANCEL:
+                cancelBatchThroughDatabaseState(context, intent);
+                break;
+            case ACTION_DELETE:
+                deleteDownloadThroughDatabaseState(context, intent);
+                break;
         }
     }
 
