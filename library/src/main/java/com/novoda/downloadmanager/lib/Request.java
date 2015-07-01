@@ -39,16 +39,16 @@ public class Request {
 
     private final List<Pair<String, String>> mRequestHeaders = new ArrayList<>();
 
-    private Uri mUri;
+    private Uri uri;
     private Uri mDestinationUri;
-    private CharSequence mTitle;
-    private CharSequence mDescription;
+    private CharSequence title;
+    private CharSequence description;
     private String mMimeType;
     private int mAllowedNetworkTypes = ~0; // default to all network types allowed
     private boolean mRoamingAllowed = true;
     private boolean mMeteredAllowed = true;
     private boolean mIsVisibleInDownloadsUi = true;
-    private boolean mScannable = false;
+    private boolean scannable = false;
     private String extraField;
     private String bigPictureUrl;
     private long batchId = -1L;
@@ -84,11 +84,11 @@ public class Request {
         if (scheme == null || (!scheme.equals("http") && !scheme.equals("https"))) {
             throw new IllegalArgumentException("Can only download HTTP/HTTPS URIs: " + uri);
         }
-        mUri = uri;
+        this.uri = uri;
     }
 
     Request(String uriString) {
-        mUri = Uri.parse(uriString);
+        uri = Uri.parse(uriString);
     }
 
     /**
@@ -217,7 +217,7 @@ public class Request {
      * should be called before {@link DownloadManager#enqueue(Request)} is called.
      */
     public void allowScanningByMediaScanner() {
-        mScannable = true;
+        scannable = true;
     }
 
     /**
@@ -252,7 +252,7 @@ public class Request {
      * @return this object
      */
     public Request setTitle(CharSequence title) {
-        mTitle = title;
+        this.title = title;
         return this;
     }
 
@@ -262,7 +262,7 @@ public class Request {
      * @return this object
      */
     public Request setDescription(CharSequence description) {
-        mDescription = description;
+        this.description = description;
         return this;
     }
 
@@ -403,8 +403,8 @@ public class Request {
      */
     ContentValues toContentValues() {
         ContentValues values = new ContentValues();
-        assert mUri != null;
-        values.put(Downloads.Impl.COLUMN_URI, mUri.toString());
+        assert uri != null;
+        values.put(Downloads.Impl.COLUMN_URI, uri.toString());
 
         if (mDestinationUri != null) {
             values.put(Downloads.Impl.COLUMN_DESTINATION, Downloads.Impl.DESTINATION_FILE_URI);
@@ -414,7 +414,7 @@ public class Request {
                     Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
         }
         // is the file supposed to be media-scannable?
-        values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED, (mScannable) ? SCANNABLE_VALUE_YES : SCANNABLE_VALUE_NO);
+        values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED, (scannable) ? SCANNABLE_VALUE_YES : SCANNABLE_VALUE_NO);
 
         if (!mRequestHeaders.isEmpty()) {
             encodeHttpHeaders(values);
@@ -449,8 +449,8 @@ public class Request {
 
     RequestBatch asBatch() {
         RequestBatch requestBatch = new RequestBatch.Builder()
-                .withTitle(mTitle.toString())
-                .withDescription(mDescription.toString())
+                .withTitle(title.toString())
+                .withDescription(description.toString())
                 .withBigPictureUrl(bigPictureUrl)
                 .withVisibility(mNotificationVisibility)
                 .build();

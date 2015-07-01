@@ -23,8 +23,8 @@ import java.util.Queue;
 public class SizeLimitActivity extends Activity implements DialogInterface.OnCancelListener, DialogInterface.OnClickListener {
     private final Queue<Intent> mDownloadsToShow = new LinkedList<>();
 
-    private Dialog mDialog;
-    private Uri mCurrentUri;
+    private Dialog dialog;
+    private Uri currentUri;
     private Intent mCurrentIntent;
 
     @Override
@@ -42,13 +42,13 @@ public class SizeLimitActivity extends Activity implements DialogInterface.OnCan
             setIntent(null);
             showNextDialog();
         }
-        if (mDialog != null && !mDialog.isShowing()) {
-            mDialog.show();
+        if (dialog != null && !dialog.isShowing()) {
+            dialog.show();
         }
     }
 
     private void showNextDialog() {
-        if (mDialog != null) {
+        if (dialog != null) {
             return;
         }
 
@@ -58,11 +58,11 @@ public class SizeLimitActivity extends Activity implements DialogInterface.OnCan
         }
 
         mCurrentIntent = mDownloadsToShow.poll();
-        mCurrentUri = mCurrentIntent.getData();
-        Cursor cursor = getContentResolver().query(mCurrentUri, null, null, null, null);
+        currentUri = mCurrentIntent.getData();
+        Cursor cursor = getContentResolver().query(currentUri, null, null, null, null);
         try {
             if (!cursor.moveToFirst()) {
-                Log.e("Empty cursor for URI " + mCurrentUri);
+                Log.e("Empty cursor for URI " + currentUri);
                 dialogClosed();
                 return;
             }
@@ -95,7 +95,7 @@ public class SizeLimitActivity extends Activity implements DialogInterface.OnCan
                     .setPositiveButton("", this) // R.string.button_start_now
                     .setNegativeButton("", this); // R.string.button_queue_for_wifi
         }
-        mDialog = builder.setOnCancelListener(this).show();
+        dialog = builder.setOnCancelListener(this).show();
     }
 
     @Override
@@ -104,8 +104,8 @@ public class SizeLimitActivity extends Activity implements DialogInterface.OnCan
     }
 
     private void dialogClosed() {
-        mDialog = null;
-        mCurrentUri = null;
+        dialog = null;
+        currentUri = null;
         showNextDialog();
     }
 
@@ -114,11 +114,11 @@ public class SizeLimitActivity extends Activity implements DialogInterface.OnCan
         boolean isRequired =
                 mCurrentIntent.getExtras().getBoolean(DownloadInfo.EXTRA_IS_WIFI_REQUIRED);
         if (isRequired && which == AlertDialog.BUTTON_NEGATIVE) {
-            getContentResolver().delete(mCurrentUri, null, null);
+            getContentResolver().delete(currentUri, null, null);
         } else if (!isRequired && which == AlertDialog.BUTTON_POSITIVE) {
             ContentValues values = new ContentValues();
             values.put(Downloads.Impl.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT, true);
-            getContentResolver().update(mCurrentUri, values, null, null);
+            getContentResolver().update(currentUri, values, null, null);
         }
         dialogClosed();
     }

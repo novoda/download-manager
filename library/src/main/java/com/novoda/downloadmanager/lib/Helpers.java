@@ -400,95 +400,95 @@ class Helpers {
         public static final int TOKEN_NULL = 8;
         public static final int TOKEN_END = 9;
 
-        private final String mSelection;
-        private final Set<String> mAllowedColumns;
-        private int mOffset = 0;
-        private int mCurrentToken = TOKEN_START;
-        private final char[] mChars;
+        private final String selection;
+        private final Set<String> allowedColumns;
+        private final char[] chars;
+        private int offset = 0;
+        private int currentToken = TOKEN_START;
 
         public Lexer(String selection, Set<String> allowedColumns) {
-            mSelection = selection;
-            mAllowedColumns = allowedColumns;
-            mChars = new char[mSelection.length()];
-            mSelection.getChars(0, mChars.length, mChars, 0);
+            this.selection = selection;
+            this.allowedColumns = allowedColumns;
+            chars = new char[this.selection.length()];
+            this.selection.getChars(0, chars.length, chars, 0);
             advance();
         }
 
         public int currentToken() {
-            return mCurrentToken;
+            return currentToken;
         }
 
         public void advance() {
-            char[] chars = mChars;
+            char[] chars = this.chars;
 
             // consume whitespace
-            while (mOffset < chars.length && chars[mOffset] == ' ') {
-                ++mOffset;
+            while (offset < chars.length && chars[offset] == ' ') {
+                ++offset;
             }
 
             // end of input
-            if (mOffset == chars.length) {
-                mCurrentToken = TOKEN_END;
+            if (offset == chars.length) {
+                currentToken = TOKEN_END;
                 return;
             }
 
             // "("
-            if (chars[mOffset] == '(') {
-                ++mOffset;
-                mCurrentToken = TOKEN_OPEN_PAREN;
+            if (chars[offset] == '(') {
+                ++offset;
+                currentToken = TOKEN_OPEN_PAREN;
                 return;
             }
 
             // ")"
-            if (chars[mOffset] == ')') {
-                ++mOffset;
-                mCurrentToken = TOKEN_CLOSE_PAREN;
+            if (chars[offset] == ')') {
+                ++offset;
+                currentToken = TOKEN_CLOSE_PAREN;
                 return;
             }
 
             // "?"
-            if (chars[mOffset] == '?') {
-                ++mOffset;
-                mCurrentToken = TOKEN_VALUE;
+            if (chars[offset] == '?') {
+                ++offset;
+                currentToken = TOKEN_VALUE;
                 return;
             }
 
             // "=" and "=="
-            if (chars[mOffset] == '=') {
-                ++mOffset;
-                mCurrentToken = TOKEN_COMPARE;
-                if (mOffset < chars.length && chars[mOffset] == '=') {
-                    ++mOffset;
+            if (chars[offset] == '=') {
+                ++offset;
+                currentToken = TOKEN_COMPARE;
+                if (offset < chars.length && chars[offset] == '=') {
+                    ++offset;
                 }
                 return;
             }
 
             // ">" and ">="
-            if (chars[mOffset] == '>') {
-                ++mOffset;
-                mCurrentToken = TOKEN_COMPARE;
-                if (mOffset < chars.length && chars[mOffset] == '=') {
-                    ++mOffset;
+            if (chars[offset] == '>') {
+                ++offset;
+                currentToken = TOKEN_COMPARE;
+                if (offset < chars.length && chars[offset] == '=') {
+                    ++offset;
                 }
                 return;
             }
 
             // "<", "<=" and "<>"
-            if (chars[mOffset] == '<') {
-                ++mOffset;
-                mCurrentToken = TOKEN_COMPARE;
-                if (mOffset < chars.length && (chars[mOffset] == '=' || chars[mOffset] == '>')) {
-                    ++mOffset;
+            if (chars[offset] == '<') {
+                ++offset;
+                currentToken = TOKEN_COMPARE;
+                if (offset < chars.length && (chars[offset] == '=' || chars[offset] == '>')) {
+                    ++offset;
                 }
                 return;
             }
 
             // "!="
-            if (chars[mOffset] == '!') {
-                ++mOffset;
-                mCurrentToken = TOKEN_COMPARE;
-                if (mOffset < chars.length && chars[mOffset] == '=') {
-                    ++mOffset;
+            if (chars[offset] == '!') {
+                ++offset;
+                currentToken = TOKEN_COMPARE;
+                if (offset < chars.length && chars[offset] == '=') {
+                    ++offset;
                     return;
                 }
                 throw new IllegalArgumentException("Unexpected character after !");
@@ -499,57 +499,57 @@ class Helpers {
             //     and then recognize the individual words.
             // no attempt is made at discarding sequences of underscores with no alphanumeric
             //     characters, even though it's not clear that they'd be legal column names.
-            if (isIdentifierStart(chars[mOffset])) {
-                int startOffset = mOffset;
-                ++mOffset;
-                while (mOffset < chars.length && isIdentifierChar(chars[mOffset])) {
-                    ++mOffset;
+            if (isIdentifierStart(chars[offset])) {
+                int startOffset = offset;
+                ++offset;
+                while (offset < chars.length && isIdentifierChar(chars[offset])) {
+                    ++offset;
                 }
-                String word = mSelection.substring(startOffset, mOffset);
-                if (mOffset - startOffset <= 4) {
+                String word = selection.substring(startOffset, offset);
+                if (offset - startOffset <= 4) {
                     if (word.equals("IS")) {
-                        mCurrentToken = TOKEN_IS;
+                        currentToken = TOKEN_IS;
                         return;
                     }
                     if (word.equals("OR") || word.equals("AND")) {
-                        mCurrentToken = TOKEN_AND_OR;
+                        currentToken = TOKEN_AND_OR;
                         return;
                     }
                     if (word.equals("NULL")) {
-                        mCurrentToken = TOKEN_NULL;
+                        currentToken = TOKEN_NULL;
                         return;
                     }
                 }
-                if (mAllowedColumns.contains(word)) {
-                    mCurrentToken = TOKEN_COLUMN;
+                if (allowedColumns.contains(word)) {
+                    currentToken = TOKEN_COLUMN;
                     return;
                 }
                 throw new IllegalArgumentException("unrecognized column or keyword");
             }
 
             // quoted strings
-            if (chars[mOffset] == '\'') {
-                ++mOffset;
-                while (mOffset < chars.length) {
-                    if (chars[mOffset] == '\'') {
-                        if (mOffset + 1 < chars.length && chars[mOffset + 1] == '\'') {
-                            ++mOffset;
+            if (chars[offset] == '\'') {
+                ++offset;
+                while (offset < chars.length) {
+                    if (chars[offset] == '\'') {
+                        if (offset + 1 < chars.length && chars[offset + 1] == '\'') {
+                            ++offset;
                         } else {
                             break;
                         }
                     }
-                    ++mOffset;
+                    ++offset;
                 }
-                if (mOffset == chars.length) {
+                if (offset == chars.length) {
                     throw new IllegalArgumentException("unterminated string");
                 }
-                ++mOffset;
-                mCurrentToken = TOKEN_VALUE;
+                ++offset;
+                currentToken = TOKEN_VALUE;
                 return;
             }
 
             // anything we don't recognize
-            throw new IllegalArgumentException("illegal character: " + chars[mOffset]);
+            throw new IllegalArgumentException("illegal character: " + chars[offset]);
         }
 
         private static final boolean isIdentifierStart(char c) {

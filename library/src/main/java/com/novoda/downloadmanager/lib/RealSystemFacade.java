@@ -27,10 +27,10 @@ import android.telephony.TelephonyManager;
 import com.novoda.notils.logger.simple.Log;
 
 class RealSystemFacade implements SystemFacade {
-    private final Context mContext;
+    private final Context context;
 
     public RealSystemFacade(Context context) {
-        mContext = context;
+        this.context = context;
     }
 
     @Override
@@ -46,18 +46,18 @@ class RealSystemFacade implements SystemFacade {
 
     @Override
     public NetworkInfo getActiveNetworkInfo() {
-        return ((ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+        return ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
     }
 
     @Override
     public boolean isActiveNetworkMetered() {
-        ConnectivityManager conn = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager conn = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         return NetworkMeter.Factory.get(conn).isActiveNetworkMetered();
     }
 
     @Override
     public boolean isNetworkRoaming() {
-        ConnectivityManager connectivity = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connectivity = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivity == null) {
             Log.w("couldn't get connectivity manager");
             return false;
@@ -65,7 +65,7 @@ class RealSystemFacade implements SystemFacade {
 
         NetworkInfo info = connectivity.getActiveNetworkInfo();
         boolean isMobile = (info != null && info.getType() == ConnectivityManager.TYPE_MOBILE);
-        TelephonyManager telephony = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        TelephonyManager telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         boolean isRoaming = isMobile && telephony.isNetworkRoaming();
         if (isRoaming) {
             Log.v("network is roaming");
@@ -75,21 +75,21 @@ class RealSystemFacade implements SystemFacade {
 
     @Override
     public Long getMaxBytesOverMobile() {
-        return DownloadManager.getMaxBytesOverMobile(mContext);
+        return DownloadManager.getMaxBytesOverMobile(context);
     }
 
     @Override
     public Long getRecommendedMaxBytesOverMobile() {
-        return DownloadManager.getRecommendedMaxBytesOverMobile(mContext);
+        return DownloadManager.getRecommendedMaxBytesOverMobile(context);
     }
 
     @Override
     public void sendBroadcast(Intent intent) {
-        mContext.sendBroadcast(intent);
+        context.sendBroadcast(intent);
     }
 
     @Override
     public boolean userOwnsPackage(int uid, String packageName) throws NameNotFoundException {
-        return mContext.getPackageManager().getApplicationInfo(packageName, 0).uid == uid;
+        return context.getPackageManager().getApplicationInfo(packageName, 0).uid == uid;
     }
 }
