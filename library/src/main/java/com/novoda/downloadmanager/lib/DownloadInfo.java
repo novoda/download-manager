@@ -70,7 +70,7 @@ class DownloadInfo {
         /**
          * Current network is blocked for requesting application.
          */
-        BLOCKED;
+        BLOCKED
     }
 
     /**
