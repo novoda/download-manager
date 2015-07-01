@@ -68,20 +68,20 @@ public class DownloadService extends Service {
     private final ContentLengthFetcher contentLengthFetcher = new ContentLengthFetcher();
 
     //    @VisibleForTesting
-    SystemFacade mSystemFacade;
+    SystemFacade systemFacade;
 
-    private AlarmManager mAlarmManager;
-    private StorageManager mStorageManager;
+    private AlarmManager alarmManager;
+    private StorageManager storageManager;
 
     /**
      * Observer to get notified when the content observer's data changes
      */
-    private DownloadManagerContentObserver mObserver;
+    private DownloadManagerContentObserver downloadManagerContentObserver;
 
     /**
      * Class to handle Notification Manager updates
      */
-    private DownloadNotifier mNotifier;
+    private DownloadNotifier downloadNotifier;
 
     /**
      * The Service's view of the list of downloads, mapping download IDs to the corresponding info
@@ -89,17 +89,17 @@ public class DownloadService extends Service {
      * downloads based on this data, so that it can deal with situation where the data in the
      * content provider changes or disappears.
      */
-//    @GuardedBy("mDownloads")
-    private final Map<Long, DownloadInfo> mDownloads = new HashMap<>();
+//    @GuardedBy("downloads")
+    private final Map<Long, DownloadInfo> downloads = new HashMap<>();
 
-    private ExecutorService mExecutor;
+    private ExecutorService executor;
 
-    private DownloadScanner mScanner;
+    private DownloadScanner downloadScanner;
 
-    private HandlerThread mUpdateThread;
-    private Handler mUpdateHandler;
+    private HandlerThread updateThread;
+    private Handler updateHandler;
 
-    private volatile int mLastStartId;
+    private volatile int lastStartId;
     private DownloadClientReadyChecker downloadClientReadyChecker;
     private ContentResolver resolver;
 
@@ -136,32 +136,32 @@ public class DownloadService extends Service {
         super.onCreate();
         Log.v("Service onCreate");
 
-        if (mSystemFacade == null) {
-            mSystemFacade = new RealSystemFacade(this);
+        if (systemFacade == null) {
+            systemFacade = new RealSystemFacade(this);
         }
 
-        mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        mStorageManager = new StorageManager(this);
+        alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        storageManager = new StorageManager(this);
 
-        mUpdateThread = new HandlerThread("DownloadManager-UpdateThread");
-        mUpdateThread.start();
-        mUpdateHandler = new Handler(mUpdateThread.getLooper(), mUpdateCallback);
+        updateThread = new HandlerThread("DownloadManager-UpdateThread");
+        updateThread.start();
+        updateHandler = new Handler(updateThread.getLooper(), mUpdateCallback);
 
-        mScanner = new DownloadScanner(this);
+        downloadScanner = new DownloadScanner(this);
 
         downloadClientReadyChecker = getDownloadClientReadyChecker();
 
-        mNotifier = new DownloadNotifier(this, getNotificationImageRetriever(), getResources());
-        mNotifier.cancelAll();
+        downloadNotifier = new DownloadNotifier(this, getNotificationImageRetriever(), getResources());
+        downloadNotifier.cancelAll();
 
-        mObserver = new DownloadManagerContentObserver();
+        downloadManagerContentObserver = new DownloadManagerContentObserver();
         getContentResolver().registerContentObserver(
                 Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
-                true, mObserver);
+                true, downloadManagerContentObserver);
 
         ConcurrentDownloadsLimitProvider concurrentDownloadsLimitProvider = ConcurrentDownloadsLimitProvider.newInstance(this);
         DownloadExecutorFactory factory = new DownloadExecutorFactory(concurrentDownloadsLimitProvider);
-        mExecutor = factory.createExecutor();
+        executor = factory.createExecutor();
         resolver = getContentResolver();
     }
 
@@ -183,7 +183,7 @@ public class DownloadService extends Service {
     public int onStartCommand(@NonNull Intent intent, int flags, int startId) {
         int returnValue = super.onStartCommand(intent, flags, startId);
         Log.v("Service onStart");
-        mLastStartId = startId;
+        lastStartId = startId;
         enqueueUpdate();
         return returnValue;
     }
@@ -197,17 +197,17 @@ public class DownloadService extends Service {
 
     private void shutDown() {
         Log.d("Shutting down service");
-        getContentResolver().unregisterContentObserver(mObserver);
-        mScanner.shutdown();
-        mUpdateThread.quit();
+        getContentResolver().unregisterContentObserver(downloadManagerContentObserver);
+        downloadScanner.shutdown();
+        updateThread.quit();
     }
 
     /**
      * Enqueue an {#updateLocked()} pass to occur in future.
      */
     private void enqueueUpdate() {
-        mUpdateHandler.removeMessages(MSG_UPDATE);
-        mUpdateHandler.obtainMessage(MSG_UPDATE, mLastStartId, -1).sendToTarget();
+        updateHandler.removeMessages(MSG_UPDATE);
+        updateHandler.obtainMessage(MSG_UPDATE, lastStartId, -1).sendToTarget();
     }
 
     /**
@@ -215,9 +215,9 @@ public class DownloadService extends Service {
      * catch any finished operations that didn't trigger an update pass.
      */
     private void enqueueFinalUpdate() {
-        mUpdateHandler.removeMessages(MSG_FINAL_UPDATE);
-        mUpdateHandler.sendMessageDelayed(
-                mUpdateHandler.obtainMessage(MSG_FINAL_UPDATE, mLastStartId, -1),
+        updateHandler.removeMessages(MSG_FINAL_UPDATE);
+        updateHandler.sendMessageDelayed(
+                updateHandler.obtainMessage(MSG_FINAL_UPDATE, lastStartId, -1),
                 5 * MINUTE_IN_MILLIS);
     }
 
@@ -242,7 +242,7 @@ public class DownloadService extends Service {
             // TODO: handle media scanner timeouts
 
             final boolean isActive;
-            synchronized (mDownloads) {
+            synchronized (downloads) {
                 isActive = updateLocked();
             }
 
@@ -256,7 +256,7 @@ public class DownloadService extends Service {
                 }
 
                 // Dump speed and update details
-                mNotifier.dumpSpeeds();
+                downloadNotifier.dumpSpeeds();
 
                 Log.wtf("Final update pass triggered, isActive=" + isActive, new IllegalStateException("someone didn't update correctly"));
             }
@@ -287,12 +287,12 @@ public class DownloadService extends Service {
     };
 
     /**
-     * Update {#mDownloads} to match {DownloadProvider} state.
+     * Update {#downloads} to match {DownloadProvider} state.
      * Depending on current download state it may enqueue {DownloadThread}
      * instances, request {DownloadScanner} scans, update user-visible
      * notifications, and/or schedule future actions with {AlarmManager}.
      * <p/>
-     * Should only be called from {#mUpdateThread} as after being
+     * Should only be called from {#updateThread} as after being
      * requested through {#enqueueUpdate()}.
      *
      * @return If there are active tasks being processed, as of the database
@@ -301,9 +301,9 @@ public class DownloadService extends Service {
     private boolean updateLocked() {
 
         boolean isActive = false;
-        Set<Long> staleDownloadIds = new HashSet<>(mDownloads.keySet());
+        Set<Long> staleDownloadIds = new HashSet<>(downloads.keySet());
         long nextRetryTimeMillis = Long.MAX_VALUE;
-        long now = mSystemFacade.currentTimeMillis();
+        long now = systemFacade.currentTimeMillis();
 
         Cursor downloadsCursor = resolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
         try {
@@ -313,10 +313,10 @@ public class DownloadService extends Service {
                 long id = downloadsCursor.getLong(idColumn);
                 staleDownloadIds.remove(id);
 
-                DownloadInfo info = mDownloads.get(id);
+                DownloadInfo info = downloads.get(id);
                 if (info == null) {
                     info = createNewDownloadInfo(reader);
-                    mDownloads.put(info.mId, info);
+                    downloads.put(info.mId, info);
                 } else {
                     updateDownloadFromDatabase(reader, info);
                 }
@@ -338,9 +338,9 @@ public class DownloadService extends Service {
             downloadsCursor.close();
         }
 
-        cleanUpStaleDownloadsThatDisappeared(staleDownloadIds, mDownloads);
+        cleanUpStaleDownloadsThatDisappeared(staleDownloadIds, downloads);
 
-        List<DownloadBatch> batches = fetchBatches(mDownloads.values());
+        List<DownloadBatch> batches = fetchBatches(downloads.values());
         updateUserVisibleNotification(batches);
 
         // Set alarm when next action is in future. It's okay if the service
@@ -350,7 +350,7 @@ public class DownloadService extends Service {
 
             Intent intent = new Intent(Constants.ACTION_RETRY);
             intent.setClass(this, DownloadReceiver.class);
-            mAlarmManager.set(AlarmManager.RTC_WAKEUP, now + nextRetryTimeMillis, PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_ONE_SHOT));
+            alarmManager.set(AlarmManager.RTC_WAKEUP, now + nextRetryTimeMillis, PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_ONE_SHOT));
         }
 
         return isActive;
@@ -417,18 +417,18 @@ public class DownloadService extends Service {
     }
 
     private boolean kickOffDownloadTaskIfReady(boolean isActive, DownloadInfo info) {
-        CollatedDownloadInfo collatedDownloadInfo = CollatedDownloadInfo.collateInfo(mDownloads, info);
+        CollatedDownloadInfo collatedDownloadInfo = CollatedDownloadInfo.collateInfo(downloads, info);
         boolean isReadyToDownload = info.isReadyToDownload(collatedDownloadInfo);
         boolean downloadIsActive = info.isActive();
 
         if (isReadyToDownload || downloadIsActive) {
-            isActive |= info.startDownloadIfNotActive(mExecutor);
+            isActive |= info.startDownloadIfNotActive(executor);
         }
         return isActive;
     }
 
     private boolean kickOffMediaScanIfCompleted(boolean isActive, DownloadInfo info) {
-        final boolean activeScan = info.startScanIfReady(mScanner);
+        final boolean activeScan = info.startScanIfReady(downloadScanner);
         isActive |= activeScan;
         return isActive;
     }
@@ -440,7 +440,7 @@ public class DownloadService extends Service {
     }
 
     private void updateUserVisibleNotification(List<DownloadBatch> batches) {
-        mNotifier.updateWith(batches);
+        downloadNotifier.updateWith(batches);
     }
 
     /**
@@ -448,7 +448,7 @@ public class DownloadService extends Service {
      * download if appropriate.
      */
     private DownloadInfo createNewDownloadInfo(DownloadInfo.Reader reader) {
-        DownloadInfo info = reader.newDownloadInfo(this, mSystemFacade, mStorageManager, mNotifier, downloadClientReadyChecker);
+        DownloadInfo info = reader.newDownloadInfo(this, systemFacade, storageManager, downloadNotifier, downloadClientReadyChecker);
         Log.v("processing inserted download " + info.mId);
         return info;
     }
