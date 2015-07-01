@@ -197,7 +197,7 @@ class DownloadInfo {
 
     /**
      * Result of last {DownloadThread} started by
-     * {@link #isReadyToDownload(CollatedDownloadInfo)} && {@link #startDownloadIfNotActive(ExecutorService)}.
+     * {@link #isReadyToDownload(CollatedDownloadInfo)} && {@link #startDownloadIfNotActive(ExecutorService, StorageManager, DownloadNotifier)}.
      */
     private Future<?> submittedThread;
 
