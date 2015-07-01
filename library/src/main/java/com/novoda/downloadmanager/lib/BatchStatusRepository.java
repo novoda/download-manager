@@ -40,7 +40,7 @@ class BatchStatusRepository {
 
     int getBatchStatus(long batchId) {
         Cursor cursor = null;
-        SparseIntArray statusCounts = new SparseIntArray();
+        SparseIntArray statusCounts = new SparseIntArray(8);
         try {
             String[] selectionArgs = {String.valueOf(batchId)};
             cursor = resolver.query(ALL_DOWNLOADS_CONTENT_URI,
@@ -52,20 +52,18 @@ class BatchStatusRepository {
             int statusColumnIndex = cursor.getColumnIndexOrThrow(COLUMN_STATUS);
 
             while (cursor.moveToNext()) {
-                int status = cursor.getInt(statusColumnIndex);
-                statusCounts.put(status, statusCounts.get(status) + 1);
+                int statusCode = cursor.getInt(statusColumnIndex);
+
+                if (Downloads.Impl.isStatusError(statusCode)) {
+                    return statusCode;
+                }
+
+                Integer currentStatusCount = statusCounts.get(statusCode);
+                statusCounts.put(statusCode, currentStatusCount + 1);
             }
         } finally {
             if (cursor != null) {
                 cursor.close();
-            }
-        }
-
-        // check for error statuses first
-        for (int i = 0; i < statusCounts.size(); i++) {
-            int statusCode = statusCounts.keyAt(i);
-            if (Downloads.Impl.isStatusError(statusCode) && statusCounts.get(statusCode) > 0) {
-                return statusCode;
             }
         }
 
@@ -76,7 +74,6 @@ class BatchStatusRepository {
         }
 
         return STATUS_UNKNOWN_ERROR;
-
     }
 
     long getBatchSizeInBytes(long batchId) {
