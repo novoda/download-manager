@@ -226,7 +226,7 @@ public final class DownloadProvider extends ContentProvider {
      */
     private static class SqlSelection {
         public final StringBuilder whereClause = new StringBuilder();
-        public final List<String> Parameters = new ArrayList<>();
+        public final List<String> parameters = new ArrayList<>();
 
         public <T> void appendClause(String newClause, final T... parameters) {
             if (newClause == null || newClause.isEmpty()) {
@@ -240,7 +240,7 @@ public final class DownloadProvider extends ContentProvider {
             whereClause.append(")");
             if (parameters != null) {
                 for (Object parameter : parameters) {
-                    Parameters.add(parameter.toString());
+                    this.parameters.add(parameter.toString());
                 }
             }
         }
@@ -250,8 +250,8 @@ public final class DownloadProvider extends ContentProvider {
         }
 
         public String[] getParameters() {
-            String[] array = new String[Parameters.size()];
-            return Parameters.toArray(array);
+            String[] array = new String[parameters.size()];
+            return parameters.toArray(array);
         }
     }
 
@@ -678,11 +678,11 @@ public final class DownloadProvider extends ContentProvider {
         Cursor ret = db.query(Downloads.Impl.DOWNLOADS_TABLE_NAME, projection, fullSelection.getSelection(),
                 fullSelection.getParameters(), null, null, sort);
 
-        if (ret != null) {
+        if (ret == null) {
+            Log.v("query failed in downloads database");
+        } else {
             ret.setNotificationUri(getContext().getContentResolver(), uri);
             Log.v("created cursor " + ret + " on behalf of " + Binder.getCallingPid());
-        } else {
-            Log.v("query failed in downloads database");
         }
         return ret;
     }
@@ -909,9 +909,10 @@ public final class DownloadProvider extends ContentProvider {
         if ((uriMatch == MY_DOWNLOADS || uriMatch == MY_DOWNLOADS_ID)
                 && getContext().checkCallingPermission(Downloads.Impl.PERMISSION_ACCESS_ALL)
                 != PackageManager.PERMISSION_GRANTED) {
+            int callingUid = Binder.getCallingUid();
             selection.appendClause(
                     Constants.UID + "= ? OR " + Downloads.Impl.COLUMN_OTHER_UID + "= ?",
-                    Binder.getCallingUid(), Binder.getCallingUid());
+                    callingUid, callingUid);
         }
         return selection;
     }
@@ -954,7 +955,7 @@ public final class DownloadProvider extends ContentProvider {
      * Remotely opens a file
      */
     @Override
-    public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
+    public ParcelFileDescriptor openFile(@NonNull Uri uri, String mode) throws FileNotFoundException {
         if (GlobalState.hasVerboseLogging()) {
             logVerboseOpenFileInfo(uri, mode);
         }
