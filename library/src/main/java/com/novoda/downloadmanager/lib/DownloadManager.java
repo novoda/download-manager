@@ -468,7 +468,7 @@ public class DownloadManager {
     }
 
     /**
-     * Cancel downloads and remove them from the download manager.  Each download will be stopped if
+     * Cancel batch downloads and remove them from the download manager.  Each download will be stopped if
      * it was running, and it will no longer be accessible through the download manager.
      * If there is a downloaded file, partial or complete, it is deleted.
      *
@@ -476,7 +476,7 @@ public class DownloadManager {
      * @return the number of downloads actually removed
      */
     public int removeBatch(long... ids) {
-        return markDownloadRowForDeletion(ids);
+        return markBatchRowForDeletion(ids);
     }
 
     /**

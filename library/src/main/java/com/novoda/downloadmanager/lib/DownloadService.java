@@ -410,14 +410,9 @@ public class DownloadService extends Service {
             }
         }
 
-        StringBuilder whereClause = new StringBuilder();
-        whereClause.append("(").append(ids.get(0));
-        for (int i = 1; i < ids.size(); i++) {
-            whereClause.append(",").append(ids.get(i));
-        }
-        whereClause.append(")");
-
-        resolver.delete(Downloads.Impl.BATCH_CONTENT_URI, Downloads.Impl.Batches._ID + " IN ?", new String[]{whereClause.toString()});
+        String selection = TextUtils.join(", ", ids);
+        String[] selectionArgs = {selection};
+        resolver.delete(Downloads.Impl.BATCH_CONTENT_URI, Downloads.Impl.Batches._ID + " IN (?)", selectionArgs);
     }
 
     private void updateTotalBytesFor(DownloadInfo info) {
