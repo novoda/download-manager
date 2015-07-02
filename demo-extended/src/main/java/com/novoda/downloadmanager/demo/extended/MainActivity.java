@@ -27,7 +27,6 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
 
     private DownloadManager downloadManager;
     private ListView listView;
-    int currentDownloadNumber = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,9 +38,9 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 DownloadAdapter adapter = (DownloadAdapter) parent.getAdapter();
-                DownloadBatch batch = adapter.getItem(position);
-                long batchId = batch.getId();
-                if (batch.isPaused()) {
+                Download item = adapter.getItem(position);
+                long batchId = item.getBatchId();
+                if (item.isPaused()) {
                     downloadManager.resumeBatch(batchId);
                 } else {
                     downloadManager.pauseBatch(batchId);
@@ -86,12 +85,11 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
 
     private void enqueueBatch() {
         final RequestBatch batch = new RequestBatch.Builder()
-                .withTitle(currentDownloadNumber + " Large Beard Shipment")
+                .withTitle("Large Beard Shipment")
                 .withDescription("Goatees galore")
                 .withBigPictureUrl(BEARD_IMAGE)
                 .withVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE)
                 .build();
-        currentDownloadNumber++;
 
         Uri uri = Uri.parse(BIG_FILE);
         final Request request = new Request(uri);
@@ -122,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
     }
 
     @Override
-    public void onQueryResult(List<DownloadBatch> downloads) {
+    public void onQueryResult(List<Download> downloads) {
         listView.setAdapter(new DownloadAdapter(downloads));
     }
 

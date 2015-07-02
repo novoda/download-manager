@@ -10,9 +10,9 @@ import com.novoda.downloadmanager.demo.R;
 import java.util.List;
 
 class DownloadAdapter extends BaseAdapter {
-    private final List<DownloadBatch> downloads;
+    private final List<Download> downloads;
 
-    public DownloadAdapter(List<DownloadBatch> downloads) {
+    public DownloadAdapter(List<Download> downloads) {
         this.downloads = downloads;
     }
 
@@ -22,7 +22,7 @@ class DownloadAdapter extends BaseAdapter {
     }
 
     @Override
-    public DownloadBatch getItem(int position) {
+    public Download getItem(int position) {
         return downloads.get(position);
     }
 
@@ -35,13 +35,12 @@ class DownloadAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = View.inflate(parent.getContext(), R.layout.list_item_download, null);
 
-        DownloadBatch batch = getItem(position);
+        Download download = getItem(position);
         TextView titleTextView = (TextView) view.findViewById(R.id.download_title_text);
         TextView locationTextView = (TextView) view.findViewById(R.id.download_location_text);
 
-        titleTextView.setText(batch.getTitle());
-        String statusText = batch.getDownloadStatusText();
-        locationTextView.setText(statusText + " : " + batch.getFileName());
+        titleTextView.setText(download.getTitle());
+        locationTextView.setText(download.getDownloadStatusText() + " : " + download.getFileName());
 
         return view;
     }

@@ -8,9 +8,7 @@ import com.novoda.downloadmanager.lib.Query;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class QueryForDownloadsAsyncTask extends AsyncTask<Query, Void, List<Download>> {
 
@@ -36,7 +34,7 @@ public class QueryForDownloadsAsyncTask extends AsyncTask<Query, Void, List<Down
                 String fileName = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_FILENAME));
                 int downloadStatus = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS));
                 long id = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BATCH_ID));
-                downloads.add(new Download(id, title, fileName, downloadStatus));
+                downloads.add(new Download(title, fileName, downloadStatus, id));
             }
         } finally {
             cursor.close();
@@ -46,29 +44,15 @@ public class QueryForDownloadsAsyncTask extends AsyncTask<Query, Void, List<Down
 
     @Override
     protected void onPostExecute(List<Download> downloads) {
-        Map<Long, DownloadBatch> downloadBatchMap = new HashMap<>();
-        for (Download download : downloads) {
-            long batchId = download.getBatchId();
-            DownloadBatch downloadBatch = getDownloadBatch(downloadBatchMap, batchId);
-            downloadBatch.add(download);
-            downloadBatchMap.put(batchId, downloadBatch);
-        }
-
+        super.onPostExecute(downloads);
         Callback callback = weakCallback.get();
         if (callback == null) {
             return;
         }
-        callback.onQueryResult(new ArrayList<DownloadBatch>(downloadBatchMap.values()));
-    }
-
-    private DownloadBatch getDownloadBatch(Map<Long, DownloadBatch> downloadBatchMap, long batchId) {
-        if (downloadBatchMap.containsKey(batchId)) {
-            return downloadBatchMap.get(batchId);
-        }
-        return new DownloadBatch(batchId);
+        callback.onQueryResult(downloads);
     }
 
     interface Callback {
-        void onQueryResult(List<DownloadBatch> downloads);
+        void onQueryResult(List<Download> downloads);
     }
 }
