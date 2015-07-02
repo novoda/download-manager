@@ -402,6 +402,13 @@ public class DownloadManager {
         mResolver.update(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
     }
 
+    public void resumeBatch(long id) {
+        ContentValues values = new ContentValues();
+        values.put(Downloads.Impl.COLUMN_CONTROL, Downloads.Impl.CONTROL_RUN);
+        values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
+        mResolver.update(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
+    }
+
     public void markDeleted(URI uri) {
         Cursor cursor = null;
         try {

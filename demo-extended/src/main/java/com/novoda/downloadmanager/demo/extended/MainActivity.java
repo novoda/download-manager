@@ -38,8 +38,13 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 DownloadAdapter adapter = (DownloadAdapter) parent.getAdapter();
-                long batchId = adapter.getItem(position).getBatchId();
-                downloadManager.pauseBatch(batchId);
+                Download item = adapter.getItem(position);
+                long batchId = item.getBatchId();
+                if (item.isPaused()) {
+                    downloadManager.resumeBatch(batchId);
+                } else {
+                    downloadManager.pauseBatch(batchId);
+                }
             }
         });
         downloadManager = DownloadManagerBuilder.from(this)
