@@ -71,17 +71,20 @@ class DownloadThread implements Runnable {
     private final SystemFacade systemFacade;
     private final StorageManager storageManager;
     private final DownloadNotifier downloadNotifier;
+    private final BatchCompletionBroadcaster batchCompletionBroadcaster;
     private final BatchStatusRepository batchStatusRepository;
 
     private volatile boolean policyDirty;
 
     public DownloadThread(Context context, SystemFacade systemFacade, DownloadInfo downloadInfo,
-                          StorageManager storageManager, DownloadNotifier downloadNotifier, BatchStatusRepository batchStatusRepository) {
+                          StorageManager storageManager, DownloadNotifier downloadNotifier,
+                          BatchCompletionBroadcaster batchCompletionBroadcaster, BatchStatusRepository batchStatusRepository) {
         this.context = context;
         this.systemFacade = systemFacade;
         this.downloadInfo = downloadInfo;
         this.storageManager = storageManager;
         this.downloadNotifier = downloadNotifier;
+        this.batchCompletionBroadcaster = batchCompletionBroadcaster;
         this.batchStatusRepository = batchStatusRepository;
     }
 
@@ -875,6 +878,8 @@ class DownloadThread implements Runnable {
                     COLUMN_BATCH_ID + " = ? AND " + _ID + " <> ? ",
                     new String[]{String.valueOf(batchId), String.valueOf(downloadId)}
             );
+        } else if (Downloads.Impl.isStatusSuccess(batchStatus)) {
+            batchCompletionBroadcaster.notifyBatchCompletedFor(batchId);
         }
     }
 

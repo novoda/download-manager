@@ -272,9 +272,15 @@ public class DownloadManager {
 
     /**
      * Broadcast intent action sent by the download manager when a download completes. The
-     * download's content:// uri is specified in the intent's data.
+     * download's ID is specified in the intent's data.
      */
     public static final String ACTION_DOWNLOAD_COMPLETE = "com.novoda.downloadmanager.DOWNLOAD_COMPLETE";
+
+    /**
+     * Broadcast intent action sent by the download manager when a batch completes. The
+     * batch's ID is specified in the intent's data.
+     */
+    public static final String ACTION_BATCH_COMPLETE = BatchCompletionBroadcaster.ACTION_BATCH_COMPLETE;
 
     /**
      * Broadcast intent action sent by the download manager when a download wasn't started due to insufficient space
@@ -295,6 +301,12 @@ public class DownloadManager {
      * long) of the download that just completed.
      */
     public static final String EXTRA_DOWNLOAD_ID = "extra_download_id";
+
+    /**
+     * Intent extra included with {@link #ACTION_BATCH_COMPLETE} intents, indicating the ID (as a
+     * long) of the batch that just completed.
+     */
+    public static final String EXTRA_BATCH_ID = BatchCompletionBroadcaster.EXTRA_BATCH_ID;
 
     /**
      * Intent extra included with {@link #ACTION_DOWNLOAD_COMPLETE} intents, indicating the status code of the download that just completed.
@@ -347,7 +359,9 @@ public class DownloadManager {
         this(context, resolver, false);
     }
 
-    public DownloadManager(Context context, ContentResolver contentResolver, boolean verboseLogging) {
+    public DownloadManager(Context context,
+                           ContentResolver contentResolver,
+                           boolean verboseLogging) {
         this.contentResolver = contentResolver;
         GlobalState.setContext(context);
         GlobalState.setVerboseLogging(verboseLogging);

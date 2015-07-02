@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.novoda.downloadmanager.demo">
+<manifest
+  package="com.novoda.downloadmanager.demo"
+  xmlns:android="http://schemas.android.com/apk/res/android">
 
   <uses-permission android:name="android.permission.INTERNET" />
 
@@ -27,6 +28,14 @@
     <meta-data
       android:name="com.novoda.downloadmanager.DatabaseFilename"
       android:value="@string/database_filename" />
+
+    <receiver
+      android:name="com.novoda.downloadmanager.demo.extended.DownloadBatchCompletionReceiver"
+      android:exported="false">
+      <intent-filter>
+        <action android:name="com.novoda.downloadmanager.action.BATCH_COMPLETE" />
+      </intent-filter>
+    </receiver>
 
   </application>
 
