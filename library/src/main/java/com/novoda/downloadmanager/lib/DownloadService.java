@@ -359,7 +359,7 @@ public class DownloadService extends Service {
     private List<DownloadBatch> fetchBatches(Collection<DownloadInfo> downloads) {
         Cursor batchesCursor = resolver.query(Downloads.Impl.BATCH_CONTENT_URI, null, null, null, null);
         List<DownloadBatch> batches = new ArrayList<>(batchesCursor.getCount());
-        List<Long> forDeletion = new ArrayList<>(batchesCursor.getCount());
+        List<Long> forDeletion = new ArrayList<>();
         try {
             int idColumn = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches._ID);
             int deleteIndex = batchesCursor.getColumnIndex(Downloads.Impl.Batches.COLUMN_DELETED);
@@ -397,19 +397,26 @@ public class DownloadService extends Service {
         }
 
         if (!forDeletion.isEmpty()) {
-            deleteBatchesForIds(forDeletion);
+            deleteBatchesForIds(forDeletion, downloads);
         }
 
         return batches;
     }
 
-    private void deleteBatchesForIds(List<Long> ids) {
+    private void deleteBatchesForIds(List<Long> ids, Collection<DownloadInfo> downloads) {
+        for (DownloadInfo download : downloads) {
+            if (ids.contains(download.batchId)) {
+                deleteFileAndDatabaseRow(download);
+            }
+        }
+
         StringBuilder whereClause = new StringBuilder();
         whereClause.append("(").append(ids.get(0));
         for (int i = 1; i < ids.size(); i++) {
             whereClause.append(",").append(ids.get(i));
         }
         whereClause.append(")");
+
         resolver.delete(Downloads.Impl.BATCH_CONTENT_URI, Downloads.Impl.Batches._ID + " IN ?", new String[]{whereClause.toString()});
     }
 
