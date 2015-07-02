@@ -56,9 +56,6 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         setupQueryingExample();
     }
 
-    private void showBatchComplete(long batchId) {
-    }
-
     private void enqueueSingleDownload() {
         Uri uri = Uri.parse(BIG_FILE);
         final Request request = new Request(uri)
@@ -113,8 +110,4 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         listView.setAdapter(new DownloadAdapter(downloads));
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
 }
