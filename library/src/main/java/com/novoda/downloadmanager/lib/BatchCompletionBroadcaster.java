@@ -12,7 +12,8 @@ class BatchCompletionBroadcaster {
     private final String packageName;
 
     public static BatchCompletionBroadcaster newInstance(Context context) {
-        return new BatchCompletionBroadcaster(context, context.getApplicationContext().getPackageName());
+        String applicationPackageName = context.getApplicationContext().getPackageName();
+        return new BatchCompletionBroadcaster(context, applicationPackageName);
     }
 
     BatchCompletionBroadcaster(Context context, String packageName) {
