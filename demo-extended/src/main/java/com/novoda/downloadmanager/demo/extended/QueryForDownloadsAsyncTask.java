@@ -41,13 +41,17 @@ public class QueryForDownloadsAsyncTask extends AsyncTask<Query, Void, List<Down
         } finally {
             cursor.close();
         }
+        sortByBatchId(downloads);
+        return downloads;
+    }
+
+    private void sortByBatchId(List<Download> downloads) {
         Collections.sort(downloads, new Comparator<Download>() {
             @Override
             public int compare(Download lhs, Download rhs) {
                 return (int) (lhs.getBatchId() - rhs.getBatchId());
             }
         });
-        return downloads;
     }
 
     @Override
