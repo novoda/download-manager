@@ -8,7 +8,7 @@ class Download {
     private final int downloadStatus;
     private final long id;
 
-    public Download(String title, String fileName, int downloadStatus, long id) {
+    public Download(long id, String title, String fileName, int downloadStatus) {
         this.title = title;
         this.fileName = fileName;
         this.downloadStatus = downloadStatus;
@@ -45,5 +45,13 @@ class Download {
 
     public boolean isPaused() {
         return downloadStatus == DownloadManager.STATUS_PAUSED;
+    }
+
+    public boolean isCompleted() {
+        return downloadStatus == DownloadManager.STATUS_SUCCESSFUL;
+    }
+
+    public boolean isDownloading() {
+        return downloadStatus == DownloadManager.STATUS_RUNNING;
     }
 }
