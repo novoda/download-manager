@@ -30,7 +30,8 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         listView = (ListView) findViewById(R.id.main_downloads_list);
-        downloadManager = DownloadManagerBuilder.from(this).build(getContentResolver());
+        downloadManager = DownloadManagerBuilder.from(this)
+                .build();
 
         setupDownloadingExample();
         setupQueryingExample();

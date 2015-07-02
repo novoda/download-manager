@@ -29,11 +29,8 @@ public class DownloadManagerBuilder {
         return this;
     }
 
-    public DownloadManager build(ContentResolver contentResolver) {
-        // TODO: is the parameter need here any more? Could use context.getContentResolver()
-        if (contentResolver == null) {
-            throw new IllegalStateException("You must use a ContentResolver with the DownloadManager.");
-        }
+    public DownloadManager build() {
+        ContentResolver contentResolver = context.getContentResolver();
         return new DownloadManager(context, contentResolver, verboseLogging);
     }
 

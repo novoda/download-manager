@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         listView = (ListView) findViewById(R.id.main_downloads_list);
         downloadManager = DownloadManagerBuilder.from(this)
                 .withVerboseLogging()
-                .build(getContentResolver());
+                .build();
 
         findViewById(R.id.single_download_button).setOnClickListener(
                 new View.OnClickListener() {
