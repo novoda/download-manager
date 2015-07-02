@@ -16,11 +16,9 @@ public class DownloadBatchCompletionReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(@NonNull Context context, @NonNull Intent intent) {
-        if (DownloadManager.ACTION_BATCH_COMPLETE.equals(intent.getAction())) {
-            long batchId = intent.getLongExtra(DownloadManager.EXTRA_BATCH_ID, UNKNOWN_BATCH_ID);
-            Toast.makeText(context, "Batch completed with id: " + batchId, Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "Batch completed: " + batchId);
-        }
+        long batchId = intent.getLongExtra(DownloadManager.EXTRA_BATCH_ID, UNKNOWN_BATCH_ID);
+        Toast.makeText(context, "Batch completed with id: " + batchId, Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "Batch completed: " + batchId);
     }
 
 }
