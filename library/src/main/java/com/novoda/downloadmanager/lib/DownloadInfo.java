@@ -455,9 +455,9 @@ class DownloadInfo {
             if (mSubmittedTask == null) {
                 BatchCompletionBroadcaster batchCompletionBroadcaster = BatchCompletionBroadcaster.newInstance(mContext);
                 ContentResolver contentResolver = mContext.getContentResolver();
-                BatchStatusRepository batchStatusRepository = new BatchStatusRepository(contentResolver);
+                BatchRepository batchRepository = new BatchRepository(contentResolver);
                 DownloadThread downloadThread = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier,
-                        batchCompletionBroadcaster, batchStatusRepository);
+                        batchCompletionBroadcaster, batchRepository);
                 mSubmittedTask = executor.submit(downloadThread);
                 isActive = true;
             } else {

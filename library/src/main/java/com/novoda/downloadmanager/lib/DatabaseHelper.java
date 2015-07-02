@@ -128,9 +128,9 @@ final class DatabaseHelper extends SQLiteOpenHelper {
                         Downloads.Impl.Batches.COLUMN_DESCRIPTION + " TEXT," +
                         Downloads.Impl.Batches.COLUMN_BIG_PICTURE + " TEXT," +
                         Downloads.Impl.Batches.COLUMN_STATUS + " INTEGER," +
-                        Downloads.Impl.Batches.COLUMN_VISIBILITY + " INTEGER" +
+                        Downloads.Impl.Batches.COLUMN_VISIBILITY + " INTEGER," +
                         Downloads.Impl.Batches.COLUMN_TOTAL_BYTES + " INTEGER NOT NULL DEFAULT -1, " +
-                        Downloads.Impl.Batches.COLUMN_CURRENT_BYTES + " INTEGER NOT NULL DEFAULT 0, " +
+                        Downloads.Impl.Batches.COLUMN_CURRENT_BYTES + " INTEGER NOT NULL DEFAULT 0 " +
                         ");");
     }
 

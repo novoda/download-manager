@@ -72,20 +72,20 @@ class DownloadThread implements Runnable {
     private final StorageManager mStorageManager;
     private final DownloadNotifier mNotifier;
     private final BatchCompletionBroadcaster batchCompletionBroadcaster;
-    private final BatchStatusRepository batchStatusRepository;
+    private final BatchRepository batchRepository;
 
     private volatile boolean mPolicyDirty;
 
     public DownloadThread(Context context, SystemFacade systemFacade, DownloadInfo info,
                           StorageManager storageManager, DownloadNotifier notifier,
-                          BatchCompletionBroadcaster batchCompletionBroadcaster, BatchStatusRepository batchStatusRepository) {
+                          BatchCompletionBroadcaster batchCompletionBroadcaster, BatchRepository batchRepository) {
         mContext = context;
         mSystemFacade = systemFacade;
         mInfo = info;
         mStorageManager = storageManager;
         mNotifier = notifier;
         this.batchCompletionBroadcaster = batchCompletionBroadcaster;
-        this.batchStatusRepository = batchStatusRepository;
+        this.batchRepository = batchRepository;
     }
 
     /**
@@ -193,7 +193,7 @@ class DownloadThread implements Runnable {
             return;
         }
 
-        long batchSizeInBytes = batchStatusRepository.getBatchSizeInBytes(mInfo.batchId);
+        long batchSizeInBytes = 100000; // TODO change me to DownloadBatch
 
         if (!mInfo.isReadyToDownload(new CollatedDownloadInfo(batchSizeInBytes))) {
             Log.d("Download " + mInfo.mId + " is not ready to download: skipping");
@@ -861,8 +861,9 @@ class DownloadThread implements Runnable {
     }
 
     private void updateBatchStatus(long batchId, long downloadId) {
-        int batchStatus = batchStatusRepository.getBatchStatus(batchId);
-        batchStatusRepository.updateBatchStatus(batchId, batchStatus);
+        int batchStatus = batchRepository.getBatchStatus(batchId);
+        batchRepository.updateBatchStatus(batchId, batchStatus);
+        batchRepository.updateTotalSize(batchId);
 
         if (Downloads.Impl.isStatusCancelled(batchStatus)) {
             ContentValues values = new ContentValues();

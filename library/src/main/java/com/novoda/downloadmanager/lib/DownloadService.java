@@ -102,6 +102,7 @@ public class DownloadService extends Service {
     private volatile int mLastStartId;
     private DownloadClientReadyChecker downloadClientReadyChecker;
     private ContentResolver resolver;
+    private BatchRepository batchRepository;
 
     /**
      * Receives notifications when the data in the content provider changes
@@ -135,6 +136,8 @@ public class DownloadService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.v("Service onCreate");
+
+        this.batchRepository = new BatchRepository(getContentResolver());
 
         if (mSystemFacade == null) {
             mSystemFacade = new RealSystemFacade(this);
@@ -326,6 +329,7 @@ public class DownloadService extends Service {
                 } else if (Downloads.Impl.isStatusCancelled(info.mStatus) || Downloads.Impl.isStatusError(info.mStatus)) {
                     deleteFileAndMediaReference(info);
                 } else {
+                    batchRepository.updateCurrentSize(info.batchId);
                     updateTotalBytesFor(info);
                     isActive = kickOffDownloadTaskIfReady(isActive, info);
                     isActive = kickOffMediaScanIfCompleted(isActive, info);

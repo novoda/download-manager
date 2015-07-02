@@ -3,6 +3,7 @@ package com.novoda.downloadmanager.demo.extended;
 import android.app.Application;
 import android.hardware.SensorManager;
 
+import com.facebook.stetho.Stetho;
 import com.novoda.downloadmanager.lib.CollatedDownloadInfo;
 import com.novoda.downloadmanager.lib.DownloadClientReadyChecker;
 
@@ -13,6 +14,14 @@ public class DemoApplication extends Application implements DownloadClientReadyC
     @Override
     public void onCreate() {
         super.onCreate();
+
+        Stetho.initialize(
+                Stetho.newInitializerBuilder(this)
+                        .enableDumpapp(Stetho.defaultDumperPluginsProvider(this))
+                        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
+                        .build()
+        );
+
         oneRuleToBindThem = new OneRuleToBindThem();
     }
 
