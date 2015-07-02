@@ -8,6 +8,8 @@ import com.novoda.downloadmanager.lib.Query;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class QueryForDownloadsAsyncTask extends AsyncTask<Query, Void, List<Download>> {
@@ -39,6 +41,12 @@ public class QueryForDownloadsAsyncTask extends AsyncTask<Query, Void, List<Down
         } finally {
             cursor.close();
         }
+        Collections.sort(downloads, new Comparator<Download>() {
+            @Override
+            public int compare(Download lhs, Download rhs) {
+                return (int) (lhs.getBatchId() - rhs.getBatchId());
+            }
+        });
         return downloads;
     }
 
