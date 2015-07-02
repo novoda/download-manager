@@ -467,11 +467,6 @@ class DownloadInfo {
         }
     }
 
-    private String taskDetails() {
-        return mSubmittedTask == null ? "NONE" : "[isDone: " + mSubmittedTask.isDone()
-                + " isCancelled: " + mSubmittedTask.isCancelled() + "]";
-    }
-
     public boolean isActive() {
         return mSubmittedTask != null && !mSubmittedTask.isDone();
     }
