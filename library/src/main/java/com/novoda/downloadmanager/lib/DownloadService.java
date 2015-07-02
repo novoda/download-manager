@@ -39,7 +39,6 @@ import com.novoda.notils.logger.simple.Log;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -329,9 +328,11 @@ public class DownloadService extends Service {
                 } else if (Downloads.Impl.isStatusCancelled(info.mStatus) || Downloads.Impl.isStatusError(info.mStatus)) {
                     deleteFileAndMediaReference(info);
                 } else {
-                    batchRepository.updateCurrentSize(info.batchId);
                     updateTotalBytesFor(info);
-                    isActive = kickOffDownloadTaskIfReady(isActive, info);
+                    batchRepository.updateCurrentSize(info.batchId);
+                    batchRepository.updateTotalSize(info.batchId);
+                    DownloadBatch downloadBatch = batchRepository.retrieveBatchBy(info);
+                    isActive = kickOffDownloadTaskIfReady(isActive, info, downloadBatch);
                     isActive = kickOffMediaScanIfCompleted(isActive, info);
                 }
 
@@ -344,7 +345,7 @@ public class DownloadService extends Service {
 
         cleanUpStaleDownloadsThatDisappeared(staleDownloadIds, mDownloads);
 
-        List<DownloadBatch> batches = fetchBatches(mDownloads.values());
+        List<DownloadBatch> batches = batchRepository.retrieveBatches(mDownloads.values());
         updateUserVisibleNotification(batches);
 
         // Set alarm when next action is in future. It's okay if the service
@@ -358,40 +359,6 @@ public class DownloadService extends Service {
         }
 
         return isActive;
-    }
-
-    private List<DownloadBatch> fetchBatches(Collection<DownloadInfo> downloads) {
-        List<DownloadBatch> batches = new ArrayList<>();
-        Cursor batchesCursor = resolver.query(Downloads.Impl.BATCH_CONTENT_URI, null, null, null, null);
-        batches.clear();
-        try {
-            int idColumn = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches._ID);
-            int visibilityColumn = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_VISIBILITY);
-            while (batchesCursor.moveToNext()) {
-                long id = batchesCursor.getLong(idColumn);
-
-                String title = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_TITLE));
-                String description = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_DESCRIPTION));
-                String bigPictureUrl = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_BIG_PICTURE));
-                int status = batchesCursor.getInt(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_STATUS));
-                long totalSizeBytes = batchesCursor.getLong(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_TOTAL_BYTES));
-                long currentSizeBytes = batchesCursor.getLong(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_CURRENT_BYTES));
-                @NotificationVisibility.Value int visibility = batchesCursor.getInt(visibilityColumn);
-
-                BatchInfo batchInfo = new BatchInfo(title, description, bigPictureUrl, visibility);
-
-                List<DownloadInfo> batchDownloads = new ArrayList<>();
-                for (DownloadInfo downloadInfo : downloads) {
-                    if (downloadInfo.batchId == id) {
-                        batchDownloads.add(downloadInfo);
-                    }
-                }
-                batches.add(new DownloadBatch(id, batchInfo, batchDownloads, status, totalSizeBytes, currentSizeBytes));
-            }
-        } finally {
-            batchesCursor.close();
-        }
-        return batches;
     }
 
     private void updateTotalBytesFor(DownloadInfo info) {
@@ -422,9 +389,8 @@ public class DownloadService extends Service {
         }
     }
 
-    private boolean kickOffDownloadTaskIfReady(boolean isActive, DownloadInfo info) {
-        CollatedDownloadInfo collatedDownloadInfo = CollatedDownloadInfo.collateInfo(mDownloads, info);
-        boolean isReadyToDownload = info.isReadyToDownload(collatedDownloadInfo);
+    private boolean kickOffDownloadTaskIfReady(boolean isActive, DownloadInfo info, DownloadBatch downloadBatch) {
+        boolean isReadyToDownload = info.isReadyToDownload(downloadBatch);
         boolean downloadIsActive = info.isActive();
 
         if (isReadyToDownload || downloadIsActive) {
@@ -445,7 +411,7 @@ public class DownloadService extends Service {
         }
     }
 
-    private void updateUserVisibleNotification(List<DownloadBatch> batches) {
+    private void updateUserVisibleNotification(Collection<DownloadBatch> batches) {
         mNotifier.updateWith(batches);
     }
 

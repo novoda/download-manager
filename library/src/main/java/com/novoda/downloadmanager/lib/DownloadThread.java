@@ -193,9 +193,8 @@ class DownloadThread implements Runnable {
             return;
         }
 
-        long batchSizeInBytes = 100000; // TODO change me to DownloadBatch
-
-        if (!mInfo.isReadyToDownload(new CollatedDownloadInfo(batchSizeInBytes))) {
+        DownloadBatch currentBatch = batchRepository.retrieveBatchBy(mInfo);
+        if (!mInfo.isReadyToDownload(currentBatch)) {
             Log.d("Download " + mInfo.mId + " is not ready to download: skipping");
             return;
         }
@@ -863,7 +862,6 @@ class DownloadThread implements Runnable {
     private void updateBatchStatus(long batchId, long downloadId) {
         int batchStatus = batchRepository.getBatchStatus(batchId);
         batchRepository.updateBatchStatus(batchId, batchStatus);
-        batchRepository.updateTotalSize(batchId);
 
         if (Downloads.Impl.isStatusCancelled(batchStatus)) {
             ContentValues values = new ContentValues();

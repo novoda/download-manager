@@ -2,7 +2,7 @@ package com.novoda.downloadmanager.lib;
 
 import java.util.List;
 
-class DownloadBatch {
+public class DownloadBatch {
 
     private final long batchId;
     private final BatchInfo info;
@@ -37,11 +37,28 @@ class DownloadBatch {
     }
 
     public long getTotalSize() {
-        throw new RuntimeException();
+        return totalSizeBytes;
     }
 
     public long getCurrentSize() {
-        throw new RuntimeException();
+        return currentSizeBytes;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        DownloadBatch that = (DownloadBatch) o;
+        return batchId == that.batchId;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (batchId ^ (batchId >>> 32));
+    }
 }

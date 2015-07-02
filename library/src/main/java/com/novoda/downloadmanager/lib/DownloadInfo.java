@@ -232,7 +232,7 @@ class DownloadInfo {
 
     /**
      * Result of last {DownloadThread} started by
-     * {@link #isReadyToDownload(CollatedDownloadInfo)} && {@link #startDownloadIfNotActive(ExecutorService)}.
+     * {@link #isReadyToDownload(DownloadBatch)} && {@link #startDownloadIfNotActive(ExecutorService)}.
      */
     private Future<?> mSubmittedTask;
 
@@ -440,12 +440,12 @@ class DownloadInfo {
      * create a {DownloadThread} and enqueue it into given
      * {@link Executor}.
      *
-     * @param collatedDownloadInfo
+     * @param downloadBatch
      * @return If actively downloading.
      */
-    public boolean isReadyToDownload(CollatedDownloadInfo collatedDownloadInfo) {
+    public boolean isReadyToDownload(DownloadBatch downloadBatch) {
         synchronized (this) {
-            return isClientReadyToDownload(collatedDownloadInfo) && isDownloadManagerReadyToDownload();
+            return isClientReadyToDownload(downloadBatch) && isDownloadManagerReadyToDownload();
         }
     }
 
@@ -478,8 +478,8 @@ class DownloadInfo {
         mContext.getContentResolver().update(getAllDownloadsUri(), downloadStatusContentValues, null, null);
     }
 
-    private boolean isClientReadyToDownload(CollatedDownloadInfo collatedDownloadInfo) {
-        return downloadClientReadyChecker.isAllowedToDownload(collatedDownloadInfo);
+    private boolean isClientReadyToDownload(DownloadBatch downloadBatch) {
+        return downloadClientReadyChecker.isAllowedToDownload(downloadBatch);
     }
 
     /**
