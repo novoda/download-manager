@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.novoda.downloadmanager.DownloadManagerBuilder;
@@ -33,6 +34,14 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         com.novoda.notils.logger.simple.Log.setShowLogs(true);
         setContentView(R.layout.activity_main);
         listView = (ListView) findViewById(R.id.main_downloads_list);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                DownloadAdapter adapter = (DownloadAdapter) parent.getAdapter();
+                long batchId = adapter.getItem(position).getBatchId();
+                downloadManager.pauseBatch(batchId);
+            }
+        });
         downloadManager = DownloadManagerBuilder.from(this)
                 .withVerboseLogging()
                 .build();

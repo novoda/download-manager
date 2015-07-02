@@ -33,7 +33,8 @@ public class QueryForDownloadsAsyncTask extends AsyncTask<Query, Void, List<Down
                 String title = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TITLE));
                 String fileName = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_FILENAME));
                 int downloadStatus = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS));
-                downloads.add(new Download(title, fileName, downloadStatus));
+                long id = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BATCH_ID));
+                downloads.add(new Download(title, fileName, downloadStatus, id));
             }
         } finally {
             cursor.close();
