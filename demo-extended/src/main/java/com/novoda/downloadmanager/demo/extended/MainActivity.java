@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         DownloadAdapter adapter = new DownloadAdapter(downloads, new DownloadAdapter.Listener() {
             @Override
             public void onDelete(Download download) {
-                downloadManager.removeBatch(download.getBatchId());
+                downloadManager.removeBatches(download.getBatchId());
             }
         });
         listView.setAdapter(adapter);
