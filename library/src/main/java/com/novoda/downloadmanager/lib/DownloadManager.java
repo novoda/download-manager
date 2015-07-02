@@ -396,13 +396,13 @@ public class DownloadManager {
         return ContentUris.parseId(downloadUri);
     }
 
-    public void markDeleted(URI uri) {
+    public void markDownloadForDeletion(URI uri) {
         Cursor cursor = null;
         try {
             cursor = mResolver.query(Downloads.Impl.CONTENT_URI, new String[]{"_id"}, Downloads.Impl.COLUMN_FILE_NAME_HINT + "=?", new String[]{uri.toString()}, null);
             if (cursor.moveToFirst()) {
                 long id = cursor.getLong(cursor.getColumnIndexOrThrow("_id"));
-                markRowDeleted(id);
+                markDownloadRowForDeletion(id);
                 return;
             }
             Log.e("Didn't delete anything for uri: " + uri);
@@ -421,7 +421,7 @@ public class DownloadManager {
      * @param ids the IDs of the downloads to be marked 'deleted'
      * @return the number of downloads actually updated
      */
-    public int markRowDeleted(long... ids) {
+    public int markDownloadRowForDeletion(long... ids) {
         if (ids == null || ids.length == 0) {
             throw new IllegalArgumentException("called with nothing to remove. input param 'ids' can't be null");
         }
@@ -443,8 +443,40 @@ public class DownloadManager {
      * @param ids the IDs of the downloads to remove
      * @return the number of downloads actually removed
      */
-    public int remove(long... ids) {
-        return markRowDeleted(ids);
+    public int removeDownload(long... ids) {
+        return markDownloadRowForDeletion(ids);
+    }
+
+    /**
+     * Marks the specified batch as 'to be deleted'. Actual cleanup of this row is done in DownloadService.
+     *
+     * @param ids the IDs of the downloads to be marked 'deleted'
+     * @return the number of downloads actually updated
+     */
+    public int markBatchRowForDeletion(long... ids) {
+        if (ids == null || ids.length == 0) {
+            throw new IllegalArgumentException("called with nothing to remove. input param 'ids' can't be null");
+        }
+        ContentValues values = new ContentValues();
+        values.put(Downloads.Impl.Batches.COLUMN_DELETED, 1);
+        // if only one id is passed in, then include it in the uri itself.
+        // this will eliminate a full database scan in the download service.
+        if (ids.length == 1) {
+            return mResolver.update(ContentUris.withAppendedId(Downloads.Impl.BATCH_CONTENT_URI, ids[0]), values, null, null);
+        }
+        return mResolver.update(Downloads.Impl.BATCH_CONTENT_URI, values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
+    }
+
+    /**
+     * Cancel downloads and remove them from the download manager.  Each download will be stopped if
+     * it was running, and it will no longer be accessible through the download manager.
+     * If there is a downloaded file, partial or complete, it is deleted.
+     *
+     * @param ids the IDs of the downloads to remove
+     * @return the number of downloads actually removed
+     */
+    public int removeBatch(long... ids) {
+        return markDownloadRowForDeletion(ids);
     }
 
     /**
