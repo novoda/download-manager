@@ -5,7 +5,7 @@ import android.content.Intent;
 
 class BatchCompletionBroadcaster {
 
-    static final String ACTION_BATCH_COMPLETE = "com.novoda.downloadmanager.BATCH_COMPLETE";
+    static final String ACTION_BATCH_COMPLETE = "com.novoda.downloadmanager.action.BATCH_COMPLETE";
     static final String EXTRA_BATCH_ID = "com.novoda.downloadmanager.extra.BATCH_ID";
 
     private final Context context;

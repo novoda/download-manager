@@ -33,7 +33,7 @@
       android:name="com.novoda.downloadmanager.demo.extended.DownloadBatchCompletionReceiver"
       android:exported="false">
       <intent-filter>
-        <action android:name="com.novoda.downloadmanager.BATCH_COMPLETE" />
+        <action android:name="com.novoda.downloadmanager.action.BATCH_COMPLETE" />
       </intent-filter>
     </receiver>
 
