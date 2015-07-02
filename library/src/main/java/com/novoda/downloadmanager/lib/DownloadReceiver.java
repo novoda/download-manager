@@ -30,8 +30,8 @@ import static com.novoda.downloadmanager.lib.NotificationVisibility.ONLY_WHEN_CO
 public class DownloadReceiver extends BroadcastReceiver {
     private static final String TAG = "DownloadReceiver";
 
-    public static final String EXTRA_BATCH_ID = "com.novoda.extra.BATCH_ID";
-    public static final int TRUE_THIS_IS_CLEARER_NOW = 1;
+    static final String EXTRA_BATCH_ID = "com.novoda.extra.BATCH_ID";
+    private static final int TRUE_THIS_IS_CLEARER_NOW = 1;
 
     private static Handler sAsyncHandler;
 

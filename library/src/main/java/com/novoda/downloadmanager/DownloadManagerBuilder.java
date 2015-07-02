@@ -29,10 +29,8 @@ public class DownloadManagerBuilder {
         return this;
     }
 
-    public DownloadManager build(ContentResolver contentResolver) {
-        if (contentResolver == null) {
-            throw new IllegalStateException("You must use a ContentResolver with the DownloadManager.");
-        }
+    public DownloadManager build() {
+        ContentResolver contentResolver = context.getContentResolver();
         return new DownloadManager(context, contentResolver, verboseLogging);
     }
 

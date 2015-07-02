@@ -453,9 +453,11 @@ class DownloadInfo {
         synchronized (this) {
             boolean isActive;
             if (mSubmittedTask == null) {
+                BatchCompletionBroadcaster batchCompletionBroadcaster = BatchCompletionBroadcaster.newInstance(mContext);
                 ContentResolver contentResolver = mContext.getContentResolver();
                 BatchStatusRepository batchStatusRepository = new BatchStatusRepository(contentResolver);
-                DownloadThread downloadThread = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier, batchStatusRepository);
+                DownloadThread downloadThread = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier,
+                        batchCompletionBroadcaster, batchStatusRepository);
                 mSubmittedTask = executor.submit(downloadThread);
                 isActive = true;
             } else {
