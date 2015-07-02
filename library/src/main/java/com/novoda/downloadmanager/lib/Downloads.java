@@ -806,6 +806,13 @@ final class Downloads {
              * <P>Owner can Init/Read/Write</P>
              */
             public static final String COLUMN_VISIBILITY = "visibility";
+
+            /**
+             * Set to true if this batch is deleted. Its downloads will also be deleted.
+             * <P>Type: BOOLEAN</P>
+             * <P>Owner can Read</P>
+             */
+            public static final String COLUMN_DELETED = "deleted";
         }
     }
 
