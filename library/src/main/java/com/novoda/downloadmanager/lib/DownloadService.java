@@ -370,6 +370,8 @@ public class DownloadService extends Service {
                 String description = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_DESCRIPTION));
                 String bigPictureUrl = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_BIG_PICTURE));
                 int status = batchesCursor.getInt(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_STATUS));
+                long totalSizeBytes = batchesCursor.getLong(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_TOTAL_BYTES));
+                long currentSizeBytes = batchesCursor.getLong(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_CURRENT_BYTES));
                 @NotificationVisibility.Value int visibility = batchesCursor.getInt(visibilityColumn);
 
                 BatchInfo batchInfo = new BatchInfo(title, description, bigPictureUrl, visibility);
@@ -380,7 +382,7 @@ public class DownloadService extends Service {
                         batchDownloads.add(downloadInfo);
                     }
                 }
-                batches.add(new DownloadBatch(id, batchInfo, batchDownloads, status));
+                batches.add(new DownloadBatch(id, batchInfo, batchDownloads, status, totalSizeBytes, currentSizeBytes));
             }
         } finally {
             batchesCursor.close();

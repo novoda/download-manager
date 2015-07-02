@@ -806,6 +806,18 @@ final class Downloads {
              * <P>Owner can Init/Read/Write</P>
              */
             public static final String COLUMN_VISIBILITY = "visibility";
+
+            /**
+             * The total size of the batch in bytes.
+             * <P>Type: INTEGER</P>
+             */
+            public static final String COLUMN_TOTAL_BYTES = "batch_total_bytes";
+
+            /**
+             * The current size of the batch in bytes (on device).
+             * <P>Type: INTEGER</P>
+             */
+            public static final String COLUMN_CURRENT_BYTES = "batch_current_bytes";
         }
     }
 

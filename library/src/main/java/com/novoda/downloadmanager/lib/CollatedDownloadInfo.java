@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class CollatedDownloadInfo {
 
-    private final long totalSize;
+    private final List<DownloadInfo> downloadInfos;
 
     static CollatedDownloadInfo collateInfo(Map<Long, DownloadInfo> downloadsMap, DownloadInfo info) {
         List<DownloadInfo> downloadInfosForBatch = new ArrayList<>();
@@ -37,5 +37,9 @@ public class CollatedDownloadInfo {
 
     public long getTotalSizeInBytes() {
         return totalSize;
+    }
+
+    public long getCurrentSize() {
+        return 0;
     }
 }

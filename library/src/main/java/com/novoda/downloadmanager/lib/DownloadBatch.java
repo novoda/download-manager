@@ -8,12 +8,16 @@ class DownloadBatch {
     private final BatchInfo info;
     private final List<DownloadInfo> downloads;
     private final int status;
+    private final long totalSizeBytes;
+    private final long currentSizeBytes;
 
-    public DownloadBatch(long batchId, BatchInfo info, List<DownloadInfo> downloads, int status) {
+    public DownloadBatch(long batchId, BatchInfo info, List<DownloadInfo> downloads, int status, long totalSizeBytes, long currentSizeBytes) {
         this.batchId = batchId;
         this.info = info;
         this.downloads = downloads;
         this.status = status;
+        this.totalSizeBytes = totalSizeBytes;
+        this.currentSizeBytes = currentSizeBytes;
     }
 
     public long getBatchId() {
@@ -31,4 +35,13 @@ class DownloadBatch {
     public int getStatus() {
         return status;
     }
+
+    public long getTotalSize() {
+        throw new RuntimeException();
+    }
+
+    public long getCurrentSize() {
+        throw new RuntimeException();
+    }
+
 }
