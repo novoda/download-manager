@@ -6,11 +6,13 @@ class Download {
     private final String title;
     private final String fileName;
     private final int downloadStatus;
+    private final long batchId;
 
-    public Download(String title, String fileName, int downloadStatus) {
+    public Download(String title, String fileName, int downloadStatus, long batchId) {
         this.title = title;
         this.fileName = fileName;
         this.downloadStatus = downloadStatus;
+        this.batchId = batchId;
     }
 
     public String getTitle() {
@@ -35,5 +37,9 @@ class Download {
         } else {
             return "WTH";
         }
+    }
+
+    public long getBatchId() {
+        return batchId;
     }
 }
