@@ -44,4 +44,10 @@ class DownloadAdapter extends BaseAdapter {
 
         return view;
     }
+
+    public void updateDownloads(List<Download> downloads) {
+        this.downloads.clear();
+        this.downloads.addAll(downloads);
+        notifyDataSetChanged();
+    }
 }
