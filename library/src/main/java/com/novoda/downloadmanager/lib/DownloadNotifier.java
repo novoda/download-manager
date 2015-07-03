@@ -64,7 +64,7 @@ class DownloadNotifier {
      * @see #buildNotificationTag(DownloadBatch)
      */
 //    @GuardedBy("mActiveNotifs")
-    private final SimpleArrayMap<String, Long> mActiveNotifs = new SimpleArrayMap<>();
+    private final SimpleArrayMap<String, Long> activeNotifs = new SimpleArrayMap<>();
 
     /**
      * Current speed of active downloads, mapped from {@link DownloadInfo#batchId}
@@ -106,7 +106,7 @@ class DownloadNotifier {
      * {@link DownloadInfo}, adding, collapsing, and removing as needed.
      */
     public void updateWith(Collection<DownloadBatch> batches) {
-        synchronized (mActiveNotifs) {
+        synchronized (activeNotifs) {
             SimpleArrayMap<String, Collection<DownloadBatch>> clusters = getClustersByNotificationTag(batches);
 
             showNotificationPerCluster(clusters);
@@ -207,11 +207,11 @@ class DownloadNotifier {
 
     private void useTimeWhenClusterFirstShownToAvoidShuffling(String tag, NotificationCompat.Builder builder) {
         final long firstShown;
-        if (mActiveNotifs.containsKey(tag)) {
-            firstShown = mActiveNotifs.get(tag);
+        if (activeNotifs.containsKey(tag)) {
+            firstShown = activeNotifs.get(tag);
         } else {
             firstShown = System.currentTimeMillis();
-            mActiveNotifs.put(tag, firstShown);
+            activeNotifs.put(tag, firstShown);
         }
         builder.setWhen(firstShown);
     }
@@ -422,11 +422,11 @@ class DownloadNotifier {
     }
 
     private void removeStaleTagsThatWereNotRenewed(SimpleArrayMap<String, Collection<DownloadBatch>> clustered) {
-        for(int i = 0, size = mActiveNotifs.size(); i < size; i++) {
-            String tag = mActiveNotifs.keyAt(i);
+        for(int i = 0, size = activeNotifs.size(); i < size; i++) {
+            String tag = activeNotifs.keyAt(i);
             if (!clustered.containsKey(tag)) {
                 mNotifManager.cancel(tag.hashCode());
-                mActiveNotifs.removeAt(i);
+                activeNotifs.removeAt(i);
             }
         }
     }
