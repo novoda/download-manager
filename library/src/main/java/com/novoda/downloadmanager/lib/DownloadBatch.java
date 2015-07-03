@@ -4,6 +4,8 @@ import java.util.List;
 
 public class DownloadBatch {
 
+    public static final DownloadBatch DELETED = new DownloadBatch(-1, null, null, -1, -1L, -1L);
+
     private final long batchId;
     private final BatchInfo info;
     private final List<DownloadInfo> downloads;
@@ -42,6 +44,10 @@ public class DownloadBatch {
 
     public long getCurrentSize() {
         return currentSizeBytes;
+    }
+
+    public boolean isDeleted() {
+        return this == DELETED;
     }
 
     @Override

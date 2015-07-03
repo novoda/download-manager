@@ -19,24 +19,20 @@ package com.novoda.downloadmanager.lib;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
 
 import com.novoda.notils.logger.simple.Log;
 
-import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -100,8 +96,8 @@ public class DownloadService extends Service {
 
     private volatile int mLastStartId;
     private DownloadClientReadyChecker downloadClientReadyChecker;
-    private ContentResolver resolver;
     private BatchRepository batchRepository;
+    private DownloadDeleter downloadDeleter;
 
     /**
      * Receives notifications when the data in the content provider changes
@@ -136,7 +132,8 @@ public class DownloadService extends Service {
         super.onCreate();
         Log.v("Service onCreate");
 
-        this.batchRepository = new BatchRepository(getContentResolver());
+        this.downloadDeleter = new DownloadDeleter(getContentResolver());
+        this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter);
 
         if (mSystemFacade == null) {
             mSystemFacade = new RealSystemFacade(this);
@@ -164,7 +161,6 @@ public class DownloadService extends Service {
         ConcurrentDownloadsLimitProvider concurrentDownloadsLimitProvider = ConcurrentDownloadsLimitProvider.newInstance(this);
         DownloadExecutorFactory factory = new DownloadExecutorFactory(concurrentDownloadsLimitProvider);
         mExecutor = factory.createExecutor();
-        resolver = getContentResolver();
     }
 
     private DownloadClientReadyChecker getDownloadClientReadyChecker() {
@@ -307,9 +303,9 @@ public class DownloadService extends Service {
         long nextRetryTimeMillis = Long.MAX_VALUE;
         long now = mSystemFacade.currentTimeMillis();
 
-        Cursor downloadsCursor = resolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
+        Cursor downloadsCursor = getContentResolver().query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
         try {
-            DownloadInfo.Reader reader = new DownloadInfo.Reader(resolver, downloadsCursor);
+            DownloadInfo.Reader reader = new DownloadInfo.Reader(getContentResolver(), downloadsCursor);
             int idColumn = downloadsCursor.getColumnIndexOrThrow(Downloads.Impl._ID);
             while (downloadsCursor.moveToNext()) {
                 long id = downloadsCursor.getLong(idColumn);
@@ -324,14 +320,19 @@ public class DownloadService extends Service {
                 }
 
                 if (info.mDeleted) {
-                    deleteFileAndDatabaseRow(info);
+                    downloadDeleter.deleteFileAndDatabaseRow(info);
                 } else if (Downloads.Impl.isStatusCancelled(info.mStatus) || Downloads.Impl.isStatusError(info.mStatus)) {
-                    deleteFileAndMediaReference(info);
+                    downloadDeleter.deleteFileAndMediaReference(info);
                 } else {
+                    DownloadBatch downloadBatch = batchRepository.retrieveBatchBy(info);
+                    if (downloadBatch.isDeleted()) {
+                        continue;
+                    }
+
                     updateTotalBytesFor(info);
                     batchRepository.updateCurrentSize(info.batchId);
                     batchRepository.updateTotalSize(info.batchId);
-                    DownloadBatch downloadBatch = batchRepository.retrieveBatchBy(info);
+
                     isActive = kickOffDownloadTaskIfReady(isActive, info, downloadBatch);
                     isActive = kickOffMediaScanIfCompleted(isActive, info);
                 }
@@ -343,7 +344,7 @@ public class DownloadService extends Service {
             downloadsCursor.close();
         }
 
-        cleanUpStaleDownloadsThatDisappeared(staleDownloadIds, mDownloads);
+        downloadDeleter.cleanUpStaleDownloadsThatDisappeared(staleDownloadIds, mDownloads);
 
         List<DownloadBatch> batches = batchRepository.retrieveBatches(mDownloads.values());
         updateUserVisibleNotification(batches);
@@ -366,26 +367,7 @@ public class DownloadService extends Service {
             ContentValues values = new ContentValues();
             info.mTotalBytes = contentLengthFetcher.fetchContentLengthFor(info);
             values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, info.mTotalBytes);
-            resolver.update(info.getAllDownloadsUri(), values, null, null);
-        }
-    }
-
-    private void deleteFileAndDatabaseRow(DownloadInfo info) {
-        deleteFileAndMediaReference(info);
-        resolver.delete(info.getAllDownloadsUri(), null, null);
-    }
-
-    private void deleteFileAndMediaReference(DownloadInfo info) {
-        if (!TextUtils.isEmpty(info.mMediaProviderUri)) {
-            resolver.delete(Uri.parse(info.mMediaProviderUri), null, null);
-        }
-
-        if (!TextUtils.isEmpty(info.mFileName)) {
-            deleteFileIfExists(info.mFileName);
-            ContentValues blankData = new ContentValues();
-            blankData.put(Downloads.Impl._DATA, (String) null);
-            resolver.update(info.getAllDownloadsUri(), blankData, null, null);
-            info.mFileName = null;
+            getContentResolver().update(info.getAllDownloadsUri(), values, null, null);
         }
     }
 
@@ -403,12 +385,6 @@ public class DownloadService extends Service {
         final boolean activeScan = info.startScanIfReady(mScanner);
         isActive |= activeScan;
         return isActive;
-    }
-
-    private void cleanUpStaleDownloadsThatDisappeared(Set<Long> staleIds, Map<Long, DownloadInfo> downloads) {
-        for (Long id : staleIds) {
-            deleteDownloadLocked(id, downloads);
-        }
     }
 
     private void updateUserVisibleNotification(Collection<DownloadBatch> batches) {
@@ -431,31 +407,6 @@ public class DownloadService extends Service {
     private void updateDownloadFromDatabase(DownloadInfo.Reader reader, DownloadInfo info) {
         reader.updateFromDatabase(info);
         Log.v("processing updated download " + info.mId + ", status: " + info.mStatus);
-    }
-
-    /**
-     * Removes the local copy of the info about a download.
-     */
-    private void deleteDownloadLocked(long id, Map<Long, DownloadInfo> downloads) {
-        DownloadInfo info = downloads.get(id);
-        if (info.mStatus == Downloads.Impl.STATUS_RUNNING) {
-            info.mStatus = Downloads.Impl.STATUS_CANCELED;
-        }
-        if (info.mDestination != Downloads.Impl.DESTINATION_EXTERNAL && info.mFileName != null) {
-            Log.d("deleteDownloadLocked() deleting " + info.mFileName);
-            deleteFileIfExists(info.mFileName);
-        }
-        downloads.remove(info.mId);
-    }
-
-    private void deleteFileIfExists(String path) {
-        if (!TextUtils.isEmpty(path)) {
-            Log.d("deleteFileIfExists() deleting " + path);
-            final File file = new File(path);
-            if (file.exists() && !file.delete()) {
-                Log.w("file: '" + path + "' couldn't be deleted");
-            }
-        }
     }
 
     @Override
