@@ -21,12 +21,6 @@
     android:layout_height="wrap_content"
     android:text="@string/button_batch_download_text" />
 
-  <Button
-    android:id="@+id/main_refresh_button"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="@string/button_refresh_text" />
-
   <TextView
     android:id="@+id/main_no_downloads_view"
     android:layout_width="wrap_content"
