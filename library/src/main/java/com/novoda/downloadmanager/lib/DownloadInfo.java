@@ -232,7 +232,7 @@ class DownloadInfo {
 
     /**
      * Result of last {DownloadThread} started by
-     * {@link #isReadyToDownload(CollatedDownloadInfo)} && {@link #startDownloadIfNotActive(ExecutorService)}.
+     * {@link #isReadyToDownload(DownloadBatch)} && {@link #startDownloadIfNotActive(ExecutorService)}.
      */
     private Future<?> mSubmittedTask;
 
@@ -442,11 +442,11 @@ class DownloadInfo {
      *
      * @return If actively downloading.
      */
-    public boolean isReadyToDownload(CollatedDownloadInfo collatedDownloadInfo) {
+    public boolean isReadyToDownload(DownloadBatch downloadBatch) {
         synchronized (this) {
             // This order MATTERS
             // it means completed downloads will not be accounted for in later downloadInfo queries
-            return isDownloadManagerReadyToDownload() && isClientReadyToDownload(collatedDownloadInfo);
+            return isDownloadManagerReadyToDownload() && isClientReadyToDownload(downloadBatch);
         }
     }
 
@@ -456,9 +456,9 @@ class DownloadInfo {
             if (mSubmittedTask == null || mSubmittedTask.isDone()) {
                 BatchCompletionBroadcaster batchCompletionBroadcaster = BatchCompletionBroadcaster.newInstance(mContext);
                 ContentResolver contentResolver = mContext.getContentResolver();
-                BatchStatusRepository batchStatusRepository = new BatchStatusRepository(contentResolver);
+                BatchRepository batchRepository = new BatchRepository(contentResolver, new DownloadDeleter(contentResolver));
                 DownloadThread downloadThread = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier,
-                        batchCompletionBroadcaster, batchStatusRepository);
+                        batchCompletionBroadcaster, batchRepository);
                 mSubmittedTask = executor.submit(downloadThread);
                 isActive = true;
             } else {
@@ -479,8 +479,8 @@ class DownloadInfo {
         mContext.getContentResolver().update(getAllDownloadsUri(), downloadStatusContentValues, null, null);
     }
 
-    private boolean isClientReadyToDownload(CollatedDownloadInfo collatedDownloadInfo) {
-        return downloadClientReadyChecker.isAllowedToDownload(collatedDownloadInfo);
+    private boolean isClientReadyToDownload(DownloadBatch downloadBatch) {
+        return downloadClientReadyChecker.isAllowedToDownload(downloadBatch);
     }
 
     /**
