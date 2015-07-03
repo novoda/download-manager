@@ -469,9 +469,9 @@ public class DownloadManager {
         // if only one id is passed in, then include it in the uri itself.
         // this will eliminate a full database scan in the download service.
         if (ids.length == 1) {
-            return mResolver.update(ContentUris.withAppendedId(Downloads.Impl.BATCH_CONTENT_URI, ids[0]), values, null, null);
+            return contentResolver.update(ContentUris.withAppendedId(Downloads.Impl.BATCH_CONTENT_URI, ids[0]), values, null, null);
         }
-        return mResolver.update(Downloads.Impl.BATCH_CONTENT_URI, values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
+        return contentResolver.update(Downloads.Impl.BATCH_CONTENT_URI, values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
     }
 
     /**

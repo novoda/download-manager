@@ -405,7 +405,7 @@ public class DownloadService extends Service {
 
     private void deleteBatchesForIds(List<Long> ids, Collection<DownloadInfo> downloads) {
         for (DownloadInfo download : downloads) {
-            if (ids.contains(download.batchId)) {
+            if (ids.contains(download.getBatchId())) {
                 deleteFileAndDatabaseRow(download);
             }
         }
