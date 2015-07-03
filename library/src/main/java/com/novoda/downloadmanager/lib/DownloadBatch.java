@@ -2,7 +2,7 @@ package com.novoda.downloadmanager.lib;
 
 import java.util.List;
 
-public class DownloadBatch implements Download {
+class DownloadBatch implements Download {
 
     public static final DownloadBatch DELETED = new DownloadBatch(-1, null, null, -1, -1L, -1L);
 
