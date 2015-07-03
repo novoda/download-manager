@@ -56,7 +56,12 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         downloadManager = DownloadManagerBuilder.from(this)
                 .withVerboseLogging()
                 .build();
-        downloadAdapter = new DownloadAdapter(new ArrayList<Download>());
+        downloadAdapter = new DownloadAdapter(new ArrayList<Download>(), new DownloadAdapter.Listener() {
+            @Override
+            public void onDelete(Download download) {
+                downloadManager.removeBatches(download.getBatchId());
+            }
+        });
         listView.setAdapter(downloadAdapter);
 
         findViewById(R.id.single_download_button).setOnClickListener(

@@ -1,19 +1,24 @@
 package com.novoda.downloadmanager.demo.extended;
 
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.novoda.downloadmanager.demo.R;
+import com.novoda.notils.caster.Views;
 
 import java.util.List;
 
 class DownloadAdapter extends BaseAdapter {
     private final List<Download> downloads;
+    private final Listener listener;
 
-    public DownloadAdapter(List<Download> downloads) {
+    public DownloadAdapter(List<Download> downloads, Listener listener) {
         this.downloads = downloads;
+        this.listener = listener;
     }
 
     @Override
@@ -35,13 +40,20 @@ class DownloadAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = View.inflate(parent.getContext(), R.layout.list_item_download, null);
 
-        Download download = getItem(position);
-        TextView titleTextView = (TextView) view.findViewById(R.id.download_title_text);
-        TextView locationTextView = (TextView) view.findViewById(R.id.download_location_text);
+        final Download download = getItem(position);
+        TextView titleTextView = Views.findById(view, R.id.download_title_text);
+        TextView locationTextView = Views.findById(view, R.id.download_location_text);
+        Button deleteButton = Views.findById(view, R.id.download_delete_button);
 
         titleTextView.setText(download.getTitle());
         String text = String.format("%1$s : %2$s\nBatch %3$d", download.getDownloadStatusText(), download.getFileName(), download.getBatchId());
         locationTextView.setText(text);
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(@NonNull View v) {
+                listener.onDelete(download);
+            }
+        });
 
         return view;
     }
@@ -50,5 +62,9 @@ class DownloadAdapter extends BaseAdapter {
         this.downloads.clear();
         this.downloads.addAll(downloads);
         notifyDataSetChanged();
+    }
+
+    interface Listener {
+        void onDelete(Download download);
     }
 }

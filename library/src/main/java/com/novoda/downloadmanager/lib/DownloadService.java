@@ -357,24 +357,34 @@ public class DownloadService extends Service {
     }
 
     private List<DownloadBatch> fetchBatches(Collection<DownloadInfo> downloads) {
-        List<DownloadBatch> batches = new ArrayList<>();
         Cursor batchesCursor = resolver.query(Downloads.Impl.BATCH_CONTENT_URI, null, null, null, null);
-        batches.clear();
+        List<DownloadBatch> batches = new ArrayList<>(batchesCursor.getCount());
+        List<Long> forDeletion = new ArrayList<>();
         try {
             int idColumn = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches._ID);
+            int deleteIndex = batchesCursor.getColumnIndex(Downloads.Impl.Batches.COLUMN_DELETED);
+            int titleIndex = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_TITLE);
+            int descriptionIndex = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_DESCRIPTION);
+            int bigPictureUrlIndex = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_BIG_PICTURE);
+            int statusIndex = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_STATUS);
             int visibilityColumn = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_VISIBILITY);
             while (batchesCursor.moveToNext()) {
                 long id = batchesCursor.getLong(idColumn);
 
-                String title = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_TITLE));
-                String description = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_DESCRIPTION));
-                String bigPictureUrl = batchesCursor.getString(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_BIG_PICTURE));
-                int status = batchesCursor.getInt(batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_STATUS));
+                if (batchesCursor.getInt(deleteIndex) == 1) {
+                    forDeletion.add(id);
+                    continue;
+                }
+
+                String title = batchesCursor.getString(titleIndex);
+                String description = batchesCursor.getString(descriptionIndex);
+                String bigPictureUrl = batchesCursor.getString(bigPictureUrlIndex);
+                int status = batchesCursor.getInt(statusIndex);
                 @NotificationVisibility.Value int visibility = batchesCursor.getInt(visibilityColumn);
 
                 BatchInfo batchInfo = new BatchInfo(title, description, bigPictureUrl, visibility);
 
-                List<DownloadInfo> batchDownloads = new ArrayList<>();
+                List<DownloadInfo> batchDownloads = new ArrayList<>(1);
                 for (DownloadInfo downloadInfo : downloads) {
                     if (downloadInfo.batchId == id) {
                         batchDownloads.add(downloadInfo);
@@ -385,7 +395,24 @@ public class DownloadService extends Service {
         } finally {
             batchesCursor.close();
         }
+
+        if (!forDeletion.isEmpty()) {
+            deleteBatchesForIds(forDeletion, downloads);
+        }
+
         return batches;
+    }
+
+    private void deleteBatchesForIds(List<Long> ids, Collection<DownloadInfo> downloads) {
+        for (DownloadInfo download : downloads) {
+            if (ids.contains(download.batchId)) {
+                deleteFileAndDatabaseRow(download);
+            }
+        }
+
+        String selection = TextUtils.join(", ", ids);
+        String[] selectionArgs = {selection};
+        resolver.delete(Downloads.Impl.BATCH_CONTENT_URI, Downloads.Impl.Batches._ID + " IN (?)", selectionArgs);
     }
 
     private void updateTotalBytesFor(DownloadInfo info) {

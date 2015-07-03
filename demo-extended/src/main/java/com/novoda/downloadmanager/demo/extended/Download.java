@@ -6,13 +6,13 @@ class Download {
     private final String title;
     private final String fileName;
     private final int downloadStatus;
-    private final long id;
+    private final long batchId;
 
-    public Download(String title, String fileName, int downloadStatus, long id) {
+    public Download(String title, String fileName, int downloadStatus, long batchId) {
         this.title = title;
         this.fileName = fileName;
         this.downloadStatus = downloadStatus;
-        this.id = id;
+        this.batchId = batchId;
     }
 
     public String getTitle() {
@@ -40,7 +40,7 @@ class Download {
     }
 
     public long getBatchId() {
-        return id;
+        return batchId;
     }
 
     public boolean isPaused() {
