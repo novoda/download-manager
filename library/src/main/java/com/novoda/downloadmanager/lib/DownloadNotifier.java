@@ -37,7 +37,6 @@ import com.novoda.notils.logger.simple.Log;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -177,7 +176,7 @@ class DownloadNotifier {
         if (cluster.containsKey(tag)) {
             batches = cluster.get(tag);
         } else {
-            batches = new HashSet<>();
+            batches = new ArrayList<>();
             cluster.put(tag, batches); // TODO not sure if this is right compared to ArrayListMultiMap
         }
 
