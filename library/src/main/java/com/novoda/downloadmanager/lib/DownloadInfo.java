@@ -440,12 +440,13 @@ class DownloadInfo {
      * create a {DownloadThread} and enqueue it into given
      * {@link Executor}.
      *
-     * @param collatedDownloadInfo
      * @return If actively downloading.
      */
     public boolean isReadyToDownload(CollatedDownloadInfo collatedDownloadInfo) {
         synchronized (this) {
-            return isClientReadyToDownload(collatedDownloadInfo) && isDownloadManagerReadyToDownload();
+            // This order MATTERS
+            // it means completed downloads will not be accounted for in later downloadInfo queries
+            return isDownloadManagerReadyToDownload() && isClientReadyToDownload(collatedDownloadInfo);
         }
     }
 
