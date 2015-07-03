@@ -129,6 +129,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
                         Downloads.Impl.Batches.COLUMN_BIG_PICTURE + " TEXT," +
                         Downloads.Impl.Batches.COLUMN_STATUS + " INTEGER," +
                         Downloads.Impl.Batches.COLUMN_VISIBILITY + " INTEGER," +
+                        Downloads.Impl.Batches.COLUMN_DELETED + " BOOLEAN NOT NULL DEFAULT 0, " +
                         Downloads.Impl.Batches.COLUMN_TOTAL_BYTES + " INTEGER NOT NULL DEFAULT -1, " +
                         Downloads.Impl.Batches.COLUMN_CURRENT_BYTES + " INTEGER NOT NULL DEFAULT 0 " +
                         ");");
@@ -156,7 +157,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             Downloads.Impl.COLUMN_DESTINATION,
             Downloads.Impl.COLUMN_URI,
             Downloads.Impl.COLUMN_STATUS,
-            Downloads.Impl.COLUMN_DELETED,
+            Downloads.Impl.DOWNLOADS_TABLE_NAME + "." + Downloads.Impl.COLUMN_DELETED,
             Downloads.Impl.COLUMN_FILE_NAME_HINT,
             Downloads.Impl.COLUMN_MIME_TYPE,
             Downloads.Impl.COLUMN_TOTAL_BYTES,
@@ -169,6 +170,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             Downloads.Impl.Batches.COLUMN_BIG_PICTURE,
             Downloads.Impl.Batches.COLUMN_VISIBILITY,
             Downloads.Impl.Batches.COLUMN_STATUS,
+            Downloads.Impl.Batches.BATCHES_TABLE_NAME + "." + Downloads.Impl.Batches.COLUMN_DELETED,
             Downloads.Impl.Batches.COLUMN_TOTAL_BYTES,
             Downloads.Impl.Batches.COLUMN_CURRENT_BYTES
     };
