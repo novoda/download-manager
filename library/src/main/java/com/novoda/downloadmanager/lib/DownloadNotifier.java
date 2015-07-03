@@ -37,8 +37,6 @@ import com.novoda.notils.logger.simple.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -66,7 +64,7 @@ class DownloadNotifier {
      * @see #buildNotificationTag(DownloadBatch)
      */
 //    @GuardedBy("mActiveNotifs")
-    private final HashMap<String, Long> mActiveNotifs = new HashMap<>();
+    private final SimpleArrayMap<String, Long> mActiveNotifs = new SimpleArrayMap<>();
 
     /**
      * Current speed of active downloads, mapped from {@link DownloadInfo#batchId}
@@ -424,12 +422,11 @@ class DownloadNotifier {
     }
 
     private void removeStaleTagsThatWereNotRenewed(SimpleArrayMap<String, Collection<DownloadBatch>> clustered) {
-        final Iterator<String> tags = mActiveNotifs.keySet().iterator();
-        while (tags.hasNext()) {
-            final String tag = tags.next();
+        for(int i = 0, size = mActiveNotifs.size(); i < size; i++) {
+            String tag = mActiveNotifs.keyAt(i);
             if (!clustered.containsKey(tag)) {
                 mNotifManager.cancel(tag.hashCode());
-                tags.remove();
+                mActiveNotifs.removeAt(i);
             }
         }
     }
