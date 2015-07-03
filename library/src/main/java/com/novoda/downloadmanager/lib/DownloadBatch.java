@@ -2,7 +2,7 @@ package com.novoda.downloadmanager.lib;
 
 import java.util.List;
 
-class DownloadBatch implements Download {
+class DownloadBatch {
 
     public static final DownloadBatch DELETED = new DownloadBatch(-1, null, null, -1, -1L, -1L);
 
@@ -22,17 +22,14 @@ class DownloadBatch implements Download {
         this.currentSizeBytes = currentSizeBytes;
     }
 
-    @Override
-    public long getId() {
+    public long getBatchId() {
         return batchId;
     }
 
-    @Override
     public long getTotalSize() {
         return totalSizeBytes;
     }
 
-    @Override
     public long getCurrentSize() {
         return currentSizeBytes;
     }

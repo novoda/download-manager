@@ -145,13 +145,13 @@ class DownloadNotifier {
         } else if (Downloads.Impl.isStatusError(status) && !Downloads.Impl.isStatusCancelled(status)
                 && shouldShowCompletedItem(visibility)) {
             // Failed downloads always have unique notifs
-            return TYPE_FAILED + ":" + batch.getId();
+            return TYPE_FAILED + ":" + batch.getBatchId();
         } else if (Downloads.Impl.isStatusCancelled(status) && shouldShowCompletedItem(visibility)) {
             // Cancelled downloads always have unique notifs
-            return TYPE_CANCELLED + ":" + batch.getId();
+            return TYPE_CANCELLED + ":" + batch.getBatchId();
         } else if (Downloads.Impl.isStatusSuccess(status) && shouldShowCompletedItem(visibility)) {
             // Complete downloads always have unique notifs
-            return TYPE_SUCCESS + ":" + batch.getId();
+            return TYPE_SUCCESS + ":" + batch.getBatchId();
         } else {
             return null;
         }
@@ -247,7 +247,7 @@ class DownloadNotifier {
 
             DownloadBatch batch = cluster.iterator().next();
             Intent cancelIntent = new Intent(Constants.ACTION_CANCEL, null, mContext, DownloadReceiver.class);
-            cancelIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getId());
+            cancelIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getBatchId());
             PendingIntent pendingCancelIntent = PendingIntent.getBroadcast(mContext, 0, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             builder.addAction(R.drawable.dl__ic_action_cancel, "Cancel", pendingCancelIntent);
 
@@ -267,11 +267,11 @@ class DownloadNotifier {
 
             final Intent intent = new Intent(action, uri, mContext, DownloadReceiver.class);
             intent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, getDownloadIds(cluster));
-            intent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getId());
+            intent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getBatchId());
             builder.setContentIntent(PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
 
             final Intent hideIntent = new Intent(Constants.ACTION_HIDE, uri, mContext, DownloadReceiver.class);
-            hideIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getId());
+            hideIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getBatchId());
             builder.setDeleteIntent(PendingIntent.getBroadcast(mContext, 0, hideIntent, 0));
         }
     }

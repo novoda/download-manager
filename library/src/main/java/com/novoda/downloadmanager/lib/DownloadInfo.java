@@ -480,7 +480,11 @@ class DownloadInfo {
     }
 
     private boolean isClientReadyToDownload(DownloadBatch downloadBatch) {
-        return downloadClientReadyChecker.isAllowedToDownload(downloadBatch);
+        return downloadClientReadyChecker.isAllowedToDownload(marshallToDownload(downloadBatch));
+    }
+
+    private Download marshallToDownload(DownloadBatch downloadBatch) {
+        return new Download(downloadBatch.getBatchId(), downloadBatch.getCurrentSize(), downloadBatch.getTotalSize());
     }
 
     /**
