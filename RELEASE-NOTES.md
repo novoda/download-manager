@@ -1,4 +1,4 @@
-0.0.12
+0.0.13
 -------
 
 BUG FIX - Queues all downloading tasks when the downloads cannot continue
