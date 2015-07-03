@@ -401,19 +401,20 @@ class DownloadInfo {
      * create a {DownloadThread} and enqueue it into given
      * {@link Executor}.
      *
-     * @param collatedDownloadInfo
      * @return If actively downloading.
      */
     public boolean isReadyToDownload(CollatedDownloadInfo collatedDownloadInfo) {
         synchronized (this) {
-            return isClientReadyToDownload(collatedDownloadInfo) && isDownloadManagerReadyToDownload();
+            // This order MATTERS
+            // it means completed downloads will not be accounted for in later downloadInfo queries
+            return isDownloadManagerReadyToDownload() && isClientReadyToDownload(collatedDownloadInfo);
         }
     }
 
     public boolean startDownloadIfNotActive(ExecutorService executor, StorageManager storageManager, DownloadNotifier downloadNotifier) {
         synchronized (this) {
             boolean isActive;
-            if (submittedThread == null) {
+            if (submittedThread == null || submittedThread.isDone()) {
                 BatchCompletionBroadcaster batchCompletionBroadcaster = BatchCompletionBroadcaster.newInstance(context);
                 ContentResolver contentResolver = context.getContentResolver();
                 BatchStatusRepository batchStatusRepository = new BatchStatusRepository(contentResolver);

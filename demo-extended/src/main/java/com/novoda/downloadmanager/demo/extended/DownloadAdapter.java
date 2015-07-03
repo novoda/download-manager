@@ -40,8 +40,15 @@ class DownloadAdapter extends BaseAdapter {
         TextView locationTextView = (TextView) view.findViewById(R.id.download_location_text);
 
         titleTextView.setText(download.getTitle());
-        locationTextView.setText(download.getDownloadStatusText() + " : " + download.getFileName());
+        String text = String.format("%1$s : %2$s\nBatch %3$d", download.getDownloadStatusText(), download.getFileName(), download.getBatchId());
+        locationTextView.setText(text);
 
         return view;
+    }
+
+    public void updateDownloads(List<Download> downloads) {
+        this.downloads.clear();
+        this.downloads.addAll(downloads);
+        notifyDataSetChanged();
     }
 }
