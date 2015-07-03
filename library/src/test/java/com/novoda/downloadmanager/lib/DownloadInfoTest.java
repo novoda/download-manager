@@ -8,14 +8,14 @@ public class DownloadInfoTest {
 
     private static final DownloadClientReadyChecker IS_READY = new DownloadClientReadyChecker() {
         @Override
-        public boolean isAllowedToDownload(CollatedDownloadInfo collatedDownloadInfo) {
+        public boolean isAllowedToDownload(DownloadBatch downloadBatch) {
             return true;
         }
     };
 
     private static final DownloadClientReadyChecker IS_NOT_READY = new DownloadClientReadyChecker() {
         @Override
-        public boolean isAllowedToDownload(CollatedDownloadInfo collatedDownloadInfo) {
+        public boolean isAllowedToDownload(DownloadBatch downloadBatch) {
             return false;
         }
     };
