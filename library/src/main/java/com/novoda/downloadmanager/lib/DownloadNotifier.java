@@ -41,7 +41,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -318,7 +317,7 @@ class DownloadNotifier {
             }
         }
 
-        Set<DownloadBatch> currentBatches = new HashSet<>();
+        List<DownloadBatch> currentBatches = new ArrayList<>();
         for (DownloadBatch batch : cluster) {
             currentBatches.add(batch);
         }
@@ -394,7 +393,7 @@ class DownloadNotifier {
         style.setSummaryText(description);
     }
 
-    private Notification buildStackedNotification(int type, NotificationCompat.Builder builder, Set<DownloadBatch> currentBatches, String remainingText, String percentText) {
+    private Notification buildStackedNotification(int type, NotificationCompat.Builder builder, Collection<DownloadBatch> currentBatches, String remainingText, String percentText) {
         final NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(builder);
 
         for (DownloadBatch batch : currentBatches) {
