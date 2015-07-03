@@ -3,7 +3,7 @@ package com.novoda.downloadmanager.demo.extended;
 import android.app.Application;
 import android.hardware.SensorManager;
 
-import com.novoda.downloadmanager.lib.CollatedDownloadInfo;
+import com.novoda.downloadmanager.lib.DownloadBatch;
 import com.novoda.downloadmanager.lib.DownloadClientReadyChecker;
 
 public class DemoApplication extends Application implements DownloadClientReadyChecker {
@@ -17,10 +17,10 @@ public class DemoApplication extends Application implements DownloadClientReadyC
     }
 
     @Override
-    public boolean isAllowedToDownload(CollatedDownloadInfo collatedDownloadInfo) {
+    public boolean isAllowedToDownload(DownloadBatch downloadBatch) {
         // Here you would add any reasons you may not want to download
         // For instance if you have some type of geo-location lock on your download capability
-        return oneRuleToBindThem.shouldWeDownload(collatedDownloadInfo);
+        return oneRuleToBindThem.shouldWeDownload(downloadBatch);
     }
 
     private static final class OneRuleToBindThem {
@@ -28,8 +28,8 @@ public class DemoApplication extends Application implements DownloadClientReadyC
         /**
          * @return for our demo we expect always to return true ... unless you want to conquer the galaxy
          */
-        public boolean shouldWeDownload(CollatedDownloadInfo collatedDownloadInfo) {
-            return collatedDownloadInfo.getTotalSizeInBytes() > SensorManager.GRAVITY_DEATH_STAR_I;
+        public boolean shouldWeDownload(DownloadBatch downloadBatch) {
+            return downloadBatch.getTotalSize() > SensorManager.GRAVITY_DEATH_STAR_I;
         }
     }
 }

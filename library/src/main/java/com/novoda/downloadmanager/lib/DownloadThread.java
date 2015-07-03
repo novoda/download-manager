@@ -72,20 +72,20 @@ class DownloadThread implements Runnable {
     private final StorageManager storageManager;
     private final DownloadNotifier downloadNotifier;
     private final BatchCompletionBroadcaster batchCompletionBroadcaster;
-    private final BatchStatusRepository batchStatusRepository;
+    private final BatchRepository batchRepository;
 
     private volatile boolean policyDirty;
 
     public DownloadThread(Context context, SystemFacade systemFacade, DownloadInfo downloadInfo,
                           StorageManager storageManager, DownloadNotifier downloadNotifier,
-                          BatchCompletionBroadcaster batchCompletionBroadcaster, BatchStatusRepository batchStatusRepository) {
+                          BatchCompletionBroadcaster batchCompletionBroadcaster, BatchRepository batchRepository) {
         this.context = context;
         this.systemFacade = systemFacade;
         this.downloadInfo = downloadInfo;
         this.storageManager = storageManager;
         this.downloadNotifier = downloadNotifier;
         this.batchCompletionBroadcaster = batchCompletionBroadcaster;
-        this.batchStatusRepository = batchStatusRepository;
+        this.batchRepository = batchRepository;
     }
 
     /**
@@ -193,10 +193,9 @@ class DownloadThread implements Runnable {
             return;
         }
 
-        long batchSizeInBytes = batchStatusRepository.getBatchSizeInBytes(downloadInfo.getBatchId());
-
-        if (!downloadInfo.isReadyToDownload(new CollatedDownloadInfo(batchSizeInBytes))) {
-            Log.d("Download " + downloadInfo.getId() + " is not ready to download; skipping");
+        DownloadBatch currentBatch = batchRepository.retrieveBatchBy(downloadInfo);
+        if (!downloadInfo.isReadyToDownload(currentBatch)) {
+            Log.d("Download " + downloadInfo.getId() + " is not ready to download: skipping");
             return;
         }
 
@@ -862,8 +861,8 @@ class DownloadThread implements Runnable {
     }
 
     private void updateBatchStatus(long batchId, long downloadId) {
-        int batchStatus = batchStatusRepository.getBatchStatus(batchId);
-        batchStatusRepository.updateBatchStatus(batchId, batchStatus);
+        int batchStatus = batchRepository.getBatchStatus(batchId);
+        batchRepository.updateBatchStatus(batchId, batchStatus);
 
         if (Downloads.Impl.isStatusCancelled(batchStatus)) {
             ContentValues values = new ContentValues(1);

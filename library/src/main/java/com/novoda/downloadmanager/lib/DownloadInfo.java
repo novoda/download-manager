@@ -113,7 +113,11 @@ class DownloadInfo {
 
     /**
      * Result of last {DownloadThread} started by
+<<<<<<< HEAD
      * {@link #isReadyToDownload(CollatedDownloadInfo)} && {@link #startDownloadIfNotActive(ExecutorService, StorageManager, DownloadNotifier)}.
+=======
+     * {@link #isReadyToDownload(DownloadBatch)} && {@link #startDownloadIfNotActive(ExecutorService)}.
+>>>>>>> master
      */
     private Future<?> submittedThread;
 
@@ -403,11 +407,11 @@ class DownloadInfo {
      *
      * @return If actively downloading.
      */
-    public boolean isReadyToDownload(CollatedDownloadInfo collatedDownloadInfo) {
+    public boolean isReadyToDownload(DownloadBatch downloadBatch) {
         synchronized (this) {
             // This order MATTERS
             // it means completed downloads will not be accounted for in later downloadInfo queries
-            return isDownloadManagerReadyToDownload() && isClientReadyToDownload(collatedDownloadInfo);
+            return isDownloadManagerReadyToDownload() && isClientReadyToDownload(downloadBatch);
         }
     }
 
@@ -417,9 +421,9 @@ class DownloadInfo {
             if (submittedThread == null || submittedThread.isDone()) {
                 BatchCompletionBroadcaster batchCompletionBroadcaster = BatchCompletionBroadcaster.newInstance(context);
                 ContentResolver contentResolver = context.getContentResolver();
-                BatchStatusRepository batchStatusRepository = new BatchStatusRepository(contentResolver);
+                BatchRepository batchRepository = new BatchRepository(contentResolver, new DownloadDeleter(contentResolver));
                 DownloadThread downloadThread = new DownloadThread(context, systemFacade, this, storageManager, downloadNotifier,
-                        batchCompletionBroadcaster, batchStatusRepository);
+                        batchCompletionBroadcaster, batchRepository);
                 submittedThread = executor.submit(downloadThread);
                 isActive = true;
             } else {
@@ -440,8 +444,8 @@ class DownloadInfo {
         context.getContentResolver().update(getAllDownloadsUri(), downloadStatusContentValues, null, null);
     }
 
-    private boolean isClientReadyToDownload(CollatedDownloadInfo collatedDownloadInfo) {
-        return downloadClientReadyChecker.isAllowedToDownload(collatedDownloadInfo);
+    private boolean isClientReadyToDownload(DownloadBatch downloadBatch) {
+        return downloadClientReadyChecker.isAllowedToDownload(downloadBatch);
     }
 
     /**

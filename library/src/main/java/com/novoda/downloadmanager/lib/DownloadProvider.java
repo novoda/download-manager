@@ -185,6 +185,8 @@ public final class DownloadProvider extends ContentProvider {
             Downloads.Impl.Batches.COLUMN_DESCRIPTION,
             Downloads.Impl.Batches.COLUMN_BIG_PICTURE,
             Downloads.Impl.Batches.COLUMN_VISIBILITY,
+            Downloads.Impl.Batches.COLUMN_TOTAL_BYTES,
+            Downloads.Impl.Batches.COLUMN_CURRENT_BYTES,
             OpenableColumns.DISPLAY_NAME,
             OpenableColumns.SIZE,
     };
@@ -556,7 +558,6 @@ public final class DownloadProvider extends ContentProvider {
                 Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE,
                 Downloads.Impl.DESTINATION_FILE_URI,
                 Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD);
-
 
         // remove the rest of the columns that are allowed (with any value)
         values.remove(Downloads.Impl.COLUMN_URI);

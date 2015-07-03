@@ -35,12 +35,12 @@ import com.novoda.downloadmanager.R;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -108,9 +108,9 @@ class DownloadNotifier {
      * Update {@link NotificationManager} to reflect the given set of
      * {@link DownloadInfo}, adding, collapsing, and removing as needed.
      */
-    public void updateWith(List<DownloadBatch> batches) {
+    public void updateWith(Collection<DownloadBatch> batches) {
         synchronized (activeNotifications) {
-            Map<String, List<DownloadBatch>> clusters = getClustersByNotificationTag(batches);
+            Map<String, Collection<DownloadBatch>> clusters = getClustersByNotificationTag(batches);
 
             showNotificationPerCluster(clusters);
 
@@ -119,8 +119,8 @@ class DownloadNotifier {
     }
 
     @NonNull
-    private Map<String, List<DownloadBatch>> getClustersByNotificationTag(List<DownloadBatch> batches) {
-        Map<String, List<DownloadBatch>> clustered = new HashMap<>();
+    private Map<String, Collection<DownloadBatch>> getClustersByNotificationTag(Collection<DownloadBatch> batches) {
+        Map<String, Collection<DownloadBatch>> clustered = new HashMap<>();
 
         for (DownloadBatch batch : batches) {
             String tag = buildNotificationTag(batch);
@@ -167,27 +167,27 @@ class DownloadNotifier {
                 || visibility == NotificationVisibility.ACTIVE_OR_COMPLETE;
     }
 
-    private void addBatchToCluster(String tag, Map<String, List<DownloadBatch>> cluster, DownloadBatch batch) {
+    private void addBatchToCluster(String tag, Map<String, Collection<DownloadBatch>> cluster, DownloadBatch batch) {
         if (tag == null) {
             return;
         }
 
-        List<DownloadBatch> batches;
+        Collection<DownloadBatch> batches;
 
         if (cluster.containsKey(tag)) {
             batches = cluster.get(tag);
         } else {
-            batches = new ArrayList<>();
+            batches = new HashSet<>();
             cluster.put(tag, batches); // TODO not sure if this is right compared to ArrayListMultiMap
         }
 
         batches.add(batch);
     }
 
-    private void showNotificationPerCluster(Map<String, List<DownloadBatch>> clusters) {
+    private void showNotificationPerCluster(Map<String, Collection<DownloadBatch>> clusters) {
         for (String notificationId : clusters.keySet()) {
             int type = getNotificationTagType(notificationId);
-            List<DownloadBatch> cluster = clusters.get(notificationId);
+            Collection<DownloadBatch> cluster = clusters.get(notificationId);
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
             useTimeWhenClusterFirstShownToAvoidShuffling(notificationId, builder);
@@ -236,7 +236,7 @@ class DownloadNotifier {
         }
     }
 
-    private void buildActionIntents(String tag, int type, List<DownloadBatch> cluster, NotificationCompat.Builder builder) {
+    private void buildActionIntents(String tag, int type, Collection<DownloadBatch> cluster, NotificationCompat.Builder builder) {
         if (type == TYPE_ACTIVE || type == TYPE_WAITING) {
             // build a synthetic uri for intent identification purposes
             Uri uri = new Uri.Builder().scheme("active-dl").appendPath(tag).build();
@@ -278,7 +278,7 @@ class DownloadNotifier {
 
     private Notification buildTitlesAndDescription(
             int type,
-            List<DownloadBatch> cluster,
+            Collection<DownloadBatch> cluster,
             NotificationCompat.Builder builder) {
 
         String remainingText = null;
@@ -317,7 +317,7 @@ class DownloadNotifier {
             }
         }
 
-        Set<DownloadBatch> currentBatches = new HashSet<>(cluster.size());
+        List<DownloadBatch> currentBatches = new ArrayList<>(cluster.size());
         for (DownloadBatch batch : cluster) {
             currentBatches.add(batch);
         }
@@ -393,7 +393,7 @@ class DownloadNotifier {
         style.setSummaryText(description);
     }
 
-    private Notification buildStackedNotification(int type, NotificationCompat.Builder builder, Set<DownloadBatch> currentBatches, String remainingText, String percentText) {
+    private Notification buildStackedNotification(int type, NotificationCompat.Builder builder, Collection<DownloadBatch> currentBatches, String remainingText, String percentText) {
         final NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(builder);
 
         for (DownloadBatch batch : currentBatches) {
@@ -423,7 +423,7 @@ class DownloadNotifier {
         style.setSummaryText(description);
     }
 
-    private void removeStaleTagsThatWereNotRenewed(Map<String, List<DownloadBatch>> clustered) {
+    private void removeStaleTagsThatWereNotRenewed(Map<String, Collection<DownloadBatch>> clustered) {
         final Iterator<String> tags = activeNotifications.keySet().iterator();
         while (tags.hasNext()) {
             final String tag = tags.next();
@@ -443,8 +443,8 @@ class DownloadNotifier {
         }
     }
 
-    private long[] getDownloadIds(List<DownloadBatch> batches) {
-        List<Long> ids = new ArrayList<>(batches.size() * 3);
+    private long[] getDownloadIds(Collection<DownloadBatch> batches) {
+        List<Long> ids = new ArrayList<>(batches.size());
         for (DownloadBatch batch : batches) {
             for (DownloadInfo downloadInfo : batch.getDownloads()) {
                 ids.add(downloadInfo.getId());
