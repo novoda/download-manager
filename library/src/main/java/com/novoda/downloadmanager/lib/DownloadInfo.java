@@ -453,7 +453,7 @@ class DownloadInfo {
     public boolean startDownloadIfNotActive(ExecutorService executor) {
         synchronized (this) {
             boolean isActive;
-            if (mSubmittedTask == null) {
+            if (mSubmittedTask == null || mSubmittedTask.isDone()) {
                 BatchCompletionBroadcaster batchCompletionBroadcaster = BatchCompletionBroadcaster.newInstance(mContext);
                 ContentResolver contentResolver = mContext.getContentResolver();
                 BatchStatusRepository batchStatusRepository = new BatchStatusRepository(contentResolver);

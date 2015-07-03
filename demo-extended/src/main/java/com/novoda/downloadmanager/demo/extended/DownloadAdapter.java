@@ -46,7 +46,8 @@ class DownloadAdapter extends BaseAdapter {
         Button deleteButton = Views.findById(view, R.id.download_delete_button);
 
         titleTextView.setText(download.getTitle());
-        locationTextView.setText(download.getDownloadStatusText() + " : " + download.getFileName());
+        String text = String.format("%1$s : %2$s\nBatch %3$d", download.getDownloadStatusText(), download.getFileName(), download.getBatchId());
+        locationTextView.setText(text);
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(@NonNull View v) {
@@ -55,6 +56,12 @@ class DownloadAdapter extends BaseAdapter {
         });
 
         return view;
+    }
+
+    public void updateDownloads(List<Download> downloads) {
+        this.downloads.clear();
+        this.downloads.addAll(downloads);
+        notifyDataSetChanged();
     }
 
     interface Listener {

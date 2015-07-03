@@ -1,12 +1,16 @@
 package com.novoda.downloadmanager.demo.extended;
 
+import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.novoda.downloadmanager.DownloadManagerBuilder;
@@ -17,6 +21,7 @@ import com.novoda.downloadmanager.lib.Query;
 import com.novoda.downloadmanager.lib.Request;
 import com.novoda.downloadmanager.lib.RequestBatch;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements QueryForDownloadsAsyncTask.Callback {
@@ -24,8 +29,10 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
     private static final String BIG_FILE = "http://download.thinkbroadband.com/20MB.zip";
     private static final String BEARD_IMAGE = "http://i.imgur.com/9JL2QVl.jpg";
 
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private DownloadManager downloadManager;
     private ListView listView;
+    private DownloadAdapter downloadAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,9 +40,29 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         com.novoda.notils.logger.simple.Log.setShowLogs(true);
         setContentView(R.layout.activity_main);
         listView = (ListView) findViewById(R.id.main_downloads_list);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                DownloadAdapter adapter = (DownloadAdapter) parent.getAdapter();
+                Download item = adapter.getItem(position);
+                long batchId = item.getBatchId();
+                if (item.isPaused()) {
+                    downloadManager.resumeBatch(batchId);
+                } else {
+                    downloadManager.pauseBatch(batchId);
+                }
+            }
+        });
         downloadManager = DownloadManagerBuilder.from(this)
                 .withVerboseLogging()
                 .build();
+        downloadAdapter = new DownloadAdapter(new ArrayList<Download>(), new DownloadAdapter.Listener() {
+            @Override
+            public void onDelete(Download download) {
+                downloadManager.removeBatches(download.getBatchId());
+            }
+        });
+        listView.setAdapter(downloadAdapter);
 
         findViewById(R.id.single_download_button).setOnClickListener(
                 new View.OnClickListener() {
@@ -54,6 +81,18 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
                 });
 
         setupQueryingExample();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        getContentResolver().registerContentObserver(DownloadManager.CONTENT_URI, true, updateSelf);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        getContentResolver().unregisterContentObserver(updateSelf);
     }
 
     private void enqueueSingleDownload() {
@@ -91,13 +130,6 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
 
     private void setupQueryingExample() {
         queryForDownloads();
-        findViewById(R.id.main_refresh_button).setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(@NonNull View v) {
-                        queryForDownloads();
-                    }
-                });
         listView.setEmptyView(findViewById(R.id.main_no_downloads_view));
     }
 
@@ -107,13 +139,16 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
 
     @Override
     public void onQueryResult(List<Download> downloads) {
-        DownloadAdapter adapter = new DownloadAdapter(downloads, new DownloadAdapter.Listener() {
-            @Override
-            public void onDelete(Download download) {
-                downloadManager.removeBatches(download.getBatchId());
-            }
-        });
-        listView.setAdapter(adapter);
+        downloadAdapter.updateDownloads(downloads);
     }
+
+    private final ContentObserver updateSelf = new ContentObserver(handler) {
+
+        @Override
+        public void onChange(boolean selfChange) {
+            queryForDownloads();
+        }
+
+    };
 
 }

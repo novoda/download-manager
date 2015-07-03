@@ -42,4 +42,8 @@ class Download {
     public long getBatchId() {
         return batchId;
     }
+
+    public boolean isPaused() {
+        return downloadStatus == DownloadManager.STATUS_PAUSED;
+    }
 }
