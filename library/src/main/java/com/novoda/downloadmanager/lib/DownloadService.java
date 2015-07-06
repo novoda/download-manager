@@ -324,7 +324,7 @@ public class DownloadService extends Service {
                 } else if (Downloads.Impl.isStatusCancelled(info.getStatus()) || Downloads.Impl.isStatusError(info.getStatus())) {
                     downloadDeleter.deleteFileAndMediaReference(info);
                 } else {
-                    DownloadBatch downloadBatch = batchRepository.retrieveBatchBy(info);
+                    DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(info);
                     if (downloadBatch.isDeleted()) {
                         continue;
                     }
@@ -346,7 +346,10 @@ public class DownloadService extends Service {
 
         downloadDeleter.cleanUpStaleDownloadsThatDisappeared(staleDownloadIds, downloads);
 
-        List<DownloadBatch> batches = batchRepository.retrieveBatches(downloads.values());
+        Collection<DownloadInfo> downloads = downloads.values();
+
+        List<DownloadBatch> batches = batchRepository.retrieveBatchesFor(downloads);
+        batchRepository.deleteMarkedBatchesFor(downloads);
         updateUserVisibleNotification(batches);
 
         // Set alarm when next action is in future. It's okay if the service
