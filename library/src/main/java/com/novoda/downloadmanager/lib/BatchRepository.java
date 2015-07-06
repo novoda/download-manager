@@ -32,7 +32,7 @@ class BatchRepository {
 
     private static final int PRIORITISED_STATUSES_SIZE = PRIORITISED_STATUSES.size();
 
-    private static final String[] PROJECTION_BATCH_ID = {Downloads.Impl.Batches._ID};
+    private static final String[] PROJECT_BATCH_ID = {Downloads.Impl.Batches._ID};
     private static final String SELECT_DELETED = Downloads.Impl.Batches.COLUMN_DELETED;
     private static final String[] WHERE_MARKED_FOR_DELETION = {"1"};
 
@@ -170,7 +170,7 @@ class BatchRepository {
     }
 
     public void deleteMarkedBatchesFor(Collection<DownloadInfo> downloads) {
-        Cursor batchesCursor = resolver.query(Downloads.Impl.BATCH_CONTENT_URI, PROJECTION_BATCH_ID, SELECT_DELETED, WHERE_MARKED_FOR_DELETION, null);
+        Cursor batchesCursor = resolver.query(Downloads.Impl.BATCH_CONTENT_URI, PROJECT_BATCH_ID, SELECT_DELETED, WHERE_MARKED_FOR_DELETION, null);
         List<Long> batchIdsToDelete = new ArrayList<>();
         try {
             while (batchesCursor.moveToNext()) {
