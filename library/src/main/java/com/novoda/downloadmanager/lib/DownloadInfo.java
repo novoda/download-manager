@@ -229,7 +229,7 @@ class DownloadInfo {
     public void broadcastIntentDownloadComplete(int finalStatus) {
         Intent intent = new Intent(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
         intent.setPackage(getPackageName());
-        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, getId());
+        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, id);
         intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_STATUS, finalStatus);
         intent.setData(getMyDownloadsUri());
         if (extras != null) {
@@ -257,24 +257,24 @@ class DownloadInfo {
      * Returns the time when a download should be restarted.
      */
     private long restartTime(long now) {
-        if (getNumFailed() == 0) {
+        if (numFailed == 0) {
             return now;
         }
         if (retryAfter > 0) {
             return lastMod + retryAfter;
         }
-        return lastMod + Constants.RETRY_FIRST_DELAY * (1000 + randomNumberGenerator.generate()) * (1 << (getNumFailed() - 1));
+        return lastMod + Constants.RETRY_FIRST_DELAY * (1000 + randomNumberGenerator.generate()) * (1 << (numFailed - 1));
     }
 
     /**
      * Returns whether this download should be enqueued.
      */
     private boolean isDownloadManagerReadyToDownload() {
-        if (getControl() == Downloads.Impl.CONTROL_PAUSED) {
+        if (control == Downloads.Impl.CONTROL_PAUSED) {
             // the download is paused, so it's not going to start
             return false;
         }
-        switch (getStatus()) {
+        switch (status) {
             case 0: // status hasn't been initialized yet, this is a new download
             case Downloads.Impl.STATUS_PENDING: // download is explicit marked as ready to start
             case Downloads.Impl.STATUS_RUNNING: // download interrupted (process killed etc) while
@@ -376,20 +376,20 @@ class DownloadInfo {
      * @return one of the NETWORK_* constants
      */
     private NetworkState checkSizeAllowedForNetwork(int networkType) {
-        if (getTotalBytes() <= 0) {
+        if (totalBytes <= 0) {
             return NetworkState.OK; // we don't know the size yet
         }
         if (networkType == ConnectivityManager.TYPE_WIFI) {
             return NetworkState.OK; // anything goes over wifi
         }
         Long maxBytesOverMobile = systemFacade.getMaxBytesOverMobile();
-        if (maxBytesOverMobile != null && getTotalBytes() > maxBytesOverMobile) {
+        if (maxBytesOverMobile != null && totalBytes > maxBytesOverMobile) {
             return NetworkState.UNUSABLE_DUE_TO_SIZE;
         }
         if (bypassRecommendedSizeLimit == 0) {
             Long recommendedMaxBytesOverMobile = systemFacade.getRecommendedMaxBytesOverMobile();
             if (recommendedMaxBytesOverMobile != null
-                    && getTotalBytes() > recommendedMaxBytesOverMobile) {
+                    && totalBytes > recommendedMaxBytesOverMobile) {
                 return NetworkState.RECOMMENDED_UNUSABLE_DUE_TO_SIZE;
             }
         }
@@ -434,9 +434,9 @@ class DownloadInfo {
     }
 
     public void updateStatus(int status) {
-        this.setStatus(status);
+        setStatus(status);
         downloadStatusContentValues.clear();
-        downloadStatusContentValues.put(Downloads.Impl.COLUMN_STATUS, this.getStatus());
+        downloadStatusContentValues.put(Downloads.Impl.COLUMN_STATUS, status);
         context.getContentResolver().update(getAllDownloadsUri(), downloadStatusContentValues, null, null);
     }
 
@@ -461,18 +461,18 @@ class DownloadInfo {
     }
 
     public boolean isOnCache() {
-        return (getDestination() == Downloads.Impl.DESTINATION_CACHE_PARTITION
-                || getDestination() == Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION
-                || getDestination() == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING
-                || getDestination() == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
+        return (this.destination == Downloads.Impl.DESTINATION_CACHE_PARTITION
+                || this.destination == Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION
+                || this.destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING
+                || this.destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
     }
 
     private Uri getMyDownloadsUri() {
-        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, getId());
+        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, id);
     }
 
     public Uri getAllDownloadsUri() {
-        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, getId());
+        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id);
     }
 
     /**
@@ -483,10 +483,10 @@ class DownloadInfo {
      * {@link Long#MAX_VALUE}, then download has no future actions.
      */
     public long nextActionMillis(long now) {
-        if (Downloads.Impl.isStatusCompleted(getStatus())) {
+        if (Downloads.Impl.isStatusCompleted(status)) {
             return Long.MAX_VALUE;
         }
-        if (getStatus() != Downloads.Impl.STATUS_WAITING_TO_RETRY) {
+        if (status != Downloads.Impl.STATUS_WAITING_TO_RETRY) {
             return 0;
         }
         long when = restartTime(now);
@@ -538,7 +538,7 @@ class DownloadInfo {
     }
 
     public boolean hasTotalBytes() {
-        return getTotalBytes() != UNKNOWN_BYTES;
+        return totalBytes != UNKNOWN_BYTES;
     }
 
     private void addHeader(String header, String value) {
