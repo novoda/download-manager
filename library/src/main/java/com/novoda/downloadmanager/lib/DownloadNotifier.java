@@ -20,7 +20,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.v4.util.SimpleArrayMap;
 
@@ -55,14 +54,7 @@ class DownloadNotifier {
 
     private final NotificationDisplayer notificationDisplayer;
 
-    public static DownloadNotifier newInstance(Context context, NotificationImageRetriever imageRetriever, Resources resources) {
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        NotificationDisplayer notificationDisplayer = new NotificationDisplayer(context, notificationManager, imageRetriever, resources);
-
-        return new DownloadNotifier(context, notificationDisplayer);
-    }
-
-    DownloadNotifier(Context context, NotificationDisplayer notificationDisplayer) {
+    public DownloadNotifier(Context context, NotificationDisplayer notificationDisplayer) {
         this.context = context;
         this.notificationDisplayer = notificationDisplayer;
     }
