@@ -245,7 +245,7 @@ class DownloadInfo {
     public void broadcastIntentDownloadFailedInsufficientSpace() {
         Intent intent = new Intent(DownloadManager.ACTION_DOWNLOAD_INSUFFICIENT_SPACE);
         intent.setPackage(getPackageName());
-        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, getId());
+        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, id);
         intent.setData(getMyDownloadsUri());
         if (extras != null) {
             intent.putExtra(EXTRA_EXTRA, extras);
@@ -330,20 +330,20 @@ class DownloadInfo {
      * @return one of the NETWORK_* constants
      */
     private NetworkState checkIsNetworkTypeAllowed(int networkType) {
-        if (getTotalBytes() <= 0) {
+        if (totalBytes <= 0) {
             return NetworkState.OK; // we don't know the size yet
         }
         if (networkType == ConnectivityManager.TYPE_WIFI) {
             return NetworkState.OK; // anything goes over wifi
         }
         Long maxBytesOverMobile = systemFacade.getMaxBytesOverMobile();
-        if (maxBytesOverMobile != null && getTotalBytes() > maxBytesOverMobile) {
+        if (maxBytesOverMobile != null && totalBytes > maxBytesOverMobile) {
             return NetworkState.UNUSABLE_DUE_TO_SIZE;
         }
         if (bypassRecommendedSizeLimit == 0) {
             Long recommendedMaxBytesOverMobile = systemFacade.getRecommendedMaxBytesOverMobile();
             if (recommendedMaxBytesOverMobile != null
-                    && getTotalBytes() > recommendedMaxBytesOverMobile) {
+                    && totalBytes > recommendedMaxBytesOverMobile) {
                 return NetworkState.RECOMMENDED_UNUSABLE_DUE_TO_SIZE;
             }
         }
