@@ -1,3 +1,8 @@
+0.1.2
+-------
+
+Fix bug batch deletion
+
 0.1.1
 -------
 
