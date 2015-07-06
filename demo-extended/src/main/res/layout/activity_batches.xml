@@ -8,22 +8,20 @@
   android:paddingTop="@dimen/activity_vertical_margin">
 
   <Button
-    android:id="@+id/pause_resume_button"
-    android:layout_width="match_parent"
+    android:id="@+id/batch_download_button"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="@string/pause_resume_button" />
+    android:text="@string/button_batch_download_text" />
 
-  <Button
-    android:id="@+id/delete_button"
-    android:layout_width="match_parent"
+  <TextView
+    android:id="@+id/main_no_downloads_view"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="@string/delete_button" />
+    android:text="@string/no_downloads" />
 
-  <Button
-    android:id="@+id/batches_button"
+  <ListView
+    android:id="@+id/main_downloads_list"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:text="@string/batches_button" />
-
+    android:layout_height="wrap_content" />
 
 </LinearLayout>

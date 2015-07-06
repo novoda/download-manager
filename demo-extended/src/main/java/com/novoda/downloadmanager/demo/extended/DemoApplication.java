@@ -14,6 +14,7 @@ public class DemoApplication extends Application implements DownloadClientReadyC
     public void onCreate() {
         super.onCreate();
         oneRuleToBindThem = new OneRuleToBindThem();
+        com.novoda.notils.logger.simple.Log.setShowLogs(true);
     }
 
     @Override

@@ -1,5 +1,8 @@
 <resources>
   <string name="app_name">Beard Downloader</string>
+  <string name="pause_resume_activty_title">Pause and resume downloads</string>
+  <string name="delete_activty_title">Delete downloads</string>
+  <string name="batches_activty_title">Batch download</string>
 
   <string name="no_downloads">No downloads yet.\nTap download and then refresh to query the download manager!</string>
   <string name="button_download_text">Download a podcast</string>
@@ -9,4 +12,7 @@
   <string name="button_delete_text">Delete batch</string>
 
   <string name="database_filename" translate="false">my_database.db</string>
+  <string name="pause_resume_button">Pause and resume downloads example</string>
+  <string name="delete_button">Delete downloads example</string>
+  <string name="batches_button">Batch downloads example</string>
 </resources>
