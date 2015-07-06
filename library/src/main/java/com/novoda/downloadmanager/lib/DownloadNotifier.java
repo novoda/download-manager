@@ -208,7 +208,7 @@ class DownloadNotifier {
     private void useTimeWhenClusterFirstShownToAvoidShuffling(String tag, NotificationCompat.Builder builder) {
         final long firstShown;
         if (activeNotifications.containsKey(tag)) {
-            firstShown = activeNotifs.get(tag);
+            firstShown = activeNotifications.get(tag);
         } else {
             firstShown = System.currentTimeMillis();
             activeNotifications.put(tag, firstShown);
