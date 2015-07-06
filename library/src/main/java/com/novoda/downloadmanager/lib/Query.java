@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -141,7 +142,7 @@ public class Query {
         if (ids == null) {
             return null;
         }
-        return DownloadManager.longArrayToStringArray(ids);
+        return longArrayToStringArray(ids);
     }
 
     private void filterByDownloadIds(List<String> selectionParts) {
@@ -152,7 +153,7 @@ public class Query {
     }
 
     private void filterByBatchIds(List<String> selectionParts) {
-        if (batchIds == null) {
+        if (batchIds == null || batchIds.length == 0) {
             return;
         }
         selectionParts.add(getWhereClauseForBatchIds(batchIds));
@@ -162,19 +163,8 @@ public class Query {
      * Get a SQL WHERE clause to select a bunch of IDs.
      */
     private String getWhereClauseForBatchIds(long[] ids) {
-        StringBuilder whereClause = new StringBuilder();
-        whereClause.append("(");
-        for (int i = 0; i < ids.length; i++) {
-            if (i > 0) {
-                whereClause.append("OR ");
-            }
-            whereClause.append(Downloads.Impl.COLUMN_BATCH_ID)
-                    .append(" = ")
-                    .append(ids[i])
-                    .append(" ");
-        }
-        whereClause.append(")");
-        return whereClause.toString();
+        String[] idStrings = longArrayToStringArray(ids);
+        return Downloads.Impl.COLUMN_BATCH_ID + " IN (" + joinStrings(",", Arrays.asList(idStrings)) + ")";
     }
 
     private void filterByExtras(List<String> selectionParts) {
@@ -215,7 +205,8 @@ public class Query {
         selectionParts.add(joinStrings(" OR ", parts));
     }
 
-    private String joinStrings(String joiner, Iterable<String> parts) {
+    // copied from AOSP for testability
+    private static String joinStrings(String joiner, Iterable<String> parts) {
         StringBuilder builder = new StringBuilder();
         boolean first = true;
         for (String part : parts) {
@@ -226,6 +217,14 @@ public class Query {
             first = false;
         }
         return builder.toString();
+    }
+
+    private static String[] longArrayToStringArray(long[] longs) {
+        String[] strings = new String[longs.length];
+        for (int i = 0; i < longs.length; i++) {
+            strings[i] = Long.toString(longs[i]);
+        }
+        return strings;
     }
 
     private String extrasClause(String extra) {
