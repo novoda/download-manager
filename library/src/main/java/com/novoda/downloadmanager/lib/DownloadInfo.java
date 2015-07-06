@@ -113,11 +113,7 @@ class DownloadInfo {
 
     /**
      * Result of last {DownloadThread} started by
-<<<<<<< HEAD
-     * {@link #isReadyToDownload(CollatedDownloadInfo)} && {@link #startDownloadIfNotActive(ExecutorService, StorageManager, DownloadNotifier)}.
-=======
-     * {@link #isReadyToDownload(DownloadBatch)} && {@link #startDownloadIfNotActive(ExecutorService)}.
->>>>>>> master
+     * {@link #isReadyToDownload(DownloadBatch)}  && {@link #startDownloadIfNotActive(ExecutorService, StorageManager, DownloadNotifier)}.
      */
     private Future<?> submittedThread;
 
