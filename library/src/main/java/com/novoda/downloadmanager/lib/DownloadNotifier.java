@@ -422,7 +422,7 @@ class DownloadNotifier {
     }
 
     private void removeStaleTagsThatWereNotRenewed(SimpleArrayMap<String, Collection<DownloadBatch>> clustered) {
-        for (int i = 0, size = activeNotifs.size(); i < size; i++) {
+        for (int i = activeNotifs.size() - 1; i >= 0; i--) {
             String tag = activeNotifs.keyAt(i);
             if (!clustered.containsKey(tag)) {
                 mNotifManager.cancel(tag.hashCode());
