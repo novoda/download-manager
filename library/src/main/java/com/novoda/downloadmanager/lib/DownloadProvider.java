@@ -230,7 +230,7 @@ public final class DownloadProvider extends ContentProvider {
         public final StringBuilder whereClause = new StringBuilder();
         public final List<String> parameters = new ArrayList<>();
 
-        public <T> void appendClause(String newClause, final T... parameters) {
+        public void appendClause(String newClause, final String... parameters) {
             if (newClause == null || newClause.isEmpty()) {
                 return;
             }
@@ -241,8 +241,8 @@ public final class DownloadProvider extends ContentProvider {
             whereClause.append(newClause);
             whereClause.append(")");
             if (parameters != null) {
-                for (Object parameter : parameters) {
-                    this.parameters.add(parameter.toString());
+                for (String parameter : parameters) {
+                    this.parameters.add(parameter);
                 }
             }
         }
@@ -907,12 +907,12 @@ public final class DownloadProvider extends ContentProvider {
             selection.appendClause(Downloads.Impl._ID + " = ?", getDownloadIdFromUri(uri));
         }
         if (uriMatch == BATCHES_ID) {
-            selection.appendClause(Downloads.Impl.Batches._ID + " = ?", ContentUris.parseId(uri));
+            selection.appendClause(Downloads.Impl.Batches._ID + " = ?", String.valueOf(ContentUris.parseId(uri)));
         }
         if ((uriMatch == MY_DOWNLOADS || uriMatch == MY_DOWNLOADS_ID)
                 && getContext().checkCallingPermission(Downloads.Impl.PERMISSION_ACCESS_ALL)
                 != PackageManager.PERMISSION_GRANTED) {
-            int callingUid = Binder.getCallingUid();
+            String callingUid = String.valueOf(Binder.getCallingUid());
             selection.appendClause(
                     Constants.UID + "= ? OR " + Downloads.Impl.COLUMN_OTHER_UID + "= ?",
                     callingUid, callingUid);
