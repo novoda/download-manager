@@ -5,6 +5,7 @@ import android.hardware.SensorManager;
 
 import com.novoda.downloadmanager.lib.DownloadBatch;
 import com.novoda.downloadmanager.lib.DownloadClientReadyChecker;
+import com.novoda.notils.logger.simple.Log;
 
 public class DemoApplication extends Application implements DownloadClientReadyChecker {
 
@@ -14,7 +15,7 @@ public class DemoApplication extends Application implements DownloadClientReadyC
     public void onCreate() {
         super.onCreate();
         oneRuleToBindThem = new OneRuleToBindThem();
-        com.novoda.notils.logger.simple.Log.setShowLogs(true);
+        Log.setShowLogs(true);
     }
 
     @Override
