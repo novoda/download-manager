@@ -346,10 +346,10 @@ public class DownloadService extends Service {
 
         downloadDeleter.cleanUpStaleDownloadsThatDisappeared(staleDownloadIds, downloads);
 
-        Collection<DownloadInfo> downloads = downloads.values();
+        Collection<DownloadInfo> allDownloads = downloads.values();
 
-        List<DownloadBatch> batches = batchRepository.retrieveBatchesFor(downloads);
-        batchRepository.deleteMarkedBatchesFor(downloads);
+        List<DownloadBatch> batches = batchRepository.retrieveBatchesFor(allDownloads);
+        batchRepository.deleteMarkedBatchesFor(allDownloads);
         updateUserVisibleNotification(batches);
 
         // Set alarm when next action is in future. It's okay if the service
