@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.v4.util.SimpleArrayMap;
-import android.text.TextUtils;
 
 import com.novoda.notils.logger.simple.Log;
 
@@ -188,15 +187,6 @@ class DownloadNotifier {
         }
 
         return staleTags;
-    }
-
-    static CharSequence getDownloadTitle(BatchInfo batch) {
-        String title = batch.getTitle();
-        if (TextUtils.isEmpty(title)) {
-            return "unknown";
-        } else {
-            return title;
-        }
     }
 
     public void dumpSpeeds() {

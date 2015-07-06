@@ -187,7 +187,7 @@ class NotificationDisplayer {
             Bitmap bitmap = imageRetriever.retrieveImage(imageUrl);
             style.bigPicture(bitmap);
         }
-        CharSequence title = DownloadNotifier.getDownloadTitle(batch.getInfo());
+        CharSequence title = getDownloadTitle(batch.getInfo());
         builder.setContentTitle(title);
         style.setBigContentTitle(title);
 
@@ -217,6 +217,15 @@ class NotificationDisplayer {
         return builder.build();
     }
 
+    private CharSequence getDownloadTitle(BatchInfo batch) {
+        String title = batch.getTitle();
+        if (TextUtils.isEmpty(title)) {
+            return "unknown";
+        } else {
+            return title;
+        }
+    }
+
     private void setSecondaryNotificationText(NotificationCompat.Builder builder, NotificationCompat.BigPictureStyle style, String description) {
         builder.setContentText(description);
         style.setSummaryText(description);
@@ -232,7 +241,7 @@ class NotificationDisplayer {
         final NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(builder);
 
         for (DownloadBatch batch : currentBatches) {
-            inboxStyle.addLine(DownloadNotifier.getDownloadTitle(batch.getInfo()));
+            inboxStyle.addLine(getDownloadTitle(batch.getInfo()));
         }
 
         if (type == DownloadNotifier.TYPE_ACTIVE) {
