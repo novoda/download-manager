@@ -31,6 +31,7 @@ class BatchRepository {
     );
 
     private static final int PRIORITISED_STATUSES_SIZE = PRIORITISED_STATUSES.size();
+    private static final String SELECT_MARKED_FOR_DELETION = Batches.COLUMN_DELETED + " = 1";
 
     private final ContentResolver resolver;
     private final DownloadDeleter downloadDeleter;
@@ -166,10 +167,7 @@ class BatchRepository {
     }
 
     public void deleteMarkedBatchesFor(Collection<DownloadInfo> downloads) {
-        String selection = Downloads.Impl.Batches.COLUMN_DELETED + " = ?";
-        String[] selectionArgs = {"1"};
-
-        Cursor batchesCursor = resolver.query(Downloads.Impl.BATCH_CONTENT_URI, null, selection, selectionArgs, null);
+        Cursor batchesCursor = resolver.query(Downloads.Impl.BATCH_CONTENT_URI, null, SELECT_MARKED_FOR_DELETION, null, null);
         List<Long> batchIdsToDelete = new ArrayList<>();
         try {
             int idColumn = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches._ID);
