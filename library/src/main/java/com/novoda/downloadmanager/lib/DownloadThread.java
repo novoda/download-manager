@@ -193,7 +193,7 @@ class DownloadThread implements Runnable {
             return;
         }
 
-        DownloadBatch currentBatch = batchRepository.retrieveBatchBy(mInfo);
+        DownloadBatch currentBatch = batchRepository.retrieveBatchFor(mInfo);
         if (!mInfo.isReadyToDownload(currentBatch)) {
             Log.d("Download " + mInfo.mId + " is not ready to download: skipping");
             return;

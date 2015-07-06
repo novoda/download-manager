@@ -31,6 +31,7 @@ class BatchRepository {
     );
 
     private static final int PRIORITISED_STATUSES_SIZE = PRIORITISED_STATUSES.size();
+    private static final String SELECT_MARKED_FOR_DELETION = Batches.COLUMN_DELETED + " = 1";
 
     private final ContentResolver resolver;
     private final DownloadDeleter downloadDeleter;
@@ -86,7 +87,8 @@ class BatchRepository {
         SparseIntArray statusCounts = new SparseIntArray(PRIORITISED_STATUSES_SIZE);
         try {
             String[] selectionArgs = {String.valueOf(batchId)};
-            cursor = resolver.query(ALL_DOWNLOADS_CONTENT_URI,
+            cursor = resolver.query(
+                    ALL_DOWNLOADS_CONTENT_URI,
                     null,
                     COLUMN_BATCH_ID + " = ?",
                     selectionArgs,
@@ -119,18 +121,17 @@ class BatchRepository {
         return STATUS_UNKNOWN_ERROR;
     }
 
-    public DownloadBatch retrieveBatchBy(DownloadInfo downloadInfo) {
-        List<DownloadBatch> batches = retrieveBatches(Collections.singletonList(downloadInfo));
+    public DownloadBatch retrieveBatchFor(DownloadInfo download) {
+        Collection<DownloadInfo> downloads = Collections.singletonList(download);
+        List<DownloadBatch> batches = retrieveBatchesFor(downloads);
         return batches.isEmpty() ? DownloadBatch.DELETED : batches.get(0);
     }
 
-    public List<DownloadBatch> retrieveBatches(Collection<DownloadInfo> downloads) {
+    public List<DownloadBatch> retrieveBatchesFor(Collection<DownloadInfo> downloads) {
         Cursor batchesCursor = resolver.query(Downloads.Impl.BATCH_CONTENT_URI, null, null, null, null);
         List<DownloadBatch> batches = new ArrayList<>(batchesCursor.getCount());
-        List<Long> forDeletion = new ArrayList<>();
         try {
             int idColumn = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches._ID);
-            int deleteIndex = batchesCursor.getColumnIndex(Downloads.Impl.Batches.COLUMN_DELETED);
             int titleIndex = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_TITLE);
             int descriptionIndex = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_DESCRIPTION);
             int bigPictureUrlIndex = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_BIG_PICTURE);
@@ -141,12 +142,6 @@ class BatchRepository {
 
             while (batchesCursor.moveToNext()) {
                 long id = batchesCursor.getLong(idColumn);
-
-                if (batchesCursor.getInt(deleteIndex) == 1) {
-                    forDeletion.add(id);
-                    continue;
-                }
-
                 String title = batchesCursor.getString(titleIndex);
                 String description = batchesCursor.getString(descriptionIndex);
                 String bigPictureUrl = batchesCursor.getString(bigPictureUrlIndex);
@@ -168,23 +163,39 @@ class BatchRepository {
             batchesCursor.close();
         }
 
-        if (!forDeletion.isEmpty()) {
-            deleteBatchesForIds(forDeletion, downloads);
-        }
-
         return batches;
     }
 
-    private void deleteBatchesForIds(List<Long> ids, Collection<DownloadInfo> downloads) {
+    public void deleteMarkedBatchesFor(Collection<DownloadInfo> downloads) {
+        Cursor batchesCursor = resolver.query(Downloads.Impl.BATCH_CONTENT_URI, null, SELECT_MARKED_FOR_DELETION, null, null);
+        List<Long> batchIdsToDelete = new ArrayList<>();
+        try {
+            int idColumn = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches._ID);
+
+            while (batchesCursor.moveToNext()) {
+                long id = batchesCursor.getLong(idColumn);
+                batchIdsToDelete.add(id);
+            }
+        } finally {
+            batchesCursor.close();
+        }
+
+        deleteBatchesForIds(batchIdsToDelete, downloads);
+    }
+
+    private void deleteBatchesForIds(List<Long> batchIdsToDelete, Collection<DownloadInfo> downloads) {
+        if (batchIdsToDelete.isEmpty()) {
+            return;
+        }
+
         for (DownloadInfo download : downloads) {
-            if (ids.contains(download.batchId)) {
+            if (batchIdsToDelete.contains(download.batchId)) {
                 downloadDeleter.deleteFileAndDatabaseRow(download);
             }
         }
 
-        String selection = TextUtils.join(", ", ids);
+        String selection = TextUtils.join(", ", batchIdsToDelete);
         String[] selectionArgs = {selection};
         resolver.delete(Downloads.Impl.BATCH_CONTENT_URI, Downloads.Impl.Batches._ID + " IN (?)", selectionArgs);
     }
-
 }
