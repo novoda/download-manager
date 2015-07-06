@@ -17,6 +17,7 @@
 package com.novoda.downloadmanager.lib;
 
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentValues;
@@ -150,7 +151,14 @@ public class DownloadService extends Service {
 
         downloadClientReadyChecker = getDownloadClientReadyChecker();
 
-        mNotifier = new DownloadNotifier(this, getNotificationImageRetriever(), getResources());
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationDisplayer notificationDisplayer = new NotificationDisplayer(
+                this,
+                notificationManager,
+                getNotificationImageRetriever(),
+                getResources());
+
+        mNotifier = new DownloadNotifier(this, notificationDisplayer);
         mNotifier.cancelAll();
 
         mObserver = new DownloadManagerContentObserver();
