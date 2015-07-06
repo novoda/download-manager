@@ -715,7 +715,7 @@ public class DownloadManager {
     /**
      * Get the DownloadProvider URI for the download with the given ID.
      */
-    Uri getDownloadUri(long id) {
+    private Uri getDownloadUri(long id) {
         return ContentUris.withAppendedId(mBaseUri, id);
     }
 
@@ -739,7 +739,7 @@ public class DownloadManager {
     /**
      * Get the selection args for a clause returned by {@link #getWhereClauseForIds(long[])}.
      */
-    static String[] longArrayToStringArray(long[] ids) {
+    private static String[] longArrayToStringArray(long[] ids) {
         String[] whereArgs = new String[ids.length];
         for (int i = 0; i < ids.length; i++) {
             whereArgs[i] = Long.toString(ids[i]);
