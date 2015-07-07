@@ -461,10 +461,10 @@ class DownloadInfo {
     }
 
     public boolean isOnCache() {
-        return (this.destination == Downloads.Impl.DESTINATION_CACHE_PARTITION
-                || this.destination == Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION
-                || this.destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING
-                || this.destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
+        return (destination == Downloads.Impl.DESTINATION_CACHE_PARTITION
+                || destination == Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION
+                || destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING
+                || destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
     }
 
     private Uri getMyDownloadsUri() {
