@@ -134,7 +134,7 @@ public class DownloadService extends Service {
         Log.v("Service onCreate");
 
         this.downloadDeleter = new DownloadDeleter(getContentResolver());
-        this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter);
+        this.batchRepository = BatchRepository.newInstance(getContentResolver(), downloadDeleter);
 
         if (mSystemFacade == null) {
             mSystemFacade = new RealSystemFacade(this);
@@ -338,8 +338,8 @@ public class DownloadService extends Service {
                     }
 
                     updateTotalBytesFor(info);
-                    batchRepository.updateCurrentSize(info.batchId);
-                    batchRepository.updateTotalSize(info.batchId);
+                    batchRepository.updateCurrentSize(info.getBatchId());
+                    batchRepository.updateTotalSize(info.getBatchId());
 
                     isActive = kickOffDownloadTaskIfReady(isActive, info, downloadBatch);
                     isActive = kickOffMediaScanIfCompleted(isActive, info);

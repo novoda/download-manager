@@ -25,6 +25,7 @@ import java.util.concurrent.Future;
  * Stores information about an individual download.
  */
 class DownloadInfo {
+
     public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
     private static final int UNKNOWN_BYTES = -1;
 
@@ -226,7 +227,7 @@ class DownloadInfo {
     public boolean mAllowRoaming;
     public boolean mAllowMetered;
     public int mBypassRecommendedSizeLimit;
-    public long batchId;
+    private long batchId;
 
     private List<Pair<String, String>> mRequestHeaders = new ArrayList<Pair<String, String>>();
 
@@ -259,6 +260,10 @@ class DownloadInfo {
         this.randomNumberGenerator = randomNumberGenerator;
         this.downloadClientReadyChecker = downloadClientReadyChecker;
         this.downloadStatusContentValues = downloadStatusContentValues;
+    }
+
+    public long getBatchId() {
+        return batchId;
     }
 
     public Collection<Pair<String, String>> getHeaders() {
@@ -456,7 +461,7 @@ class DownloadInfo {
             if (mSubmittedTask == null || mSubmittedTask.isDone()) {
                 BatchCompletionBroadcaster batchCompletionBroadcaster = BatchCompletionBroadcaster.newInstance(mContext);
                 ContentResolver contentResolver = mContext.getContentResolver();
-                BatchRepository batchRepository = new BatchRepository(contentResolver, new DownloadDeleter(contentResolver));
+                BatchRepository batchRepository = BatchRepository.newInstance(contentResolver, new DownloadDeleter(contentResolver));
                 DownloadThread downloadThread = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier,
                         batchCompletionBroadcaster, batchRepository);
                 mSubmittedTask = executor.submit(downloadThread);
