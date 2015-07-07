@@ -331,6 +331,7 @@ public class DownloadService extends Service {
                     if (downloadBatch.isDeleted()) {
                         break;
                     }
+
                     isActive = kickOffDownloadTaskIfReady(isActive, info, downloadBatch);
                     isActive = kickOffMediaScanIfCompleted(isActive, info);
                 }
