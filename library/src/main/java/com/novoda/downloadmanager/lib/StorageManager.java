@@ -16,6 +16,7 @@
 
 package com.novoda.downloadmanager.lib;
 
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
@@ -41,52 +42,52 @@ class StorageManager {
     /**
      * the max amount of space allowed to be taken up by the downloads data dir
      */
-    private static final long sMaxdownloadDataDirSize = 100 * 1024 * 1024;
+    private static final long MAX_DOWNLOAD_DATA_DIR_SIZE_BYTES = 100 * 1024 * 1024;
 
     /**
      * threshold (in bytes) beyond which the low space warning kicks in and attempt is made to
      * purge some downloaded files to make space
      */
-    private static final long sDownloadDataDirLowSpaceThreshold = 10 * sMaxdownloadDataDirSize / 100;
+    private static final long DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD_BYTES = 10 * MAX_DOWNLOAD_DATA_DIR_SIZE_BYTES / 100;
 
     /**
      * see {@link Environment#getExternalStorageDirectory()}
      */
-    private final File mExternalStorageDir;
+    private final File externalStorageDir;
 
     /**
      * see {@link android.os.Environment#getDataDirectory()}
      */
-    private final File mInternalStorageDir;
+    private final File internalStorageDir;
 
     /**
      * see {@link Environment#getDownloadCacheDirectory()}
      */
-    private final File mSystemCacheDir;
+    private final File systemCacheDir;
 
     /**
      * The downloaded files are saved to this dir. it is the value returned by
      * {@link Context#getCacheDir()}.
      */
-    private final File mDownloadDataDir;
+    private final File downloadDataDir;
 
     /**
      * how often do we need to perform checks on space to make sure space is available
      */
     private static final int FREQUENCY_OF_CHECKS_ON_SPACE_AVAILABILITY = 1024 * 1024; // 1MB
-    private int mBytesDownloadedSinceLastCheckOnSpace = 0;
+    private int bytesDownloadedSinceLastCheckOnSpace = 0;
 
     /**
      * misc members
      */
-    private final Context mContext;
+    private final ContentResolver contentResolver;
 
-    public StorageManager(Context context) {
-        mContext = context;
-        mDownloadDataDir = getDownloadDataDirectory(context);
-        mExternalStorageDir = Environment.getExternalStorageDirectory();
-        mInternalStorageDir = Environment.getDataDirectory();
-        mSystemCacheDir = Environment.getDownloadCacheDirectory();
+    StorageManager(ContentResolver contentResolver, File externalStorageDir, File internalStorageDir, File systemCacheDir, File downloadDataDir) {
+        this.contentResolver = contentResolver;
+        this.externalStorageDir = externalStorageDir;
+        this.internalStorageDir = internalStorageDir;
+        this.systemCacheDir = systemCacheDir;
+        this.downloadDataDir = downloadDataDir;
         startThreadToCleanupDatabaseAndPurgeFileSystem();
     }
 
@@ -96,10 +97,10 @@ class StorageManager {
      * The value is specified in terms of num of downloads since last time the cleanup was done.
      */
     private static final int FREQUENCY_OF_DATABASE_N_FILESYSTEM_CLEANUP = 250;
-    private int mNumDownloadsSoFar = 0;
+    private int numDownloadsSoFar = 0;
 
     synchronized void incrementNumDownloadsSoFar() {
-        if (++mNumDownloadsSoFar % FREQUENCY_OF_DATABASE_N_FILESYSTEM_CLEANUP == 0) {
+        if (++numDownloadsSoFar % FREQUENCY_OF_DATABASE_N_FILESYSTEM_CLEANUP == 0) {
             startThreadToCleanupDatabaseAndPurgeFileSystem();
         }
     }
@@ -108,20 +109,20 @@ class StorageManager {
      *      remove spurious files from the file system
      *      remove excess entries from the database
      */
-    private Thread mCleanupThread = null;
+    private Thread cleanupThread = null;
 
     private synchronized void startThreadToCleanupDatabaseAndPurgeFileSystem() {
-        if (mCleanupThread != null && mCleanupThread.isAlive()) {
+        if (cleanupThread != null && cleanupThread.isAlive()) {
             return;
         }
-        mCleanupThread = new Thread() {
+        cleanupThread = new Thread() {
             @Override
             public void run() {
                 removeSpuriousFiles();
                 trimDatabase();
             }
         };
-        mCleanupThread.start();
+        cleanupThread.start();
     }
 
     void verifySpaceBeforeWritingToFile(int destination, String path, long length)
@@ -144,23 +145,23 @@ class StorageManager {
             case Downloads.Impl.DESTINATION_CACHE_PARTITION:
             case Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING:
             case Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE:
-                dir = mDownloadDataDir;
+                dir = downloadDataDir;
                 break;
             case Downloads.Impl.DESTINATION_EXTERNAL:
-                dir = mExternalStorageDir;
+                dir = externalStorageDir;
                 break;
             case Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION:
-                dir = mSystemCacheDir;
+                dir = systemCacheDir;
                 break;
             case Downloads.Impl.DESTINATION_FILE_URI:
-                if (path.startsWith(mExternalStorageDir.getPath())) {
-                    dir = mExternalStorageDir;
-                } else if (path.startsWith(mDownloadDataDir.getPath())) {
-                    dir = mDownloadDataDir;
-                } else if (path.startsWith(mSystemCacheDir.getPath())) {
-                    dir = mSystemCacheDir;
-                } else if (path.startsWith(mInternalStorageDir.getPath())) {
-                    dir = mInternalStorageDir;
+                if (path.startsWith(externalStorageDir.getPath())) {
+                    dir = externalStorageDir;
+                } else if (path.startsWith(downloadDataDir.getPath())) {
+                    dir = downloadDataDir;
+                } else if (path.startsWith(systemCacheDir.getPath())) {
+                    dir = systemCacheDir;
+                } else if (path.startsWith(internalStorageDir.getPath())) {
+                    dir = internalStorageDir;
                 }
                 break;
         }
@@ -187,15 +188,15 @@ class StorageManager {
         }
         // is there enough space in the file system of the given param 'root'.
         long bytesAvailable = getAvailableBytesInFileSystemAtGivenRoot(root);
-        if (bytesAvailable < sDownloadDataDirLowSpaceThreshold) {
+        if (bytesAvailable < DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD_BYTES) {
             /* filesystem's available space is below threshold for low space warning.
              * threshold typically is 10% of download data dir space quota.
              * try to cleanup and see if the low space situation goes away.
              */
-            discardPurgeableFiles(destination, sDownloadDataDirLowSpaceThreshold);
+            discardPurgeableFiles(destination, DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD_BYTES);
             removeSpuriousFiles();
             bytesAvailable = getAvailableBytesInFileSystemAtGivenRoot(root);
-            if (bytesAvailable < sDownloadDataDirLowSpaceThreshold) {
+            if (bytesAvailable < DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD_BYTES) {
                 /*
                  * available space is still below the threshold limit.
                  *
@@ -204,7 +205,7 @@ class StorageManager {
                  * is available because downloadmanager shouldn't end up taking those last
                  * few MB of space left on the filesystem.
                  */
-                if (root.equals(mSystemCacheDir)) {
+                if (root.equals(systemCacheDir)) {
                     Log.w("System cache dir ('/cache') is running low on space." + "space available (in bytes): " + bytesAvailable);
                 } else {
                     throw new StopRequestException(Downloads.Impl.STATUS_INSUFFICIENT_SPACE_ERROR,
@@ -212,18 +213,18 @@ class StorageManager {
                 }
             }
         }
-        if (root.equals(mDownloadDataDir)) {
+        if (root.equals(downloadDataDir)) {
             // this download is going into downloads data dir. check space in that specific dir.
-            bytesAvailable = getAvailableBytesInDownloadsDataDir(mDownloadDataDir);
-            if (bytesAvailable < sDownloadDataDirLowSpaceThreshold) {
+            bytesAvailable = getAvailableBytesInDownloadsDataDir(downloadDataDir);
+            if (bytesAvailable < DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD_BYTES) {
                 // print a warning
                 Log.w("Downloads data dir: " + root + " is running low on space. space available (in bytes): " + bytesAvailable);
             }
             if (bytesAvailable < targetBytes) {
                 // Insufficient space; make space.
-                discardPurgeableFiles(destination, sDownloadDataDirLowSpaceThreshold);
+                discardPurgeableFiles(destination, DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD_BYTES);
                 removeSpuriousFiles();
-                bytesAvailable = getAvailableBytesInDownloadsDataDir(mDownloadDataDir);
+                bytesAvailable = getAvailableBytesInDownloadsDataDir(downloadDataDir);
             }
         }
         if (bytesAvailable < targetBytes) {
@@ -238,11 +239,10 @@ class StorageManager {
      */
     private long getAvailableBytesInDownloadsDataDir(File root) {
         File[] files = root.listFiles();
-        long space = sMaxdownloadDataDirSize;
+        long space = MAX_DOWNLOAD_DATA_DIR_SIZE_BYTES;
         if (files == null) {
             return space;
         }
-        int size = files.length;
         for (File file : files) {
             space -= file.length();
         }
@@ -263,11 +263,11 @@ class StorageManager {
             case Downloads.Impl.DESTINATION_CACHE_PARTITION:
             case Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE:
             case Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING:
-                return mDownloadDataDir;
+                return downloadDataDir;
             case Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION:
-                return mSystemCacheDir;
+                return systemCacheDir;
             case Downloads.Impl.DESTINATION_EXTERNAL:
-                File base = new File(mExternalStorageDir.getPath() + Constants.DEFAULT_DL_SUBDIR);
+                File base = new File(externalStorageDir.getPath() + Constants.DEFAULT_DL_SUBDIR);
                 if (!base.isDirectory() && !base.mkdir()) {
                     // Can't create download directory, e.g. because a file called "download"
                     // already exists at the root level, or the SD card filesystem is read-only.
@@ -280,7 +280,7 @@ class StorageManager {
     }
 
     File getDownloadDataDirectory() {
-        return mDownloadDataDir;
+        return downloadDataDir;
     }
 
     public static File getDownloadDataDirectory(Context context) {
@@ -298,7 +298,7 @@ class StorageManager {
                 String.valueOf(destination) :
                 String.valueOf(Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
         String[] bindArgs = new String[]{destStr};
-        Cursor cursor = mContext.getContentResolver().query(
+        Cursor cursor = contentResolver.query(
                 Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
                 null,
                 "( " +
@@ -321,7 +321,7 @@ class StorageManager {
                 totalFreed += file.length();
                 file.delete();
                 long id = cursor.getLong(cursor.getColumnIndex(Downloads.Impl._ID));
-                mContext.getContentResolver().delete(ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id), null, null);
+                contentResolver.delete(ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id), null, null);
             }
         } finally {
             cursor.close();
@@ -340,19 +340,19 @@ class StorageManager {
     private void removeSpuriousFiles() {
         Log.i("in removeSpuriousFiles");
         // get a list of all files in system cache dir and downloads data dir
-        List<File> files = new ArrayList<File>();
-        File[] listOfFiles = mSystemCacheDir.listFiles();
+        List<File> files = new ArrayList<>();
+        File[] listOfFiles = systemCacheDir.listFiles();
         if (listOfFiles != null) {
             files.addAll(Arrays.asList(listOfFiles));
         }
-        listOfFiles = mDownloadDataDir.listFiles();
+        listOfFiles = downloadDataDir.listFiles();
         if (listOfFiles != null) {
             files.addAll(Arrays.asList(listOfFiles));
         }
         if (files.size() == 0) {
             return;
         }
-        Cursor cursor = mContext.getContentResolver()
+        Cursor cursor = contentResolver
                 .query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, new String[]{Downloads.Impl._DATA}, null, null, null);
         try {
             if (cursor != null) {
@@ -397,7 +397,7 @@ class StorageManager {
         Log.i("in trimDatabase");
         Cursor cursor = null;
         try {
-            cursor = mContext.getContentResolver().query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
+            cursor = contentResolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
                     new String[]{Downloads.Impl._ID},
                     Downloads.Impl.COLUMN_STATUS + " >= '200'", null,
                     Downloads.Impl.COLUMN_LAST_MODIFICATION);
@@ -412,7 +412,7 @@ class StorageManager {
                 while (numDelete > 0) {
                     Uri downloadUri = ContentUris.withAppendedId(
                             Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, cursor.getLong(columnId));
-                    mContext.getContentResolver().delete(downloadUri, null, null);
+                    contentResolver.delete(downloadUri, null, null);
                     if (!cursor.moveToNext()) {
                         break;
                     }
@@ -433,11 +433,11 @@ class StorageManager {
     }
 
     private synchronized int incrementBytesDownloadedSinceLastCheckOnSpace(long val) {
-        mBytesDownloadedSinceLastCheckOnSpace += val;
-        return mBytesDownloadedSinceLastCheckOnSpace;
+        bytesDownloadedSinceLastCheckOnSpace += val;
+        return bytesDownloadedSinceLastCheckOnSpace;
     }
 
     private synchronized void resetBytesDownloadedSinceLastCheckOnSpace() {
-        mBytesDownloadedSinceLastCheckOnSpace = 0;
+        bytesDownloadedSinceLastCheckOnSpace = 0;
     }
 }

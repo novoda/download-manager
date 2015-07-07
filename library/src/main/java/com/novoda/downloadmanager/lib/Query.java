@@ -24,10 +24,10 @@ public class Query {
 
     private long[] downloadIds = null;
     private long[] batchIds = null;
-    private Integer mStatusFlags = null;
-    private String mOrderByColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
-    private int mOrderDirection = ORDER_DESCENDING;
-    private boolean mOnlyIncludeVisibleInDownloadsUi = false;
+    private Integer statusFlags = null;
+    private String orderByColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
+    private int orderDirection = ORDER_DESCENDING;
+    private boolean onlyIncludeVisibleInDownloadsUi = false;
     private String[] filterExtras;
 
     /**
@@ -67,7 +67,7 @@ public class Query {
      * @return this object
      */
     public Query setFilterByStatus(int flags) {
-        mStatusFlags = flags;
+        statusFlags = flags;
         return this;
     }
 
@@ -80,7 +80,7 @@ public class Query {
      * @return this object
      */
     public Query setOnlyIncludeVisibleInDownloadsUi(boolean value) {
-        mOnlyIncludeVisibleInDownloadsUi = value;
+        onlyIncludeVisibleInDownloadsUi = value;
         return this;
     }
 
@@ -98,14 +98,17 @@ public class Query {
             throw new IllegalArgumentException("Invalid direction: " + direction);
         }
 
-        if (column.equals(DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP)) {
-            mOrderByColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
-        } else if (column.equals(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)) {
-            mOrderByColumn = Downloads.Impl.COLUMN_TOTAL_BYTES;
-        } else {
-            throw new IllegalArgumentException("Cannot order by " + column);
+        switch (column) {
+            case DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP:
+                orderByColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
+                break;
+            case DownloadManager.COLUMN_TOTAL_SIZE_BYTES:
+                orderByColumn = Downloads.Impl.COLUMN_TOTAL_BYTES;
+                break;
+            default:
+                throw new IllegalArgumentException("Cannot order by " + column);
         }
-        mOrderDirection = direction;
+        orderDirection = direction;
         return this;
     }
 
@@ -124,7 +127,7 @@ public class Query {
         filterByExtras(selectionParts);
         filterByStatus(selectionParts);
 
-        if (mOnlyIncludeVisibleInDownloadsUi) {
+        if (onlyIncludeVisibleInDownloadsUi) {
             selectionParts.add(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI + " != '0'");
         }
 
@@ -132,8 +135,8 @@ public class Query {
         selectionParts.add(Downloads.Impl.COLUMN_DELETED + " != '1'");
 
         String selection = joinStrings(" AND ", selectionParts);
-        String orderDirection = (mOrderDirection == ORDER_ASCENDING ? "ASC" : "DESC");
-        String orderBy = mOrderByColumn + " " + orderDirection;
+        String orderDirection = (this.orderDirection == ORDER_ASCENDING ? "ASC" : "DESC");
+        String orderBy = orderByColumn + " " + orderDirection;
 
         return resolver.query(baseUri, projection, selection, selectionArgs, orderBy);
     }
@@ -179,27 +182,27 @@ public class Query {
     }
 
     private void filterByStatus(List<String> selectionParts) {
-        if (mStatusFlags == null) {
+        if (statusFlags == null) {
             return;
         }
 
         List<String> parts = new ArrayList<>();
-        if ((mStatusFlags & DownloadManager.STATUS_PENDING) != 0) {
+        if ((statusFlags & DownloadManager.STATUS_PENDING) != 0) {
             parts.add(statusClause("=", Downloads.Impl.STATUS_PENDING));
         }
-        if ((mStatusFlags & DownloadManager.STATUS_RUNNING) != 0) {
+        if ((statusFlags & DownloadManager.STATUS_RUNNING) != 0) {
             parts.add(statusClause("=", Downloads.Impl.STATUS_RUNNING));
         }
-        if ((mStatusFlags & DownloadManager.STATUS_PAUSED) != 0) {
+        if ((statusFlags & DownloadManager.STATUS_PAUSED) != 0) {
             parts.add(statusClause("=", Downloads.Impl.STATUS_PAUSED_BY_APP));
             parts.add(statusClause("=", Downloads.Impl.STATUS_WAITING_TO_RETRY));
             parts.add(statusClause("=", Downloads.Impl.STATUS_WAITING_FOR_NETWORK));
             parts.add(statusClause("=", Downloads.Impl.STATUS_QUEUED_FOR_WIFI));
         }
-        if ((mStatusFlags & DownloadManager.STATUS_SUCCESSFUL) != 0) {
+        if ((statusFlags & DownloadManager.STATUS_SUCCESSFUL) != 0) {
             parts.add(statusClause("=", Downloads.Impl.STATUS_SUCCESS));
         }
-        if ((mStatusFlags & DownloadManager.STATUS_FAILED) != 0) {
+        if ((statusFlags & DownloadManager.STATUS_FAILED) != 0) {
             parts.add("(" + statusClause(">=", 400) + " AND " + statusClause("<", 600) + ")");
         }
         selectionParts.add(joinStrings(" OR ", parts));

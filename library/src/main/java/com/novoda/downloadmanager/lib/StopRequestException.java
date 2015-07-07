@@ -26,25 +26,25 @@ import static com.novoda.downloadmanager.lib.Downloads.Impl.STATUS_UNHANDLED_RED
  * URI, headers, or destination filename.
  */
 class StopRequestException extends Exception {
-    private final int mFinalStatus;
+    private final int finalStatus;
 
     public StopRequestException(int finalStatus, String message) {
         super(message);
-        mFinalStatus = finalStatus;
+        this.finalStatus = finalStatus;
     }
 
     public StopRequestException(int finalStatus, Throwable t) {
         super(t);
-        mFinalStatus = finalStatus;
+        this.finalStatus = finalStatus;
     }
 
     public StopRequestException(int finalStatus, String message, Throwable t) {
         super(message, t);
-        mFinalStatus = finalStatus;
+        this.finalStatus = finalStatus;
     }
 
     public int getFinalStatus() {
-        return mFinalStatus;
+        return finalStatus;
     }
 
     public static StopRequestException throwUnhandledHttpError(int code, String message) throws StopRequestException {
