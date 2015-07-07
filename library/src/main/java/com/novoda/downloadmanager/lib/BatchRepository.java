@@ -127,7 +127,14 @@ class BatchRepository {
     public DownloadBatch retrieveBatchFor(DownloadInfo download) {
         Collection<DownloadInfo> downloads = Collections.singletonList(download);
         List<DownloadBatch> batches = retrieveBatchesFor(downloads);
-        return batches.isEmpty() ? DownloadBatch.DELETED : batches.get(0);
+
+        for (DownloadBatch batch : batches) {
+            if (batch.getBatchId() == download.batchId) {
+                return batch;
+            }
+        }
+
+        return DownloadBatch.DELETED;
     }
 
     public List<DownloadBatch> retrieveBatchesFor(Collection<DownloadInfo> downloads) {
