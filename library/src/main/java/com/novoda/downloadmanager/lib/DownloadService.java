@@ -319,28 +319,30 @@ public class DownloadService extends Service {
         Collection<DownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
         updateTotalBytesFor(allDownloads);
 
-        for (DownloadInfo info : allDownloads) {
-            if (info.mDeleted) {
-                downloadDeleter.deleteFileAndDatabaseRow(info);
-            } else if (Downloads.Impl.isStatusCancelled(info.mStatus) || Downloads.Impl.isStatusError(info.mStatus)) {
-                downloadDeleter.deleteFileAndMediaReference(info);
-            } else {
-                DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(info);
-                if (downloadBatch.isDeleted()) {
-                    continue;
-                }
-                isActive = kickOffDownloadTaskIfReady(isActive, info, downloadBatch);
-                isActive = kickOffMediaScanIfCompleted(isActive, info);
-            }
+        List<DownloadBatch> downloadBatches = batchRepository.retrieveBatchesFor(allDownloads);
+        for (DownloadBatch downloadBatch : downloadBatches) {
 
-            // Keep track of nearest next action
-            nextRetryTimeMillis = Math.min(info.nextActionMillis(now), nextRetryTimeMillis);
+            for (DownloadInfo info : downloadBatch.getDownloads()) {
+                if (info.mDeleted) {
+                    downloadDeleter.deleteFileAndDatabaseRow(info);
+                } else if (Downloads.Impl.isStatusCancelled(info.mStatus) || Downloads.Impl.isStatusError(info.mStatus)) {
+                    downloadDeleter.deleteFileAndMediaReference(info);
+                } else {
+                    if (downloadBatch.isDeleted()) {
+                        break;
+                    }
+                    isActive = kickOffDownloadTaskIfReady(isActive, info, downloadBatch);
+                    isActive = kickOffMediaScanIfCompleted(isActive, info);
+                }
+
+                // Keep track of nearest next action
+                nextRetryTimeMillis = Math.min(info.nextActionMillis(now), nextRetryTimeMillis);
+            }
 
         }
 
-        List<DownloadBatch> batches = batchRepository.retrieveBatchesFor(allDownloads);
         batchRepository.deleteMarkedBatchesFor(allDownloads);
-        updateUserVisibleNotification(batches);
+        updateUserVisibleNotification(downloadBatches);
 
         // Set alarm when next action is in future. It's okay if the service
         // continues to run in meantime, since it will kick off an update pass.
