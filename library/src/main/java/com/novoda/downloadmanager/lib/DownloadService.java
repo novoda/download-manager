@@ -318,20 +318,17 @@ public class DownloadService extends Service {
 
         Collection<DownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
         updateTotalBytesFor(allDownloads);
+
         for (DownloadInfo info : allDownloads) {
             if (info.mDeleted) {
                 downloadDeleter.deleteFileAndDatabaseRow(info);
             } else if (Downloads.Impl.isStatusCancelled(info.mStatus) || Downloads.Impl.isStatusError(info.mStatus)) {
                 downloadDeleter.deleteFileAndMediaReference(info);
             } else {
-                batchRepository.updateCurrentSize(info.getBatchId());
-                batchRepository.updateTotalSize(info.getBatchId());
-
                 DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(info);
                 if (downloadBatch.isDeleted()) {
                     continue;
                 }
-
                 isActive = kickOffDownloadTaskIfReady(isActive, info, downloadBatch);
                 isActive = kickOffMediaScanIfCompleted(isActive, info);
             }
@@ -365,6 +362,9 @@ public class DownloadService extends Service {
                 downloadInfo.mTotalBytes = contentLengthFetcher.fetchContentLengthFor(downloadInfo);
                 values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, downloadInfo.mTotalBytes);
                 getContentResolver().update(downloadInfo.getAllDownloadsUri(), values, null, null);
+
+                batchRepository.updateCurrentSize(downloadInfo.getBatchId());
+                batchRepository.updateTotalSize(downloadInfo.getBatchId());
             }
         }
     }
