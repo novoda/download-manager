@@ -138,7 +138,7 @@ public class DownloadService extends Service {
         Log.v("Service onCreate");
 
         this.downloadDeleter = new DownloadDeleter(getContentResolver());
-        this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter);
+        this.batchRepository = BatchRepository.newInstance(getContentResolver(), downloadDeleter);
 
         if (systemFacade == null) {
             systemFacade = new RealSystemFacade(this);

@@ -25,7 +25,8 @@ import java.util.concurrent.Future;
  * Stores information about an individual download.
  */
 class DownloadInfo {
-    private static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
+
+    public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
     private static final int UNKNOWN_BYTES = -1;
 
     // TODO: move towards these in-memory objects being sources of truth, and periodically pushing to provider.
@@ -136,7 +137,6 @@ class DownloadInfo {
         this.downloadClientReadyChecker = downloadClientReadyChecker;
         this.downloadStatusContentValues = downloadStatusContentValues;
     }
-
 
     public long getId() {
         return id;
@@ -418,7 +418,7 @@ class DownloadInfo {
                 String applicationPackageName = context.getApplicationContext().getPackageName();
                 BatchCompletionBroadcaster batchCompletionBroadcaster = new BatchCompletionBroadcaster(context, applicationPackageName);
                 ContentResolver contentResolver = context.getContentResolver();
-                BatchRepository batchRepository = new BatchRepository(contentResolver, new DownloadDeleter(contentResolver));
+                BatchRepository batchRepository = BatchRepository.newInstance(contentResolver, new DownloadDeleter(contentResolver));
                 DownloadThread downloadThread = new DownloadThread(context, systemFacade, this, storageManager, downloadNotifier,
                         batchCompletionBroadcaster, batchRepository);
                 submittedThread = executor.submit(downloadThread);
