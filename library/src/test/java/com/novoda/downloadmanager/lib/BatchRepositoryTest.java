@@ -71,8 +71,8 @@ public class BatchRepositoryTest {
 
     @Test
     public void givenADownloadInfoAndNoLinkedBatchesWhenRetrievingTheBatchThenTheBatchIsDeleted() {
-        long batchIdToMatch = 100L;
-        when(downloadInfo.getBatchId()).thenReturn(batchIdToMatch);
+        long batchIdToBeMissing = 100L;
+        when(downloadInfo.getBatchId()).thenReturn(batchIdToBeMissing);
         Cursor emptyBatchCursor = mock(Cursor.class);
         when(contentResolver.query(any(Uri.class), any(String[].class), anyString(), any(String[].class), anyString())).thenReturn(emptyBatchCursor);
 
