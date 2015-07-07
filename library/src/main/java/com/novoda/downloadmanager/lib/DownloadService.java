@@ -24,7 +24,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
-import android.database.Cursor;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -38,7 +37,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -88,6 +86,7 @@ public class DownloadService extends Service {
     private DownloadClientReadyChecker downloadClientReadyChecker;
     private BatchRepository batchRepository;
     private DownloadDeleter downloadDeleter;
+    private DownloadsRepository downloadsRepository;
 
     /**
      * Receives notifications when the data in the content provider changes
@@ -158,6 +157,24 @@ public class DownloadService extends Service {
         ConcurrentDownloadsLimitProvider concurrentDownloadsLimitProvider = ConcurrentDownloadsLimitProvider.newInstance(this);
         DownloadExecutorFactory factory = new DownloadExecutorFactory(concurrentDownloadsLimitProvider);
         mExecutor = factory.createExecutor();
+
+        this.downloadsRepository = new DownloadsRepository(getContentResolver(), new DownloadsRepository.DownloadInfoCreator() {
+            @Override
+            public DownloadInfo create(DownloadInfo.Reader reader) {
+                return createNewDownloadInfo(reader);
+            }
+        });
+
+    }
+
+    /**
+     * Keeps a local copy of the info about a download, and initiates the
+     * download if appropriate.
+     */
+    private DownloadInfo createNewDownloadInfo(DownloadInfo.Reader reader) {
+        DownloadInfo info = reader.newDownloadInfo(this, mSystemFacade, mStorageManager, mNotifier, downloadClientReadyChecker);
+        Log.v("processing inserted download " + info.mId);
+        return info;
     }
 
     private DownloadClientReadyChecker getDownloadClientReadyChecker() {
@@ -297,9 +314,8 @@ public class DownloadService extends Service {
         long nextRetryTimeMillis = Long.MAX_VALUE;
         long now = mSystemFacade.currentTimeMillis();
 
-        Collection<DownloadInfo> allDownloads = getAllDownloads().values();
+        Collection<DownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
         for (DownloadInfo info : allDownloads) {
-
             if (info.mDeleted) {
                 downloadDeleter.deleteFileAndDatabaseRow(info);
             } else if (Downloads.Impl.isStatusCancelled(info.mStatus) || Downloads.Impl.isStatusError(info.mStatus)) {
@@ -340,24 +356,6 @@ public class DownloadService extends Service {
         return isActive;
     }
 
-    private Map<Long, DownloadInfo> getAllDownloads() {
-        Cursor downloadsCursor = getContentResolver().query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
-        try {
-            DownloadInfo.Reader reader = new DownloadInfo.Reader(getContentResolver(), downloadsCursor);
-            int idColumn = downloadsCursor.getColumnIndexOrThrow(Downloads.Impl._ID);
-
-            Map<Long, DownloadInfo> downloads = new HashMap<>();
-
-            while (downloadsCursor.moveToNext()) {
-                long id = downloadsCursor.getLong(idColumn);
-                downloads.put(id, createNewDownloadInfo(reader));
-            }
-            return downloads;
-        } finally {
-            downloadsCursor.close();
-        }
-    }
-
     private void updateTotalBytesFor(Collection<DownloadInfo> downloadInfos) {
         ContentValues values = new ContentValues();
         for (DownloadInfo downloadInfo : downloadInfos) {
@@ -387,16 +385,6 @@ public class DownloadService extends Service {
 
     private void updateUserVisibleNotification(Collection<DownloadBatch> batches) {
         mNotifier.updateWith(batches);
-    }
-
-    /**
-     * Keeps a local copy of the info about a download, and initiates the
-     * download if appropriate.
-     */
-    private DownloadInfo createNewDownloadInfo(DownloadInfo.Reader reader) {
-        DownloadInfo info = reader.newDownloadInfo(this, mSystemFacade, mStorageManager, mNotifier, downloadClientReadyChecker);
-        Log.v("processing inserted download " + info.mId);
-        return info;
     }
 
     @Override
