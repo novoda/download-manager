@@ -39,10 +39,8 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
@@ -78,15 +76,6 @@ public class DownloadService extends Service {
      * Class to handle Notification Manager updates
      */
     private DownloadNotifier mNotifier;
-
-    /**
-     * The Service's view of the list of downloads, mapping download IDs to the corresponding info
-     * object. This is kept independently from the content provider, and the Service only initiates
-     * downloads based on this data, so that it can deal with situation where the data in the
-     * content provider changes or disappears.
-     */
-//    @GuardedBy("mDownloads")
-    private final Map<Long, DownloadInfo> cachedDownloads = new HashMap<>();
 
     private ExecutorService mExecutor;
 
@@ -248,9 +237,7 @@ public class DownloadService extends Service {
             // TODO: handle media scanner timeouts
 
             final boolean isActive;
-            synchronized (cachedDownloads) {
-                isActive = updateLocked();
-            }
+            isActive = updateLocked();
 
             if (msg.what == MSG_FINAL_UPDATE) {
                 // Dump thread stacks belonging to pool
@@ -307,23 +294,21 @@ public class DownloadService extends Service {
     private boolean updateLocked() {
 
         boolean isActive = false;
-        Set<Long> staleDownloadIds = new HashSet<>(cachedDownloads.keySet());
         long nextRetryTimeMillis = Long.MAX_VALUE;
         long now = mSystemFacade.currentTimeMillis();
 
         Cursor downloadsCursor = getContentResolver().query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
+        Collection<DownloadInfo> allDownloads = getAllDownloads(downloadsCursor).values();
         try {
-            cachedDownloads.clear();
-            cachedDownloads.putAll(getAllDownloads(staleDownloadIds, downloadsCursor));
 
-            for (DownloadInfo info : cachedDownloads.values()) {
+            for (DownloadInfo info : allDownloads) {
 
                 if (info.mDeleted) {
                     downloadDeleter.deleteFileAndDatabaseRow(info);
                 } else if (Downloads.Impl.isStatusCancelled(info.mStatus) || Downloads.Impl.isStatusError(info.mStatus)) {
                     downloadDeleter.deleteFileAndMediaReference(info);
                 } else {
-                    updateTotalBytesFor(cachedDownloads.values());
+                    updateTotalBytesFor(allDownloads);
                     DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(info);
                     if (downloadBatch.isDeleted()) {
                         continue;
@@ -345,12 +330,8 @@ public class DownloadService extends Service {
             downloadsCursor.close();
         }
 
-        downloadDeleter.cleanUpStaleDownloadsThatDisappeared(staleDownloadIds, cachedDownloads);
-
-        Collection<DownloadInfo> downloads = cachedDownloads.values();
-
-        List<DownloadBatch> batches = batchRepository.retrieveBatchesFor(downloads);
-        batchRepository.deleteMarkedBatchesFor(downloads);
+        List<DownloadBatch> batches = batchRepository.retrieveBatchesFor(allDownloads);
+        batchRepository.deleteMarkedBatchesFor(allDownloads);
         updateUserVisibleNotification(batches);
 
         // Set alarm when next action is in future. It's okay if the service
@@ -366,7 +347,7 @@ public class DownloadService extends Service {
         return isActive;
     }
 
-    private Map<Long, DownloadInfo> getAllDownloads(Set<Long> staleDownloadIds, Cursor downloadsCursor) {
+    private Map<Long, DownloadInfo> getAllDownloads(Cursor downloadsCursor) {
         DownloadInfo.Reader reader = new DownloadInfo.Reader(getContentResolver(), downloadsCursor);
         int idColumn = downloadsCursor.getColumnIndexOrThrow(Downloads.Impl._ID);
 
@@ -374,7 +355,6 @@ public class DownloadService extends Service {
 
         while (downloadsCursor.moveToNext()) {
             long id = downloadsCursor.getLong(idColumn);
-            staleDownloadIds.remove(id);
             downloads.put(id, createNewDownloadInfo(reader));
         }
         return downloads;
