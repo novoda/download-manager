@@ -15,14 +15,17 @@
 
   <Button
     android:id="@+id/batch_download_button"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:text="@string/button_batch_download_text" />
 
   <TextView
     android:id="@+id/main_no_downloads_view"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_height="0dip"
+    android:layout_weight="100"
+    android:gravity="center"
+    android:textAppearance="?android:textAppearanceMedium"
     android:text="@string/no_downloads" />
 
   <ListView
