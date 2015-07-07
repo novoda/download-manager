@@ -3,7 +3,10 @@ package com.novoda.downloadmanager.lib;
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.annotation.IntDef;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,6 +15,12 @@ import java.util.List;
  * This class may be used to filter download manager queries.
  */
 public class Query {
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({ORDER_ASCENDING, ORDER_DESCENDING})
+    public @interface Order {
+    }
+
     /**
      * Constant for use with {@link #orderBy}
      */
@@ -106,7 +115,7 @@ public class Query {
      * @param direction either {@link #ORDER_ASCENDING} or {@link #ORDER_DESCENDING}
      * @return this object
      */
-    public Query orderBy(String column, int direction) {
+    public Query orderBy(String column, @Order int direction) {
         if (direction != ORDER_ASCENDING && direction != ORDER_DESCENDING) {
             throw new IllegalArgumentException("Invalid direction: " + direction);
         }
