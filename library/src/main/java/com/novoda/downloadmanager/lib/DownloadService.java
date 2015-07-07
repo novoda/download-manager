@@ -385,7 +385,7 @@ public class DownloadService extends Service {
     }
 
     private void updateTotalBytesFor(DownloadInfo info) {
-        if (info.getTotalBytes() == -1) {
+        if (!info.hasTotalBytes()) {
             ContentValues values = new ContentValues();
             info.setTotalBytes(contentLengthFetcher.fetchContentLengthFor(info));
             values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, info.getTotalBytes());
