@@ -4,7 +4,7 @@
   <string name="delete_activty_title">Delete downloads</string>
   <string name="batches_activty_title">Batch download</string>
 
-  <string name="no_downloads">No downloads yet.\nTap download and then refresh to query the download manager!</string>
+  <string name="no_downloads">No downloads yet.\nTap the \'Download\' button to add items to the download queue.</string>
   <string name="button_download_text">Download a podcast</string>
   <string name="button_refresh_text">Refresh</string>
   <string name="button_single_download_text">Download a single item</string>
@@ -15,4 +15,7 @@
   <string name="pause_resume_button">Pause and resume downloads example</string>
   <string name="delete_button">Delete downloads example</string>
   <string name="batches_button">Batch downloads example</string>
+  <string name="pause_resume_description">This demo shows how the pause and resume of a download works. Tap on a download that\'s in progress to pause it and tap on a paused item to resume it.</string>
+  <string name="delete_description">This demo shows how the deletion of a download works. Use the \'Delete\' buttons to delete downloads that are in any state.</string>
+  <string name="batches_description">This demo shows how you can create a batch to download many files as one download (the list shows them separately to show a batch contains more than one item).</string>
 </resources>
