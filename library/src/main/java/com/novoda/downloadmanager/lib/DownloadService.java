@@ -113,9 +113,6 @@ public class DownloadService extends Service {
         throw new UnsupportedOperationException("Cannot bind to Download Manager Service");
     }
 
-    /**
-     * Initializes the service when it is first created
-     */
     @Override
     public void onCreate() {
         super.onCreate();
