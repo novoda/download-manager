@@ -2,7 +2,7 @@ package com.novoda.downloadmanager.demo.extended;
 
 import com.novoda.downloadmanager.lib.DownloadManager;
 
-class Download {
+public class Download {
     private final String title;
     private final String fileName;
     private final int downloadStatus;

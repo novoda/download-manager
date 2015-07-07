@@ -12,9 +12,13 @@ import com.novoda.notils.caster.Views;
 
 import java.util.List;
 
-class DownloadAdapter extends BaseAdapter {
+public class DownloadAdapter extends BaseAdapter {
     private final List<Download> downloads;
     private final Listener listener;
+
+    public DownloadAdapter(List<Download> downloads) {
+        this(downloads, null);
+    }
 
     public DownloadAdapter(List<Download> downloads, Listener listener) {
         this.downloads = downloads;
@@ -48,12 +52,19 @@ class DownloadAdapter extends BaseAdapter {
         titleTextView.setText(download.getTitle());
         String text = String.format("%1$s : %2$s\nBatch %3$d", download.getDownloadStatusText(), download.getFileName(), download.getBatchId());
         locationTextView.setText(text);
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(@NonNull View v) {
-                listener.onDelete(download);
-            }
-        });
+
+        if (listener == null) {
+            deleteButton.setVisibility(View.GONE);
+            deleteButton.setOnClickListener(null);
+        } else {
+            deleteButton.setVisibility(View.VISIBLE);
+            deleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(@NonNull View v) {
+                    listener.onDelete(download);
+                }
+            });
+        }
 
         return view;
     }
@@ -64,7 +75,7 @@ class DownloadAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
-    interface Listener {
+    public interface Listener {
         void onDelete(Download download);
     }
 }
