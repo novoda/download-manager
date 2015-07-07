@@ -146,79 +146,79 @@ class DownloadInfo {
         return uri;
     }
 
-    boolean isNoIntegrity() {
+    public boolean isNoIntegrity() {
         return noIntegrity;
     }
 
-    String getHint() {
+    public String getHint() {
         return hint;
     }
 
-    String getFileName() {
+    public String getFileName() {
         return fileName;
     }
 
-    void setFileName(String fileName) {
+    public void setFileName(String fileName) {
         this.fileName = fileName;
     }
 
-    String getMimeType() {
+    public String getMimeType() {
         return mimeType;
     }
 
-    int getDestination() {
+    public int getDestination() {
         return destination;
     }
 
-    int getControl() {
+    public int getControl() {
         return control;
     }
 
-    int getStatus() {
+    public int getStatus() {
         return status;
     }
 
-    void setStatus(int status) {
+    public void setStatus(int status) {
         this.status = status;
     }
 
-    int getNumFailed() {
+    public int getNumFailed() {
         return numFailed;
     }
 
-    String getNotificationClassName() {
+    public String getNotificationClassName() {
         return notificationClassName;
     }
 
-    String getUserAgent() {
+    public String getUserAgent() {
         return userAgent;
     }
 
-    long getTotalBytes() {
+    public long getTotalBytes() {
         return totalBytes;
     }
 
-    void setTotalBytes(long totalBytes) {
+    public void setTotalBytes(long totalBytes) {
         this.totalBytes = totalBytes;
     }
 
-    long getCurrentBytes() {
+    public long getCurrentBytes() {
         return currentBytes;
     }
 
-    String getETag() {
+    public String getETag() {
         return eTag;
     }
 
-    boolean isDeleted() {
+    public boolean isDeleted() {
         return deleted;
     }
 
-    String getMediaProviderUri() {
+    public String getMediaProviderUri() {
         return mediaProviderUri;
     }
 
-    long getBatchId() {
+    public long getBatchId() {
         return batchId;
     }
 
