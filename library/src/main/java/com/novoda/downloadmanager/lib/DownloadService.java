@@ -337,7 +337,7 @@ public class DownloadService extends Service {
                         continue;
                     }
 
-                    updateTotalBytesFor(info);
+                    updateTotalBytesFor(downloadBatch);
                     batchRepository.updateCurrentSize(info.getBatchId());
                     batchRepository.updateTotalSize(info.getBatchId());
 
@@ -373,12 +373,14 @@ public class DownloadService extends Service {
         return isActive;
     }
 
-    private void updateTotalBytesFor(DownloadInfo info) {
-        if (info.mTotalBytes == -1) {
+    private void updateTotalBytesFor(DownloadBatch batch) {
+        if (batch.getTotalSize() == -1) {
             ContentValues values = new ContentValues();
-            info.mTotalBytes = contentLengthFetcher.fetchContentLengthFor(info);
-            values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, info.mTotalBytes);
-            getContentResolver().update(info.getAllDownloadsUri(), values, null, null);
+            for (DownloadInfo downloadInfo : batch.getDownloads()) {
+                downloadInfo.mTotalBytes = contentLengthFetcher.fetchContentLengthFor(downloadInfo);
+                values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, downloadInfo.mTotalBytes);
+                getContentResolver().update(downloadInfo.getAllDownloadsUri(), values, null, null);
+            }
         }
     }
 
