@@ -23,7 +23,7 @@ class ContentLengthFetcher {
     public long fetchContentLengthFor(DownloadInfo info) {
         HttpURLConnection conn = null;
         try {
-            conn = (HttpURLConnection) new URL(info.mUri).openConnection();
+            conn = (HttpURLConnection) new URL(info.getUri()).openConnection();
             conn.setInstanceFollowRedirects(true);
             conn.setConnectTimeout(TIMEOUT_MILLIS);
             conn.setReadTimeout(TIMEOUT_MILLIS);
@@ -67,7 +67,7 @@ class ContentLengthFetcher {
     }
 
     private String userAgent(DownloadInfo info) {
-        String userAgent = info.mUserAgent;
+        String userAgent = info.getUserAgent();
         if (userAgent == null) {
             return Constants.DEFAULT_USER_AGENT;
         }

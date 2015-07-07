@@ -28,6 +28,7 @@ import android.os.SystemClock;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
@@ -37,8 +38,8 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 class DownloadScanner implements MediaScannerConnectionClient {
     private static final long SCAN_TIMEOUT = MINUTE_IN_MILLIS;
 
-    private final Context mContext;
-    private final MediaScannerConnection mConnection;
+    private final ContentResolver resolver;
+    private final MediaScannerConnection mediaScannerConnection;
 
     private static class ScanRequest {
         public final long id;
@@ -58,12 +59,12 @@ class DownloadScanner implements MediaScannerConnectionClient {
         }
     }
 
-    //    @GuardedBy("mConnection")
-    private HashMap<String, ScanRequest> mPending = new HashMap<String, ScanRequest>();
+    //    @GuardedBy("mediaScannerConnection")
+    private Map<String, ScanRequest> pendingRequests = new HashMap<>();
 
-    public DownloadScanner(Context context) {
-        mContext = context;
-        mConnection = new MediaScannerConnection(context, this);
+    public DownloadScanner(ContentResolver resolver, Context context) {
+        this.resolver = resolver;
+        mediaScannerConnection = new MediaScannerConnection(context, this);
     }
 
     /**
@@ -71,13 +72,13 @@ class DownloadScanner implements MediaScannerConnectionClient {
      * internal duration.
      */
     public boolean hasPendingScans() {
-        synchronized (mConnection) {
-            if (mPending.isEmpty()) {
+        synchronized (mediaScannerConnection) {
+            if (pendingRequests.isEmpty()) {
                 return false;
             } else {
                 // Check if pending scans have timed out
                 final long nowRealtime = SystemClock.elapsedRealtime();
-                for (ScanRequest req : mPending.values()) {
+                for (ScanRequest req : pendingRequests.values()) {
                     if (nowRealtime < req.requestRealtime + SCAN_TIMEOUT) {
                         return true;
                     }
@@ -94,28 +95,28 @@ class DownloadScanner implements MediaScannerConnectionClient {
      * @see #hasPendingScans()
      */
     public void requestScan(DownloadInfo info) {
-        Log.v("requestScan() for " + info.mFileName);
-        synchronized (mConnection) {
-            final ScanRequest req = new ScanRequest(info.mId, info.mFileName, info.mMimeType);
-            mPending.put(req.path, req);
+        Log.v("requestScan() for " + info.getFileName());
+        synchronized (mediaScannerConnection) {
+            final ScanRequest req = new ScanRequest(info.getId(), info.getFileName(), info.getMimeType());
+            pendingRequests.put(req.path, req);
 
-            if (mConnection.isConnected()) {
-                req.exec(mConnection);
+            if (mediaScannerConnection.isConnected()) {
+                req.exec(mediaScannerConnection);
             } else {
-                mConnection.connect();
+                mediaScannerConnection.connect();
             }
         }
     }
 
     public void shutdown() {
-        mConnection.disconnect();
+        mediaScannerConnection.disconnect();
     }
 
     @Override
     public void onMediaScannerConnected() {
-        synchronized (mConnection) {
-            for (ScanRequest req : mPending.values()) {
-                req.exec(mConnection);
+        synchronized (mediaScannerConnection) {
+            for (ScanRequest req : pendingRequests.values()) {
+                req.exec(mediaScannerConnection);
             }
         }
     }
@@ -123,8 +124,8 @@ class DownloadScanner implements MediaScannerConnectionClient {
     @Override
     public void onScanCompleted(String path, Uri uri) {
         final ScanRequest req;
-        synchronized (mConnection) {
-            req = mPending.remove(path);
+        synchronized (mediaScannerConnection) {
+            req = pendingRequests.remove(path);
         }
         if (req == null) {
             Log.w("Missing request for path " + path);
@@ -139,7 +140,6 @@ class DownloadScanner implements MediaScannerConnectionClient {
             values.put(Downloads.Impl.COLUMN_MEDIAPROVIDER_URI, uri.toString());
         }
 
-        final ContentResolver resolver = mContext.getContentResolver();
         final Uri downloadUri = ContentUris.withAppendedId(
                 Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, req.id);
         final int rows = resolver.update(downloadUri, values, null, null);
