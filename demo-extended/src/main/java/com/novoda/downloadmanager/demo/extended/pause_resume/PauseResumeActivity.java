@@ -55,6 +55,7 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
                 } else {
                     downloadManager.pauseBatch(batchId);
                 }
+                queryForDownloads();
             }
         });
         downloadManager = DownloadManagerBuilder.from(this)
