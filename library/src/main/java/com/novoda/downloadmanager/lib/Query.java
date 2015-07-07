@@ -22,6 +22,20 @@ public class Query {
      */
     public static final int ORDER_DESCENDING = 2;
 
+    private static final String ORDER_BY_LIVENESS = String.format("CASE batch_status "
+                    + "WHEN %1$d THEN 1 "
+                    + "WHEN %2$d THEN 2 "
+                    + "WHEN %3$d THEN 3 "
+                    + "WHEN %4$d THEN 4 "
+                    + "WHEN %5$d THEN 5 "
+                    + "ELSE 2 END",
+            Downloads.Impl.STATUS_RUNNING,
+            Downloads.Impl.STATUS_PENDING,
+            Downloads.Impl.STATUS_PAUSED_BY_APP,
+            Downloads.Impl.STATUS_BATCH_FAILED,
+            Downloads.Impl.STATUS_SUCCESS
+    );
+
     private long[] downloadIds = null;
     private long[] batchIds = null;
     private Integer mStatusFlags = null;
@@ -114,21 +128,11 @@ public class Query {
     /**
      * Sorts downloads according to the 'liveness' of the download, i.e. in the order:
      * Downloading, queued, other, paused, failed, completed
+     *
      * @return this {@link Query}
      */
     public Query orderByLiveness() {
-        orderString = String.format("CASE batch_status " +
-                        "WHEN %1$d THEN 1 " +
-                        "WHEN %2$d THEN 2 " +
-                        "WHEN %3$d THEN 3 " +
-                        "WHEN %4$d THEN 4 " +
-                        "WHEN %5$d THEN 5 " +
-                        "ELSE 2 END",
-                Downloads.Impl.STATUS_RUNNING,
-                Downloads.Impl.STATUS_PENDING,
-                Downloads.Impl.STATUS_PAUSED_BY_APP,
-                Downloads.Impl.STATUS_BATCH_FAILED,
-                Downloads.Impl.STATUS_SUCCESS);
+        orderString = ORDER_BY_LIVENESS;
         return this;
     }
 
