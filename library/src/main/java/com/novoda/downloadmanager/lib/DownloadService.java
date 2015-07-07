@@ -136,7 +136,7 @@ public class DownloadService extends Service {
 
         this.downloads = new Downloads(DownloadProvider.AUTHORITY);
         this.downloadDeleter = new DownloadDeleter(getContentResolver());
-        this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter, downloads);
+        this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter, downloads.getBatchContentUri(), downloads.getAllDownloadsContentUri());
 
         if (mSystemFacade == null) {
             mSystemFacade = new RealSystemFacade(this);
@@ -359,7 +359,7 @@ public class DownloadService extends Service {
         Collection<DownloadInfo> downloads = mDownloads.values();
 
         List<DownloadBatch> batches = batchRepository.retrieveBatchesFor(downloads);
-        batchRepository.deleteMarkedBatchesFor(downloads, this.downloads.getBatchContentUri());
+        batchRepository.deleteMarkedBatchesFor(downloads);
         updateUserVisibleNotification(batches);
 
         // Set alarm when next action is in future. It's okay if the service

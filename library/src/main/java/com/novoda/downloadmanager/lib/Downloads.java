@@ -842,11 +842,4 @@ public class Downloads {
      * Query where clause for general querying.
      */
     private static final String QUERY_WHERE_CLAUSE = Impl.COLUMN_NOTIFICATION_CLASS + "=?";
-
-    /**
-     * Delete all the downloads for a package/class pair.
-     */
-    public void removeAllDownloads(Context context, String notificationClass) {
-        context.getContentResolver().delete(getContentUri(), QUERY_WHERE_CLAUSE, new String[]{notificationClass});
-    }
 }

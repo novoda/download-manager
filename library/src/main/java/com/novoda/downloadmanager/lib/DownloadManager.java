@@ -56,14 +56,6 @@ import java.net.URI;
 public class DownloadManager {
 
     /**
-     * This is the uri for the underlying table
-     * use this at your own risk as many of the constants defined here will not return you what you expect for raw cursor data
-     */
-    public Uri getContentUri() {
-        return downloads.getContentUri();
-    }
-
-    /**
      * An identifier for a particular download, unique across the system.  Clients use this ID to
      * make subsequent calls related to the download.
      */
@@ -413,23 +405,6 @@ public class DownloadManager {
         values.put(Downloads.Impl.COLUMN_CONTROL, Downloads.Impl.CONTROL_RUN);
         values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
         mResolver.update(downloads.getAllDownloadsContentUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
-    }
-
-    public void removeDownload(URI uri) {
-        Cursor cursor = null;
-        try {
-            cursor = mResolver.query(downloads.getContentUri(), new String[]{"_id"}, Downloads.Impl.COLUMN_FILE_NAME_HINT + "=?", new String[]{uri.toString()}, null);
-            if (cursor.moveToFirst()) {
-                long id = cursor.getLong(cursor.getColumnIndexOrThrow("_id"));
-                removeDownloads(id);
-                return;
-            }
-            Log.e("Didn't delete anything for uri: " + uri);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
     }
 
     /**
