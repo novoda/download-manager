@@ -309,13 +309,13 @@ public class DownloadService extends Service {
                     downloadDeleter.deleteFileAndMediaReference(info);
                 } else {
                     updateTotalBytesFor(allDownloads);
+                    batchRepository.updateCurrentSize(info.getBatchId());
+                    batchRepository.updateTotalSize(info.getBatchId());
+
                     DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(info);
                     if (downloadBatch.isDeleted()) {
                         continue;
                     }
-
-                    batchRepository.updateCurrentSize(info.getBatchId());
-                    batchRepository.updateTotalSize(info.getBatchId());
 
                     isActive = kickOffDownloadTaskIfReady(isActive, info, downloadBatch);
                     isActive = kickOffMediaScanIfCompleted(isActive, info);
