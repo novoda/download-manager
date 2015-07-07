@@ -409,7 +409,7 @@ class Helpers {
         public Lexer(String selection, Set<String> allowedColumns) {
             this.selection = selection;
             this.allowedColumns = allowedColumns;
-            chars = new char[this.selection.length()];
+            this.chars = new char[this.selection.length()];
             this.selection.getChars(0, chars.length, chars, 0);
             advance();
         }
