@@ -47,7 +47,4 @@ public class Download {
         return downloadStatus == DownloadManager.STATUS_PAUSED;
     }
 
-    public int getDownloadStatus() {
-        return downloadStatus;
-    }
 }

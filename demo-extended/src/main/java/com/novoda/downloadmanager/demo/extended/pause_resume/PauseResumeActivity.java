@@ -125,11 +125,6 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
 
     @Override
     public void onQueryResult(List<Download> downloads) {
-        String statuses = "";
-        for (Download download : downloads) {
-            statuses += download.getDownloadStatus() + "|";
-        }
-        Log.d(statuses);
         downloadAdapter.updateDownloads(downloads);
     }
 }
