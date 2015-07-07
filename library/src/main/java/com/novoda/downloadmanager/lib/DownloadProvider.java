@@ -909,7 +909,7 @@ public final class DownloadProvider extends ContentProvider {
             selection.appendClause(Downloads.Impl._ID + " = ?", getDownloadIdFromUri(uri));
         }
         if (uriMatch == BATCHES_ID) {
-            selection.appendClause(Downloads.Impl.Batches._ID + " = ?", String.valueOf(ContentUris.parseId(uri)));
+            selection.appendClause(Downloads.Impl.Batches._ID + " = ?", uri.getLastPathSegment());
         }
         if ((uriMatch == MY_DOWNLOADS || uriMatch == MY_DOWNLOADS_ID)
                 && getContext().checkCallingPermission(Downloads.Impl.PERMISSION_ACCESS_ALL)
