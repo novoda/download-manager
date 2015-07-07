@@ -44,7 +44,6 @@ class BatchRepository {
 
     public static BatchRepository newInstance(ContentResolver resolver, DownloadDeleter downloadDeleter) {
         return new BatchRepository(resolver, downloadDeleter, BATCH_CONTENT_URI, ALL_DOWNLOADS_CONTENT_URI);
-
     }
 
     BatchRepository(ContentResolver resolver, DownloadDeleter downloadDeleter, Uri batchContentUri, Uri allDownloadsContentUri) {
