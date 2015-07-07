@@ -492,7 +492,7 @@ public class DownloadManager {
     }
 
     public Cursor queryBatch(BatchQuery query) {
-        BatchRepository batchRepository = new BatchRepository(mResolver, new DownloadDeleter(mResolver));
+        BatchRepository batchRepository = BatchRepository.newInstance(contentResolver, new DownloadDeleter(contentResolver));
         Cursor cursor = batchRepository.retrieveFor(query);
         if (cursor == null) {
             return null;
