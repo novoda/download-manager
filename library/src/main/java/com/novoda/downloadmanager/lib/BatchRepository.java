@@ -41,7 +41,7 @@ class BatchRepository {
     private final DownloadDeleter downloadDeleter;
     private final Downloads downloads;
 
-    public BatchRepository(ContentResolver resolver, DownloadDeleter downloadDeleter, Downloads downloads) {
+    BatchRepository(ContentResolver resolver, DownloadDeleter downloadDeleter, Downloads downloads) {
         this.resolver = resolver;
         this.downloadDeleter = downloadDeleter;
         this.downloads = downloads;
