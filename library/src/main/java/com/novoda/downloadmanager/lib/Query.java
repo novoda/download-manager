@@ -15,20 +15,19 @@ public class Query {
     /**
      * Constant for use with {@link #orderBy}
      */
-    static final int ORDER_ASCENDING = 1;
+    public static final int ORDER_ASCENDING = 1;
 
     /**
      * Constant for use with {@link #orderBy}
      */
-    static final int ORDER_DESCENDING = 2;
+    public static final int ORDER_DESCENDING = 2;
 
     private long[] downloadIds = null;
     private long[] batchIds = null;
     private Integer mStatusFlags = null;
-    private String mOrderByColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
-    private int mOrderDirection = ORDER_DESCENDING;
     private boolean mOnlyIncludeVisibleInDownloadsUi = false;
     private String[] filterExtras;
+    private String orderString = Downloads.Impl.COLUMN_LAST_MODIFICATION + " DESC";
 
     /**
      * Include only the downloads with the given IDs.
@@ -93,19 +92,43 @@ public class Query {
      * @param direction either {@link #ORDER_ASCENDING} or {@link #ORDER_DESCENDING}
      * @return this object
      */
-    Query orderBy(String column, int direction) {
+    public Query orderBy(String column, int direction) {
         if (direction != ORDER_ASCENDING && direction != ORDER_DESCENDING) {
             throw new IllegalArgumentException("Invalid direction: " + direction);
         }
 
+        String resolvedOrderColumn;
         if (column.equals(DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP)) {
-            mOrderByColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
+            resolvedOrderColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
         } else if (column.equals(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)) {
-            mOrderByColumn = Downloads.Impl.COLUMN_TOTAL_BYTES;
+            resolvedOrderColumn = Downloads.Impl.COLUMN_TOTAL_BYTES;
         } else {
             throw new IllegalArgumentException("Cannot order by " + column);
         }
-        mOrderDirection = direction;
+
+        String orderDirection = (direction == ORDER_ASCENDING ? "ASC" : "DESC");
+        orderString = resolvedOrderColumn + " " + orderDirection;
+        return this;
+    }
+
+    /**
+     * Sorts downloads according to the 'liveness' of the download, i.e. in the order:
+     * Downloading, queued, other, paused, failed, completed
+     * @return this {@link Query}
+     */
+    public Query orderByLiveness() {
+        orderString = String.format("CASE batch_status " +
+                        "WHEN %1$d THEN 1 " +
+                        "WHEN %2$d THEN 2 " +
+                        "WHEN %3$d THEN 3 " +
+                        "WHEN %4$d THEN 4 " +
+                        "WHEN %5$d THEN 5 " +
+                        "ELSE 2 END",
+                Downloads.Impl.STATUS_RUNNING,
+                Downloads.Impl.STATUS_PENDING,
+                Downloads.Impl.STATUS_PAUSED_BY_APP,
+                Downloads.Impl.STATUS_BATCH_FAILED,
+                Downloads.Impl.STATUS_SUCCESS);
         return this;
     }
 
@@ -132,10 +155,8 @@ public class Query {
         selectionParts.add(Downloads.Impl.COLUMN_DELETED + " != '1'");
 
         String selection = joinStrings(" AND ", selectionParts);
-        String orderDirection = (mOrderDirection == ORDER_ASCENDING ? "ASC" : "DESC");
-        String orderBy = mOrderByColumn + " " + orderDirection;
 
-        return resolver.query(baseUri, projection, selection, selectionArgs, orderBy);
+        return resolver.query(baseUri, projection, selection, selectionArgs, orderString);
     }
 
     private String[] getIdsAsStringArray(long[] ids) {

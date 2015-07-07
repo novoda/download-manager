@@ -81,7 +81,8 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
     }
 
     private void queryForDownloads() {
-        QueryForDownloadsAsyncTask.newInstance(downloadManager, this).execute(new Query());
+        Query orderedQuery = new Query().orderByLiveness();
+        QueryForDownloadsAsyncTask.newInstance(downloadManager, this).execute(orderedQuery);
     }
 
     private void enqueueSingleDownload() {
@@ -124,6 +125,11 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
 
     @Override
     public void onQueryResult(List<Download> downloads) {
+        String statuses = "";
+        for (Download download : downloads) {
+            statuses += download.getDownloadStatus() + "|";
+        }
+        Log.d(statuses);
         downloadAdapter.updateDownloads(downloads);
     }
 }

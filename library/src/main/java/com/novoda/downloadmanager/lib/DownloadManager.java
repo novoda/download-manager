@@ -826,7 +826,7 @@ public class DownloadManager {
             return ContentUris.withAppendedId(mBaseUri, downloadId).toString();
         }
 
-        private long getReason(int status) {
+            private long getReason(int status) {
             switch (translateStatus(status)) {
                 case STATUS_FAILED:
                     return getErrorCode(status);
