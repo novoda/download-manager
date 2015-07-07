@@ -9,3 +9,5 @@ allprojects {
         jcenter()
     }
 }
+
+apply from: 'code-quality/android-code-quality.gradle'
