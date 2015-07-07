@@ -17,7 +17,7 @@ public class QueryForDownloadsAsyncTask extends AsyncTask<Query, Void, List<Down
     private final DownloadManager downloadManager;
     private final WeakReference<Callback> weakCallback;
 
-    static QueryForDownloadsAsyncTask newInstance(DownloadManager downloadManager, Callback callback) {
+    public static QueryForDownloadsAsyncTask newInstance(DownloadManager downloadManager, Callback callback) {
         return new QueryForDownloadsAsyncTask(downloadManager, new WeakReference<>(callback));
     }
 
@@ -64,7 +64,7 @@ public class QueryForDownloadsAsyncTask extends AsyncTask<Query, Void, List<Down
         callback.onQueryResult(downloads);
     }
 
-    interface Callback {
+    public interface Callback {
         void onQueryResult(List<Download> downloads);
     }
 }
