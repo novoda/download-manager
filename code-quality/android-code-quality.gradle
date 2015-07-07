@@ -4,77 +4,8 @@ task staticAnalysis {
     group 'Verification'
 }
 
-def sourceSetMain = android.sourceSets.main.java.srcDirs
-def rulesDir = new File("$project.rootDir/code-quality", 'rules')
-def ignoreFail = true // sad panda
-
-def includeSrcPatternApplication = 'com/novoda/downloadmanager/**/*.java'
-def excludeSrcPatternRClass = 'com/novoda/downloadmanager/**/R.java'
-def excludeSrcPatternGeneratedFiles = '**/gen/**'
-
-apply plugin: 'checkstyle'
-task checkstyleMain(type: Checkstyle) {
-    description 'Checks whether Java source code complies with coding rules.'
-    ignoreFailures ignoreFail
-    configFile = file("$rulesDir/checkstyle/modules.xml")
-
-    source sourceSetMain
-    include includeSrcPatternApplication
-    exclude excludeSrcPatternRClass
-    exclude excludeSrcPatternGeneratedFiles
-
-    classpath = files()
-
-    doLast {
-        def htmlReportFile = new File(reports.xml.destination.parent, name - 'checkstyle' + '.html')
-        ant.xslt(in: reports.xml.destination,
-                style: file("$rulesDir/checkstyle/stylesheet-noframes-sorted.xsl"),
-                out: htmlReportFile)
-        println "See the Checkstyle report at: $htmlReportFile"
-    }
-}
-staticAnalysis.dependsOn checkstyleMain
-
-apply plugin: 'findbugs'
-task findbugsMain(type: FindBugs) {
-    description 'Uses static analysis to look for bugs in Java code.'
-    ignoreFailures ignoreFail
-    excludeFilter = file("$rulesDir/findbugs/exclude.xml")
-    classes = files("$project.buildDir/intermediates/classes/")
-
-    source sourceSetMain
-    include includeSrcPatternApplication
-    exclude excludeSrcPatternRClass
-    exclude excludeSrcPatternGeneratedFiles
-
-    classpath = files()
-
-    reports {
-        html.enabled = project.hasProperty('findbugs.html')
-        xml.enabled = !html.enabled // only one output format can be enabled
-    }
-}
-staticAnalysis.dependsOn findbugsMain
-android.libraryVariants.all { variant ->
-    findbugsMain.dependsOn variant.javaCompile
-    findbugsMain.mustRunAfter variant.javaCompile
-}
-
-apply plugin: 'pmd'
-task pmdMain(type: Pmd) {
-    description 'Finds common programming flaws throw static analysis of code.'
-    ignoreFailures ignoreFail
-    ruleSetFiles = files("$rulesDir/pmd/ruleset.xml")
-
-    source sourceSetMain
-    include includeSrcPatternApplication
-    exclude excludeSrcPatternRClass
-    exclude excludeSrcPatternGeneratedFiles
-
-    reports {
-        xml.enabled = true
-    }
-}
-staticAnalysis.dependsOn pmdMain
-
 check.dependsOn staticAnalysis
+
+apply from: "$project.rootDir/code-quality/checkstyle.gradle"
+apply from: "$project.rootDir/code-quality/findbugs.gradle"
+apply from: "$project.rootDir/code-quality/pmd.gradle"
