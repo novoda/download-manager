@@ -42,13 +42,13 @@ class StorageManager {
     /**
      * the max amount of space allowed to be taken up by the downloads data dir
      */
-    private static final long MAX_DOWNLOAD_DATA_DIR_SIZE = 100 * 1024 * 1024;
+    private static final long MAX_DOWNLOAD_DATA_DIR_SIZE_BYTES = 100 * 1024 * 1024;
 
     /**
      * threshold (in bytes) beyond which the low space warning kicks in and attempt is made to
      * purge some downloaded files to make space
      */
-    private static final long DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD = 10 * MAX_DOWNLOAD_DATA_DIR_SIZE / 100;
+    private static final long DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD_BYTES = 10 * MAX_DOWNLOAD_DATA_DIR_SIZE_BYTES / 100;
 
     /**
      * see {@link Environment#getExternalStorageDirectory()}
@@ -188,15 +188,15 @@ class StorageManager {
         }
         // is there enough space in the file system of the given param 'root'.
         long bytesAvailable = getAvailableBytesInFileSystemAtGivenRoot(root);
-        if (bytesAvailable < DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD) {
+        if (bytesAvailable < DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD_BYTES) {
             /* filesystem's available space is below threshold for low space warning.
              * threshold typically is 10% of download data dir space quota.
              * try to cleanup and see if the low space situation goes away.
              */
-            discardPurgeableFiles(destination, DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD);
+            discardPurgeableFiles(destination, DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD_BYTES);
             removeSpuriousFiles();
             bytesAvailable = getAvailableBytesInFileSystemAtGivenRoot(root);
-            if (bytesAvailable < DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD) {
+            if (bytesAvailable < DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD_BYTES) {
                 /*
                  * available space is still below the threshold limit.
                  *
@@ -216,13 +216,13 @@ class StorageManager {
         if (root.equals(downloadDataDir)) {
             // this download is going into downloads data dir. check space in that specific dir.
             bytesAvailable = getAvailableBytesInDownloadsDataDir(downloadDataDir);
-            if (bytesAvailable < DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD) {
+            if (bytesAvailable < DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD_BYTES) {
                 // print a warning
                 Log.w("Downloads data dir: " + root + " is running low on space. space available (in bytes): " + bytesAvailable);
             }
             if (bytesAvailable < targetBytes) {
                 // Insufficient space; make space.
-                discardPurgeableFiles(destination, DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD);
+                discardPurgeableFiles(destination, DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD_BYTES);
                 removeSpuriousFiles();
                 bytesAvailable = getAvailableBytesInDownloadsDataDir(downloadDataDir);
             }
@@ -239,7 +239,7 @@ class StorageManager {
      */
     private long getAvailableBytesInDownloadsDataDir(File root) {
         File[] files = root.listFiles();
-        long space = MAX_DOWNLOAD_DATA_DIR_SIZE;
+        long space = MAX_DOWNLOAD_DATA_DIR_SIZE_BYTES;
         if (files == null) {
             return space;
         }
