@@ -297,37 +297,30 @@ public class DownloadService extends Service {
         long nextRetryTimeMillis = Long.MAX_VALUE;
         long now = mSystemFacade.currentTimeMillis();
 
-        Cursor downloadsCursor = getContentResolver().query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
-        Collection<DownloadInfo> allDownloads = getAllDownloads(downloadsCursor).values();
-        try {
+        Collection<DownloadInfo> allDownloads = getAllDownloads().values();
+        for (DownloadInfo info : allDownloads) {
 
-            for (DownloadInfo info : allDownloads) {
+            if (info.mDeleted) {
+                downloadDeleter.deleteFileAndDatabaseRow(info);
+            } else if (Downloads.Impl.isStatusCancelled(info.mStatus) || Downloads.Impl.isStatusError(info.mStatus)) {
+                downloadDeleter.deleteFileAndMediaReference(info);
+            } else {
+                updateTotalBytesFor(allDownloads);
+                batchRepository.updateCurrentSize(info.getBatchId());
+                batchRepository.updateTotalSize(info.getBatchId());
 
-                if (info.mDeleted) {
-                    downloadDeleter.deleteFileAndDatabaseRow(info);
-                } else if (Downloads.Impl.isStatusCancelled(info.mStatus) || Downloads.Impl.isStatusError(info.mStatus)) {
-                    downloadDeleter.deleteFileAndMediaReference(info);
-                } else {
-                    updateTotalBytesFor(allDownloads);
-                    batchRepository.updateCurrentSize(info.getBatchId());
-                    batchRepository.updateTotalSize(info.getBatchId());
-
-                    DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(info);
-                    if (downloadBatch.isDeleted()) {
-                        continue;
-                    }
-
-                    isActive = kickOffDownloadTaskIfReady(isActive, info, downloadBatch);
-                    isActive = kickOffMediaScanIfCompleted(isActive, info);
+                DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(info);
+                if (downloadBatch.isDeleted()) {
+                    continue;
                 }
 
-                // Keep track of nearest next action
-                nextRetryTimeMillis = Math.min(info.nextActionMillis(now), nextRetryTimeMillis);
-
+                isActive = kickOffDownloadTaskIfReady(isActive, info, downloadBatch);
+                isActive = kickOffMediaScanIfCompleted(isActive, info);
             }
 
-        } finally {
-            downloadsCursor.close();
+            // Keep track of nearest next action
+            nextRetryTimeMillis = Math.min(info.nextActionMillis(now), nextRetryTimeMillis);
+
         }
 
         List<DownloadBatch> batches = batchRepository.retrieveBatchesFor(allDownloads);
@@ -347,17 +340,22 @@ public class DownloadService extends Service {
         return isActive;
     }
 
-    private Map<Long, DownloadInfo> getAllDownloads(Cursor downloadsCursor) {
-        DownloadInfo.Reader reader = new DownloadInfo.Reader(getContentResolver(), downloadsCursor);
-        int idColumn = downloadsCursor.getColumnIndexOrThrow(Downloads.Impl._ID);
+    private Map<Long, DownloadInfo> getAllDownloads() {
+        Cursor downloadsCursor = getContentResolver().query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
+        try {
+            DownloadInfo.Reader reader = new DownloadInfo.Reader(getContentResolver(), downloadsCursor);
+            int idColumn = downloadsCursor.getColumnIndexOrThrow(Downloads.Impl._ID);
 
-        Map<Long, DownloadInfo> downloads = new HashMap<>();
+            Map<Long, DownloadInfo> downloads = new HashMap<>();
 
-        while (downloadsCursor.moveToNext()) {
-            long id = downloadsCursor.getLong(idColumn);
-            downloads.put(id, createNewDownloadInfo(reader));
+            while (downloadsCursor.moveToNext()) {
+                long id = downloadsCursor.getLong(idColumn);
+                downloads.put(id, createNewDownloadInfo(reader));
+            }
+            return downloads;
+        } finally {
+            downloadsCursor.close();
         }
-        return downloads;
     }
 
     private void updateTotalBytesFor(Collection<DownloadInfo> downloadInfos) {
