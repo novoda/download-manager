@@ -3,6 +3,7 @@ package com.novoda.downloadmanager.lib;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.net.Uri;
 import android.util.SparseIntArray;
 
 import com.novoda.notils.string.StringUtils;
@@ -172,8 +173,8 @@ class BatchRepository {
         return batches;
     }
 
-    public void deleteMarkedBatchesFor(Collection<DownloadInfo> downloads) {
-        Cursor batchesCursor = resolver.query(this.downloads.getBatchContentUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null);
+    public void deleteMarkedBatchesFor(Collection<DownloadInfo> downloads, Uri batchContentUri) {
+        Cursor batchesCursor = resolver.query(batchContentUri, PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null);
         List<Long> batchIdsToDelete = new ArrayList<>();
         try {
             while (batchesCursor.moveToNext()) {

@@ -359,7 +359,7 @@ public class DownloadService extends Service {
         Collection<DownloadInfo> downloads = mDownloads.values();
 
         List<DownloadBatch> batches = batchRepository.retrieveBatchesFor(downloads);
-        batchRepository.deleteMarkedBatchesFor(downloads);
+        batchRepository.deleteMarkedBatchesFor(downloads, this.downloads.getBatchContentUri());
         updateUserVisibleNotification(batches);
 
         // Set alarm when next action is in future. It's okay if the service
