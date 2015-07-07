@@ -254,7 +254,9 @@ public class DownloadService extends Service {
             // TODO: handle media scanner timeouts
 
             final boolean isActive;
-            isActive = updateLocked();
+            synchronized (DownloadService.this) {
+                isActive = updateLocked();
+            }
 
             if (msg.what == MSG_FINAL_UPDATE) {
                 // Dump thread stacks belonging to pool
