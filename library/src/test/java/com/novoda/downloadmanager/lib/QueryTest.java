@@ -72,11 +72,10 @@ public class QueryTest {
         verify(resolver).query(any(Uri.class), any(String[].class), anyString(), any(String[].class), eq("lastmod DESC"));
     }
 
-    @Test(expected = IllegalArgumentException.class )
+    @Test(expected = IllegalArgumentException.class)
     public void whenWeSetAnUnsupportedOrderByOnAQueryThenTheResolverIsQueriedWithTheCorrectSortOrder() {
         new Query().orderBy(DownloadManager.COLUMN_STATUS, Query.ORDER_ASCENDING).runQuery(resolver, null, uri);
-
-        verify(resolver).query(any(Uri.class), any(String[].class), anyString(), any(String[].class), eq("batch_status ASC"));
+        // Expecting an exception
     }
 
 }
