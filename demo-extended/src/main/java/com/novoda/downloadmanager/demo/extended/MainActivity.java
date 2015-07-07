@@ -16,6 +16,8 @@ import android.widget.ListView;
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.lib.DownloadManager;
+import com.novoda.downloadmanager.lib.DownloadProvider;
+import com.novoda.downloadmanager.lib.Downloads;
 import com.novoda.downloadmanager.lib.NotificationVisibility;
 import com.novoda.downloadmanager.lib.Query;
 import com.novoda.downloadmanager.lib.Request;
@@ -33,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
     private DownloadManager downloadManager;
     private ListView listView;
     private DownloadAdapter downloadAdapter;
+    private Downloads downloads;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
                 }
             }
         });
+        downloads = new Downloads(DownloadProvider.AUTHORITY);
         downloadManager = DownloadManagerBuilder.from(this)
                 .withVerboseLogging()
                 .build();
@@ -86,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
     @Override
     protected void onStart() {
         super.onStart();
-        getContentResolver().registerContentObserver(DownloadManager.CONTENT_URI, true, updateSelf);
+        getContentResolver().registerContentObserver(downloads.getContentUri(), true, updateSelf);
     }
 
     @Override

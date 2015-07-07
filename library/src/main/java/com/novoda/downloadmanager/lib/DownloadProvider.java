@@ -154,11 +154,7 @@ public final class DownloadProvider extends ContentProvider {
     /**
      * Different base URIs that could be used to access an individual download
      */
-    private static final Uri[] BASE_URIS = new Uri[]{
-            Downloads.Impl.CONTENT_URI,
-            Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
-            Downloads.Impl.BATCH_CONTENT_URI
-    };
+    private final Uri[] BASE_URIS;
 
     private static final String[] sAppReadableColumnsArray = new String[]{
             Downloads.Impl._ID,
@@ -219,6 +215,18 @@ public final class DownloadProvider extends ContentProvider {
 
     //    @VisibleForTesting
     SystemFacade mSystemFacade;
+
+    private Downloads downloads;
+
+    public DownloadProvider() {
+        downloads = new Downloads(DownloadProvider.AUTHORITY);
+
+        BASE_URIS = new Uri[]{
+                downloads.getContentUri(),
+                downloads.getAllDownloadsContentUri(),
+                downloads.getBatchContentUri()
+        };;
+    }
 
     /**
      * This class encapsulates a SQL where clause and its parameters.  It makes it possible for
@@ -356,7 +364,7 @@ public final class DownloadProvider extends ContentProvider {
         }
         if (match == BATCHES) {
             long rowId = db.insert(Downloads.Impl.Batches.BATCHES_TABLE_NAME, null, values);
-            return ContentUris.withAppendedId(Downloads.Impl.BATCH_CONTENT_URI, rowId);
+            return ContentUris.withAppendedId(downloads.getBatchContentUri(), rowId);
         }
         Log.d("calling insert on an unknown/invalid URI: " + uri);
         throw new IllegalArgumentException("Unknown/Invalid URI " + uri);
@@ -494,7 +502,7 @@ public final class DownloadProvider extends ContentProvider {
         Context context = getContext();
         context.startService(new Intent(context, DownloadService.class));
         notifyContentChanged(uri, match);
-        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, rowID);
+        return ContentUris.withAppendedId(downloads.getContentUri(), rowID);
     }
 
     /**
@@ -1011,7 +1019,8 @@ public final class DownloadProvider extends ContentProvider {
     private void logVerboseOpenFileInfo(Uri uri, String mode) {
         Log.v("openFile uri: " + uri + ", mode: " + mode
                 + ", uid: " + Binder.getCallingUid());
-        Cursor cursor = query(Downloads.Impl.CONTENT_URI,
+        Cursor cursor = query(
+                downloads.getContentUri(),
                 new String[]{"_id"}, null, null, "_id");
         if (cursor == null) {
             Log.v("null cursor in openFile");

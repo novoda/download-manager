@@ -99,6 +99,7 @@ public class DownloadService extends Service {
     private DownloadClientReadyChecker downloadClientReadyChecker;
     private BatchRepository batchRepository;
     private DownloadDeleter downloadDeleter;
+    private Downloads downloads;
 
     /**
      * Receives notifications when the data in the content provider changes
@@ -133,21 +134,22 @@ public class DownloadService extends Service {
         super.onCreate();
         Log.v("Service onCreate");
 
+        this.downloads = new Downloads(DownloadProvider.AUTHORITY);
         this.downloadDeleter = new DownloadDeleter(getContentResolver());
-        this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter);
+        this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter, downloads);
 
         if (mSystemFacade == null) {
             mSystemFacade = new RealSystemFacade(this);
         }
 
         mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        mStorageManager = new StorageManager(this);
+        mStorageManager = new StorageManager(this, downloads);
 
         mUpdateThread = new HandlerThread("DownloadManager-UpdateThread");
         mUpdateThread.start();
         mUpdateHandler = new Handler(mUpdateThread.getLooper(), mUpdateCallback);
 
-        mScanner = new DownloadScanner(this);
+        mScanner = new DownloadScanner(this, downloads);
 
         downloadClientReadyChecker = getDownloadClientReadyChecker();
 
@@ -156,14 +158,14 @@ public class DownloadService extends Service {
                 this,
                 notificationManager,
                 getNotificationImageRetriever(),
-                getResources());
-
+                getResources(),
+                downloads);
         mNotifier = new DownloadNotifier(this, notificationDisplayer);
         mNotifier.cancelAll();
 
         mObserver = new DownloadManagerContentObserver();
         getContentResolver().registerContentObserver(
-                Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
+                downloads.getAllDownloadsContentUri(),
                 true, mObserver);
 
         ConcurrentDownloadsLimitProvider concurrentDownloadsLimitProvider = ConcurrentDownloadsLimitProvider.newInstance(this);
@@ -311,7 +313,7 @@ public class DownloadService extends Service {
         long nextRetryTimeMillis = Long.MAX_VALUE;
         long now = mSystemFacade.currentTimeMillis();
 
-        Cursor downloadsCursor = getContentResolver().query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
+        Cursor downloadsCursor = getContentResolver().query(downloads.getAllDownloadsContentUri(), null, null, null, null);
         try {
             DownloadInfo.Reader reader = new DownloadInfo.Reader(getContentResolver(), downloadsCursor);
             int idColumn = downloadsCursor.getColumnIndexOrThrow(Downloads.Impl._ID);
@@ -338,8 +340,8 @@ public class DownloadService extends Service {
                     }
 
                     updateTotalBytesFor(info);
-                    batchRepository.updateCurrentSize(info.batchId);
-                    batchRepository.updateTotalSize(info.batchId);
+                    batchRepository.updateCurrentSize(info.getBatchId());
+                    batchRepository.updateTotalSize(info.getBatchId());
 
                     isActive = kickOffDownloadTaskIfReady(isActive, info, downloadBatch);
                     isActive = kickOffMediaScanIfCompleted(isActive, info);
@@ -407,7 +409,7 @@ public class DownloadService extends Service {
      * download if appropriate.
      */
     private DownloadInfo createNewDownloadInfo(DownloadInfo.Reader reader) {
-        DownloadInfo info = reader.newDownloadInfo(this, mSystemFacade, mStorageManager, mNotifier, downloadClientReadyChecker);
+        DownloadInfo info = reader.newDownloadInfo(this, mSystemFacade, mStorageManager, mNotifier, downloadClientReadyChecker, downloads);
         Log.v("processing inserted download " + info.mId);
         return info;
     }

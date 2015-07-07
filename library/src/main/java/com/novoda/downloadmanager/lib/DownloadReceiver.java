@@ -41,6 +41,12 @@ public class DownloadReceiver extends BroadcastReceiver {
         sAsyncHandler = new Handler(thread.getLooper());
     }
 
+    private final Downloads downloads;
+
+    public DownloadReceiver() {
+        downloads = new Downloads(DownloadProvider.AUTHORITY);
+    }
+
     @Override
     public void onReceive(@NonNull Context context, @NonNull Intent intent) {
         String action = intent.getAction();
@@ -106,7 +112,7 @@ public class DownloadReceiver extends BroadcastReceiver {
      * Notify the owner of a running download that its notification was clicked.
      */
     private void sendNotificationClickedIntent(Context context, long[] ids) {
-        Uri uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, ids[0]);
+        Uri uri = ContentUris.withAppendedId(downloads.getAllDownloadsContentUri(), ids[0]);
 
         Intent appIntent = new Intent(DownloadManager.ACTION_NOTIFICATION_CLICKED);
         appIntent.setPackage(context.getPackageName());
@@ -114,7 +120,7 @@ public class DownloadReceiver extends BroadcastReceiver {
         if (ids.length == 1) {
             appIntent.setData(uri);
         } else {
-            appIntent.setData(Downloads.Impl.CONTENT_URI);
+            appIntent.setData(downloads.getContentUri());
         }
 
         context.sendBroadcast(appIntent);
@@ -125,7 +131,7 @@ public class DownloadReceiver extends BroadcastReceiver {
      * {@link DownloadManager#COLUMN_ID}.
      */
     private void openDownload(Context context, long id) {
-        Intent intent = OpenHelper.buildViewIntent(context, id);
+        Intent intent = new OpenHelper(downloads).buildViewIntent(context, id);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         try {
             context.startActivity(intent);
@@ -140,7 +146,7 @@ public class DownloadReceiver extends BroadcastReceiver {
      * user so it's not renewed later.
      */
     private void hideNotification(Context context, long batchId) {
-        Uri uri = ContentUris.withAppendedId(Downloads.Impl.BATCH_CONTENT_URI, batchId);
+        Uri uri = ContentUris.withAppendedId(downloads.getBatchContentUri(), batchId);
         Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
         try {
             if (cursor.moveToFirst()) {
@@ -169,7 +175,7 @@ public class DownloadReceiver extends BroadcastReceiver {
         downloadValues.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_CANCELED);
         long batchId = getBatchId(intent);
         context.getContentResolver().update(
-                Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
+                downloads.getAllDownloadsContentUri(),
                 downloadValues,
                 Downloads.Impl.COLUMN_BATCH_ID + " = ?",
                 new String[]{String.valueOf(batchId)}
@@ -177,7 +183,7 @@ public class DownloadReceiver extends BroadcastReceiver {
         ContentValues batchValues = new ContentValues(1);
         batchValues.put(Downloads.Impl.Batches.COLUMN_STATUS, Downloads.Impl.STATUS_CANCELED);
         context.getContentResolver().update(
-                ContentUris.withAppendedId(Downloads.Impl.BATCH_CONTENT_URI, batchId),
+                ContentUris.withAppendedId(downloads.getBatchContentUri(), batchId),
                 batchValues,
                 null,
                 null
@@ -199,7 +205,7 @@ public class DownloadReceiver extends BroadcastReceiver {
         if (intent.getData() != null) {
             downloadId = ContentUris.parseId(intent.getData());
         }
-        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, downloadId);
+        return ContentUris.withAppendedId(downloads.getAllDownloadsContentUri(), downloadId);
     }
 
     private long getBatchId(Intent intent) {

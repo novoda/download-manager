@@ -25,15 +25,20 @@ import android.net.Uri;
 import java.io.File;
 
 import static android.app.DownloadManager.*;
-import static com.novoda.downloadmanager.lib.Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI;
 import static com.novoda.downloadmanager.lib.Downloads.Impl.RequestHeaders;
 
 class OpenHelper {
+
+    private final Downloads downloads;
+
+    public OpenHelper(Downloads downloads) {
+        this.downloads = downloads;
+    }
     /**
      * Build an {@link Intent} to view the download at current {@link Cursor}
      * position, handling subtleties around installing packages.
      */
-    public static Intent buildViewIntent(Context context, long id) {
+    public Intent buildViewIntent(Context context, long id) {
         final DownloadManager downManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
         downManager.setAccessAllDownloads(true);
 
@@ -62,7 +67,7 @@ class OpenHelper {
                 intent.putExtra("android.intent.extra.ORIGINATING_UID", getOriginatingUid(context, id));
             } else if ("file".equals(localUri.getScheme())) {
                 intent.setDataAndType(
-                        ContentUris.withAppendedId(ALL_DOWNLOADS_CONTENT_URI, id), mimeType);
+                        ContentUris.withAppendedId(downloads.getAllDownloadsContentUri(), id), mimeType);
             } else {
                 intent.setDataAndType(localUri, mimeType);
             }
@@ -73,9 +78,9 @@ class OpenHelper {
         }
     }
 
-    private static Uri getRefererUri(Context context, long id) {
+    private Uri getRefererUri(Context context, long id) {
         final Uri headersUri = Uri.withAppendedPath(
-                ContentUris.withAppendedId(ALL_DOWNLOADS_CONTENT_URI, id),
+                ContentUris.withAppendedId(downloads.getAllDownloadsContentUri(), id),
                 RequestHeaders.URI_SEGMENT);
         final Cursor headers = context.getContentResolver()
                 .query(headersUri, null, null, null, null);
@@ -92,8 +97,8 @@ class OpenHelper {
         return null;
     }
 
-    private static int getOriginatingUid(Context context, long id) {
-        final Uri uri = ContentUris.withAppendedId(ALL_DOWNLOADS_CONTENT_URI, id);
+    private int getOriginatingUid(Context context, long id) {
+        final Uri uri = ContentUris.withAppendedId(downloads.getAllDownloadsContentUri(), id);
         final Cursor cursor = context.getContentResolver().query(uri, new String[]{Constants.UID},
                 null, null, null);
         if (cursor != null) {

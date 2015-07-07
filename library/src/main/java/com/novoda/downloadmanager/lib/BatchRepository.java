@@ -3,8 +3,9 @@ package com.novoda.downloadmanager.lib;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.text.TextUtils;
 import android.util.SparseIntArray;
+
+import com.novoda.notils.string.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,22 +39,24 @@ class BatchRepository {
 
     private final ContentResolver resolver;
     private final DownloadDeleter downloadDeleter;
+    private final Downloads downloads;
 
-    public BatchRepository(ContentResolver resolver, DownloadDeleter downloadDeleter) {
+    public BatchRepository(ContentResolver resolver, DownloadDeleter downloadDeleter, Downloads downloads) {
         this.resolver = resolver;
         this.downloadDeleter = downloadDeleter;
+        this.downloads = downloads;
     }
 
     void updateTotalSize(long batchId) {
         ContentValues updateValues = new ContentValues();
         updateValues.put(Batches.COLUMN_TOTAL_BYTES, getSummedBatchSizeInBytes(batchId, COLUMN_TOTAL_BYTES));
-        resolver.update(BATCH_CONTENT_URI, updateValues, Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
+        resolver.update(downloads.getBatchContentUri(), updateValues, Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
     }
 
     void updateCurrentSize(long batchId) {
         ContentValues updateValues = new ContentValues();
         updateValues.put(Batches.COLUMN_CURRENT_BYTES, getSummedBatchSizeInBytes(batchId, COLUMN_CURRENT_BYTES));
-        resolver.update(BATCH_CONTENT_URI, updateValues, Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
+        resolver.update(downloads.getBatchContentUri(), updateValues, Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
     }
 
     private long getSummedBatchSizeInBytes(long batchId, String columnName) {
@@ -62,7 +65,7 @@ class BatchRepository {
         try {
             String[] selectionArgs = {String.valueOf(batchId)};
             cursor = resolver.query(
-                    ALL_DOWNLOADS_CONTENT_URI,
+                    downloads.getAllDownloadsContentUri(),
                     new String[]{"sum(" + columnName + ")"},
                     COLUMN_BATCH_ID + " = ?",
                     selectionArgs,
@@ -82,7 +85,7 @@ class BatchRepository {
     void updateBatchStatus(long batchId, int status) {
         ContentValues values = new ContentValues();
         values.put(Batches.COLUMN_STATUS, status);
-        resolver.update(BATCH_CONTENT_URI, values, Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
+        resolver.update(downloads.getBatchContentUri(), values, Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
     }
 
     int getBatchStatus(long batchId) {
@@ -91,7 +94,7 @@ class BatchRepository {
         try {
             String[] selectionArgs = {String.valueOf(batchId)};
             cursor = resolver.query(
-                    ALL_DOWNLOADS_CONTENT_URI,
+                    downloads.getAllDownloadsContentUri(),
                     null,
                     COLUMN_BATCH_ID + " = ?",
                     selectionArgs,
@@ -131,7 +134,7 @@ class BatchRepository {
     }
 
     public List<DownloadBatch> retrieveBatchesFor(Collection<DownloadInfo> downloads) {
-        Cursor batchesCursor = resolver.query(Downloads.Impl.BATCH_CONTENT_URI, null, null, null, null);
+        Cursor batchesCursor = resolver.query(this.downloads.getBatchContentUri(), null, null, null, null);
         List<DownloadBatch> batches = new ArrayList<>(batchesCursor.getCount());
         try {
             int idColumn = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches._ID);
@@ -156,7 +159,7 @@ class BatchRepository {
 
                 List<DownloadInfo> batchDownloads = new ArrayList<>(1);
                 for (DownloadInfo downloadInfo : downloads) {
-                    if (downloadInfo.batchId == id) {
+                    if (downloadInfo.getBatchId() == id) {
                         batchDownloads.add(downloadInfo);
                     }
                 }
@@ -170,7 +173,7 @@ class BatchRepository {
     }
 
     public void deleteMarkedBatchesFor(Collection<DownloadInfo> downloads) {
-        Cursor batchesCursor = resolver.query(Downloads.Impl.BATCH_CONTENT_URI, PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null);
+        Cursor batchesCursor = resolver.query(this.downloads.getBatchContentUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null);
         List<Long> batchIdsToDelete = new ArrayList<>();
         try {
             while (batchesCursor.moveToNext()) {
@@ -190,13 +193,13 @@ class BatchRepository {
         }
 
         for (DownloadInfo download : downloads) {
-            if (batchIdsToDelete.contains(download.batchId)) {
+            if (batchIdsToDelete.contains(download.getBatchId())) {
                 downloadDeleter.deleteFileAndDatabaseRow(download);
             }
         }
 
-        String selection = TextUtils.join(", ", batchIdsToDelete);
+        String selection = StringUtils.join(batchIdsToDelete, ", ");
         String[] selectionArgs = {selection};
-        resolver.delete(Downloads.Impl.BATCH_CONTENT_URI, Downloads.Impl.Batches._ID + " IN (?)", selectionArgs);
+        resolver.delete(this.downloads.getBatchContentUri(), Downloads.Impl.Batches._ID + " IN (?)", selectionArgs);
     }
 }
