@@ -28,6 +28,7 @@ import android.os.SystemClock;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
@@ -59,7 +60,7 @@ class DownloadScanner implements MediaScannerConnectionClient {
     }
 
     //    @GuardedBy("mediaScannerConnection")
-    private HashMap<String, ScanRequest> pendingRequests = new HashMap<>();
+    private Map<String, ScanRequest> pendingRequests = new HashMap<>();
 
     public static DownloadScanner newInstance(Context context){
         return new DownloadScanner(context.getContentResolver(), context);
