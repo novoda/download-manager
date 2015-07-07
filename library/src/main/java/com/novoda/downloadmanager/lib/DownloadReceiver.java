@@ -59,6 +59,8 @@ public class DownloadReceiver extends BroadcastReceiver {
             case ACTION_CANCEL:
                 handleSystemNotificationAction(context, intent);
                 break;
+            default:
+                break;
         }
     }
 
@@ -109,6 +111,8 @@ public class DownloadReceiver extends BroadcastReceiver {
                 break;
             case ACTION_DELETE:
                 deleteDownloadThroughDatabaseState(context, intent);
+                break;
+            default:
                 break;
         }
     }
