@@ -1,11 +1,11 @@
 0.1.3
 -------
 
-#71 Incorrect DownloadBatch passed to rule checker
-#69 splits demos
-#67 batch id query error
-#62 batch deletion bug
-#60 replaces data structures
+Incorrect DownloadBatch passed to rule checker #71 
+splits demos #69
+batch id query error #67
+batch deletion bug #62
+replaces data structures #60
 
 0.1.2
 -------
