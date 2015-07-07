@@ -401,14 +401,6 @@ public class DownloadService extends Service {
         return info;
     }
 
-    /**
-     * Updates the local copy of the info about a download.
-     */
-    private void updateDownloadFromDatabase(DownloadInfo.Reader reader, DownloadInfo info) {
-        reader.updateFromDatabase(info);
-        Log.v("processing updated download " + info.mId + ", status: " + info.mStatus);
-    }
-
     @Override
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         Log.e("I want to dump but nothing to dump into");
