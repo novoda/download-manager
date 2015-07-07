@@ -179,7 +179,7 @@
   </module>
 
   <module name="SuppressionFilter">
-    <property name="file" value="code-quality/checkstyle-rules/checkstyle-suppressions.xml" />
+    <property name="file" value="code-quality/rules/checkstyle/suppressions.xml" />
   </module>
 
   <!-- Enable suppression comments -->

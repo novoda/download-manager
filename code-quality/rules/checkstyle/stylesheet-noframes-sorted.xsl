@@ -2,6 +2,19 @@
   <xsl:output method="html" indent="yes" />
   <xsl:decimal-format decimal-separator="." grouping-separator="," />
 
+  <xsl:key name="files" match="file" use="@name" />
+
+  <!-- Checkstyle XML Style Sheet by Stephane Bailliez <sbailliez@apache.org>         -->
+  <!-- Part of the Checkstyle distribution found at http://checkstyle.sourceforge.net -->
+  <!-- Usage (generates checkstyle_report.html):                                      -->
+  <!--    <checkstyle failonviolation="false" config="${check.config}">               -->
+  <!--      <fileset dir="${src.dir}" includes="**/*.java"/>                          -->
+  <!--      <formatter type="xml" toFile="${doc.dir}/checkstyle_report.xml"/>         -->
+  <!--    </checkstyle>                                                               -->
+  <!--    <style basedir="${doc.dir}" destdir="${doc.dir}"                            -->
+  <!--            includes="checkstyle_report.xml"                                    -->
+  <!--            style="${doc.dir}/stylesheet-noframes-sorted.xsl"/>                 -->
+
   <xsl:template match="checkstyle">
     <html>
       <head>
@@ -58,7 +71,7 @@
         </style>
       </head>
       <body>
-        <a name="#top"></a>
+        <a name="top"></a>
         <!-- jakarta logo -->
         <table border="0" cellpadding="0" cellspacing="0" width="100%">
           <tr>
@@ -89,12 +102,8 @@
         <hr size="1" width="100%" align="left" />
 
         <!-- For each package create its part -->
-        <xsl:for-each select="file">
-          <xsl:sort select="@name" />
-          <xsl:apply-templates select="." />
-          <p />
-          <p />
-        </xsl:for-each>
+        <xsl:apply-templates select="file[@name and generate-id(.) = generate-id(key('files', @name))]" />
+
         <hr size="1" width="100%" align="left" />
 
 
@@ -110,13 +119,13 @@
         <th>Name</th>
         <th>Errors</th>
       </tr>
-      <xsl:for-each select="file">
-        <xsl:sort select="@name" />
+      <xsl:for-each select="file[@name and generate-id(.) = generate-id(key('files', @name))]">
+        <xsl:sort data-type="number" order="descending" select="count(key('files', @name)/error)" />
         <xsl:variable name="errorCount" select="count(error)" />
         <tr>
           <xsl:call-template name="alternated-row" />
           <td>
-            <a href="#{@name}">
+            <a href="#f-{@name}">
               <xsl:value-of select="@name" />
             </a>
           </td>
@@ -130,7 +139,7 @@
 
 
   <xsl:template match="file">
-    <a name="#{@name}"></a>
+    <a name="f-{@name}"></a>
     <h3>File
       <xsl:value-of select="@name" />
     </h3>
@@ -140,7 +149,8 @@
         <th>Error Description</th>
         <th>Line</th>
       </tr>
-      <xsl:for-each select="error">
+      <xsl:for-each select="key('files', @name)/error">
+        <xsl:sort data-type="number" order="ascending" select="@line" />
         <tr>
           <xsl:call-template name="alternated-row" />
           <td>
@@ -158,7 +168,7 @@
 
   <xsl:template match="checkstyle" mode="summary">
     <h3>Summary</h3>
-    <xsl:variable name="fileCount" select="count(file)" />
+    <xsl:variable name="fileCount" select="count(file[@name and generate-id(.) = generate-id(key('files', @name))])" />
     <xsl:variable name="errorCount" select="count(file/error)" />
     <table class="log" border="0" cellpadding="5" cellspacing="2" width="100%">
       <tr>
