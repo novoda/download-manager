@@ -317,13 +317,13 @@ public class DownloadService extends Service {
         long now = mSystemFacade.currentTimeMillis();
 
         Collection<DownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
+        updateTotalBytesFor(allDownloads);
         for (DownloadInfo info : allDownloads) {
             if (info.mDeleted) {
                 downloadDeleter.deleteFileAndDatabaseRow(info);
             } else if (Downloads.Impl.isStatusCancelled(info.mStatus) || Downloads.Impl.isStatusError(info.mStatus)) {
                 downloadDeleter.deleteFileAndMediaReference(info);
             } else {
-                updateTotalBytesFor(allDownloads);
                 batchRepository.updateCurrentSize(info.getBatchId());
                 batchRepository.updateTotalSize(info.getBatchId());
 
