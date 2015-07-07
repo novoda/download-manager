@@ -106,10 +106,8 @@ class DownloadInfo {
             Uri headerUri = Uri.withAppendedPath(info.getAllDownloadsUri(), Downloads.Impl.RequestHeaders.URI_SEGMENT);
             Cursor cursor = mResolver.query(headerUri, null, null, null, null);
             try {
-                int headerIndex =
-                        cursor.getColumnIndexOrThrow(Downloads.Impl.RequestHeaders.COLUMN_HEADER);
-                int valueIndex =
-                        cursor.getColumnIndexOrThrow(Downloads.Impl.RequestHeaders.COLUMN_VALUE);
+                int headerIndex = cursor.getColumnIndexOrThrow(Downloads.Impl.RequestHeaders.COLUMN_HEADER);
+                int valueIndex = cursor.getColumnIndexOrThrow(Downloads.Impl.RequestHeaders.COLUMN_VALUE);
                 for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
                     addHeader(info, cursor.getString(headerIndex), cursor.getString(valueIndex));
                 }

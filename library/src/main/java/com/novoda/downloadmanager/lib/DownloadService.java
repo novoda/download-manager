@@ -86,7 +86,7 @@ public class DownloadService extends Service {
      * content provider changes or disappears.
      */
 //    @GuardedBy("mDownloads")
-    private final Map<Long, DownloadInfo> mDownloads = new HashMap<>();
+    private final Map<Long, DownloadInfo> cachedDownloads = new HashMap<>();
 
     private ExecutorService mExecutor;
 
@@ -248,7 +248,7 @@ public class DownloadService extends Service {
             // TODO: handle media scanner timeouts
 
             final boolean isActive;
-            synchronized (mDownloads) {
+            synchronized (cachedDownloads) {
                 isActive = updateLocked();
             }
 
@@ -307,37 +307,28 @@ public class DownloadService extends Service {
     private boolean updateLocked() {
 
         boolean isActive = false;
-        Set<Long> staleDownloadIds = new HashSet<>(mDownloads.keySet());
+        Set<Long> staleDownloadIds = new HashSet<>(cachedDownloads.keySet());
         long nextRetryTimeMillis = Long.MAX_VALUE;
         long now = mSystemFacade.currentTimeMillis();
 
         Cursor downloadsCursor = getContentResolver().query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
         try {
-            DownloadInfo.Reader reader = new DownloadInfo.Reader(getContentResolver(), downloadsCursor);
-            int idColumn = downloadsCursor.getColumnIndexOrThrow(Downloads.Impl._ID);
-            while (downloadsCursor.moveToNext()) {
-                long id = downloadsCursor.getLong(idColumn);
-                staleDownloadIds.remove(id);
+            cachedDownloads.clear();
+            cachedDownloads.putAll(getAllDownloads(staleDownloadIds, downloadsCursor));
 
-                DownloadInfo info = mDownloads.get(id);
-                if (info == null) {
-                    info = createNewDownloadInfo(reader);
-                    mDownloads.put(info.mId, info);
-                } else {
-                    updateDownloadFromDatabase(reader, info);
-                }
+            for (DownloadInfo info : cachedDownloads.values()) {
 
                 if (info.mDeleted) {
                     downloadDeleter.deleteFileAndDatabaseRow(info);
                 } else if (Downloads.Impl.isStatusCancelled(info.mStatus) || Downloads.Impl.isStatusError(info.mStatus)) {
                     downloadDeleter.deleteFileAndMediaReference(info);
                 } else {
+                    updateTotalBytesFor(cachedDownloads.values());
                     DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(info);
                     if (downloadBatch.isDeleted()) {
                         continue;
                     }
 
-                    updateTotalBytesFor(downloadBatch);
                     batchRepository.updateCurrentSize(info.getBatchId());
                     batchRepository.updateTotalSize(info.getBatchId());
 
@@ -347,14 +338,16 @@ public class DownloadService extends Service {
 
                 // Keep track of nearest next action
                 nextRetryTimeMillis = Math.min(info.nextActionMillis(now), nextRetryTimeMillis);
+
             }
+
         } finally {
             downloadsCursor.close();
         }
 
-        downloadDeleter.cleanUpStaleDownloadsThatDisappeared(staleDownloadIds, mDownloads);
+        downloadDeleter.cleanUpStaleDownloadsThatDisappeared(staleDownloadIds, cachedDownloads);
 
-        Collection<DownloadInfo> downloads = mDownloads.values();
+        Collection<DownloadInfo> downloads = cachedDownloads.values();
 
         List<DownloadBatch> batches = batchRepository.retrieveBatchesFor(downloads);
         batchRepository.deleteMarkedBatchesFor(downloads);
@@ -373,10 +366,24 @@ public class DownloadService extends Service {
         return isActive;
     }
 
-    private void updateTotalBytesFor(DownloadBatch batch) {
-        if (batch.getTotalSize() == -1) {
-            ContentValues values = new ContentValues();
-            for (DownloadInfo downloadInfo : batch.getDownloads()) {
+    private Map<Long, DownloadInfo> getAllDownloads(Set<Long> staleDownloadIds, Cursor downloadsCursor) {
+        DownloadInfo.Reader reader = new DownloadInfo.Reader(getContentResolver(), downloadsCursor);
+        int idColumn = downloadsCursor.getColumnIndexOrThrow(Downloads.Impl._ID);
+
+        Map<Long, DownloadInfo> downloads = new HashMap<>();
+
+        while (downloadsCursor.moveToNext()) {
+            long id = downloadsCursor.getLong(idColumn);
+            staleDownloadIds.remove(id);
+            downloads.put(id, createNewDownloadInfo(reader));
+        }
+        return downloads;
+    }
+
+    private void updateTotalBytesFor(Collection<DownloadInfo> downloadInfos) {
+        ContentValues values = new ContentValues();
+        for (DownloadInfo downloadInfo : downloadInfos) {
+            if (downloadInfo.mTotalBytes == -1) {
                 downloadInfo.mTotalBytes = contentLengthFetcher.fetchContentLengthFor(downloadInfo);
                 values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, downloadInfo.mTotalBytes);
                 getContentResolver().update(downloadInfo.getAllDownloadsUri(), values, null, null);
