@@ -401,14 +401,14 @@ public class DownloadManager {
     public void pauseBatch(long id) {
         ContentValues values = new ContentValues();
         values.put(Downloads.Impl.COLUMN_CONTROL, Downloads.Impl.CONTROL_PAUSED);
-        mResolver.update(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
+        mResolver.update(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, values, COLUMN_BATCH_ID + "=?", new String[]{String.valueOf(id)});
     }
 
     public void resumeBatch(long id) {
         ContentValues values = new ContentValues();
         values.put(Downloads.Impl.COLUMN_CONTROL, Downloads.Impl.CONTROL_RUN);
         values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
-        mResolver.update(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
+        mResolver.update(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, values, COLUMN_BATCH_ID + "=?", new String[]{String.valueOf(id)});
     }
 
     public void removeDownload(URI uri) {
@@ -485,6 +485,16 @@ public class DownloadManager {
             return null;
         }
         return new CursorTranslator(underlyingCursor, Downloads.Impl.DOWNLOADS_BY_BATCH_URI);
+    }
+
+    public Cursor queryBatch(BatchQuery query) {
+        BatchRepository batchRepository = new BatchRepository(mResolver, new DownloadDeleter(mResolver));
+        Cursor cursor = batchRepository.retrieveFor(query);
+        if (cursor == null) {
+            return null;
+        }
+
+        return new CursorTranslator(cursor, Downloads.Impl.BATCH_CONTENT_URI);
     }
 
     /**

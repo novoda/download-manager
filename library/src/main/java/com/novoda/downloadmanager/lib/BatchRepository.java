@@ -199,4 +199,8 @@ class BatchRepository {
         String[] selectionArgs = {selection};
         resolver.delete(Downloads.Impl.BATCH_CONTENT_URI, Downloads.Impl.Batches._ID + " IN (?)", selectionArgs);
     }
+
+    public Cursor retrieveFor(BatchQuery query) {
+        return resolver.query(BATCH_CONTENT_URI, null, query.getSelection(), query.getSelectionArguments(), null);
+    }
 }
