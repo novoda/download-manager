@@ -61,6 +61,8 @@ public class DownloadManager {
      */
     public static final Uri CONTENT_URI = Downloads.Impl.CONTENT_URI;
 
+    public static final Uri BATCH_CONTENT_URI = Downloads.Impl.BATCH_CONTENT_URI;
+
     /**
      * An identifier for a particular download, unique across the system.  Clients use this ID to
      * make subsequent calls related to the download.
