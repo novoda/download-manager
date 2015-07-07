@@ -201,7 +201,7 @@ class DownloadThread implements Runnable {
 
         if (downloadStatus != Downloads.Impl.STATUS_RUNNING) {
             mInfo.updateStatus(Downloads.Impl.STATUS_RUNNING);
-            updateBatchStatus(mInfo.batchId, mInfo.mId);
+            updateBatchStatus(mInfo.getBatchId(), mInfo.mId);
         }
 
         State state = new State(mInfo);
@@ -852,7 +852,7 @@ class DownloadThread implements Runnable {
         }
         getContentResolver().update(mInfo.getAllDownloadsUri(), values, null, null);
 
-        updateBatchStatus(mInfo.batchId, mInfo.mId);
+        updateBatchStatus(mInfo.getBatchId(), mInfo.mId);
     }
 
     private ContentResolver getContentResolver() {
