@@ -1,3 +1,12 @@
+0.1.3
+-------
+
+#71 Incorrect DownloadBatch passed to rule checker
+#69 splits demos
+#67 batch id query error
+#62 batch deletion bug
+#60 replaces data structures
+
 0.1.2
 -------
 
