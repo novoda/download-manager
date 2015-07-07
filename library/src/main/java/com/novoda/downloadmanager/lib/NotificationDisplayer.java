@@ -27,6 +27,7 @@ class NotificationDisplayer {
     private final NotificationManager notificationManager;
     private final NotificationImageRetriever imageRetriever;
     private final Resources resources;
+    private final Downloads downloads;
 
     /**
      * Current speed of active downloads, mapped from {@link DownloadInfo#batchId}
@@ -38,11 +39,13 @@ class NotificationDisplayer {
             Context context,
             NotificationManager notificationManager,
             NotificationImageRetriever imageRetriever,
-            Resources resources) {
+            Resources resources,
+            Downloads downloads) {
         this.context = context;
         this.notificationManager = notificationManager;
         this.imageRetriever = imageRetriever;
         this.resources = resources;
+        this.downloads = downloads;
     }
 
     public void buildAndShowNotification(SimpleArrayMap<String, Collection<DownloadBatch>> clusters, String notificationId, long firstShown) {
@@ -103,7 +106,7 @@ class NotificationDisplayer {
             DownloadBatch batch = cluster.iterator().next();
             // TODO: Decide how we handle notification clicks
             DownloadInfo downloadInfo = batch.getDownloads().get(0);
-            Uri uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, downloadInfo.mId);
+            Uri uri = ContentUris.withAppendedId(downloads.getAllDownloadsContentUri(), downloadInfo.mId);
             builder.setAutoCancel(true);
 
             final String action;

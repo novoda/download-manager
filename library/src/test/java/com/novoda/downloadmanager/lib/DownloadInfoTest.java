@@ -29,6 +29,7 @@ public class DownloadInfoTest {
                 null,
                 null,
                 IS_READY,
+                null,
                 null);
 
         boolean isReady = downloadInfo.isReadyToDownload(null);
@@ -45,6 +46,7 @@ public class DownloadInfoTest {
                 null,
                 null,
                 IS_NOT_READY,
+                null,
                 null);
 
         boolean isReady = downloadInfo.isReadyToDownload(null);

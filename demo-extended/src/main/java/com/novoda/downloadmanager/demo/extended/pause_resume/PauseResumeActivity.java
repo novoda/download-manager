@@ -19,6 +19,8 @@ import com.novoda.downloadmanager.demo.extended.DownloadAdapter;
 import com.novoda.downloadmanager.demo.extended.QueryForDownloadsAsyncTask;
 import com.novoda.downloadmanager.demo.extended.QueryTimestamp;
 import com.novoda.downloadmanager.lib.DownloadManager;
+import com.novoda.downloadmanager.lib.DownloadProvider;
+import com.novoda.downloadmanager.lib.Downloads;
 import com.novoda.downloadmanager.lib.NotificationVisibility;
 import com.novoda.downloadmanager.lib.Query;
 import com.novoda.downloadmanager.lib.Request;
@@ -35,6 +37,7 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
     private DownloadManager downloadManager;
     private ListView listView;
     private DownloadAdapter downloadAdapter;
+    private Downloads downloads;
 
     private final QueryTimestamp lastQueryTimestamp = new QueryTimestamp();
 
@@ -42,6 +45,8 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pause_resume);
+
+        downloads = new Downloads(DownloadProvider.AUTHORITY);
 
         listView = (ListView) findViewById(R.id.main_downloads_list);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -100,7 +105,7 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
     @Override
     protected void onStart() {
         super.onStart();
-        getContentResolver().registerContentObserver(DownloadManager.CONTENT_URI, true, updateSelf);
+        getContentResolver().registerContentObserver(downloads.getContentUri(), true, updateSelf);
     }
 
     private final ContentObserver updateSelf = new ContentObserver(handler) {

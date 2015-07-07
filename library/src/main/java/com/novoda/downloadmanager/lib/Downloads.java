@@ -26,8 +26,50 @@ import android.provider.BaseColumns;
  *
  * @pending
  */
-final class Downloads {
-    private Downloads() {
+public class Downloads {
+
+    private final String authority;
+
+    /**
+     * The content URI for accessing publicly accessible downloads (i.e., it requires no
+     * permissions to access this downloaded file)
+     */
+    public Uri getPublicityAccessibleDownloadsUri() {
+        return Uri.parse(getAuthority() + "/" + Impl.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT);
+    }
+    /**
+     * The content:// URI to access downloads and their batch data.
+     */
+    public Uri getDownloadsByBatchUri() {
+        return Uri.parse(getAuthority() + "/downloads_by_batch");
+    }
+    /**
+     * The content URI for accessing all downloads across all UIDs (requires the
+     * ACCESS_ALL_DOWNLOADS permission).
+     */
+    public Uri getAllDownloadsContentUri() {
+        return Uri.parse(getAuthority() + "/all_downloads");
+    }
+    /**
+     * The content:// URI to access downloads owned by the caller's UID.
+     */
+    public Uri getBatchContentUri() {
+        return Uri.parse(getAuthority() + "/batches");
+    }
+
+    public Downloads(String authority) {
+        this.authority = "content://" + authority;
+    }
+
+    /**
+     * The content:// URI to access downloads owned by the caller's UID.
+     */
+    public Uri getContentUri() {
+        return Uri.parse(getAuthority() + "/my_downloads");
+    }
+
+    private String getAuthority() {
+        return authority;
     }
 
     /**
@@ -80,41 +122,9 @@ final class Downloads {
         public static final String PERMISSION_NO_NOTIFICATION = "android.permission.DOWNLOAD_WITHOUT_NOTIFICATION";
 
         /**
-         * Added so we can use our own ContentProvider - Matches: DownloadProvider.java
-         */
-        private static final String AUTHORITY = "content://" + DownloadProvider.AUTHORITY;
-
-        /**
-         * The content:// URI to access downloads owned by the caller's UID.
-         */
-        public static final Uri CONTENT_URI = Uri.parse(AUTHORITY + "/my_downloads");
-
-        /**
-         * The content:// URI to access downloads owned by the caller's UID.
-         */
-        public static final Uri BATCH_CONTENT_URI = Uri.parse(AUTHORITY + "/batches");
-
-        /**
-         * The content URI for accessing all downloads across all UIDs (requires the
-         * ACCESS_ALL_DOWNLOADS permission).
-         */
-        public static final Uri ALL_DOWNLOADS_CONTENT_URI = Uri.parse(AUTHORITY + "/all_downloads");
-
-        /**
-         * The content:// URI to access downloads and their batch data.
-         */
-        public static final Uri DOWNLOADS_BY_BATCH_URI = Uri.parse(AUTHORITY + "/downloads_by_batch");
-
-        /**
          * URI segment to access a publicly accessible downloaded file
          */
         public static final String PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT = "public_downloads";
-
-        /**
-         * The content URI for accessing publicly accessible downloads (i.e., it requires no
-         * permissions to access this downloaded file)
-         */
-        public static final Uri PUBLICLY_ACCESSIBLE_DOWNLOADS_URI = Uri.parse(AUTHORITY + "/" + PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT);
 
         /**
          * Name of downloadstable in the database
@@ -832,11 +842,4 @@ final class Downloads {
      * Query where clause for general querying.
      */
     private static final String QUERY_WHERE_CLAUSE = Impl.COLUMN_NOTIFICATION_CLASS + "=?";
-
-    /**
-     * Delete all the downloads for a package/class pair.
-     */
-    public static void removeAllDownloads(Context context, String notificationClass) {
-        context.getContentResolver().delete(Impl.CONTENT_URI, QUERY_WHERE_CLAUSE, new String[]{notificationClass});
-    }
 }

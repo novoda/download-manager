@@ -38,6 +38,7 @@ class DownloadScanner implements MediaScannerConnectionClient {
     private static final long SCAN_TIMEOUT = MINUTE_IN_MILLIS;
 
     private final Context mContext;
+    private final Downloads downloads;
     private final MediaScannerConnection mConnection;
 
     private static class ScanRequest {
@@ -61,8 +62,9 @@ class DownloadScanner implements MediaScannerConnectionClient {
     //    @GuardedBy("mConnection")
     private HashMap<String, ScanRequest> mPending = new HashMap<String, ScanRequest>();
 
-    public DownloadScanner(Context context) {
+    public DownloadScanner(Context context, Downloads downloads) {
         mContext = context;
+        this.downloads = downloads;
         mConnection = new MediaScannerConnection(context, this);
     }
 
@@ -141,7 +143,7 @@ class DownloadScanner implements MediaScannerConnectionClient {
 
         final ContentResolver resolver = mContext.getContentResolver();
         final Uri downloadUri = ContentUris.withAppendedId(
-                Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, req.id);
+                downloads.getAllDownloadsContentUri(), req.id);
         final int rows = resolver.update(downloadUri, values, null, null);
         if (rows == 0) {
             // Local row disappeared during scan; download was probably deleted

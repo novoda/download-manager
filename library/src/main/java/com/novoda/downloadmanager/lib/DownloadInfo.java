@@ -47,7 +47,8 @@ class DownloadInfo {
                 SystemFacade systemFacade,
                 StorageManager storageManager,
                 DownloadNotifier notifier,
-                DownloadClientReadyChecker downloadClientReadyChecker) {
+                DownloadClientReadyChecker downloadClientReadyChecker,
+                Downloads downloads) {
             RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
             ContentValues contentValues = new ContentValues();
             DownloadInfo info = new DownloadInfo(
@@ -57,7 +58,8 @@ class DownloadInfo {
                     notifier,
                     randomNumberGenerator,
                     downloadClientReadyChecker,
-                    contentValues);
+                    contentValues,
+                    downloads);
             updateFromDatabase(info);
             readRequestHeaders(info);
 
@@ -244,6 +246,7 @@ class DownloadInfo {
     private final DownloadClientReadyChecker downloadClientReadyChecker;
     private final RandomNumberGenerator randomNumberGenerator;
     private final ContentValues downloadStatusContentValues;
+    private final Downloads downloads;
 
     DownloadInfo(
             Context context,
@@ -252,7 +255,8 @@ class DownloadInfo {
             DownloadNotifier notifier,
             RandomNumberGenerator randomNumberGenerator,
             DownloadClientReadyChecker downloadClientReadyChecker,
-            ContentValues downloadStatusContentValues) {
+            ContentValues downloadStatusContentValues,
+            Downloads downloads) {
         this.mContext = context;
         this.mSystemFacade = systemFacade;
         this.mStorageManager = storageManager;
@@ -260,6 +264,7 @@ class DownloadInfo {
         this.randomNumberGenerator = randomNumberGenerator;
         this.downloadClientReadyChecker = downloadClientReadyChecker;
         this.downloadStatusContentValues = downloadStatusContentValues;
+        this.downloads = downloads;
     }
 
     public long getBatchId() {
@@ -461,9 +466,9 @@ class DownloadInfo {
             if (mSubmittedTask == null || mSubmittedTask.isDone()) {
                 BatchCompletionBroadcaster batchCompletionBroadcaster = BatchCompletionBroadcaster.newInstance(mContext);
                 ContentResolver contentResolver = mContext.getContentResolver();
-                BatchRepository batchRepository = BatchRepository.newInstance(contentResolver, new DownloadDeleter(contentResolver));
+                BatchRepository batchRepository = new BatchRepository(contentResolver, new DownloadDeleter(contentResolver), downloads);
                 DownloadThread downloadThread = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier,
-                        batchCompletionBroadcaster, batchRepository);
+                        batchCompletionBroadcaster, batchRepository, downloads);
                 mSubmittedTask = executor.submit(downloadThread);
                 isActive = true;
             } else {
@@ -512,11 +517,11 @@ class DownloadInfo {
     }
 
     public Uri getMyDownloadsUri() {
-        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, mId);
+        return ContentUris.withAppendedId(downloads.getContentUri(), mId);
     }
 
     public Uri getAllDownloadsUri() {
-        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, mId);
+        return ContentUris.withAppendedId(downloads.getAllDownloadsContentUri(), mId);
     }
 
     /**
@@ -564,9 +569,9 @@ class DownloadInfo {
     /**
      * Query and return status of requested download.
      */
-    public static int queryDownloadStatus(ContentResolver resolver, long id) {
+    public static int queryDownloadStatus(ContentResolver resolver, long id, Downloads downloads) {
         final Cursor cursor = resolver.query(
-                ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id),
+                ContentUris.withAppendedId(downloads.getAllDownloadsContentUri(), id),
                 new String[]{Downloads.Impl.COLUMN_STATUS}, null, null, null);
         try {
             if (cursor.moveToFirst()) {

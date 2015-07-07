@@ -73,12 +73,14 @@ class DownloadThread implements Runnable {
     private final DownloadNotifier mNotifier;
     private final BatchCompletionBroadcaster batchCompletionBroadcaster;
     private final BatchRepository batchRepository;
+    private final Downloads downloads;
 
     private volatile boolean mPolicyDirty;
 
     public DownloadThread(Context context, SystemFacade systemFacade, DownloadInfo info,
                           StorageManager storageManager, DownloadNotifier notifier,
-                          BatchCompletionBroadcaster batchCompletionBroadcaster, BatchRepository batchRepository) {
+                          BatchCompletionBroadcaster batchCompletionBroadcaster, BatchRepository batchRepository,
+                          Downloads downloads) {
         mContext = context;
         mSystemFacade = systemFacade;
         mInfo = info;
@@ -86,6 +88,7 @@ class DownloadThread implements Runnable {
         mNotifier = notifier;
         this.batchCompletionBroadcaster = batchCompletionBroadcaster;
         this.batchRepository = batchRepository;
+        this.downloads = downloads;
     }
 
     /**
@@ -179,7 +182,7 @@ class DownloadThread implements Runnable {
 
     private void runInternal() {
         // Skip when download already marked as finished; this download was probably started again while racing with UpdateThread.
-        int downloadStatus = DownloadInfo.queryDownloadStatus(getContentResolver(), mInfo.mId);
+        int downloadStatus = DownloadInfo.queryDownloadStatus(getContentResolver(), mInfo.mId, downloads);
         if (downloadStatus == Downloads.Impl.STATUS_SUCCESS) {
             Log.d("Download " + mInfo.mId + " already finished; skipping");
             return;
@@ -866,12 +869,12 @@ class DownloadThread implements Runnable {
         if (Downloads.Impl.isStatusCancelled(batchStatus)) {
             ContentValues values = new ContentValues();
             values.put(COLUMN_STATUS, STATUS_CANCELED);
-            getContentResolver().update(ALL_DOWNLOADS_CONTENT_URI, values, COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
+            getContentResolver().update(downloads.getAllDownloadsContentUri(), values, COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
         } else if (Downloads.Impl.isStatusError(batchStatus)) {
             ContentValues values = new ContentValues();
             values.put(COLUMN_STATUS, STATUS_BATCH_FAILED);
             getContentResolver().update(
-                    ALL_DOWNLOADS_CONTENT_URI,
+                    downloads.getAllDownloadsContentUri(),
                     values,
                     COLUMN_BATCH_ID + " = ? AND " + _ID + " <> ? ",
                     new String[]{String.valueOf(batchId), String.valueOf(downloadId)}
