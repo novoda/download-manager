@@ -57,10 +57,10 @@ public class BatchRepositoryTest {
     public void setUp() {
         initMocks(this);
 
-        this.batchRepository = new BatchRepository(mockContentResolver, mockDownloadDeleter, mock(Uri.class), mock(Uri.class));
-
         when(mockDownloads.getBatchContentUri()).thenReturn(mockUri);
         when(mockDownloads.getAllDownloadsContentUri()).thenReturn(mockUri);
+
+        this.batchRepository = new BatchRepository(mockContentResolver, mockDownloadDeleter, mockDownloads);
 
         when(mockDownloadInfoId1.getBatchId()).thenReturn(1L);
         when(mockDownloadInfoId2.getBatchId()).thenReturn(2L);
@@ -120,8 +120,6 @@ public class BatchRepositoryTest {
         when(mockContentResolver.query(mockDownloads.getBatchContentUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null)).thenReturn(cursorWithDownloadsIdToBeDeleted);
         when(mockContentResolver.query(any(Uri.class), any(String[].class), any(String.class), any(String[].class), any(String.class))).thenReturn(cursorWithDownloadsIdToBeDeleted);
 
-        BatchRepository batchRepository = new BatchRepository(mockContentResolver, mockDownloadDeleter, mockUri, mockUri);
-
         Collection<DownloadInfo> downloads = Arrays.asList(mockDownloadInfoId1, mockDownloadInfoId2, mockDownloadInfoId3, mockDownloadInfoId4);
         batchRepository.deleteMarkedBatchesFor(downloads);
 
@@ -139,8 +137,6 @@ public class BatchRepositoryTest {
         when(mockContentResolver.query(mockDownloads.getBatchContentUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null)).thenReturn(cursorWithDownloadsIdToBeDeleted);
         when(mockContentResolver.query(any(Uri.class), any(String[].class), any(String.class), any(String[].class), any(String.class))).thenReturn(cursorWithDownloadsIdToBeDeleted);
 
-        BatchRepository batchRepository = new BatchRepository(mockContentResolver, mockDownloadDeleter, mockUri, mockUri);
-
         Collection<DownloadInfo> downloads = Arrays.asList(mockDownloadInfoId1, mockDownloadInfoId2, mockDownloadInfoId3, mockDownloadInfoId4);
         batchRepository.deleteMarkedBatchesFor(downloads);
 
@@ -157,8 +153,6 @@ public class BatchRepositoryTest {
         MockCursorWithDownloadsIdsToBeDeleted cursorWithDownloadsIdToBeDeleted = new MockCursorWithDownloadsIdsToBeDeleted(Collections.<Long>emptyList());
         when(mockContentResolver.query(mockDownloads.getBatchContentUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null)).thenReturn(cursorWithDownloadsIdToBeDeleted);
         when(mockContentResolver.query(any(Uri.class), any(String[].class), any(String.class), any(String[].class), any(String.class))).thenReturn(cursorWithDownloadsIdToBeDeleted);
-
-        BatchRepository batchRepository = new BatchRepository(mockContentResolver, mockDownloadDeleter, mockUri, mockUri);
 
         Collection<DownloadInfo> downloads = Arrays.asList(mockDownloadInfoId1, mockDownloadInfoId2, mockDownloadInfoId3, mockDownloadInfoId4);
         batchRepository.deleteMarkedBatchesFor(downloads);

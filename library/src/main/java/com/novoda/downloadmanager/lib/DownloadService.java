@@ -136,7 +136,7 @@ public class DownloadService extends Service {
 
         this.downloads = new Downloads(DownloadProvider.AUTHORITY);
         this.downloadDeleter = new DownloadDeleter(getContentResolver());
-        this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter, downloads.getBatchContentUri(), downloads.getAllDownloadsContentUri());
+        this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter, downloads);
 
         if (mSystemFacade == null) {
             mSystemFacade = new RealSystemFacade(this);
