@@ -62,10 +62,6 @@ class DownloadScanner implements MediaScannerConnectionClient {
     //    @GuardedBy("mediaScannerConnection")
     private Map<String, ScanRequest> pendingRequests = new HashMap<>();
 
-    public static DownloadScanner newInstance(Context context){
-        return new DownloadScanner(context.getContentResolver(), context);
-    }
-
     public DownloadScanner(ContentResolver resolver, Context context) {
         this.resolver = resolver;
         mediaScannerConnection = new MediaScannerConnection(context, this);

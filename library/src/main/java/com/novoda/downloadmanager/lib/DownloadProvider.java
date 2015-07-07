@@ -267,7 +267,9 @@ public final class DownloadProvider extends ContentProvider {
         }
 
         Context context = getContext();
-        DatabaseFilenameProvider databaseFilenameProvider = DatabaseFilenameProvider.newInstance(context, DB_NAME);
+        PackageManager packageManager = context.getPackageManager();
+        String packageName = context.getApplicationContext().getPackageName();
+        DatabaseFilenameProvider databaseFilenameProvider = new DatabaseFilenameProvider(packageManager, packageName, DB_NAME);
         String databaseFilename = databaseFilenameProvider.getDatabaseFilename();
         openHelper = new DatabaseHelper(context, databaseFilename);
         // Initialize the system uid

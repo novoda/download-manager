@@ -20,11 +20,14 @@ import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -34,6 +37,7 @@ import android.support.annotation.NonNull;
 
 import com.novoda.notils.logger.simple.Log;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -141,13 +145,18 @@ public class DownloadService extends Service {
         }
 
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        storageManager = StorageManager.newInstance(this);
+        ContentResolver contentResolver = getContentResolver();
+        File downloadDataDir = StorageManager.getDownloadDataDirectory(this);
+        File externalStorageDir = Environment.getExternalStorageDirectory();
+        File internalStorageDir = Environment.getDataDirectory();
+        File systemCacheDir = Environment.getDownloadCacheDirectory();
+        storageManager = new StorageManager(contentResolver, externalStorageDir, internalStorageDir, systemCacheDir, downloadDataDir);
 
         updateThread = new HandlerThread("DownloadManager-UpdateThread");
         updateThread.start();
         updateHandler = new Handler(updateThread.getLooper(), updateCallback);
 
-        downloadScanner = DownloadScanner.newInstance(this);
+        downloadScanner = new DownloadScanner(getContentResolver(), this);
 
         downloadClientReadyChecker = getDownloadClientReadyChecker();
 
@@ -166,7 +175,9 @@ public class DownloadService extends Service {
                 Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
                 true, downloadManagerContentObserver);
 
-        ConcurrentDownloadsLimitProvider concurrentDownloadsLimitProvider = ConcurrentDownloadsLimitProvider.newInstance(this);
+        PackageManager packageManager = getPackageManager();
+        String packageName = getApplicationContext().getPackageName();
+        ConcurrentDownloadsLimitProvider concurrentDownloadsLimitProvider = new ConcurrentDownloadsLimitProvider(packageManager, packageName);
         DownloadExecutorFactory factory = new DownloadExecutorFactory(concurrentDownloadsLimitProvider);
         executor = factory.createExecutor();
     }

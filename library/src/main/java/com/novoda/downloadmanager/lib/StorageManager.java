@@ -82,15 +82,6 @@ class StorageManager {
      */
     private final ContentResolver contentResolver;
 
-    public static StorageManager newInstance(Context context) {
-        ContentResolver contentResolver = context.getContentResolver();
-        File downloadDataDir = getDownloadDataDirectory(context);
-        File externalStorageDir = Environment.getExternalStorageDirectory();
-        File internalStorageDir = Environment.getDataDirectory();
-        File systemCacheDir = Environment.getDownloadCacheDirectory();
-        return new StorageManager(contentResolver, externalStorageDir, internalStorageDir, systemCacheDir, downloadDataDir);
-    }
-
     StorageManager(ContentResolver contentResolver, File externalStorageDir, File internalStorageDir, File systemCacheDir, File downloadDataDir) {
         this.contentResolver = contentResolver;
         this.externalStorageDir = externalStorageDir;

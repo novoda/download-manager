@@ -1,6 +1,5 @@
 package com.novoda.downloadmanager.lib;
 
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -13,12 +12,6 @@ class DatabaseFilenameProvider {
     private final PackageManager packageManager;
     private final String packageName;
     private final String defaultFilename;
-
-    static DatabaseFilenameProvider newInstance(@NonNull Context context, @NonNull String defaultFilename) {
-        PackageManager packageManager = context.getPackageManager();
-        String packageName = context.getApplicationContext().getPackageName();
-        return new DatabaseFilenameProvider(packageManager, packageName, defaultFilename);
-    }
 
     DatabaseFilenameProvider(@NonNull PackageManager packageManager, @NonNull String packageName, @NonNull String defaultFilename) {
         this.packageManager = packageManager;

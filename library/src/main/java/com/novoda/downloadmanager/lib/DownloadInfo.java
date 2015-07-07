@@ -415,7 +415,8 @@ class DownloadInfo {
         synchronized (this) {
             boolean isActive;
             if (submittedThread == null || submittedThread.isDone()) {
-                BatchCompletionBroadcaster batchCompletionBroadcaster = BatchCompletionBroadcaster.newInstance(context);
+                String applicationPackageName = context.getApplicationContext().getPackageName();
+                BatchCompletionBroadcaster batchCompletionBroadcaster = new BatchCompletionBroadcaster(context, applicationPackageName);
                 ContentResolver contentResolver = context.getContentResolver();
                 BatchRepository batchRepository = new BatchRepository(contentResolver, new DownloadDeleter(contentResolver));
                 DownloadThread downloadThread = new DownloadThread(context, systemFacade, this, storageManager, downloadNotifier,
