@@ -4,8 +4,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 
 import com.novoda.downloadmanager.lib.DownloadManager;
-import com.novoda.downloadmanager.lib.DownloadProvider;
-import com.novoda.downloadmanager.lib.Downloads;
 import com.novoda.downloadmanager.lib.DownloadsUriProvider;
 
 /**
