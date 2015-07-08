@@ -87,6 +87,16 @@ public class DownloadManager {
     public static final String COLUMN_BATCH_ID = Downloads.Impl.COLUMN_BATCH_ID;
 
     /**
+     * The total size in bytes of the batch.
+     */
+    public static final String COLUMN_BATCH_TOTAL_SIZE_BYTES = Downloads.Impl.Batches.COLUMN_TOTAL_BYTES;
+
+    /**
+     * The current size in bytes of the batch.
+     */
+    public static final String COLUMN_BATCH_CURRENTL_SIZE_BYTES = Downloads.Impl.Batches.COLUMN_CURRENT_BYTES;
+
+    /**
      * The extra supplied information for this download.
      */
     public static final String COLUMN_NOTIFICATION_EXTRAS = Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS;
@@ -405,14 +415,14 @@ public class DownloadManager {
     public void pauseBatch(long id) {
         ContentValues values = new ContentValues();
         values.put(Downloads.Impl.COLUMN_CONTROL, Downloads.Impl.CONTROL_PAUSED);
-        contentResolver.update(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
+        contentResolver.update(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, values, COLUMN_BATCH_ID + "=?", new String[]{String.valueOf(id)});
     }
 
     public void resumeBatch(long id) {
         ContentValues values = new ContentValues();
         values.put(Downloads.Impl.COLUMN_CONTROL, Downloads.Impl.CONTROL_RUN);
         values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
-        contentResolver.update(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
+        contentResolver.update(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, values, COLUMN_BATCH_ID + "=?", new String[]{String.valueOf(id)});
     }
 
     public void removeDownload(URI uri) {
