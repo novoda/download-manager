@@ -157,7 +157,7 @@ public final class DownloadProvider extends ContentProvider {
     private final Uri[] BASE_URIS;
 
     private static final String[] APP_READABLE_COLUMNS_ARRAY = new String[]{
-            Downloads.Impl._ID,
+            DownloadsColumns._ID,
             DownloadsColumns.COLUMN_APP_DATA,
             DownloadsColumns.COLUMN_DATA,
             DownloadsColumns.COLUMN_MIME_TYPE,
@@ -328,7 +328,7 @@ public final class DownloadProvider extends ContentProvider {
                 final SQLiteDatabase db = openHelper.getReadableDatabase();
                 final String mimeType = DatabaseUtils.stringForQuery(db,
                         "SELECT " + DownloadsColumns.COLUMN_MIME_TYPE + " FROM " + DownloadsTables.DOWNLOADS_TABLE_NAME +
-                                " WHERE " + Downloads.Impl._ID + " = ?",
+                                " WHERE " + DownloadsColumns._ID + " = ?",
                         new String[]{id});
                 if (TextUtils.isEmpty(mimeType)) {
                     return DOWNLOAD_TYPE;
@@ -790,7 +790,7 @@ public final class DownloadProvider extends ContentProvider {
      * Delete request headers for downloads matching the given query.
      */
     private void deleteRequestHeaders(SQLiteDatabase db, String where, String[] whereArgs) {
-        String[] projection = new String[]{Downloads.Impl._ID};
+        String[] projection = new String[]{DownloadsColumns._ID};
         Cursor cursor = db.query(DownloadsTables.DOWNLOADS_TABLE_NAME, projection, where, whereArgs, null, null, null, null);
         try {
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
@@ -918,7 +918,7 @@ public final class DownloadProvider extends ContentProvider {
         selection.appendClause(where, whereArgs);
         if (uriMatch == MY_DOWNLOADS_ID || uriMatch == ALL_DOWNLOADS_ID ||
                 uriMatch == PUBLIC_DOWNLOAD_ID) {
-            selection.appendClause(Downloads.Impl._ID + " = ?", getDownloadIdFromUri(uri));
+            selection.appendClause(DownloadsColumns._ID + " = ?", getDownloadIdFromUri(uri));
         }
         if (uriMatch == BATCHES_ID) {
             selection.appendClause(DownloadsColumnsBatches._ID + " = ?", uri.getLastPathSegment());
