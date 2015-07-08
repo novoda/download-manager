@@ -205,6 +205,6 @@ class BatchRepository {
 
         String selection = StringUtils.join(batchIdsToDelete, ", ");
         String[] selectionArgs = {selection};
-        resolver.delete(this.downloadsUriProvider.getBatchesUri(), DownloadsColumnsBatches._ID + " IN (?)", selectionArgs);
+        resolver.delete(downloadsUriProvider.getBatchesUri(), DownloadsColumnsBatches._ID + " IN (?)", selectionArgs);
     }
 }
