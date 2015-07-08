@@ -866,9 +866,7 @@ public final class DownloadProvider extends ContentProvider {
             case ALL_DOWNLOADS_ID:
                 SqlSelection selection = getWhereClause(uri, where, whereArgs, match);
                 if (filteredValues.size() > 0) {
-                    count = db.update(
-                            DownloadsTables.DOWNLOADS_TABLE_NAME, filteredValues, selection.getSelection(),
-                            selection.getParameters());
+                    count = db.update(DownloadsTables.DOWNLOADS_TABLE_NAME, filteredValues, selection.getSelection(), selection.getParameters());
                 } else {
                     count = 0;
                 }
@@ -876,9 +874,7 @@ public final class DownloadProvider extends ContentProvider {
             case BATCHES:
             case BATCHES_ID:
                 SqlSelection batchSelection = getWhereClause(uri, where, whereArgs, match);
-                count = db.update(
-                        DownloadsColumnsBatches.BATCHES_TABLE_NAME, values, batchSelection.getSelection(),
-                        batchSelection.getParameters());
+                count = db.update(DownloadsColumnsBatches.BATCHES_TABLE_NAME, values, batchSelection.getSelection(), batchSelection.getParameters());
                 break;
             default:
                 Log.d("updating unknown/invalid URI: " + uri);
@@ -1026,9 +1022,7 @@ public final class DownloadProvider extends ContentProvider {
     private void logVerboseOpenFileInfo(Uri uri, String mode) {
         Log.v("openFile uri: " + uri + ", mode: " + mode
                 + ", uid: " + Binder.getCallingUid());
-        Cursor cursor = query(
-                downloadsUriProvider.getContentUri(),
-                new String[]{"_id"}, null, null, "_id");
+        Cursor cursor = query(downloadsUriProvider.getContentUri(), new String[]{"_id"}, null, null, "_id");
         if (cursor == null) {
             Log.v("null cursor in openFile");
         } else {
