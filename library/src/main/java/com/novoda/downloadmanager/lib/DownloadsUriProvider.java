@@ -4,14 +4,36 @@ import android.net.Uri;
 
 public class DownloadsUriProvider {
 
-    private final String authority;
+    private final Uri publicityAccessibleDownloadsUriSegment;
+    private final Uri downloadsByBatchUri;
+    private final Uri allDownloadsContentUri;
+    private final Uri batchContentUri;
+    private final Uri contentUri;
 
     public static DownloadsUriProvider newInstance() {
-        return new DownloadsUriProvider(DownloadProvider.AUTHORITY);
+        String authority = DownloadProvider.AUTHORITY;
+
+        Uri publicityAccessibleDownloadsUriSegment = Uri.parse(authority + "/" + Downloads.Impl.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT);
+        Uri downloadsByBatchUri = Uri.parse(authority + "/downloads_by_batch");
+        Uri allDownloadsContentUri = Uri.parse(authority + "/all_downloads");
+        Uri batchContentUri = Uri.parse(authority + "/batches");
+        Uri contentUri = Uri.parse(authority + "/my_downloads");
+
+        return new DownloadsUriProvider(
+                publicityAccessibleDownloadsUriSegment,
+                downloadsByBatchUri,
+                allDownloadsContentUri,
+                batchContentUri,
+                contentUri
+        );
     }
 
-    DownloadsUriProvider(String authority) {
-        this.authority = authority;
+    DownloadsUriProvider(Uri publicityAccessibleDownloadsUriSegment, Uri downloadsByBatchUri, Uri allDownloadsContentUri, Uri batchContentUri, Uri contentUri) {
+        this.publicityAccessibleDownloadsUriSegment = publicityAccessibleDownloadsUriSegment;
+        this.downloadsByBatchUri = downloadsByBatchUri;
+        this.allDownloadsContentUri = allDownloadsContentUri;
+        this.batchContentUri = batchContentUri;
+        this.contentUri = contentUri;
     }
 
     /**
@@ -19,14 +41,14 @@ public class DownloadsUriProvider {
      * permissions to access this downloaded file)
      */
     public Uri getPublicityAccessibleDownloadsUri() {
-        return Uri.parse(authority + "/" + Downloads.Impl.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT);
+        return publicityAccessibleDownloadsUriSegment;
     }
 
     /**
      * The content:// URI to access downloads and their batch data.
      */
     public Uri getDownloadsByBatchUri() {
-        return Uri.parse(authority + "/downloads_by_batch");
+        return downloadsByBatchUri;
     }
 
     /**
@@ -34,20 +56,20 @@ public class DownloadsUriProvider {
      * ACCESS_ALL_DOWNLOADS permission).
      */
     public Uri getAllDownloadsContentUri() {
-        return Uri.parse(authority + "/all_downloads");
+        return allDownloadsContentUri;
     }
 
     /**
      * The content:// URI to access downloads owned by the caller's UID.
      */
     public Uri getBatchContentUri() {
-        return Uri.parse(authority + "/batches");
+        return batchContentUri;
     }
 
     /**
      * The content:// URI to access downloads owned by the caller's UID.
      */
     public Uri getContentUri() {
-        return Uri.parse(authority + "/my_downloads");
+        return contentUri;
     }
 }
