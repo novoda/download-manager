@@ -387,7 +387,7 @@ public final class DownloadProvider extends ContentProvider {
         // validate the destination column
         Integer dest = values.getAsInteger(Downloads.Impl.COLUMN_DESTINATION);
         if (dest != null) {
-            if (getContext().checkCallingPermission(Downloads.Impl.PERMISSION_ACCESS_ADVANCED)
+            if (getContext().checkCallingPermission(DownloadsPermission.PERMISSION_ACCESS_ADVANCED)
                     != PackageManager.PERMISSION_GRANTED
                     && (dest == Downloads.Impl.DESTINATION_CACHE_PARTITION
                     || dest == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING
@@ -399,7 +399,7 @@ public final class DownloadProvider extends ContentProvider {
             // for public API behavior, if an app has CACHE_NON_PURGEABLE permission, automatically
             // switch to non-purgeable download
             boolean hasNonPurgeablePermission =
-                    getContext().checkCallingPermission(Downloads.Impl.PERMISSION_CACHE_NON_PURGEABLE) == PackageManager.PERMISSION_GRANTED;
+                    getContext().checkCallingPermission(DownloadsPermission.PERMISSION_CACHE_NON_PURGEABLE) == PackageManager.PERMISSION_GRANTED;
             if (dest == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE && hasNonPurgeablePermission) {
                 dest = Downloads.Impl.DESTINATION_CACHE_PARTITION;
             }
@@ -459,7 +459,7 @@ public final class DownloadProvider extends ContentProvider {
         copyString(Downloads.Impl.COLUMN_REFERER, values, filteredValues);
 
         // UID, PID columns
-        if (getContext().checkCallingPermission(Downloads.Impl.PERMISSION_ACCESS_ADVANCED) == PackageManager.PERMISSION_GRANTED) {
+        if (getContext().checkCallingPermission(DownloadsPermission.PERMISSION_ACCESS_ADVANCED) == PackageManager.PERMISSION_GRANTED) {
             copyInteger(Downloads.Impl.COLUMN_OTHER_UID, values, filteredValues);
         }
         filteredValues.put(Constants.UID, Binder.getCallingUid());
@@ -544,7 +544,7 @@ public final class DownloadProvider extends ContentProvider {
      * @throws SecurityException if the caller has insufficient permissions
      */
     private void checkDownloadInsertPermissions(ContentValues values) {
-        if (getContext().checkCallingOrSelfPermission(Downloads.Impl.PERMISSION_ACCESS) == PackageManager.PERMISSION_GRANTED) {
+        if (getContext().checkCallingOrSelfPermission(DownloadsPermission.PERMISSION_ACCESS) == PackageManager.PERMISSION_GRANTED) {
             return;
         }
 
@@ -920,7 +920,7 @@ public final class DownloadProvider extends ContentProvider {
             selection.appendClause(Downloads.Impl.Batches._ID + " = ?", uri.getLastPathSegment());
         }
         if ((uriMatch == MY_DOWNLOADS || uriMatch == MY_DOWNLOADS_ID)
-                && getContext().checkCallingPermission(Downloads.Impl.PERMISSION_ACCESS_ALL)
+                && getContext().checkCallingPermission(DownloadsPermission.PERMISSION_ACCESS_ALL)
                 != PackageManager.PERMISSION_GRANTED) {
             String callingUid = String.valueOf(Binder.getCallingUid());
             selection.appendClause(
