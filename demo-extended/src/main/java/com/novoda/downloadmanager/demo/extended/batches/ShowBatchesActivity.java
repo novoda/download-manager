@@ -13,7 +13,6 @@ import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.demo.extended.QueryTimestamp;
 import com.novoda.downloadmanager.lib.BatchQuery;
 import com.novoda.downloadmanager.lib.DownloadManager;
-import com.novoda.notils.logger.simple.Log;
 
 import java.util.ArrayList;
 import java.util.List;

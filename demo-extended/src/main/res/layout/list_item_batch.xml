@@ -26,4 +26,18 @@
     android:textAppearance="?android:attr/textAppearanceSmall"
     tools:text="Status" />
 
+  <TextView
+    android:id="@+id/batch_total_size_text"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textAppearance="?android:attr/textAppearanceSmall"
+    tools:text="Total size" />
+
+  <TextView
+    android:id="@+id/batch_current_size_text"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textAppearance="?android:attr/textAppearanceSmall"
+    tools:text="Current size" />
+
 </LinearLayout>

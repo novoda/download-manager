@@ -6,11 +6,15 @@ public class Batch {
     private final int id;
     private final String title;
     private final int status;
+    private final long totalBytes;
+    private final long currentBytes;
 
-    public Batch(int id, String title, int status) {
+    public Batch(int id, String title, int status, long totalBytes, long currentBytes) {
         this.id = id;
         this.title = title;
         this.status = status;
+        this.totalBytes = totalBytes;
+        this.currentBytes = currentBytes;
     }
 
     public String getTitle() {
@@ -19,6 +23,14 @@ public class Batch {
 
     public int getId() {
         return id;
+    }
+
+    public long getTotalBytes() {
+        return totalBytes;
+    }
+
+    public long getCurrentBytes() {
+        return currentBytes;
     }
 
     public String getDownloadStatusText() {

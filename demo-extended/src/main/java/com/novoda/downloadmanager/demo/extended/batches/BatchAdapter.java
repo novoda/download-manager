@@ -41,11 +41,15 @@ public class BatchAdapter extends BaseAdapter {
         TextView idTextView = Views.findById(view, R.id.batch_id_text);
         TextView titleTextView = Views.findById(view, R.id.batch_title_text);
         TextView statusTextView = Views.findById(view, R.id.batch_status_text);
+        TextView totalSizeTextView = Views.findById(view, R.id.batch_total_size_text);
+        TextView currentSizeTextView = Views.findById(view, R.id.batch_current_size_text);
 
         idTextView.setText(String.format(Locale.getDefault(), "Id: %d", batch.getId()));
         titleTextView.setText(batch.getTitle());
         String status = String.format(Locale.getDefault(), "Status: %s", batch.getDownloadStatusText());
         statusTextView.setText(status);
+        totalSizeTextView.setText(String.format(Locale.getDefault(), "Total size: %d bytes", batch.getTotalBytes()));
+        currentSizeTextView.setText(String.format(Locale.getDefault(), "Current size: %d bytes", batch.getCurrentBytes()));
 
         return view;
     }

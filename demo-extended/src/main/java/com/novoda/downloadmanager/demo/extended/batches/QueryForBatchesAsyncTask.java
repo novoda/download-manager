@@ -33,7 +33,9 @@ public class QueryForBatchesAsyncTask extends AsyncTask<BatchQuery, Void, List<B
                 int id = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_ID));
                 String title = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TITLE));
                 int status = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BATCH_STATUS));
-                batches.add(new Batch(id, title, status));
+                long totalBytes = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BATCH_TOTAL_SIZE_BYTES));
+                long currentBytes = cursor.getLong(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BATCH_CURRENTL_SIZE_BYTES));
+                batches.add(new Batch(id, title, status, totalBytes, currentBytes));
             }
         } finally {
             cursor.close();
