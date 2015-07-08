@@ -400,13 +400,13 @@ public class DownloadManager {
 
     public void pauseBatch(long id) {
         ContentValues values = new ContentValues();
-        values.put(DownloadsColumns.COLUMN_CONTROL, Downloads.Impl.CONTROL_PAUSED);
+        values.put(DownloadsColumns.COLUMN_CONTROL, DownloadsControl.CONTROL_PAUSED);
         contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
     }
 
     public void resumeBatch(long id) {
         ContentValues values = new ContentValues();
-        values.put(DownloadsColumns.COLUMN_CONTROL, Downloads.Impl.CONTROL_RUN);
+        values.put(DownloadsColumns.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
         values.put(DownloadsColumns.COLUMN_STATUS, DownloadsStatus.STATUS_PENDING);
         contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
     }

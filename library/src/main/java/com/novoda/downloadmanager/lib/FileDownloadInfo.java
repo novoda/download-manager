@@ -276,7 +276,7 @@ class FileDownloadInfo {
      * Returns whether this download should be enqueued.
      */
     private boolean isDownloadManagerReadyToDownload() {
-        if (control == Downloads.Impl.CONTROL_PAUSED) {
+        if (control == DownloadsControl.CONTROL_PAUSED) {
             // the download is paused, so it's not going to start
             return false;
         }

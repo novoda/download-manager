@@ -541,7 +541,7 @@ class DownloadThread implements Runnable {
      */
     private void checkPausedOrCanceled() throws StopRequestException {
         synchronized (fileDownloadInfo) {
-            if (fileDownloadInfo.getControl() == Downloads.Impl.CONTROL_PAUSED) {
+            if (fileDownloadInfo.getControl() == DownloadsControl.CONTROL_PAUSED) {
                 throw new StopRequestException(DownloadsStatus.STATUS_PAUSED_BY_APP, "download paused by owner");
             }
             if (fileDownloadInfo.getStatus() == DownloadsStatus.STATUS_CANCELED) {
