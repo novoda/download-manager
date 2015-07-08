@@ -56,8 +56,8 @@ final class DatabaseHelper extends SQLiteOpenHelper {
      */
     private void createDownloadsTable(SQLiteDatabase db) {
         try {
-            db.execSQL("DROP TABLE IF EXISTS " + Downloads.Impl.DOWNLOADS_TABLE_NAME);
-            db.execSQL("CREATE TABLE " + Downloads.Impl.DOWNLOADS_TABLE_NAME + "(" +
+            db.execSQL("DROP TABLE IF EXISTS " + DownloadsTables.DOWNLOADS_TABLE_NAME);
+            db.execSQL("CREATE TABLE " + DownloadsTables.DOWNLOADS_TABLE_NAME + "(" +
                     Downloads.Impl._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                     DownloadsColumns.COLUMN_URI + " TEXT, " +
                     Constants.RETRY_AFTER_X_REDIRECT_COUNT + " INTEGER, " +
@@ -105,7 +105,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(DownloadsColumns.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, false);
         String cacheSelection = DownloadsColumns.COLUMN_DESTINATION + " != " + Downloads.Impl.DESTINATION_EXTERNAL;
-        db.update(Downloads.Impl.DOWNLOADS_TABLE_NAME, values, cacheSelection, null);
+        db.update(DownloadsTables.DOWNLOADS_TABLE_NAME, values, cacheSelection, null);
     }
 
     private void createHeadersTable(SQLiteDatabase db) {
@@ -136,13 +136,13 @@ final class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     private void createDownloadsByBatchView(SQLiteDatabase db) {
-        db.execSQL("DROP VIEW IF EXISTS " + Downloads.Impl.VIEW_NAME_DOWNLOADS_BY_BATCH);
-        db.execSQL("CREATE VIEW " + Downloads.Impl.VIEW_NAME_DOWNLOADS_BY_BATCH
+        db.execSQL("DROP VIEW IF EXISTS " + DownloadsTables.VIEW_NAME_DOWNLOADS_BY_BATCH);
+        db.execSQL("CREATE VIEW " + DownloadsTables.VIEW_NAME_DOWNLOADS_BY_BATCH
                         + " AS SELECT DISTINCT "
                         + projectionFrom(DOWNLOAD_BY_BATCH_VIEW_COLUMNS)
-                        + " FROM " + Downloads.Impl.DOWNLOADS_TABLE_NAME
+                        + " FROM " + DownloadsTables.DOWNLOADS_TABLE_NAME
                         + " INNER JOIN " + Downloads.Impl.Batches.BATCHES_TABLE_NAME
-                        + " ON " + Downloads.Impl.DOWNLOADS_TABLE_NAME + "." + DownloadsColumns.COLUMN_BATCH_ID
+                        + " ON " + DownloadsTables.DOWNLOADS_TABLE_NAME + "." + DownloadsColumns.COLUMN_BATCH_ID
                         + " = " + Downloads.Impl.Batches.BATCHES_TABLE_NAME + "." + Downloads.Impl.Batches._ID + ";"
         );
     }
@@ -151,13 +151,13 @@ final class DatabaseHelper extends SQLiteOpenHelper {
      * columns to request from DownloadProvider.
      */
     public static final String[] DOWNLOAD_BY_BATCH_VIEW_COLUMNS = new String[]{
-            Downloads.Impl.DOWNLOADS_TABLE_NAME + "." + Downloads.Impl._ID + " AS _id ",
+            DownloadsTables.DOWNLOADS_TABLE_NAME + "." + Downloads.Impl._ID + " AS _id ",
             Downloads.Impl._DATA,
             DownloadsColumns.COLUMN_MEDIAPROVIDER_URI,
             DownloadsColumns.COLUMN_DESTINATION,
             DownloadsColumns.COLUMN_URI,
             DownloadsColumns.COLUMN_STATUS,
-            Downloads.Impl.DOWNLOADS_TABLE_NAME + "." + DownloadsColumns.COLUMN_DELETED,
+            DownloadsTables.DOWNLOADS_TABLE_NAME + "." + DownloadsColumns.COLUMN_DELETED,
             DownloadsColumns.COLUMN_FILE_NAME_HINT,
             DownloadsColumns.COLUMN_MIME_TYPE,
             DownloadsColumns.COLUMN_TOTAL_BYTES,

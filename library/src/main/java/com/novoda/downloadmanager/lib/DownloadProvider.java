@@ -327,7 +327,7 @@ public final class DownloadProvider extends ContentProvider {
                 final String id = getDownloadIdFromUri(uri);
                 final SQLiteDatabase db = openHelper.getReadableDatabase();
                 final String mimeType = DatabaseUtils.stringForQuery(db,
-                        "SELECT " + DownloadsColumns.COLUMN_MIME_TYPE + " FROM " + Downloads.Impl.DOWNLOADS_TABLE_NAME +
+                        "SELECT " + DownloadsColumns.COLUMN_MIME_TYPE + " FROM " + DownloadsTables.DOWNLOADS_TABLE_NAME +
                                 " WHERE " + Downloads.Impl._ID + " = ?",
                         new String[]{id});
                 if (TextUtils.isEmpty(mimeType)) {
@@ -488,7 +488,7 @@ public final class DownloadProvider extends ContentProvider {
             Log.v("other UID " + filteredValues.getAsInteger(DownloadsColumns.COLUMN_OTHER_UID));
         }
 
-        long rowID = db.insert(Downloads.Impl.DOWNLOADS_TABLE_NAME, null, filteredValues);
+        long rowID = db.insert(DownloadsTables.DOWNLOADS_TABLE_NAME, null, filteredValues);
         if (rowID == -1) {
             Log.d("couldn't insert into downloads database");
             return null;
@@ -644,7 +644,7 @@ public final class DownloadProvider extends ContentProvider {
                 return db.query(Downloads.Impl.Batches.BATCHES_TABLE_NAME, projection, batchSelection.getSelection(),
                         batchSelection.getParameters(), null, null, sort);
             case DOWNLOADS_BY_BATCH:
-                return db.query(Downloads.Impl.VIEW_NAME_DOWNLOADS_BY_BATCH, projection, selection, selectionArgs, null, null, sort);
+                return db.query(DownloadsTables.VIEW_NAME_DOWNLOADS_BY_BATCH, projection, selection, selectionArgs, null, null, sort);
             case REQUEST_HEADERS_URI:
                 if (projection != null || selection != null || sort != null) {
                     throw new UnsupportedOperationException(
@@ -688,7 +688,8 @@ public final class DownloadProvider extends ContentProvider {
             logVerboseQueryInfo(projection, selection, selectionArgs, sort, db);
         }
 
-        Cursor ret = db.query(Downloads.Impl.DOWNLOADS_TABLE_NAME, projection, fullSelection.getSelection(),
+        Cursor ret = db.query(
+                DownloadsTables.DOWNLOADS_TABLE_NAME, projection, fullSelection.getSelection(),
                 fullSelection.getParameters(), null, null, sort);
 
         if (ret == null) {
@@ -789,7 +790,7 @@ public final class DownloadProvider extends ContentProvider {
      */
     private void deleteRequestHeaders(SQLiteDatabase db, String where, String[] whereArgs) {
         String[] projection = new String[]{Downloads.Impl._ID};
-        Cursor cursor = db.query(Downloads.Impl.DOWNLOADS_TABLE_NAME, projection, where, whereArgs, null, null, null, null);
+        Cursor cursor = db.query(DownloadsTables.DOWNLOADS_TABLE_NAME, projection, where, whereArgs, null, null, null, null);
         try {
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
                 long id = cursor.getLong(0);
@@ -864,7 +865,8 @@ public final class DownloadProvider extends ContentProvider {
             case ALL_DOWNLOADS_ID:
                 SqlSelection selection = getWhereClause(uri, where, whereArgs, match);
                 if (filteredValues.size() > 0) {
-                    count = db.update(Downloads.Impl.DOWNLOADS_TABLE_NAME, filteredValues, selection.getSelection(),
+                    count = db.update(
+                            DownloadsTables.DOWNLOADS_TABLE_NAME, filteredValues, selection.getSelection(),
                             selection.getParameters());
                 } else {
                     count = 0;
@@ -948,7 +950,7 @@ public final class DownloadProvider extends ContentProvider {
             case ALL_DOWNLOADS_ID:
                 SqlSelection selection = getWhereClause(uri, where, whereArgs, match);
                 deleteRequestHeaders(db, selection.getSelection(), selection.getParameters());
-                count = db.delete(Downloads.Impl.DOWNLOADS_TABLE_NAME, selection.getSelection(), selection.getParameters());
+                count = db.delete(DownloadsTables.DOWNLOADS_TABLE_NAME, selection.getSelection(), selection.getParameters());
                 break;
             case BATCHES:
             case BATCHES_ID:

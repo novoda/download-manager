@@ -48,16 +48,6 @@ final class Downloads {
         public static final String PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT = "public_downloads";
 
         /**
-         * Name of downloadstable in the database
-         */
-        public static final String DOWNLOADS_TABLE_NAME = "Downloads";
-
-        /**
-         * Name of downloadstable in the database
-         */
-        public static final String VIEW_NAME_DOWNLOADS_BY_BATCH = "DownloadsByBatch";
-
-        /**
          * The name of the column containing the filename where the downloaded data
          * was actually stored.
          * <P>Type: TEXT</P>
