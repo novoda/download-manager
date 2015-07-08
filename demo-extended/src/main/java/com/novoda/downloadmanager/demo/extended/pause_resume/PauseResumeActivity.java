@@ -81,7 +81,8 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
     }
 
     private void queryForDownloads() {
-        QueryForDownloadsAsyncTask.newInstance(downloadManager, this).execute(new Query());
+        Query orderedQuery = new Query().orderByLiveness();
+        QueryForDownloadsAsyncTask.newInstance(downloadManager, this).execute(orderedQuery);
     }
 
     private void enqueueSingleDownload() {
