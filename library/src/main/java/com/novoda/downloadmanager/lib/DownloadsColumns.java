@@ -81,6 +81,10 @@ final class DownloadsColumns {
      */
     public static final String COLUMN_NOTIFICATION_CLASS = "notificationclass";
     /**
+     * Query where clause for general querying.
+     */
+    private static final String QUERY_WHERE_CLAUSE = COLUMN_NOTIFICATION_CLASS + "=?";
+    /**
      * If extras are specified when requesting a download they will be provided in the intent that
      * is sent to the specified class and package when a download has finished.
      * <P>Type: TEXT</P>

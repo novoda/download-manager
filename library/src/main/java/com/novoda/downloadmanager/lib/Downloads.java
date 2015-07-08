@@ -64,9 +64,4 @@ final class Downloads {
 
     }
 
-    /**
-     * Query where clause for general querying.
-     */
-    private static final String QUERY_WHERE_CLAUSE = DownloadsColumns.COLUMN_NOTIFICATION_CLASS + "=?";
-
 }
