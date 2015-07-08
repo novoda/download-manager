@@ -49,8 +49,6 @@ public class Query {
     private long[] downloadIds = null;
     private long[] batchIds = null;
     private Integer statusFlags = null;
-    private String orderByColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
-    private int orderDirection = ORDER_DESCENDING;
     private boolean onlyIncludeVisibleInDownloadsUi = false;
     private String[] filterExtras;
     private String orderString = Downloads.Impl.COLUMN_LAST_MODIFICATION + " DESC";
