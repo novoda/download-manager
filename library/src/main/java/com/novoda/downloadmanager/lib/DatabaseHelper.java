@@ -58,7 +58,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
         try {
             db.execSQL("DROP TABLE IF EXISTS " + DownloadsTables.DOWNLOADS_TABLE_NAME);
             db.execSQL("CREATE TABLE " + DownloadsTables.DOWNLOADS_TABLE_NAME + "(" +
-                    Downloads.Impl._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    DownloadsColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                     DownloadsColumns.COLUMN_URI + " TEXT, " +
                     Constants.RETRY_AFTER_X_REDIRECT_COUNT + " INTEGER, " +
                     DownloadsColumns.COLUMN_APP_DATA + " TEXT, " +
@@ -151,7 +151,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
      * columns to request from DownloadProvider.
      */
     public static final String[] DOWNLOAD_BY_BATCH_VIEW_COLUMNS = new String[]{
-            DownloadsTables.DOWNLOADS_TABLE_NAME + "." + Downloads.Impl._ID + " AS _id ",
+            DownloadsTables.DOWNLOADS_TABLE_NAME + "." + DownloadsColumns._ID + " AS _id ",
             DownloadsColumns.COLUMN_DATA,
             DownloadsColumns.COLUMN_MEDIAPROVIDER_URI,
             DownloadsColumns.COLUMN_DESTINATION,
