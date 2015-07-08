@@ -46,4 +46,5 @@ public class Download {
     public boolean isPaused() {
         return downloadStatus == DownloadManager.STATUS_PAUSED;
     }
+
 }

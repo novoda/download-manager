@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -48,4 +49,40 @@ public class QueryTest {
 
         assertThat(stringArgumentCaptor.getValue()).doesNotContain(Downloads.Impl.COLUMN_BATCH_ID + " IN ");
     }
+
+    @Test
+    public void whenWeSetABatchStatusOrderByOnAQueryThenTheResolverIsQueriedWithTheCorrectSortOrder() {
+        new Query().orderBy(DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP, Query.ORDER_ASCENDING).runQuery(resolver, null, uri);
+
+        // Actually resolves to Downloads.Impl.COLUMN_LAST_MODIFIED
+        verify(resolver).query(any(Uri.class), any(String[].class), anyString(), any(String[].class), eq("lastmod ASC"));
+    }
+
+    @Test
+    public void whenWeSetNoOrderByOnAQueryThenTheResolverIsQueriedWithTheLastModifiedSortOrder() {
+        new Query().runQuery(resolver, null, uri);
+
+        verify(resolver).query(any(Uri.class), any(String[].class), anyString(), any(String[].class), eq("lastmod DESC"));
+    }
+
+    @Test
+    public void whenOrderingByLivenessThenTheResolverIsQueriedWithTheExpectedSort() {
+        new Query().orderByLiveness().runQuery(resolver, null, uri);
+
+        verify(resolver).query(any(Uri.class), any(String[].class), anyString(), any(String[].class), eq("CASE batch_status " +
+                        "WHEN 192 THEN 1 " +
+                        "WHEN 190 THEN 2 " +
+                        "WHEN 193 THEN 3 " +
+                        "WHEN 498 THEN 4 " +
+                        "WHEN 200 THEN 5 " +
+                        "ELSE 2 END"));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void whenWeSetAnUnsupportedOrderByOnAQueryThenTheResolverIsQueriedWithTheCorrectSortOrder() {
+        int anyOrder = Query.ORDER_ASCENDING;
+        new Query().orderBy(DownloadManager.COLUMN_STATUS, anyOrder).runQuery(resolver, null, uri);
+        // Expecting an exception
+    }
+
 }
