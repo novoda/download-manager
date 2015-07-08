@@ -89,12 +89,12 @@ class DownloadScanner implements MediaScannerConnectionClient {
     }
 
     /**
-     * Request that given {@link DownloadInfo} be scanned at some point in
+     * Request that given {@link FileDownloadInfo} be scanned at some point in
      * future. Enqueues the request to be scanned asynchronously.
      *
      * @see #hasPendingScans()
      */
-    public void requestScan(DownloadInfo info) {
+    public void requestScan(FileDownloadInfo info) {
         Log.v("requestScan() for " + info.getFileName());
         synchronized (mediaScannerConnection) {
             final ScanRequest req = new ScanRequest(info.getId(), info.getFileName(), info.getMimeType());

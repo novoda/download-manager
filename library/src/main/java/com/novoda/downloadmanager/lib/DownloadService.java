@@ -90,7 +90,7 @@ public class DownloadService extends Service {
      * content provider changes or disappears.
      */
 //    @GuardedBy("downloads")
-    private final Map<Long, DownloadInfo> downloads = new HashMap<>();
+    private final Map<Long, FileDownloadInfo> downloads = new HashMap<>();
 
     private ExecutorService executor;
 
@@ -324,13 +324,13 @@ public class DownloadService extends Service {
 
         Cursor downloadsCursor = getContentResolver().query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
         try {
-            DownloadInfo.Reader reader = new DownloadInfo.Reader(getContentResolver(), downloadsCursor);
+            FileDownloadInfo.Reader reader = new FileDownloadInfo.Reader(getContentResolver(), downloadsCursor);
             int idColumn = downloadsCursor.getColumnIndexOrThrow(Downloads.Impl._ID);
             while (downloadsCursor.moveToNext()) {
                 long id = downloadsCursor.getLong(idColumn);
                 staleDownloadIds.remove(id);
 
-                DownloadInfo info = downloads.get(id);
+                FileDownloadInfo info = downloads.get(id);
                 if (info == null) {
                     info = createNewDownloadInfo(reader);
                     downloads.put(info.getId(), info);
@@ -365,7 +365,7 @@ public class DownloadService extends Service {
 
         downloadDeleter.cleanUpStaleDownloadsThatDisappeared(staleDownloadIds, downloads);
 
-        Collection<DownloadInfo> allDownloads = downloads.values();
+        Collection<FileDownloadInfo> allDownloads = downloads.values();
 
         List<DownloadBatch> batches = batchRepository.retrieveBatchesFor(allDownloads);
         batchRepository.deleteMarkedBatchesFor(allDownloads);
@@ -384,7 +384,7 @@ public class DownloadService extends Service {
         return isActive;
     }
 
-    private void updateTotalBytesFor(DownloadInfo info) {
+    private void updateTotalBytesFor(FileDownloadInfo info) {
         if (!info.hasTotalBytes()) {
             ContentValues values = new ContentValues();
             info.setTotalBytes(contentLengthFetcher.fetchContentLengthFor(info));
@@ -393,7 +393,7 @@ public class DownloadService extends Service {
         }
     }
 
-    private boolean kickOffDownloadTaskIfReady(boolean isActive, DownloadInfo info, DownloadBatch downloadBatch) {
+    private boolean kickOffDownloadTaskIfReady(boolean isActive, FileDownloadInfo info, DownloadBatch downloadBatch) {
         boolean isReadyToDownload = info.isReadyToDownload(downloadBatch);
         boolean downloadIsActive = info.isActive();
 
@@ -403,7 +403,7 @@ public class DownloadService extends Service {
         return isActive;
     }
 
-    private boolean kickOffMediaScanIfCompleted(boolean isActive, DownloadInfo info) {
+    private boolean kickOffMediaScanIfCompleted(boolean isActive, FileDownloadInfo info) {
         final boolean activeScan = info.startScanIfReady(downloadScanner);
         isActive |= activeScan;
         return isActive;
@@ -417,8 +417,8 @@ public class DownloadService extends Service {
      * Keeps a local copy of the info about a download, and initiates the
      * download if appropriate.
      */
-    private DownloadInfo createNewDownloadInfo(DownloadInfo.Reader reader) {
-        DownloadInfo info = reader.newDownloadInfo(this, systemFacade, downloadClientReadyChecker);
+    private FileDownloadInfo createNewDownloadInfo(FileDownloadInfo.Reader reader) {
+        FileDownloadInfo info = reader.newDownloadInfo(this, systemFacade, downloadClientReadyChecker);
         Log.v("processing inserted download " + info.getId());
         return info;
     }
@@ -426,7 +426,7 @@ public class DownloadService extends Service {
     /**
      * Updates the local copy of the info about a download.
      */
-    private void updateDownloadFromDatabase(DownloadInfo.Reader reader, DownloadInfo info) {
+    private void updateDownloadFromDatabase(FileDownloadInfo.Reader reader, FileDownloadInfo info) {
         reader.updateFromDatabase(info);
         Log.v("processing updated download " + info.getId() + ", status: " + info.getStatus());
     }

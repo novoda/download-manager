@@ -29,7 +29,7 @@ class NotificationDisplayer {
     private final Resources resources;
 
     /**
-     * Current speed of active downloads, mapped from {@link DownloadInfo#batchId}
+     * Current speed of active downloads, mapped from {@link FileDownloadInfo#batchId}
      * to speed in bytes per second.
      */
     private final LongSparseArray<Long> downloadSpeed = new LongSparseArray<>();
@@ -102,8 +102,8 @@ class NotificationDisplayer {
         } else if (type == DownloadNotifier.TYPE_SUCCESS) {
             DownloadBatch batch = cluster.iterator().next();
             // TODO: Decide how we handle notification clicks
-            DownloadInfo downloadInfo = batch.getDownloads().get(0);
-            Uri uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, downloadInfo.getId());
+            FileDownloadInfo fileDownloadInfo = batch.getDownloads().get(0);
+            Uri uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, fileDownloadInfo.getId());
             builder.setAutoCancel(true);
 
             final String action;
@@ -133,7 +133,7 @@ class NotificationDisplayer {
             long totalBytesPerSecond = 0;
             synchronized (downloadSpeed) {
                 for (DownloadBatch batch : cluster) {
-                    for (DownloadInfo info : batch.getDownloads()) {
+                    for (FileDownloadInfo info : batch.getDownloads()) {
                         if (info.hasTotalBytes()) {
                             currentBytes += info.getCurrentBytes();
                             totalBytes += info.getTotalBytes();
@@ -270,8 +270,8 @@ class NotificationDisplayer {
     private long[] getDownloadIds(Collection<DownloadBatch> batches) {
         List<Long> ids = new ArrayList<>();
         for (DownloadBatch batch : batches) {
-            for (DownloadInfo downloadInfo : batch.getDownloads()) {
-                ids.add(downloadInfo.getId());
+            for (FileDownloadInfo fileDownloadInfo : batch.getDownloads()) {
+                ids.add(fileDownloadInfo.getId());
             }
         }
 
