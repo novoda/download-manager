@@ -35,7 +35,7 @@ public class DeleteActivity extends AppCompatActivity implements QueryForDownloa
     private DownloadManager downloadManager;
     private ListView listView;
     private DownloadAdapter downloadAdapter;
-    private DownloadsUriProvider downloads;
+    private DownloadsUriProvider downloadsUriProvider;
 
     private final QueryTimestamp lastQueryTimestamp = new QueryTimestamp();
 
@@ -43,7 +43,7 @@ public class DeleteActivity extends AppCompatActivity implements QueryForDownloa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_delete);
-        downloads = DownloadsUriProvider.getInstance();
+        downloadsUriProvider = DownloadsUriProvider.getInstance();
         listView = (ListView) findViewById(R.id.main_downloads_list);
         downloadManager = DownloadManagerBuilder.from(this)
                 .withVerboseLogging()
@@ -92,7 +92,7 @@ public class DeleteActivity extends AppCompatActivity implements QueryForDownloa
     @Override
     protected void onStart() {
         super.onStart();
-        getContentResolver().registerContentObserver(downloads.getContentUri(), true, updateSelf);
+        getContentResolver().registerContentObserver(downloadsUriProvider.getContentUri(), true, updateSelf);
     }
 
     private final ContentObserver updateSelf = new ContentObserver(handler) {
