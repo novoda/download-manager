@@ -115,8 +115,11 @@ public class BatchQuery {
          * Filter by status
          *
          * @param statusFlags status flags that can be combined with "|"
-         *                    one of {@link DownloadManager#STATUS_PAUSED, DownloadManager#STATUS_FAILED, DownloadManager#STATUS_PENDING,
-         *                    DownloadManager#STATUS_SUCCESSFUL, DownloadManager#STATUS_RUNNING}
+         *                    one of {@link DownloadManager#STATUS_PAUSED},
+         *                    {@link DownloadManager#STATUS_FAILED},
+         *                    {@link DownloadManager#STATUS_PENDING},
+         *                    {@link DownloadManager#STATUS_SUCCESSFUL},
+         *                    {@link DownloadManager#STATUS_RUNNING}
          *                    <p/>
          *                    e.g. withStatusFilter(DownloadManager.STATUS_FAILED | DownloadManager.STATUS_PENDING)
          * @return {@link BatchQuery.Builder}
