@@ -599,7 +599,6 @@ final class Downloads {
          * Use isSucccess() to capture the entire category.
          */
         public static final int STATUS_SUCCESS = 200;
-        ;
 
         /**
          * This request couldn't be parsed. This is also used when processing
