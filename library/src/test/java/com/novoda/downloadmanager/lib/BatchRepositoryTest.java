@@ -13,8 +13,7 @@ import org.mockito.stubbing.Answer;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class BatchRepositoryTest {
@@ -79,5 +78,14 @@ public class BatchRepositoryTest {
         DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(fileDownloadInfo);
 
         assertThat(downloadBatch).isEqualTo(DownloadBatch.DELETED);
+    }
+
+    @Test
+    public void givenABatchQueryWhenQueryingThenTheQueryIsUsed() {
+        BatchQuery query = new BatchQuery.Builder().withId(12).build();
+
+        batchRepository.retrieveFor(query);
+
+        verify(contentResolver).query(any(Uri.class), any(String[].class), eq(query.getSelection()), eq(query.getSelectionArguments()), eq(query.getSortOrder()));
     }
 }
