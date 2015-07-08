@@ -8,6 +8,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class used to query the batches table. Use {@link BatchQuery.Builder} in order to build it.
+ */
 public class BatchQuery {
     public static final BatchQuery ALL = new BatchQuery(null, null, null);
     private static final int LOW_END_FAILED_STATUS_CODE = 400;
@@ -61,6 +64,12 @@ public class BatchQuery {
             builder = new Criteria.Builder();
         }
 
+        /**
+         * Filter by batch id
+         *
+         * @param id id of the batch
+         * @return {@link BatchQuery.Builder}
+         */
         public Builder withId(long id) {
             this.criteriaIdBuilder = new Criteria.Builder();
             criteriaIdBuilder
@@ -69,11 +78,23 @@ public class BatchQuery {
             return this;
         }
 
+        /**
+         * Sorting in ascending order by sort column
+         *
+         * @param sortColumn sort column
+         * @return {@link BatchQuery.Builder}
+         */
         public Builder withSortAscendingBy(String sortColumn) {
             builder.sortBy(sortColumn).ascending();
             return this;
         }
 
+        /**
+         * Sorting in descending order by sort column
+         *
+         * @param sortColumn sort column
+         * @return {@link BatchQuery.Builder}
+         */
         public Builder withSortDescendingBy(String sortColumn) {
             builder.sortBy(sortColumn).descending();
             return this;
@@ -82,12 +103,24 @@ public class BatchQuery {
         /**
          * Sorts batches according to the 'liveness' of the download, i.e. in the order:
          * Downloading, queued, other, paused, failed, completed
+         *
+         * @return {@link BatchQuery.Builder}
          */
         public Builder withSortByLiveness() {
             builder.sortBy(ORDER_BY_LIVENESS);
             return this;
         }
 
+        /**
+         * Filter by status
+         *
+         * @param statusFlags status flags that can be combined with "|"
+         *                    one of {@link DownloadManager#STATUS_PAUSED, DownloadManager#STATUS_FAILED, DownloadManager#STATUS_PENDING,
+         *                    DownloadManager#STATUS_SUCCESSFUL, DownloadManager#STATUS_RUNNING}
+         *                    <p/>
+         *                    e.g. withStatusFilter(DownloadManager.STATUS_FAILED | DownloadManager.STATUS_PENDING)
+         * @return {@link BatchQuery.Builder}
+         */
         public Builder withStatusFilter(@Status int statusFlags) {
             this.criteriaStatusBuilder = new Criteria.Builder();
             List<Integer> statuses = buildStatusesFrom(statusFlags);
