@@ -107,7 +107,7 @@ class BatchRepository {
                     return statusCode;
                 }
 
-                Integer currentStatusCount = statusCounts.get(statusCode);
+                int currentStatusCount = statusCounts.get(statusCode);
                 statusCounts.put(statusCode, currentStatusCount + 1);
             }
         } finally {
@@ -116,7 +116,7 @@ class BatchRepository {
             }
         }
 
-        for (Integer status : PRIORITISED_STATUSES) {
+        for (int status : PRIORITISED_STATUSES) {
             if (statusCounts.get(status) > 0) {
                 return status;
             }

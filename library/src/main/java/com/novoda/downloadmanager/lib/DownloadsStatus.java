@@ -142,6 +142,11 @@ final class DownloadsStatus {
     public static final int STATUS_BATCH_FAILED = 498;
 
     /**
+     * This download has been submitted to the download executor but not yet started
+     */
+    public static final int STATUS_SUBMITTED = 189;
+
+    /**
      * Returns whether the status is informational (i.e. 1xx).
      */
     public static boolean isStatusInformational(int status) {
@@ -200,6 +205,14 @@ final class DownloadsStatus {
      */
     public static boolean isStatusCancelled(int status) {
         return status == STATUS_CANCELED;
+    }
+
+    public static boolean isStatusSubmitted(int status) {
+        return status == STATUS_SUBMITTED;
+    }
+
+    public static boolean isStatusRunning(int status) {
+        return status == STATUS_RUNNING;
     }
 
     /**
