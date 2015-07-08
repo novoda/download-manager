@@ -156,7 +156,7 @@ public class DownloadService extends Service {
 
         this.downloadsRepository = new DownloadsRepository(getContentResolver(), new DownloadsRepository.DownloadInfoCreator() {
             @Override
-            public DownloadInfo create(DownloadInfo.Reader reader) {
+            public FileDownloadInfo create(FileDownloadInfo.Reader reader) {
                 return createNewDownloadInfo(reader);
             }
         });
@@ -167,8 +167,8 @@ public class DownloadService extends Service {
      * Keeps a local copy of the info about a download, and initiates the
      * download if appropriate.
      */
-    private DownloadInfo createNewDownloadInfo(DownloadInfo.Reader reader) {
-        DownloadInfo info = reader.newDownloadInfo(this, systemFacade, downloadClientReadyChecker);
+    private FileDownloadInfo createNewDownloadInfo(FileDownloadInfo.Reader reader) {
+        FileDownloadInfo info = reader.newDownloadInfo(this, systemFacade, downloadClientReadyChecker);
         Log.v("processing inserted download " + info.getId());
         return info;
     }
@@ -309,13 +309,13 @@ public class DownloadService extends Service {
         long nextRetryTimeMillis = Long.MAX_VALUE;
         long now = systemFacade.currentTimeMillis();
 
-        Collection<DownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
+        Collection<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
         updateTotalBytesFor(allDownloads);
 
         List<DownloadBatch> downloadBatches = batchRepository.retrieveBatchesFor(allDownloads);
         for (DownloadBatch downloadBatch : downloadBatches) {
 
-            for (DownloadInfo info : downloadBatch.getDownloads()) {
+            for (FileDownloadInfo info : downloadBatch.getDownloads()) {
                 if (info.isDeleted()) {
                     downloadDeleter.deleteFileAndDatabaseRow(info);
                 } else if (Downloads.Impl.isStatusCancelled(info.getStatus()) || Downloads.Impl.isStatusError(info.getStatus())) {
@@ -351,9 +351,9 @@ public class DownloadService extends Service {
         return isActive;
     }
 
-    private void updateTotalBytesFor(Collection<DownloadInfo> downloadInfos) {
+    private void updateTotalBytesFor(Collection<FileDownloadInfo> downloadInfos) {
         ContentValues values = new ContentValues();
-        for (DownloadInfo downloadInfo : downloadInfos) {
+        for (FileDownloadInfo downloadInfo : downloadInfos) {
             if (downloadInfo.getTotalBytes() == -1) {
                 long totalBytes = contentLengthFetcher.fetchContentLengthFor(downloadInfo);
                 values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, totalBytes);
@@ -365,7 +365,7 @@ public class DownloadService extends Service {
         }
     }
 
-    private boolean kickOffDownloadTaskIfReady(boolean isActive, DownloadInfo info, DownloadBatch downloadBatch) {
+    private boolean kickOffDownloadTaskIfReady(boolean isActive, FileDownloadInfo info, DownloadBatch downloadBatch) {
         boolean isReadyToDownload = info.isReadyToDownload(downloadBatch);
         boolean downloadIsActive = info.isActive();
 
@@ -375,7 +375,7 @@ public class DownloadService extends Service {
         return isActive;
     }
 
-    private boolean kickOffMediaScanIfCompleted(boolean isActive, DownloadInfo info) {
+    private boolean kickOffMediaScanIfCompleted(boolean isActive, FileDownloadInfo info) {
         final boolean activeScan = info.startScanIfReady(downloadScanner);
         isActive |= activeScan;
         return isActive;

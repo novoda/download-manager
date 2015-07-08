@@ -16,11 +16,11 @@ class DownloadsRepository {
         this.downloadInfoCreator = downloadInfoCreator;
     }
 
-    public List<DownloadInfo> getAllDownloads() {
+    public List<FileDownloadInfo> getAllDownloads() {
         Cursor downloadsCursor = contentResolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
         try {
-            List<DownloadInfo> downloads = new ArrayList<>();
-            DownloadInfo.Reader reader = new DownloadInfo.Reader(contentResolver, downloadsCursor);
+            List<FileDownloadInfo> downloads = new ArrayList<>();
+            FileDownloadInfo.Reader reader = new FileDownloadInfo.Reader(contentResolver, downloadsCursor);
 
             while (downloadsCursor.moveToNext()) {
                 downloads.add(downloadInfoCreator.create(reader));
@@ -33,7 +33,7 @@ class DownloadsRepository {
     }
 
     interface DownloadInfoCreator {
-        DownloadInfo create(DownloadInfo.Reader reader);
+        FileDownloadInfo create(FileDownloadInfo.Reader reader);
     }
 
 }

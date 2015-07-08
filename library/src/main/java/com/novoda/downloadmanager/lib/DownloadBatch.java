@@ -2,18 +2,18 @@ package com.novoda.downloadmanager.lib;
 
 import java.util.List;
 
-public class DownloadBatch {
+class DownloadBatch {
 
     public static final DownloadBatch DELETED = new DownloadBatch(-1, null, null, -1, -1L, -1L);
 
     private final long batchId;
     private final BatchInfo info;
-    private final List<DownloadInfo> downloads;
+    private final List<FileDownloadInfo> downloads;
     private final int status;
     private final long totalSizeBytes;
     private final long currentSizeBytes;
 
-    public DownloadBatch(long batchId, BatchInfo info, List<DownloadInfo> downloads, int status, long totalSizeBytes, long currentSizeBytes) {
+    public DownloadBatch(long batchId, BatchInfo info, List<FileDownloadInfo> downloads, int status, long totalSizeBytes, long currentSizeBytes) {
         this.batchId = batchId;
         this.info = info;
         this.downloads = downloads;
@@ -26,24 +26,24 @@ public class DownloadBatch {
         return batchId;
     }
 
-    public BatchInfo getInfo() {
-        return info;
-    }
-
-    public List<DownloadInfo> getDownloads() {
-        return downloads;
-    }
-
-    public int getStatus() {
-        return status;
-    }
-
     public long getTotalSize() {
         return totalSizeBytes;
     }
 
     public long getCurrentSize() {
         return currentSizeBytes;
+    }
+
+    public BatchInfo getInfo() {
+        return info;
+    }
+
+    public List<FileDownloadInfo> getDownloads() {
+        return downloads;
+    }
+
+    public int getStatus() {
+        return status;
     }
 
     public boolean isDeleted() {

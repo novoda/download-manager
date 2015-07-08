@@ -28,7 +28,7 @@ public class BatchRepositoryTest {
     DownloadDeleter downloadDeleter;
 
     @Mock
-    DownloadInfo downloadInfo;
+    FileDownloadInfo fileDownloadInfo;
 
     @Before
     public void setUp() {
@@ -39,11 +39,11 @@ public class BatchRepositoryTest {
     @Test
     public void givenADownloadInfoWhenRetrievingTheBatchThenTheBatchIdsMatch() {
         long expectedBatchId = 100L;
-        when(downloadInfo.getBatchId()).thenReturn(expectedBatchId);
+        when(fileDownloadInfo.getBatchId()).thenReturn(expectedBatchId);
         Cursor batchCursor = singleBatchCursor(expectedBatchId);
         when(contentResolver.query(any(Uri.class), any(String[].class), anyString(), any(String[].class), anyString())).thenReturn(batchCursor);
 
-        DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(downloadInfo);
+        DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(fileDownloadInfo);
 
         assertThat(downloadBatch.getBatchId()).isEqualTo(expectedBatchId);
     }
@@ -72,11 +72,11 @@ public class BatchRepositoryTest {
     @Test
     public void givenADownloadInfoAndNoLinkedBatchesWhenRetrievingTheBatchThenTheBatchIsDeleted() {
         long batchIdToBeMissing = 100L;
-        when(downloadInfo.getBatchId()).thenReturn(batchIdToBeMissing);
+        when(fileDownloadInfo.getBatchId()).thenReturn(batchIdToBeMissing);
         Cursor emptyBatchCursor = mock(Cursor.class);
         when(contentResolver.query(any(Uri.class), any(String[].class), anyString(), any(String[].class), anyString())).thenReturn(emptyBatchCursor);
 
-        DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(downloadInfo);
+        DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(fileDownloadInfo);
 
         assertThat(downloadBatch).isEqualTo(DownloadBatch.DELETED);
     }
