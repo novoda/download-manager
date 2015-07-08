@@ -559,7 +559,7 @@ class FileDownloadInfo {
                 Context context,
                 SystemFacade systemFacade,
                 DownloadClientReadyChecker downloadClientReadyChecker,
-                DownloadsUriProvider downloads) {
+                DownloadsUriProvider downloadsUriProvider) {
             RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
             ContentValues contentValues = new ContentValues();
             PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
@@ -570,7 +570,7 @@ class FileDownloadInfo {
                     downloadClientReadyChecker,
                     contentValues, 
                     downloadMarshaller,
-                    downloads);
+                    downloadsUriProvider);
             updateFromDatabase(info);
             readRequestHeaders(info);
 
