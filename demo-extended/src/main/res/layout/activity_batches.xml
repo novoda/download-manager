@@ -19,6 +19,12 @@
     android:layout_height="wrap_content"
     android:text="@string/button_batch_download_text" />
 
+  <Button
+    android:id="@+id/batch_show_button"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="@string/button_batch_show_text" />
+
   <TextView
     android:id="@+id/main_no_downloads_view"
     android:layout_width="match_parent"
