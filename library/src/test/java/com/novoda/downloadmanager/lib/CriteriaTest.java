@@ -6,6 +6,7 @@ public class CriteriaTest {
 
     private static final String SORT_COLUMN = "sort_column";
     private static final String SORT_COLUMN_ASCENDING = "sort_column ASC ";
+    private static final String SORT_COLUMN_DESCENDING = "sort_column DESC ";
     private static final String SELECTION_COLUMN = "selection1";
     private static final String SELECTION_QUERY = "selection1=?";
     private static final String ARGUMENT = "arg1";
@@ -49,6 +50,20 @@ public class CriteriaTest {
 
         CriteriaAssert.assertThat(criteria)
                 .hasSort(SORT_COLUMN_ASCENDING)
+                .hasArguments(new String[]{ARGUMENT});
+    }
+
+    @Test
+    public void givenACriteriaWithSortDescendingWhenBuildingThenTheSortIsAdded() {
+        Criteria criteria = new Criteria.Builder()
+                .withSelection(SELECTION_COLUMN, Criteria.Wildcard.EQUALS)
+                .withArgument(ARGUMENT)
+                .sortBy(SORT_COLUMN)
+                .descending()
+                .build();
+
+        CriteriaAssert.assertThat(criteria)
+                .hasSort(SORT_COLUMN_DESCENDING)
                 .hasArguments(new String[]{ARGUMENT});
     }
 
