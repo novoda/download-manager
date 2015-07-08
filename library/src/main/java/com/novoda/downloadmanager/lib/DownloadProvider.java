@@ -175,14 +175,14 @@ public final class DownloadProvider extends ContentProvider {
             DownloadsColumns.COLUMN_DELETED,
             DownloadsColumns.COLUMN_NOTIFICATION_EXTRAS,
             DownloadsColumns.COLUMN_BATCH_ID,
-            Downloads.Impl.Batches._ID,
-            Downloads.Impl.Batches.COLUMN_STATUS,
-            Downloads.Impl.Batches.COLUMN_TITLE,
-            Downloads.Impl.Batches.COLUMN_DESCRIPTION,
-            Downloads.Impl.Batches.COLUMN_BIG_PICTURE,
-            Downloads.Impl.Batches.COLUMN_VISIBILITY,
-            Downloads.Impl.Batches.COLUMN_TOTAL_BYTES,
-            Downloads.Impl.Batches.COLUMN_CURRENT_BYTES,
+            DownloadsColumnsBatches._ID,
+            DownloadsColumnsBatches.COLUMN_STATUS,
+            DownloadsColumnsBatches.COLUMN_TITLE,
+            DownloadsColumnsBatches.COLUMN_DESCRIPTION,
+            DownloadsColumnsBatches.COLUMN_BIG_PICTURE,
+            DownloadsColumnsBatches.COLUMN_VISIBILITY,
+            DownloadsColumnsBatches.COLUMN_TOTAL_BYTES,
+            DownloadsColumnsBatches.COLUMN_CURRENT_BYTES,
             OpenableColumns.DISPLAY_NAME,
             OpenableColumns.SIZE,
     };
@@ -195,7 +195,7 @@ public final class DownloadProvider extends ContentProvider {
         Collections.addAll(APP_READABLE_COLUMNS_SET, APP_READABLE_COLUMNS_ARRAY);
 
         COLUMNS_MAP = new HashMap<>();
-        COLUMNS_MAP.put(OpenableColumns.DISPLAY_NAME, Downloads.Impl.Batches.COLUMN_TITLE + " AS " + OpenableColumns.DISPLAY_NAME);
+        COLUMNS_MAP.put(OpenableColumns.DISPLAY_NAME, DownloadsColumnsBatches.COLUMN_TITLE + " AS " + OpenableColumns.DISPLAY_NAME);
         COLUMNS_MAP.put(OpenableColumns.SIZE, DownloadsColumns.COLUMN_TOTAL_BYTES + " AS " + OpenableColumns.SIZE);
     }
 
@@ -366,7 +366,7 @@ public final class DownloadProvider extends ContentProvider {
             return insertDownload(uri, values, db, match);
         }
         if (match == BATCHES) {
-            long rowId = db.insert(Downloads.Impl.Batches.BATCHES_TABLE_NAME, null, values);
+            long rowId = db.insert(DownloadsColumnsBatches.BATCHES_TABLE_NAME, null, values);
             return ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), rowId);
         }
         Log.d("calling insert on an unknown/invalid URI: " + uri);
@@ -641,7 +641,8 @@ public final class DownloadProvider extends ContentProvider {
             case BATCHES:
             case BATCHES_ID:
                 SqlSelection batchSelection = getWhereClause(uri, selection, selectionArgs, match);
-                return db.query(Downloads.Impl.Batches.BATCHES_TABLE_NAME, projection, batchSelection.getSelection(),
+                return db.query(
+                        DownloadsColumnsBatches.BATCHES_TABLE_NAME, projection, batchSelection.getSelection(),
                         batchSelection.getParameters(), null, null, sort);
             case DOWNLOADS_BY_BATCH:
                 return db.query(DownloadsTables.VIEW_NAME_DOWNLOADS_BY_BATCH, projection, selection, selectionArgs, null, null, sort);
@@ -875,7 +876,8 @@ public final class DownloadProvider extends ContentProvider {
             case BATCHES:
             case BATCHES_ID:
                 SqlSelection batchSelection = getWhereClause(uri, where, whereArgs, match);
-                count = db.update(Downloads.Impl.Batches.BATCHES_TABLE_NAME, values, batchSelection.getSelection(),
+                count = db.update(
+                        DownloadsColumnsBatches.BATCHES_TABLE_NAME, values, batchSelection.getSelection(),
                         batchSelection.getParameters());
                 break;
             default:
@@ -919,7 +921,7 @@ public final class DownloadProvider extends ContentProvider {
             selection.appendClause(Downloads.Impl._ID + " = ?", getDownloadIdFromUri(uri));
         }
         if (uriMatch == BATCHES_ID) {
-            selection.appendClause(Downloads.Impl.Batches._ID + " = ?", uri.getLastPathSegment());
+            selection.appendClause(DownloadsColumnsBatches._ID + " = ?", uri.getLastPathSegment());
         }
         if ((uriMatch == MY_DOWNLOADS || uriMatch == MY_DOWNLOADS_ID)
                 && getContext().checkCallingPermission(DownloadsPermission.PERMISSION_ACCESS_ALL)
@@ -955,7 +957,7 @@ public final class DownloadProvider extends ContentProvider {
             case BATCHES:
             case BATCHES_ID:
                 SqlSelection batchSelection = getWhereClause(uri, where, whereArgs, match);
-                count = db.delete(Downloads.Impl.Batches.BATCHES_TABLE_NAME, batchSelection.getSelection(), batchSelection.getParameters());
+                count = db.delete(DownloadsColumnsBatches.BATCHES_TABLE_NAME, batchSelection.getSelection(), batchSelection.getParameters());
                 break;
 
             default:

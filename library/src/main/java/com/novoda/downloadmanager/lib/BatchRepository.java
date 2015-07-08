@@ -13,8 +13,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static com.novoda.downloadmanager.lib.Downloads.Impl.*;
-
 class BatchRepository {
 
     private static final List<Integer> PRIORITISED_STATUSES = Arrays.asList(
@@ -33,8 +31,8 @@ class BatchRepository {
 
     private static final int PRIORITISED_STATUSES_SIZE = PRIORITISED_STATUSES.size();
 
-    private static final String[] PROJECT_BATCH_ID = {Batches._ID};
-    private static final String WHERE_DELETED_VALUE_IS = Batches.COLUMN_DELETED + " = ?";
+    private static final String[] PROJECT_BATCH_ID = {DownloadsColumnsBatches._ID};
+    private static final String WHERE_DELETED_VALUE_IS = DownloadsColumnsBatches.COLUMN_DELETED + " = ?";
     private static final String[] MARKED_FOR_DELETION = {"1"};
 
     private final ContentResolver resolver;
@@ -49,14 +47,14 @@ class BatchRepository {
 
     void updateTotalSize(long batchId) {
         ContentValues updateValues = new ContentValues();
-        updateValues.put(Batches.COLUMN_TOTAL_BYTES, getSummedBatchSizeInBytes(batchId, DownloadsColumns.COLUMN_TOTAL_BYTES));
-        resolver.update(downloadsUriProvider.getBatchesUri(), updateValues, Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
+        updateValues.put(DownloadsColumnsBatches.COLUMN_TOTAL_BYTES, getSummedBatchSizeInBytes(batchId, DownloadsColumns.COLUMN_TOTAL_BYTES));
+        resolver.update(downloadsUriProvider.getBatchesUri(), updateValues, DownloadsColumnsBatches._ID + " = ?", new String[]{String.valueOf(batchId)});
     }
 
     void updateCurrentSize(long batchId) {
         ContentValues updateValues = new ContentValues();
-        updateValues.put(Batches.COLUMN_CURRENT_BYTES, getSummedBatchSizeInBytes(batchId, DownloadsColumns.COLUMN_CURRENT_BYTES));
-        resolver.update(downloadsUriProvider.getBatchesUri(), updateValues, Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
+        updateValues.put(DownloadsColumnsBatches.COLUMN_CURRENT_BYTES, getSummedBatchSizeInBytes(batchId, DownloadsColumns.COLUMN_CURRENT_BYTES));
+        resolver.update(downloadsUriProvider.getBatchesUri(), updateValues, DownloadsColumnsBatches._ID + " = ?", new String[]{String.valueOf(batchId)});
     }
 
     private long getSummedBatchSizeInBytes(long batchId, String columnName) {
@@ -84,8 +82,8 @@ class BatchRepository {
 
     void updateBatchStatus(long batchId, int status) {
         ContentValues values = new ContentValues();
-        values.put(Batches.COLUMN_STATUS, status);
-        resolver.update(downloadsUriProvider.getBatchesUri(), values, Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
+        values.put(DownloadsColumnsBatches.COLUMN_STATUS, status);
+        resolver.update(downloadsUriProvider.getBatchesUri(), values, DownloadsColumnsBatches._ID + " = ?", new String[]{String.valueOf(batchId)});
     }
 
     int getBatchStatus(long batchId) {
@@ -144,14 +142,14 @@ class BatchRepository {
         Cursor batchesCursor = resolver.query(this.downloadsUriProvider.getBatchesUri(), null, null, null, null);
         List<DownloadBatch> batches = new ArrayList<>(batchesCursor.getCount());
         try {
-            int idColumn = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches._ID);
-            int titleIndex = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_TITLE);
-            int descriptionIndex = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_DESCRIPTION);
-            int bigPictureUrlIndex = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_BIG_PICTURE);
-            int statusIndex = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_STATUS);
-            int visibilityColumn = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches.COLUMN_VISIBILITY);
-            int totalBatchSizeIndex = batchesCursor.getColumnIndexOrThrow(Batches.COLUMN_TOTAL_BYTES);
-            int currentBatchSizeIndex = batchesCursor.getColumnIndexOrThrow(Batches.COLUMN_CURRENT_BYTES);
+            int idColumn = batchesCursor.getColumnIndexOrThrow(DownloadsColumnsBatches._ID);
+            int titleIndex = batchesCursor.getColumnIndexOrThrow(DownloadsColumnsBatches.COLUMN_TITLE);
+            int descriptionIndex = batchesCursor.getColumnIndexOrThrow(DownloadsColumnsBatches.COLUMN_DESCRIPTION);
+            int bigPictureUrlIndex = batchesCursor.getColumnIndexOrThrow(DownloadsColumnsBatches.COLUMN_BIG_PICTURE);
+            int statusIndex = batchesCursor.getColumnIndexOrThrow(DownloadsColumnsBatches.COLUMN_STATUS);
+            int visibilityColumn = batchesCursor.getColumnIndexOrThrow(DownloadsColumnsBatches.COLUMN_VISIBILITY);
+            int totalBatchSizeIndex = batchesCursor.getColumnIndexOrThrow(DownloadsColumnsBatches.COLUMN_TOTAL_BYTES);
+            int currentBatchSizeIndex = batchesCursor.getColumnIndexOrThrow(DownloadsColumnsBatches.COLUMN_CURRENT_BYTES);
 
             while (batchesCursor.moveToNext()) {
                 long id = batchesCursor.getLong(idColumn);
@@ -207,6 +205,6 @@ class BatchRepository {
 
         String selection = StringUtils.join(batchIdsToDelete, ", ");
         String[] selectionArgs = {selection};
-        resolver.delete(this.downloadsUriProvider.getBatchesUri(), Downloads.Impl.Batches._ID + " IN (?)", selectionArgs);
+        resolver.delete(this.downloadsUriProvider.getBatchesUri(), DownloadsColumnsBatches._ID + " IN (?)", selectionArgs);
     }
 }

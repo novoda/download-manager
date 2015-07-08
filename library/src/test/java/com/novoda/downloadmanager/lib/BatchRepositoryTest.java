@@ -25,8 +25,8 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 public class BatchRepositoryTest {
 
-    private static final String[] PROJECT_BATCH_ID = {Downloads.Impl.Batches._ID};
-    private static final String WHERE_DELETED_VALUE_IS = Downloads.Impl.Batches.COLUMN_DELETED + " = ?";
+    private static final String[] PROJECT_BATCH_ID = {DownloadsColumnsBatches._ID};
+    private static final String WHERE_DELETED_VALUE_IS = DownloadsColumnsBatches.COLUMN_DELETED + " = ?";
     private static final String[] MARKED_FOR_DELETION = {"1"};
     private static final String _ID = "_id";
 

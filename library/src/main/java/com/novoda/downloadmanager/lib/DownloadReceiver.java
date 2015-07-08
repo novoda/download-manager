@@ -167,13 +167,13 @@ public class DownloadReceiver extends BroadcastReceiver {
         Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
         try {
             if (cursor.moveToFirst()) {
-                int status = getInt(cursor, Downloads.Impl.Batches.COLUMN_STATUS);
-                @NotificationVisibility.Value int visibility = getInt(cursor, Downloads.Impl.Batches.COLUMN_VISIBILITY);
+                int status = getInt(cursor, DownloadsColumnsBatches.COLUMN_STATUS);
+                @NotificationVisibility.Value int visibility = getInt(cursor, DownloadsColumnsBatches.COLUMN_VISIBILITY);
 
                 if ((DownloadsStatus.isStatusCancelled(status) || DownloadsStatus.isStatusCompleted(status))
                         && (visibility == ACTIVE_OR_COMPLETE || visibility == ONLY_WHEN_COMPLETE)) {
                     ContentValues values = new ContentValues(1);
-                    values.put(Downloads.Impl.Batches.COLUMN_VISIBILITY, NotificationVisibility.ONLY_WHEN_ACTIVE);
+                    values.put(DownloadsColumnsBatches.COLUMN_VISIBILITY, NotificationVisibility.ONLY_WHEN_ACTIVE);
                     context.getContentResolver().update(uri, values, null, null);
                 }
             } else {
@@ -198,7 +198,7 @@ public class DownloadReceiver extends BroadcastReceiver {
                 new String[]{String.valueOf(batchId)}
         );
         ContentValues batchValues = new ContentValues(1);
-        batchValues.put(Downloads.Impl.Batches.COLUMN_STATUS, DownloadsStatus.STATUS_CANCELED);
+        batchValues.put(DownloadsColumnsBatches.COLUMN_STATUS, DownloadsStatus.STATUS_CANCELED);
         context.getContentResolver().update(
                 ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), batchId),
                 batchValues,

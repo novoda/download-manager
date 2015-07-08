@@ -120,18 +120,18 @@ final class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     private void createBatchesTable(SQLiteDatabase db) {
-        db.execSQL("DROP TABLE IF EXISTS " + Downloads.Impl.Batches.BATCHES_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + DownloadsColumnsBatches.BATCHES_TABLE_NAME);
         db.execSQL(
-                "CREATE TABLE " + Downloads.Impl.Batches.BATCHES_TABLE_NAME + "(" +
-                        Downloads.Impl.Batches._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                        Downloads.Impl.Batches.COLUMN_TITLE + " TEXT NOT NULL," +
-                        Downloads.Impl.Batches.COLUMN_DESCRIPTION + " TEXT," +
-                        Downloads.Impl.Batches.COLUMN_BIG_PICTURE + " TEXT," +
-                        Downloads.Impl.Batches.COLUMN_STATUS + " INTEGER," +
-                        Downloads.Impl.Batches.COLUMN_VISIBILITY + " INTEGER," +
-                        Downloads.Impl.Batches.COLUMN_DELETED + " BOOLEAN NOT NULL DEFAULT 0, " +
-                        Downloads.Impl.Batches.COLUMN_TOTAL_BYTES + " INTEGER NOT NULL DEFAULT -1, " +
-                        Downloads.Impl.Batches.COLUMN_CURRENT_BYTES + " INTEGER NOT NULL DEFAULT 0 " +
+                "CREATE TABLE " + DownloadsColumnsBatches.BATCHES_TABLE_NAME + "(" +
+                        DownloadsColumnsBatches._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                        DownloadsColumnsBatches.COLUMN_TITLE + " TEXT NOT NULL," +
+                        DownloadsColumnsBatches.COLUMN_DESCRIPTION + " TEXT," +
+                        DownloadsColumnsBatches.COLUMN_BIG_PICTURE + " TEXT," +
+                        DownloadsColumnsBatches.COLUMN_STATUS + " INTEGER," +
+                        DownloadsColumnsBatches.COLUMN_VISIBILITY + " INTEGER," +
+                        DownloadsColumnsBatches.COLUMN_DELETED + " BOOLEAN NOT NULL DEFAULT 0, " +
+                        DownloadsColumnsBatches.COLUMN_TOTAL_BYTES + " INTEGER NOT NULL DEFAULT -1, " +
+                        DownloadsColumnsBatches.COLUMN_CURRENT_BYTES + " INTEGER NOT NULL DEFAULT 0 " +
                         ");");
     }
 
@@ -141,9 +141,9 @@ final class DatabaseHelper extends SQLiteOpenHelper {
                         + " AS SELECT DISTINCT "
                         + projectionFrom(DOWNLOAD_BY_BATCH_VIEW_COLUMNS)
                         + " FROM " + DownloadsTables.DOWNLOADS_TABLE_NAME
-                        + " INNER JOIN " + Downloads.Impl.Batches.BATCHES_TABLE_NAME
+                        + " INNER JOIN " + DownloadsColumnsBatches.BATCHES_TABLE_NAME
                         + " ON " + DownloadsTables.DOWNLOADS_TABLE_NAME + "." + DownloadsColumns.COLUMN_BATCH_ID
-                        + " = " + Downloads.Impl.Batches.BATCHES_TABLE_NAME + "." + Downloads.Impl.Batches._ID + ";"
+                        + " = " + DownloadsColumnsBatches.BATCHES_TABLE_NAME + "." + DownloadsColumnsBatches._ID + ";"
         );
     }
 
@@ -165,14 +165,14 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             DownloadsColumns.COLUMN_CURRENT_BYTES,
             DownloadsColumns.COLUMN_NOTIFICATION_EXTRAS,
             DownloadsColumns.COLUMN_BATCH_ID,
-            Downloads.Impl.Batches.COLUMN_TITLE,
-            Downloads.Impl.Batches.COLUMN_DESCRIPTION,
-            Downloads.Impl.Batches.COLUMN_BIG_PICTURE,
-            Downloads.Impl.Batches.COLUMN_VISIBILITY,
-            Downloads.Impl.Batches.COLUMN_STATUS,
-            Downloads.Impl.Batches.BATCHES_TABLE_NAME + "." + Downloads.Impl.Batches.COLUMN_DELETED,
-            Downloads.Impl.Batches.COLUMN_TOTAL_BYTES,
-            Downloads.Impl.Batches.COLUMN_CURRENT_BYTES
+            DownloadsColumnsBatches.COLUMN_TITLE,
+            DownloadsColumnsBatches.COLUMN_DESCRIPTION,
+            DownloadsColumnsBatches.COLUMN_BIG_PICTURE,
+            DownloadsColumnsBatches.COLUMN_VISIBILITY,
+            DownloadsColumnsBatches.COLUMN_STATUS,
+            DownloadsColumnsBatches.BATCHES_TABLE_NAME + "." + DownloadsColumnsBatches.COLUMN_DELETED,
+            DownloadsColumnsBatches.COLUMN_TOTAL_BYTES,
+            DownloadsColumnsBatches.COLUMN_CURRENT_BYTES
     };
 
     private String projectionFrom(String[] array) {

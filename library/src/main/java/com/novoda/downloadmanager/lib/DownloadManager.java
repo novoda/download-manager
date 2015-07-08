@@ -65,13 +65,13 @@ public class DownloadManager {
      * The client-supplied title for this download.  This will be displayed in system notifications.
      * Defaults to the empty string.
      */
-    public static final String COLUMN_TITLE = Downloads.Impl.Batches.COLUMN_TITLE;
+    public static final String COLUMN_TITLE = DownloadsColumnsBatches.COLUMN_TITLE;
 
     /**
      * The client-supplied description of this download.  This will be displayed in system
      * notifications.  Defaults to the empty string.
      */
-    public static final String COLUMN_DESCRIPTION = Downloads.Impl.Batches.COLUMN_DESCRIPTION;
+    public static final String COLUMN_DESCRIPTION = DownloadsColumnsBatches.COLUMN_DESCRIPTION;
 
     /**
      * The ID of the batch that contains this download.
@@ -86,7 +86,7 @@ public class DownloadManager {
     /**
      * The status of the batch that contains this download.
      */
-    public static final String COLUMN_BATCH_STATUS = Downloads.Impl.Batches.COLUMN_STATUS;
+    public static final String COLUMN_BATCH_STATUS = DownloadsColumnsBatches.COLUMN_STATUS;
 
     /**
      * URI to be downloaded.
@@ -332,11 +332,11 @@ public class DownloadManager {
             DownloadsColumns.COLUMN_LAST_MODIFICATION + " AS " + COLUMN_LAST_MODIFIED_TIMESTAMP,
             DownloadsColumns.COLUMN_CURRENT_BYTES + " AS " + COLUMN_BYTES_DOWNLOADED_SO_FAR,
             DownloadsColumns.COLUMN_BATCH_ID,
-            Downloads.Impl.Batches.COLUMN_TITLE,
-            Downloads.Impl.Batches.COLUMN_DESCRIPTION,
-            Downloads.Impl.Batches.COLUMN_BIG_PICTURE,
-            Downloads.Impl.Batches.COLUMN_VISIBILITY,
-            Downloads.Impl.Batches.COLUMN_STATUS,
+            DownloadsColumnsBatches.COLUMN_TITLE,
+            DownloadsColumnsBatches.COLUMN_DESCRIPTION,
+            DownloadsColumnsBatches.COLUMN_BIG_PICTURE,
+            DownloadsColumnsBatches.COLUMN_VISIBILITY,
+            DownloadsColumnsBatches.COLUMN_STATUS,
         /* add the following 'computed' columns to the cursor.
          * they are not 'returned' by the database, but their inclusion
          * eliminates need to have lot of methods in CursorTranslator
@@ -463,7 +463,7 @@ public class DownloadManager {
             throw new IllegalArgumentException("called with nothing to remove. input param 'ids' can't be null");
         }
         ContentValues values = new ContentValues();
-        values.put(Downloads.Impl.Batches.COLUMN_DELETED, 1);
+        values.put(DownloadsColumnsBatches.COLUMN_DELETED, 1);
         // if only one id is passed in, then include it in the uri itself.
         // this will eliminate a full database scan in the download service.
         if (ids.length == 1) {
@@ -767,7 +767,7 @@ public class DownloadManager {
 
     private long insert(RequestBatch batch) {
         ContentValues values = batch.toContentValues();
-        values.put(Downloads.Impl.Batches.COLUMN_STATUS, DownloadsStatus.STATUS_PENDING);
+        values.put(DownloadsColumnsBatches.COLUMN_STATUS, DownloadsStatus.STATUS_PENDING);
         Uri batchUri = contentResolver.insert(downloadsUriProvider.getBatchesUri(), values);
         return ContentUris.parseId(batchUri);
     }
@@ -800,7 +800,7 @@ public class DownloadManager {
                 case COLUMN_STATUS:
                     return translateStatus(super.getInt(getColumnIndex(DownloadsColumns.COLUMN_STATUS)));
                 case COLUMN_BATCH_STATUS:
-                    return translateStatus(super.getInt(getColumnIndex(Downloads.Impl.Batches.COLUMN_STATUS)));
+                    return translateStatus(super.getInt(getColumnIndex(DownloadsColumnsBatches.COLUMN_STATUS)));
                 default:
                     return super.getLong(columnIndex);
             }
