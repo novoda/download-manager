@@ -865,6 +865,7 @@ class DownloadThread implements Runnable {
 
     private void updateBatchStatus(long batchId, long downloadId) {
         int batchStatus = batchRepository.getBatchStatus(batchId);
+
         batchRepository.updateBatchStatus(batchId, batchStatus);
 
         if (Downloads.Impl.isStatusCancelled(batchStatus)) {

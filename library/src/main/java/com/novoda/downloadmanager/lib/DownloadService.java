@@ -374,6 +374,7 @@ public class DownloadService extends Service {
 
         if (isReadyToDownload && !downloadIsSubmittedOrActive) {
             info.startDownload(executor, storageManager, downloadNotifier, downloadsRepository);
+            return true;
         }
         return downloadIsSubmittedOrActive;
     }
