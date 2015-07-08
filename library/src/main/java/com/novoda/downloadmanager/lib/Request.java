@@ -437,7 +437,7 @@ public class Request {
         int index = 0;
         for (Pair<String, String> header : requestHeaders) {
             String headerString = header.first + ": " + header.second;
-            values.put(Downloads.Impl.RequestHeaders.INSERT_KEY_PREFIX + index, headerString);
+            values.put(DownloadsColumnsRequestHeaders.INSERT_KEY_PREFIX + index, headerString);
             index++;
         }
     }

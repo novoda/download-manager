@@ -109,13 +109,13 @@ final class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     private void createHeadersTable(SQLiteDatabase db) {
-        db.execSQL("DROP TABLE IF EXISTS " + Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + DownloadsColumnsRequestHeaders.HEADERS_DB_TABLE);
         db.execSQL(
-                "CREATE TABLE " + Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE + "(" +
-                        Downloads.Impl.RequestHeaders._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                        Downloads.Impl.RequestHeaders.COLUMN_DOWNLOAD_ID + " INTEGER NOT NULL," +
-                        Downloads.Impl.RequestHeaders.COLUMN_HEADER + " TEXT NOT NULL," +
-                        Downloads.Impl.RequestHeaders.COLUMN_VALUE + " TEXT NOT NULL" +
+                "CREATE TABLE " + DownloadsColumnsRequestHeaders.HEADERS_DB_TABLE + "(" +
+                        DownloadsColumnsRequestHeaders._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                        DownloadsColumnsRequestHeaders.COLUMN_DOWNLOAD_ID + " INTEGER NOT NULL," +
+                        DownloadsColumnsRequestHeaders.COLUMN_HEADER + " TEXT NOT NULL," +
+                        DownloadsColumnsRequestHeaders.COLUMN_VALUE + " TEXT NOT NULL" +
                         ");");
     }
 

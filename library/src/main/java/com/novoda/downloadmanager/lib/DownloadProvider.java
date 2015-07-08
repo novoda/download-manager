@@ -142,12 +142,12 @@ public final class DownloadProvider extends ContentProvider {
         URI_MATCHER.addURI(AUTHORITY, "batches", BATCHES);
         URI_MATCHER.addURI(AUTHORITY, "batches/#", BATCHES_ID);
         URI_MATCHER.addURI(AUTHORITY, "downloads_by_batch", DOWNLOADS_BY_BATCH);
-        URI_MATCHER.addURI(AUTHORITY, "my_downloads/#/" + Downloads.Impl.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
-        URI_MATCHER.addURI(AUTHORITY, "all_downloads/#/" + Downloads.Impl.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
+        URI_MATCHER.addURI(AUTHORITY, "my_downloads/#/" + DownloadsColumnsRequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
+        URI_MATCHER.addURI(AUTHORITY, "all_downloads/#/" + DownloadsColumnsRequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
         // temporary, for backwards compatibility
         URI_MATCHER.addURI(AUTHORITY, "download", MY_DOWNLOADS);
         URI_MATCHER.addURI(AUTHORITY, "download/#", MY_DOWNLOADS_ID);
-        URI_MATCHER.addURI(AUTHORITY, "download/#/" + Downloads.Impl.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
+        URI_MATCHER.addURI(AUTHORITY, "download/#/" + DownloadsColumnsRequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
         URI_MATCHER.addURI(AUTHORITY, Downloads.Impl.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT + "/#", PUBLIC_DOWNLOAD_ID);
     }
 
@@ -583,7 +583,7 @@ public final class DownloadProvider extends ContentProvider {
         Iterator<Map.Entry<String, Object>> iterator = values.valueSet().iterator();
         while (iterator.hasNext()) {
             String key = iterator.next().getKey();
-            if (key.startsWith(Downloads.Impl.RequestHeaders.INSERT_KEY_PREFIX)) {
+            if (key.startsWith(DownloadsColumnsRequestHeaders.INSERT_KEY_PREFIX)) {
                 iterator.remove();
             }
         }
@@ -756,18 +756,18 @@ public final class DownloadProvider extends ContentProvider {
      */
     private void insertRequestHeaders(SQLiteDatabase db, long downloadId, ContentValues values) {
         ContentValues rowValues = new ContentValues();
-        rowValues.put(Downloads.Impl.RequestHeaders.COLUMN_DOWNLOAD_ID, downloadId);
+        rowValues.put(DownloadsColumnsRequestHeaders.COLUMN_DOWNLOAD_ID, downloadId);
         for (Map.Entry<String, Object> entry : values.valueSet()) {
             String key = entry.getKey();
-            if (key.startsWith(Downloads.Impl.RequestHeaders.INSERT_KEY_PREFIX)) {
+            if (key.startsWith(DownloadsColumnsRequestHeaders.INSERT_KEY_PREFIX)) {
                 String headerLine = entry.getValue().toString();
                 if (!headerLine.contains(":")) {
                     throw new IllegalArgumentException("Invalid HTTP header line: " + headerLine);
                 }
                 String[] parts = headerLine.split(":", 2);
-                rowValues.put(Downloads.Impl.RequestHeaders.COLUMN_HEADER, parts[0].trim());
-                rowValues.put(Downloads.Impl.RequestHeaders.COLUMN_VALUE, parts[1].trim());
-                db.insert(Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE, null, rowValues);
+                rowValues.put(DownloadsColumnsRequestHeaders.COLUMN_HEADER, parts[0].trim());
+                rowValues.put(DownloadsColumnsRequestHeaders.COLUMN_VALUE, parts[1].trim());
+                db.insert(DownloadsColumnsRequestHeaders.HEADERS_DB_TABLE, null, rowValues);
             }
         }
     }
@@ -776,12 +776,12 @@ public final class DownloadProvider extends ContentProvider {
      * Handle a query for the custom request headers registered for a download.
      */
     private Cursor queryRequestHeaders(SQLiteDatabase db, Uri uri) {
-        String where = Downloads.Impl.RequestHeaders.COLUMN_DOWNLOAD_ID + "="
+        String where = DownloadsColumnsRequestHeaders.COLUMN_DOWNLOAD_ID + "="
                 + getDownloadIdFromUri(uri);
-        String[] projection = new String[]{Downloads.Impl.RequestHeaders.COLUMN_HEADER,
-                Downloads.Impl.RequestHeaders.COLUMN_VALUE};
+        String[] projection = new String[]{DownloadsColumnsRequestHeaders.COLUMN_HEADER,
+                DownloadsColumnsRequestHeaders.COLUMN_VALUE};
         return db.query(
-                Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE, projection, where,
+                DownloadsColumnsRequestHeaders.HEADERS_DB_TABLE, projection, where,
                 null, null, null, null);
     }
 
@@ -794,8 +794,8 @@ public final class DownloadProvider extends ContentProvider {
         try {
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
                 long id = cursor.getLong(0);
-                String idWhere = Downloads.Impl.RequestHeaders.COLUMN_DOWNLOAD_ID + "=" + id;
-                db.delete(Downloads.Impl.RequestHeaders.HEADERS_DB_TABLE, idWhere, null);
+                String idWhere = DownloadsColumnsRequestHeaders.COLUMN_DOWNLOAD_ID + "=" + id;
+                db.delete(DownloadsColumnsRequestHeaders.HEADERS_DB_TABLE, idWhere, null);
             }
         } finally {
             cursor.close();

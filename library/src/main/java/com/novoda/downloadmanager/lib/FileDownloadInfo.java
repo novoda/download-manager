@@ -626,13 +626,13 @@ class FileDownloadInfo {
 
         private void readRequestHeaders(FileDownloadInfo info) {
             info.clearHeaders();
-            Uri headerUri = Uri.withAppendedPath(info.getAllDownloadsUri(), Downloads.Impl.RequestHeaders.URI_SEGMENT);
+            Uri headerUri = Uri.withAppendedPath(info.getAllDownloadsUri(), DownloadsColumnsRequestHeaders.URI_SEGMENT);
             Cursor cursor = resolver.query(headerUri, null, null, null, null);
             try {
                 int headerIndex =
-                        cursor.getColumnIndexOrThrow(Downloads.Impl.RequestHeaders.COLUMN_HEADER);
+                        cursor.getColumnIndexOrThrow(DownloadsColumnsRequestHeaders.COLUMN_HEADER);
                 int valueIndex =
-                        cursor.getColumnIndexOrThrow(Downloads.Impl.RequestHeaders.COLUMN_VALUE);
+                        cursor.getColumnIndexOrThrow(DownloadsColumnsRequestHeaders.COLUMN_VALUE);
                 for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
                     info.addHeader(cursor.getString(headerIndex), cursor.getString(valueIndex));
                 }

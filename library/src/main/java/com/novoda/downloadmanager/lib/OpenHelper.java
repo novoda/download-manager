@@ -25,7 +25,6 @@ import android.net.Uri;
 import java.io.File;
 
 import static android.app.DownloadManager.*;
-import static com.novoda.downloadmanager.lib.Downloads.Impl.RequestHeaders;
 
 class OpenHelper {
 
@@ -81,14 +80,14 @@ class OpenHelper {
     private Uri getRefererUri(Context context, long id) {
         final Uri headersUri = Uri.withAppendedPath(
                 ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id),
-                RequestHeaders.URI_SEGMENT);
+                DownloadsColumnsRequestHeaders.URI_SEGMENT);
         final Cursor headers = context.getContentResolver()
                 .query(headersUri, null, null, null, null);
         try {
             while (headers.moveToNext()) {
-                final String header = getCursorString(headers, RequestHeaders.COLUMN_HEADER);
+                final String header = getCursorString(headers, DownloadsColumnsRequestHeaders.COLUMN_HEADER);
                 if ("Referer".equalsIgnoreCase(header)) {
-                    return getCursorUri(headers, RequestHeaders.COLUMN_VALUE);
+                    return getCursorUri(headers, DownloadsColumnsRequestHeaders.COLUMN_VALUE);
                 }
             }
         } finally {

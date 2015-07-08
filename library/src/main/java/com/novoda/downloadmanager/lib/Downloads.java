@@ -16,7 +16,6 @@
 
 package com.novoda.downloadmanager.lib;
 
-import android.app.DownloadManager;
 import android.provider.BaseColumns;
 
 /**
@@ -84,27 +83,6 @@ final class Downloads {
          * 4xx: client errors<br>
          * 5xx: server errors
          */
-
-        /**
-         * Constants related to HTTP request headers associated with each download.
-         */
-        public static class RequestHeaders implements BaseColumns {
-            public static final String HEADERS_DB_TABLE = "request_headers";
-            public static final String COLUMN_DOWNLOAD_ID = "download_id";
-            public static final String COLUMN_HEADER = "header";
-            public static final String COLUMN_VALUE = "value";
-
-            /**
-             * Path segment to add to a download URI to retrieve request headers
-             */
-            public static final String URI_SEGMENT = "headers";
-
-            /**
-             * Prefix for ContentValues keys that contain HTTP header lines, to be passed to
-             * DownloadProvider.insert().
-             */
-            public static final String INSERT_KEY_PREFIX = "http_header_";
-        }
 
         /**
          * Constants related to batches associated with each download.
@@ -176,4 +154,5 @@ final class Downloads {
      * Query where clause for general querying.
      */
     private static final String QUERY_WHERE_CLAUSE = DownloadsColumns.COLUMN_NOTIFICATION_CLASS + "=?";
+
 }
