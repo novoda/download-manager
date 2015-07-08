@@ -38,6 +38,7 @@ class DownloadsRepository {
         Uri uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id);
         Cursor downloadsCursor = contentResolver.query(uri, null, null, null, null);
         try {
+            downloadsCursor.moveToFirst();
             FileDownloadInfo.Reader reader = new FileDownloadInfo.Reader(contentResolver, downloadsCursor);
             return downloadInfoCreator.create(reader);
         } finally {
