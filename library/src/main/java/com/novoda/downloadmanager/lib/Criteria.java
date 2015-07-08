@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Criteria {
+class Criteria {
 
     public static final Criteria ALL = new Criteria(null, null);
 
