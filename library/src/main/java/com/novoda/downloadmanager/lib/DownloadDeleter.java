@@ -25,16 +25,16 @@ class DownloadDeleter {
     }
 
     public void deleteFileAndMediaReference(DownloadInfo info) {
-        if (!TextUtils.isEmpty(info.mMediaProviderUri)) {
-            resolver.delete(Uri.parse(info.mMediaProviderUri), null, null);
+        if (!TextUtils.isEmpty(info.getMediaProviderUri())) {
+            resolver.delete(Uri.parse(info.getMediaProviderUri()), null, null);
         }
 
-        if (!TextUtils.isEmpty(info.mFileName)) {
-            deleteFileIfExists(info.mFileName);
+        if (!TextUtils.isEmpty(info.getFileName())) {
+            deleteFileIfExists(info.getFileName());
             ContentValues blankData = new ContentValues();
             blankData.put(Downloads.Impl._DATA, (String) null);
             resolver.update(info.getAllDownloadsUri(), blankData, null, null);
-            info.mFileName = null;
+            info.setFileName(null);
         }
     }
 
@@ -49,14 +49,14 @@ class DownloadDeleter {
      */
     private void deleteDownloadLocked(long id, Map<Long, DownloadInfo> downloads) {
         DownloadInfo info = downloads.get(id);
-        if (info.mStatus == Downloads.Impl.STATUS_RUNNING) {
-            info.mStatus = Downloads.Impl.STATUS_CANCELED;
+        if (info.getStatus() == Downloads.Impl.STATUS_RUNNING) {
+            info.setStatus(Downloads.Impl.STATUS_CANCELED);
         }
-        if (info.mDestination != Downloads.Impl.DESTINATION_EXTERNAL && info.mFileName != null) {
-            Log.d("deleteDownloadLocked() deleting " + info.mFileName);
-            deleteFileIfExists(info.mFileName);
+        if (info.getDestination() != Downloads.Impl.DESTINATION_EXTERNAL && info.getFileName() != null) {
+            Log.d("deleteDownloadLocked() deleting " + info.getFileName());
+            deleteFileIfExists(info.getFileName());
         }
-        downloads.remove(info.mId);
+        downloads.remove(info.getId());
     }
 
     private void deleteFileIfExists(String path) {

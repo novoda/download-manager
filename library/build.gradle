@@ -57,3 +57,5 @@ publish {
     description = 'Download manager based on AOSP DM but allowing downloading to internal private storage.'
     website = 'https://github.com/novoda/download-manager'
 }
+
+apply from: "$project.rootDir/code-quality/android-code-quality.gradle"
