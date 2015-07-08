@@ -320,7 +320,7 @@ public class DownloadManager {
      */
     public static final String[] UNDERLYING_COLUMNS = new String[]{
             Downloads.Impl._ID,
-            Downloads.Impl._DATA + " AS " + COLUMN_LOCAL_FILENAME,
+            DownloadsColumns.COLUMN_DATA + " AS " + COLUMN_LOCAL_FILENAME,
             DownloadsColumns.COLUMN_MEDIAPROVIDER_URI,
             DownloadsColumns.COLUMN_DESTINATION,
             DownloadsColumns.COLUMN_URI,
@@ -607,7 +607,7 @@ public class DownloadManager {
         ContentValues values = new ContentValues();
         values.put(DownloadsColumns.COLUMN_CURRENT_BYTES, 0);
         values.put(DownloadsColumns.COLUMN_TOTAL_BYTES, -1);
-        values.putNull(Downloads.Impl._DATA);
+        values.putNull(DownloadsColumns.COLUMN_DATA);
         values.put(DownloadsColumns.COLUMN_STATUS, DownloadsStatus.STATUS_PENDING);
         values.put(DownloadsColumns.COLUMN_FAILED_CONNECTIONS, 0);
         contentResolver.update(baseUri, values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
@@ -694,7 +694,7 @@ public class DownloadManager {
 
         ContentValues values = request.toContentValues();
         values.put(DownloadsColumns.COLUMN_DESTINATION, Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD);
-        values.put(Downloads.Impl._DATA, path);
+        values.put(DownloadsColumns.COLUMN_DATA, path);
         values.put(DownloadsColumns.COLUMN_STATUS, DownloadsStatus.STATUS_SUCCESS);
         values.put(DownloadsColumns.COLUMN_TOTAL_BYTES, length);
         values.put(DownloadsColumns.COLUMN_MEDIA_SCANNED, (isMediaScannerScannable) ? Request.SCANNABLE_VALUE_YES : Request.SCANNABLE_VALUE_NO);

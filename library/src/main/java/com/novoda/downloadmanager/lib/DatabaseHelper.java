@@ -64,7 +64,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
                     DownloadsColumns.COLUMN_APP_DATA + " TEXT, " +
                     DownloadsColumns.COLUMN_NO_INTEGRITY + " BOOLEAN, " +
                     DownloadsColumns.COLUMN_FILE_NAME_HINT + " TEXT, " +
-                    Downloads.Impl._DATA + " TEXT, " +
+                    DownloadsColumns.COLUMN_DATA + " TEXT, " +
                     DownloadsColumns.COLUMN_MIME_TYPE + " TEXT, " +
                     DownloadsColumns.COLUMN_DESTINATION + " INTEGER, " +
                     Constants.NO_SYSTEM_FILES + " BOOLEAN, " +
@@ -152,7 +152,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
      */
     public static final String[] DOWNLOAD_BY_BATCH_VIEW_COLUMNS = new String[]{
             DownloadsTables.DOWNLOADS_TABLE_NAME + "." + Downloads.Impl._ID + " AS _id ",
-            Downloads.Impl._DATA,
+            DownloadsColumns.COLUMN_DATA,
             DownloadsColumns.COLUMN_MEDIAPROVIDER_URI,
             DownloadsColumns.COLUMN_DESTINATION,
             DownloadsColumns.COLUMN_URI,

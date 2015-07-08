@@ -593,7 +593,7 @@ class FileDownloadInfo {
             info.scannable = getInt(DownloadsColumns.COLUMN_MEDIA_SCANNED) == 1;
             info.noIntegrity = getInt(DownloadsColumns.COLUMN_NO_INTEGRITY) == 1;
             info.hint = getString(DownloadsColumns.COLUMN_FILE_NAME_HINT);
-            info.fileName = getString(Downloads.Impl._DATA);
+            info.fileName = getString(DownloadsColumns.COLUMN_DATA);
             info.mimeType = getString(DownloadsColumns.COLUMN_MIME_TYPE);
             info.destination = getInt(DownloadsColumns.COLUMN_DESTINATION);
             info.status = getInt(DownloadsColumns.COLUMN_STATUS);

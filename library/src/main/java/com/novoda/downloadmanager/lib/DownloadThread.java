@@ -704,7 +704,7 @@ class DownloadThread implements Runnable {
      */
     private void updateDatabaseFromHeaders(State state) {
         ContentValues values = new ContentValues(4);
-        values.put(Downloads.Impl._DATA, state.filename);
+        values.put(DownloadsColumns.COLUMN_DATA, state.filename);
         if (state.headerETag != null) {
             values.put(Constants.ETAG, state.headerETag);
         }
@@ -845,7 +845,7 @@ class DownloadThread implements Runnable {
         fileDownloadInfo.setStatus(finalStatus);
         ContentValues values = new ContentValues(8);
         values.put(DownloadsColumns.COLUMN_STATUS, finalStatus);
-        values.put(Downloads.Impl._DATA, state.filename);
+        values.put(DownloadsColumns.COLUMN_DATA, state.filename);
         values.put(DownloadsColumns.COLUMN_MIME_TYPE, state.mimeType);
         values.put(DownloadsColumns.COLUMN_LAST_MODIFICATION, systemFacade.currentTimeMillis());
         values.put(DownloadsColumns.COLUMN_FAILED_CONNECTIONS, numFailed);

@@ -159,7 +159,7 @@ public final class DownloadProvider extends ContentProvider {
     private static final String[] APP_READABLE_COLUMNS_ARRAY = new String[]{
             Downloads.Impl._ID,
             DownloadsColumns.COLUMN_APP_DATA,
-            Downloads.Impl._DATA,
+            DownloadsColumns.COLUMN_DATA,
             DownloadsColumns.COLUMN_MIME_TYPE,
             DownloadsColumns.COLUMN_DESTINATION,
             DownloadsColumns.COLUMN_CONTROL,
@@ -428,7 +428,7 @@ public final class DownloadProvider extends ContentProvider {
             filteredValues.put(DownloadsColumns.COLUMN_TOTAL_BYTES, values.getAsLong(DownloadsColumns.COLUMN_TOTAL_BYTES));
             filteredValues.put(DownloadsColumns.COLUMN_CURRENT_BYTES, 0);
             copyInteger(DownloadsColumns.COLUMN_MEDIA_SCANNED, values, filteredValues);
-            copyString(Downloads.Impl._DATA, values, filteredValues);
+            copyString(DownloadsColumns.COLUMN_DATA, values, filteredValues);
         } else {
             filteredValues.put(DownloadsColumns.COLUMN_STATUS, DownloadsStatus.STATUS_PENDING);
             filteredValues.put(DownloadsColumns.COLUMN_TOTAL_BYTES, -1);
@@ -560,7 +560,7 @@ public final class DownloadProvider extends ContentProvider {
              * DownloadManager.addCompletedDownload(String, String, String, boolean, String, String, long)
              */
             values.remove(DownloadsColumns.COLUMN_TOTAL_BYTES);
-            values.remove(Downloads.Impl._DATA);
+            values.remove(DownloadsColumns.COLUMN_DATA);
             values.remove(DownloadsColumns.COLUMN_STATUS);
         }
         enforceAllowedValues(

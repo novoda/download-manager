@@ -1,7 +1,5 @@
 package com.novoda.downloadmanager.lib;
 
-import android.app.*;
-
 final class DownloadsColumns {
 
     /**
@@ -213,6 +211,13 @@ final class DownloadsColumns {
      * The column that is used to count retries
      */
     public static final String COLUMN_FAILED_CONNECTIONS = "numfailed";
+    /**
+     * The name of the column containing the filename where the downloaded data
+     * was actually stored.
+     * <P>Type: TEXT</P>
+     * <P>Owner can Read</P>
+     */
+    public static final String COLUMN_DATA = "_data";
 
     private DownloadsColumns() {
         // non-instantiable class

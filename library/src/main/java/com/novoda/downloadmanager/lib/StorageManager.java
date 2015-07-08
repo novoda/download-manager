@@ -321,7 +321,7 @@ class StorageManager {
         }
         long totalFreed = 0;
         try {
-            final int dataIndex = cursor.getColumnIndex(Downloads.Impl._DATA);
+            final int dataIndex = cursor.getColumnIndex(DownloadsColumns.COLUMN_DATA);
             while (cursor.moveToNext() && totalFreed < targetBytes) {
                 final String data = cursor.getString(dataIndex);
                 if (TextUtils.isEmpty(data)) continue;
@@ -363,7 +363,7 @@ class StorageManager {
             return;
         }
         Cursor cursor = contentResolver
-                .query(downloadsUriProvider.getAllDownloadsUri(), new String[]{Downloads.Impl._DATA}, null, null, null);
+                .query(downloadsUriProvider.getAllDownloadsUri(), new String[]{DownloadsColumns.COLUMN_DATA}, null, null, null);
         try {
             if (cursor != null) {
                 while (cursor.moveToNext()) {

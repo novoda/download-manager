@@ -48,14 +48,6 @@ final class Downloads {
         public static final String PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT = "public_downloads";
 
         /**
-         * The name of the column containing the filename where the downloaded data
-         * was actually stored.
-         * <P>Type: TEXT</P>
-         * <P>Owner can Read</P>
-         */
-        public static final String _DATA = "_data";
-
-        /**
          * default value for {@link DownloadsColumns#COLUMN_LAST_UPDATESRC}.
          * This value is used when this column's value is not relevant.
          */
