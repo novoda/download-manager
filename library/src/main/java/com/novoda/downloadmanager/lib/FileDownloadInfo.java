@@ -413,7 +413,8 @@ class FileDownloadInfo {
         }
     }
 
-    public boolean startDownloadIfNotActive(ExecutorService executor, StorageManager storageManager, DownloadNotifier downloadNotifier) {
+    public boolean startDownloadIfNotActive(ExecutorService executor, StorageManager storageManager, DownloadNotifier downloadNotifier
+            , DownloadsRepository downloadsRepository) {
         synchronized (this) {
             boolean isActive;
             if (submittedThread == null || submittedThread.isDone()) {
@@ -422,7 +423,7 @@ class FileDownloadInfo {
                 ContentResolver contentResolver = context.getContentResolver();
                 BatchRepository batchRepository = BatchRepository.newInstance(contentResolver, new DownloadDeleter(contentResolver));
                 DownloadThread downloadThread = new DownloadThread(context, systemFacade, this, storageManager, downloadNotifier,
-                        batchCompletionBroadcaster, batchRepository);
+                        batchCompletionBroadcaster, batchRepository, downloadsRepository);
                 submittedThread = executor.submit(downloadThread);
                 isActive = true;
             } else {

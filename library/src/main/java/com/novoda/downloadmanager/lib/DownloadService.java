@@ -370,7 +370,7 @@ public class DownloadService extends Service {
         boolean downloadIsActive = info.isActive();
 
         if (isReadyToDownload || downloadIsActive) {
-            isActive |= info.startDownloadIfNotActive(executor, storageManager, downloadNotifier);
+            isActive |= info.startDownloadIfNotActive(executor, storageManager, downloadNotifier, downloadsRepository);
         }
         return isActive;
     }

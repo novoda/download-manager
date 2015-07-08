@@ -46,8 +46,8 @@ import java.net.UnknownHostException;
 import java.util.Locale;
 
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
-import static com.novoda.downloadmanager.lib.FileDownloadInfo.NetworkState;
 import static com.novoda.downloadmanager.lib.Downloads.Impl.*;
+import static com.novoda.downloadmanager.lib.FileDownloadInfo.NetworkState;
 import static java.net.HttpURLConnection.*;
 
 /**
@@ -73,19 +73,22 @@ class DownloadThread implements Runnable {
     private final DownloadNotifier downloadNotifier;
     private final BatchCompletionBroadcaster batchCompletionBroadcaster;
     private final BatchRepository batchRepository;
+    private final DownloadsRepository downloadsRepository;
 
     private volatile boolean policyDirty;
 
-    public DownloadThread(Context context, SystemFacade systemFacade, FileDownloadInfo fileDownloadInfo,
+    public DownloadThread(Context context, SystemFacade systemFacade, FileDownloadInfo originalDownloadInfo,
                           StorageManager storageManager, DownloadNotifier downloadNotifier,
-                          BatchCompletionBroadcaster batchCompletionBroadcaster, BatchRepository batchRepository) {
+                          BatchCompletionBroadcaster batchCompletionBroadcaster, BatchRepository batchRepository,
+                          DownloadsRepository downloadsRepository) {
         this.context = context;
         this.systemFacade = systemFacade;
-        this.fileDownloadInfo = fileDownloadInfo;
+        this.fileDownloadInfo = originalDownloadInfo;
         this.storageManager = storageManager;
         this.downloadNotifier = downloadNotifier;
         this.batchCompletionBroadcaster = batchCompletionBroadcaster;
         this.batchRepository = batchRepository;
+        this.downloadsRepository = downloadsRepository;
     }
 
     /**
