@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.novoda.downloadmanager.lib.DownloadsDestination.*;
+
 /**
  * Manages the storage space consumed by Downloads Data dir. When space falls below
  * a threshold limit (set in resource xml files), starts cleanup of the Downloads data dir
@@ -330,7 +332,7 @@ class StorageManager {
                 Log.d("purging " + file.getAbsolutePath() + " for " + file.length() + " bytes");
                 totalFreed += file.length();
                 file.delete();
-                long id = cursor.getLong(cursor.getColumnIndex(Downloads.Impl._ID));
+                long id = cursor.getLong(cursor.getColumnIndex(DownloadsColumns._ID));
                 contentResolver.delete(ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id), null, null);
             }
         } finally {
@@ -409,7 +411,7 @@ class StorageManager {
         try {
             cursor = contentResolver.query(
                     downloadsUriProvider.getAllDownloadsUri(),
-                    new String[]{Downloads.Impl._ID},
+                    new String[]{DownloadsColumns._ID},
                     DownloadsColumns.COLUMN_STATUS + " >= '200'", null,
                     DownloadsColumns.COLUMN_LAST_MODIFICATION);
             if (cursor == null) {
@@ -419,7 +421,7 @@ class StorageManager {
             }
             if (cursor.moveToFirst()) {
                 int numDelete = cursor.getCount() - Constants.MAX_DOWNLOADS;
-                int columnId = cursor.getColumnIndexOrThrow(Downloads.Impl._ID);
+                int columnId = cursor.getColumnIndexOrThrow(DownloadsColumns._ID);
                 while (numDelete > 0) {
                     Uri downloadUri = ContentUris.withAppendedId(
                             downloadsUriProvider.getAllDownloadsUri(), cursor.getLong(columnId));
