@@ -37,13 +37,13 @@ public class BatchRepositoryTest {
     @Mock
     private FileDownloadInfo mockFileDownloadInfo;
     @Mock
-    private FileDownloadInfo mockDownloadInfoId1;
+    private FileDownloadInfo mockFileDownloadInfoId1;
     @Mock
-    private FileDownloadInfo mockDownloadInfoId2;
+    private FileDownloadInfo mockFileDownloadInfoId2;
     @Mock
-    private FileDownloadInfo mockDownloadInfoId3;
+    private FileDownloadInfo mockFileDownloadInfoId3;
     @Mock
-    private FileDownloadInfo mockDownloadInfoId4;
+    private FileDownloadInfo mockFileDownloadInfoId4;
     @Mock
     private DownloadsUriProvider mockDownloadsUriProvider;
     @Mock
@@ -60,10 +60,10 @@ public class BatchRepositoryTest {
 
         this.batchRepository = new BatchRepository(mockContentResolver, mockDownloadDeleter, mockDownloadsUriProvider);
 
-        when(mockDownloadInfoId1.getBatchId()).thenReturn(1L);
-        when(mockDownloadInfoId2.getBatchId()).thenReturn(2L);
-        when(mockDownloadInfoId3.getBatchId()).thenReturn(3L);
-        when(mockDownloadInfoId4.getBatchId()).thenReturn(4L);
+        when(mockFileDownloadInfoId1.getBatchId()).thenReturn(1L);
+        when(mockFileDownloadInfoId2.getBatchId()).thenReturn(2L);
+        when(mockFileDownloadInfoId3.getBatchId()).thenReturn(3L);
+        when(mockFileDownloadInfoId4.getBatchId()).thenReturn(4L);
     }
 
     @Test
@@ -96,14 +96,14 @@ public class BatchRepositoryTest {
         when(mockContentResolver.query(mockDownloadsUriProvider.getBatchesUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null)).thenReturn(cursorWithDownloadsIdToBeDeleted);
         when(mockContentResolver.query(any(Uri.class), any(String[].class), any(String.class), any(String[].class), any(String.class))).thenReturn(cursorWithDownloadsIdToBeDeleted);
 
-        Collection<FileDownloadInfo> downloads = Arrays.asList(mockDownloadInfoId1, mockDownloadInfoId2, mockDownloadInfoId3, mockDownloadInfoId4);
+        Collection<FileDownloadInfo> downloads = Arrays.asList(mockFileDownloadInfoId1, mockFileDownloadInfoId2, mockFileDownloadInfoId3, mockFileDownloadInfoId4);
         batchRepository.deleteMarkedBatchesFor(downloads);
 
         verify(mockContentResolver).query(mockDownloadsUriProvider.getBatchesUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null);
-        verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockDownloadInfoId1);
-        verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockDownloadInfoId2);
-        verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockDownloadInfoId3);
-        verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockDownloadInfoId4);
+        verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockFileDownloadInfoId1);
+        verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockFileDownloadInfoId2);
+        verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockFileDownloadInfoId3);
+        verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockFileDownloadInfoId4);
         verify(mockContentResolver).delete(this.mockDownloadsUriProvider.getBatchesUri(), _ID + " IN (?)", new String[]{"1, 2, 3, 4"});
     }
 
@@ -113,14 +113,14 @@ public class BatchRepositoryTest {
         when(mockContentResolver.query(mockDownloadsUriProvider.getBatchesUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null)).thenReturn(cursorWithDownloadsIdToBeDeleted);
         when(mockContentResolver.query(any(Uri.class), any(String[].class), any(String.class), any(String[].class), any(String.class))).thenReturn(cursorWithDownloadsIdToBeDeleted);
 
-        Collection<FileDownloadInfo> downloads = Arrays.asList(mockDownloadInfoId1, mockDownloadInfoId2, mockDownloadInfoId3, mockDownloadInfoId4);
+        Collection<FileDownloadInfo> downloads = Arrays.asList(mockFileDownloadInfoId1, mockFileDownloadInfoId2, mockFileDownloadInfoId3, mockFileDownloadInfoId4);
         batchRepository.deleteMarkedBatchesFor(downloads);
 
         verify(mockContentResolver).query(mockDownloadsUriProvider.getBatchesUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null);
-        verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockDownloadInfoId1);
-        verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockDownloadInfoId2);
-        verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockDownloadInfoId3);
-        verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockDownloadInfoId4);
+        verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockFileDownloadInfoId1);
+        verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockFileDownloadInfoId2);
+        verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockFileDownloadInfoId3);
+        verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockFileDownloadInfoId4);
         verify(mockContentResolver).delete(this.mockDownloadsUriProvider.getBatchesUri(), _ID + " IN (?)", new String[]{"2, 3"});
     }
 
@@ -130,14 +130,14 @@ public class BatchRepositoryTest {
         when(mockContentResolver.query(mockDownloadsUriProvider.getBatchesUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null)).thenReturn(cursorWithDownloadsIdToBeDeleted);
         when(mockContentResolver.query(any(Uri.class), any(String[].class), any(String.class), any(String[].class), any(String.class))).thenReturn(cursorWithDownloadsIdToBeDeleted);
 
-        Collection<FileDownloadInfo> downloads = Arrays.asList(mockDownloadInfoId1, mockDownloadInfoId2, mockDownloadInfoId3, mockDownloadInfoId4);
+        Collection<FileDownloadInfo> downloads = Arrays.asList(mockFileDownloadInfoId1, mockFileDownloadInfoId2, mockFileDownloadInfoId3, mockFileDownloadInfoId4);
         batchRepository.deleteMarkedBatchesFor(downloads);
 
         verify(mockContentResolver).query(mockDownloadsUriProvider.getBatchesUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null);
-        verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockDownloadInfoId1);
-        verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockDownloadInfoId2);
-        verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockDownloadInfoId3);
-        verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockDownloadInfoId4);
+        verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockFileDownloadInfoId1);
+        verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockFileDownloadInfoId2);
+        verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockFileDownloadInfoId3);
+        verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockFileDownloadInfoId4);
         verify(mockContentResolver, never()).delete(any(Uri.class), any(String.class), any(String[].class));
     }
 
