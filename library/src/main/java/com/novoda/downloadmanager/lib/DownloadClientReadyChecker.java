@@ -7,8 +7,6 @@ public interface DownloadClientReadyChecker {
 
     /**
      * This method is executed on a background thread
-     *
-     * @param download
      */
     boolean isAllowedToDownload(Download download);
 
