@@ -1,6 +1,5 @@
 package com.novoda.downloadmanager.lib;
 
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -14,12 +13,6 @@ class ConcurrentDownloadsLimitProvider {
 
     private final PackageManager packageManager;
     private final String packageName;
-
-    static ConcurrentDownloadsLimitProvider newInstance(Context context) {
-        PackageManager packageManager = context.getPackageManager();
-        String packageName = context.getApplicationContext().getPackageName();
-        return new ConcurrentDownloadsLimitProvider(packageManager, packageName);
-    }
 
     ConcurrentDownloadsLimitProvider(PackageManager packageManager, String packageName) {
         this.packageManager = packageManager;

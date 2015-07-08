@@ -127,13 +127,13 @@ class DownloadNotifier {
             return TYPE_ACTIVE + ":" + context.getPackageName();
         } else if (Downloads.Impl.isStatusError(status) && !Downloads.Impl.isStatusCancelled(status)
                 && shouldShowCompletedItem(visibility)) {
-            // Failed downloads always have unique notifs
+            // Failed downloads always have unique notifications
             return TYPE_FAILED + ":" + batch.getBatchId();
         } else if (Downloads.Impl.isStatusCancelled(status) && shouldShowCompletedItem(visibility)) {
-            // Cancelled downloads always have unique notifs
+            // Cancelled downloads always have unique notifications
             return TYPE_CANCELLED + ":" + batch.getBatchId();
         } else if (Downloads.Impl.isStatusSuccess(status) && shouldShowCompletedItem(visibility)) {
-            // Complete downloads always have unique notifs
+            // Complete downloads always have unique notifications
             return TYPE_SUCCESS + ":" + batch.getBatchId();
         } else {
             return null;

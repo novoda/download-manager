@@ -106,7 +106,7 @@ class NotificationDisplayer {
             DownloadBatch batch = cluster.iterator().next();
             // TODO: Decide how we handle notification clicks
             DownloadInfo downloadInfo = batch.getDownloads().get(0);
-            Uri uri = ContentUris.withAppendedId(downloads.getAllDownloadsContentUri(), downloadInfo.mId);
+            Uri uri = ContentUris.withAppendedId(downloads.getAllDownloadsContentUri(), downloadInfo.getId());
             builder.setAutoCancel(true);
 
             final String action;
@@ -138,9 +138,9 @@ class NotificationDisplayer {
                 for (DownloadBatch batch : cluster) {
                     for (DownloadInfo info : batch.getDownloads()) {
                         if (info.hasTotalBytes()) {
-                            currentBytes += info.mCurrentBytes;
-                            totalBytes += info.mTotalBytes;
-                            Long bytesPerSecond = downloadSpeed.get(info.mId);
+                            currentBytes += info.getCurrentBytes();
+                            totalBytes += info.getTotalBytes();
+                            Long bytesPerSecond = downloadSpeed.get(info.getId());
                             if (bytesPerSecond != null) {
                                 totalBytesPerSecond += bytesPerSecond;
                             }
@@ -274,7 +274,7 @@ class NotificationDisplayer {
         List<Long> ids = new ArrayList<>();
         for (DownloadBatch batch : batches) {
             for (DownloadInfo downloadInfo : batch.getDownloads()) {
-                ids.add(downloadInfo.mId);
+                ids.add(downloadInfo.getId());
             }
         }
 

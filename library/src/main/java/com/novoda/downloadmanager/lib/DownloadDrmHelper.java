@@ -53,15 +53,14 @@ class DownloadDrmHelper {
      * function shouldn't be called if the file shouldn't be DRM converted
      */
     public static String modifyDrmFwLockFileExtension(String filename) {
-        if (filename != null) {
-            int extensionIndex;
-            extensionIndex = filename.lastIndexOf(".");
-            if (extensionIndex != -1) {
-                filename = filename.substring(0, extensionIndex);
-            }
-            filename = filename.concat(EXTENSION_INTERNAL_FWDL);
+        if (filename == null) {
+            return null;
         }
-        return filename;
+        int extensionIndex = filename.lastIndexOf(".");
+        if (extensionIndex != -1) {
+            filename = filename.substring(0, extensionIndex);
+        }
+        return filename.concat(EXTENSION_INTERNAL_FWDL);
     }
 
     /**

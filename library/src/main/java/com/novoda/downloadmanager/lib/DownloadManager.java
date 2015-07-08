@@ -345,18 +345,22 @@ public class DownloadManager {
             "'placeholder' AS " + COLUMN_REASON
     };
 
-    private final ContentResolver mResolver;
+    private final ContentResolver contentResolver;
     private final Downloads downloads;
 
-    private Uri mBaseUri;
+    private Uri baseUri;
+
+    public DownloadManager(Context context, ContentResolver resolver, Downloads downloads) {
+        this(context, resolver, false, downloads);
+    }
 
     public DownloadManager(Context context,
                            ContentResolver contentResolver,
                            boolean verboseLogging,
                            Downloads downloads) {
-        this.mResolver = contentResolver;
+        this.contentResolver = contentResolver;
         this.downloads = downloads;
-        this.mBaseUri = downloads.getContentUri();
+        this.baseUri = downloads.getContentUri();
         GlobalState.setContext(context);
         GlobalState.setVerboseLogging(verboseLogging);
     }
@@ -367,9 +371,9 @@ public class DownloadManager {
      */
     void setAccessAllDownloads(boolean accessAllDownloads) {
         if (accessAllDownloads) {
-            mBaseUri = downloads.getAllDownloadsContentUri();
+            baseUri = downloads.getAllDownloadsContentUri();
         } else {
-            mBaseUri = downloads.getContentUri();
+            baseUri = downloads.getContentUri();
         }
     }
 
@@ -390,21 +394,38 @@ public class DownloadManager {
 
     private long insert(Request request) {
         ContentValues values = request.toContentValues();
-        Uri downloadUri = mResolver.insert(downloads.getContentUri(), values);
+        Uri downloadUri = contentResolver.insert(downloads.getContentUri(), values);
         return ContentUris.parseId(downloadUri);
     }
 
     public void pauseBatch(long id) {
         ContentValues values = new ContentValues();
         values.put(Downloads.Impl.COLUMN_CONTROL, Downloads.Impl.CONTROL_PAUSED);
-        mResolver.update(downloads.getAllDownloadsContentUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
+        contentResolver.update(downloads.getAllDownloadsContentUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
     }
 
     public void resumeBatch(long id) {
         ContentValues values = new ContentValues();
         values.put(Downloads.Impl.COLUMN_CONTROL, Downloads.Impl.CONTROL_RUN);
         values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
-        mResolver.update(downloads.getAllDownloadsContentUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
+        contentResolver.update(downloads.getAllDownloadsContentUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
+    }
+
+    public void removeDownload(URI uri) {
+        Cursor cursor = null;
+        try {
+            cursor = contentResolver.query(downloads.getContentUri(), new String[]{"_id"}, Downloads.Impl.COLUMN_FILE_NAME_HINT + "=?", new String[]{uri.toString()}, null);
+            if (cursor.moveToFirst()) {
+                long id = cursor.getLong(cursor.getColumnIndexOrThrow("_id"));
+                removeDownloads(id);
+                return;
+            }
+            Log.e("Didn't delete anything for uri: " + uri);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
     }
 
     /**
@@ -424,9 +445,9 @@ public class DownloadManager {
         // if only one id is passed in, then include it in the uri itself.
         // this will eliminate a full database scan in the download service.
         if (ids.length == 1) {
-            return mResolver.update(ContentUris.withAppendedId(mBaseUri, ids[0]), values, null, null);
+            return contentResolver.update(ContentUris.withAppendedId(baseUri, ids[0]), values, null, null);
         }
-        return mResolver.update(mBaseUri, values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
+        return contentResolver.update(baseUri, values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
     }
 
     /**
@@ -446,9 +467,9 @@ public class DownloadManager {
         // if only one id is passed in, then include it in the uri itself.
         // this will eliminate a full database scan in the download service.
         if (ids.length == 1) {
-            return mResolver.update(ContentUris.withAppendedId(downloads.getBatchContentUri(), ids[0]), values, null, null);
+            return contentResolver.update(ContentUris.withAppendedId(downloads.getBatchContentUri(), ids[0]), values, null, null);
         }
-        return mResolver.update(downloads.getBatchContentUri(), values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
+        return contentResolver.update(downloads.getBatchContentUri(), values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
     }
 
     /**
@@ -459,7 +480,7 @@ public class DownloadManager {
      * COLUMN_* constants.
      */
     public Cursor query(Query query) {
-        Cursor underlyingCursor = query.runQuery(mResolver, UNDERLYING_COLUMNS, downloads.getDownloadsByBatchUri());
+        Cursor underlyingCursor = query.runQuery(contentResolver, UNDERLYING_COLUMNS, downloads.getDownloadsByBatchUri());
         if (underlyingCursor == null) {
             return null;
         }
@@ -474,7 +495,7 @@ public class DownloadManager {
      * @throws FileNotFoundException if the destination file does not already exist
      */
     public ParcelFileDescriptor openDownloadedFile(long id) throws FileNotFoundException {
-        return mResolver.openFileDescriptor(getDownloadUri(id), "r");
+        return contentResolver.openFileDescriptor(getDownloadUri(id), "r");
     }
 
     /**
@@ -550,7 +571,7 @@ public class DownloadManager {
             if (cursor == null) {
                 return null;
             }
-            while (cursor.moveToFirst()) {
+            if (cursor.moveToFirst()) {
                 return cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MEDIA_TYPE));
             }
         } finally {
@@ -589,7 +610,7 @@ public class DownloadManager {
         values.putNull(Downloads.Impl._DATA);
         values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
         values.put(Downloads.Impl.COLUMN_FAILED_CONNECTIONS, 0);
-        mResolver.update(mBaseUri, values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
+        contentResolver.update(baseUri, values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
     }
 
     /**
@@ -677,7 +698,7 @@ public class DownloadManager {
         values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_SUCCESS);
         values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, length);
         values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED, (isMediaScannerScannable) ? Request.SCANNABLE_VALUE_YES : Request.SCANNABLE_VALUE_NO);
-        Uri downloadUri = mResolver.insert(downloads.getContentUri(), values);
+        Uri downloadUri = contentResolver.insert(downloads.getContentUri(), values);
         if (downloadUri == null) {
             return -1;
         }
@@ -697,7 +718,7 @@ public class DownloadManager {
      * Get the DownloadProvider URI for the download with the given ID.
      */
     private Uri getDownloadUri(long id) {
-        return ContentUris.withAppendedId(mBaseUri, id);
+        return ContentUris.withAppendedId(baseUri, id);
     }
 
     /**
@@ -747,7 +768,7 @@ public class DownloadManager {
     private long insert(RequestBatch batch) {
         ContentValues values = batch.toContentValues();
         values.put(Downloads.Impl.Batches.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
-        Uri batchUri = mResolver.insert(downloads.getBatchContentUri(), values);
+        Uri batchUri = contentResolver.insert(downloads.getBatchContentUri(), values);
         return ContentUris.parseId(batchUri);
     }
 
@@ -758,11 +779,11 @@ public class DownloadManager {
      * underlying data.
      */
     private static class CursorTranslator extends CursorWrapper {
-        private Uri mBaseUri;
+        private final Uri baseUri;
 
         public CursorTranslator(Cursor cursor, Uri baseUri) {
             super(cursor);
-            mBaseUri = baseUri;
+            this.baseUri = baseUri;
         }
 
         @Override
@@ -804,7 +825,7 @@ public class DownloadManager {
 
             // return content URI for cache download
             long downloadId = getLong(getColumnIndex(Downloads.Impl._ID));
-            return ContentUris.withAppendedId(mBaseUri, downloadId).toString();
+            return ContentUris.withAppendedId(baseUri, downloadId).toString();
         }
 
         private long getReason(int status) {

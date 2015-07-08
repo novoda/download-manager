@@ -26,8 +26,6 @@ public class DownloadInfoTest {
                 null,
                 null,
                 null,
-                null,
-                null,
                 IS_READY,
                 null,
                 null);
@@ -40,8 +38,6 @@ public class DownloadInfoTest {
     @Test
     public void givenClientIsNotReadyToDownloadThenDownloadDoesNotStart() {
         DownloadInfo downloadInfo = new DownloadInfo(
-                null,
-                null,
                 null,
                 null,
                 null,
