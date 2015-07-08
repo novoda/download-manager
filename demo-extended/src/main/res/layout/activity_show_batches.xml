@@ -56,6 +56,12 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:text="@string/failed_or_pending" />
+
+    <RadioButton
+      android:id="@+id/show_batches_query_live"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/live" />
   </RadioGroup>
 
   <ListView

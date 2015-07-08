@@ -13,6 +13,7 @@ import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.demo.extended.QueryTimestamp;
 import com.novoda.downloadmanager.lib.BatchQuery;
 import com.novoda.downloadmanager.lib.DownloadManager;
+import com.novoda.notils.logger.simple.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +63,8 @@ public class ShowBatchesActivity extends AppCompatActivity implements QueryForBa
                     case R.id.show_batches_query_failed_pending:
                         query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_FAILED | DownloadManager.STATUS_PENDING).build();
                         break;
+                    case R.id.show_batches_query_live:
+                        query = new BatchQuery.Builder().withSortByLiveness().build();
                     default:
                         break;
                 }
