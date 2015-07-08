@@ -282,23 +282,23 @@ class FileDownloadInfo {
         }
         switch (status) {
             case 0: // status hasn't been initialized yet, this is a new download
-            case Downloads.Impl.STATUS_PENDING: // download is explicit marked as ready to start
-            case Downloads.Impl.STATUS_RUNNING: // download interrupted (process killed etc) while
+            case STATUS_PENDING: // download is explicit marked as ready to start
+            case STATUS_RUNNING: // download interrupted (process killed etc) while
                 // running, without a chance to update the database
                 return true;
 
-            case Downloads.Impl.STATUS_WAITING_FOR_NETWORK:
-            case Downloads.Impl.STATUS_QUEUED_FOR_WIFI:
+            case STATUS_WAITING_FOR_NETWORK:
+            case STATUS_QUEUED_FOR_WIFI:
                 return checkCanUseNetwork() == NetworkState.OK;
 
-            case Downloads.Impl.STATUS_WAITING_TO_RETRY:
+            case STATUS_WAITING_TO_RETRY:
                 // download was waiting for a delayed restart
                 final long now = systemFacade.currentTimeMillis();
                 return restartTime(now) <= now;
-            case Downloads.Impl.STATUS_DEVICE_NOT_FOUND_ERROR:
+            case STATUS_DEVICE_NOT_FOUND_ERROR:
                 // is the media mounted?
                 return Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
-            case Downloads.Impl.STATUS_INSUFFICIENT_SPACE_ERROR:
+            case STATUS_INSUFFICIENT_SPACE_ERROR:
                 // avoids repetition of retrying download
                 return false;
         }
@@ -443,7 +443,7 @@ class FileDownloadInfo {
     public void updateStatus(int status) {
         setStatus(status);
         downloadStatusContentValues.clear();
-        downloadStatusContentValues.put(Downloads.Impl.COLUMN_STATUS, status);
+        downloadStatusContentValues.put(DownloadsColumns.COLUMN_STATUS, status);
         context.getContentResolver().update(getAllDownloadsUri(), downloadStatusContentValues, null, null);
     }
 
@@ -490,10 +490,10 @@ class FileDownloadInfo {
      * {@link Long#MAX_VALUE}, then download has no future actions.
      */
     public long nextActionMillis(long now) {
-        if (Downloads.Impl.isStatusCompleted(status)) {
+        if (DownloadsStatus.isStatusCompleted(status)) {
             return Long.MAX_VALUE;
         }
-        if (status != Downloads.Impl.STATUS_WAITING_TO_RETRY) {
+        if (status != DownloadsStatus.STATUS_WAITING_TO_RETRY) {
             return 0;
         }
         long when = restartTime(now);
@@ -511,7 +511,7 @@ class FileDownloadInfo {
                 && (getDestination() == Downloads.Impl.DESTINATION_EXTERNAL ||
                 getDestination() == Downloads.Impl.DESTINATION_FILE_URI ||
                 getDestination() == Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD)
-                && Downloads.Impl.isStatusSuccess(getStatus())
+                && DownloadsStatus.isStatusSuccess(getStatus())
                 && scannable;
     }
 
@@ -530,14 +530,14 @@ class FileDownloadInfo {
     public static int queryDownloadStatus(ContentResolver resolver, long id, DownloadsUriProvider downloadsUriProvider) {
         final Cursor cursor = resolver.query(
                 ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id),
-                new String[]{Downloads.Impl.COLUMN_STATUS}, null, null, null);
+                new String[]{DownloadsColumns.COLUMN_STATUS}, null, null, null);
         try {
             if (cursor.moveToFirst()) {
                 return cursor.getInt(0);
             } else {
                 // TODO: increase strictness of value returned for unknown
                 // downloads; this is safe default for now.
-                return Downloads.Impl.STATUS_PENDING;
+                return DownloadsStatus.STATUS_PENDING;
             }
         } finally {
             cursor.close();
@@ -589,38 +589,38 @@ class FileDownloadInfo {
 
         public void updateFromDatabase(FileDownloadInfo info) {
             info.id = getLong(Downloads.Impl._ID);
-            info.uri = getString(Downloads.Impl.COLUMN_URI);
-            info.scannable = getInt(Downloads.Impl.COLUMN_MEDIA_SCANNED) == 1;
-            info.noIntegrity = getInt(Downloads.Impl.COLUMN_NO_INTEGRITY) == 1;
-            info.hint = getString(Downloads.Impl.COLUMN_FILE_NAME_HINT);
+            info.uri = getString(DownloadsColumns.COLUMN_URI);
+            info.scannable = getInt(DownloadsColumns.COLUMN_MEDIA_SCANNED) == 1;
+            info.noIntegrity = getInt(DownloadsColumns.COLUMN_NO_INTEGRITY) == 1;
+            info.hint = getString(DownloadsColumns.COLUMN_FILE_NAME_HINT);
             info.fileName = getString(Downloads.Impl._DATA);
-            info.mimeType = getString(Downloads.Impl.COLUMN_MIME_TYPE);
-            info.destination = getInt(Downloads.Impl.COLUMN_DESTINATION);
-            info.status = getInt(Downloads.Impl.COLUMN_STATUS);
-            info.numFailed = getInt(Downloads.Impl.COLUMN_FAILED_CONNECTIONS);
+            info.mimeType = getString(DownloadsColumns.COLUMN_MIME_TYPE);
+            info.destination = getInt(DownloadsColumns.COLUMN_DESTINATION);
+            info.status = getInt(DownloadsColumns.COLUMN_STATUS);
+            info.numFailed = getInt(DownloadsColumns.COLUMN_FAILED_CONNECTIONS);
             int retryRedirect = getInt(Constants.RETRY_AFTER_X_REDIRECT_COUNT);
             info.retryAfter = retryRedirect & 0xfffffff;
-            info.lastMod = getLong(Downloads.Impl.COLUMN_LAST_MODIFICATION);
-            info.notificationClassName = getString(Downloads.Impl.COLUMN_NOTIFICATION_CLASS);
-            info.extras = getString(Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS);
-            info.cookies = getString(Downloads.Impl.COLUMN_COOKIE_DATA);
-            info.userAgent = getString(Downloads.Impl.COLUMN_USER_AGENT);
-            info.referer = getString(Downloads.Impl.COLUMN_REFERER);
-            info.totalBytes = getLong(Downloads.Impl.COLUMN_TOTAL_BYTES);
-            info.currentBytes = getLong(Downloads.Impl.COLUMN_CURRENT_BYTES);
+            info.lastMod = getLong(DownloadsColumns.COLUMN_LAST_MODIFICATION);
+            info.notificationClassName = getString(DownloadsColumns.COLUMN_NOTIFICATION_CLASS);
+            info.extras = getString(DownloadsColumns.COLUMN_NOTIFICATION_EXTRAS);
+            info.cookies = getString(DownloadsColumns.COLUMN_COOKIE_DATA);
+            info.userAgent = getString(DownloadsColumns.COLUMN_USER_AGENT);
+            info.referer = getString(DownloadsColumns.COLUMN_REFERER);
+            info.totalBytes = getLong(DownloadsColumns.COLUMN_TOTAL_BYTES);
+            info.currentBytes = getLong(DownloadsColumns.COLUMN_CURRENT_BYTES);
             info.eTag = getString(Constants.ETAG);
             info.uid = getInt(Constants.UID);
             info.mediaScanned = getInt(Constants.MEDIA_SCANNED);
-            info.deleted = getInt(Downloads.Impl.COLUMN_DELETED) == 1;
-            info.mediaProviderUri = getString(Downloads.Impl.COLUMN_MEDIAPROVIDER_URI);
-            info.allowedNetworkTypes = getInt(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES);
-            info.allowRoaming = getInt(Downloads.Impl.COLUMN_ALLOW_ROAMING) != 0;
-            info.allowMetered = getInt(Downloads.Impl.COLUMN_ALLOW_METERED) != 0;
-            info.bypassRecommendedSizeLimit = getInt(Downloads.Impl.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
-            info.batchId = getLong(Downloads.Impl.COLUMN_BATCH_ID);
+            info.deleted = getInt(DownloadsColumns.COLUMN_DELETED) == 1;
+            info.mediaProviderUri = getString(DownloadsColumns.COLUMN_MEDIAPROVIDER_URI);
+            info.allowedNetworkTypes = getInt(DownloadsColumns.COLUMN_ALLOWED_NETWORK_TYPES);
+            info.allowRoaming = getInt(DownloadsColumns.COLUMN_ALLOW_ROAMING) != 0;
+            info.allowMetered = getInt(DownloadsColumns.COLUMN_ALLOW_METERED) != 0;
+            info.bypassRecommendedSizeLimit = getInt(DownloadsColumns.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
+            info.batchId = getLong(DownloadsColumns.COLUMN_BATCH_ID);
 
             synchronized (this) {
-                info.control = getInt(Downloads.Impl.COLUMN_CONTROL);
+                info.control = getInt(DownloadsColumns.COLUMN_CONTROL);
             }
         }
 

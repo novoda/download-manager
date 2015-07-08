@@ -137,9 +137,9 @@ class DownloadScanner implements MediaScannerConnectionClient {
         // Update scanned column, which will kick off a database update pass,
         // eventually deciding if overall service is ready for teardown.
         final ContentValues values = new ContentValues();
-        values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED, 1);
+        values.put(DownloadsColumns.COLUMN_MEDIA_SCANNED, 1);
         if (uri != null) {
-            values.put(Downloads.Impl.COLUMN_MEDIAPROVIDER_URI, uri.toString());
+            values.put(DownloadsColumns.COLUMN_MEDIAPROVIDER_URI, uri.toString());
         }
 
         final Uri downloadUri = ContentUris.withAppendedId(

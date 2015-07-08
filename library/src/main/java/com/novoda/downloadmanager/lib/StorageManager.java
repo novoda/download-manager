@@ -191,7 +191,7 @@ class StorageManager {
         if (destination == Downloads.Impl.DESTINATION_FILE_URI ||
                 destination == Downloads.Impl.DESTINATION_EXTERNAL) {
             if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                throw new StopRequestException(Downloads.Impl.STATUS_DEVICE_NOT_FOUND_ERROR, "external media not mounted");
+                throw new StopRequestException(DownloadsStatus.STATUS_DEVICE_NOT_FOUND_ERROR, "external media not mounted");
             }
         }
         // is there enough space in the file system of the given param 'root'.
@@ -216,7 +216,8 @@ class StorageManager {
                 if (root.equals(systemCacheDir)) {
                     Log.w("System cache dir ('/cache') is running low on space." + "space available (in bytes): " + bytesAvailable);
                 } else {
-                    throw new StopRequestException(Downloads.Impl.STATUS_INSUFFICIENT_SPACE_ERROR,
+                    throw new StopRequestException(
+                            DownloadsStatus.STATUS_INSUFFICIENT_SPACE_ERROR,
                             "space in the filesystem rooted at: " + root + " is below 10% availability. stopping this download.");
                 }
             }
@@ -236,7 +237,8 @@ class StorageManager {
             }
         }
         if (bytesAvailable < targetBytes) {
-            throw new StopRequestException(Downloads.Impl.STATUS_INSUFFICIENT_SPACE_ERROR,
+            throw new StopRequestException(
+                    DownloadsStatus.STATUS_INSUFFICIENT_SPACE_ERROR,
                     "not enough free space in the filesystem rooted at: " + root + " and unable to free any more");
         }
     }
@@ -279,7 +281,7 @@ class StorageManager {
                 if (!base.isDirectory() && !base.mkdir()) {
                     // Can't create download directory, e.g. because a file called "download"
                     // already exists at the root level, or the SD card filesystem is read-only.
-                    throw new StopRequestException(Downloads.Impl.STATUS_FILE_ERROR, "unable to create external downloads directory " + base.getPath());
+                    throw new StopRequestException(DownloadsStatus.STATUS_FILE_ERROR, "unable to create external downloads directory " + base.getPath());
                 }
                 return base;
             default:
@@ -310,10 +312,10 @@ class StorageManager {
                 downloadsUriProvider.getAllDownloadsUri(),
                 null,
                 "( " +
-                        Downloads.Impl.COLUMN_STATUS + " = '" + Downloads.Impl.STATUS_SUCCESS + "' AND " +
-                        Downloads.Impl.COLUMN_DESTINATION + " = ? )",
+                        DownloadsColumns.COLUMN_STATUS + " = '" + DownloadsStatus.STATUS_SUCCESS + "' AND " +
+                        DownloadsColumns.COLUMN_DESTINATION + " = ? )",
                 bindArgs,
-                Downloads.Impl.COLUMN_LAST_MODIFICATION);
+                DownloadsColumns.COLUMN_LAST_MODIFICATION);
         if (cursor == null) {
             return 0;
         }
@@ -408,8 +410,8 @@ class StorageManager {
             cursor = contentResolver.query(
                     downloadsUriProvider.getAllDownloadsUri(),
                     new String[]{Downloads.Impl._ID},
-                    Downloads.Impl.COLUMN_STATUS + " >= '200'", null,
-                    Downloads.Impl.COLUMN_LAST_MODIFICATION);
+                    DownloadsColumns.COLUMN_STATUS + " >= '200'", null,
+                    DownloadsColumns.COLUMN_LAST_MODIFICATION);
             if (cursor == null) {
                 // This isn't good - if we can't do basic queries in our database, nothings gonna work
                 Log.e("null cursor in trimDatabase");

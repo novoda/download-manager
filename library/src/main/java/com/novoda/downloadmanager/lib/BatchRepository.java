@@ -18,17 +18,17 @@ import static com.novoda.downloadmanager.lib.Downloads.Impl.*;
 class BatchRepository {
 
     private static final List<Integer> PRIORITISED_STATUSES = Arrays.asList(
-            STATUS_CANCELED,
-            STATUS_RUNNING,
+            DownloadsStatus.STATUS_CANCELED,
+            DownloadsStatus.STATUS_RUNNING,
 
             // Paused statuses
-            STATUS_PAUSED_BY_APP,
-            STATUS_WAITING_TO_RETRY,
-            STATUS_WAITING_FOR_NETWORK,
-            STATUS_QUEUED_FOR_WIFI,
+            DownloadsStatus.STATUS_PAUSED_BY_APP,
+            DownloadsStatus.STATUS_WAITING_TO_RETRY,
+            DownloadsStatus.STATUS_WAITING_FOR_NETWORK,
+            DownloadsStatus.STATUS_QUEUED_FOR_WIFI,
 
-            STATUS_PENDING,
-            STATUS_SUCCESS
+            DownloadsStatus.STATUS_PENDING,
+            DownloadsStatus.STATUS_SUCCESS
     );
 
     private static final int PRIORITISED_STATUSES_SIZE = PRIORITISED_STATUSES.size();
@@ -49,13 +49,13 @@ class BatchRepository {
 
     void updateTotalSize(long batchId) {
         ContentValues updateValues = new ContentValues();
-        updateValues.put(Batches.COLUMN_TOTAL_BYTES, getSummedBatchSizeInBytes(batchId, COLUMN_TOTAL_BYTES));
+        updateValues.put(Batches.COLUMN_TOTAL_BYTES, getSummedBatchSizeInBytes(batchId, DownloadsColumns.COLUMN_TOTAL_BYTES));
         resolver.update(downloadsUriProvider.getBatchesUri(), updateValues, Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
     }
 
     void updateCurrentSize(long batchId) {
         ContentValues updateValues = new ContentValues();
-        updateValues.put(Batches.COLUMN_CURRENT_BYTES, getSummedBatchSizeInBytes(batchId, COLUMN_CURRENT_BYTES));
+        updateValues.put(Batches.COLUMN_CURRENT_BYTES, getSummedBatchSizeInBytes(batchId, DownloadsColumns.COLUMN_CURRENT_BYTES));
         resolver.update(downloadsUriProvider.getBatchesUri(), updateValues, Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
     }
 
@@ -67,7 +67,7 @@ class BatchRepository {
             cursor = resolver.query(
                     downloadsUriProvider.getAllDownloadsUri(),
                     new String[]{"sum(" + columnName + ")"},
-                    COLUMN_BATCH_ID + " = ?",
+                    DownloadsColumns.COLUMN_BATCH_ID + " = ?",
                     selectionArgs,
                     null);
 
@@ -96,16 +96,16 @@ class BatchRepository {
             cursor = resolver.query(
                     downloadsUriProvider.getAllDownloadsUri(),
                     null,
-                    COLUMN_BATCH_ID + " = ?",
+                    DownloadsColumns.COLUMN_BATCH_ID + " = ?",
                     selectionArgs,
                     null);
 
-            int statusColumnIndex = cursor.getColumnIndexOrThrow(COLUMN_STATUS);
+            int statusColumnIndex = cursor.getColumnIndexOrThrow(DownloadsColumns.COLUMN_STATUS);
 
             while (cursor.moveToNext()) {
                 int statusCode = cursor.getInt(statusColumnIndex);
 
-                if (Downloads.Impl.isStatusError(statusCode)) {
+                if (DownloadsStatus.isStatusError(statusCode)) {
                     return statusCode;
                 }
 
@@ -124,7 +124,7 @@ class BatchRepository {
             }
         }
 
-        return STATUS_UNKNOWN_ERROR;
+        return DownloadsStatus.STATUS_UNKNOWN_ERROR;
     }
 
     public DownloadBatch retrieveBatchFor(FileDownloadInfo download) {

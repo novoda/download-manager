@@ -27,14 +27,14 @@ public class DownloadNotifierTest {
     public void whenRemovingStaleNotificationsThenItDoesNotCrash() {
         Collection<DownloadBatch> batches = new ArrayList<>();
 
-        DownloadBatch batchQueuedForWifi = getDownloadBatchWith(Downloads.Impl.STATUS_QUEUED_FOR_WIFI);
-        DownloadBatch batchRunning = getDownloadBatchWith(Downloads.Impl.STATUS_RUNNING);
+        DownloadBatch batchQueuedForWifi = getDownloadBatchWith(DownloadsStatus.STATUS_QUEUED_FOR_WIFI);
+        DownloadBatch batchRunning = getDownloadBatchWith(DownloadsStatus.STATUS_RUNNING);
 
         batches.add(batchQueuedForWifi);
         batches.add(batchRunning);
 
         Collection<DownloadBatch> updatedBatches = new ArrayList<>();
-        DownloadBatch batchQueuedForWifiUpdated = getDownloadBatchWith(Downloads.Impl.STATUS_QUEUED_FOR_WIFI);
+        DownloadBatch batchQueuedForWifiUpdated = getDownloadBatchWith(DownloadsStatus.STATUS_QUEUED_FOR_WIFI);
         updatedBatches.add(batchQueuedForWifiUpdated);
 
         DownloadNotifier downloadNotifier = new DownloadNotifier(mockContext, mockNotificationDisplayer);

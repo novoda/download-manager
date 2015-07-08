@@ -321,7 +321,7 @@ public class DownloadService extends Service {
             for (FileDownloadInfo info : downloadBatch.getDownloads()) {
                 if (info.isDeleted()) {
                     downloadDeleter.deleteFileAndDatabaseRow(info);
-                } else if (Downloads.Impl.isStatusCancelled(info.getStatus()) || Downloads.Impl.isStatusError(info.getStatus())) {
+                } else if (DownloadsStatus.isStatusCancelled(info.getStatus()) || DownloadsStatus.isStatusError(info.getStatus())) {
                     downloadDeleter.deleteFileAndMediaReference(info);
                 } else {
                     if (downloadBatch.isDeleted()) {
@@ -359,7 +359,7 @@ public class DownloadService extends Service {
         for (FileDownloadInfo downloadInfo : downloadInfos) {
             if (downloadInfo.getTotalBytes() == -1) {
                 long totalBytes = contentLengthFetcher.fetchContentLengthFor(downloadInfo);
-                values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, totalBytes);
+                values.put(DownloadsColumns.COLUMN_TOTAL_BYTES, totalBytes);
                 getContentResolver().update(downloadInfo.getAllDownloadsUri(), values, null, null);
 
                 batchRepository.updateCurrentSize(downloadInfo.getBatchId());

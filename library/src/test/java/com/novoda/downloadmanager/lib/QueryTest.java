@@ -38,7 +38,7 @@ public class QueryTest {
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
-        assertThat(stringArgumentCaptor.getValue()).contains(Downloads.Impl.COLUMN_BATCH_ID + " IN (1,2,3)");
+        assertThat(stringArgumentCaptor.getValue()).contains(DownloadsColumns.COLUMN_BATCH_ID + " IN (1,2,3)");
     }
 
     @Test
@@ -47,7 +47,7 @@ public class QueryTest {
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
-        assertThat(stringArgumentCaptor.getValue()).doesNotContain(Downloads.Impl.COLUMN_BATCH_ID + " IN ");
+        assertThat(stringArgumentCaptor.getValue()).doesNotContain(DownloadsColumns.COLUMN_BATCH_ID + " IN ");
     }
 
     @Test

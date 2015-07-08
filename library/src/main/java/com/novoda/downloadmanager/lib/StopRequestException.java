@@ -15,8 +15,8 @@
  */
 package com.novoda.downloadmanager.lib;
 
-import static com.novoda.downloadmanager.lib.Downloads.Impl.STATUS_UNHANDLED_HTTP_CODE;
-import static com.novoda.downloadmanager.lib.Downloads.Impl.STATUS_UNHANDLED_REDIRECT;
+import static com.novoda.downloadmanager.lib.DownloadsStatus.STATUS_UNHANDLED_HTTP_CODE;
+import static com.novoda.downloadmanager.lib.DownloadsStatus.STATUS_UNHANDLED_REDIRECT;
 
 /**
  * Raised to indicate that the current request should be stopped immediately.

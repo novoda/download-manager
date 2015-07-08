@@ -158,23 +158,23 @@ public final class DownloadProvider extends ContentProvider {
 
     private static final String[] APP_READABLE_COLUMNS_ARRAY = new String[]{
             Downloads.Impl._ID,
-            Downloads.Impl.COLUMN_APP_DATA,
+            DownloadsColumns.COLUMN_APP_DATA,
             Downloads.Impl._DATA,
-            Downloads.Impl.COLUMN_MIME_TYPE,
-            Downloads.Impl.COLUMN_DESTINATION,
-            Downloads.Impl.COLUMN_CONTROL,
-            Downloads.Impl.COLUMN_STATUS,
-            Downloads.Impl.COLUMN_LAST_MODIFICATION,
-            Downloads.Impl.COLUMN_NOTIFICATION_CLASS,
-            Downloads.Impl.COLUMN_TOTAL_BYTES,
-            Downloads.Impl.COLUMN_CURRENT_BYTES,
-            Downloads.Impl.COLUMN_URI,
-            Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI,
-            Downloads.Impl.COLUMN_FILE_NAME_HINT,
-            Downloads.Impl.COLUMN_MEDIAPROVIDER_URI,
-            Downloads.Impl.COLUMN_DELETED,
-            Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS,
-            Downloads.Impl.COLUMN_BATCH_ID,
+            DownloadsColumns.COLUMN_MIME_TYPE,
+            DownloadsColumns.COLUMN_DESTINATION,
+            DownloadsColumns.COLUMN_CONTROL,
+            DownloadsColumns.COLUMN_STATUS,
+            DownloadsColumns.COLUMN_LAST_MODIFICATION,
+            DownloadsColumns.COLUMN_NOTIFICATION_CLASS,
+            DownloadsColumns.COLUMN_TOTAL_BYTES,
+            DownloadsColumns.COLUMN_CURRENT_BYTES,
+            DownloadsColumns.COLUMN_URI,
+            DownloadsColumns.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI,
+            DownloadsColumns.COLUMN_FILE_NAME_HINT,
+            DownloadsColumns.COLUMN_MEDIAPROVIDER_URI,
+            DownloadsColumns.COLUMN_DELETED,
+            DownloadsColumns.COLUMN_NOTIFICATION_EXTRAS,
+            DownloadsColumns.COLUMN_BATCH_ID,
             Downloads.Impl.Batches._ID,
             Downloads.Impl.Batches.COLUMN_STATUS,
             Downloads.Impl.Batches.COLUMN_TITLE,
@@ -196,7 +196,7 @@ public final class DownloadProvider extends ContentProvider {
 
         COLUMNS_MAP = new HashMap<>();
         COLUMNS_MAP.put(OpenableColumns.DISPLAY_NAME, Downloads.Impl.Batches.COLUMN_TITLE + " AS " + OpenableColumns.DISPLAY_NAME);
-        COLUMNS_MAP.put(OpenableColumns.SIZE, Downloads.Impl.COLUMN_TOTAL_BYTES + " AS " + OpenableColumns.SIZE);
+        COLUMNS_MAP.put(OpenableColumns.SIZE, DownloadsColumns.COLUMN_TOTAL_BYTES + " AS " + OpenableColumns.SIZE);
     }
 
     private static final List<String> DOWNLOAD_MANAGER_COLUMNS_LIST = Arrays.asList(DownloadManager.UNDERLYING_COLUMNS);
@@ -327,7 +327,7 @@ public final class DownloadProvider extends ContentProvider {
                 final String id = getDownloadIdFromUri(uri);
                 final SQLiteDatabase db = openHelper.getReadableDatabase();
                 final String mimeType = DatabaseUtils.stringForQuery(db,
-                        "SELECT " + Downloads.Impl.COLUMN_MIME_TYPE + " FROM " + Downloads.Impl.DOWNLOADS_TABLE_NAME +
+                        "SELECT " + DownloadsColumns.COLUMN_MIME_TYPE + " FROM " + Downloads.Impl.DOWNLOADS_TABLE_NAME +
                                 " WHERE " + Downloads.Impl._ID + " = ?",
                         new String[]{id});
                 if (TextUtils.isEmpty(mimeType)) {
@@ -378,14 +378,14 @@ public final class DownloadProvider extends ContentProvider {
     private Uri insertDownload(Uri uri, ContentValues values, SQLiteDatabase db, int match) {
         // copy some of the input values as it
         ContentValues filteredValues = new ContentValues();
-        copyString(Downloads.Impl.COLUMN_URI, values, filteredValues);
-        copyString(Downloads.Impl.COLUMN_APP_DATA, values, filteredValues);
-        copyBoolean(Downloads.Impl.COLUMN_NO_INTEGRITY, values, filteredValues);
-        copyString(Downloads.Impl.COLUMN_FILE_NAME_HINT, values, filteredValues);
-        copyString(Downloads.Impl.COLUMN_MIME_TYPE, values, filteredValues);
+        copyString(DownloadsColumns.COLUMN_URI, values, filteredValues);
+        copyString(DownloadsColumns.COLUMN_APP_DATA, values, filteredValues);
+        copyBoolean(DownloadsColumns.COLUMN_NO_INTEGRITY, values, filteredValues);
+        copyString(DownloadsColumns.COLUMN_FILE_NAME_HINT, values, filteredValues);
+        copyString(DownloadsColumns.COLUMN_MIME_TYPE, values, filteredValues);
 
         // validate the destination column
-        Integer dest = values.getAsInteger(Downloads.Impl.COLUMN_DESTINATION);
+        Integer dest = values.getAsInteger(DownloadsColumns.COLUMN_DESTINATION);
         if (dest != null) {
             if (getContext().checkCallingPermission(DownloadsPermission.PERMISSION_ACCESS_ADVANCED)
                     != PackageManager.PERMISSION_GRANTED
@@ -411,41 +411,41 @@ public final class DownloadProvider extends ContentProvider {
                 getContext().enforcePermission("android.permission.ACCESS_CACHE_FILESYSTEM", Binder.getCallingPid(), Binder.getCallingUid(),
                         "need ACCESS_CACHE_FILESYSTEM permission to use system cache");
             }
-            filteredValues.put(Downloads.Impl.COLUMN_DESTINATION, dest);
+            filteredValues.put(DownloadsColumns.COLUMN_DESTINATION, dest);
         }
 
         // copy the control column as is
-        copyInteger(Downloads.Impl.COLUMN_CONTROL, values, filteredValues);
+        copyInteger(DownloadsColumns.COLUMN_CONTROL, values, filteredValues);
 
         /*
          * requests coming from
          * DownloadManager.addCompletedDownload(String, String, String,
          * boolean, String, String, long) need special treatment
          */
-        if (values.getAsInteger(Downloads.Impl.COLUMN_DESTINATION) == Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
+        if (values.getAsInteger(DownloadsColumns.COLUMN_DESTINATION) == Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
             // these requests always are marked as 'completed'
-            filteredValues.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_SUCCESS);
-            filteredValues.put(Downloads.Impl.COLUMN_TOTAL_BYTES, values.getAsLong(Downloads.Impl.COLUMN_TOTAL_BYTES));
-            filteredValues.put(Downloads.Impl.COLUMN_CURRENT_BYTES, 0);
-            copyInteger(Downloads.Impl.COLUMN_MEDIA_SCANNED, values, filteredValues);
+            filteredValues.put(DownloadsColumns.COLUMN_STATUS, DownloadsStatus.STATUS_SUCCESS);
+            filteredValues.put(DownloadsColumns.COLUMN_TOTAL_BYTES, values.getAsLong(DownloadsColumns.COLUMN_TOTAL_BYTES));
+            filteredValues.put(DownloadsColumns.COLUMN_CURRENT_BYTES, 0);
+            copyInteger(DownloadsColumns.COLUMN_MEDIA_SCANNED, values, filteredValues);
             copyString(Downloads.Impl._DATA, values, filteredValues);
         } else {
-            filteredValues.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
-            filteredValues.put(Downloads.Impl.COLUMN_TOTAL_BYTES, -1);
-            filteredValues.put(Downloads.Impl.COLUMN_CURRENT_BYTES, 0);
+            filteredValues.put(DownloadsColumns.COLUMN_STATUS, DownloadsStatus.STATUS_PENDING);
+            filteredValues.put(DownloadsColumns.COLUMN_TOTAL_BYTES, -1);
+            filteredValues.put(DownloadsColumns.COLUMN_CURRENT_BYTES, 0);
         }
 
         // set lastupdate to current time
         long lastMod = systemFacade.currentTimeMillis();
-        filteredValues.put(Downloads.Impl.COLUMN_LAST_MODIFICATION, lastMod);
+        filteredValues.put(DownloadsColumns.COLUMN_LAST_MODIFICATION, lastMod);
 
         // use packagename of the caller to set the notification columns
-        String clazz = values.getAsString(Downloads.Impl.COLUMN_NOTIFICATION_CLASS);
+        String clazz = values.getAsString(DownloadsColumns.COLUMN_NOTIFICATION_CLASS);
         if (clazz != null) {
             int uid = Binder.getCallingUid();
             try {
                 if ((uid == 0) || systemFacade.userOwnsPackage(uid, getContext().getPackageName())) {
-                    filteredValues.put(Downloads.Impl.COLUMN_NOTIFICATION_CLASS, clazz);
+                    filteredValues.put(DownloadsColumns.COLUMN_NOTIFICATION_CLASS, clazz);
                 }
             } catch (NameNotFoundException ex) {
                 /* ignored for now */
@@ -453,14 +453,14 @@ public final class DownloadProvider extends ContentProvider {
         }
 
         // copy some more columns as is
-        copyString(Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS, values, filteredValues);
-        copyString(Downloads.Impl.COLUMN_COOKIE_DATA, values, filteredValues);
-        copyString(Downloads.Impl.COLUMN_USER_AGENT, values, filteredValues);
-        copyString(Downloads.Impl.COLUMN_REFERER, values, filteredValues);
+        copyString(DownloadsColumns.COLUMN_NOTIFICATION_EXTRAS, values, filteredValues);
+        copyString(DownloadsColumns.COLUMN_COOKIE_DATA, values, filteredValues);
+        copyString(DownloadsColumns.COLUMN_USER_AGENT, values, filteredValues);
+        copyString(DownloadsColumns.COLUMN_REFERER, values, filteredValues);
 
         // UID, PID columns
         if (getContext().checkCallingPermission(DownloadsPermission.PERMISSION_ACCESS_ADVANCED) == PackageManager.PERMISSION_GRANTED) {
-            copyInteger(Downloads.Impl.COLUMN_OTHER_UID, values, filteredValues);
+            copyInteger(DownloadsColumns.COLUMN_OTHER_UID, values, filteredValues);
         }
         filteredValues.put(Constants.UID, Binder.getCallingUid());
         if (Binder.getCallingUid() == 0) {
@@ -468,24 +468,24 @@ public final class DownloadProvider extends ContentProvider {
         }
 
         // is_visible_in_downloads_ui column
-        if (values.containsKey(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI)) {
-            copyBoolean(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, values, filteredValues);
+        if (values.containsKey(DownloadsColumns.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI)) {
+            copyBoolean(DownloadsColumns.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, values, filteredValues);
         } else {
             // by default, make external downloads visible in the UI
             boolean isExternal = (dest == null || dest == Downloads.Impl.DESTINATION_EXTERNAL);
-            filteredValues.put(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, isExternal);
+            filteredValues.put(DownloadsColumns.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, isExternal);
         }
 
         // public api requests and networktypes/roaming columns
-        copyInteger(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES, values, filteredValues);
-        copyBoolean(Downloads.Impl.COLUMN_ALLOW_ROAMING, values, filteredValues);
-        copyBoolean(Downloads.Impl.COLUMN_ALLOW_METERED, values, filteredValues);
+        copyInteger(DownloadsColumns.COLUMN_ALLOWED_NETWORK_TYPES, values, filteredValues);
+        copyBoolean(DownloadsColumns.COLUMN_ALLOW_ROAMING, values, filteredValues);
+        copyBoolean(DownloadsColumns.COLUMN_ALLOW_METERED, values, filteredValues);
 
-        copyInteger(Downloads.Impl.COLUMN_BATCH_ID, values, filteredValues);
+        copyInteger(DownloadsColumns.COLUMN_BATCH_ID, values, filteredValues);
 
         Log.v("initiating download with UID " + filteredValues.getAsInteger(Constants.UID));
-        if (filteredValues.containsKey(Downloads.Impl.COLUMN_OTHER_UID)) {
-            Log.v("other UID " + filteredValues.getAsInteger(Downloads.Impl.COLUMN_OTHER_UID));
+        if (filteredValues.containsKey(DownloadsColumns.COLUMN_OTHER_UID)) {
+            Log.v("other UID " + filteredValues.getAsInteger(DownloadsColumns.COLUMN_OTHER_UID));
         }
 
         long rowID = db.insert(Downloads.Impl.DOWNLOADS_TABLE_NAME, null, filteredValues);
@@ -510,7 +510,7 @@ public final class DownloadProvider extends ContentProvider {
      * Check that the file URI provided for DESTINATION_FILE_URI is valid.
      */
     private void checkFileUriDestination(ContentValues values) {
-        String fileUri = values.getAsString(Downloads.Impl.COLUMN_FILE_NAME_HINT);
+        String fileUri = values.getAsString(DownloadsColumns.COLUMN_FILE_NAME_HINT);
         if (fileUri == null) {
             throw new IllegalArgumentException(
                     "DESTINATION_FILE_URI must include a file URI under COLUMN_FILE_NAME_HINT");
@@ -555,31 +555,31 @@ public final class DownloadProvider extends ContentProvider {
         values = new ContentValues(values);
 
         // validate the destination column
-        if (values.getAsInteger(Downloads.Impl.COLUMN_DESTINATION) == Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
+        if (values.getAsInteger(DownloadsColumns.COLUMN_DESTINATION) == Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
             /* this row is inserted by
              * DownloadManager.addCompletedDownload(String, String, String, boolean, String, String, long)
              */
-            values.remove(Downloads.Impl.COLUMN_TOTAL_BYTES);
+            values.remove(DownloadsColumns.COLUMN_TOTAL_BYTES);
             values.remove(Downloads.Impl._DATA);
-            values.remove(Downloads.Impl.COLUMN_STATUS);
+            values.remove(DownloadsColumns.COLUMN_STATUS);
         }
         enforceAllowedValues(
-                values, Downloads.Impl.COLUMN_DESTINATION,
+                values, DownloadsColumns.COLUMN_DESTINATION,
                 Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE,
                 Downloads.Impl.DESTINATION_FILE_URI,
                 Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD);
 
         // remove the rest of the columns that are allowed (with any value)
-        values.remove(Downloads.Impl.COLUMN_URI);
-        values.remove(Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS);
-        values.remove(Downloads.Impl.COLUMN_BATCH_ID);
-        values.remove(Downloads.Impl.COLUMN_MIME_TYPE);
-        values.remove(Downloads.Impl.COLUMN_FILE_NAME_HINT); // checked later in insert()
-        values.remove(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES);
-        values.remove(Downloads.Impl.COLUMN_ALLOW_ROAMING);
-        values.remove(Downloads.Impl.COLUMN_ALLOW_METERED);
-        values.remove(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI);
-        values.remove(Downloads.Impl.COLUMN_MEDIA_SCANNED);
+        values.remove(DownloadsColumns.COLUMN_URI);
+        values.remove(DownloadsColumns.COLUMN_NOTIFICATION_EXTRAS);
+        values.remove(DownloadsColumns.COLUMN_BATCH_ID);
+        values.remove(DownloadsColumns.COLUMN_MIME_TYPE);
+        values.remove(DownloadsColumns.COLUMN_FILE_NAME_HINT); // checked later in insert()
+        values.remove(DownloadsColumns.COLUMN_ALLOWED_NETWORK_TYPES);
+        values.remove(DownloadsColumns.COLUMN_ALLOW_ROAMING);
+        values.remove(DownloadsColumns.COLUMN_ALLOW_METERED);
+        values.remove(DownloadsColumns.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI);
+        values.remove(DownloadsColumns.COLUMN_MEDIA_SCANNED);
         Iterator<Map.Entry<String, Object>> iterator = values.valueSet().iterator();
         while (iterator.hasNext()) {
             String key = iterator.next().getKey();
@@ -824,8 +824,8 @@ public final class DownloadProvider extends ContentProvider {
         int count;
         boolean startService = false;
 
-        if (values.containsKey(Downloads.Impl.COLUMN_DELETED)) {
-            if (values.getAsInteger(Downloads.Impl.COLUMN_DELETED) == 1) {
+        if (values.containsKey(DownloadsColumns.COLUMN_DELETED)) {
+            if (values.getAsInteger(DownloadsColumns.COLUMN_DELETED) == 1) {
                 // some rows are to be 'deleted'. need to start DownloadService.
                 startService = true;
             }
@@ -834,23 +834,23 @@ public final class DownloadProvider extends ContentProvider {
         ContentValues filteredValues;
         if (Binder.getCallingPid() != Process.myPid()) {
             filteredValues = new ContentValues();
-            copyString(Downloads.Impl.COLUMN_APP_DATA, values, filteredValues);
-            Integer i = values.getAsInteger(Downloads.Impl.COLUMN_CONTROL);
+            copyString(DownloadsColumns.COLUMN_APP_DATA, values, filteredValues);
+            Integer i = values.getAsInteger(DownloadsColumns.COLUMN_CONTROL);
             if (i != null) {
-                filteredValues.put(Downloads.Impl.COLUMN_CONTROL, i);
+                filteredValues.put(DownloadsColumns.COLUMN_CONTROL, i);
                 startService = true;
             }
 
-            copyInteger(Downloads.Impl.COLUMN_CONTROL, values, filteredValues);
-            copyString(Downloads.Impl.COLUMN_MEDIAPROVIDER_URI, values, filteredValues);
-            copyInteger(Downloads.Impl.COLUMN_DELETED, values, filteredValues);
+            copyInteger(DownloadsColumns.COLUMN_CONTROL, values, filteredValues);
+            copyString(DownloadsColumns.COLUMN_MEDIAPROVIDER_URI, values, filteredValues);
+            copyInteger(DownloadsColumns.COLUMN_DELETED, values, filteredValues);
         } else {
             filteredValues = values;
 
-            Integer status = values.getAsInteger(Downloads.Impl.COLUMN_STATUS);
-            boolean isRestart = status != null && status == Downloads.Impl.STATUS_PENDING;
+            Integer status = values.getAsInteger(DownloadsColumns.COLUMN_STATUS);
+            boolean isRestart = status != null && status == DownloadsStatus.STATUS_PENDING;
             boolean isUserBypassingSizeLimit =
-                    values.containsKey(Downloads.Impl.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
+                    values.containsKey(DownloadsColumns.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
             if (isRestart || isUserBypassingSizeLimit) {
                 startService = true;
             }
@@ -924,7 +924,7 @@ public final class DownloadProvider extends ContentProvider {
                 != PackageManager.PERMISSION_GRANTED) {
             String callingUid = String.valueOf(Binder.getCallingUid());
             selection.appendClause(
-                    Constants.UID + "= ? OR " + Downloads.Impl.COLUMN_OTHER_UID + "= ?",
+                    Constants.UID + "= ? OR " + DownloadsColumns.COLUMN_OTHER_UID + "= ?",
                     callingUid, callingUid);
         }
         return selection;
