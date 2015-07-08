@@ -3,7 +3,10 @@ package com.novoda.downloadmanager.lib;
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.annotation.IntDef;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,23 +15,43 @@ import java.util.List;
  * This class may be used to filter download manager queries.
  */
 public class Query {
-    /**
-     * Constant for use with {@link #orderBy}
-     */
-    static final int ORDER_ASCENDING = 1;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({ORDER_ASCENDING, ORDER_DESCENDING})
+    public @interface Order {
+    }
 
     /**
      * Constant for use with {@link #orderBy}
      */
-    static final int ORDER_DESCENDING = 2;
+    public static final int ORDER_ASCENDING = 1;
+
+    /**
+     * Constant for use with {@link #orderBy}
+     */
+    public static final int ORDER_DESCENDING = 2;
+
+    private static final String ORDER_BY_LIVENESS = String.format("CASE batch_status "
+                    + "WHEN %1$d THEN 1 "
+                    + "WHEN %2$d THEN 2 "
+                    + "WHEN %3$d THEN 3 "
+                    + "WHEN %4$d THEN 4 "
+                    + "WHEN %5$d THEN 5 "
+                    + "ELSE 2 "
+                    + "END",
+            Downloads.Impl.STATUS_RUNNING,
+            Downloads.Impl.STATUS_PENDING,
+            Downloads.Impl.STATUS_PAUSED_BY_APP,
+            Downloads.Impl.STATUS_BATCH_FAILED,
+            Downloads.Impl.STATUS_SUCCESS
+    );
 
     private long[] downloadIds = null;
     private long[] batchIds = null;
     private Integer statusFlags = null;
-    private String orderByColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
-    private int orderDirection = ORDER_DESCENDING;
     private boolean onlyIncludeVisibleInDownloadsUi = false;
     private String[] filterExtras;
+    private String orderString = Downloads.Impl.COLUMN_LAST_MODIFICATION + " DESC";
 
     /**
      * Include only the downloads with the given IDs.
@@ -93,22 +116,36 @@ public class Query {
      * @param direction either {@link #ORDER_ASCENDING} or {@link #ORDER_DESCENDING}
      * @return this object
      */
-    Query orderBy(String column, int direction) {
+    public Query orderBy(String column, @Order int direction) {
         if (direction != ORDER_ASCENDING && direction != ORDER_DESCENDING) {
             throw new IllegalArgumentException("Invalid direction: " + direction);
         }
 
+        String resolvedOrderColumn;
         switch (column) {
             case DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP:
-                orderByColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
+                resolvedOrderColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
                 break;
             case DownloadManager.COLUMN_TOTAL_SIZE_BYTES:
-                orderByColumn = Downloads.Impl.COLUMN_TOTAL_BYTES;
+                resolvedOrderColumn = Downloads.Impl.COLUMN_TOTAL_BYTES;
                 break;
             default:
                 throw new IllegalArgumentException("Cannot order by " + column);
         }
-        orderDirection = direction;
+
+        String orderDirection = (direction == ORDER_ASCENDING ? "ASC" : "DESC");
+        orderString = resolvedOrderColumn + " " + orderDirection;
+        return this;
+    }
+
+    /**
+     * Sorts downloads according to the 'liveness' of the download, i.e. in the order:
+     * Downloading, queued, other, paused, failed, completed
+     *
+     * @return this {@link Query}
+     */
+    public Query orderByLiveness() {
+        orderString = ORDER_BY_LIVENESS;
         return this;
     }
 
@@ -135,10 +172,8 @@ public class Query {
         selectionParts.add(Downloads.Impl.COLUMN_DELETED + " != '1'");
 
         String selection = joinStrings(" AND ", selectionParts);
-        String orderDirection = (this.orderDirection == ORDER_ASCENDING ? "ASC" : "DESC");
-        String orderBy = orderByColumn + " " + orderDirection;
 
-        return resolver.query(baseUri, projection, selection, selectionArgs, orderBy);
+        return resolver.query(baseUri, projection, selection, selectionArgs, orderString);
     }
 
     private String[] getIdsAsStringArray(long[] ids) {

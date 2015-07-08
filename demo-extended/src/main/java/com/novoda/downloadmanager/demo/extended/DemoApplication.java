@@ -3,7 +3,7 @@ package com.novoda.downloadmanager.demo.extended;
 import android.app.Application;
 import android.hardware.SensorManager;
 
-import com.novoda.downloadmanager.lib.DownloadBatch;
+import com.novoda.downloadmanager.Download;
 import com.novoda.downloadmanager.lib.DownloadClientReadyChecker;
 import com.novoda.notils.logger.simple.Log;
 
@@ -19,10 +19,10 @@ public class DemoApplication extends Application implements DownloadClientReadyC
     }
 
     @Override
-    public boolean isAllowedToDownload(DownloadBatch downloadBatch) {
+    public boolean isAllowedToDownload(Download download) {
         // Here you would add any reasons you may not want to download
         // For instance if you have some type of geo-location lock on your download capability
-        return oneRuleToBindThem.shouldWeDownload(downloadBatch);
+        return oneRuleToBindThem.shouldWeDownload(download);
     }
 
     private static final class OneRuleToBindThem {
@@ -30,8 +30,8 @@ public class DemoApplication extends Application implements DownloadClientReadyC
         /**
          * @return for our demo we expect always to return true ... unless you want to conquer the galaxy
          */
-        public boolean shouldWeDownload(DownloadBatch downloadBatch) {
-            return downloadBatch.getTotalSize() > SensorManager.GRAVITY_DEATH_STAR_I;
+        public boolean shouldWeDownload(Download download) {
+            return download.getTotalSize() > SensorManager.GRAVITY_DEATH_STAR_I;
         }
     }
 }

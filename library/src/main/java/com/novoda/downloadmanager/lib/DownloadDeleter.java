@@ -19,12 +19,12 @@ class DownloadDeleter {
         this.resolver = resolver;
     }
 
-    public void deleteFileAndDatabaseRow(DownloadInfo info) {
+    public void deleteFileAndDatabaseRow(FileDownloadInfo info) {
         deleteFileAndMediaReference(info);
         resolver.delete(info.getAllDownloadsUri(), null, null);
     }
 
-    public void deleteFileAndMediaReference(DownloadInfo info) {
+    public void deleteFileAndMediaReference(FileDownloadInfo info) {
         if (!TextUtils.isEmpty(info.getMediaProviderUri())) {
             resolver.delete(Uri.parse(info.getMediaProviderUri()), null, null);
         }
@@ -38,7 +38,7 @@ class DownloadDeleter {
         }
     }
 
-    public void cleanUpStaleDownloadsThatDisappeared(Set<Long> staleIds, Map<Long, DownloadInfo> downloads) {
+    public void cleanUpStaleDownloadsThatDisappeared(Set<Long> staleIds, Map<Long, FileDownloadInfo> downloads) {
         for (Long id : staleIds) {
             deleteDownloadLocked(id, downloads);
         }
@@ -47,8 +47,8 @@ class DownloadDeleter {
     /**
      * Removes the local copy of the info about a download.
      */
-    private void deleteDownloadLocked(long id, Map<Long, DownloadInfo> downloads) {
-        DownloadInfo info = downloads.get(id);
+    private void deleteDownloadLocked(long id, Map<Long, FileDownloadInfo> downloads) {
+        FileDownloadInfo info = downloads.get(id);
         if (info.getStatus() == Downloads.Impl.STATUS_RUNNING) {
             info.setStatus(Downloads.Impl.STATUS_CANCELED);
         }

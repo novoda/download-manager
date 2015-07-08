@@ -46,7 +46,7 @@ public class DownloadNotifierTest {
         return new DownloadBatch(
                 1,
                 new BatchInfo("", "", "", NotificationVisibility.ACTIVE_OR_COMPLETE),
-                new ArrayList<DownloadInfo>(),
+                new ArrayList<FileDownloadInfo>(),
                 status,
                 1,
                 1);
