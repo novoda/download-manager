@@ -369,10 +369,9 @@ public class DownloadService extends Service {
     }
 
     private boolean kickOffDownloadTaskIfReady(FileDownloadInfo info, DownloadBatch downloadBatch) {
-        boolean isReadyToDownload = info.isReadyToDownload(downloadBatch);
         boolean downloadIsSubmittedOrActive = info.isSubmittedOrRunning();
 
-        if (isReadyToDownload && !downloadIsSubmittedOrActive) {
+        if (!downloadIsSubmittedOrActive && info.isReadyToDownload(downloadBatch)) {
             info.startDownload(executor, storageManager, downloadNotifier, downloadsRepository);
             return true;
         }
