@@ -154,7 +154,7 @@ public final class DownloadProvider extends ContentProvider {
     /**
      * Different base URIs that could be used to access an individual download
      */
-    private final Uri[] BASE_URIS;
+    private final Uri[] baseUris;
 
     private static final String[] APP_READABLE_COLUMNS_ARRAY = new String[]{
             DownloadsColumns._ID,
@@ -221,7 +221,7 @@ public final class DownloadProvider extends ContentProvider {
     public DownloadProvider() {
         downloadsUriProvider = DownloadsUriProvider.getInstance();
 
-        BASE_URIS = new Uri[]{
+        baseUris = new Uri[]{
                 downloadsUriProvider.getContentUri(),
                 downloadsUriProvider.getAllDownloadsUri(),
                 downloadsUriProvider.getBatchesUri()
@@ -904,7 +904,7 @@ public final class DownloadProvider extends ContentProvider {
         if (uriMatch == MY_DOWNLOADS_ID || uriMatch == ALL_DOWNLOADS_ID) {
             downloadId = Long.parseLong(getDownloadIdFromUri(uri));
         }
-        for (Uri uriToNotify : BASE_URIS) {
+        for (Uri uriToNotify : baseUris) {
             if (downloadId != null) {
                 uriToNotify = ContentUris.withAppendedId(uriToNotify, downloadId);
             }
