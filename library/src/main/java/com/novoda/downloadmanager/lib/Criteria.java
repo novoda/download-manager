@@ -6,8 +6,6 @@ import java.util.List;
 
 class Criteria {
 
-    public static final Criteria ALL = new Criteria(null, null);
-
     private final String selection;
     private final String sort;
     private final String[] selectionArguments;
