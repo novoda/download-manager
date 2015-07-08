@@ -128,6 +128,7 @@ public class Criteria {
         public static class SortBuilder {
 
             private static final String ASCENDING_SORT = "ASC";
+            private static final String DESCENDING_SORT = "DESC";
 
             private final Builder builder;
             private String sort = "";
@@ -138,6 +139,11 @@ public class Criteria {
 
             public Builder ascending() {
                 this.sort += (SPACE + ASCENDING_SORT + SPACE);
+                return builder;
+            }
+
+            public Builder descending() {
+                this.sort += (SPACE + DESCENDING_SORT + SPACE);
                 return builder;
             }
 

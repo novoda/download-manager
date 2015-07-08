@@ -9,18 +9,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BatchQuery {
-    private static final BatchQuery ALL = new BatchQuery(null, null);
+    public static final BatchQuery ALL = new BatchQuery(null, null, null);
 
     private final String selection;
+    private final String sortOrder;
     private final String[] selectionArguments;
 
-    BatchQuery(String selection, String[] selectionArguments) {
+    BatchQuery(String selection, String sortOrder, String[] selectionArguments) {
         this.selection = selection;
+        this.sortOrder = sortOrder;
         this.selectionArguments = selectionArguments;
     }
 
     String getSelection() {
         return selection;
+    }
+
+    String getSortOrder() {
+        return sortOrder;
     }
 
     String[] getSelectionArguments() {
@@ -43,6 +49,16 @@ public class BatchQuery {
             criteriaIdBuilder
                     .withSelection(Downloads.Impl.Batches._ID, Criteria.Wildcard.EQUALS)
                     .withArgument(String.valueOf(id));
+            return this;
+        }
+
+        public Builder withSortAscendingBy(String sortColumn) {
+            builder.sortBy(sortColumn).ascending();
+            return this;
+        }
+
+        public Builder withSortDescendingBy(String sortColumn) {
+            builder.sortBy(sortColumn).descending();
             return this;
         }
 
@@ -147,8 +163,9 @@ public class BatchQuery {
 
             Criteria criteria = builder.build();
             String selection = criteria.getSelection();
+            String sortOrder = criteria.getSort();
             String[] selectionArguments = criteria.getSelectionArguments();
-            return new BatchQuery(selection, selectionArguments);
+            return new BatchQuery(selection, sortOrder, selectionArguments);
         }
     }
 
