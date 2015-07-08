@@ -151,11 +151,6 @@ public final class DownloadProvider extends ContentProvider {
         URI_MATCHER.addURI(AUTHORITY, DownloadsDestination.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT + "/#", PUBLIC_DOWNLOAD_ID);
     }
 
-    /**
-     * Different base URIs that could be used to access an individual download
-     */
-    private final Uri[] baseUris;
-
     private static final String[] APP_READABLE_COLUMNS_ARRAY = new String[]{
             DownloadsColumns._ID,
             DownloadsColumns.COLUMN_APP_DATA,
@@ -200,6 +195,11 @@ public final class DownloadProvider extends ContentProvider {
     }
 
     private static final List<String> DOWNLOAD_MANAGER_COLUMNS_LIST = Arrays.asList(DownloadManager.UNDERLYING_COLUMNS);
+
+    /**
+     * Different base URIs that could be used to access an individual download
+     */
+    private final Uri[] baseUris;
 
     /**
      * The database that lies underneath this content provider
