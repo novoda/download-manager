@@ -80,7 +80,8 @@ public class QueryTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void whenWeSetAnUnsupportedOrderByOnAQueryThenTheResolverIsQueriedWithTheCorrectSortOrder() {
-        new Query().orderBy(DownloadManager.COLUMN_STATUS, Query.ORDER_ASCENDING).runQuery(resolver, null, uri);
+        int anyOrder = Query.ORDER_ASCENDING;
+        new Query().orderBy(DownloadManager.COLUMN_STATUS, anyOrder).runQuery(resolver, null, uri);
         // Expecting an exception
     }
 
