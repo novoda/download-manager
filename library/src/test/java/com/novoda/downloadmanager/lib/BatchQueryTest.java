@@ -231,7 +231,7 @@ public class BatchQueryTest {
     }
 
     @Test
-    public void givenMultipleSettingStatusFilterMultipleTimesWhenTheQueryIsBuiltThenOnlyTheLastFilterIsTakenIntoConsideration() {
+    public void givenSettingStatusFilterMultipleTimesWhenTheQueryIsBuiltThenOnlyTheLastFilterIsTakenIntoConsideration() {
         BatchQuery query = new BatchQuery.Builder()
                 .withStatusFilter(DownloadManager.STATUS_PENDING)
                 .withStatusFilter(DownloadManager.STATUS_FAILED)
@@ -250,7 +250,7 @@ public class BatchQueryTest {
     }
 
     @Test
-    public void givenMultipleSettingIdFilterMultipleTimesWhenTheQueryIsBuiltThenOnlyTheLastFilterIsTakenIntoConsideration() {
+    public void givenSettingIdFilterMultipleTimesWhenTheQueryIsBuiltThenOnlyTheLastFilterIsTakenIntoConsideration() {
         int firstId = 12;
         int secondId = 13;
         BatchQuery query = new BatchQuery.Builder()
