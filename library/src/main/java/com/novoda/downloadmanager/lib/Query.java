@@ -37,7 +37,8 @@ public class Query {
                     + "WHEN %3$d THEN 3 "
                     + "WHEN %4$d THEN 4 "
                     + "WHEN %5$d THEN 5 "
-                    + "ELSE 2 END",
+                    + "ELSE 2 "
+                    + "END",
             Downloads.Impl.STATUS_RUNNING,
             Downloads.Impl.STATUS_PENDING,
             Downloads.Impl.STATUS_PAUSED_BY_APP,
