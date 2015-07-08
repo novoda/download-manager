@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -23,10 +24,10 @@ public class Query {
 
     private long[] downloadIds = null;
     private long[] batchIds = null;
-    private Integer mStatusFlags = null;
-    private String mOrderByColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
-    private int mOrderDirection = ORDER_DESCENDING;
-    private boolean mOnlyIncludeVisibleInDownloadsUi = false;
+    private Integer statusFlags = null;
+    private String orderByColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
+    private int orderDirection = ORDER_DESCENDING;
+    private boolean onlyIncludeVisibleInDownloadsUi = false;
     private String[] filterExtras;
 
     /**
@@ -66,7 +67,7 @@ public class Query {
      * @return this object
      */
     public Query setFilterByStatus(int flags) {
-        mStatusFlags = flags;
+        statusFlags = flags;
         return this;
     }
 
@@ -79,7 +80,7 @@ public class Query {
      * @return this object
      */
     public Query setOnlyIncludeVisibleInDownloadsUi(boolean value) {
-        mOnlyIncludeVisibleInDownloadsUi = value;
+        onlyIncludeVisibleInDownloadsUi = value;
         return this;
     }
 
@@ -97,14 +98,17 @@ public class Query {
             throw new IllegalArgumentException("Invalid direction: " + direction);
         }
 
-        if (column.equals(DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP)) {
-            mOrderByColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
-        } else if (column.equals(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)) {
-            mOrderByColumn = Downloads.Impl.COLUMN_TOTAL_BYTES;
-        } else {
-            throw new IllegalArgumentException("Cannot order by " + column);
+        switch (column) {
+            case DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP:
+                orderByColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
+                break;
+            case DownloadManager.COLUMN_TOTAL_SIZE_BYTES:
+                orderByColumn = Downloads.Impl.COLUMN_TOTAL_BYTES;
+                break;
+            default:
+                throw new IllegalArgumentException("Cannot order by " + column);
         }
-        mOrderDirection = direction;
+        orderDirection = direction;
         return this;
     }
 
@@ -123,7 +127,7 @@ public class Query {
         filterByExtras(selectionParts);
         filterByStatus(selectionParts);
 
-        if (mOnlyIncludeVisibleInDownloadsUi) {
+        if (onlyIncludeVisibleInDownloadsUi) {
             selectionParts.add(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI + " != '0'");
         }
 
@@ -131,8 +135,8 @@ public class Query {
         selectionParts.add(Downloads.Impl.COLUMN_DELETED + " != '1'");
 
         String selection = joinStrings(" AND ", selectionParts);
-        String orderDirection = (mOrderDirection == ORDER_ASCENDING ? "ASC" : "DESC");
-        String orderBy = mOrderByColumn + " " + orderDirection;
+        String orderDirection = (this.orderDirection == ORDER_ASCENDING ? "ASC" : "DESC");
+        String orderBy = orderByColumn + " " + orderDirection;
 
         return resolver.query(baseUri, projection, selection, selectionArgs, orderBy);
     }
@@ -141,7 +145,7 @@ public class Query {
         if (ids == null) {
             return null;
         }
-        return DownloadManager.longArrayToStringArray(ids);
+        return longArrayToStringArray(ids);
     }
 
     private void filterByDownloadIds(List<String> selectionParts) {
@@ -152,7 +156,7 @@ public class Query {
     }
 
     private void filterByBatchIds(List<String> selectionParts) {
-        if (batchIds == null) {
+        if (batchIds == null || batchIds.length == 0) {
             return;
         }
         selectionParts.add(getWhereClauseForBatchIds(batchIds));
@@ -162,19 +166,8 @@ public class Query {
      * Get a SQL WHERE clause to select a bunch of IDs.
      */
     private String getWhereClauseForBatchIds(long[] ids) {
-        StringBuilder whereClause = new StringBuilder();
-        whereClause.append("(");
-        for (int i = 0; i < ids.length; i++) {
-            if (i > 0) {
-                whereClause.append("OR ");
-            }
-            whereClause.append(Downloads.Impl.COLUMN_BATCH_ID)
-                    .append(" = ")
-                    .append(ids[i])
-                    .append(" ");
-        }
-        whereClause.append(")");
-        return whereClause.toString();
+        String[] idStrings = longArrayToStringArray(ids);
+        return Downloads.Impl.COLUMN_BATCH_ID + " IN (" + joinStrings(",", Arrays.asList(idStrings)) + ")";
     }
 
     private void filterByExtras(List<String> selectionParts) {
@@ -189,33 +182,34 @@ public class Query {
     }
 
     private void filterByStatus(List<String> selectionParts) {
-        if (mStatusFlags == null) {
+        if (statusFlags == null) {
             return;
         }
 
         List<String> parts = new ArrayList<>();
-        if ((mStatusFlags & DownloadManager.STATUS_PENDING) != 0) {
+        if ((statusFlags & DownloadManager.STATUS_PENDING) != 0) {
             parts.add(statusClause("=", Downloads.Impl.STATUS_PENDING));
         }
-        if ((mStatusFlags & DownloadManager.STATUS_RUNNING) != 0) {
+        if ((statusFlags & DownloadManager.STATUS_RUNNING) != 0) {
             parts.add(statusClause("=", Downloads.Impl.STATUS_RUNNING));
         }
-        if ((mStatusFlags & DownloadManager.STATUS_PAUSED) != 0) {
+        if ((statusFlags & DownloadManager.STATUS_PAUSED) != 0) {
             parts.add(statusClause("=", Downloads.Impl.STATUS_PAUSED_BY_APP));
             parts.add(statusClause("=", Downloads.Impl.STATUS_WAITING_TO_RETRY));
             parts.add(statusClause("=", Downloads.Impl.STATUS_WAITING_FOR_NETWORK));
             parts.add(statusClause("=", Downloads.Impl.STATUS_QUEUED_FOR_WIFI));
         }
-        if ((mStatusFlags & DownloadManager.STATUS_SUCCESSFUL) != 0) {
+        if ((statusFlags & DownloadManager.STATUS_SUCCESSFUL) != 0) {
             parts.add(statusClause("=", Downloads.Impl.STATUS_SUCCESS));
         }
-        if ((mStatusFlags & DownloadManager.STATUS_FAILED) != 0) {
+        if ((statusFlags & DownloadManager.STATUS_FAILED) != 0) {
             parts.add("(" + statusClause(">=", 400) + " AND " + statusClause("<", 600) + ")");
         }
         selectionParts.add(joinStrings(" OR ", parts));
     }
 
-    private String joinStrings(String joiner, Iterable<String> parts) {
+    // copied from AOSP for testability
+    private static String joinStrings(String joiner, Iterable<String> parts) {
         StringBuilder builder = new StringBuilder();
         boolean first = true;
         for (String part : parts) {
@@ -226,6 +220,14 @@ public class Query {
             first = false;
         }
         return builder.toString();
+    }
+
+    private static String[] longArrayToStringArray(long[] longs) {
+        String[] strings = new String[longs.length];
+        for (int i = 0; i < longs.length; i++) {
+            strings[i] = Long.toString(longs[i]);
+        }
+        return strings;
     }
 
     private String extrasClause(String extra) {

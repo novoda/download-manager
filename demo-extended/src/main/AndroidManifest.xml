@@ -21,6 +21,18 @@
       </intent-filter>
     </activity>
 
+    <activity
+      android:name="com.novoda.downloadmanager.demo.extended.pause_resume.PauseResumeActivity"
+      android:label="@string/pause_resume_activty_title" />
+
+    <activity
+      android:name="com.novoda.downloadmanager.demo.extended.delete.DeleteActivity"
+      android:label="@string/delete_activty_title" />
+
+    <activity
+      android:name="com.novoda.downloadmanager.demo.extended.batches.BatchesActivity"
+      android:label="@string/batches_activty_title" />
+
     <meta-data
       android:name="com.novoda.downloadmanager.MaxConcurrentDownloads"
       android:value="@integer/max_concurrent_downloads" />

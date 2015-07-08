@@ -1,4 +1,37 @@
-0.0.12
+0.1.3
+-------
+
+Incorrect DownloadBatch passed to rule checker #71 
+splits demos #69
+batch id query error #67
+batch deletion bug #62
+replaces data structures #60
+
+0.1.2
+-------
+
+Fix bug batch deletion
+
+0.1.1
+-------
+
+Adds download batch pausing and resuming
+Adds download batch deletion
+Adds current and total size to batches
+
+0.1.0
+-------
+
+Broadcast batch completion events #47
+Optimisation - Get full batch size in one query #49
+Optimisation - Removes unnecessary full loop #50
+
+0.0.14
+-------
+
+Adds the CollatedDownloadInfo to the downloadrulecheck (means you can check the total size of the batch in the can download check!)
+
+0.0.13
 -------
 
 BUG FIX - Queues all downloading tasks when the downloads cannot continue

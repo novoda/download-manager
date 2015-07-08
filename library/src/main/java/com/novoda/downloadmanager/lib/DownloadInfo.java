@@ -25,123 +25,11 @@ import java.util.concurrent.Future;
  * Stores information about an individual download.
  */
 class DownloadInfo {
+
     public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
     private static final int UNKNOWN_BYTES = -1;
 
-    // TODO: move towards these in-memory objects being sources of truth, and
-
-    // periodically pushing to provider.
-
-    public static class Reader {
-        private ContentResolver mResolver;
-        private Cursor mCursor;
-
-        public Reader(ContentResolver resolver, Cursor cursor) {
-            mResolver = resolver;
-            mCursor = cursor;
-        }
-
-        public DownloadInfo newDownloadInfo(
-                Context context,
-                SystemFacade systemFacade,
-                StorageManager storageManager,
-                DownloadNotifier notifier,
-                DownloadClientReadyChecker downloadClientReadyChecker) {
-            RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
-            ContentValues contentValues = new ContentValues();
-            DownloadInfo info = new DownloadInfo(
-                    context,
-                    systemFacade,
-                    storageManager,
-                    notifier,
-                    randomNumberGenerator,
-                    downloadClientReadyChecker,
-                    contentValues);
-            updateFromDatabase(info);
-            readRequestHeaders(info);
-
-            return info;
-        }
-
-        public void updateFromDatabase(DownloadInfo info) {
-            info.mId = getLong(Downloads.Impl._ID);
-            info.mUri = getString(Downloads.Impl.COLUMN_URI);
-            info.mScannable = getInt(Downloads.Impl.COLUMN_MEDIA_SCANNED) == 1;
-            info.mNoIntegrity = getInt(Downloads.Impl.COLUMN_NO_INTEGRITY) == 1;
-            info.mHint = getString(Downloads.Impl.COLUMN_FILE_NAME_HINT);
-            info.mFileName = getString(Downloads.Impl._DATA);
-            info.mMimeType = getString(Downloads.Impl.COLUMN_MIME_TYPE);
-            info.mDestination = getInt(Downloads.Impl.COLUMN_DESTINATION);
-            info.mStatus = getInt(Downloads.Impl.COLUMN_STATUS);
-            info.mNumFailed = getInt(Downloads.Impl.COLUMN_FAILED_CONNECTIONS);
-            int retryRedirect = getInt(Constants.RETRY_AFTER_X_REDIRECT_COUNT);
-            info.mRetryAfter = retryRedirect & 0xfffffff;
-            info.mLastMod = getLong(Downloads.Impl.COLUMN_LAST_MODIFICATION);
-            info.mClass = getString(Downloads.Impl.COLUMN_NOTIFICATION_CLASS);
-            info.mExtras = getString(Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS);
-            info.mCookies = getString(Downloads.Impl.COLUMN_COOKIE_DATA);
-            info.mUserAgent = getString(Downloads.Impl.COLUMN_USER_AGENT);
-            info.mReferer = getString(Downloads.Impl.COLUMN_REFERER);
-            info.mTotalBytes = getLong(Downloads.Impl.COLUMN_TOTAL_BYTES);
-            info.mCurrentBytes = getLong(Downloads.Impl.COLUMN_CURRENT_BYTES);
-            info.mETag = getString(Constants.ETAG);
-            info.mUid = getInt(Constants.UID);
-            info.mMediaScanned = getInt(Constants.MEDIA_SCANNED);
-            info.mDeleted = getInt(Downloads.Impl.COLUMN_DELETED) == 1;
-            info.mMediaProviderUri = getString(Downloads.Impl.COLUMN_MEDIAPROVIDER_URI);
-            info.mAllowedNetworkTypes = getInt(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES);
-            info.mAllowRoaming = getInt(Downloads.Impl.COLUMN_ALLOW_ROAMING) != 0;
-            info.mAllowMetered = getInt(Downloads.Impl.COLUMN_ALLOW_METERED) != 0;
-            info.mBypassRecommendedSizeLimit = getInt(Downloads.Impl.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
-            info.batchId = getLong(Downloads.Impl.COLUMN_BATCH_ID);
-
-            synchronized (this) {
-                info.mControl = getInt(Downloads.Impl.COLUMN_CONTROL);
-            }
-        }
-
-        private void readRequestHeaders(DownloadInfo info) {
-            info.mRequestHeaders.clear();
-            Uri headerUri = Uri.withAppendedPath(info.getAllDownloadsUri(), Downloads.Impl.RequestHeaders.URI_SEGMENT);
-            Cursor cursor = mResolver.query(headerUri, null, null, null, null);
-            try {
-                int headerIndex =
-                        cursor.getColumnIndexOrThrow(Downloads.Impl.RequestHeaders.COLUMN_HEADER);
-                int valueIndex =
-                        cursor.getColumnIndexOrThrow(Downloads.Impl.RequestHeaders.COLUMN_VALUE);
-                for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-                    addHeader(info, cursor.getString(headerIndex), cursor.getString(valueIndex));
-                }
-            } finally {
-                cursor.close();
-            }
-
-            if (info.mCookies != null) {
-                addHeader(info, "Cookie", info.mCookies);
-            }
-            if (info.mReferer != null) {
-                addHeader(info, "Referer", info.mReferer);
-            }
-        }
-
-        private void addHeader(DownloadInfo info, String header, String value) {
-            info.mRequestHeaders.add(Pair.create(header, value));
-        }
-
-        private String getString(String column) {
-            int index = mCursor.getColumnIndexOrThrow(column);
-            String s = mCursor.getString(index);
-            return (TextUtils.isEmpty(s)) ? null : s;
-        }
-
-        private Integer getInt(String column) {
-            return mCursor.getInt(mCursor.getColumnIndexOrThrow(column));
-        }
-
-        private Long getLong(String column) {
-            return mCursor.getLong(mCursor.getColumnIndexOrThrow(column));
-        }
-    }
+    // TODO: move towards these in-memory objects being sources of truth, and periodically pushing to provider.
 
     /**
      * Constants used to indicate network state for a specific download, after
@@ -184,7 +72,7 @@ class DownloadInfo {
         /**
          * Current network is blocked for requesting application.
          */
-        BLOCKED;
+        BLOCKED
     }
 
     /**
@@ -193,53 +81,46 @@ class DownloadInfo {
      */
     public static final String EXTRA_IS_WIFI_REQUIRED = "isWifiRequired";
 
-    public long mId;
-    public String mUri;
-    /**
-     * Add to check if scannable i.e. we don't want internal files to be scanned
-     */
-    public boolean mScannable;
-    public boolean mNoIntegrity;
-    public String mHint;
-    public String mFileName;
-    public String mMimeType;
-    public int mDestination;
-    public int mVisibility;
-    public int mControl;
-    public int mStatus;
-    public int mNumFailed;
-    public int mRetryAfter;
-    public long mLastMod;
-    public String mClass;
-    public String mExtras;
-    public String mCookies;
-    public String mUserAgent;
-    public String mReferer;
-    public long mTotalBytes;
-    public long mCurrentBytes;
-    public String mETag;
-    public int mUid;
-    public int mMediaScanned;
-    public boolean mDeleted;
-    public String mMediaProviderUri;
-    public int mAllowedNetworkTypes;
-    public boolean mAllowRoaming;
-    public boolean mAllowMetered;
-    public int mBypassRecommendedSizeLimit;
-    public long batchId;
-
-    private List<Pair<String, String>> mRequestHeaders = new ArrayList<Pair<String, String>>();
+    private long id;
+    private String uri;
+    private boolean scannable;
+    private boolean noIntegrity;
+    private String hint;
+    private String fileName;
+    private String mimeType;
+    private int destination;
+    private int control;
+    private int status;
+    private int numFailed;
+    private int retryAfter;
+    private long lastMod;
+    private String notificationClassName;
+    private String extras;
+    private String cookies;
+    private String userAgent;
+    private String referer;
+    private long totalBytes;
+    private long currentBytes;
+    private String eTag;
+    private int uid;
+    private int mediaScanned;
+    private boolean deleted;
+    private String mediaProviderUri;
+    private int allowedNetworkTypes;
+    private boolean allowRoaming;
+    private boolean allowMetered;
+    private int bypassRecommendedSizeLimit;
+    private long batchId;
 
     /**
      * Result of last {DownloadThread} started by
-     * {@link #isReadyToDownload(DownloadBatch)} && {@link #startDownloadIfNotActive(ExecutorService)}.
+     * {@link #isReadyToDownload(DownloadBatch)}  && {@link #startDownloadIfNotActive(ExecutorService, StorageManager, DownloadNotifier)}.
      */
-    private Future<?> mSubmittedTask;
+    private Future<?> submittedThread;
 
-    private final Context mContext;
-    private final SystemFacade mSystemFacade;
-    private final StorageManager mStorageManager;
-    private final DownloadNotifier mNotifier;
+    private final List<Pair<String, String>> requestHeaders = new ArrayList<>();
+    private final Context context;
+    private final SystemFacade systemFacade;
     private final DownloadClientReadyChecker downloadClientReadyChecker;
     private final RandomNumberGenerator randomNumberGenerator;
     private final ContentValues downloadStatusContentValues;
@@ -247,73 +128,153 @@ class DownloadInfo {
     DownloadInfo(
             Context context,
             SystemFacade systemFacade,
-            StorageManager storageManager,
-            DownloadNotifier notifier,
             RandomNumberGenerator randomNumberGenerator,
             DownloadClientReadyChecker downloadClientReadyChecker,
             ContentValues downloadStatusContentValues) {
-        this.mContext = context;
-        this.mSystemFacade = systemFacade;
-        this.mStorageManager = storageManager;
-        this.mNotifier = notifier;
+        this.context = context;
+        this.systemFacade = systemFacade;
         this.randomNumberGenerator = randomNumberGenerator;
         this.downloadClientReadyChecker = downloadClientReadyChecker;
         this.downloadStatusContentValues = downloadStatusContentValues;
     }
 
+    public long getId() {
+        return id;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public boolean isNoIntegrity() {
+        return noIntegrity;
+    }
+
+    public String getHint() {
+        return hint;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public int getDestination() {
+        return destination;
+    }
+
+    public int getControl() {
+        return control;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public int getNumFailed() {
+        return numFailed;
+    }
+
+    public String getNotificationClassName() {
+        return notificationClassName;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public long getTotalBytes() {
+        return totalBytes;
+    }
+
+    public void setTotalBytes(long totalBytes) {
+        this.totalBytes = totalBytes;
+    }
+
+    public long getCurrentBytes() {
+        return currentBytes;
+    }
+
+    public String getETag() {
+        return eTag;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public String getMediaProviderUri() {
+        return mediaProviderUri;
+    }
+
+    public long getBatchId() {
+        return batchId;
+    }
+
     public Collection<Pair<String, String>> getHeaders() {
-        return Collections.unmodifiableList(mRequestHeaders);
+        return Collections.unmodifiableList(requestHeaders);
     }
 
     public void broadcastIntentDownloadComplete(int finalStatus) {
         Intent intent = new Intent(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
         intent.setPackage(getPackageName());
-        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, mId);
+        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, id);
         intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_STATUS, finalStatus);
         intent.setData(getMyDownloadsUri());
-        if (mExtras != null) {
-            intent.putExtra(EXTRA_EXTRA, mExtras);
+        if (extras != null) {
+            intent.putExtra(EXTRA_EXTRA, extras);
         }
-        mContext.sendBroadcast(intent);
+        context.sendBroadcast(intent);
     }
 
     private String getPackageName() {
-        return mContext.getApplicationContext().getPackageName();
+        return context.getApplicationContext().getPackageName();
     }
 
     public void broadcastIntentDownloadFailedInsufficientSpace() {
         Intent intent = new Intent(DownloadManager.ACTION_DOWNLOAD_INSUFFICIENT_SPACE);
         intent.setPackage(getPackageName());
-        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, mId);
+        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, id);
         intent.setData(getMyDownloadsUri());
-        if (mExtras != null) {
-            intent.putExtra(EXTRA_EXTRA, mExtras);
+        if (extras != null) {
+            intent.putExtra(EXTRA_EXTRA, extras);
         }
-        mContext.sendBroadcast(intent);
+        context.sendBroadcast(intent);
     }
 
     /**
      * Returns the time when a download should be restarted.
      */
-    public long restartTime(long now) {
-        if (mNumFailed == 0) {
+    private long restartTime(long now) {
+        if (numFailed == 0) {
             return now;
         }
-        if (mRetryAfter > 0) {
-            return mLastMod + mRetryAfter;
+        if (retryAfter > 0) {
+            return lastMod + retryAfter;
         }
-        return mLastMod + Constants.RETRY_FIRST_DELAY * (1000 + randomNumberGenerator.generate()) * (1 << (mNumFailed - 1));
+        return lastMod + Constants.RETRY_FIRST_DELAY * (1000 + randomNumberGenerator.generate()) * (1 << (numFailed - 1));
     }
 
     /**
      * Returns whether this download should be enqueued.
      */
     private boolean isDownloadManagerReadyToDownload() {
-        if (mControl == Downloads.Impl.CONTROL_PAUSED) {
+        if (control == Downloads.Impl.CONTROL_PAUSED) {
             // the download is paused, so it's not going to start
             return false;
         }
-        switch (mStatus) {
+        switch (status) {
             case 0: // status hasn't been initialized yet, this is a new download
             case Downloads.Impl.STATUS_PENDING: // download is explicit marked as ready to start
             case Downloads.Impl.STATUS_RUNNING: // download interrupted (process killed etc) while
@@ -326,7 +287,7 @@ class DownloadInfo {
 
             case Downloads.Impl.STATUS_WAITING_TO_RETRY:
                 // download was waiting for a delayed restart
-                final long now = mSystemFacade.currentTimeMillis();
+                final long now = systemFacade.currentTimeMillis();
                 return restartTime(now) <= now;
             case Downloads.Impl.STATUS_DEVICE_NOT_FOUND_ERROR:
                 // is the media mounted?
@@ -342,24 +303,24 @@ class DownloadInfo {
      * Returns whether this download is allowed to use the network.
      */
     public NetworkState checkCanUseNetwork() {
-        final NetworkInfo info = mSystemFacade.getActiveNetworkInfo();
+        final NetworkInfo info = systemFacade.getActiveNetworkInfo();
         if (info == null || !info.isConnected()) {
             return NetworkState.NO_CONNECTION;
         }
         if (NetworkInfo.DetailedState.BLOCKED.equals(info.getDetailedState())) {
             return NetworkState.BLOCKED;
         }
-        if (mSystemFacade.isNetworkRoaming() && !isRoamingAllowed()) {
+        if (systemFacade.isNetworkRoaming() && !isRoamingAllowed()) {
             return NetworkState.CANNOT_USE_ROAMING;
         }
-        if (mSystemFacade.isActiveNetworkMetered() && !mAllowMetered) {
+        if (systemFacade.isActiveNetworkMetered() && !allowMetered) {
             return NetworkState.TYPE_DISALLOWED_BY_REQUESTOR;
         }
         return checkIsNetworkTypeAllowed(info.getType());
     }
 
     private boolean isRoamingAllowed() {
-        return mAllowRoaming;
+        return allowRoaming;
     }
 
     /**
@@ -369,20 +330,20 @@ class DownloadInfo {
      * @return one of the NETWORK_* constants
      */
     private NetworkState checkIsNetworkTypeAllowed(int networkType) {
-        if (mTotalBytes <= 0) {
+        if (totalBytes <= 0) {
             return NetworkState.OK; // we don't know the size yet
         }
         if (networkType == ConnectivityManager.TYPE_WIFI) {
             return NetworkState.OK; // anything goes over wifi
         }
-        Long maxBytesOverMobile = mSystemFacade.getMaxBytesOverMobile();
-        if (maxBytesOverMobile != null && mTotalBytes > maxBytesOverMobile) {
+        Long maxBytesOverMobile = systemFacade.getMaxBytesOverMobile();
+        if (maxBytesOverMobile != null && totalBytes > maxBytesOverMobile) {
             return NetworkState.UNUSABLE_DUE_TO_SIZE;
         }
-        if (mBypassRecommendedSizeLimit == 0) {
-            Long recommendedMaxBytesOverMobile = mSystemFacade.getRecommendedMaxBytesOverMobile();
+        if (bypassRecommendedSizeLimit == 0) {
+            Long recommendedMaxBytesOverMobile = systemFacade.getRecommendedMaxBytesOverMobile();
             if (recommendedMaxBytesOverMobile != null
-                    && mTotalBytes > recommendedMaxBytesOverMobile) {
+                    && totalBytes > recommendedMaxBytesOverMobile) {
                 return NetworkState.RECOMMENDED_UNUSABLE_DUE_TO_SIZE;
             }
         }
@@ -415,20 +376,20 @@ class DownloadInfo {
      * @return one of the NETWORK_* constants
      */
     private NetworkState checkSizeAllowedForNetwork(int networkType) {
-        if (mTotalBytes <= 0) {
+        if (totalBytes <= 0) {
             return NetworkState.OK; // we don't know the size yet
         }
         if (networkType == ConnectivityManager.TYPE_WIFI) {
             return NetworkState.OK; // anything goes over wifi
         }
-        Long maxBytesOverMobile = mSystemFacade.getMaxBytesOverMobile();
-        if (maxBytesOverMobile != null && mTotalBytes > maxBytesOverMobile) {
+        Long maxBytesOverMobile = systemFacade.getMaxBytesOverMobile();
+        if (maxBytesOverMobile != null && totalBytes > maxBytesOverMobile) {
             return NetworkState.UNUSABLE_DUE_TO_SIZE;
         }
-        if (mBypassRecommendedSizeLimit == 0) {
-            Long recommendedMaxBytesOverMobile = mSystemFacade.getRecommendedMaxBytesOverMobile();
+        if (bypassRecommendedSizeLimit == 0) {
+            Long recommendedMaxBytesOverMobile = systemFacade.getRecommendedMaxBytesOverMobile();
             if (recommendedMaxBytesOverMobile != null
-                    && mTotalBytes > recommendedMaxBytesOverMobile) {
+                    && totalBytes > recommendedMaxBytesOverMobile) {
                 return NetworkState.RECOMMENDED_UNUSABLE_DUE_TO_SIZE;
             }
         }
@@ -450,33 +411,34 @@ class DownloadInfo {
         }
     }
 
-    public boolean startDownloadIfNotActive(ExecutorService executor) {
+    public boolean startDownloadIfNotActive(ExecutorService executor, StorageManager storageManager, DownloadNotifier downloadNotifier) {
         synchronized (this) {
             boolean isActive;
-            if (mSubmittedTask == null || mSubmittedTask.isDone()) {
-                BatchCompletionBroadcaster batchCompletionBroadcaster = BatchCompletionBroadcaster.newInstance(mContext);
-                ContentResolver contentResolver = mContext.getContentResolver();
-                BatchRepository batchRepository = new BatchRepository(contentResolver, new DownloadDeleter(contentResolver));
-                DownloadThread downloadThread = new DownloadThread(mContext, mSystemFacade, this, mStorageManager, mNotifier,
+            if (submittedThread == null || submittedThread.isDone()) {
+                String applicationPackageName = context.getApplicationContext().getPackageName();
+                BatchCompletionBroadcaster batchCompletionBroadcaster = new BatchCompletionBroadcaster(context, applicationPackageName);
+                ContentResolver contentResolver = context.getContentResolver();
+                BatchRepository batchRepository = BatchRepository.newInstance(contentResolver, new DownloadDeleter(contentResolver));
+                DownloadThread downloadThread = new DownloadThread(context, systemFacade, this, storageManager, downloadNotifier,
                         batchCompletionBroadcaster, batchRepository);
-                mSubmittedTask = executor.submit(downloadThread);
+                submittedThread = executor.submit(downloadThread);
                 isActive = true;
             } else {
-                isActive = !mSubmittedTask.isDone();
+                isActive = !submittedThread.isDone();
             }
             return isActive;
         }
     }
 
     public boolean isActive() {
-        return mSubmittedTask != null && !mSubmittedTask.isDone();
+        return submittedThread != null && !submittedThread.isDone();
     }
 
     public void updateStatus(int status) {
-        mStatus = status;
+        setStatus(status);
         downloadStatusContentValues.clear();
-        downloadStatusContentValues.put(Downloads.Impl.COLUMN_STATUS, mStatus);
-        mContext.getContentResolver().update(getAllDownloadsUri(), downloadStatusContentValues, null, null);
+        downloadStatusContentValues.put(Downloads.Impl.COLUMN_STATUS, status);
+        context.getContentResolver().update(getAllDownloadsUri(), downloadStatusContentValues, null, null);
     }
 
     private boolean isClientReadyToDownload(DownloadBatch downloadBatch) {
@@ -504,18 +466,18 @@ class DownloadInfo {
     }
 
     public boolean isOnCache() {
-        return (mDestination == Downloads.Impl.DESTINATION_CACHE_PARTITION
-                || mDestination == Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION
-                || mDestination == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING
-                || mDestination == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
+        return (destination == Downloads.Impl.DESTINATION_CACHE_PARTITION
+                || destination == Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION
+                || destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING
+                || destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
     }
 
-    public Uri getMyDownloadsUri() {
-        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, mId);
+    private Uri getMyDownloadsUri() {
+        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, id);
     }
 
     public Uri getAllDownloadsUri() {
-        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, mId);
+        return ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id);
     }
 
     /**
@@ -526,10 +488,10 @@ class DownloadInfo {
      * {@link Long#MAX_VALUE}, then download has no future actions.
      */
     public long nextActionMillis(long now) {
-        if (Downloads.Impl.isStatusCompleted(mStatus)) {
+        if (Downloads.Impl.isStatusCompleted(status)) {
             return Long.MAX_VALUE;
         }
-        if (mStatus != Downloads.Impl.STATUS_WAITING_TO_RETRY) {
+        if (status != Downloads.Impl.STATUS_WAITING_TO_RETRY) {
             return 0;
         }
         long when = restartTime(now);
@@ -542,13 +504,13 @@ class DownloadInfo {
     /**
      * Returns whether a file should be scanned
      */
-    public boolean shouldScanFile() {
-        return (mMediaScanned == 0)
-                && (mDestination == Downloads.Impl.DESTINATION_EXTERNAL ||
-                mDestination == Downloads.Impl.DESTINATION_FILE_URI ||
-                mDestination == Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD)
-                && Downloads.Impl.isStatusSuccess(mStatus)
-                && mScannable;
+    private boolean shouldScanFile() {
+        return (mediaScanned == 0)
+                && (getDestination() == Downloads.Impl.DESTINATION_EXTERNAL ||
+                getDestination() == Downloads.Impl.DESTINATION_FILE_URI ||
+                getDestination() == Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD)
+                && Downloads.Impl.isStatusSuccess(getStatus())
+                && scannable;
     }
 
     void notifyPauseDueToSize(boolean isWifiRequired) {
@@ -557,7 +519,7 @@ class DownloadInfo {
         intent.setClassName(SizeLimitActivity.class.getPackage().getName(), SizeLimitActivity.class.getName());
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(EXTRA_IS_WIFI_REQUIRED, isWifiRequired);
-        mContext.startActivity(intent);
+        context.startActivity(intent);
     }
 
     /**
@@ -581,6 +543,117 @@ class DownloadInfo {
     }
 
     public boolean hasTotalBytes() {
-        return mTotalBytes != UNKNOWN_BYTES;
+        return totalBytes != UNKNOWN_BYTES;
+    }
+
+    private void addHeader(String header, String value) {
+        requestHeaders.add(Pair.create(header, value));
+    }
+
+    private void clearHeaders() {
+        requestHeaders.clear();
+    }
+
+    public static class Reader {
+        private final ContentResolver resolver;
+        private final Cursor cursor;
+
+        public Reader(ContentResolver resolver, Cursor cursor) {
+            this.resolver = resolver;
+            this.cursor = cursor;
+        }
+
+        public DownloadInfo newDownloadInfo(
+                Context context,
+                SystemFacade systemFacade,
+                DownloadClientReadyChecker downloadClientReadyChecker) {
+            RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
+            ContentValues contentValues = new ContentValues();
+            DownloadInfo info = new DownloadInfo(
+                    context,
+                    systemFacade,
+                    randomNumberGenerator,
+                    downloadClientReadyChecker,
+                    contentValues);
+            updateFromDatabase(info);
+            readRequestHeaders(info);
+
+            return info;
+        }
+
+        public void updateFromDatabase(DownloadInfo info) {
+            info.id = getLong(Downloads.Impl._ID);
+            info.uri = getString(Downloads.Impl.COLUMN_URI);
+            info.scannable = getInt(Downloads.Impl.COLUMN_MEDIA_SCANNED) == 1;
+            info.noIntegrity = getInt(Downloads.Impl.COLUMN_NO_INTEGRITY) == 1;
+            info.hint = getString(Downloads.Impl.COLUMN_FILE_NAME_HINT);
+            info.fileName = getString(Downloads.Impl._DATA);
+            info.mimeType = getString(Downloads.Impl.COLUMN_MIME_TYPE);
+            info.destination = getInt(Downloads.Impl.COLUMN_DESTINATION);
+            info.status = getInt(Downloads.Impl.COLUMN_STATUS);
+            info.numFailed = getInt(Downloads.Impl.COLUMN_FAILED_CONNECTIONS);
+            int retryRedirect = getInt(Constants.RETRY_AFTER_X_REDIRECT_COUNT);
+            info.retryAfter = retryRedirect & 0xfffffff;
+            info.lastMod = getLong(Downloads.Impl.COLUMN_LAST_MODIFICATION);
+            info.notificationClassName = getString(Downloads.Impl.COLUMN_NOTIFICATION_CLASS);
+            info.extras = getString(Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS);
+            info.cookies = getString(Downloads.Impl.COLUMN_COOKIE_DATA);
+            info.userAgent = getString(Downloads.Impl.COLUMN_USER_AGENT);
+            info.referer = getString(Downloads.Impl.COLUMN_REFERER);
+            info.totalBytes = getLong(Downloads.Impl.COLUMN_TOTAL_BYTES);
+            info.currentBytes = getLong(Downloads.Impl.COLUMN_CURRENT_BYTES);
+            info.eTag = getString(Constants.ETAG);
+            info.uid = getInt(Constants.UID);
+            info.mediaScanned = getInt(Constants.MEDIA_SCANNED);
+            info.deleted = getInt(Downloads.Impl.COLUMN_DELETED) == 1;
+            info.mediaProviderUri = getString(Downloads.Impl.COLUMN_MEDIAPROVIDER_URI);
+            info.allowedNetworkTypes = getInt(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES);
+            info.allowRoaming = getInt(Downloads.Impl.COLUMN_ALLOW_ROAMING) != 0;
+            info.allowMetered = getInt(Downloads.Impl.COLUMN_ALLOW_METERED) != 0;
+            info.bypassRecommendedSizeLimit = getInt(Downloads.Impl.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
+            info.batchId = getLong(Downloads.Impl.COLUMN_BATCH_ID);
+
+            synchronized (this) {
+                info.control = getInt(Downloads.Impl.COLUMN_CONTROL);
+            }
+        }
+
+        private void readRequestHeaders(DownloadInfo info) {
+            info.clearHeaders();
+            Uri headerUri = Uri.withAppendedPath(info.getAllDownloadsUri(), Downloads.Impl.RequestHeaders.URI_SEGMENT);
+            Cursor cursor = resolver.query(headerUri, null, null, null, null);
+            try {
+                int headerIndex =
+                        cursor.getColumnIndexOrThrow(Downloads.Impl.RequestHeaders.COLUMN_HEADER);
+                int valueIndex =
+                        cursor.getColumnIndexOrThrow(Downloads.Impl.RequestHeaders.COLUMN_VALUE);
+                for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                    info.addHeader(cursor.getString(headerIndex), cursor.getString(valueIndex));
+                }
+            } finally {
+                cursor.close();
+            }
+
+            if (info.cookies != null) {
+                info.addHeader("Cookie", info.cookies);
+            }
+            if (info.referer != null) {
+                info.addHeader("Referer", info.referer);
+            }
+        }
+
+        private String getString(String column) {
+            int index = cursor.getColumnIndexOrThrow(column);
+            String s = cursor.getString(index);
+            return (TextUtils.isEmpty(s)) ? null : s;
+        }
+
+        private Integer getInt(String column) {
+            return cursor.getInt(cursor.getColumnIndexOrThrow(column));
+        }
+
+        private Long getLong(String column) {
+            return cursor.getLong(cursor.getColumnIndexOrThrow(column));
+        }
     }
 }
