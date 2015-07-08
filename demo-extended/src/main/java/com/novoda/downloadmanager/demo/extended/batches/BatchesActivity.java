@@ -2,8 +2,6 @@ package com.novoda.downloadmanager.demo.extended.batches;
 
 import android.content.Intent;
 import android.database.ContentObserver;
-import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -20,7 +18,6 @@ import com.novoda.downloadmanager.demo.extended.Download;
 import com.novoda.downloadmanager.demo.extended.DownloadAdapter;
 import com.novoda.downloadmanager.demo.extended.QueryForDownloadsAsyncTask;
 import com.novoda.downloadmanager.demo.extended.QueryTimestamp;
-import com.novoda.downloadmanager.lib.BatchQuery;
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.NotificationVisibility;
 import com.novoda.downloadmanager.lib.Query;
@@ -70,9 +67,6 @@ public class BatchesActivity extends AppCompatActivity implements QueryForDownlo
                 });
 
         setupQueryingExample();
-        Cursor cursor = downloadManager.queryBatch(new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_PENDING | DownloadManager
-                .STATUS_FAILED).build());
-        DatabaseUtils.dumpCursor(cursor);
     }
 
     private void setupQueryingExample() {
