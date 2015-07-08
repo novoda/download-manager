@@ -94,7 +94,7 @@ public class DownloadManager {
     /**
      * The current size in bytes of the batch.
      */
-    public static final String COLUMN_BATCH_CURRENTL_SIZE_BYTES = Downloads.Impl.Batches.COLUMN_CURRENT_BYTES;
+    public static final String COLUMN_BATCH_CURRENT_SIZE_BYTES = Downloads.Impl.Batches.COLUMN_CURRENT_BYTES;
 
     /**
      * The extra supplied information for this download.
