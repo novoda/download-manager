@@ -1,6 +1,8 @@
 package com.novoda.downloadmanager.lib;
 
-final class DownloadsColumns {
+import android.provider.BaseColumns;
+
+final class DownloadsColumns implements BaseColumns {
 
     /**
      * The name of the column containing the URI of the data being downloaded.
