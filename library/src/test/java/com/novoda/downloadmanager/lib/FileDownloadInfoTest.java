@@ -30,7 +30,9 @@ public class FileDownloadInfoTest {
                 null,
                 null,
                 IS_READY,
-                null);
+                null,
+                mock(PublicFacingDownloadMarshaller.class)
+        );
 
         boolean isReady = fileDownloadInfo.isReadyToDownload(mock(DownloadBatch.class));
 
@@ -44,7 +46,9 @@ public class FileDownloadInfoTest {
                 null,
                 null,
                 IS_NOT_READY,
-                null);
+                null,
+                mock(PublicFacingDownloadMarshaller.class)
+        );
 
         boolean isReady = fileDownloadInfo.isReadyToDownload(mock(DownloadBatch.class));
 

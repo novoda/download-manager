@@ -13,8 +13,6 @@ import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Pair;
 
-import com.novoda.downloadmanager.Download;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -126,18 +124,20 @@ class FileDownloadInfo {
     private final DownloadClientReadyChecker downloadClientReadyChecker;
     private final RandomNumberGenerator randomNumberGenerator;
     private final ContentValues downloadStatusContentValues;
+    private final PublicFacingDownloadMarshaller downloadMarshaller;
 
     FileDownloadInfo(
             Context context,
             SystemFacade systemFacade,
             RandomNumberGenerator randomNumberGenerator,
             DownloadClientReadyChecker downloadClientReadyChecker,
-            ContentValues downloadStatusContentValues) {
+            ContentValues downloadStatusContentValues, PublicFacingDownloadMarshaller downloadMarshaller) {
         this.context = context;
         this.systemFacade = systemFacade;
         this.randomNumberGenerator = randomNumberGenerator;
         this.downloadClientReadyChecker = downloadClientReadyChecker;
         this.downloadStatusContentValues = downloadStatusContentValues;
+        this.downloadMarshaller = downloadMarshaller;
     }
 
     public long getId() {
@@ -444,11 +444,7 @@ class FileDownloadInfo {
     }
 
     private boolean isClientReadyToDownload(DownloadBatch downloadBatch) {
-        return downloadClientReadyChecker.isAllowedToDownload(marshallToDownload(downloadBatch));
-    }
-
-    private Download marshallToDownload(DownloadBatch downloadBatch) {
-        return new Download(downloadBatch.getBatchId(), downloadBatch.getCurrentSize(), downloadBatch.getTotalSize());
+        return downloadClientReadyChecker.isAllowedToDownload(downloadMarshaller.marshall(downloadBatch));
     }
 
     /**
@@ -571,12 +567,13 @@ class FileDownloadInfo {
                 DownloadClientReadyChecker downloadClientReadyChecker) {
             RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
             ContentValues contentValues = new ContentValues();
+            PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
             FileDownloadInfo info = new FileDownloadInfo(
                     context,
                     systemFacade,
                     randomNumberGenerator,
                     downloadClientReadyChecker,
-                    contentValues);
+                    contentValues, downloadMarshaller);
             updateFromDatabase(info);
             readRequestHeaders(info);
 
