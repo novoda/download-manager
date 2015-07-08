@@ -434,7 +434,7 @@ class FileDownloadInfo {
     }
 
     public boolean isActive() {
-        return submittedThread != null && !submittedThread.isDone();
+        return Downloads.Impl.isStatusSubmitted(status) || Downloads.Impl.isStatusRunning(status);
     }
 
     public void updateStatus(int status) {

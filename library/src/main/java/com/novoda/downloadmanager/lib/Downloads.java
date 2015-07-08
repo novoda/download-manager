@@ -528,6 +528,14 @@ final class Downloads {
             return status == STATUS_CANCELED;
         }
 
+        public static boolean isStatusSubmitted(int status) {
+            return status == STATUS_SUBMITTED;
+        }
+
+        public static boolean isStatusRunning(int status) {
+            return status == STATUS_RUNNING;
+        }
+
         /**
          * Returns whether the download did not start due to insufficient space
          */
@@ -586,6 +594,11 @@ final class Downloads {
          * Use isSucccess() to capture the entire category.
          */
         public static final int STATUS_SUCCESS = 200;
+
+        /**
+         * This download has been submitted to the download executor but not yet started
+         */
+        public static final int STATUS_SUBMITTED = 201;
 
         /**
          * This request couldn't be parsed. This is also used when processing
