@@ -36,6 +36,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URI;
 
+import static com.novoda.downloadmanager.lib.DownloadsStatus.*;
+
 /**
  * The download manager is a system service that handles long-running HTTP downloads. Clients may
  * request that a URI be downloaded to a particular destination file. The download manager will
@@ -59,7 +61,7 @@ public class DownloadManager {
      * An identifier for a particular download, unique across the system.  Clients use this ID to
      * make subsequent calls related to the download.
      */
-    public static final String COLUMN_ID = Downloads.Impl._ID;
+    public static final String COLUMN_ID = DownloadsColumns._ID;
 
     /**
      * The client-supplied title for this download.  This will be displayed in system notifications.
@@ -319,7 +321,7 @@ public class DownloadManager {
      * columns to request from DownloadProvider.
      */
     public static final String[] UNDERLYING_COLUMNS = new String[]{
-            Downloads.Impl._ID,
+            DownloadsColumns._ID,
             DownloadsColumns.COLUMN_DATA + " AS " + COLUMN_LOCAL_FILENAME,
             DownloadsColumns.COLUMN_MEDIAPROVIDER_URI,
             DownloadsColumns.COLUMN_DESTINATION,
@@ -731,7 +733,7 @@ public class DownloadManager {
             if (i > 0) {
                 whereClause.append("OR ");
             }
-            whereClause.append(Downloads.Impl._ID);
+            whereClause.append(DownloadsColumns._ID);
             whereClause.append(" = ? ");
         }
         whereClause.append(")");
@@ -824,7 +826,7 @@ public class DownloadManager {
             }
 
             // return content URI for cache download
-            long downloadId = getLong(getColumnIndex(Downloads.Impl._ID));
+            long downloadId = getLong(getColumnIndex(DownloadsColumns._ID));
             return ContentUris.withAppendedId(baseUri, downloadId).toString();
         }
 
