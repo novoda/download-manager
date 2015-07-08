@@ -112,4 +112,16 @@ public class DownloadsStatusTest {
         assertThat(DownloadsStatus.isStatusSuccess(600)).isFalse();
     }
 
+    @Test
+    public void whenStatusIs189ThenStatusIsSubmitted() {
+        boolean isStatusSubmitted = DownloadsStatus.isStatusSubmitted(189);
+        assertThat(isStatusSubmitted).isTrue();
+    }
+
+    @Test
+    public void whenStatusIs192ThenStatusIsRunning() {
+        boolean isStatusRunning = DownloadsStatus.isStatusRunning(192);
+        assertThat(isStatusRunning).isTrue();
+    }
+
 }
