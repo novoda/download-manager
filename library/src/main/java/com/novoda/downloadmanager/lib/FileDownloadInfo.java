@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
 /**
  * Stores information about an individual download.
@@ -111,12 +110,6 @@ class FileDownloadInfo {
     private boolean allowMetered;
     private int bypassRecommendedSizeLimit;
     private long batchId;
-
-    /**
-     * Result of last {DownloadThread} started by
-     * {@link #isReadyToDownload(DownloadBatch)}  && {@link #startDownloadIfNotActive(ExecutorService, StorageManager, DownloadNotifier)}.
-     */
-    private Future<?> submittedThread;
 
     private final List<Pair<String, String>> requestHeaders = new ArrayList<>();
     private final Context context;
@@ -421,7 +414,7 @@ class FileDownloadInfo {
         BatchRepository batchRepository = BatchRepository.newInstance(contentResolver, new DownloadDeleter(contentResolver));
         DownloadThread downloadThread = new DownloadThread(context, systemFacade, this, storageManager, downloadNotifier,
                 batchCompletionBroadcaster, batchRepository, downloadsRepository);
-        submittedThread = executor.submit(downloadThread);
+        executor.submit(downloadThread);
     }
 
     public boolean isSubmittedOrRunning() {
