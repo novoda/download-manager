@@ -126,89 +126,68 @@ public class BatchQuery {
          */
         public Builder withStatusFilter(@Status int statusFlags) {
             this.criteriaStatusBuilder = new Criteria.Builder();
-            List<Integer> statuses = buildStatusesFrom(statusFlags);
-
-            for (int status : statuses) {
-                switch (status) {
-                    case DownloadManager.STATUS_PENDING:
-                        criteriaStatusBuilder
-                                .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
-                                .withArgument(String.valueOf(Downloads.Impl.STATUS_PENDING));
-                        break;
-                    case DownloadManager.STATUS_RUNNING:
-                        criteriaStatusBuilder
-                                .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
-                                .withArgument(String.valueOf(Downloads.Impl.STATUS_RUNNING));
-                        break;
-                    case DownloadManager.STATUS_PAUSED:
-                        criteriaStatusBuilder
-                                .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
-                                .withArgument(String.valueOf(Downloads.Impl.STATUS_PAUSED_BY_APP))
-                                .or()
-                                .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
-                                .withArgument(String.valueOf(Downloads.Impl.STATUS_WAITING_TO_RETRY))
-                                .or()
-                                .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
-                                .withArgument(String.valueOf(Downloads.Impl.STATUS_WAITING_FOR_NETWORK))
-                                .or()
-                                .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
-                                .withArgument(String.valueOf(Downloads.Impl.STATUS_QUEUED_FOR_WIFI));
-                        break;
-                    case DownloadManager.STATUS_SUCCESSFUL:
-                        criteriaStatusBuilder
-                                .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
-                                .withArgument(String.valueOf(Downloads.Impl.STATUS_SUCCESS));
-                        break;
-                    case DownloadManager.STATUS_FAILED:
-                        criteriaStatusBuilder
-                                .withInnerCriteria(
-                                        new Criteria.Builder()
-                                                .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.MORE_THAN_EQUAL)
-                                                .withArgument(String.valueOf(LOW_END_FAILED_STATUS_CODE))
-                                                .and()
-                                                .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.LESS_THAN)
-                                                .withArgument(String.valueOf(HIGH_END_FAILED_STATUS_CODE))
-                                                .build());
-                        break;
-                    default:
-                        break;
-
-                }
-
-                if (isNotLastIn(statuses, status)) {
-                    criteriaStatusBuilder.or();
-                }
-            }
+            criteriaStatusBuilder.or(buildCriteriaListFrom(statusFlags));
             return this;
         }
 
         @NonNull
-        private List<Integer> buildStatusesFrom(@Status int statusFlags) {
-            List<Integer> statuses = new ArrayList<>();
+        private List<Criteria> buildCriteriaListFrom(@Status int statusFlags) {
+            List<Criteria> criteriaList = new ArrayList<>();
             if ((statusFlags & DownloadManager.STATUS_PENDING) != 0) {
-                statuses.add(DownloadManager.STATUS_PENDING);
+                Criteria pendingCriteria = new Criteria.Builder()
+                        .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
+                        .withArgument(String.valueOf(Downloads.Impl.STATUS_PENDING))
+                        .build();
+                criteriaList.add(pendingCriteria);
             }
 
             if ((statusFlags & DownloadManager.STATUS_RUNNING) != 0) {
-                statuses.add(DownloadManager.STATUS_RUNNING);
+                Criteria runningCriteria = new Criteria.Builder()
+                        .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
+                        .withArgument(String.valueOf(Downloads.Impl.STATUS_RUNNING))
+                        .build();
+                criteriaList.add(runningCriteria);
             }
 
             if ((statusFlags & DownloadManager.STATUS_PAUSED) != 0) {
-                statuses.add(DownloadManager.STATUS_PAUSED);
+                Criteria pausedCriteria = new Criteria.Builder()
+                        .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
+                        .withArgument(String.valueOf(Downloads.Impl.STATUS_PAUSED_BY_APP))
+                        .or()
+                        .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
+                        .withArgument(String.valueOf(Downloads.Impl.STATUS_WAITING_TO_RETRY))
+                        .or()
+                        .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
+                        .withArgument(String.valueOf(Downloads.Impl.STATUS_WAITING_FOR_NETWORK))
+                        .or()
+                        .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
+                        .withArgument(String.valueOf(Downloads.Impl.STATUS_QUEUED_FOR_WIFI))
+                        .build();
+                criteriaList.add(pausedCriteria);
             }
 
             if ((statusFlags & DownloadManager.STATUS_SUCCESSFUL) != 0) {
-                statuses.add(DownloadManager.STATUS_SUCCESSFUL);
+                Criteria successfulCriteria = new Criteria.Builder()
+                        .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
+                        .withArgument(String.valueOf(Downloads.Impl.STATUS_SUCCESS))
+                        .build();
+                criteriaList.add(successfulCriteria);
 
             }
             if ((statusFlags & DownloadManager.STATUS_FAILED) != 0) {
-                statuses.add(DownloadManager.STATUS_FAILED);
+                Criteria failedCriteria = new Criteria.Builder()
+                        .withInnerCriteria(
+                                new Criteria.Builder()
+                                        .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.MORE_THAN_EQUAL)
+                                        .withArgument(String.valueOf(LOW_END_FAILED_STATUS_CODE))
+                                        .and()
+                                        .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.LESS_THAN)
+                                        .withArgument(String.valueOf(HIGH_END_FAILED_STATUS_CODE))
+                                        .build())
+                        .build();
+                criteriaList.add(failedCriteria);
             }
-            return statuses;
-        }
-
-        private boolean isNotLastIn(List<Integer> statuses, int status) {
-            return statuses.lastIndexOf(status) != statuses.size() - 1;
+            return criteriaList;
         }
 
         public BatchQuery build() {

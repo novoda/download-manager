@@ -66,6 +66,21 @@ class Criteria {
             return this;
         }
 
+        public Builder or(List<Criteria> criteriaList) {
+            for (Criteria criteria : criteriaList) {
+                selectionBuilder.withSelection(criteria.getSelection());
+                argumentBuilder.withArguments(criteria.getSelectionArguments());
+                if (isNotLastIn(criteriaList, criteria)) {
+                    or();
+                }
+            }
+            return this;
+        }
+
+        private boolean isNotLastIn(List<Criteria> criteriaList, Criteria criteria) {
+            return criteriaList.indexOf(criteria) != criteriaList.size() - 1;
+        }
+
         public SortBuilder sortBy(String sortColumn) {
             return sortBuilder.sortBy(sortColumn);
 
