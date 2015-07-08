@@ -36,8 +36,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URI;
 
-import static com.novoda.downloadmanager.lib.DownloadsStatus.*;
-
 /**
  * The download manager is a system service that handles long-running HTTP downloads. Clients may
  * request that a URI be downloaded to a particular destination file. The download manager will
@@ -845,13 +843,13 @@ public class DownloadManager {
 
         private long getPausedReason(int status) {
             switch (status) {
-                case STATUS_WAITING_TO_RETRY:
+                case DownloadsStatus.STATUS_WAITING_TO_RETRY:
                     return PAUSED_WAITING_TO_RETRY;
 
-                case STATUS_WAITING_FOR_NETWORK:
+                case DownloadsStatus.STATUS_WAITING_FOR_NETWORK:
                     return PAUSED_WAITING_FOR_NETWORK;
 
-                case STATUS_QUEUED_FOR_WIFI:
+                case DownloadsStatus.STATUS_QUEUED_FOR_WIFI:
                     return PAUSED_QUEUED_FOR_WIFI;
 
                 default:
@@ -867,29 +865,29 @@ public class DownloadManager {
             }
 
             switch (status) {
-                case STATUS_FILE_ERROR:
+                case DownloadsStatus.STATUS_FILE_ERROR:
                     return ERROR_FILE_ERROR;
 
-                case STATUS_UNHANDLED_HTTP_CODE:
-                case STATUS_UNHANDLED_REDIRECT:
+                case DownloadsStatus.STATUS_UNHANDLED_HTTP_CODE:
+                case DownloadsStatus.STATUS_UNHANDLED_REDIRECT:
                     return ERROR_UNHANDLED_HTTP_CODE;
 
-                case STATUS_HTTP_DATA_ERROR:
+                case DownloadsStatus.STATUS_HTTP_DATA_ERROR:
                     return ERROR_HTTP_DATA_ERROR;
 
-                case STATUS_TOO_MANY_REDIRECTS:
+                case DownloadsStatus.STATUS_TOO_MANY_REDIRECTS:
                     return ERROR_TOO_MANY_REDIRECTS;
 
-                case STATUS_INSUFFICIENT_SPACE_ERROR:
+                case DownloadsStatus.STATUS_INSUFFICIENT_SPACE_ERROR:
                     return ERROR_INSUFFICIENT_SPACE;
 
-                case STATUS_DEVICE_NOT_FOUND_ERROR:
+                case DownloadsStatus.STATUS_DEVICE_NOT_FOUND_ERROR:
                     return ERROR_DEVICE_NOT_FOUND;
 
-                case STATUS_CANNOT_RESUME:
+                case DownloadsStatus.STATUS_CANNOT_RESUME:
                     return ERROR_CANNOT_RESUME;
 
-                case STATUS_FILE_ALREADY_EXISTS_ERROR:
+                case DownloadsStatus.STATUS_FILE_ALREADY_EXISTS_ERROR:
                     return ERROR_FILE_ALREADY_EXISTS;
 
                 default:
@@ -899,19 +897,19 @@ public class DownloadManager {
 
         private int translateStatus(int status) {
             switch (status) {
-                case STATUS_PENDING:
+                case DownloadsStatus.STATUS_PENDING:
                     return STATUS_PENDING;
 
-                case STATUS_RUNNING:
+                case DownloadsStatus.STATUS_RUNNING:
                     return STATUS_RUNNING;
 
-                case STATUS_PAUSED_BY_APP:
-                case STATUS_WAITING_TO_RETRY:
-                case STATUS_WAITING_FOR_NETWORK:
-                case STATUS_QUEUED_FOR_WIFI:
+                case DownloadsStatus.STATUS_PAUSED_BY_APP:
+                case DownloadsStatus.STATUS_WAITING_TO_RETRY:
+                case DownloadsStatus.STATUS_WAITING_FOR_NETWORK:
+                case DownloadsStatus.STATUS_QUEUED_FOR_WIFI:
                     return STATUS_PAUSED;
 
-                case STATUS_SUCCESS:
+                case DownloadsStatus.STATUS_SUCCESS:
                     return STATUS_SUCCESSFUL;
 
                 default:

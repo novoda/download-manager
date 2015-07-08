@@ -21,8 +21,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
-import static com.novoda.downloadmanager.lib.DownloadsStatus.*;
-
 /**
  * Stores information about an individual download.
  */
@@ -284,23 +282,23 @@ class FileDownloadInfo {
         }
         switch (status) {
             case 0: // status hasn't been initialized yet, this is a new download
-            case STATUS_PENDING: // download is explicit marked as ready to start
-            case STATUS_RUNNING: // download interrupted (process killed etc) while
+            case DownloadsStatus.STATUS_PENDING: // download is explicit marked as ready to start
+            case DownloadsStatus.STATUS_RUNNING: // download interrupted (process killed etc) while
                 // running, without a chance to update the database
                 return true;
 
-            case STATUS_WAITING_FOR_NETWORK:
-            case STATUS_QUEUED_FOR_WIFI:
+            case DownloadsStatus.STATUS_WAITING_FOR_NETWORK:
+            case DownloadsStatus.STATUS_QUEUED_FOR_WIFI:
                 return checkCanUseNetwork() == NetworkState.OK;
 
-            case STATUS_WAITING_TO_RETRY:
+            case DownloadsStatus.STATUS_WAITING_TO_RETRY:
                 // download was waiting for a delayed restart
                 final long now = systemFacade.currentTimeMillis();
                 return restartTime(now) <= now;
-            case STATUS_DEVICE_NOT_FOUND_ERROR:
+            case DownloadsStatus.STATUS_DEVICE_NOT_FOUND_ERROR:
                 // is the media mounted?
                 return Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
-            case STATUS_INSUFFICIENT_SPACE_ERROR:
+            case DownloadsStatus.STATUS_INSUFFICIENT_SPACE_ERROR:
                 // avoids repetition of retrying download
                 return false;
         }
@@ -539,7 +537,7 @@ class FileDownloadInfo {
             } else {
                 // TODO: increase strictness of value returned for unknown
                 // downloads; this is safe default for now.
-                return STATUS_PENDING;
+                return DownloadsStatus.STATUS_PENDING;
             }
         } finally {
             cursor.close();

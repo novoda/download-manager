@@ -33,8 +33,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.novoda.downloadmanager.lib.DownloadsDestination.*;
-
 /**
  * Manages the storage space consumed by Downloads Data dir. When space falls below
  * a threshold limit (set in resource xml files), starts cleanup of the Downloads data dir
@@ -152,18 +150,18 @@ class StorageManager {
             throw new IllegalArgumentException("path can't be null");
         }
         switch (destination) {
-            case DESTINATION_CACHE_PARTITION:
-            case DESTINATION_CACHE_PARTITION_NOROAMING:
-            case DESTINATION_CACHE_PARTITION_PURGEABLE:
+            case DownloadsDestination.DESTINATION_CACHE_PARTITION:
+            case DownloadsDestination.DESTINATION_CACHE_PARTITION_NOROAMING:
+            case DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE:
                 dir = downloadDataDir;
                 break;
-            case DESTINATION_EXTERNAL:
+            case DownloadsDestination.DESTINATION_EXTERNAL:
                 dir = externalStorageDir;
                 break;
-            case DESTINATION_SYSTEMCACHE_PARTITION:
+            case DownloadsDestination.DESTINATION_SYSTEMCACHE_PARTITION:
                 dir = systemCacheDir;
                 break;
-            case DESTINATION_FILE_URI:
+            case DownloadsDestination.DESTINATION_FILE_URI:
                 if (path.startsWith(externalStorageDir.getPath())) {
                     dir = externalStorageDir;
                 } else if (path.startsWith(downloadDataDir.getPath())) {
@@ -272,13 +270,13 @@ class StorageManager {
     File locateDestinationDirectory(String mimeType, int destination, long contentLength)
             throws StopRequestException {
         switch (destination) {
-            case DESTINATION_CACHE_PARTITION:
-            case DESTINATION_CACHE_PARTITION_PURGEABLE:
-            case DESTINATION_CACHE_PARTITION_NOROAMING:
+            case DownloadsDestination.DESTINATION_CACHE_PARTITION:
+            case DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE:
+            case DownloadsDestination.DESTINATION_CACHE_PARTITION_NOROAMING:
                 return downloadDataDir;
-            case DESTINATION_SYSTEMCACHE_PARTITION:
+            case DownloadsDestination.DESTINATION_SYSTEMCACHE_PARTITION:
                 return systemCacheDir;
-            case DESTINATION_EXTERNAL:
+            case DownloadsDestination.DESTINATION_EXTERNAL:
                 File base = new File(externalStorageDir.getPath() + Constants.DEFAULT_DL_SUBDIR);
                 if (!base.isDirectory() && !base.mkdir()) {
                     // Can't create download directory, e.g. because a file called "download"
