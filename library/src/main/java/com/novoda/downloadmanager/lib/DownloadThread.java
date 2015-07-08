@@ -46,8 +46,8 @@ import java.net.UnknownHostException;
 import java.util.Locale;
 
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
+import static com.novoda.downloadmanager.lib.DownloadsStatus.STATUS_HTTP_DATA_ERROR;
 import static com.novoda.downloadmanager.lib.FileDownloadInfo.NetworkState;
-import static com.novoda.downloadmanager.lib.Downloads.Impl.*;
 import static java.net.HttpURLConnection.*;
 
 /**
@@ -387,7 +387,7 @@ class DownloadThread implements Runnable {
                 throw new StopRequestException(HTTP_NOT_FOUND, e);
             } catch (IOException e) {
                 // Trouble with low-level sockets
-                throw new StopRequestException(DownloadsStatus.STATUS_HTTP_DATA_ERROR, e);
+                throw new StopRequestException(STATUS_HTTP_DATA_ERROR, e);
 
             } finally {
                 if (conn != null) {
@@ -411,7 +411,7 @@ class DownloadThread implements Runnable {
             try {
                 in = conn.getInputStream();
             } catch (IOException e) {
-                throw new StopRequestException(DownloadsStatus.STATUS_HTTP_DATA_ERROR, e);
+                throw new StopRequestException(STATUS_HTTP_DATA_ERROR, e);
             }
 
             try {
@@ -637,7 +637,7 @@ class DownloadThread implements Runnable {
             if (cannotResume(state)) {
                 throw new StopRequestException(DownloadsStatus.STATUS_CANNOT_RESUME, "mismatched content length; unable to resume");
             } else {
-                throw new StopRequestException(DownloadsStatus.STATUS_HTTP_DATA_ERROR, "closed socket before end of file");
+                throw new StopRequestException(STATUS_HTTP_DATA_ERROR, "closed socket before end of file");
             }
         }
     }
@@ -669,7 +669,7 @@ class DownloadThread implements Runnable {
             if (cannotResume(state)) {
                 throw new StopRequestException(DownloadsStatus.STATUS_CANNOT_RESUME, "Failed reading response: " + ex + "; unable to resume", ex);
             } else {
-                throw new StopRequestException(DownloadsStatus.STATUS_HTTP_DATA_ERROR, "Failed reading response: " + ex, ex);
+                throw new StopRequestException(STATUS_HTTP_DATA_ERROR, "Failed reading response: " + ex, ex);
             }
         }
     }
@@ -882,7 +882,7 @@ class DownloadThread implements Runnable {
             getContentResolver().update(
                     downloadsUriProvider.getAllDownloadsUri(),
                     values,
-                    DownloadsColumns.COLUMN_BATCH_ID + " = ? AND " + _ID + " <> ? ",
+                    DownloadsColumns.COLUMN_BATCH_ID + " = ? AND " + DownloadsColumns._ID + " <> ? ",
                     new String[]{String.valueOf(batchId), String.valueOf(downloadId)}
             );
         } else if (DownloadsStatus.isStatusSuccess(batchStatus)) {
