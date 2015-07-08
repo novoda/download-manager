@@ -104,7 +104,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
     private void makeCacheDownloadsInvisible(SQLiteDatabase db) {
         ContentValues values = new ContentValues();
         values.put(DownloadsColumns.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, false);
-        String cacheSelection = DownloadsColumns.COLUMN_DESTINATION + " != " + Downloads.Impl.DESTINATION_EXTERNAL;
+        String cacheSelection = DownloadsColumns.COLUMN_DESTINATION + " != " + DownloadsDestination.DESTINATION_EXTERNAL;
         db.update(DownloadsTables.DOWNLOADS_TABLE_NAME, values, cacheSelection, null);
     }
 

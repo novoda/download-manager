@@ -52,7 +52,7 @@ class DownloadDeleter {
         if (info.getStatus() == DownloadsStatus.STATUS_RUNNING) {
             info.setStatus(DownloadsStatus.STATUS_CANCELED);
         }
-        if (info.getDestination() != Downloads.Impl.DESTINATION_EXTERNAL && info.getFileName() != null) {
+        if (info.getDestination() != DownloadsDestination.DESTINATION_EXTERNAL && info.getFileName() != null) {
             Log.d("deleteDownloadLocked() deleting " + info.getFileName());
             deleteFileIfExists(info.getFileName());
         }

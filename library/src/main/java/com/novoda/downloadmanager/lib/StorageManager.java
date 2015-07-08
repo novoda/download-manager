@@ -150,18 +150,18 @@ class StorageManager {
             throw new IllegalArgumentException("path can't be null");
         }
         switch (destination) {
-            case Downloads.Impl.DESTINATION_CACHE_PARTITION:
-            case Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING:
-            case Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE:
+            case DESTINATION_CACHE_PARTITION:
+            case DESTINATION_CACHE_PARTITION_NOROAMING:
+            case DESTINATION_CACHE_PARTITION_PURGEABLE:
                 dir = downloadDataDir;
                 break;
-            case Downloads.Impl.DESTINATION_EXTERNAL:
+            case DESTINATION_EXTERNAL:
                 dir = externalStorageDir;
                 break;
-            case Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION:
+            case DESTINATION_SYSTEMCACHE_PARTITION:
                 dir = systemCacheDir;
                 break;
-            case Downloads.Impl.DESTINATION_FILE_URI:
+            case DESTINATION_FILE_URI:
                 if (path.startsWith(externalStorageDir.getPath())) {
                     dir = externalStorageDir;
                 } else if (path.startsWith(downloadDataDir.getPath())) {
@@ -188,8 +188,8 @@ class StorageManager {
         if (targetBytes == 0) {
             return;
         }
-        if (destination == Downloads.Impl.DESTINATION_FILE_URI ||
-                destination == Downloads.Impl.DESTINATION_EXTERNAL) {
+        if (destination == DownloadsDestination.DESTINATION_FILE_URI ||
+                destination == DownloadsDestination.DESTINATION_EXTERNAL) {
             if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
                 throw new StopRequestException(DownloadsStatus.STATUS_DEVICE_NOT_FOUND_ERROR, "external media not mounted");
             }
@@ -270,13 +270,13 @@ class StorageManager {
     File locateDestinationDirectory(String mimeType, int destination, long contentLength)
             throws StopRequestException {
         switch (destination) {
-            case Downloads.Impl.DESTINATION_CACHE_PARTITION:
-            case Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE:
-            case Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING:
+            case DESTINATION_CACHE_PARTITION:
+            case DESTINATION_CACHE_PARTITION_PURGEABLE:
+            case DESTINATION_CACHE_PARTITION_NOROAMING:
                 return downloadDataDir;
-            case Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION:
+            case DESTINATION_SYSTEMCACHE_PARTITION:
                 return systemCacheDir;
-            case Downloads.Impl.DESTINATION_EXTERNAL:
+            case DESTINATION_EXTERNAL:
                 File base = new File(externalStorageDir.getPath() + Constants.DEFAULT_DL_SUBDIR);
                 if (!base.isDirectory() && !base.mkdir()) {
                     // Can't create download directory, e.g. because a file called "download"
@@ -304,9 +304,9 @@ class StorageManager {
      */
     private long discardPurgeableFiles(int destination, long targetBytes) {
         Log.i("discardPurgeableFiles: destination = " + destination + ", targetBytes = " + targetBytes);
-        String destStr = (destination == Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION) ?
+        String destStr = (destination == DownloadsDestination.DESTINATION_SYSTEMCACHE_PARTITION) ?
                 String.valueOf(destination) :
-                String.valueOf(Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
+                String.valueOf(DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE);
         String[] bindArgs = new String[]{destStr};
         Cursor cursor = contentResolver.query(
                 downloadsUriProvider.getAllDownloadsUri(),

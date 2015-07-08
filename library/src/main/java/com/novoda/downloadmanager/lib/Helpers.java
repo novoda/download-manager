@@ -77,7 +77,7 @@ class Helpers {
         }
         String path;
         File base = null;
-        if (destination == Downloads.Impl.DESTINATION_FILE_URI) {
+        if (destination == DownloadsDestination.DESTINATION_FILE_URI) {
             path = Uri.parse(hint).getPath();
         } else {
             base = storageManager.locateDestinationDirectory(mimeType, destination, contentLength);
@@ -96,7 +96,7 @@ class Helpers {
         String extension = null;
         int dotIndex = filename.lastIndexOf('.');
         boolean missingExtension = dotIndex < 0 || dotIndex < filename.lastIndexOf('/');
-        if (destination == Downloads.Impl.DESTINATION_FILE_URI) {
+        if (destination == DownloadsDestination.DESTINATION_FILE_URI) {
             // Destination is explicitly set - do not change the extension
             if (missingExtension) {
                 extension = "";
@@ -264,10 +264,10 @@ class Helpers {
         String fullFilename = filename + extension;
         if (!new File(fullFilename).exists()
                 && (!recoveryDir ||
-                (destination != Downloads.Impl.DESTINATION_CACHE_PARTITION &&
-                        destination != Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION &&
-                        destination != Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE &&
-                        destination != Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING))) {
+                (destination != DownloadsDestination.DESTINATION_CACHE_PARTITION &&
+                        destination != DownloadsDestination.DESTINATION_SYSTEMCACHE_PARTITION &&
+                        destination != DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE &&
+                        destination != DownloadsDestination.DESTINATION_CACHE_PARTITION_NOROAMING))) {
             return fullFilename;
         }
         filename = filename + Constants.FILENAME_SEQUENCE_SEPARATOR;

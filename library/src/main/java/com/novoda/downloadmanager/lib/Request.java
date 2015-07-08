@@ -407,12 +407,12 @@ public class Request {
         values.put(DownloadsColumns.COLUMN_URI, uri.toString());
 
         if (destinationUri != null) {
-            values.put(DownloadsColumns.COLUMN_DESTINATION, Downloads.Impl.DESTINATION_FILE_URI);
+            values.put(DownloadsColumns.COLUMN_DESTINATION, DownloadsDestination.DESTINATION_FILE_URI);
             values.put(DownloadsColumns.COLUMN_FILE_NAME_HINT, destinationUri.toString());
         } else {
             values.put(
                     DownloadsColumns.COLUMN_DESTINATION,
-                    Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
+                    DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE);
         }
         // is the file supposed to be media-scannable?
         values.put(DownloadsColumns.COLUMN_MEDIA_SCANNED, (scannable) ? SCANNABLE_VALUE_YES : SCANNABLE_VALUE_NO);

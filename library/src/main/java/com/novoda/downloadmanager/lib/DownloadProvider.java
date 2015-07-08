@@ -389,9 +389,9 @@ public final class DownloadProvider extends ContentProvider {
         if (dest != null) {
             if (getContext().checkCallingPermission(DownloadsPermission.PERMISSION_ACCESS_ADVANCED)
                     != PackageManager.PERMISSION_GRANTED
-                    && (dest == Downloads.Impl.DESTINATION_CACHE_PARTITION
-                    || dest == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING
-                    || dest == Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION)) {
+                    && (dest == DownloadsDestination.DESTINATION_CACHE_PARTITION
+                    || dest == DownloadsDestination.DESTINATION_CACHE_PARTITION_NOROAMING
+                    || dest == DownloadsDestination.DESTINATION_SYSTEMCACHE_PARTITION)) {
                 throw new SecurityException(
                         "setting destination to : " + dest +
                                 " not allowed, unless PERMISSION_ACCESS_ADVANCED is granted");
@@ -400,14 +400,14 @@ public final class DownloadProvider extends ContentProvider {
             // switch to non-purgeable download
             boolean hasNonPurgeablePermission =
                     getContext().checkCallingPermission(DownloadsPermission.PERMISSION_CACHE_NON_PURGEABLE) == PackageManager.PERMISSION_GRANTED;
-            if (dest == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE && hasNonPurgeablePermission) {
-                dest = Downloads.Impl.DESTINATION_CACHE_PARTITION;
+            if (dest == DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE && hasNonPurgeablePermission) {
+                dest = DownloadsDestination.DESTINATION_CACHE_PARTITION;
             }
-            if (dest == Downloads.Impl.DESTINATION_FILE_URI) {
+            if (dest == DownloadsDestination.DESTINATION_FILE_URI) {
                 getContext().enforcePermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, Binder.getCallingPid(), Binder.getCallingUid(),
                         "need WRITE_EXTERNAL_STORAGE permission to use DESTINATION_FILE_URI");
                 checkFileUriDestination(values);
-            } else if (dest == Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION) {
+            } else if (dest == DownloadsDestination.DESTINATION_SYSTEMCACHE_PARTITION) {
                 getContext().enforcePermission("android.permission.ACCESS_CACHE_FILESYSTEM", Binder.getCallingPid(), Binder.getCallingUid(),
                         "need ACCESS_CACHE_FILESYSTEM permission to use system cache");
             }
@@ -422,7 +422,7 @@ public final class DownloadProvider extends ContentProvider {
          * DownloadManager.addCompletedDownload(String, String, String,
          * boolean, String, String, long) need special treatment
          */
-        if (values.getAsInteger(DownloadsColumns.COLUMN_DESTINATION) == Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
+        if (values.getAsInteger(DownloadsColumns.COLUMN_DESTINATION) == DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
             // these requests always are marked as 'completed'
             filteredValues.put(DownloadsColumns.COLUMN_STATUS, DownloadsStatus.STATUS_SUCCESS);
             filteredValues.put(DownloadsColumns.COLUMN_TOTAL_BYTES, values.getAsLong(DownloadsColumns.COLUMN_TOTAL_BYTES));
@@ -472,7 +472,7 @@ public final class DownloadProvider extends ContentProvider {
             copyBoolean(DownloadsColumns.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, values, filteredValues);
         } else {
             // by default, make external downloads visible in the UI
-            boolean isExternal = (dest == null || dest == Downloads.Impl.DESTINATION_EXTERNAL);
+            boolean isExternal = (dest == null || dest == DownloadsDestination.DESTINATION_EXTERNAL);
             filteredValues.put(DownloadsColumns.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, isExternal);
         }
 
@@ -555,7 +555,7 @@ public final class DownloadProvider extends ContentProvider {
         values = new ContentValues(values);
 
         // validate the destination column
-        if (values.getAsInteger(DownloadsColumns.COLUMN_DESTINATION) == Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
+        if (values.getAsInteger(DownloadsColumns.COLUMN_DESTINATION) == DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
             /* this row is inserted by
              * DownloadManager.addCompletedDownload(String, String, String, boolean, String, String, long)
              */
@@ -565,9 +565,9 @@ public final class DownloadProvider extends ContentProvider {
         }
         enforceAllowedValues(
                 values, DownloadsColumns.COLUMN_DESTINATION,
-                Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE,
-                Downloads.Impl.DESTINATION_FILE_URI,
-                Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD);
+                DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE,
+                DownloadsDestination.DESTINATION_FILE_URI,
+                DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD);
 
         // remove the rest of the columns that are allowed (with any value)
         values.remove(DownloadsColumns.COLUMN_URI);

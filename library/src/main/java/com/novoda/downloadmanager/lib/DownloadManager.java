@@ -528,10 +528,10 @@ public class DownloadManager {
                     // TODO: if we ever add API to DownloadManager to let the caller specify
                     // non-external storage for a downloaded file, then the following code
                     // should also check for that destination.
-                    if (destination == Downloads.Impl.DESTINATION_CACHE_PARTITION ||
-                            destination == Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION ||
-                            destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING ||
-                            destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE) {
+                    if (destination == DownloadsDestination.DESTINATION_CACHE_PARTITION ||
+                            destination == DownloadsDestination.DESTINATION_SYSTEMCACHE_PARTITION ||
+                            destination == DownloadsDestination.DESTINATION_CACHE_PARTITION_NOROAMING ||
+                            destination == DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE) {
                         // return private uri
                         return ContentUris.withAppendedId(downloadsUriProvider.getContentUri(), id);
                     } else {
@@ -693,7 +693,7 @@ public class DownloadManager {
                 .setNotificationVisibility((showNotification) ? NotificationVisibility.ONLY_WHEN_COMPLETE : NotificationVisibility.HIDDEN);
 
         ContentValues values = request.toContentValues();
-        values.put(DownloadsColumns.COLUMN_DESTINATION, Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD);
+        values.put(DownloadsColumns.COLUMN_DESTINATION, DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD);
         values.put(DownloadsColumns.COLUMN_DATA, path);
         values.put(DownloadsColumns.COLUMN_STATUS, DownloadsStatus.STATUS_SUCCESS);
         values.put(DownloadsColumns.COLUMN_TOTAL_BYTES, length);
@@ -813,9 +813,9 @@ public class DownloadManager {
 
         private String getLocalUri() {
             long destinationType = getLong(getColumnIndex(DownloadsColumns.COLUMN_DESTINATION));
-            if (destinationType == Downloads.Impl.DESTINATION_FILE_URI
-                    || destinationType == Downloads.Impl.DESTINATION_EXTERNAL
-                    || destinationType == Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
+            if (destinationType == DownloadsDestination.DESTINATION_FILE_URI
+                    || destinationType == DownloadsDestination.DESTINATION_EXTERNAL
+                    || destinationType == DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
                 String localPath = getString(getColumnIndex(COLUMN_LOCAL_FILENAME));
                 if (localPath == null) {
                     return null;

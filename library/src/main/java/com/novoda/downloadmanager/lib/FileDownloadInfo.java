@@ -468,10 +468,10 @@ class FileDownloadInfo {
     }
 
     public boolean isOnCache() {
-        return (destination == Downloads.Impl.DESTINATION_CACHE_PARTITION
-                || destination == Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION
-                || destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING
-                || destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
+        return (destination == DownloadsDestination.DESTINATION_CACHE_PARTITION
+                || destination == DownloadsDestination.DESTINATION_SYSTEMCACHE_PARTITION
+                || destination == DownloadsDestination.DESTINATION_CACHE_PARTITION_NOROAMING
+                || destination == DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE);
     }
 
     public Uri getMyDownloadsUri() {
@@ -508,9 +508,9 @@ class FileDownloadInfo {
      */
     private boolean shouldScanFile() {
         return (mediaScanned == 0)
-                && (getDestination() == Downloads.Impl.DESTINATION_EXTERNAL ||
-                getDestination() == Downloads.Impl.DESTINATION_FILE_URI ||
-                getDestination() == Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD)
+                && (getDestination() == DownloadsDestination.DESTINATION_EXTERNAL ||
+                getDestination() == DownloadsDestination.DESTINATION_FILE_URI ||
+                getDestination() == DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD)
                 && DownloadsStatus.isStatusSuccess(getStatus())
                 && scannable;
     }
