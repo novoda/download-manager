@@ -1,5 +1,15 @@
 package com.novoda.downloadmanager.lib;
 
+/**
+ * Lists the states that the download manager can set on a download
+ * to notify applications of the download progress.
+ * The codes follow the HTTP families:<br>
+ * 1xx: informational<br>
+ * 2xx: success<br>
+ * 3xx: redirects (not used by the download manager)<br>
+ * 4xx: client errors<br>
+ * 5xx: server errors
+ */
 final class DownloadsStatus {
 
     /**
