@@ -125,8 +125,8 @@ public class BatchQuery {
          * @return {@link BatchQuery.Builder}
          */
         public Builder withStatusFilter(@Status int statusFlags) {
-            this.criteriaStatusBuilder = new Criteria.Builder();
-            criteriaStatusBuilder.or(buildCriteriaListFrom(statusFlags));
+            this.criteriaStatusBuilder = new Criteria.Builder()
+                    .or(buildCriteriaListFrom(statusFlags));
             return this;
         }
 
