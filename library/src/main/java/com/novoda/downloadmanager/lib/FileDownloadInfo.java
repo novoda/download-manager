@@ -13,6 +13,8 @@ import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Pair;
 
+import com.novoda.downloadmanager.Download;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;

@@ -3,7 +3,7 @@ package com.novoda.downloadmanager.demo.extended;
 import android.app.Application;
 import android.hardware.SensorManager;
 
-import com.novoda.downloadmanager.lib.Download;
+import com.novoda.downloadmanager.Download;
 import com.novoda.downloadmanager.lib.DownloadClientReadyChecker;
 import com.novoda.notils.logger.simple.Log;
 

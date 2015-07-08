@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager.lib;
 
+import com.novoda.downloadmanager.Download;
+
 import org.junit.Test;
 
 import static org.fest.assertions.api.Assertions.assertThat;

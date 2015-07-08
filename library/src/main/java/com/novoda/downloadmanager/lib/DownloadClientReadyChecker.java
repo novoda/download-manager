@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager.lib;
 
+import com.novoda.downloadmanager.Download;
+
 public interface DownloadClientReadyChecker {
     Ready READY = new Ready();
 
