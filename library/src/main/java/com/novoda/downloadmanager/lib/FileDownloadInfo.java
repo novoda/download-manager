@@ -174,6 +174,7 @@ class FileDownloadInfo {
     }
 
     public void setStatus(int status) {
+        // TODO remove me!
         this.status = status;
     }
 
