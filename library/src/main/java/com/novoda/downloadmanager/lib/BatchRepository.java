@@ -217,6 +217,6 @@ class BatchRepository {
     }
 
     public Cursor retrieveFor(BatchQuery query) {
-        return resolver.query(BATCH_CONTENT_URI, null, query.getSelection(), query.getSelectionArguments(), query.getSortOrder());
+        return resolver.query(batchContentUri, null, query.getSelection(), query.getSelectionArguments(), query.getSortOrder());
     }
 }
