@@ -35,7 +35,7 @@ public class BatchRepositoryTest {
     @Mock
     private DownloadDeleter mockDownloadDeleter;
     @Mock
-    private FileDownloadInfo fileDownloadInfo;
+    private FileDownloadInfo mockFileDownloadInfo;
     @Mock
     private FileDownloadInfo mockDownloadInfoId1;
     @Mock
@@ -45,7 +45,7 @@ public class BatchRepositoryTest {
     @Mock
     private FileDownloadInfo mockDownloadInfoId4;
     @Mock
-    private Downloads mockDownloads;
+    private DownloadsUriProvider mockDownloadsUriProvider;
     @Mock
     private Uri mockUri;
 
@@ -55,10 +55,10 @@ public class BatchRepositoryTest {
     public void setUp() {
         initMocks(this);
 
-        when(mockDownloads.getBatchContentUri()).thenReturn(mockUri);
-        when(mockDownloads.getAllDownloadsContentUri()).thenReturn(mockUri);
+        when(mockDownloadsUriProvider.getBatchContentUri()).thenReturn(mockUri);
+        when(mockDownloadsUriProvider.getAllDownloadsContentUri()).thenReturn(mockUri);
 
-        this.batchRepository = new BatchRepository(mockContentResolver, mockDownloadDeleter, mockDownloads);
+        this.batchRepository = new BatchRepository(mockContentResolver, mockDownloadDeleter, mockDownloadsUriProvider);
 
         when(mockDownloadInfoId1.getBatchId()).thenReturn(1L);
         when(mockDownloadInfoId2.getBatchId()).thenReturn(2L);
@@ -69,11 +69,11 @@ public class BatchRepositoryTest {
     @Test
     public void givenADownloadInfoWhenRetrievingTheBatchThenTheBatchIdsMatch() {
         long expectedBatchId = 100L;
-        when(fileDownloadInfo.getBatchId()).thenReturn(expectedBatchId);
+        when(mockFileDownloadInfo.getBatchId()).thenReturn(expectedBatchId);
         Cursor batchCursor = new MockCursorWithBatchIds(Arrays.asList(expectedBatchId));
         when(mockContentResolver.query(any(Uri.class), any(String[].class), anyString(), any(String[].class), anyString())).thenReturn(batchCursor);
 
-        DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(fileDownloadInfo);
+        DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(mockFileDownloadInfo);
 
         assertThat(downloadBatch.getBatchId()).isEqualTo(expectedBatchId);
     }
@@ -81,11 +81,11 @@ public class BatchRepositoryTest {
     @Test
     public void givenADownloadInfoAndNoLinkedBatchesWhenRetrievingTheBatchThenTheBatchIsDeleted() {
         long batchIdToBeMissing = 100L;
-        when(fileDownloadInfo.getBatchId()).thenReturn(batchIdToBeMissing);
+        when(mockFileDownloadInfo.getBatchId()).thenReturn(batchIdToBeMissing);
         Cursor emptyBatchCursor = mock(Cursor.class);
         when(mockContentResolver.query(any(Uri.class), any(String[].class), anyString(), any(String[].class), anyString())).thenReturn(emptyBatchCursor);
 
-        DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(fileDownloadInfo);
+        DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(mockFileDownloadInfo);
 
         assertThat(downloadBatch).isEqualTo(DownloadBatch.DELETED);
     }
@@ -93,47 +93,47 @@ public class BatchRepositoryTest {
     @Test
     public void whenThereAreFourBatchesMarkedToBeDeletedAndFourBatchesThenRemoveAll() {
         Cursor cursorWithDownloadsIdToBeDeleted = new MockCursorWithBatchIds(Arrays.asList(1L, 2L, 3L, 4L));
-        when(mockContentResolver.query(mockDownloads.getBatchContentUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null)).thenReturn(cursorWithDownloadsIdToBeDeleted);
+        when(mockContentResolver.query(mockDownloadsUriProvider.getBatchContentUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null)).thenReturn(cursorWithDownloadsIdToBeDeleted);
         when(mockContentResolver.query(any(Uri.class), any(String[].class), any(String.class), any(String[].class), any(String.class))).thenReturn(cursorWithDownloadsIdToBeDeleted);
 
         Collection<FileDownloadInfo> downloads = Arrays.asList(mockDownloadInfoId1, mockDownloadInfoId2, mockDownloadInfoId3, mockDownloadInfoId4);
         batchRepository.deleteMarkedBatchesFor(downloads);
 
-        verify(mockContentResolver).query(mockDownloads.getBatchContentUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null);
+        verify(mockContentResolver).query(mockDownloadsUriProvider.getBatchContentUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null);
         verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockDownloadInfoId1);
         verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockDownloadInfoId2);
         verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockDownloadInfoId3);
         verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockDownloadInfoId4);
-        verify(mockContentResolver).delete(this.mockDownloads.getBatchContentUri(), _ID + " IN (?)", new String[]{"1, 2, 3, 4"});
+        verify(mockContentResolver).delete(this.mockDownloadsUriProvider.getBatchContentUri(), _ID + " IN (?)", new String[]{"1, 2, 3, 4"});
     }
 
     @Test
     public void whenThereAreTwoBatchesMarkedToBeDeletedAndFourBatchesThenRemoveAll() {
         Cursor cursorWithDownloadsIdToBeDeleted = new MockCursorWithBatchIds(Arrays.asList(2L, 3L));
-        when(mockContentResolver.query(mockDownloads.getBatchContentUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null)).thenReturn(cursorWithDownloadsIdToBeDeleted);
+        when(mockContentResolver.query(mockDownloadsUriProvider.getBatchContentUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null)).thenReturn(cursorWithDownloadsIdToBeDeleted);
         when(mockContentResolver.query(any(Uri.class), any(String[].class), any(String.class), any(String[].class), any(String.class))).thenReturn(cursorWithDownloadsIdToBeDeleted);
 
         Collection<FileDownloadInfo> downloads = Arrays.asList(mockDownloadInfoId1, mockDownloadInfoId2, mockDownloadInfoId3, mockDownloadInfoId4);
         batchRepository.deleteMarkedBatchesFor(downloads);
 
-        verify(mockContentResolver).query(mockDownloads.getBatchContentUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null);
+        verify(mockContentResolver).query(mockDownloadsUriProvider.getBatchContentUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null);
         verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockDownloadInfoId1);
         verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockDownloadInfoId2);
         verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockDownloadInfoId3);
         verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockDownloadInfoId4);
-        verify(mockContentResolver).delete(this.mockDownloads.getBatchContentUri(), _ID + " IN (?)", new String[]{"2, 3"});
+        verify(mockContentResolver).delete(this.mockDownloadsUriProvider.getBatchContentUri(), _ID + " IN (?)", new String[]{"2, 3"});
     }
 
     @Test
     public void whenThereNoBatchesMarkedToBeDeletedAndFourBatchesThenRemoveAll() {
         Cursor cursorWithDownloadsIdToBeDeleted = new MockCursorWithBatchIds(Collections.<Long>emptyList());
-        when(mockContentResolver.query(mockDownloads.getBatchContentUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null)).thenReturn(cursorWithDownloadsIdToBeDeleted);
+        when(mockContentResolver.query(mockDownloadsUriProvider.getBatchContentUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null)).thenReturn(cursorWithDownloadsIdToBeDeleted);
         when(mockContentResolver.query(any(Uri.class), any(String[].class), any(String.class), any(String[].class), any(String.class))).thenReturn(cursorWithDownloadsIdToBeDeleted);
 
         Collection<FileDownloadInfo> downloads = Arrays.asList(mockDownloadInfoId1, mockDownloadInfoId2, mockDownloadInfoId3, mockDownloadInfoId4);
         batchRepository.deleteMarkedBatchesFor(downloads);
 
-        verify(mockContentResolver).query(mockDownloads.getBatchContentUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null);
+        verify(mockContentResolver).query(mockDownloadsUriProvider.getBatchContentUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null);
         verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockDownloadInfoId1);
         verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockDownloadInfoId2);
         verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockDownloadInfoId3);

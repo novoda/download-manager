@@ -40,7 +40,7 @@ class DownloadScanner implements MediaScannerConnectionClient {
 
     private final ContentResolver resolver;
     private final MediaScannerConnection mediaScannerConnection;
-    private final Downloads downloads;
+    private final DownloadsUriProvider downloadsUriProvider;
 
     private static class ScanRequest {
         public final long id;
@@ -63,10 +63,10 @@ class DownloadScanner implements MediaScannerConnectionClient {
     //    @GuardedBy("mediaScannerConnection")
     private Map<String, ScanRequest> pendingRequests = new HashMap<>();
 
-    public DownloadScanner(ContentResolver resolver, Context context, Downloads downloads) {
+    public DownloadScanner(ContentResolver resolver, Context context, DownloadsUriProvider downloadsUriProvider) {
         this.resolver = resolver;
         this.mediaScannerConnection = new MediaScannerConnection(context, this);
-        this.downloads = downloads;
+        this.downloadsUriProvider = downloadsUriProvider;
     }
 
     /**
@@ -143,7 +143,7 @@ class DownloadScanner implements MediaScannerConnectionClient {
         }
 
         final Uri downloadUri = ContentUris.withAppendedId(
-                downloads.getAllDownloadsContentUri(), req.id);
+                downloadsUriProvider.getAllDownloadsContentUri(), req.id);
         final int rows = resolver.update(downloadUri, values, null, null);
         if (rows == 0) {
             // Local row disappeared during scan; download was probably deleted

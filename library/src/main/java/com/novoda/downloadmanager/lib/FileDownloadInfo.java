@@ -125,7 +125,7 @@ class FileDownloadInfo {
     private final RandomNumberGenerator randomNumberGenerator;
     private final ContentValues downloadStatusContentValues;
     private final PublicFacingDownloadMarshaller downloadMarshaller;
-    private final Downloads downloads;
+    private final DownloadsUriProvider downloadsUriProvider;
 
     FileDownloadInfo(
             Context context,
@@ -134,14 +134,14 @@ class FileDownloadInfo {
             DownloadClientReadyChecker downloadClientReadyChecker,
             ContentValues downloadStatusContentValues, 
             PublicFacingDownloadMarshaller downloadMarshaller,
-            Downloads downloads) {
+            DownloadsUriProvider downloadsUriProvider) {
         this.context = context;
         this.systemFacade = systemFacade;
         this.randomNumberGenerator = randomNumberGenerator;
         this.downloadClientReadyChecker = downloadClientReadyChecker;
         this.downloadStatusContentValues = downloadStatusContentValues;
         this.downloadMarshaller = downloadMarshaller;
-        this.downloads = downloads;
+        this.downloadsUriProvider = downloadsUriProvider;
     }
 
     public long getId() {
@@ -424,9 +424,9 @@ class FileDownloadInfo {
                 String applicationPackageName = context.getApplicationContext().getPackageName();
                 BatchCompletionBroadcaster batchCompletionBroadcaster = new BatchCompletionBroadcaster(context, applicationPackageName);
                 ContentResolver contentResolver = context.getContentResolver();
-                BatchRepository batchRepository = new BatchRepository(contentResolver, new DownloadDeleter(contentResolver), downloads);
+                BatchRepository batchRepository = new BatchRepository(contentResolver, new DownloadDeleter(contentResolver), downloadsUriProvider);
                 DownloadThread downloadThread = new DownloadThread(context, systemFacade, this, storageManager, downloadNotifier,
-                        batchCompletionBroadcaster, batchRepository, downloads);
+                        batchCompletionBroadcaster, batchRepository, downloadsUriProvider);
                 submittedThread = executor.submit(downloadThread);
                 isActive = true;
             } else {
@@ -475,11 +475,11 @@ class FileDownloadInfo {
     }
 
     public Uri getMyDownloadsUri() {
-        return ContentUris.withAppendedId(downloads.getContentUri(), id);
+        return ContentUris.withAppendedId(downloadsUriProvider.getContentUri(), id);
     }
 
     public Uri getAllDownloadsUri() {
-        return ContentUris.withAppendedId(downloads.getAllDownloadsContentUri(), id);
+        return ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsContentUri(), id);
     }
 
     /**
@@ -527,9 +527,9 @@ class FileDownloadInfo {
     /**
      * Query and return status of requested download.
      */
-    public static int queryDownloadStatus(ContentResolver resolver, long id, Downloads downloads) {
+    public static int queryDownloadStatus(ContentResolver resolver, long id, DownloadsUriProvider downloadsUriProvider) {
         final Cursor cursor = resolver.query(
-                ContentUris.withAppendedId(downloads.getAllDownloadsContentUri(), id),
+                ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsContentUri(), id),
                 new String[]{Downloads.Impl.COLUMN_STATUS}, null, null, null);
         try {
             if (cursor.moveToFirst()) {
@@ -569,7 +569,7 @@ class FileDownloadInfo {
                 Context context,
                 SystemFacade systemFacade,
                 DownloadClientReadyChecker downloadClientReadyChecker,
-                Downloads downloads) {
+                DownloadsUriProvider downloads) {
             RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
             ContentValues contentValues = new ContentValues();
             PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();

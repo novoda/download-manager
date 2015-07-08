@@ -6,6 +6,7 @@ import android.content.Context;
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.DownloadProvider;
 import com.novoda.downloadmanager.lib.Downloads;
+import com.novoda.downloadmanager.lib.DownloadsUriProvider;
 
 /**
  * A client can specify whether the downloads are allowed to proceed by implementing
@@ -33,8 +34,8 @@ public class DownloadManagerBuilder {
 
     public DownloadManager build() {
         ContentResolver contentResolver = context.getContentResolver();
-        Downloads downloads = new Downloads(DownloadProvider.AUTHORITY);
-        return new DownloadManager(context, contentResolver, verboseLogging, downloads);
+        DownloadsUriProvider downloadsUriProvider = DownloadsUriProvider.newInstance();
+        return new DownloadManager(context, contentResolver, verboseLogging, downloadsUriProvider);
     }
 
 }

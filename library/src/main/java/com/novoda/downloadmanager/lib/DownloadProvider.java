@@ -216,15 +216,15 @@ public final class DownloadProvider extends ContentProvider {
     //    @VisibleForTesting
     SystemFacade systemFacade;
 
-    private Downloads downloads;
+    private DownloadsUriProvider downloadsUriProvider;
 
     public DownloadProvider() {
-        downloads = new Downloads(DownloadProvider.AUTHORITY);
+        downloadsUriProvider = DownloadsUriProvider.newInstance();
 
         BASE_URIS = new Uri[]{
-                downloads.getContentUri(),
-                downloads.getAllDownloadsContentUri(),
-                downloads.getBatchContentUri()
+                downloadsUriProvider.getContentUri(),
+                downloadsUriProvider.getAllDownloadsContentUri(),
+                downloadsUriProvider.getBatchContentUri()
         };;
     }
 
@@ -367,7 +367,7 @@ public final class DownloadProvider extends ContentProvider {
         }
         if (match == BATCHES) {
             long rowId = db.insert(Downloads.Impl.Batches.BATCHES_TABLE_NAME, null, values);
-            return ContentUris.withAppendedId(downloads.getBatchContentUri(), rowId);
+            return ContentUris.withAppendedId(downloadsUriProvider.getBatchContentUri(), rowId);
         }
         Log.d("calling insert on an unknown/invalid URI: " + uri);
         throw new IllegalArgumentException("Unknown/Invalid URI " + uri);
@@ -503,7 +503,7 @@ public final class DownloadProvider extends ContentProvider {
         Context context = getContext();
         context.startService(new Intent(context, DownloadService.class));
         notifyContentChanged(uri, match);
-        return ContentUris.withAppendedId(downloads.getContentUri(), rowID);
+        return ContentUris.withAppendedId(downloadsUriProvider.getContentUri(), rowID);
     }
 
     /**
@@ -1023,7 +1023,7 @@ public final class DownloadProvider extends ContentProvider {
         Log.v("openFile uri: " + uri + ", mode: " + mode
                 + ", uid: " + Binder.getCallingUid());
         Cursor cursor = query(
-                downloads.getContentUri(),
+                downloadsUriProvider.getContentUri(),
                 new String[]{"_id"}, null, null, "_id");
         if (cursor == null) {
             Log.v("null cursor in openFile");

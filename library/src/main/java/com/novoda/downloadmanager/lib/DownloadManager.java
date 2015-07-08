@@ -285,7 +285,7 @@ public class DownloadManager {
      * Broadcast intent action sent by the download manager when the user clicks on a running
      * download, either from a system notification. The download's content: uri is specified
      * in the intent's data if the click is associated with a single download,
-     * or {@link DownloadManager#CONTENT_URI} if the notification is associated with
+     * or {@link DownloadsUriProvider#getContentUri()} if the notification is associated with
      * multiple downloads.
      */
     public static final String ACTION_NOTIFICATION_CLICKED = "com.novoda.downloadmaanger.DOWNLOAD_NOTIFICATION_CLICKED";
@@ -346,21 +346,21 @@ public class DownloadManager {
     };
 
     private final ContentResolver contentResolver;
-    private final Downloads downloads;
+    private final DownloadsUriProvider downloadsUriProvider;
 
     private Uri baseUri;
 
-    public DownloadManager(Context context, ContentResolver resolver, Downloads downloads) {
-        this(context, resolver, false, downloads);
+    public DownloadManager(Context context, ContentResolver resolver, DownloadsUriProvider downloadsUriProvider) {
+        this(context, resolver, false, downloadsUriProvider);
     }
 
     public DownloadManager(Context context,
                            ContentResolver contentResolver,
                            boolean verboseLogging,
-                           Downloads downloads) {
+                           DownloadsUriProvider downloadsUriProvider) {
         this.contentResolver = contentResolver;
-        this.downloads = downloads;
-        this.baseUri = downloads.getContentUri();
+        this.downloadsUriProvider = downloadsUriProvider;
+        this.baseUri = downloadsUriProvider.getContentUri();
         GlobalState.setContext(context);
         GlobalState.setVerboseLogging(verboseLogging);
     }
@@ -371,9 +371,9 @@ public class DownloadManager {
      */
     void setAccessAllDownloads(boolean accessAllDownloads) {
         if (accessAllDownloads) {
-            baseUri = downloads.getAllDownloadsContentUri();
+            baseUri = downloadsUriProvider.getAllDownloadsContentUri();
         } else {
-            baseUri = downloads.getContentUri();
+            baseUri = downloadsUriProvider.getContentUri();
         }
     }
 
@@ -394,27 +394,27 @@ public class DownloadManager {
 
     private long insert(Request request) {
         ContentValues values = request.toContentValues();
-        Uri downloadUri = contentResolver.insert(downloads.getContentUri(), values);
+        Uri downloadUri = contentResolver.insert(downloadsUriProvider.getContentUri(), values);
         return ContentUris.parseId(downloadUri);
     }
 
     public void pauseBatch(long id) {
         ContentValues values = new ContentValues();
         values.put(Downloads.Impl.COLUMN_CONTROL, Downloads.Impl.CONTROL_PAUSED);
-        contentResolver.update(downloads.getAllDownloadsContentUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
+        contentResolver.update(downloadsUriProvider.getAllDownloadsContentUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
     }
 
     public void resumeBatch(long id) {
         ContentValues values = new ContentValues();
         values.put(Downloads.Impl.COLUMN_CONTROL, Downloads.Impl.CONTROL_RUN);
         values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
-        contentResolver.update(downloads.getAllDownloadsContentUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
+        contentResolver.update(downloadsUriProvider.getAllDownloadsContentUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
     }
 
     public void removeDownload(URI uri) {
         Cursor cursor = null;
         try {
-            cursor = contentResolver.query(downloads.getContentUri(), new String[]{"_id"}, Downloads.Impl.COLUMN_FILE_NAME_HINT + "=?", new String[]{uri.toString()}, null);
+            cursor = contentResolver.query(downloadsUriProvider.getContentUri(), new String[]{"_id"}, Downloads.Impl.COLUMN_FILE_NAME_HINT + "=?", new String[]{uri.toString()}, null);
             if (cursor.moveToFirst()) {
                 long id = cursor.getLong(cursor.getColumnIndexOrThrow("_id"));
                 removeDownloads(id);
@@ -467,9 +467,9 @@ public class DownloadManager {
         // if only one id is passed in, then include it in the uri itself.
         // this will eliminate a full database scan in the download service.
         if (ids.length == 1) {
-            return contentResolver.update(ContentUris.withAppendedId(downloads.getBatchContentUri(), ids[0]), values, null, null);
+            return contentResolver.update(ContentUris.withAppendedId(downloadsUriProvider.getBatchContentUri(), ids[0]), values, null, null);
         }
-        return contentResolver.update(downloads.getBatchContentUri(), values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
+        return contentResolver.update(downloadsUriProvider.getBatchContentUri(), values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
     }
 
     /**
@@ -480,11 +480,11 @@ public class DownloadManager {
      * COLUMN_* constants.
      */
     public Cursor query(Query query) {
-        Cursor underlyingCursor = query.runQuery(contentResolver, UNDERLYING_COLUMNS, downloads.getDownloadsByBatchUri());
+        Cursor underlyingCursor = query.runQuery(contentResolver, UNDERLYING_COLUMNS, downloadsUriProvider.getDownloadsByBatchUri());
         if (underlyingCursor == null) {
             return null;
         }
-        return new CursorTranslator(underlyingCursor, downloads.getDownloadsByBatchUri());
+        return new CursorTranslator(underlyingCursor, downloadsUriProvider.getDownloadsByBatchUri());
     }
 
     /**
@@ -533,7 +533,7 @@ public class DownloadManager {
                             destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING ||
                             destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE) {
                         // return private uri
-                        return ContentUris.withAppendedId(downloads.getContentUri(), id);
+                        return ContentUris.withAppendedId(downloadsUriProvider.getContentUri(), id);
                     } else {
                         // return public uri
                         String path = cursor.getString(
@@ -698,7 +698,7 @@ public class DownloadManager {
         values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_SUCCESS);
         values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, length);
         values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED, (isMediaScannerScannable) ? Request.SCANNABLE_VALUE_YES : Request.SCANNABLE_VALUE_NO);
-        Uri downloadUri = contentResolver.insert(downloads.getContentUri(), values);
+        Uri downloadUri = contentResolver.insert(downloadsUriProvider.getContentUri(), values);
         if (downloadUri == null) {
             return -1;
         }
@@ -768,7 +768,7 @@ public class DownloadManager {
     private long insert(RequestBatch batch) {
         ContentValues values = batch.toContentValues();
         values.put(Downloads.Impl.Batches.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
-        Uri batchUri = contentResolver.insert(downloads.getBatchContentUri(), values);
+        Uri batchUri = contentResolver.insert(downloadsUriProvider.getBatchContentUri(), values);
         return ContentUris.parseId(batchUri);
     }
 

@@ -81,7 +81,7 @@ class StorageManager {
      * misc members
      */
     private final ContentResolver contentResolver;
-    private final Downloads downloads;
+    private final DownloadsUriProvider downloadsUriProvider;
 
     StorageManager(
             ContentResolver contentResolver, 
@@ -89,13 +89,13 @@ class StorageManager {
             File internalStorageDir, 
             File systemCacheDir, 
             File downloadDataDir, 
-            Downloads downloads) {
+            DownloadsUriProvider downloadsUriProvider) {
         this.contentResolver = contentResolver;
         this.externalStorageDir = externalStorageDir;
         this.internalStorageDir = internalStorageDir;
         this.systemCacheDir = systemCacheDir;
         this.downloadDataDir = downloadDataDir;
-        this.downloads = downloads;
+        this.downloadsUriProvider = downloadsUriProvider;
         startThreadToCleanupDatabaseAndPurgeFileSystem();
     }
 
@@ -307,7 +307,7 @@ class StorageManager {
                 String.valueOf(Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
         String[] bindArgs = new String[]{destStr};
         Cursor cursor = contentResolver.query(
-                downloads.getAllDownloadsContentUri(),
+                downloadsUriProvider.getAllDownloadsContentUri(),
                 null,
                 "( " +
                         Downloads.Impl.COLUMN_STATUS + " = '" + Downloads.Impl.STATUS_SUCCESS + "' AND " +
@@ -329,7 +329,7 @@ class StorageManager {
                 totalFreed += file.length();
                 file.delete();
                 long id = cursor.getLong(cursor.getColumnIndex(Downloads.Impl._ID));
-                contentResolver.delete(ContentUris.withAppendedId(downloads.getAllDownloadsContentUri(), id), null, null);
+                contentResolver.delete(ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsContentUri(), id), null, null);
             }
         } finally {
             cursor.close();
@@ -361,7 +361,7 @@ class StorageManager {
             return;
         }
         Cursor cursor = contentResolver
-                .query(downloads.getAllDownloadsContentUri(), new String[]{Downloads.Impl._DATA}, null, null, null);
+                .query(downloadsUriProvider.getAllDownloadsContentUri(), new String[]{Downloads.Impl._DATA}, null, null, null);
         try {
             if (cursor != null) {
                 while (cursor.moveToNext()) {
@@ -405,7 +405,8 @@ class StorageManager {
         Log.i("in trimDatabase");
         Cursor cursor = null;
         try {
-            cursor = contentResolver.query(downloads.getAllDownloadsContentUri(),
+            cursor = contentResolver.query(
+                    downloadsUriProvider.getAllDownloadsContentUri(),
                     new String[]{Downloads.Impl._ID},
                     Downloads.Impl.COLUMN_STATUS + " >= '200'", null,
                     Downloads.Impl.COLUMN_LAST_MODIFICATION);
@@ -419,7 +420,7 @@ class StorageManager {
                 int columnId = cursor.getColumnIndexOrThrow(Downloads.Impl._ID);
                 while (numDelete > 0) {
                     Uri downloadUri = ContentUris.withAppendedId(
-                            downloads.getAllDownloadsContentUri(), cursor.getLong(columnId));
+                            downloadsUriProvider.getAllDownloadsContentUri(), cursor.getLong(columnId));
                     contentResolver.delete(downloadUri, null, null);
                     if (!cursor.moveToNext()) {
                         break;

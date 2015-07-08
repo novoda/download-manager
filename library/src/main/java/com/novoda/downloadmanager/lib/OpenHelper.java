@@ -29,10 +29,10 @@ import static com.novoda.downloadmanager.lib.Downloads.Impl.RequestHeaders;
 
 class OpenHelper {
 
-    private final Downloads downloads;
+    private final DownloadsUriProvider downloadsUriProvider;
 
-    public OpenHelper(Downloads downloads) {
-        this.downloads = downloads;
+    public OpenHelper(DownloadsUriProvider downloadsUriProvider) {
+        this.downloadsUriProvider = downloadsUriProvider;
     }
     /**
      * Build an {@link Intent} to view the download at current {@link Cursor}
@@ -67,7 +67,7 @@ class OpenHelper {
                 intent.putExtra("android.intent.extra.ORIGINATING_UID", getOriginatingUid(context, id));
             } else if ("file".equals(localUri.getScheme())) {
                 intent.setDataAndType(
-                        ContentUris.withAppendedId(downloads.getAllDownloadsContentUri(), id), mimeType);
+                        ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsContentUri(), id), mimeType);
             } else {
                 intent.setDataAndType(localUri, mimeType);
             }
@@ -80,7 +80,7 @@ class OpenHelper {
 
     private Uri getRefererUri(Context context, long id) {
         final Uri headersUri = Uri.withAppendedPath(
-                ContentUris.withAppendedId(downloads.getAllDownloadsContentUri(), id),
+                ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsContentUri(), id),
                 RequestHeaders.URI_SEGMENT);
         final Cursor headers = context.getContentResolver()
                 .query(headersUri, null, null, null, null);
@@ -98,7 +98,7 @@ class OpenHelper {
     }
 
     private int getOriginatingUid(Context context, long id) {
-        final Uri uri = ContentUris.withAppendedId(downloads.getAllDownloadsContentUri(), id);
+        final Uri uri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsContentUri(), id);
         final Cursor cursor = context.getContentResolver().query(uri, new String[]{Constants.UID},
                 null, null, null);
         if (cursor != null) {

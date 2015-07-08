@@ -10,16 +10,16 @@ class DownloadsRepository {
 
     private final ContentResolver contentResolver;
     private final DownloadInfoCreator downloadInfoCreator;
-    private final Downloads downloads;
+    private final DownloadsUriProvider downloadsUriProvider;
 
-    public DownloadsRepository(ContentResolver contentResolver, DownloadInfoCreator downloadInfoCreator, Downloads downloads) {
+    public DownloadsRepository(ContentResolver contentResolver, DownloadInfoCreator downloadInfoCreator, DownloadsUriProvider downloadsUriProvider) {
         this.contentResolver = contentResolver;
         this.downloadInfoCreator = downloadInfoCreator;
-        this.downloads = downloads;
+        this.downloadsUriProvider = downloadsUriProvider;
     }
 
     public List<FileDownloadInfo> getAllDownloads() {
-        Cursor downloadsCursor = contentResolver.query(downloads.getAllDownloadsContentUri(), null, null, null, null);
+        Cursor downloadsCursor = contentResolver.query(downloadsUriProvider.getAllDownloadsContentUri(), null, null, null, null);
         try {
             List<FileDownloadInfo> downloads = new ArrayList<>();
             FileDownloadInfo.Reader reader = new FileDownloadInfo.Reader(contentResolver, downloadsCursor);

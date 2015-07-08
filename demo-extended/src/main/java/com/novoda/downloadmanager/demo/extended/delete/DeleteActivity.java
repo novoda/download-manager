@@ -18,8 +18,7 @@ import com.novoda.downloadmanager.demo.extended.DownloadAdapter;
 import com.novoda.downloadmanager.demo.extended.QueryForDownloadsAsyncTask;
 import com.novoda.downloadmanager.demo.extended.QueryTimestamp;
 import com.novoda.downloadmanager.lib.DownloadManager;
-import com.novoda.downloadmanager.lib.DownloadProvider;
-import com.novoda.downloadmanager.lib.Downloads;
+import com.novoda.downloadmanager.lib.DownloadsUriProvider;
 import com.novoda.downloadmanager.lib.NotificationVisibility;
 import com.novoda.downloadmanager.lib.Query;
 import com.novoda.downloadmanager.lib.Request;
@@ -36,7 +35,7 @@ public class DeleteActivity extends AppCompatActivity implements QueryForDownloa
     private DownloadManager downloadManager;
     private ListView listView;
     private DownloadAdapter downloadAdapter;
-    private Downloads downloads;
+    private DownloadsUriProvider downloads;
 
     private final QueryTimestamp lastQueryTimestamp = new QueryTimestamp();
 
@@ -44,7 +43,7 @@ public class DeleteActivity extends AppCompatActivity implements QueryForDownloa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_delete);
-        downloads = new Downloads(DownloadProvider.AUTHORITY);
+        downloads = DownloadsUriProvider.newInstance();
         listView = (ListView) findViewById(R.id.main_downloads_list);
         downloadManager = DownloadManagerBuilder.from(this)
                 .withVerboseLogging()

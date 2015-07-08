@@ -73,13 +73,18 @@ class DownloadThread implements Runnable {
     private final DownloadNotifier downloadNotifier;
     private final BatchCompletionBroadcaster batchCompletionBroadcaster;
     private final BatchRepository batchRepository;
-    private final Downloads downloads;
+    private final DownloadsUriProvider downloadsUriProvider;
 
     private volatile boolean policyDirty;
 
-    public DownloadThread(Context context, SystemFacade systemFacade, FileDownloadInfo fileDownloadInfo,
-                          StorageManager storageManager, DownloadNotifier downloadNotifier,
-                          BatchCompletionBroadcaster batchCompletionBroadcaster, BatchRepository batchRepository, Downloads downloads) {
+    public DownloadThread(Context context,
+                          SystemFacade systemFacade,
+                          FileDownloadInfo fileDownloadInfo,
+                          StorageManager storageManager,
+                          DownloadNotifier downloadNotifier,
+                          BatchCompletionBroadcaster batchCompletionBroadcaster,
+                          BatchRepository batchRepository,
+                          DownloadsUriProvider downloadsUriProvider) {
         this.context = context;
         this.systemFacade = systemFacade;
         this.fileDownloadInfo = fileDownloadInfo;
@@ -87,7 +92,7 @@ class DownloadThread implements Runnable {
         this.downloadNotifier = downloadNotifier;
         this.batchCompletionBroadcaster = batchCompletionBroadcaster;
         this.batchRepository = batchRepository;
-        this.downloads = downloads;
+        this.downloadsUriProvider = downloadsUriProvider;
     }
 
     /**
@@ -181,7 +186,7 @@ class DownloadThread implements Runnable {
 
     private void runInternal() {
         // Skip when download already marked as finished; this download was probably started again while racing with UpdateThread.
-        int downloadStatus = FileDownloadInfo.queryDownloadStatus(getContentResolver(), fileDownloadInfo.getId(), downloads);
+        int downloadStatus = FileDownloadInfo.queryDownloadStatus(getContentResolver(), fileDownloadInfo.getId(), downloadsUriProvider);
         if (downloadStatus == Downloads.Impl.STATUS_SUCCESS) {
             Log.d("Download " + fileDownloadInfo.getId() + " already finished; skipping");
             return;
@@ -869,12 +874,12 @@ class DownloadThread implements Runnable {
         if (Downloads.Impl.isStatusCancelled(batchStatus)) {
             ContentValues values = new ContentValues(1);
             values.put(COLUMN_STATUS, STATUS_CANCELED);
-            getContentResolver().update(downloads.getAllDownloadsContentUri(), values, COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
+            getContentResolver().update(downloadsUriProvider.getAllDownloadsContentUri(), values, COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
         } else if (Downloads.Impl.isStatusError(batchStatus)) {
             ContentValues values = new ContentValues(1);
             values.put(COLUMN_STATUS, STATUS_BATCH_FAILED);
             getContentResolver().update(
-                    downloads.getAllDownloadsContentUri(),
+                    downloadsUriProvider.getAllDownloadsContentUri(),
                     values,
                     COLUMN_BATCH_ID + " = ? AND " + _ID + " <> ? ",
                     new String[]{String.valueOf(batchId), String.valueOf(downloadId)}

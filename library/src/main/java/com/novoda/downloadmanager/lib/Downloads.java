@@ -28,50 +28,6 @@ import android.provider.BaseColumns;
  */
 public class Downloads {
 
-    private final String authority;
-
-    /**
-     * The content URI for accessing publicly accessible downloads (i.e., it requires no
-     * permissions to access this downloaded file)
-     */
-    public Uri getPublicityAccessibleDownloadsUri() {
-        return Uri.parse(getAuthority() + "/" + Impl.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT);
-    }
-    /**
-     * The content:// URI to access downloads and their batch data.
-     */
-    public Uri getDownloadsByBatchUri() {
-        return Uri.parse(getAuthority() + "/downloads_by_batch");
-    }
-    /**
-     * The content URI for accessing all downloads across all UIDs (requires the
-     * ACCESS_ALL_DOWNLOADS permission).
-     */
-    public Uri getAllDownloadsContentUri() {
-        return Uri.parse(getAuthority() + "/all_downloads");
-    }
-    /**
-     * The content:// URI to access downloads owned by the caller's UID.
-     */
-    public Uri getBatchContentUri() {
-        return Uri.parse(getAuthority() + "/batches");
-    }
-
-    public Downloads(String authority) {
-        this.authority = "content://" + authority;
-    }
-
-    /**
-     * The content:// URI to access downloads owned by the caller's UID.
-     */
-    public Uri getContentUri() {
-        return Uri.parse(getAuthority() + "/my_downloads");
-    }
-
-    private String getAuthority() {
-        return authority;
-    }
-
     /**
      * Implementation details
      * <p/>
