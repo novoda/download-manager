@@ -1,5 +1,13 @@
 package com.novoda.downloadmanager.lib;
 
+import android.support.annotation.IntDef;
+import android.support.annotation.NonNull;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
+
 public class BatchQuery {
     private static final BatchQuery ALL = new BatchQuery(null, null);
 
@@ -20,30 +28,29 @@ public class BatchQuery {
     }
 
     public static class Builder {
-        private static final long NO_FILTER_BY_ID = -1L;
+
+        private final Criteria.Builder builder;
 
         private Criteria.Builder criteriaIdBuilder;
         private Criteria.Builder criteriaStatusBuilder;
-        private long id = NO_FILTER_BY_ID;
-        private int[] statusFlag;
 
         public Builder() {
-            this.criteriaStatusBuilder = new Criteria.Builder();
-            this.criteriaIdBuilder = new Criteria.Builder();
+            builder = new Criteria.Builder();
         }
 
         public Builder withId(long id) {
-            this.id = id;
+            this.criteriaIdBuilder = new Criteria.Builder();
             criteriaIdBuilder
                     .withSelection(Downloads.Impl.Batches._ID, Criteria.Wildcard.EQUALS)
                     .withArgument(String.valueOf(id));
             return this;
         }
 
-        public Builder withStatusFilter(int... statuses) {
-            this.statusFlag = statuses;
-            for (int i = 0; i < statuses.length; i++) {
-                int status = statuses[i];
+        public Builder withStatusFilter(@Status int statusFlags) {
+            this.criteriaStatusBuilder = new Criteria.Builder();
+            List<Integer> statuses = buildStatusesFrom(statusFlags);
+
+            for (int status : statuses) {
                 switch (status) {
                     case DownloadManager.STATUS_PENDING:
                         criteriaStatusBuilder
@@ -90,31 +97,51 @@ public class BatchQuery {
 
                 }
 
-                if (isNotTheLastElement(i, statuses)) {
+                if (isNotLastIn(statuses, status)) {
                     criteriaStatusBuilder.or();
                 }
             }
             return this;
         }
 
-        private boolean isNotTheLastElement(int index, int[] items) {
-            return index != (items.length - 1);
+        @NonNull
+        private List<Integer> buildStatusesFrom(@Status int statusFlags) {
+            List<Integer> statuses = new ArrayList<>();
+            if ((statusFlags & DownloadManager.STATUS_PENDING) != 0) {
+                statuses.add(DownloadManager.STATUS_PENDING);
+            }
+
+            if ((statusFlags & DownloadManager.STATUS_RUNNING) != 0) {
+                statuses.add(DownloadManager.STATUS_RUNNING);
+            }
+
+            if ((statusFlags & DownloadManager.STATUS_PAUSED) != 0) {
+                statuses.add(DownloadManager.STATUS_PAUSED);
+            }
+
+            if ((statusFlags & DownloadManager.STATUS_SUCCESSFUL) != 0) {
+                statuses.add(DownloadManager.STATUS_SUCCESSFUL);
+
+            }
+            if ((statusFlags & DownloadManager.STATUS_FAILED) != 0) {
+                statuses.add(DownloadManager.STATUS_FAILED);
+            }
+            return statuses;
+        }
+
+        private boolean isNotLastIn(List<Integer> statuses, int status) {
+            return statuses.lastIndexOf(status) != statuses.size() - 1;
         }
 
         public BatchQuery build() {
-            Criteria.Builder builder = new Criteria.Builder();
-            if (id == NO_FILTER_BY_ID && statusFlag == null) {
-                return ALL;
-            }
-
-            if (id != NO_FILTER_BY_ID) {
+            if (criteriaIdBuilder != null) {
                 builder.withInnerCriteria(criteriaIdBuilder.build());
-                if (statusFlag != null) {
+                if (criteriaStatusBuilder != null) {
                     builder.and();
                 }
             }
 
-            if (statusFlag != null) {
+            if (criteriaStatusBuilder != null) {
                 builder.withInnerCriteria(criteriaStatusBuilder.build());
             }
 
@@ -123,5 +150,16 @@ public class BatchQuery {
             String[] selectionArguments = criteria.getSelectionArguments();
             return new BatchQuery(selection, selectionArguments);
         }
+    }
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true,
+            value = {DownloadManager.STATUS_PENDING,
+                    DownloadManager.STATUS_RUNNING,
+                    DownloadManager.STATUS_PAUSED,
+                    DownloadManager.STATUS_SUCCESSFUL,
+                    DownloadManager.STATUS_FAILED})
+    public @interface Status {
+        //marker interface that ensures the annotated fields are in within the above values
     }
 }

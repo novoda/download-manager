@@ -61,7 +61,7 @@ public class BatchesActivity extends AppCompatActivity implements QueryForDownlo
                 });
 
         setupQueryingExample();
-        Cursor cursor = downloadManager.queryBatch(new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_SUCCESSFUL, DownloadManager
+        Cursor cursor = downloadManager.queryBatch(new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_PENDING | DownloadManager
                 .STATUS_FAILED).build());
         DatabaseUtils.dumpCursor(cursor);
     }

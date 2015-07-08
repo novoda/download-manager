@@ -12,8 +12,8 @@ public class BatchQueryTest {
     public void givenNoConstraintsWhenTheQueryIsBuiltItHasNullSelectionAndNullSelectionArguments() {
         BatchQuery query = new BatchQuery.Builder().build();
 
-        assertThat(query.getSelection()).isNull();
-        assertThat(query.getSelectionArguments()).isNull();
+        assertThat(query.getSelection()).isEmpty();
+        assertThat(query.getSelectionArguments()).isEmpty();
     }
 
     @Test
@@ -22,7 +22,7 @@ public class BatchQueryTest {
         BatchQuery query = new BatchQuery.Builder().withId(id).build();
 
         assertThat(query.getSelection()).isEqualTo("(" + Downloads.Impl.Batches._ID + "=?)");
-        assertThatTwoArraysAreEqual(query.getSelectionArguments(), new Integer[]{id});
+        assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), new Integer[]{id});
     }
 
     @Test
@@ -30,7 +30,7 @@ public class BatchQueryTest {
         BatchQuery query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_PENDING).build();
 
         assertThat(query.getSelection()).isEqualTo("(" + Downloads.Impl.Batches.COLUMN_STATUS + "=?)");
-        assertThatTwoArraysAreEqual(query.getSelectionArguments(), new Integer[]{Downloads.Impl.STATUS_PENDING});
+        assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), new Integer[]{Downloads.Impl.STATUS_PENDING});
     }
 
     @Test
@@ -38,7 +38,7 @@ public class BatchQueryTest {
         BatchQuery query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_RUNNING).build();
 
         assertThat(query.getSelection()).isEqualTo("(" + Downloads.Impl.Batches.COLUMN_STATUS + "=?)");
-        assertThatTwoArraysAreEqual(query.getSelectionArguments(), new Integer[]{Downloads.Impl.STATUS_RUNNING});
+        assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), new Integer[]{Downloads.Impl.STATUS_RUNNING});
     }
 
     @Test
@@ -56,7 +56,7 @@ public class BatchQueryTest {
                 Downloads.Impl.STATUS_WAITING_FOR_NETWORK,
                 Downloads.Impl.STATUS_QUEUED_FOR_WIFI
         };
-        assertThatTwoArraysAreEqual(query.getSelectionArguments(), expectedArguments);
+        assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), expectedArguments);
     }
 
     @Test
@@ -67,12 +67,15 @@ public class BatchQueryTest {
                 "((" + Downloads.Impl.Batches.COLUMN_STATUS + ">=? AND "
                         + Downloads.Impl.Batches.COLUMN_STATUS + "<?))");
         Integer[] expectedArguments = {400, 600};
-        assertThatTwoArraysAreEqual(query.getSelectionArguments(), expectedArguments);
+        assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), expectedArguments);
     }
 
     @Test
     public void givenTheQueryIsWithTwoMultipleStatusFilterWhenItIsBuiltThenTheSelectionAndArgumentsAreCorrect() {
-        BatchQuery query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_PAUSED, DownloadManager.STATUS_FAILED).build();
+        BatchQuery query = new BatchQuery.Builder()
+                .withStatusFilter(
+                        DownloadManager.STATUS_PAUSED
+                                | DownloadManager.STATUS_FAILED).build();
 
         assertThat(query.getSelection()).isEqualTo(
                 "(" + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
@@ -89,13 +92,17 @@ public class BatchQueryTest {
                 400,
                 600
         };
-        assertThatTwoArraysAreEqual(query.getSelectionArguments(), expectedArguments);
+        assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), expectedArguments);
     }
 
     @Test
     public void givenTheQueryIsWithThreeMultipleStatusFilterWhenItIsBuiltThenTheSelectionAndArgumentsAreCorrect() {
-        BatchQuery query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_PENDING, DownloadManager.STATUS_RUNNING,
-                DownloadManager.STATUS_PAUSED).build();
+        BatchQuery query = new BatchQuery.Builder()
+                .withStatusFilter(
+                        DownloadManager.STATUS_PENDING
+                                | DownloadManager.STATUS_RUNNING
+                                | DownloadManager.STATUS_PAUSED)
+                .build();
 
         assertThat(query.getSelection()).isEqualTo(
                 "(" + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
@@ -112,14 +119,19 @@ public class BatchQueryTest {
                 Downloads.Impl.STATUS_WAITING_FOR_NETWORK,
                 Downloads.Impl.STATUS_QUEUED_FOR_WIFI
         };
-        assertThatTwoArraysAreEqual(query.getSelectionArguments(), expectedArguments);
+        assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), expectedArguments);
 
     }
 
     @Test
     public void givenTheQueryIsWithFourMultipleStatusFilterWhenItIsBuiltThenTheSelectionAndArgumentsAreCorrect() {
-        BatchQuery query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_RUNNING, DownloadManager.STATUS_PENDING,
-                DownloadManager.STATUS_PAUSED, DownloadManager.STATUS_SUCCESSFUL).build();
+        BatchQuery query = new BatchQuery.Builder()
+                .withStatusFilter(
+                        DownloadManager.STATUS_RUNNING
+                                | DownloadManager.STATUS_PENDING
+                                | DownloadManager.STATUS_PAUSED
+                                | DownloadManager.STATUS_SUCCESSFUL)
+                .build();
 
         assertThat(query.getSelection()).isEqualTo(
                 "(" + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
@@ -131,45 +143,51 @@ public class BatchQueryTest {
                         + Downloads.Impl.Batches.COLUMN_STATUS + "=?)");
 
         Integer[] expectedArguments = {
-                Downloads.Impl.STATUS_RUNNING,
                 Downloads.Impl.STATUS_PENDING,
+                Downloads.Impl.STATUS_RUNNING,
                 Downloads.Impl.STATUS_PAUSED_BY_APP,
                 Downloads.Impl.STATUS_WAITING_TO_RETRY,
                 Downloads.Impl.STATUS_WAITING_FOR_NETWORK,
                 Downloads.Impl.STATUS_QUEUED_FOR_WIFI,
                 Downloads.Impl.STATUS_SUCCESS
         };
-        assertThatTwoArraysAreEqual(query.getSelectionArguments(), expectedArguments);
+        assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), expectedArguments);
     }
 
     @Test
     public void givenTheQueryIsWithAllMultipleStatusFilterWhenItIsBuiltThenTheSelectionAndArgumentsAreCorrect() {
-        BatchQuery query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_FAILED, DownloadManager.STATUS_SUCCESSFUL,
-                DownloadManager.STATUS_RUNNING, DownloadManager.STATUS_PENDING, DownloadManager.STATUS_PAUSED).build();
+        BatchQuery query = new BatchQuery.Builder()
+                .withStatusFilter(
+                        DownloadManager.STATUS_FAILED
+                                | DownloadManager.STATUS_SUCCESSFUL
+                                | DownloadManager.STATUS_RUNNING
+                                | DownloadManager.STATUS_PENDING
+                                | DownloadManager.STATUS_PAUSED)
+                .build();
 
         assertThat(query.getSelection()).isEqualTo(
-                "(" + "(" + Downloads.Impl.Batches.COLUMN_STATUS + ">=? AND "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "<?) OR "
+                "(" + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
                         + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
                         + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
                         + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
                         + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
                         + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
                         + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=?)");
+                        + "(" + Downloads.Impl.Batches.COLUMN_STATUS + ">=? AND "
+                        + Downloads.Impl.Batches.COLUMN_STATUS + "<?))");
 
         Integer[] expectedArguments = {
-                400,
-                600,
-                Downloads.Impl.STATUS_SUCCESS,
-                Downloads.Impl.STATUS_RUNNING,
                 Downloads.Impl.STATUS_PENDING,
+                Downloads.Impl.STATUS_RUNNING,
                 Downloads.Impl.STATUS_PAUSED_BY_APP,
                 Downloads.Impl.STATUS_WAITING_TO_RETRY,
                 Downloads.Impl.STATUS_WAITING_FOR_NETWORK,
-                Downloads.Impl.STATUS_QUEUED_FOR_WIFI
+                Downloads.Impl.STATUS_QUEUED_FOR_WIFI,
+                Downloads.Impl.STATUS_SUCCESS,
+                400,
+                600,
         };
-        assertThatTwoArraysAreEqual(query.getSelectionArguments(), expectedArguments);
+        assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), expectedArguments);
     }
 
     @Test
@@ -177,42 +195,126 @@ public class BatchQueryTest {
         int id = 14;
         BatchQuery query = new BatchQuery.Builder()
                 .withStatusFilter(
-                        DownloadManager.STATUS_FAILED,
-                        DownloadManager.STATUS_SUCCESSFUL,
-                        DownloadManager.STATUS_RUNNING,
-                        DownloadManager.STATUS_PENDING,
-                        DownloadManager.STATUS_PAUSED)
+                        DownloadManager.STATUS_FAILED
+                                | DownloadManager.STATUS_SUCCESSFUL
+                                | DownloadManager.STATUS_RUNNING
+                                | DownloadManager.STATUS_PENDING
+                                | DownloadManager.STATUS_PAUSED)
                 .withId(id)
                 .build();
 
         assertThat(query.getSelection()).isEqualTo(
                 "(" + Downloads.Impl.Batches._ID + "=?) AND "
-                        + "(" + "(" + Downloads.Impl.Batches.COLUMN_STATUS + ">=? AND "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "<?) OR "
+                        + "(" + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
                         + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
                         + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
                         + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
                         + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
                         + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
                         + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=?)");
+                        + "(" + Downloads.Impl.Batches.COLUMN_STATUS + ">=? AND "
+                        + Downloads.Impl.Batches.COLUMN_STATUS + "<?))");
 
         Integer[] expectedArguments = {
                 id,
-                400,
-                600,
-                Downloads.Impl.STATUS_SUCCESS,
-                Downloads.Impl.STATUS_RUNNING,
                 Downloads.Impl.STATUS_PENDING,
+                Downloads.Impl.STATUS_RUNNING,
                 Downloads.Impl.STATUS_PAUSED_BY_APP,
                 Downloads.Impl.STATUS_WAITING_TO_RETRY,
                 Downloads.Impl.STATUS_WAITING_FOR_NETWORK,
-                Downloads.Impl.STATUS_QUEUED_FOR_WIFI
+                Downloads.Impl.STATUS_QUEUED_FOR_WIFI,
+                Downloads.Impl.STATUS_SUCCESS,
+                400,
+                600
         };
-        assertThatTwoArraysAreEqual(query.getSelectionArguments(), expectedArguments);
+        assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), expectedArguments);
     }
 
-    private void assertThatTwoArraysAreEqual(Object[] firstArray, Object[] secondArray) {
+    @Test
+    public void givenMultipleSettingStatusFilterMultipleTimesWhenTheQueryIsBuiltThenOnlyTheLastFilterIsTakenIntoConsideration() {
+        BatchQuery query = new BatchQuery.Builder()
+                .withStatusFilter(DownloadManager.STATUS_PENDING)
+                .withStatusFilter(DownloadManager.STATUS_FAILED)
+                .build();
+
+        assertThat(query.getSelection()).isEqualTo(
+                "((" + Downloads.Impl.Batches.COLUMN_STATUS + ">=? AND "
+                        + Downloads.Impl.Batches.COLUMN_STATUS + "<?))");
+
+        Integer[] expectedArguments = {
+                400,
+                600
+        };
+        assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), expectedArguments);
+
+    }
+
+    @Test
+    public void givenMultipleSettingIdFilterMultipleTimesWhenTheQueryIsBuiltThenOnlyTheLastFilterIsTakenIntoConsideration() {
+        int firstId = 12;
+        int secondId = 13;
+        BatchQuery query = new BatchQuery.Builder()
+                .withId(firstId)
+                .withId(secondId)
+                .build();
+
+        assertThat(query.getSelection()).isEqualTo("(" + Downloads.Impl.Batches._ID + "=?)");
+        Integer[] expectedArguments = {secondId};
+        assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), expectedArguments);
+
+    }
+
+    @Test
+    public void givenMultipleSettingIdFilterAndStatusFilterMultipleTimesWhenTheQueryIsBuiltThenOnlyTheLastFilterFromBothIsTakenIntoConsideration() {
+        int firstId = 12;
+        int secondId = 13;
+        int thirdId = 14;
+        BatchQuery query = new BatchQuery.Builder()
+                .withId(firstId)
+                .withStatusFilter(DownloadManager.STATUS_PENDING)
+                .withId(secondId)
+                .withStatusFilter(DownloadManager.STATUS_PENDING
+                        | DownloadManager.STATUS_RUNNING)
+                .withId(thirdId)
+                .build();
+
+        assertThat(query.getSelection()).isEqualTo(
+                "(" + Downloads.Impl.Batches._ID + "=?) AND "
+                        + "(" + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
+                        + Downloads.Impl.Batches.COLUMN_STATUS + "=?)");
+        Integer[] expectedArguments = {
+                thirdId,
+                Downloads.Impl.STATUS_PENDING,
+                Downloads.Impl.STATUS_RUNNING};
+        assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), expectedArguments);
+
+    }
+
+    @Test
+    public void givenAscendingSortOrderWhenTheQueryIsBuiltThenTheSortIsCorrectlyTakenIntoConsideration() {
+        String sortColumn = "sort_column";
+        BatchQuery query = new BatchQuery.Builder()
+                .withStatusFilter(DownloadManager.STATUS_PENDING)
+                .withSortAscendingBy(sortColumn)
+                .build();
+
+        assertThat(query.getSelection()).isEqualTo("(" + Downloads.Impl.Batches.COLUMN_STATUS + "=?)");
+        assertThat(query.getSortOrder()).isEqualTo(sortColumn + " ASC ");
+    }
+
+    @Test
+    public void givenDescendingSortOrderWhenTheQueryIsBuiltThenTheSortIsCorrectlyTakenIntoConsideration() {
+        String sortColumn = "sort_column";
+        BatchQuery query = new BatchQuery.Builder()
+                .withStatusFilter(DownloadManager.STATUS_PENDING)
+                .withSortDescendingBy(sortColumn)
+                .build();
+
+        assertThat(query.getSelection()).isEqualTo("(" + Downloads.Impl.Batches.COLUMN_STATUS + "=?)");
+        assertThat(query.getSortOrder()).isEqualTo(sortColumn + " DESC ");
+    }
+
+    private void assertThatSelectionArgumentAreEqualTo(Object[] firstArray, Object[] secondArray) {
         assertThat(Arrays.toString(firstArray)).isEqualTo(Arrays.toString(secondArray));
     }
 
