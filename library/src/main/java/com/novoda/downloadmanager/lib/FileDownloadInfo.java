@@ -24,7 +24,7 @@ import java.util.concurrent.Future;
 /**
  * Stores information about an individual download.
  */
-class DownloadInfo {
+class FileDownloadInfo {
 
     public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
     private static final int UNKNOWN_BYTES = -1;
@@ -125,7 +125,7 @@ class DownloadInfo {
     private final RandomNumberGenerator randomNumberGenerator;
     private final ContentValues downloadStatusContentValues;
 
-    DownloadInfo(
+    FileDownloadInfo(
             Context context,
             SystemFacade systemFacade,
             RandomNumberGenerator randomNumberGenerator,
@@ -563,13 +563,13 @@ class DownloadInfo {
             this.cursor = cursor;
         }
 
-        public DownloadInfo newDownloadInfo(
+        public FileDownloadInfo newDownloadInfo(
                 Context context,
                 SystemFacade systemFacade,
                 DownloadClientReadyChecker downloadClientReadyChecker) {
             RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
             ContentValues contentValues = new ContentValues();
-            DownloadInfo info = new DownloadInfo(
+            FileDownloadInfo info = new FileDownloadInfo(
                     context,
                     systemFacade,
                     randomNumberGenerator,
@@ -581,7 +581,7 @@ class DownloadInfo {
             return info;
         }
 
-        public void updateFromDatabase(DownloadInfo info) {
+        public void updateFromDatabase(FileDownloadInfo info) {
             info.id = getLong(Downloads.Impl._ID);
             info.uri = getString(Downloads.Impl.COLUMN_URI);
             info.scannable = getInt(Downloads.Impl.COLUMN_MEDIA_SCANNED) == 1;
@@ -618,7 +618,7 @@ class DownloadInfo {
             }
         }
 
-        private void readRequestHeaders(DownloadInfo info) {
+        private void readRequestHeaders(FileDownloadInfo info) {
             info.clearHeaders();
             Uri headerUri = Uri.withAppendedPath(info.getAllDownloadsUri(), Downloads.Impl.RequestHeaders.URI_SEGMENT);
             Cursor cursor = resolver.query(headerUri, null, null, null, null);

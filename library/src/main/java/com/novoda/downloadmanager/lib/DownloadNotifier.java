@@ -30,7 +30,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Update {@link NotificationManager} to reflect current {@link DownloadInfo}
+ * Update {@link NotificationManager} to reflect current {@link FileDownloadInfo}
  * states. Collapses similar downloads into a single notification, and builds
  * {@link PendingIntent} that launch towards {DownloadReceiver}.
  */
@@ -73,7 +73,7 @@ class DownloadNotifier {
 
     /**
      * Update {@link NotificationManager} to reflect the given set of
-     * {@link DownloadInfo}, adding, collapsing, and removing as needed.
+     * {@link FileDownloadInfo}, adding, collapsing, and removing as needed.
      */
     public void updateWith(Collection<DownloadBatch> batches) {
         synchronized (activeNotifications) {
@@ -115,7 +115,7 @@ class DownloadNotifier {
     }
 
     /**
-     * Build tag used for collapsing several {@link DownloadInfo} into a single
+     * Build tag used for collapsing several {@link FileDownloadInfo} into a single
      * {@link Notification}.
      */
     private String buildNotificationTag(DownloadBatch batch) {

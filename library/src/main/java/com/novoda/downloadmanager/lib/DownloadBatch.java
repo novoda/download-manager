@@ -8,12 +8,12 @@ class DownloadBatch {
 
     private final long batchId;
     private final BatchInfo info;
-    private final List<DownloadInfo> downloads;
+    private final List<FileDownloadInfo> downloads;
     private final int status;
     private final long totalSizeBytes;
     private final long currentSizeBytes;
 
-    public DownloadBatch(long batchId, BatchInfo info, List<DownloadInfo> downloads, int status, long totalSizeBytes, long currentSizeBytes) {
+    public DownloadBatch(long batchId, BatchInfo info, List<FileDownloadInfo> downloads, int status, long totalSizeBytes, long currentSizeBytes) {
         this.batchId = batchId;
         this.info = info;
         this.downloads = downloads;
@@ -38,7 +38,7 @@ class DownloadBatch {
         return info;
     }
 
-    public List<DownloadInfo> getDownloads() {
+    public List<FileDownloadInfo> getDownloads() {
         return downloads;
     }
 
