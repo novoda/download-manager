@@ -544,6 +544,11 @@ final class Downloads {
         }
 
         /**
+         * This download has been submitted to the download executor but not yet started
+         */
+        public static final int STATUS_SUBMITTED = 189;
+
+        /**
          * This download hasn't stated yet
          */
         public static final int STATUS_PENDING = 190;
@@ -594,11 +599,7 @@ final class Downloads {
          * Use isSucccess() to capture the entire category.
          */
         public static final int STATUS_SUCCESS = 200;
-
-        /**
-         * This download has been submitted to the download executor but not yet started
-         */
-        public static final int STATUS_SUBMITTED = 201;
+        ;
 
         /**
          * This request couldn't be parsed. This is also used when processing
