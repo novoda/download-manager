@@ -10,6 +10,8 @@ import java.util.List;
 
 public class BatchQuery {
     public static final BatchQuery ALL = new BatchQuery(null, null, null);
+    private static final int LOW_END_FAILED_STATUS_CODE = 400;
+    private static final int HIGH_END_FAILED_STATUS_CODE = 600;
 
     private final String selection;
     private final String sortOrder;
@@ -102,10 +104,10 @@ public class BatchQuery {
                                 .withInnerCriteria(
                                         new Criteria.Builder()
                                                 .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.MORE_THAN_EQUAL)
-                                                .withArgument(String.valueOf(400))
+                                                .withArgument(String.valueOf(LOW_END_FAILED_STATUS_CODE))
                                                 .and()
                                                 .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.LESS_THAN)
-                                                .withArgument(String.valueOf(600))
+                                                .withArgument(String.valueOf(HIGH_END_FAILED_STATUS_CODE))
                                                 .build());
                         break;
                     default:
