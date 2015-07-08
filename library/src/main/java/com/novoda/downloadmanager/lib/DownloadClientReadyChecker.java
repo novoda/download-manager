@@ -1,14 +1,14 @@
 package com.novoda.downloadmanager.lib;
 
+import com.novoda.downloadmanager.Download;
+
 public interface DownloadClientReadyChecker {
     Ready READY = new Ready();
 
     /**
      * This method is executed on a background thread
-     *
-     * @param downloadBatch
      */
-    boolean isAllowedToDownload(DownloadBatch downloadBatch);
+    boolean isAllowedToDownload(Download download);
 
     /**
      * Ready specifies that it is always ready to download
@@ -16,7 +16,7 @@ public interface DownloadClientReadyChecker {
     class Ready implements DownloadClientReadyChecker {
 
         @Override
-        public boolean isAllowedToDownload(DownloadBatch downloadBatch) {
+        public boolean isAllowedToDownload(Download download) {
             return true;
         }
     }

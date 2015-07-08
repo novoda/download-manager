@@ -26,7 +26,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
-import android.database.Cursor;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -42,11 +41,8 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
@@ -67,33 +63,12 @@ public class DownloadService extends Service {
     private static final boolean DEBUG_LIFECYCLE = false;
     private final ContentLengthFetcher contentLengthFetcher = new ContentLengthFetcher();
 
-    //    @VisibleForTesting
-    SystemFacade systemFacade;
-
+    private SystemFacade systemFacade;
     private AlarmManager alarmManager;
     private StorageManager storageManager;
-
-    /**
-     * Observer to get notified when the content observer's data changes
-     */
     private DownloadManagerContentObserver downloadManagerContentObserver;
-
-    /**
-     * Class to handle Notification Manager updates
-     */
     private DownloadNotifier downloadNotifier;
-
-    /**
-     * The Service's view of the list of downloads, mapping download IDs to the corresponding info
-     * object. This is kept independently from the content provider, and the Service only initiates
-     * downloads based on this data, so that it can deal with situation where the data in the
-     * content provider changes or disappears.
-     */
-//    @GuardedBy("downloads")
-    private final Map<Long, DownloadInfo> downloads = new HashMap<>();
-
     private ExecutorService executor;
-
     private DownloadScanner downloadScanner;
 
     private HandlerThread updateThread;
@@ -102,6 +77,7 @@ public class DownloadService extends Service {
     private volatile int lastStartId;
     private DownloadClientReadyChecker downloadClientReadyChecker;
     private BatchRepository batchRepository;
+    private DownloadsRepository downloadsRepository;
     private DownloadDeleter downloadDeleter;
     private Downloads downloadsProvider;
 
@@ -130,15 +106,11 @@ public class DownloadService extends Service {
         throw new UnsupportedOperationException("Cannot bind to Download Manager Service");
     }
 
-    /**
-     * Initializes the service when it is first created
-     */
     @Override
     public void onCreate() {
         super.onCreate();
         Log.v("Service onCreate");
-        
-        this.downloadsProvider = new Downloads(DownloadProvider.AUTHORITY);
+
         this.downloadDeleter = new DownloadDeleter(getContentResolver());
         this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter, downloadsProvider);
 
@@ -183,6 +155,24 @@ public class DownloadService extends Service {
         ConcurrentDownloadsLimitProvider concurrentDownloadsLimitProvider = new ConcurrentDownloadsLimitProvider(packageManager, packageName);
         DownloadExecutorFactory factory = new DownloadExecutorFactory(concurrentDownloadsLimitProvider);
         executor = factory.createExecutor();
+
+        this.downloadsRepository = new DownloadsRepository(getContentResolver(), new DownloadsRepository.DownloadInfoCreator() {
+            @Override
+            public FileDownloadInfo create(FileDownloadInfo.Reader reader) {
+                return createNewDownloadInfo(reader);
+            }
+        }, downloadsProvider);
+
+    }
+
+    /**
+     * Keeps a local copy of the info about a download, and initiates the
+     * download if appropriate.
+     */
+    private FileDownloadInfo createNewDownloadInfo(FileDownloadInfo.Reader reader) {
+        FileDownloadInfo info = reader.newDownloadInfo(this, systemFacade, downloadClientReadyChecker, downloadsProvider);
+        Log.v("processing inserted download " + info.getId());
+        return info;
     }
 
     private DownloadClientReadyChecker getDownloadClientReadyChecker() {
@@ -261,10 +251,7 @@ public class DownloadService extends Service {
             // TODO: switch to asking real tasks to derive active state
             // TODO: handle media scanner timeouts
 
-            final boolean isActive;
-            synchronized (downloads) {
-                isActive = updateLocked();
-            }
+            boolean isActive = updateLocked();
 
             if (msg.what == MSG_FINAL_UPDATE) {
                 // Dump thread stacks belonging to pool
@@ -314,46 +301,31 @@ public class DownloadService extends Service {
      * <p/>
      * Should only be called from {#updateThread} as after being
      * requested through {#enqueueUpdate()}.
-     *
-     * @return If there are active tasks being processed, as of the database
+     * for (DownloadInfo info : downloadBatch.getDownloads()) {
+     * if (info.isDeleted) {
      * snapshot taken in this update.
      */
     private boolean updateLocked() {
 
         boolean isActive = false;
-        Set<Long> staleDownloadIds = new HashSet<>(downloads.keySet());
         long nextRetryTimeMillis = Long.MAX_VALUE;
         long now = systemFacade.currentTimeMillis();
 
-        Cursor downloadsCursor = getContentResolver().query(downloadsProvider.getAllDownloadsContentUri(), null, null, null, null);
-        try {
-            DownloadInfo.Reader reader = new DownloadInfo.Reader(getContentResolver(), downloadsCursor);
-            int idColumn = downloadsCursor.getColumnIndexOrThrow(Downloads.Impl._ID);
-            while (downloadsCursor.moveToNext()) {
-                long id = downloadsCursor.getLong(idColumn);
-                staleDownloadIds.remove(id);
+        Collection<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
+        updateTotalBytesFor(allDownloads);
 
-                DownloadInfo info = downloads.get(id);
-                if (info == null) {
-                    info = createNewDownloadInfo(reader);
-                    downloads.put(info.getId(), info);
-                } else {
-                    updateDownloadFromDatabase(reader, info);
-                }
+        List<DownloadBatch> downloadBatches = batchRepository.retrieveBatchesFor(allDownloads);
+        for (DownloadBatch downloadBatch : downloadBatches) {
 
+            for (FileDownloadInfo info : downloadBatch.getDownloads()) {
                 if (info.isDeleted()) {
                     downloadDeleter.deleteFileAndDatabaseRow(info);
                 } else if (Downloads.Impl.isStatusCancelled(info.getStatus()) || Downloads.Impl.isStatusError(info.getStatus())) {
                     downloadDeleter.deleteFileAndMediaReference(info);
                 } else {
-                    DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(info);
                     if (downloadBatch.isDeleted()) {
-                        continue;
+                        break;
                     }
-
-                    updateTotalBytesFor(info);
-                    batchRepository.updateCurrentSize(info.getBatchId());
-                    batchRepository.updateTotalSize(info.getBatchId());
 
                     isActive = kickOffDownloadTaskIfReady(isActive, info, downloadBatch);
                     isActive = kickOffMediaScanIfCompleted(isActive, info);
@@ -362,17 +334,11 @@ public class DownloadService extends Service {
                 // Keep track of nearest next action
                 nextRetryTimeMillis = Math.min(info.nextActionMillis(now), nextRetryTimeMillis);
             }
-        } finally {
-            downloadsCursor.close();
+
         }
 
-        downloadDeleter.cleanUpStaleDownloadsThatDisappeared(staleDownloadIds, downloads);
-
-        Collection<DownloadInfo> allDownloads = downloads.values();
-
-        List<DownloadBatch> batches = batchRepository.retrieveBatchesFor(allDownloads);
         batchRepository.deleteMarkedBatchesFor(allDownloads);
-        updateUserVisibleNotification(batches);
+        updateUserVisibleNotification(downloadBatches);
 
         // Set alarm when next action is in future. It's okay if the service
         // continues to run in meantime, since it will kick off an update pass.
@@ -387,16 +353,21 @@ public class DownloadService extends Service {
         return isActive;
     }
 
-    private void updateTotalBytesFor(DownloadInfo info) {
-        if (!info.hasTotalBytes()) {
-            ContentValues values = new ContentValues();
-            info.setTotalBytes(contentLengthFetcher.fetchContentLengthFor(info));
-            values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, info.getTotalBytes());
-            getContentResolver().update(info.getAllDownloadsUri(), values, null, null);
+    private void updateTotalBytesFor(Collection<FileDownloadInfo> downloadInfos) {
+        ContentValues values = new ContentValues();
+        for (FileDownloadInfo downloadInfo : downloadInfos) {
+            if (downloadInfo.getTotalBytes() == -1) {
+                long totalBytes = contentLengthFetcher.fetchContentLengthFor(downloadInfo);
+                values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, totalBytes);
+                getContentResolver().update(downloadInfo.getAllDownloadsUri(), values, null, null);
+
+                batchRepository.updateCurrentSize(downloadInfo.getBatchId());
+                batchRepository.updateTotalSize(downloadInfo.getBatchId());
+            }
         }
     }
 
-    private boolean kickOffDownloadTaskIfReady(boolean isActive, DownloadInfo info, DownloadBatch downloadBatch) {
+    private boolean kickOffDownloadTaskIfReady(boolean isActive, FileDownloadInfo info, DownloadBatch downloadBatch) {
         boolean isReadyToDownload = info.isReadyToDownload(downloadBatch);
         boolean downloadIsActive = info.isActive();
 
@@ -406,7 +377,7 @@ public class DownloadService extends Service {
         return isActive;
     }
 
-    private boolean kickOffMediaScanIfCompleted(boolean isActive, DownloadInfo info) {
+    private boolean kickOffMediaScanIfCompleted(boolean isActive, FileDownloadInfo info) {
         final boolean activeScan = info.startScanIfReady(downloadScanner);
         isActive |= activeScan;
         return isActive;
@@ -414,24 +385,6 @@ public class DownloadService extends Service {
 
     private void updateUserVisibleNotification(Collection<DownloadBatch> batches) {
         downloadNotifier.updateWith(batches);
-    }
-
-    /**
-     * Keeps a local copy of the info about a download, and initiates the
-     * download if appropriate.
-     */
-    private DownloadInfo createNewDownloadInfo(DownloadInfo.Reader reader) {
-        DownloadInfo info = reader.newDownloadInfo(this, systemFacade, downloadClientReadyChecker, downloadsProvider);
-        Log.v("processing inserted download " + info.getId());
-        return info;
-    }
-
-    /**
-     * Updates the local copy of the info about a download.
-     */
-    private void updateDownloadFromDatabase(DownloadInfo.Reader reader, DownloadInfo info) {
-        reader.updateFromDatabase(info);
-        Log.v("processing updated download " + info.getId() + ", status: " + info.getStatus());
     }
 
     @Override

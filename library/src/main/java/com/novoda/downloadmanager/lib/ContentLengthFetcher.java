@@ -20,7 +20,7 @@ class ContentLengthFetcher {
     private static final String HEADER_USER_AGENT = "User-Agent";
     private static final String METHOD_HEAD = "HEAD";
 
-    public long fetchContentLengthFor(DownloadInfo info) {
+    public long fetchContentLengthFor(FileDownloadInfo info) {
         HttpURLConnection conn = null;
         try {
             conn = (HttpURLConnection) new URL(info.getUri()).openConnection();
@@ -55,7 +55,7 @@ class ContentLengthFetcher {
         }
     }
 
-    private void addRequestHeaders(DownloadInfo info, HttpURLConnection conn) {
+    private void addRequestHeaders(FileDownloadInfo info, HttpURLConnection conn) {
         for (Pair<String, String> header : info.getHeaders()) {
             conn.addRequestProperty(header.first, header.second);
         }
@@ -66,7 +66,7 @@ class ContentLengthFetcher {
         }
     }
 
-    private String userAgent(DownloadInfo info) {
+    private String userAgent(FileDownloadInfo info) {
         String userAgent = info.getUserAgent();
         if (userAgent == null) {
             return Constants.DEFAULT_USER_AGENT;

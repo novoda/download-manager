@@ -24,7 +24,7 @@ import java.util.concurrent.Future;
 /**
  * Stores information about an individual download.
  */
-class DownloadInfo {
+class FileDownloadInfo {
 
     public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
     private static final int UNKNOWN_BYTES = -1;
@@ -124,20 +124,23 @@ class DownloadInfo {
     private final DownloadClientReadyChecker downloadClientReadyChecker;
     private final RandomNumberGenerator randomNumberGenerator;
     private final ContentValues downloadStatusContentValues;
+    private final PublicFacingDownloadMarshaller downloadMarshaller;
     private final Downloads downloads;
 
-    DownloadInfo(
+    FileDownloadInfo(
             Context context,
             SystemFacade systemFacade,
             RandomNumberGenerator randomNumberGenerator,
             DownloadClientReadyChecker downloadClientReadyChecker,
-            ContentValues downloadStatusContentValues,
+            ContentValues downloadStatusContentValues, 
+            PublicFacingDownloadMarshaller downloadMarshaller,
             Downloads downloads) {
         this.context = context;
         this.systemFacade = systemFacade;
         this.randomNumberGenerator = randomNumberGenerator;
         this.downloadClientReadyChecker = downloadClientReadyChecker;
         this.downloadStatusContentValues = downloadStatusContentValues;
+        this.downloadMarshaller = downloadMarshaller;
         this.downloads = downloads;
     }
 
@@ -445,7 +448,7 @@ class DownloadInfo {
     }
 
     private boolean isClientReadyToDownload(DownloadBatch downloadBatch) {
-        return downloadClientReadyChecker.isAllowedToDownload(downloadBatch);
+        return downloadClientReadyChecker.isAllowedToDownload(downloadMarshaller.marshall(downloadBatch));
     }
 
     /**
@@ -562,19 +565,21 @@ class DownloadInfo {
             this.cursor = cursor;
         }
 
-        public DownloadInfo newDownloadInfo(
+        public FileDownloadInfo newDownloadInfo(
                 Context context,
                 SystemFacade systemFacade,
                 DownloadClientReadyChecker downloadClientReadyChecker,
                 Downloads downloads) {
             RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
             ContentValues contentValues = new ContentValues();
-            DownloadInfo info = new DownloadInfo(
+            PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
+            FileDownloadInfo info = new FileDownloadInfo(
                     context,
                     systemFacade,
                     randomNumberGenerator,
                     downloadClientReadyChecker,
-                    contentValues,
+                    contentValues, 
+                    downloadMarshaller,
                     downloads);
             updateFromDatabase(info);
             readRequestHeaders(info);
@@ -582,7 +587,7 @@ class DownloadInfo {
             return info;
         }
 
-        public void updateFromDatabase(DownloadInfo info) {
+        public void updateFromDatabase(FileDownloadInfo info) {
             info.id = getLong(Downloads.Impl._ID);
             info.uri = getString(Downloads.Impl.COLUMN_URI);
             info.scannable = getInt(Downloads.Impl.COLUMN_MEDIA_SCANNED) == 1;
@@ -619,7 +624,7 @@ class DownloadInfo {
             }
         }
 
-        private void readRequestHeaders(DownloadInfo info) {
+        private void readRequestHeaders(FileDownloadInfo info) {
             info.clearHeaders();
             Uri headerUri = Uri.withAppendedPath(info.getAllDownloadsUri(), Downloads.Impl.RequestHeaders.URI_SEGMENT);
             Cursor cursor = resolver.query(headerUri, null, null, null, null);

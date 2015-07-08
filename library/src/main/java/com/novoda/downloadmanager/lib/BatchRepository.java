@@ -127,8 +127,8 @@ class BatchRepository {
         return STATUS_UNKNOWN_ERROR;
     }
 
-    public DownloadBatch retrieveBatchFor(DownloadInfo download) {
-        Collection<DownloadInfo> downloads = Collections.singletonList(download);
+    public DownloadBatch retrieveBatchFor(FileDownloadInfo download) {
+        Collection<FileDownloadInfo> downloads = Collections.singletonList(download);
         List<DownloadBatch> batches = retrieveBatchesFor(downloads);
 
         for (DownloadBatch batch : batches) {
@@ -140,7 +140,7 @@ class BatchRepository {
         return DownloadBatch.DELETED;
     }
 
-    public List<DownloadBatch> retrieveBatchesFor(Collection<DownloadInfo> downloads) {
+    public List<DownloadBatch> retrieveBatchesFor(Collection<FileDownloadInfo> downloads) {
         Cursor batchesCursor = resolver.query(this.downloads.getBatchContentUri(), null, null, null, null);
         List<DownloadBatch> batches = new ArrayList<>(batchesCursor.getCount());
         try {
@@ -164,10 +164,10 @@ class BatchRepository {
                 long currentSizeBytes = batchesCursor.getLong(currentBatchSizeIndex);
                 BatchInfo batchInfo = new BatchInfo(title, description, bigPictureUrl, visibility);
 
-                List<DownloadInfo> batchDownloads = new ArrayList<>(1);
-                for (DownloadInfo downloadInfo : downloads) {
-                    if (downloadInfo.getBatchId() == id) {
-                        batchDownloads.add(downloadInfo);
+                List<FileDownloadInfo> batchDownloads = new ArrayList<>(1);
+                for (FileDownloadInfo fileDownloadInfo : downloads) {
+                    if (fileDownloadInfo.getBatchId() == id) {
+                        batchDownloads.add(fileDownloadInfo);
                     }
                 }
                 batches.add(new DownloadBatch(id, batchInfo, batchDownloads, status, totalSizeBytes, currentSizeBytes));
@@ -179,7 +179,7 @@ class BatchRepository {
         return batches;
     }
 
-    public void deleteMarkedBatchesFor(Collection<DownloadInfo> downloads) {
+    public void deleteMarkedBatchesFor(Collection<FileDownloadInfo> downloads) {
         Cursor batchesCursor = resolver.query(this.downloads.getBatchContentUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null);
         List<Long> batchIdsToDelete = new ArrayList<>();
         try {
@@ -194,12 +194,12 @@ class BatchRepository {
         deleteBatchesForIds(batchIdsToDelete, downloads);
     }
 
-    private void deleteBatchesForIds(List<Long> batchIdsToDelete, Collection<DownloadInfo> downloads) {
+    private void deleteBatchesForIds(List<Long> batchIdsToDelete, Collection<FileDownloadInfo> downloads) {
         if (batchIdsToDelete.isEmpty()) {
             return;
         }
 
-        for (DownloadInfo download : downloads) {
+        for (FileDownloadInfo download : downloads) {
             if (batchIdsToDelete.contains(download.getBatchId())) {
                 downloadDeleter.deleteFileAndDatabaseRow(download);
             }
