@@ -369,8 +369,8 @@ public class DownloadService extends Service {
         boolean isReadyToDownload = info.isReadyToDownload(downloadBatch);
         boolean downloadIsActive = info.isActive();
 
-        if (isReadyToDownload || downloadIsActive) {
-            isActive |= info.startDownloadIfNotActive(executor, storageManager, downloadNotifier, downloadsRepository);
+        if (isReadyToDownload && !downloadIsActive) {
+            info.startDownload(executor, storageManager, downloadNotifier, downloadsRepository);
         }
         return isActive;
     }

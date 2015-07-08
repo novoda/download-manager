@@ -413,24 +413,15 @@ class FileDownloadInfo {
         }
     }
 
-    public boolean startDownloadIfNotActive(ExecutorService executor, StorageManager storageManager, DownloadNotifier downloadNotifier
+    public void startDownload(ExecutorService executor, StorageManager storageManager, DownloadNotifier downloadNotifier
             , DownloadsRepository downloadsRepository) {
-        synchronized (this) {
-            boolean isActive;
-            if (submittedThread == null || submittedThread.isDone()) {
-                String applicationPackageName = context.getApplicationContext().getPackageName();
-                BatchCompletionBroadcaster batchCompletionBroadcaster = new BatchCompletionBroadcaster(context, applicationPackageName);
-                ContentResolver contentResolver = context.getContentResolver();
-                BatchRepository batchRepository = BatchRepository.newInstance(contentResolver, new DownloadDeleter(contentResolver));
-                DownloadThread downloadThread = new DownloadThread(context, systemFacade, this, storageManager, downloadNotifier,
-                        batchCompletionBroadcaster, batchRepository, downloadsRepository);
-                submittedThread = executor.submit(downloadThread);
-                isActive = true;
-            } else {
-                isActive = !submittedThread.isDone();
-            }
-            return isActive;
-        }
+        String applicationPackageName = context.getApplicationContext().getPackageName();
+        BatchCompletionBroadcaster batchCompletionBroadcaster = new BatchCompletionBroadcaster(context, applicationPackageName);
+        ContentResolver contentResolver = context.getContentResolver();
+        BatchRepository batchRepository = BatchRepository.newInstance(contentResolver, new DownloadDeleter(contentResolver));
+        DownloadThread downloadThread = new DownloadThread(context, systemFacade, this, storageManager, downloadNotifier,
+                batchCompletionBroadcaster, batchRepository, downloadsRepository);
+        submittedThread = executor.submit(downloadThread);
     }
 
     public boolean isActive() {
