@@ -2,10 +2,6 @@ package com.novoda.downloadmanager.lib;
 
 final class DownloadsControl {
 
-    private DownloadsControl() {
-        // non-instantiable class
-    }
-
     /**
      * This download is allowed to run.
      */
@@ -14,4 +10,9 @@ final class DownloadsControl {
      * This download must pause at the first opportunity.
      */
     public static final int CONTROL_PAUSED = 1;
+
+    private DownloadsControl() {
+        // non-instantiable class
+    }
+
 }
