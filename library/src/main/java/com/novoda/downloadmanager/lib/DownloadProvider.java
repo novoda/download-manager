@@ -219,7 +219,7 @@ public final class DownloadProvider extends ContentProvider {
     private DownloadsUriProvider downloadsUriProvider;
 
     public DownloadProvider() {
-        downloadsUriProvider = DownloadsUriProvider.newInstance();
+        downloadsUriProvider = DownloadsUriProvider.getInstance();
 
         BASE_URIS = new Uri[]{
                 downloadsUriProvider.getContentUri(),

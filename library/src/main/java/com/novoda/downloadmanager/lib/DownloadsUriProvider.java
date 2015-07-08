@@ -10,7 +10,15 @@ public class DownloadsUriProvider {
     private final Uri batchContentUri;
     private final Uri contentUri;
 
-    public static DownloadsUriProvider newInstance() {
+    public static DownloadsUriProvider getInstance() {
+        return LazyInitialisationHelper.INSTANCE;
+    }
+
+    private static class LazyInitialisationHelper {
+        private static final DownloadsUriProvider INSTANCE = newInstance();
+    }
+
+    private static DownloadsUriProvider newInstance() {
         String authority = DownloadProvider.AUTHORITY;
 
         Uri publicityAccessibleDownloadsUriSegment = Uri.parse(authority + "/" + Downloads.Impl.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT);
@@ -28,7 +36,12 @@ public class DownloadsUriProvider {
         );
     }
 
-    DownloadsUriProvider(Uri publicityAccessibleDownloadsUriSegment, Uri downloadsByBatchUri, Uri allDownloadsContentUri, Uri batchContentUri, Uri contentUri) {
+    DownloadsUriProvider(
+            Uri publicityAccessibleDownloadsUriSegment,
+            Uri downloadsByBatchUri,
+            Uri allDownloadsContentUri,
+            Uri batchContentUri,
+            Uri contentUri) {
         this.publicityAccessibleDownloadsUriSegment = publicityAccessibleDownloadsUriSegment;
         this.downloadsByBatchUri = downloadsByBatchUri;
         this.allDownloadsContentUri = allDownloadsContentUri;

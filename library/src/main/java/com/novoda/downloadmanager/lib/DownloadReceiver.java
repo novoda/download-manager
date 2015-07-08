@@ -44,7 +44,7 @@ public class DownloadReceiver extends BroadcastReceiver {
     private final DownloadsUriProvider downloadsUriProvider;
 
     public DownloadReceiver() {
-        downloadsUriProvider = DownloadsUriProvider.newInstance();
+        downloadsUriProvider = DownloadsUriProvider.getInstance();
     }
 
     @Override

@@ -43,7 +43,7 @@ public class DeleteActivity extends AppCompatActivity implements QueryForDownloa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_delete);
-        downloads = DownloadsUriProvider.newInstance();
+        downloads = DownloadsUriProvider.getInstance();
         listView = (ListView) findViewById(R.id.main_downloads_list);
         downloadManager = DownloadManagerBuilder.from(this)
                 .withVerboseLogging()

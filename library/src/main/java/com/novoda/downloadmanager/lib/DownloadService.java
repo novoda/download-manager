@@ -111,7 +111,7 @@ public class DownloadService extends Service {
         super.onCreate();
         Log.v("Service onCreate");
 
-        this.downloadsUriProvider = DownloadsUriProvider.newInstance();
+        this.downloadsUriProvider = DownloadsUriProvider.getInstance();
         this.downloadDeleter = new DownloadDeleter(getContentResolver());
         this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter, downloadsUriProvider);
 

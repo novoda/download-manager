@@ -45,7 +45,7 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pause_resume);
 
-        downloadsUriProvider = DownloadsUriProvider.newInstance();
+        downloadsUriProvider = DownloadsUriProvider.getInstance();
 
         listView = (ListView) findViewById(R.id.main_downloads_list);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

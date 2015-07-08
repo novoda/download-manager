@@ -32,7 +32,7 @@ public class DownloadManagerBuilder {
 
     public DownloadManager build() {
         ContentResolver contentResolver = context.getContentResolver();
-        DownloadsUriProvider downloadsUriProvider = DownloadsUriProvider.newInstance();
+        DownloadsUriProvider downloadsUriProvider = DownloadsUriProvider.getInstance();
         return new DownloadManager(context, contentResolver, verboseLogging, downloadsUriProvider);
     }
 
