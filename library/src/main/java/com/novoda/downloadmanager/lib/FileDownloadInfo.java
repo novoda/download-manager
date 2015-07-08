@@ -21,6 +21,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import static com.novoda.downloadmanager.lib.DownloadsStatus.*;
+
 /**
  * Stores information about an individual download.
  */
@@ -537,7 +539,7 @@ class FileDownloadInfo {
             } else {
                 // TODO: increase strictness of value returned for unknown
                 // downloads; this is safe default for now.
-                return DownloadsStatus.STATUS_PENDING;
+                return STATUS_PENDING;
             }
         } finally {
             cursor.close();
@@ -588,7 +590,7 @@ class FileDownloadInfo {
         }
 
         public void updateFromDatabase(FileDownloadInfo info) {
-            info.id = getLong(Downloads.Impl._ID);
+            info.id = getLong(DownloadsColumns._ID);
             info.uri = getString(DownloadsColumns.COLUMN_URI);
             info.scannable = getInt(DownloadsColumns.COLUMN_MEDIA_SCANNED) == 1;
             info.noIntegrity = getInt(DownloadsColumns.COLUMN_NO_INTEGRITY) == 1;
