@@ -249,10 +249,7 @@ public class DownloadService extends Service {
             // TODO: switch to asking real tasks to derive active state
             // TODO: handle media scanner timeouts
 
-            final boolean isActive;
-            synchronized (DownloadService.this) {
-                isActive = updateLocked();
-            }
+            boolean isActive = updateLocked();
 
             if (msg.what == MSG_FINAL_UPDATE) {
                 // Dump thread stacks belonging to pool
