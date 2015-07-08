@@ -21,7 +21,7 @@ public class DownloadsUriProvider {
     private static DownloadsUriProvider newInstance() {
         String authority = "content://" + DownloadProvider.AUTHORITY;
 
-        Uri publicityAccessibleDownloadsUri = Uri.parse(authority + "/" + Downloads.Impl.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT);
+        Uri publicityAccessibleDownloadsUri = Uri.parse(authority + "/" + DownloadsDestination.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT);
         Uri downloadsByBatchUri = Uri.parse(authority + "/downloads_by_batch");
         Uri allDownloadsUri = Uri.parse(authority + "/all_downloads");
         Uri batchesUri = Uri.parse(authority + "/batches");

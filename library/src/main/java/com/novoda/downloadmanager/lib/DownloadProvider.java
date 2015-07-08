@@ -148,7 +148,7 @@ public final class DownloadProvider extends ContentProvider {
         URI_MATCHER.addURI(AUTHORITY, "download", MY_DOWNLOADS);
         URI_MATCHER.addURI(AUTHORITY, "download/#", MY_DOWNLOADS_ID);
         URI_MATCHER.addURI(AUTHORITY, "download/#/" + DownloadsColumnsRequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
-        URI_MATCHER.addURI(AUTHORITY, Downloads.Impl.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT + "/#", PUBLIC_DOWNLOAD_ID);
+        URI_MATCHER.addURI(AUTHORITY, DownloadsDestination.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT + "/#", PUBLIC_DOWNLOAD_ID);
     }
 
     /**

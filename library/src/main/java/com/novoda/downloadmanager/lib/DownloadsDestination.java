@@ -52,6 +52,10 @@ final class DownloadsDestination {
      * and caller wants to have this download displayed in Downloads App.
      */
     public static final int DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD = 6;
+    /**
+     * URI segment to access a publicly accessible downloaded file
+     */
+    public static final String PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT = "public_downloads";
 
     private DownloadsDestination() {
         // non-instantiable class

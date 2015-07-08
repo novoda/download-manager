@@ -41,11 +41,6 @@ final class Downloads {
         private Impl() {
         }
 
-        /**
-         * URI segment to access a publicly accessible downloaded file
-         */
-        public static final String PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT = "public_downloads";
-
         /*
          * Lists the destinations that an application can specify for a download.
          */
