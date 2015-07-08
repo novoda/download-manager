@@ -10,7 +10,7 @@ class Criteria {
     private final String sort;
     private final String[] selectionArguments;
 
-    Criteria(String selection, String sort, String... selectionArguments) {
+    Criteria(String selection, String[] selectionArguments, String sort) {
         this.selection = selection;
         this.sort = sort;
         this.selectionArguments = selectionArguments;
@@ -87,7 +87,7 @@ class Criteria {
         }
 
         public Criteria build() {
-            return new Criteria(selectionBuilder.build(), sortBuilder.build(), argumentBuilder.build());
+            return new Criteria(selectionBuilder.build(), argumentBuilder.build(), sortBuilder.build());
         }
 
         public static class SelectionBuilder {

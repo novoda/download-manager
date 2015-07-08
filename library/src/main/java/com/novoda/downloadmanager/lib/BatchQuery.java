@@ -20,7 +20,7 @@ public class BatchQuery {
     private final String sortOrder;
     private final String[] selectionArguments;
 
-    BatchQuery(String selection, String sortOrder, String[] selectionArguments) {
+    BatchQuery(String selection, String[] selectionArguments, String sortOrder) {
         this.selection = selection;
         this.sortOrder = sortOrder;
         this.selectionArguments = selectionArguments;
@@ -206,7 +206,7 @@ public class BatchQuery {
             String selection = criteria.getSelection();
             String sortOrder = criteria.getSort();
             String[] selectionArguments = criteria.getSelectionArguments();
-            return new BatchQuery(selection, sortOrder, selectionArguments);
+            return new BatchQuery(selection, selectionArguments, sortOrder);
         }
     }
 
