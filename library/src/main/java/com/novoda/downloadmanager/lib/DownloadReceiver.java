@@ -129,7 +129,7 @@ public class DownloadReceiver extends BroadcastReceiver {
      * Notify the owner of a running download that its notification was clicked.
      */
     private void sendNotificationClickedIntent(Context context, long[] ids) {
-        Uri uri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsContentUri(), ids[0]);
+        Uri uri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), ids[0]);
 
         Intent appIntent = new Intent(DownloadManager.ACTION_NOTIFICATION_CLICKED);
         appIntent.setPackage(context.getPackageName());
@@ -163,7 +163,7 @@ public class DownloadReceiver extends BroadcastReceiver {
      * user so it's not renewed later.
      */
     private void hideNotification(Context context, long batchId) {
-        Uri uri = ContentUris.withAppendedId(downloadsUriProvider.getBatchContentUri(), batchId);
+        Uri uri = ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), batchId);
         Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
         try {
             if (cursor.moveToFirst()) {
@@ -192,7 +192,7 @@ public class DownloadReceiver extends BroadcastReceiver {
         downloadValues.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_CANCELED);
         long batchId = getBatchId(intent);
         context.getContentResolver().update(
-                downloadsUriProvider.getAllDownloadsContentUri(),
+                downloadsUriProvider.getAllDownloadsUri(),
                 downloadValues,
                 Downloads.Impl.COLUMN_BATCH_ID + " = ?",
                 new String[]{String.valueOf(batchId)}
@@ -200,7 +200,7 @@ public class DownloadReceiver extends BroadcastReceiver {
         ContentValues batchValues = new ContentValues(1);
         batchValues.put(Downloads.Impl.Batches.COLUMN_STATUS, Downloads.Impl.STATUS_CANCELED);
         context.getContentResolver().update(
-                ContentUris.withAppendedId(downloadsUriProvider.getBatchContentUri(), batchId),
+                ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), batchId),
                 batchValues,
                 null,
                 null
@@ -222,7 +222,7 @@ public class DownloadReceiver extends BroadcastReceiver {
         if (intent.getData() != null) {
             downloadId = ContentUris.parseId(intent.getData());
         }
-        return ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsContentUri(), downloadId);
+        return ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), downloadId);
     }
 
     private long getBatchId(Intent intent) {

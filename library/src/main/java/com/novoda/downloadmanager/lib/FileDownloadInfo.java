@@ -479,7 +479,7 @@ class FileDownloadInfo {
     }
 
     public Uri getAllDownloadsUri() {
-        return ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsContentUri(), id);
+        return ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id);
     }
 
     /**
@@ -529,7 +529,7 @@ class FileDownloadInfo {
      */
     public static int queryDownloadStatus(ContentResolver resolver, long id, DownloadsUriProvider downloadsUriProvider) {
         final Cursor cursor = resolver.query(
-                ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsContentUri(), id),
+                ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id),
                 new String[]{Downloads.Impl.COLUMN_STATUS}, null, null, null);
         try {
             if (cursor.moveToFirst()) {

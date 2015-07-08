@@ -874,12 +874,12 @@ class DownloadThread implements Runnable {
         if (Downloads.Impl.isStatusCancelled(batchStatus)) {
             ContentValues values = new ContentValues(1);
             values.put(COLUMN_STATUS, STATUS_CANCELED);
-            getContentResolver().update(downloadsUriProvider.getAllDownloadsContentUri(), values, COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
+            getContentResolver().update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
         } else if (Downloads.Impl.isStatusError(batchStatus)) {
             ContentValues values = new ContentValues(1);
             values.put(COLUMN_STATUS, STATUS_BATCH_FAILED);
             getContentResolver().update(
-                    downloadsUriProvider.getAllDownloadsContentUri(),
+                    downloadsUriProvider.getAllDownloadsUri(),
                     values,
                     COLUMN_BATCH_ID + " = ? AND " + _ID + " <> ? ",
                     new String[]{String.valueOf(batchId), String.valueOf(downloadId)}

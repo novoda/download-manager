@@ -371,7 +371,7 @@ public class DownloadManager {
      */
     void setAccessAllDownloads(boolean accessAllDownloads) {
         if (accessAllDownloads) {
-            baseUri = downloadsUriProvider.getAllDownloadsContentUri();
+            baseUri = downloadsUriProvider.getAllDownloadsUri();
         } else {
             baseUri = downloadsUriProvider.getContentUri();
         }
@@ -401,14 +401,14 @@ public class DownloadManager {
     public void pauseBatch(long id) {
         ContentValues values = new ContentValues();
         values.put(Downloads.Impl.COLUMN_CONTROL, Downloads.Impl.CONTROL_PAUSED);
-        contentResolver.update(downloadsUriProvider.getAllDownloadsContentUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
+        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
     }
 
     public void resumeBatch(long id) {
         ContentValues values = new ContentValues();
         values.put(Downloads.Impl.COLUMN_CONTROL, Downloads.Impl.CONTROL_RUN);
         values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
-        contentResolver.update(downloadsUriProvider.getAllDownloadsContentUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
+        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
     }
 
     public void removeDownload(URI uri) {
@@ -467,9 +467,9 @@ public class DownloadManager {
         // if only one id is passed in, then include it in the uri itself.
         // this will eliminate a full database scan in the download service.
         if (ids.length == 1) {
-            return contentResolver.update(ContentUris.withAppendedId(downloadsUriProvider.getBatchContentUri(), ids[0]), values, null, null);
+            return contentResolver.update(ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), ids[0]), values, null, null);
         }
-        return contentResolver.update(downloadsUriProvider.getBatchContentUri(), values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
+        return contentResolver.update(downloadsUriProvider.getBatchesUri(), values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
     }
 
     /**
@@ -768,7 +768,7 @@ public class DownloadManager {
     private long insert(RequestBatch batch) {
         ContentValues values = batch.toContentValues();
         values.put(Downloads.Impl.Batches.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
-        Uri batchUri = contentResolver.insert(downloadsUriProvider.getBatchContentUri(), values);
+        Uri batchUri = contentResolver.insert(downloadsUriProvider.getBatchesUri(), values);
         return ContentUris.parseId(batchUri);
     }
 

@@ -148,7 +148,7 @@ public class DownloadService extends Service {
 
         downloadManagerContentObserver = new DownloadManagerContentObserver();
         getContentResolver().registerContentObserver(
-                downloadsUriProvider.getAllDownloadsContentUri(),
+                downloadsUriProvider.getAllDownloadsUri(),
                 true, downloadManagerContentObserver);
 
         PackageManager packageManager = getPackageManager();

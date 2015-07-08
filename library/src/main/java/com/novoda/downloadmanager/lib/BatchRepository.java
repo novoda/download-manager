@@ -50,13 +50,13 @@ class BatchRepository {
     void updateTotalSize(long batchId) {
         ContentValues updateValues = new ContentValues();
         updateValues.put(Batches.COLUMN_TOTAL_BYTES, getSummedBatchSizeInBytes(batchId, COLUMN_TOTAL_BYTES));
-        resolver.update(downloadsUriProvider.getBatchContentUri(), updateValues, Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
+        resolver.update(downloadsUriProvider.getBatchesUri(), updateValues, Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
     }
 
     void updateCurrentSize(long batchId) {
         ContentValues updateValues = new ContentValues();
         updateValues.put(Batches.COLUMN_CURRENT_BYTES, getSummedBatchSizeInBytes(batchId, COLUMN_CURRENT_BYTES));
-        resolver.update(downloadsUriProvider.getBatchContentUri(), updateValues, Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
+        resolver.update(downloadsUriProvider.getBatchesUri(), updateValues, Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
     }
 
     private long getSummedBatchSizeInBytes(long batchId, String columnName) {
@@ -65,7 +65,7 @@ class BatchRepository {
         try {
             String[] selectionArgs = {String.valueOf(batchId)};
             cursor = resolver.query(
-                    downloadsUriProvider.getAllDownloadsContentUri(),
+                    downloadsUriProvider.getAllDownloadsUri(),
                     new String[]{"sum(" + columnName + ")"},
                     COLUMN_BATCH_ID + " = ?",
                     selectionArgs,
@@ -85,7 +85,7 @@ class BatchRepository {
     void updateBatchStatus(long batchId, int status) {
         ContentValues values = new ContentValues();
         values.put(Batches.COLUMN_STATUS, status);
-        resolver.update(downloadsUriProvider.getBatchContentUri(), values, Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
+        resolver.update(downloadsUriProvider.getBatchesUri(), values, Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
     }
 
     int getBatchStatus(long batchId) {
@@ -94,7 +94,7 @@ class BatchRepository {
         try {
             String[] selectionArgs = {String.valueOf(batchId)};
             cursor = resolver.query(
-                    downloadsUriProvider.getAllDownloadsContentUri(),
+                    downloadsUriProvider.getAllDownloadsUri(),
                     null,
                     COLUMN_BATCH_ID + " = ?",
                     selectionArgs,
@@ -141,7 +141,7 @@ class BatchRepository {
     }
 
     public List<DownloadBatch> retrieveBatchesFor(Collection<FileDownloadInfo> downloads) {
-        Cursor batchesCursor = resolver.query(this.downloadsUriProvider.getBatchContentUri(), null, null, null, null);
+        Cursor batchesCursor = resolver.query(this.downloadsUriProvider.getBatchesUri(), null, null, null, null);
         List<DownloadBatch> batches = new ArrayList<>(batchesCursor.getCount());
         try {
             int idColumn = batchesCursor.getColumnIndexOrThrow(Downloads.Impl.Batches._ID);
@@ -180,7 +180,7 @@ class BatchRepository {
     }
 
     public void deleteMarkedBatchesFor(Collection<FileDownloadInfo> downloads) {
-        Cursor batchesCursor = resolver.query(this.downloadsUriProvider.getBatchContentUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null);
+        Cursor batchesCursor = resolver.query(this.downloadsUriProvider.getBatchesUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null);
         List<Long> batchIdsToDelete = new ArrayList<>();
         try {
             while (batchesCursor.moveToNext()) {
@@ -207,6 +207,6 @@ class BatchRepository {
 
         String selection = StringUtils.join(batchIdsToDelete, ", ");
         String[] selectionArgs = {selection};
-        resolver.delete(this.downloadsUriProvider.getBatchContentUri(), Downloads.Impl.Batches._ID + " IN (?)", selectionArgs);
+        resolver.delete(this.downloadsUriProvider.getBatchesUri(), Downloads.Impl.Batches._ID + " IN (?)", selectionArgs);
     }
 }

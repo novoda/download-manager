@@ -19,7 +19,7 @@ class DownloadsRepository {
     }
 
     public List<FileDownloadInfo> getAllDownloads() {
-        Cursor downloadsCursor = contentResolver.query(downloadsUriProvider.getAllDownloadsContentUri(), null, null, null, null);
+        Cursor downloadsCursor = contentResolver.query(downloadsUriProvider.getAllDownloadsUri(), null, null, null, null);
         try {
             List<FileDownloadInfo> downloads = new ArrayList<>();
             FileDownloadInfo.Reader reader = new FileDownloadInfo.Reader(contentResolver, downloadsCursor);

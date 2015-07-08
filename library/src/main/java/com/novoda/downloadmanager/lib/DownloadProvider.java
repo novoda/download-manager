@@ -223,8 +223,8 @@ public final class DownloadProvider extends ContentProvider {
 
         BASE_URIS = new Uri[]{
                 downloadsUriProvider.getContentUri(),
-                downloadsUriProvider.getAllDownloadsContentUri(),
-                downloadsUriProvider.getBatchContentUri()
+                downloadsUriProvider.getAllDownloadsUri(),
+                downloadsUriProvider.getBatchesUri()
         };;
     }
 
@@ -367,7 +367,7 @@ public final class DownloadProvider extends ContentProvider {
         }
         if (match == BATCHES) {
             long rowId = db.insert(Downloads.Impl.Batches.BATCHES_TABLE_NAME, null, values);
-            return ContentUris.withAppendedId(downloadsUriProvider.getBatchContentUri(), rowId);
+            return ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), rowId);
         }
         Log.d("calling insert on an unknown/invalid URI: " + uri);
         throw new IllegalArgumentException("Unknown/Invalid URI " + uri);

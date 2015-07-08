@@ -307,7 +307,7 @@ class StorageManager {
                 String.valueOf(Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
         String[] bindArgs = new String[]{destStr};
         Cursor cursor = contentResolver.query(
-                downloadsUriProvider.getAllDownloadsContentUri(),
+                downloadsUriProvider.getAllDownloadsUri(),
                 null,
                 "( " +
                         Downloads.Impl.COLUMN_STATUS + " = '" + Downloads.Impl.STATUS_SUCCESS + "' AND " +
@@ -329,7 +329,7 @@ class StorageManager {
                 totalFreed += file.length();
                 file.delete();
                 long id = cursor.getLong(cursor.getColumnIndex(Downloads.Impl._ID));
-                contentResolver.delete(ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsContentUri(), id), null, null);
+                contentResolver.delete(ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id), null, null);
             }
         } finally {
             cursor.close();
@@ -361,7 +361,7 @@ class StorageManager {
             return;
         }
         Cursor cursor = contentResolver
-                .query(downloadsUriProvider.getAllDownloadsContentUri(), new String[]{Downloads.Impl._DATA}, null, null, null);
+                .query(downloadsUriProvider.getAllDownloadsUri(), new String[]{Downloads.Impl._DATA}, null, null, null);
         try {
             if (cursor != null) {
                 while (cursor.moveToNext()) {
@@ -406,7 +406,7 @@ class StorageManager {
         Cursor cursor = null;
         try {
             cursor = contentResolver.query(
-                    downloadsUriProvider.getAllDownloadsContentUri(),
+                    downloadsUriProvider.getAllDownloadsUri(),
                     new String[]{Downloads.Impl._ID},
                     Downloads.Impl.COLUMN_STATUS + " >= '200'", null,
                     Downloads.Impl.COLUMN_LAST_MODIFICATION);
@@ -420,7 +420,7 @@ class StorageManager {
                 int columnId = cursor.getColumnIndexOrThrow(Downloads.Impl._ID);
                 while (numDelete > 0) {
                     Uri downloadUri = ContentUris.withAppendedId(
-                            downloadsUriProvider.getAllDownloadsContentUri(), cursor.getLong(columnId));
+                            downloadsUriProvider.getAllDownloadsUri(), cursor.getLong(columnId));
                     contentResolver.delete(downloadUri, null, null);
                     if (!cursor.moveToNext()) {
                         break;

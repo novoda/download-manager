@@ -143,7 +143,7 @@ class DownloadScanner implements MediaScannerConnectionClient {
         }
 
         final Uri downloadUri = ContentUris.withAppendedId(
-                downloadsUriProvider.getAllDownloadsContentUri(), req.id);
+                downloadsUriProvider.getAllDownloadsUri(), req.id);
         final int rows = resolver.update(downloadUri, values, null, null);
         if (rows == 0) {
             // Local row disappeared during scan; download was probably deleted
