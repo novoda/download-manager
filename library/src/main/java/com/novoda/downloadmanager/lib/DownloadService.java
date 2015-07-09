@@ -365,9 +365,9 @@ public class DownloadService extends Service {
                 values.put(DownloadContract.Downloads.COLUMN_TOTAL_BYTES, totalBytes);
                 getContentResolver().update(downloadInfo.getAllDownloadsUri(), values, null, null);
 
-                batchRepository.updateCurrentSize(downloadInfo.getBatchId());
                 batchRepository.updateTotalSize(downloadInfo.getBatchId());
             }
+            batchRepository.updateCurrentSize(downloadInfo.getBatchId());
         }
     }
 
