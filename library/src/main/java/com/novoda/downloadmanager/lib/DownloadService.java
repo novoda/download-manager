@@ -172,7 +172,7 @@ public class DownloadService extends Service {
      * download if appropriate.
      */
     private FileDownloadInfo createNewDownloadInfo(FileDownloadInfo.Reader reader) {
-        FileDownloadInfo info = reader.newDownloadInfo(this, systemFacade, downloadReadyChecker, downloadsUriProvider);
+        FileDownloadInfo info = reader.newDownloadInfo(this, systemFacade, downloadsUriProvider);
         Log.v("processing inserted download " + info.getId());
         return info;
     }
@@ -359,7 +359,7 @@ public class DownloadService extends Service {
     private void downloadOrContinueBatch(List<FileDownloadInfo> downloads) {
         for (FileDownloadInfo info : downloads) {
             if (!info.isSubmittedOrRunning()) {
-                info.startDownload(executor, storageManager, downloadNotifier, downloadsRepository);
+                info.startDownload(executor, storageManager, downloadNotifier, downloadsRepository, downloadReadyChecker);
             }
         }
     }

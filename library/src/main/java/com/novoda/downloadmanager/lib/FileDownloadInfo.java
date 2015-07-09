@@ -2,7 +2,6 @@ package com.novoda.downloadmanager.lib;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
@@ -105,23 +104,16 @@ class FileDownloadInfo {
     private final Context context;
     private final SystemFacade systemFacade;
     private final RandomNumberGenerator randomNumberGenerator;
-    private final ContentValues downloadStatusContentValues;
-    private final DownloadReadyChecker downloadReadyChecker;
     private final DownloadsUriProvider downloadsUriProvider;
 
     FileDownloadInfo(
             Context context,
             SystemFacade systemFacade,
             RandomNumberGenerator randomNumberGenerator,
-            ContentValues downloadStatusContentValues,
-            PublicFacingDownloadMarshaller downloadMarshaller,
-            DownloadReadyChecker downloadReadyChecker,
             DownloadsUriProvider downloadsUriProvider) {
         this.context = context;
         this.systemFacade = systemFacade;
         this.randomNumberGenerator = randomNumberGenerator;
-        this.downloadStatusContentValues = downloadStatusContentValues;
-        this.downloadReadyChecker = downloadReadyChecker;
         this.downloadsUriProvider = downloadsUriProvider;
     }
 
@@ -293,7 +285,8 @@ class FileDownloadInfo {
             ExecutorService executor,
             StorageManager storageManager,
             DownloadNotifier downloadNotifier,
-            DownloadsRepository downloadsRepository) {
+            DownloadsRepository downloadsRepository,
+            DownloadReadyChecker downloadReadyChecker) {
         String applicationPackageName = context.getApplicationContext().getPackageName();
         BatchCompletionBroadcaster batchCompletionBroadcaster = new BatchCompletionBroadcaster(context, applicationPackageName);
         ContentResolver contentResolver = context.getContentResolver();
@@ -396,22 +389,9 @@ class FileDownloadInfo {
             this.cursor = cursor;
         }
 
-        public FileDownloadInfo newDownloadInfo(
-                Context context,
-                SystemFacade systemFacade,
-                DownloadReadyChecker downloadReadyChecker,
-                DownloadsUriProvider downloadsUriProvider) {
+        public FileDownloadInfo newDownloadInfo(Context context, SystemFacade systemFacade, DownloadsUriProvider downloadsUriProvider) {
             RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
-            ContentValues contentValues = new ContentValues();
-            PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
-            FileDownloadInfo info = new FileDownloadInfo(
-                    context,
-                    systemFacade,
-                    randomNumberGenerator,
-                    contentValues,
-                    downloadMarshaller,
-                    downloadReadyChecker,
-                    downloadsUriProvider);
+            FileDownloadInfo info = new FileDownloadInfo(context, systemFacade, randomNumberGenerator, downloadsUriProvider);
             updateFromDatabase(info);
             readRequestHeaders(info);
 
