@@ -331,7 +331,7 @@ class FileDownloadInfo {
         BatchRepository batchRepository = new BatchRepository(contentResolver, new DownloadDeleter(contentResolver), downloadsUriProvider);
         DownloadThread downloadThread = new DownloadThread(
                 context, systemFacade, this, storageManager, downloadNotifier,
-                batchCompletionBroadcaster, batchRepository, downloadsUriProvider, downloadsRepository, new NetworkChecker(systemFacade), downloadReadyChecker);
+                batchCompletionBroadcaster, batchRepository, downloadsUriProvider, downloadsRepository, new NetworkChecker(systemFacade), downloadReadyChecker, id, batchId);
         executor.submit(downloadThread);
     }
 
