@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
-  package="com.novoda.downloadmanager.demo"
-  xmlns:android="http://schemas.android.com/apk/res/android">
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.novoda.downloadmanager.demo">
 
   <uses-permission android:name="android.permission.INTERNET" />
 
@@ -28,6 +28,11 @@
     <activity
       android:name="com.novoda.downloadmanager.demo.extended.delete.DeleteActivity"
       android:label="@string/delete_activty_title" />
+
+    <activity
+      android:name="com.novoda.downloadmanager.demo.extended.batches.ShowBatchesActivity"
+      android:label="@string/title_activity_show_batches" />
+
 
     <activity
       android:name="com.novoda.downloadmanager.demo.extended.batches.BatchesActivity"

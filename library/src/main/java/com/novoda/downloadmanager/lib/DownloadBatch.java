@@ -68,10 +68,10 @@ class DownloadBatch {
     }
 
     private long getNextActionMillisFor(long now, FileDownloadInfo info) {
-        if (Downloads.Impl.isStatusCompleted(status)) {
+        if (DownloadStatus.isCompleted(status)) {
             return Long.MAX_VALUE;
         }
-        if (status != Downloads.Impl.STATUS_WAITING_TO_RETRY) {
+        if (status != DownloadStatus.WAITING_TO_RETRY) {
             return 0;
         }
         long when = info.restartTime(now);
@@ -106,7 +106,7 @@ class DownloadBatch {
             if (info.isDeleted()) {
                 downloadDeleter.deleteFileAndDatabaseRow(info);
                 isDeleted = true;
-            } else if (Downloads.Impl.isStatusCancelled(info.getStatus()) || Downloads.Impl.isStatusError(info.getStatus())) {
+            } else if (DownloadStatus.isCancelled(info.getStatus()) || DownloadStatus.isError(info.getStatus())) {
                 downloadDeleter.deleteFileAndMediaReference(info);
                 isDeleted = true;
             }

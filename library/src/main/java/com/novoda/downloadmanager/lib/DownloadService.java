@@ -79,6 +79,7 @@ public class DownloadService extends Service {
     private DownloadsRepository downloadsRepository;
     private DownloadDeleter downloadDeleter;
     private DownloadReadyChecker downloadReadyChecker;
+    private DownloadsUriProvider downloadsUriProvider;
 
     /**
      * Receives notifications when the data in the content provider changes
@@ -114,8 +115,9 @@ public class DownloadService extends Service {
             systemFacade = new RealSystemFacade(this);
         }
 
+        this.downloadsUriProvider = DownloadsUriProvider.getInstance();
         this.downloadDeleter = new DownloadDeleter(getContentResolver());
-        this.batchRepository = BatchRepository.newInstance(getContentResolver(), downloadDeleter);
+        this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter, downloadsUriProvider);
         PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
         DownloadClientReadyChecker downloadClientReadyChecker = getDownloadClientReadyChecker();
         this.downloadReadyChecker = new DownloadReadyChecker(systemFacade, new NetworkChecker(systemFacade), downloadClientReadyChecker, downloadMarshaller);
@@ -126,27 +128,28 @@ public class DownloadService extends Service {
         File externalStorageDir = Environment.getExternalStorageDirectory();
         File internalStorageDir = Environment.getDataDirectory();
         File systemCacheDir = Environment.getDownloadCacheDirectory();
-        storageManager = new StorageManager(contentResolver, externalStorageDir, internalStorageDir, systemCacheDir, downloadDataDir);
+        storageManager = new StorageManager(contentResolver, externalStorageDir, internalStorageDir, systemCacheDir, downloadDataDir, downloadsUriProvider);
 
         updateThread = new HandlerThread("DownloadManager-UpdateThread");
         updateThread.start();
         updateHandler = new Handler(updateThread.getLooper(), updateCallback);
 
-        downloadScanner = new DownloadScanner(getContentResolver(), this);
+        downloadScanner = new DownloadScanner(getContentResolver(), this, downloadsUriProvider);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         NotificationDisplayer notificationDisplayer = new NotificationDisplayer(
                 this,
                 notificationManager,
                 getNotificationImageRetriever(),
-                getResources());
+                getResources(),
+                downloadsUriProvider);
 
         downloadNotifier = new DownloadNotifier(this, notificationDisplayer);
         downloadNotifier.cancelAll();
 
         downloadManagerContentObserver = new DownloadManagerContentObserver();
         getContentResolver().registerContentObserver(
-                Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
+                downloadsUriProvider.getAllDownloadsUri(),
                 true, downloadManagerContentObserver);
 
         PackageManager packageManager = getPackageManager();
@@ -160,7 +163,7 @@ public class DownloadService extends Service {
             public FileDownloadInfo create(FileDownloadInfo.Reader reader) {
                 return createNewDownloadInfo(reader);
             }
-        });
+        }, downloadsUriProvider);
 
     }
 
@@ -169,7 +172,7 @@ public class DownloadService extends Service {
      * download if appropriate.
      */
     private FileDownloadInfo createNewDownloadInfo(FileDownloadInfo.Reader reader) {
-        FileDownloadInfo info = reader.newDownloadInfo(this, systemFacade, downloadReadyChecker);
+        FileDownloadInfo info = reader.newDownloadInfo(this, systemFacade, downloadReadyChecker, downloadsUriProvider);
         Log.v("processing inserted download " + info.getId());
         return info;
     }
@@ -305,6 +308,7 @@ public class DownloadService extends Service {
      * snapshot taken in this update.
      */
     private boolean updateLocked() {
+
         boolean isActive = false;
         long nextRetryTimeMillis = Long.MAX_VALUE;
         long now = systemFacade.currentTimeMillis();
@@ -313,7 +317,6 @@ public class DownloadService extends Service {
         updateTotalBytesFor(allDownloads);
 
         List<DownloadBatch> downloadBatches = batchRepository.retrieveBatchesFor(allDownloads);
-
         for (DownloadBatch downloadBatch : downloadBatches) {
             if (downloadBatch.isActive()) {
                 isActive = true;
@@ -360,14 +363,14 @@ public class DownloadService extends Service {
     private void updateTotalBytesFor(Collection<FileDownloadInfo> downloadInfos) {
         ContentValues values = new ContentValues();
         for (FileDownloadInfo downloadInfo : downloadInfos) {
-            if (downloadInfo.getTotalBytes() == -1) {
+            if (downloadInfo.hasUnknownTotalBytes()) {
                 long totalBytes = contentLengthFetcher.fetchContentLengthFor(downloadInfo);
-                values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, totalBytes);
+                values.put(DownloadContract.Downloads.COLUMN_TOTAL_BYTES, totalBytes);
                 getContentResolver().update(downloadInfo.getAllDownloadsUri(), values, null, null);
 
-                batchRepository.updateCurrentSize(downloadInfo.getBatchId());
                 batchRepository.updateTotalSize(downloadInfo.getBatchId());
             }
+            batchRepository.updateCurrentSize(downloadInfo.getBatchId());
         }
     }
 

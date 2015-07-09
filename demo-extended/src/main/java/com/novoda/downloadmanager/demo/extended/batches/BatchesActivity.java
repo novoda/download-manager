@@ -1,5 +1,6 @@
 package com.novoda.downloadmanager.demo.extended.batches;
 
+import android.content.Intent;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
@@ -57,6 +58,14 @@ public class BatchesActivity extends AppCompatActivity implements QueryForDownlo
                     }
                 });
 
+        findViewById(R.id.batch_show_button).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(@NonNull View v) {
+                        startActivity(new Intent(BatchesActivity.this, ShowBatchesActivity.class));
+                    }
+                });
+
         setupQueryingExample();
     }
 
@@ -92,7 +101,7 @@ public class BatchesActivity extends AppCompatActivity implements QueryForDownlo
     @Override
     protected void onStart() {
         super.onStart();
-        getContentResolver().registerContentObserver(DownloadManager.CONTENT_URI, true, updateSelf);
+        getContentResolver().registerContentObserver(downloadManager.getContentUri(), true, updateSelf);
     }
 
     private final ContentObserver updateSelf = new ContentObserver(handler) {

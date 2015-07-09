@@ -121,18 +121,18 @@ class DownloadNotifier {
     private String buildNotificationTag(DownloadBatch batch) {
         int status = batch.getStatus();
         int visibility = batch.getInfo().getVisibility();
-        if (status == Downloads.Impl.STATUS_QUEUED_FOR_WIFI) {
+        if (status == DownloadStatus.QUEUED_FOR_WIFI) {
             return TYPE_WAITING + ":" + context.getPackageName();
-        } else if (status == Downloads.Impl.STATUS_RUNNING && shouldShowActiveItem(visibility)) {
+        } else if (status == DownloadStatus.RUNNING && shouldShowActiveItem(visibility)) {
             return TYPE_ACTIVE + ":" + context.getPackageName();
-        } else if (Downloads.Impl.isStatusError(status) && !Downloads.Impl.isStatusCancelled(status)
+        } else if (DownloadStatus.isError(status) && !DownloadStatus.isCancelled(status)
                 && shouldShowCompletedItem(visibility)) {
             // Failed downloads always have unique notifications
             return TYPE_FAILED + ":" + batch.getBatchId();
-        } else if (Downloads.Impl.isStatusCancelled(status) && shouldShowCompletedItem(visibility)) {
+        } else if (DownloadStatus.isCancelled(status) && shouldShowCompletedItem(visibility)) {
             // Cancelled downloads always have unique notifications
             return TYPE_CANCELLED + ":" + batch.getBatchId();
-        } else if (Downloads.Impl.isStatusSuccess(status) && shouldShowCompletedItem(visibility)) {
+        } else if (DownloadStatus.isSuccess(status) && shouldShowCompletedItem(visibility)) {
             // Complete downloads always have unique notifications
             return TYPE_SUCCESS + ":" + batch.getBatchId();
         } else {

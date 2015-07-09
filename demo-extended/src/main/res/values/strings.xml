@@ -5,10 +5,12 @@
   <string name="batches_activty_title">Batch download</string>
 
   <string name="no_downloads">No downloads yet.\nTap the \'Download\' button to add items to the download queue.</string>
+  <string name="no_batches">No batches yet.\nGo back and tap the \'Download\' button to begin downloading.</string>
   <string name="button_download_text">Download a podcast</string>
   <string name="button_refresh_text">Refresh</string>
   <string name="button_single_download_text">Download a single item</string>
   <string name="button_batch_download_text">Download a batch of items</string>
+  <string name="button_batch_show_text">Show batches</string>
   <string name="button_delete_text">Delete batch</string>
 
   <string name="database_filename" translate="false">my_database.db</string>
@@ -18,4 +20,16 @@
   <string name="pause_resume_description">This demo shows how the pause and resume of a download works. Tap on a download that\'s in progress to pause it and tap on a paused item to resume it.</string>
   <string name="delete_description">This demo shows how the deletion of a download works. Use the \'Delete\' buttons to delete downloads that are in any state.</string>
   <string name="batches_description">This demo shows how you can create a batch to download many files as one download (the list shows them separately to show a batch contains more than one item).</string>
+  <string name="title_activity_show_batches">ShowBatchesActivity</string>
+
+  <string name="hello_world">Hello world!</string>
+  <string name="action_settings">Settings</string>
+  <string name="filter_batches_by_statuses">Filter the batches by following statuses:</string>
+  <string name="all">All</string>
+  <string name="successful">Successful</string>
+  <string name="pending">Pending</string>
+  <string name="downloading">Downloading</string>
+  <string name="failed">Failed</string>
+  <string name="failed_or_pending">Failed or pending</string>
+  <string name="live">Live</string>
 </resources>

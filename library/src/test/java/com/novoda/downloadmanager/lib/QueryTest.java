@@ -38,7 +38,7 @@ public class QueryTest {
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
-        assertThat(stringArgumentCaptor.getValue()).contains(Downloads.Impl.COLUMN_BATCH_ID + " IN (1,2,3)");
+        assertThat(stringArgumentCaptor.getValue()).contains(DownloadContract.Downloads.COLUMN_BATCH_ID + " IN (1,2,3)");
     }
 
     @Test
@@ -47,7 +47,7 @@ public class QueryTest {
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
-        assertThat(stringArgumentCaptor.getValue()).doesNotContain(Downloads.Impl.COLUMN_BATCH_ID + " IN ");
+        assertThat(stringArgumentCaptor.getValue()).doesNotContain(DownloadContract.Downloads.COLUMN_BATCH_ID + " IN ");
     }
 
     @Test
@@ -69,13 +69,13 @@ public class QueryTest {
     public void whenOrderingByLivenessThenTheResolverIsQueriedWithTheExpectedSort() {
         new Query().orderByLiveness().runQuery(resolver, null, uri);
 
-        verify(resolver).query(any(Uri.class), any(String[].class), anyString(), any(String[].class), eq("CASE batch_status " +
+        verify(resolver).query(any(Uri.class), any(String[].class), anyString(), any(String[].class), eq("CASE status " +
                         "WHEN 192 THEN 1 " +
                         "WHEN 190 THEN 2 " +
                         "WHEN 193 THEN 3 " +
                         "WHEN 498 THEN 4 " +
                         "WHEN 200 THEN 5 " +
-                        "ELSE 2 END"));
+                        "ELSE 6 END, _id ASC"));
     }
 
     @Test(expected = IllegalArgumentException.class)
