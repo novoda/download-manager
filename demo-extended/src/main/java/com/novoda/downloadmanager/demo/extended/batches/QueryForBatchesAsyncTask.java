@@ -26,7 +26,7 @@ public class QueryForBatchesAsyncTask extends AsyncTask<BatchQuery, Void, List<B
 
     @Override
     protected List<Batch> doInBackground(BatchQuery... params) {
-        Cursor cursor = downloadManager.queryBatch(params[0]);
+        Cursor cursor = downloadManager.query(params[0]);
         List<Batch> batches = new ArrayList<>();
         try {
             while (cursor.moveToNext()) {

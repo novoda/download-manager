@@ -501,7 +501,7 @@ public class DownloadManager {
         return new CursorTranslator(underlyingCursor, Downloads.Impl.DOWNLOADS_BY_BATCH_URI);
     }
 
-    public Cursor queryBatch(BatchQuery query) {
+    public Cursor query(BatchQuery query) {
         BatchRepository batchRepository = BatchRepository.newInstance(contentResolver, new DownloadDeleter(contentResolver));
         Cursor cursor = batchRepository.retrieveFor(query);
         if (cursor == null) {
