@@ -69,13 +69,13 @@ public class QueryTest {
     public void whenOrderingByLivenessThenTheResolverIsQueriedWithTheExpectedSort() {
         new Query().orderByLiveness().runQuery(resolver, null, uri);
 
-        verify(resolver).query(any(Uri.class), any(String[].class), anyString(), any(String[].class), eq("CASE batch_status " +
+        verify(resolver).query(any(Uri.class), any(String[].class), anyString(), any(String[].class), eq("CASE status " +
                         "WHEN 192 THEN 1 " +
                         "WHEN 190 THEN 2 " +
                         "WHEN 193 THEN 3 " +
                         "WHEN 498 THEN 4 " +
                         "WHEN 200 THEN 5 " +
-                        "ELSE 2 END"));
+                        "ELSE 6 END, _id ASC"));
     }
 
     @Test(expected = IllegalArgumentException.class)
