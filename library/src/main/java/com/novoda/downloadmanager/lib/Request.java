@@ -54,7 +54,7 @@ public class Request {
     private long batchId = -1L;
     /**
      * if a file is designated as a MediaScanner scannable file, the following value is
-     * stored in the database column {@link com.novoda.downloadmanager.lib.Downloads.Impl#COLUMN_MEDIA_SCANNED}.
+     * stored in the database column {@link DownloadContract.Downloads#COLUMN_MEDIA_SCANNED}.
      */
     static final int SCANNABLE_VALUE_YES = 0;
     // value of 1 is stored in the above column by DownloadProvider after it is scanned by
@@ -62,7 +62,7 @@ public class Request {
     /**
      * if a file is designated as a file that should not be scanned by MediaScanner,
      * the following value is stored in the database column
-     * {@link com.novoda.downloadmanager.lib.Downloads.Impl#COLUMN_MEDIA_SCANNED}.
+     * {@link DownloadContract.Downloads#COLUMN_MEDIA_SCANNED}.
      */
     static final int SCANNABLE_VALUE_NO = 2;
 
@@ -404,30 +404,31 @@ public class Request {
     ContentValues toContentValues() {
         ContentValues values = new ContentValues();
         assert uri != null;
-        values.put(Downloads.Impl.COLUMN_URI, uri.toString());
+        values.put(DownloadContract.Downloads.COLUMN_URI, uri.toString());
 
         if (destinationUri != null) {
-            values.put(Downloads.Impl.COLUMN_DESTINATION, Downloads.Impl.DESTINATION_FILE_URI);
-            values.put(Downloads.Impl.COLUMN_FILE_NAME_HINT, destinationUri.toString());
+            values.put(DownloadContract.Downloads.COLUMN_DESTINATION, DownloadsDestination.DESTINATION_FILE_URI);
+            values.put(DownloadContract.Downloads.COLUMN_FILE_NAME_HINT, destinationUri.toString());
         } else {
-            values.put(Downloads.Impl.COLUMN_DESTINATION,
-                    Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
+            values.put(
+                    DownloadContract.Downloads.COLUMN_DESTINATION,
+                    DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE);
         }
         // is the file supposed to be media-scannable?
-        values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED, (scannable) ? SCANNABLE_VALUE_YES : SCANNABLE_VALUE_NO);
+        values.put(DownloadContract.Downloads.COLUMN_MEDIA_SCANNED, (scannable) ? SCANNABLE_VALUE_YES : SCANNABLE_VALUE_NO);
 
         if (!requestHeaders.isEmpty()) {
             encodeHttpHeaders(values);
         }
 
-        putIfNonNull(values, Downloads.Impl.COLUMN_MIME_TYPE, mimeType);
+        putIfNonNull(values, DownloadContract.Downloads.COLUMN_MIME_TYPE, mimeType);
 
-        values.put(Downloads.Impl.COLUMN_ALLOWED_NETWORK_TYPES, allowedNetworkTypes);
-        values.put(Downloads.Impl.COLUMN_ALLOW_ROAMING, roamingAllowed);
-        values.put(Downloads.Impl.COLUMN_ALLOW_METERED, meteredAllowed);
-        values.put(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, isVisibleInDownloadsUi);
-        values.put(Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS, extraField);
-        values.put(Downloads.Impl.COLUMN_BATCH_ID, batchId);
+        values.put(DownloadContract.Downloads.COLUMN_ALLOWED_NETWORK_TYPES, allowedNetworkTypes);
+        values.put(DownloadContract.Downloads.COLUMN_ALLOW_ROAMING, roamingAllowed);
+        values.put(DownloadContract.Downloads.COLUMN_ALLOW_METERED, meteredAllowed);
+        values.put(DownloadContract.Downloads.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, isVisibleInDownloadsUi);
+        values.put(DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS, extraField);
+        values.put(DownloadContract.Downloads.COLUMN_BATCH_ID, batchId);
 
         return values;
     }
@@ -436,7 +437,7 @@ public class Request {
         int index = 0;
         for (Pair<String, String> header : requestHeaders) {
             String headerString = header.first + ": " + header.second;
-            values.put(Downloads.Impl.RequestHeaders.INSERT_KEY_PREFIX + index, headerString);
+            values.put(DownloadContract.RequestHeaders.INSERT_KEY_PREFIX + index, headerString);
             index++;
         }
     }

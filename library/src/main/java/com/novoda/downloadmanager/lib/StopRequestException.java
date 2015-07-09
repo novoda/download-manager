@@ -15,8 +15,8 @@
  */
 package com.novoda.downloadmanager.lib;
 
-import static com.novoda.downloadmanager.lib.Downloads.Impl.STATUS_UNHANDLED_HTTP_CODE;
-import static com.novoda.downloadmanager.lib.Downloads.Impl.STATUS_UNHANDLED_REDIRECT;
+import static com.novoda.downloadmanager.lib.DownloadStatus.UNHANDLED_HTTP_CODE;
+import static com.novoda.downloadmanager.lib.DownloadStatus.UNHANDLED_REDIRECT;
 
 /**
  * Raised to indicate that the current request should be stopped immediately.
@@ -52,9 +52,9 @@ class StopRequestException extends Exception {
         if (code >= 400 && code < 600) {
             throw new StopRequestException(code, error);
         } else if (code >= 300 && code < 400) {
-            throw new StopRequestException(STATUS_UNHANDLED_REDIRECT, error);
+            throw new StopRequestException(UNHANDLED_REDIRECT, error);
         } else {
-            throw new StopRequestException(STATUS_UNHANDLED_HTTP_CODE, error);
+            throw new StopRequestException(UNHANDLED_HTTP_CODE, error);
         }
     }
 }

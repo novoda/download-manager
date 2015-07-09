@@ -52,7 +52,7 @@ public class Query {
     private Integer statusFlags = null;
     private boolean onlyIncludeVisibleInDownloadsUi = false;
     private String[] filterExtras;
-    private String orderString = Downloads.Impl.COLUMN_LAST_MODIFICATION + " DESC";
+    private String orderString = DownloadContract.Downloads.COLUMN_LAST_MODIFICATION + " DESC";
 
     /**
      * Include only the downloads with the given IDs.
@@ -125,10 +125,10 @@ public class Query {
         String resolvedOrderColumn;
         switch (column) {
             case DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP:
-                resolvedOrderColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
+                resolvedOrderColumn = DownloadContract.Downloads.COLUMN_LAST_MODIFICATION;
                 break;
             case DownloadManager.COLUMN_TOTAL_SIZE_BYTES:
-                resolvedOrderColumn = Downloads.Impl.COLUMN_TOTAL_BYTES;
+                resolvedOrderColumn = DownloadContract.Downloads.COLUMN_TOTAL_BYTES;
                 break;
             default:
                 throw new IllegalArgumentException("Cannot order by " + column);
@@ -166,11 +166,11 @@ public class Query {
         filterByStatus(selectionParts);
 
         if (onlyIncludeVisibleInDownloadsUi) {
-            selectionParts.add(Downloads.Impl.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI + " != '0'");
+            selectionParts.add(DownloadContract.Downloads.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI + " != '0'");
         }
 
         // only return rows which are not marked 'deleted = 1'
-        selectionParts.add(Downloads.Impl.COLUMN_DELETED + " != '1'");
+        selectionParts.add(DownloadContract.Downloads.COLUMN_DELETED + " != '1'");
 
         String selection = joinStrings(" AND ", selectionParts);
 
@@ -203,7 +203,7 @@ public class Query {
      */
     private String getWhereClauseForBatchIds(long[] ids) {
         String[] idStrings = longArrayToStringArray(ids);
-        return Downloads.Impl.COLUMN_BATCH_ID + " IN (" + joinStrings(",", Arrays.asList(idStrings)) + ")";
+        return DownloadContract.Downloads.COLUMN_BATCH_ID + " IN (" + joinStrings(",", Arrays.asList(idStrings)) + ")";
     }
 
     private void filterByExtras(List<String> selectionParts) {
@@ -224,19 +224,19 @@ public class Query {
 
         List<String> parts = new ArrayList<>();
         if ((statusFlags & DownloadManager.STATUS_PENDING) != 0) {
-            parts.add(statusClause("=", Downloads.Impl.STATUS_PENDING));
+            parts.add(statusClause("=", DownloadStatus.PENDING));
         }
         if ((statusFlags & DownloadManager.STATUS_RUNNING) != 0) {
-            parts.add(statusClause("=", Downloads.Impl.STATUS_RUNNING));
+            parts.add(statusClause("=", DownloadStatus.RUNNING));
         }
         if ((statusFlags & DownloadManager.STATUS_PAUSED) != 0) {
-            parts.add(statusClause("=", Downloads.Impl.STATUS_PAUSED_BY_APP));
-            parts.add(statusClause("=", Downloads.Impl.STATUS_WAITING_TO_RETRY));
-            parts.add(statusClause("=", Downloads.Impl.STATUS_WAITING_FOR_NETWORK));
-            parts.add(statusClause("=", Downloads.Impl.STATUS_QUEUED_FOR_WIFI));
+            parts.add(statusClause("=", DownloadStatus.PAUSED_BY_APP));
+            parts.add(statusClause("=", DownloadStatus.WAITING_TO_RETRY));
+            parts.add(statusClause("=", DownloadStatus.WAITING_FOR_NETWORK));
+            parts.add(statusClause("=", DownloadStatus.QUEUED_FOR_WIFI));
         }
         if ((statusFlags & DownloadManager.STATUS_SUCCESSFUL) != 0) {
-            parts.add(statusClause("=", Downloads.Impl.STATUS_SUCCESS));
+            parts.add(statusClause("=", DownloadStatus.SUCCESS));
         }
         if ((statusFlags & DownloadManager.STATUS_FAILED) != 0) {
             parts.add("(" + statusClause(">=", 400) + " AND " + statusClause("<", 600) + ")");
@@ -267,10 +267,10 @@ public class Query {
     }
 
     private String extrasClause(String extra) {
-        return Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS + " = '" + extra + "'";
+        return DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS + " = '" + extra + "'";
     }
 
     private String statusClause(String operator, int value) {
-        return Downloads.Impl.COLUMN_STATUS + operator + "'" + value + "'";
+        return DownloadContract.Downloads.COLUMN_STATUS + operator + "'" + value + "'";
     }
 }

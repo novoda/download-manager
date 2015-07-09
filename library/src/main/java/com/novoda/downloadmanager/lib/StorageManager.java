@@ -81,13 +81,21 @@ class StorageManager {
      * misc members
      */
     private final ContentResolver contentResolver;
+    private final DownloadsUriProvider downloadsUriProvider;
 
-    StorageManager(ContentResolver contentResolver, File externalStorageDir, File internalStorageDir, File systemCacheDir, File downloadDataDir) {
+    StorageManager(
+            ContentResolver contentResolver, 
+            File externalStorageDir, 
+            File internalStorageDir, 
+            File systemCacheDir, 
+            File downloadDataDir, 
+            DownloadsUriProvider downloadsUriProvider) {
         this.contentResolver = contentResolver;
         this.externalStorageDir = externalStorageDir;
         this.internalStorageDir = internalStorageDir;
         this.systemCacheDir = systemCacheDir;
         this.downloadDataDir = downloadDataDir;
+        this.downloadsUriProvider = downloadsUriProvider;
         startThreadToCleanupDatabaseAndPurgeFileSystem();
     }
 
@@ -142,18 +150,18 @@ class StorageManager {
             throw new IllegalArgumentException("path can't be null");
         }
         switch (destination) {
-            case Downloads.Impl.DESTINATION_CACHE_PARTITION:
-            case Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING:
-            case Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE:
+            case DownloadsDestination.DESTINATION_CACHE_PARTITION:
+            case DownloadsDestination.DESTINATION_CACHE_PARTITION_NOROAMING:
+            case DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE:
                 dir = downloadDataDir;
                 break;
-            case Downloads.Impl.DESTINATION_EXTERNAL:
+            case DownloadsDestination.DESTINATION_EXTERNAL:
                 dir = externalStorageDir;
                 break;
-            case Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION:
+            case DownloadsDestination.DESTINATION_SYSTEMCACHE_PARTITION:
                 dir = systemCacheDir;
                 break;
-            case Downloads.Impl.DESTINATION_FILE_URI:
+            case DownloadsDestination.DESTINATION_FILE_URI:
                 if (path.startsWith(externalStorageDir.getPath())) {
                     dir = externalStorageDir;
                 } else if (path.startsWith(downloadDataDir.getPath())) {
@@ -180,10 +188,10 @@ class StorageManager {
         if (targetBytes == 0) {
             return;
         }
-        if (destination == Downloads.Impl.DESTINATION_FILE_URI ||
-                destination == Downloads.Impl.DESTINATION_EXTERNAL) {
+        if (destination == DownloadsDestination.DESTINATION_FILE_URI ||
+                destination == DownloadsDestination.DESTINATION_EXTERNAL) {
             if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                throw new StopRequestException(Downloads.Impl.STATUS_DEVICE_NOT_FOUND_ERROR, "external media not mounted");
+                throw new StopRequestException(DownloadStatus.DEVICE_NOT_FOUND_ERROR, "external media not mounted");
             }
         }
         // is there enough space in the file system of the given param 'root'.
@@ -208,7 +216,8 @@ class StorageManager {
                 if (root.equals(systemCacheDir)) {
                     Log.w("System cache dir ('/cache') is running low on space." + "space available (in bytes): " + bytesAvailable);
                 } else {
-                    throw new StopRequestException(Downloads.Impl.STATUS_INSUFFICIENT_SPACE_ERROR,
+                    throw new StopRequestException(
+                            DownloadStatus.INSUFFICIENT_SPACE_ERROR,
                             "space in the filesystem rooted at: " + root + " is below 10% availability. stopping this download.");
                 }
             }
@@ -228,7 +237,8 @@ class StorageManager {
             }
         }
         if (bytesAvailable < targetBytes) {
-            throw new StopRequestException(Downloads.Impl.STATUS_INSUFFICIENT_SPACE_ERROR,
+            throw new StopRequestException(
+                    DownloadStatus.INSUFFICIENT_SPACE_ERROR,
                     "not enough free space in the filesystem rooted at: " + root + " and unable to free any more");
         }
     }
@@ -260,18 +270,18 @@ class StorageManager {
     File locateDestinationDirectory(String mimeType, int destination, long contentLength)
             throws StopRequestException {
         switch (destination) {
-            case Downloads.Impl.DESTINATION_CACHE_PARTITION:
-            case Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE:
-            case Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING:
+            case DownloadsDestination.DESTINATION_CACHE_PARTITION:
+            case DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE:
+            case DownloadsDestination.DESTINATION_CACHE_PARTITION_NOROAMING:
                 return downloadDataDir;
-            case Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION:
+            case DownloadsDestination.DESTINATION_SYSTEMCACHE_PARTITION:
                 return systemCacheDir;
-            case Downloads.Impl.DESTINATION_EXTERNAL:
+            case DownloadsDestination.DESTINATION_EXTERNAL:
                 File base = new File(externalStorageDir.getPath() + Constants.DEFAULT_DL_SUBDIR);
                 if (!base.isDirectory() && !base.mkdir()) {
                     // Can't create download directory, e.g. because a file called "download"
                     // already exists at the root level, or the SD card filesystem is read-only.
-                    throw new StopRequestException(Downloads.Impl.STATUS_FILE_ERROR, "unable to create external downloads directory " + base.getPath());
+                    throw new StopRequestException(DownloadStatus.FILE_ERROR, "unable to create external downloads directory " + base.getPath());
                 }
                 return base;
             default:
@@ -294,24 +304,24 @@ class StorageManager {
      */
     private long discardPurgeableFiles(int destination, long targetBytes) {
         Log.i("discardPurgeableFiles: destination = " + destination + ", targetBytes = " + targetBytes);
-        String destStr = (destination == Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION) ?
+        String destStr = (destination == DownloadsDestination.DESTINATION_SYSTEMCACHE_PARTITION) ?
                 String.valueOf(destination) :
-                String.valueOf(Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE);
+                String.valueOf(DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE);
         String[] bindArgs = new String[]{destStr};
         Cursor cursor = contentResolver.query(
-                Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
+                downloadsUriProvider.getAllDownloadsUri(),
                 null,
                 "( " +
-                        Downloads.Impl.COLUMN_STATUS + " = '" + Downloads.Impl.STATUS_SUCCESS + "' AND " +
-                        Downloads.Impl.COLUMN_DESTINATION + " = ? )",
+                        DownloadContract.Downloads.COLUMN_STATUS + " = '" + DownloadStatus.SUCCESS + "' AND " +
+                        DownloadContract.Downloads.COLUMN_DESTINATION + " = ? )",
                 bindArgs,
-                Downloads.Impl.COLUMN_LAST_MODIFICATION);
+                DownloadContract.Downloads.COLUMN_LAST_MODIFICATION);
         if (cursor == null) {
             return 0;
         }
         long totalFreed = 0;
         try {
-            final int dataIndex = cursor.getColumnIndex(Downloads.Impl._DATA);
+            final int dataIndex = cursor.getColumnIndex(DownloadContract.Downloads.COLUMN_DATA);
             while (cursor.moveToNext() && totalFreed < targetBytes) {
                 final String data = cursor.getString(dataIndex);
                 if (TextUtils.isEmpty(data)) continue;
@@ -320,8 +330,8 @@ class StorageManager {
                 Log.d("purging " + file.getAbsolutePath() + " for " + file.length() + " bytes");
                 totalFreed += file.length();
                 file.delete();
-                long id = cursor.getLong(cursor.getColumnIndex(Downloads.Impl._ID));
-                contentResolver.delete(ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id), null, null);
+                long id = cursor.getLong(cursor.getColumnIndex(DownloadContract.Downloads._ID));
+                contentResolver.delete(ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id), null, null);
             }
         } finally {
             cursor.close();
@@ -353,7 +363,7 @@ class StorageManager {
             return;
         }
         Cursor cursor = contentResolver
-                .query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, new String[]{Downloads.Impl._DATA}, null, null, null);
+                .query(downloadsUriProvider.getAllDownloadsUri(), new String[]{DownloadContract.Downloads.COLUMN_DATA}, null, null, null);
         try {
             if (cursor != null) {
                 while (cursor.moveToNext()) {
@@ -397,10 +407,11 @@ class StorageManager {
         Log.i("in trimDatabase");
         Cursor cursor = null;
         try {
-            cursor = contentResolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI,
-                    new String[]{Downloads.Impl._ID},
-                    Downloads.Impl.COLUMN_STATUS + " >= '200'", null,
-                    Downloads.Impl.COLUMN_LAST_MODIFICATION);
+            cursor = contentResolver.query(
+                    downloadsUriProvider.getAllDownloadsUri(),
+                    new String[]{DownloadContract.Downloads._ID},
+                    DownloadContract.Downloads.COLUMN_STATUS + " >= '200'", null,
+                    DownloadContract.Downloads.COLUMN_LAST_MODIFICATION);
             if (cursor == null) {
                 // This isn't good - if we can't do basic queries in our database, nothings gonna work
                 Log.e("null cursor in trimDatabase");
@@ -408,10 +419,10 @@ class StorageManager {
             }
             if (cursor.moveToFirst()) {
                 int numDelete = cursor.getCount() - Constants.MAX_DOWNLOADS;
-                int columnId = cursor.getColumnIndexOrThrow(Downloads.Impl._ID);
+                int columnId = cursor.getColumnIndexOrThrow(DownloadContract.Downloads._ID);
                 while (numDelete > 0) {
                     Uri downloadUri = ContentUris.withAppendedId(
-                            Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, cursor.getLong(columnId));
+                            downloadsUriProvider.getAllDownloadsUri(), cursor.getLong(columnId));
                     contentResolver.delete(downloadUri, null, null);
                     if (!cursor.moveToNext()) {
                         break;
