@@ -75,6 +75,8 @@ class DownloadThread implements Runnable {
     private final BatchRepository batchRepository;
     private final DownloadsUriProvider downloadsUriProvider;
     private final DownloadsRepository downloadsRepository;
+    private final NetworkChecker networkChecker;
+    private final DownloadReadyChecker downloadReadyChecker;
 
     private volatile boolean policyDirty;
 
@@ -86,7 +88,9 @@ class DownloadThread implements Runnable {
                           BatchCompletionBroadcaster batchCompletionBroadcaster,
                           BatchRepository batchRepository,
                           DownloadsUriProvider downloadsUriProvider,
-                          DownloadsRepository downloadsRepository) {
+                          DownloadsRepository downloadsRepository,
+                          NetworkChecker networkChecker,
+                          DownloadReadyChecker downloadReadyChecker) {
         this.context = context;
         this.systemFacade = systemFacade;
         this.originalDownloadInfo = originalDownloadInfo;
@@ -96,6 +100,8 @@ class DownloadThread implements Runnable {
         this.batchRepository = batchRepository;
         this.downloadsUriProvider = downloadsUriProvider;
         this.downloadsRepository = downloadsRepository;
+        this.networkChecker = networkChecker;
+        this.downloadReadyChecker = downloadReadyChecker;
     }
 
     /**
@@ -204,7 +210,8 @@ class DownloadThread implements Runnable {
         }
 
         DownloadBatch currentBatch = batchRepository.retrieveBatchFor(originalDownloadInfo);
-        if (!originalDownloadInfo.isReadyToDownload(currentBatch)) {
+
+        if (!downloadReadyChecker.canDownload(currentBatch)) {
             Log.d("Download " + originalDownloadInfo.getId() + " is not ready to download: skipping");
             return;
         }
@@ -301,7 +308,7 @@ class DownloadThread implements Runnable {
 
             cleanupDestination(state, finalStatus);
             notifyDownloadCompleted(state, finalStatus, errorMsg, numFailed);
-            
+
             Log.i("Download " + originalDownloadInfo.getId() + " finished with status " + DownloadStatus.statusToString(finalStatus));
 
 //            netPolicy.unregisterListener(mPolicyListener);
@@ -473,7 +480,7 @@ class DownloadThread implements Runnable {
         // checking connectivity will apply current policy
         policyDirty = false;
 
-        final NetworkState networkUsable = originalDownloadInfo.checkCanUseNetwork();
+        final NetworkState networkUsable = networkChecker.checkCanUseNetwork(originalDownloadInfo);
         if (networkUsable != NetworkState.OK) {
             int status = DownloadStatus.WAITING_FOR_NETWORK;
             if (networkUsable == NetworkState.UNUSABLE_DUE_TO_SIZE) {
