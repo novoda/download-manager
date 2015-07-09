@@ -538,6 +538,10 @@ class FileDownloadInfo {
         return totalBytes != UNKNOWN_BYTES;
     }
 
+    public boolean hasUnknownTotalBytes() {
+        return !hasTotalBytes();
+    }
+
     private void addHeader(String header, String value) {
         requestHeaders.add(Pair.create(header, value));
     }

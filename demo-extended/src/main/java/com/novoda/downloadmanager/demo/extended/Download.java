@@ -2,6 +2,10 @@ package com.novoda.downloadmanager.demo.extended;
 
 import com.novoda.downloadmanager.lib.DownloadManager;
 
+/**
+ * Model object to encapsulate data from the Downloads table.
+ * It represents a single download containing the file name of the downloaded file.
+ */
 public class Download {
     private final String title;
     private final String fileName;
@@ -24,18 +28,19 @@ public class Download {
     }
 
     public String getDownloadStatusText() {
-        if (downloadStatus == DownloadManager.STATUS_RUNNING) {
-            return "Downloading";
-        } else if (downloadStatus == DownloadManager.STATUS_SUCCESSFUL) {
-            return "Complete";
-        } else if (downloadStatus == DownloadManager.STATUS_FAILED) {
-            return "Failed";
-        } else if (downloadStatus == DownloadManager.STATUS_PENDING) {
-            return "Queued";
-        } else if (downloadStatus == DownloadManager.STATUS_PAUSED) {
-            return "Paused";
-        } else {
-            return "WTH";
+        switch (downloadStatus) {
+            case DownloadManager.STATUS_RUNNING:
+                return "Downloading";
+            case DownloadManager.STATUS_SUCCESSFUL:
+                return "Complete";
+            case DownloadManager.STATUS_FAILED:
+                return "Failed";
+            case DownloadManager.STATUS_PENDING:
+                return "Queued";
+            case DownloadManager.STATUS_PAUSED:
+                return "Paused";
+            default:
+                return "WTH";
         }
     }
 
