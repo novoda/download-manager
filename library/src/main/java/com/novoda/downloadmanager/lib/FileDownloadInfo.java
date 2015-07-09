@@ -7,9 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Pair;
 
@@ -28,10 +26,23 @@ class FileDownloadInfo {
     public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
     private static final int UNKNOWN_BYTES = -1;
 
+    public boolean allowMetered() {
+        return allowMetered;
+    }
+
+    public boolean allowRoaming() {
+        return allowRoaming;
+    }
+
+    public boolean isRecommendedSizeLimitBypassed() {
+        return bypassRecommendedSizeLimit == 0;
+    }
+
     // TODO: move towards these in-memory objects being sources of truth, and periodically pushing to provider.
 
     /**
      * Constants used to indicate network state for a specific download, after
+     * private final CanDownload canDownload;
      * applying any requested constraints.
      */
     public enum NetworkState {
@@ -118,19 +129,21 @@ class FileDownloadInfo {
     private final RandomNumberGenerator randomNumberGenerator;
     private final ContentValues downloadStatusContentValues;
     private final PublicFacingDownloadMarshaller downloadMarshaller;
+    private final CanDownload canDownload;
 
     FileDownloadInfo(
             Context context,
             SystemFacade systemFacade,
             RandomNumberGenerator randomNumberGenerator,
             DownloadClientReadyChecker downloadClientReadyChecker,
-            ContentValues downloadStatusContentValues, PublicFacingDownloadMarshaller downloadMarshaller) {
+            ContentValues downloadStatusContentValues, PublicFacingDownloadMarshaller downloadMarshaller, CanDownload canDownload) {
         this.context = context;
         this.systemFacade = systemFacade;
         this.randomNumberGenerator = randomNumberGenerator;
         this.downloadClientReadyChecker = downloadClientReadyChecker;
         this.downloadStatusContentValues = downloadStatusContentValues;
         this.downloadMarshaller = downloadMarshaller;
+        this.canDownload = canDownload;
     }
 
     public long getId() {
@@ -252,7 +265,7 @@ class FileDownloadInfo {
     /**
      * Returns the time when a download should be restarted.
      */
-    private long restartTime(long now) {
+    public long restartTime(long now) {
         if (numFailed == 0) {
             return now;
         }
@@ -260,90 +273,6 @@ class FileDownloadInfo {
             return lastMod + retryAfter;
         }
         return lastMod + Constants.RETRY_FIRST_DELAY * (1000 + randomNumberGenerator.generate()) * (1 << (numFailed - 1));
-    }
-
-    /**
-     * Returns whether this download should be enqueued.
-     */
-    private boolean isDownloadManagerReadyToDownload() {
-        if (control == Downloads.Impl.CONTROL_PAUSED) {
-            // the download is paused, so it's not going to start
-            return false;
-        }
-        switch (status) {
-            case 0: // status hasn't been initialized yet, this is a new download
-            case Downloads.Impl.STATUS_PENDING: // download is explicit marked as ready to start
-            case Downloads.Impl.STATUS_RUNNING: // download interrupted (process killed etc) while
-                // running, without a chance to update the database
-                return true;
-
-            case Downloads.Impl.STATUS_WAITING_FOR_NETWORK:
-            case Downloads.Impl.STATUS_QUEUED_FOR_WIFI:
-                return checkCanUseNetwork() == NetworkState.OK;
-
-            case Downloads.Impl.STATUS_WAITING_TO_RETRY:
-                // download was waiting for a delayed restart
-                final long now = systemFacade.currentTimeMillis();
-                return restartTime(now) <= now;
-            case Downloads.Impl.STATUS_DEVICE_NOT_FOUND_ERROR:
-                // is the media mounted?
-                return Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
-            case Downloads.Impl.STATUS_INSUFFICIENT_SPACE_ERROR:
-                // avoids repetition of retrying download
-                return false;
-        }
-        return false;
-    }
-
-    /**
-     * Returns whether this download is allowed to use the network.
-     */
-    public NetworkState checkCanUseNetwork() {
-        final NetworkInfo info = systemFacade.getActiveNetworkInfo();
-        if (info == null || !info.isConnected()) {
-            return NetworkState.NO_CONNECTION;
-        }
-        if (NetworkInfo.DetailedState.BLOCKED.equals(info.getDetailedState())) {
-            return NetworkState.BLOCKED;
-        }
-        if (systemFacade.isNetworkRoaming() && !isRoamingAllowed()) {
-            return NetworkState.CANNOT_USE_ROAMING;
-        }
-        if (systemFacade.isActiveNetworkMetered() && !allowMetered) {
-            return NetworkState.TYPE_DISALLOWED_BY_REQUESTOR;
-        }
-        return checkIsNetworkTypeAllowed(info.getType());
-    }
-
-    private boolean isRoamingAllowed() {
-        return allowRoaming;
-    }
-
-    /**
-     * Check if this download can proceed over the given network type.
-     *
-     * @param networkType a constant from ConnectivityManager.TYPE_*.
-     * @return one of the NETWORK_* constants
-     */
-    private NetworkState checkIsNetworkTypeAllowed(int networkType) {
-        if (totalBytes <= 0) {
-            return NetworkState.OK; // we don't know the size yet
-        }
-        if (networkType == ConnectivityManager.TYPE_WIFI) {
-            return NetworkState.OK; // anything goes over wifi
-        }
-        Long maxBytesOverMobile = systemFacade.getMaxBytesOverMobile();
-        if (maxBytesOverMobile != null && totalBytes > maxBytesOverMobile) {
-            return NetworkState.UNUSABLE_DUE_TO_SIZE;
-        }
-        if (bypassRecommendedSizeLimit == 0) {
-            Long recommendedMaxBytesOverMobile = systemFacade.getRecommendedMaxBytesOverMobile();
-            if (recommendedMaxBytesOverMobile != null
-                    && totalBytes > recommendedMaxBytesOverMobile) {
-                return NetworkState.RECOMMENDED_UNUSABLE_DUE_TO_SIZE;
-            }
-        }
-        return NetworkState.OK;
     }
 
     /**
@@ -403,7 +332,7 @@ class FileDownloadInfo {
         synchronized (this) {
             // This order MATTERS
             // it means completed downloads will not be accounted for in later downloadInfo queries
-            return isDownloadManagerReadyToDownload() && isClientReadyToDownload(downloadBatch);
+            return canDownload.isDownloadManagerReadyToDownload(this) && isClientReadyToDownload(downloadBatch);
         }
     }
 
@@ -414,7 +343,7 @@ class FileDownloadInfo {
         ContentResolver contentResolver = context.getContentResolver();
         BatchRepository batchRepository = BatchRepository.newInstance(contentResolver, new DownloadDeleter(contentResolver));
         DownloadThread downloadThread = new DownloadThread(context, systemFacade, this, storageManager, downloadNotifier,
-                batchCompletionBroadcaster, batchRepository, downloadsRepository);
+                batchCompletionBroadcaster, batchRepository, downloadsRepository, new NetworkChecker(systemFacade));
         executor.submit(downloadThread);
     }
 
@@ -554,12 +483,13 @@ class FileDownloadInfo {
             RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
             ContentValues contentValues = new ContentValues();
             PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
+            CanDownload canDownload = new CanDownload(systemFacade, new NetworkChecker(systemFacade));
             FileDownloadInfo info = new FileDownloadInfo(
                     context,
                     systemFacade,
                     randomNumberGenerator,
                     downloadClientReadyChecker,
-                    contentValues, downloadMarshaller);
+                    contentValues, downloadMarshaller, canDownload);
             updateFromDatabase(info);
             readRequestHeaders(info);
 

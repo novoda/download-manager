@@ -74,13 +74,14 @@ class DownloadThread implements Runnable {
     private final BatchCompletionBroadcaster batchCompletionBroadcaster;
     private final BatchRepository batchRepository;
     private final DownloadsRepository downloadsRepository;
+    private final NetworkChecker networkChecker;
 
     private volatile boolean policyDirty;
 
     public DownloadThread(Context context, SystemFacade systemFacade, FileDownloadInfo originalDownloadInfo,
                           StorageManager storageManager, DownloadNotifier downloadNotifier,
                           BatchCompletionBroadcaster batchCompletionBroadcaster, BatchRepository batchRepository,
-                          DownloadsRepository downloadsRepository) {
+                          DownloadsRepository downloadsRepository, NetworkChecker networkChecker) {
         this.context = context;
         this.systemFacade = systemFacade;
         this.originalDownloadInfo = originalDownloadInfo;
@@ -89,6 +90,7 @@ class DownloadThread implements Runnable {
         this.batchCompletionBroadcaster = batchCompletionBroadcaster;
         this.batchRepository = batchRepository;
         this.downloadsRepository = downloadsRepository;
+        this.networkChecker = networkChecker;
     }
 
     /**
@@ -466,7 +468,7 @@ class DownloadThread implements Runnable {
         // checking connectivity will apply current policy
         policyDirty = false;
 
-        final NetworkState networkUsable = originalDownloadInfo.checkCanUseNetwork();
+        final NetworkState networkUsable = networkChecker.checkCanUseNetwork(originalDownloadInfo);
         if (networkUsable != NetworkState.OK) {
             int status = STATUS_WAITING_FOR_NETWORK;
             if (networkUsable == NetworkState.UNUSABLE_DUE_TO_SIZE) {
