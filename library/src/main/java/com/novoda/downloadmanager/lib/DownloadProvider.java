@@ -225,7 +225,7 @@ public final class DownloadProvider extends ContentProvider {
                 downloadsUriProvider.getContentUri(),
                 downloadsUriProvider.getAllDownloadsUri(),
                 downloadsUriProvider.getBatchesUri()
-        };;
+        };
     }
 
     /**
