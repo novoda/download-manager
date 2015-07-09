@@ -2,7 +2,7 @@ package com.novoda.downloadmanager.lib;
 
 import android.net.Uri;
 
-public class DownloadsUriProvider {
+class DownloadsUriProvider {
 
     private final Uri publicityAccessibleDownloadsUri;
     private final Uri downloadsByBatchUri;

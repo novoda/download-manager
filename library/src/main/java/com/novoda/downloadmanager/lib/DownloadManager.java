@@ -350,11 +350,19 @@ public class DownloadManager {
 
     private Uri baseUri;
 
-    public DownloadManager(Context context, ContentResolver resolver, DownloadsUriProvider downloadsUriProvider) {
+    public DownloadManager(Context context, ContentResolver resolver) {
+        this(context, resolver, false, DownloadsUriProvider.getInstance());
+    }
+
+    public DownloadManager(Context context, ContentResolver contentResolver, boolean verboseLogging) {
+        this(context, contentResolver, verboseLogging, DownloadsUriProvider.getInstance());
+    }
+
+    DownloadManager(Context context, ContentResolver resolver, DownloadsUriProvider downloadsUriProvider) {
         this(context, resolver, false, downloadsUriProvider);
     }
 
-    public DownloadManager(Context context,
+    DownloadManager(Context context,
                            ContentResolver contentResolver,
                            boolean verboseLogging,
                            DownloadsUriProvider downloadsUriProvider) {
@@ -719,6 +727,10 @@ public class DownloadManager {
      */
     private Uri getDownloadUri(long id) {
         return ContentUris.withAppendedId(baseUri, id);
+    }
+
+    public Uri getContentUri() {
+        return downloadsUriProvider.getContentUri();
     }
 
     /**
