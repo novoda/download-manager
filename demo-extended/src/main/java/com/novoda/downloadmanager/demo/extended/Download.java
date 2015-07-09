@@ -2,6 +2,10 @@ package com.novoda.downloadmanager.demo.extended;
 
 import com.novoda.downloadmanager.lib.DownloadManager;
 
+/**
+ * Model object to encapsulate data from the Downloads table.
+ * It represents a single download containing the file name of the downloaded file.
+ */
 public class Download {
     private final String title;
     private final String fileName;

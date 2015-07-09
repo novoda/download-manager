@@ -1,7 +1,13 @@
 package com.novoda.downloadmanager.demo.extended.batches;
 
+import com.novoda.downloadmanager.demo.extended.Download;
 import com.novoda.downloadmanager.lib.DownloadManager;
 
+/**
+ * Model object to encapsulate data from the Batches table.
+ * The difference between this and {@link Download} is that the batch doesn't
+ * contain the file path as it represents a batch of downloads.
+ */
 public class Batch {
     private final int id;
     private final String title;
