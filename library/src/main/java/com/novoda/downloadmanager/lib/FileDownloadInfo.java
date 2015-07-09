@@ -101,17 +101,11 @@ class FileDownloadInfo {
     private long batchId;
 
     private final List<Pair<String, String>> requestHeaders = new ArrayList<>();
-    private final Context context;
     private final SystemFacade systemFacade;
     private final RandomNumberGenerator randomNumberGenerator;
     private final DownloadsUriProvider downloadsUriProvider;
 
-    FileDownloadInfo(
-            Context context,
-            SystemFacade systemFacade,
-            RandomNumberGenerator randomNumberGenerator,
-            DownloadsUriProvider downloadsUriProvider) {
-        this.context = context;
+    FileDownloadInfo(SystemFacade systemFacade, RandomNumberGenerator randomNumberGenerator, DownloadsUriProvider downloadsUriProvider) {
         this.systemFacade = systemFacade;
         this.randomNumberGenerator = randomNumberGenerator;
         this.downloadsUriProvider = downloadsUriProvider;
@@ -281,12 +275,7 @@ class FileDownloadInfo {
         return NetworkState.OK;
     }
 
-    public void startDownload(
-            ExecutorService executor,
-            StorageManager storageManager,
-            DownloadNotifier downloadNotifier,
-            DownloadsRepository downloadsRepository,
-            DownloadReadyChecker downloadReadyChecker) {
+    public void startDownload(Context context, ExecutorService executor, StorageManager storageManager, DownloadNotifier downloadNotifier, DownloadsRepository downloadsRepository, DownloadReadyChecker downloadReadyChecker) {
         String applicationPackageName = context.getApplicationContext().getPackageName();
         BatchCompletionBroadcaster batchCompletionBroadcaster = new BatchCompletionBroadcaster(context, applicationPackageName);
         ContentResolver contentResolver = context.getContentResolver();

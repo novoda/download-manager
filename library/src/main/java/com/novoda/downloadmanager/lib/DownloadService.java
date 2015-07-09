@@ -359,7 +359,7 @@ public class DownloadService extends Service {
     private void downloadOrContinueBatch(List<FileDownloadInfo> downloads) {
         for (FileDownloadInfo info : downloads) {
             if (!info.isSubmittedOrRunning()) {
-                info.startDownload(executor, storageManager, downloadNotifier, downloadsRepository, downloadReadyChecker);
+                info.startDownload(this, executor, storageManager, downloadNotifier, downloadsRepository, downloadReadyChecker);
             }
         }
     }
