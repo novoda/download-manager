@@ -50,6 +50,37 @@ class DownloadBatch {
         return this == DELETED;
     }
 
+    /**
+     * Return time when this download will be ready for its next action, in
+     * milliseconds after given time.
+     *
+     * @return If {@code 0}, download is ready to proceed immediately. If
+     * {@link Long#MAX_VALUE}, then download has no future actions.
+     */
+    public long nextActionMillis(long now) {
+        long nextRetryTimeMillis = Long.MAX_VALUE;
+
+        for (FileDownloadInfo info : downloads) {
+            long foo = getNextActionMillisFor(now, info);
+            nextRetryTimeMillis = Math.min(foo, nextRetryTimeMillis);
+        }
+        return nextRetryTimeMillis;
+    }
+
+    private long getNextActionMillisFor(long now, FileDownloadInfo info) {
+        if (Downloads.Impl.isStatusCompleted(status)) {
+            return Long.MAX_VALUE;
+        }
+        if (status != Downloads.Impl.STATUS_WAITING_TO_RETRY) {
+            return 0;
+        }
+        long when = info.restartTime(now);
+        if (when <= now) {
+            return 0;
+        }
+        return when - now;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -66,5 +97,29 @@ class DownloadBatch {
     @Override
     public int hashCode() {
         return (int) (batchId ^ (batchId >>> 32));
+    }
+
+    public boolean prune(DownloadDeleter downloadDeleter) {
+        boolean isDeleted = false;
+
+        for (FileDownloadInfo info : downloads) {
+            if (info.isDeleted()) {
+                downloadDeleter.deleteFileAndDatabaseRow(info);
+                isDeleted = true;
+            } else if (Downloads.Impl.isStatusCancelled(info.getStatus()) || Downloads.Impl.isStatusError(info.getStatus())) {
+                downloadDeleter.deleteFileAndMediaReference(info);
+                isDeleted = true;
+            }
+        }
+        return isDeleted;
+    }
+
+    public boolean isActive() {
+        for (FileDownloadInfo info : downloads) {
+            if (info.isSubmittedOrRunning()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

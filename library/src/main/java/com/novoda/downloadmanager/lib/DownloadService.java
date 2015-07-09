@@ -75,7 +75,6 @@ public class DownloadService extends Service {
     private Handler updateHandler;
 
     private volatile int lastStartId;
-    private DownloadClientReadyChecker downloadClientReadyChecker;
     private BatchRepository batchRepository;
     private DownloadsRepository downloadsRepository;
     private DownloadDeleter downloadDeleter;
@@ -118,6 +117,7 @@ public class DownloadService extends Service {
         this.downloadDeleter = new DownloadDeleter(getContentResolver());
         this.batchRepository = BatchRepository.newInstance(getContentResolver(), downloadDeleter);
         PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
+        DownloadClientReadyChecker downloadClientReadyChecker = getDownloadClientReadyChecker();
         this.downloadReadyChecker = new DownloadReadyChecker(systemFacade, new NetworkChecker(systemFacade), downloadClientReadyChecker, downloadMarshaller);
 
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
@@ -133,8 +133,6 @@ public class DownloadService extends Service {
         updateHandler = new Handler(updateThread.getLooper(), updateCallback);
 
         downloadScanner = new DownloadScanner(getContentResolver(), this);
-
-        downloadClientReadyChecker = getDownloadClientReadyChecker();
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         NotificationDisplayer notificationDisplayer = new NotificationDisplayer(
@@ -171,7 +169,7 @@ public class DownloadService extends Service {
      * download if appropriate.
      */
     private FileDownloadInfo createNewDownloadInfo(FileDownloadInfo.Reader reader) {
-        FileDownloadInfo info = reader.newDownloadInfo(this, systemFacade, downloadClientReadyChecker);
+        FileDownloadInfo info = reader.newDownloadInfo(this, systemFacade, downloadReadyChecker);
         Log.v("processing inserted download " + info.getId());
         return info;
     }
@@ -307,7 +305,6 @@ public class DownloadService extends Service {
      * snapshot taken in this update.
      */
     private boolean updateLocked() {
-
         boolean isActive = false;
         long nextRetryTimeMillis = Long.MAX_VALUE;
         long now = systemFacade.currentTimeMillis();
@@ -317,28 +314,18 @@ public class DownloadService extends Service {
 
         List<DownloadBatch> downloadBatches = batchRepository.retrieveBatchesFor(allDownloads);
         for (DownloadBatch downloadBatch : downloadBatches) {
-
-            for (FileDownloadInfo info : downloadBatch.getDownloads()) {
-                if (info.isDeleted()) {
-                    downloadDeleter.deleteFileAndDatabaseRow(info);
-                } else if (Downloads.Impl.isStatusCancelled(info.getStatus()) || Downloads.Impl.isStatusError(info.getStatus())) {
-                    downloadDeleter.deleteFileAndMediaReference(info);
-                } else {
-                    if (downloadBatch.isDeleted()) {
-                        break;
-                    }
-
-                    if (!isActive) {
-                        isActive = kickOffDownloadTaskIfReady(info, downloadBatch);
-                        isActive = kickOffMediaScanIfCompleted(isActive, info);
-                    }
-
-                }
-
-                // Keep track of nearest next action
-                nextRetryTimeMillis = Math.min(info.nextActionMillis(now), nextRetryTimeMillis);
+            if (downloadBatch.isDeleted() || downloadBatch.prune(downloadDeleter)) {
+                continue;
             }
 
+            if (downloadBatch.isActive()) {
+                isActive = true;
+            } else if (downloadReadyChecker.canDownload(downloadBatch)) {
+                downloadOrContinueBatch(downloadBatch.getDownloads());
+                isActive = true;
+            }
+
+            nextRetryTimeMillis = downloadBatch.nextActionMillis(now);
         }
 
         batchRepository.deleteMarkedBatchesFor(allDownloads);
@@ -357,6 +344,14 @@ public class DownloadService extends Service {
         return isActive;
     }
 
+    private void downloadOrContinueBatch(List<FileDownloadInfo> downloads) {
+        for (FileDownloadInfo info : downloads) {
+            if (!info.isSubmittedOrRunning()) {
+                info.startDownload(executor, storageManager, downloadNotifier, downloadsRepository);
+            }
+        }
+    }
+
     private void updateTotalBytesFor(Collection<FileDownloadInfo> downloadInfos) {
         ContentValues values = new ContentValues();
         for (FileDownloadInfo downloadInfo : downloadInfos) {
@@ -369,16 +364,6 @@ public class DownloadService extends Service {
                 batchRepository.updateTotalSize(downloadInfo.getBatchId());
             }
         }
-    }
-
-    private boolean kickOffDownloadTaskIfReady(FileDownloadInfo info, DownloadBatch downloadBatch) {
-        boolean downloadIsSubmittedOrActive = info.isSubmittedOrRunning();
-
-        if (!downloadIsSubmittedOrActive && downloadReadyChecker.canDownload(downloadBatch)) {
-            info.startDownload(executor, storageManager, downloadNotifier, downloadsRepository);
-            return true;
-        }
-        return downloadIsSubmittedOrActive;
     }
 
     private boolean kickOffMediaScanIfCompleted(boolean isActive, FileDownloadInfo info) {

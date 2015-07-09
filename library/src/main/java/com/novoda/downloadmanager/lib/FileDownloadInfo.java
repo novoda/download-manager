@@ -374,27 +374,6 @@ class FileDownloadInfo {
     }
 
     /**
-     * Return time when this download will be ready for its next action, in
-     * milliseconds after given time.
-     *
-     * @return If {@code 0}, download is ready to proceed immediately. If
-     * {@link Long#MAX_VALUE}, then download has no future actions.
-     */
-    public long nextActionMillis(long now) {
-        if (Downloads.Impl.isStatusCompleted(status)) {
-            return Long.MAX_VALUE;
-        }
-        if (status != Downloads.Impl.STATUS_WAITING_TO_RETRY) {
-            return 0;
-        }
-        long when = restartTime(now);
-        if (when <= now) {
-            return 0;
-        }
-        return when - now;
-    }
-
-    /**
      * Returns whether a file should be scanned
      */
     private boolean shouldScanFile() {
@@ -459,11 +438,10 @@ class FileDownloadInfo {
         public FileDownloadInfo newDownloadInfo(
                 Context context,
                 SystemFacade systemFacade,
-                DownloadClientReadyChecker downloadClientReadyChecker) {
+                DownloadReadyChecker downloadReadyChecker) {
             RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
             ContentValues contentValues = new ContentValues();
             PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
-            DownloadReadyChecker downloadReadyChecker = new DownloadReadyChecker(systemFacade, new NetworkChecker(systemFacade), downloadClientReadyChecker, downloadMarshaller);
             FileDownloadInfo info = new FileDownloadInfo(
                     context,
                     systemFacade,
