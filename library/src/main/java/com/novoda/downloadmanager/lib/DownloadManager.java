@@ -351,21 +351,20 @@ public class DownloadManager {
     private Uri baseUri;
 
     public DownloadManager(Context context, ContentResolver resolver) {
-        this(context, resolver, false, DownloadsUriProvider.getInstance());
+        this(context, resolver, DownloadsUriProvider.getInstance(), false);
     }
 
     public DownloadManager(Context context, ContentResolver contentResolver, boolean verboseLogging) {
-        this(context, contentResolver, verboseLogging, DownloadsUriProvider.getInstance());
+        this(context, contentResolver, DownloadsUriProvider.getInstance(), verboseLogging);
     }
 
     DownloadManager(Context context, ContentResolver resolver, DownloadsUriProvider downloadsUriProvider) {
-        this(context, resolver, false, downloadsUriProvider);
+        this(context, resolver, downloadsUriProvider, false);
     }
 
     DownloadManager(Context context,
-                           ContentResolver contentResolver,
-                           boolean verboseLogging,
-                           DownloadsUriProvider downloadsUriProvider) {
+                    ContentResolver contentResolver,
+                    DownloadsUriProvider downloadsUriProvider, boolean verboseLogging) {
         this.contentResolver = contentResolver;
         this.downloadsUriProvider = downloadsUriProvider;
         this.baseUri = downloadsUriProvider.getContentUri();
