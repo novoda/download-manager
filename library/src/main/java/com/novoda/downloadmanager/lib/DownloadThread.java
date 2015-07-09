@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.drm.DrmManagerClient;
 import android.net.NetworkInfo;
 import android.net.TrafficStats;
+import android.net.Uri;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.SystemClock;
@@ -87,6 +88,7 @@ class DownloadThread implements Runnable {
 
     private final long id;
     private final long batchId;
+    private final Uri allDownloadsUri;
 
     private volatile boolean policyDirty;
 
@@ -115,6 +117,7 @@ class DownloadThread implements Runnable {
         this.downloadReadyChecker = downloadReadyChecker;
         this.id = downloadId;
         this.batchId = batchId;
+        this.allDownloadsUri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id);
     }
 
     /**
@@ -509,7 +512,7 @@ class DownloadThread implements Runnable {
 
     void notifyPauseDueToSize(boolean isWifiRequired) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id));
+        intent.setData(allDownloadsUri);
         intent.setClassName(SizeLimitActivity.class.getPackage().getName(), SizeLimitActivity.class.getName());
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(EXTRA_IS_WIFI_REQUIRED, isWifiRequired);
@@ -616,7 +619,7 @@ class DownloadThread implements Runnable {
                 now - state.timeLastNotification > Constants.MIN_PROGRESS_TIME) {
             ContentValues values = new ContentValues();
             values.put(DownloadContract.Downloads.COLUMN_CURRENT_BYTES, state.currentBytes);
-            getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
+            getContentResolver().update(allDownloadsUri, values, null, null);
             state.bytesNotified = state.currentBytes;
             state.timeLastNotification = now;
         }
@@ -661,7 +664,7 @@ class DownloadThread implements Runnable {
         if (state.contentLength == -1) {
             values.put(DownloadContract.Downloads.COLUMN_TOTAL_BYTES, state.currentBytes);
         }
-        getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
+        getContentResolver().update(allDownloadsUri, values, null, null);
 
         final boolean lengthMismatched = (state.contentLength != -1)
                 && (state.currentBytes != state.contentLength);
@@ -697,7 +700,7 @@ class DownloadThread implements Runnable {
 
             ContentValues values = new ContentValues(1);
             values.put(DownloadContract.Downloads.COLUMN_CURRENT_BYTES, state.currentBytes);
-            getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
+            getContentResolver().update(allDownloadsUri, values, null, null);
             if (cannotResume(state)) {
                 throw new StopRequestException(DownloadStatus.CANNOT_RESUME, "Failed reading response: " + ex + "; unable to resume", ex);
             } else {
@@ -744,7 +747,7 @@ class DownloadThread implements Runnable {
             values.put(DownloadContract.Downloads.COLUMN_MIME_TYPE, state.mimeType);
         }
         values.put(DownloadContract.Downloads.COLUMN_TOTAL_BYTES, originalDownloadInfo.getTotalBytes());
-        getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
+        getContentResolver().update(allDownloadsUri, values, null, null);
     }
 
     /**
@@ -891,7 +894,7 @@ class DownloadThread implements Runnable {
         if (!TextUtils.isEmpty(errorMsg)) {
             values.put(DownloadContract.Downloads.COLUMN_ERROR_MSG, errorMsg);
         }
-        getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
+        getContentResolver().update(allDownloadsUri, values, null, null);
 
         updateBatchStatus(batchId, id);
     }
