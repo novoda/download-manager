@@ -12,3 +12,4 @@ Here we show the following use cases
    - Client has rules that determine if downloads should start / resume
    - Changing the database name where all downloads are saved
    - Enqueuing batched requests
+   - Querying batch information
