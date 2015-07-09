@@ -185,7 +185,7 @@ public class CriteriaTest {
         Criteria firstCriteria = new Criteria.Builder().withSelection(SELECTION_COLUMN, Criteria.Wildcard.EQUALS).withArgument(ARGUMENT).build();
         Criteria secondCriteria = new Criteria.Builder().withSelection(ANOTHER_SELECTION_COLUMN, Criteria.Wildcard.EQUALS).withArgument(ARGUMENT).build();
 
-        Criteria orCriteria = new Criteria.Builder().or(Arrays.asList(firstCriteria, secondCriteria)).build();
+        Criteria orCriteria = new Criteria.Builder().joinWithOr(Arrays.asList(firstCriteria, secondCriteria)).build();
 
         CriteriaAssert.assertThat(orCriteria)
                 .hasSelection(SELECTION_QUERY + OR + ANOTHER_SELECTION_COLUMN_QUERY)

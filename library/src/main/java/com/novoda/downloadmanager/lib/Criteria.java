@@ -66,7 +66,7 @@ class Criteria {
             return this;
         }
 
-        public Builder or(List<Criteria> criteriaList) {
+        public Builder joinWithOr(List<Criteria> criteriaList) {
             for (Criteria criteria : criteriaList) {
                 selectionBuilder.withSelection(criteria.getSelection());
                 argumentBuilder.withArguments(criteria.getSelectionArguments());
