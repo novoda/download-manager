@@ -1,3 +1,29 @@
+0.1.8
+-------
+#79 Query for batches
+#87 Fix current size for batches
+
+0.1.7
+-------
+#86 - improves sort for live items
+#83 - update tests and injection
+
+0.1.6
+-------
+#82 fix pause and resume
+#84 performance improvements around download checks
+
+0.1.5
+-------
+#74 - adds ability to sort queries by liveness
+#75 - calculate entire batch size
+
+0.1.4
+-------
+Code cleanup #63
+Limit client knowledge of internals #59
+Adds static analysis #72
+
 0.1.3
 -------
 
