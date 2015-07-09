@@ -142,42 +142,42 @@ public final class DownloadProvider extends ContentProvider {
         URI_MATCHER.addURI(AUTHORITY, "batches", BATCHES);
         URI_MATCHER.addURI(AUTHORITY, "batches/#", BATCHES_ID);
         URI_MATCHER.addURI(AUTHORITY, "downloads_by_batch", DOWNLOADS_BY_BATCH);
-        URI_MATCHER.addURI(AUTHORITY, "my_downloads/#/" + RequestHeadersContract.URI_SEGMENT, REQUEST_HEADERS_URI);
-        URI_MATCHER.addURI(AUTHORITY, "all_downloads/#/" + RequestHeadersContract.URI_SEGMENT, REQUEST_HEADERS_URI);
+        URI_MATCHER.addURI(AUTHORITY, "my_downloads/#/" + DownloadContract.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
+        URI_MATCHER.addURI(AUTHORITY, "all_downloads/#/" + DownloadContract.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
         // temporary, for backwards compatibility
         URI_MATCHER.addURI(AUTHORITY, "download", MY_DOWNLOADS);
         URI_MATCHER.addURI(AUTHORITY, "download/#", MY_DOWNLOADS_ID);
-        URI_MATCHER.addURI(AUTHORITY, "download/#/" + RequestHeadersContract.URI_SEGMENT, REQUEST_HEADERS_URI);
+        URI_MATCHER.addURI(AUTHORITY, "download/#/" + DownloadContract.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
         URI_MATCHER.addURI(AUTHORITY, DownloadsDestination.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT + "/#", PUBLIC_DOWNLOAD_ID);
     }
 
     private static final String[] APP_READABLE_COLUMNS_ARRAY = new String[]{
-            DownloadsContract._ID,
-            DownloadsContract.COLUMN_APP_DATA,
-            DownloadsContract.COLUMN_DATA,
-            DownloadsContract.COLUMN_MIME_TYPE,
-            DownloadsContract.COLUMN_DESTINATION,
-            DownloadsContract.COLUMN_CONTROL,
-            DownloadsContract.COLUMN_STATUS,
-            DownloadsContract.COLUMN_LAST_MODIFICATION,
-            DownloadsContract.COLUMN_NOTIFICATION_CLASS,
-            DownloadsContract.COLUMN_TOTAL_BYTES,
-            DownloadsContract.COLUMN_CURRENT_BYTES,
-            DownloadsContract.COLUMN_URI,
-            DownloadsContract.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI,
-            DownloadsContract.COLUMN_FILE_NAME_HINT,
-            DownloadsContract.COLUMN_MEDIAPROVIDER_URI,
-            DownloadsContract.COLUMN_DELETED,
-            DownloadsContract.COLUMN_NOTIFICATION_EXTRAS,
-            DownloadsContract.COLUMN_BATCH_ID,
-            BatchesContract._ID,
-            BatchesContract.COLUMN_STATUS,
-            BatchesContract.COLUMN_TITLE,
-            BatchesContract.COLUMN_DESCRIPTION,
-            BatchesContract.COLUMN_BIG_PICTURE,
-            BatchesContract.COLUMN_VISIBILITY,
-            BatchesContract.COLUMN_TOTAL_BYTES,
-            BatchesContract.COLUMN_CURRENT_BYTES,
+            DownloadContract.Downloads._ID,
+            DownloadContract.Downloads.COLUMN_APP_DATA,
+            DownloadContract.Downloads.COLUMN_DATA,
+            DownloadContract.Downloads.COLUMN_MIME_TYPE,
+            DownloadContract.Downloads.COLUMN_DESTINATION,
+            DownloadContract.Downloads.COLUMN_CONTROL,
+            DownloadContract.Downloads.COLUMN_STATUS,
+            DownloadContract.Downloads.COLUMN_LAST_MODIFICATION,
+            DownloadContract.Downloads.COLUMN_NOTIFICATION_CLASS,
+            DownloadContract.Downloads.COLUMN_TOTAL_BYTES,
+            DownloadContract.Downloads.COLUMN_CURRENT_BYTES,
+            DownloadContract.Downloads.COLUMN_URI,
+            DownloadContract.Downloads.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI,
+            DownloadContract.Downloads.COLUMN_FILE_NAME_HINT,
+            DownloadContract.Downloads.COLUMN_MEDIAPROVIDER_URI,
+            DownloadContract.Downloads.COLUMN_DELETED,
+            DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS,
+            DownloadContract.Downloads.COLUMN_BATCH_ID,
+            DownloadContract.Batches._ID,
+            DownloadContract.Batches.COLUMN_STATUS,
+            DownloadContract.Batches.COLUMN_TITLE,
+            DownloadContract.Batches.COLUMN_DESCRIPTION,
+            DownloadContract.Batches.COLUMN_BIG_PICTURE,
+            DownloadContract.Batches.COLUMN_VISIBILITY,
+            DownloadContract.Batches.COLUMN_TOTAL_BYTES,
+            DownloadContract.Batches.COLUMN_CURRENT_BYTES,
             OpenableColumns.DISPLAY_NAME,
             OpenableColumns.SIZE,
     };
@@ -190,8 +190,8 @@ public final class DownloadProvider extends ContentProvider {
         Collections.addAll(APP_READABLE_COLUMNS_SET, APP_READABLE_COLUMNS_ARRAY);
 
         COLUMNS_MAP = new HashMap<>();
-        COLUMNS_MAP.put(OpenableColumns.DISPLAY_NAME, BatchesContract.COLUMN_TITLE + " AS " + OpenableColumns.DISPLAY_NAME);
-        COLUMNS_MAP.put(OpenableColumns.SIZE, DownloadsContract.COLUMN_TOTAL_BYTES + " AS " + OpenableColumns.SIZE);
+        COLUMNS_MAP.put(OpenableColumns.DISPLAY_NAME, DownloadContract.Batches.COLUMN_TITLE + " AS " + OpenableColumns.DISPLAY_NAME);
+        COLUMNS_MAP.put(OpenableColumns.SIZE, DownloadContract.Downloads.COLUMN_TOTAL_BYTES + " AS " + OpenableColumns.SIZE);
     }
 
     private static final List<String> DOWNLOAD_MANAGER_COLUMNS_LIST = Arrays.asList(DownloadManager.UNDERLYING_COLUMNS);
@@ -327,8 +327,8 @@ public final class DownloadProvider extends ContentProvider {
                 final String id = getDownloadIdFromUri(uri);
                 final SQLiteDatabase db = openHelper.getReadableDatabase();
                 final String mimeType = DatabaseUtils.stringForQuery(db,
-                        "SELECT " + DownloadsContract.COLUMN_MIME_TYPE + " FROM " + DownloadsContract.DOWNLOADS_TABLE_NAME +
-                                " WHERE " + DownloadsContract._ID + " = ?",
+                        "SELECT " + DownloadContract.Downloads.COLUMN_MIME_TYPE + " FROM " + DownloadContract.Downloads.DOWNLOADS_TABLE_NAME +
+                                " WHERE " + DownloadContract.Downloads._ID + " = ?",
                         new String[]{id});
                 if (TextUtils.isEmpty(mimeType)) {
                     return DOWNLOAD_TYPE;
@@ -366,7 +366,7 @@ public final class DownloadProvider extends ContentProvider {
             return insertDownload(uri, values, db, match);
         }
         if (match == BATCHES) {
-            long rowId = db.insert(BatchesContract.BATCHES_TABLE_NAME, null, values);
+            long rowId = db.insert(DownloadContract.Batches.BATCHES_TABLE_NAME, null, values);
             return ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), rowId);
         }
         Log.d("calling insert on an unknown/invalid URI: " + uri);
@@ -378,14 +378,14 @@ public final class DownloadProvider extends ContentProvider {
     private Uri insertDownload(Uri uri, ContentValues values, SQLiteDatabase db, int match) {
         // copy some of the input values as it
         ContentValues filteredValues = new ContentValues();
-        copyString(DownloadsContract.COLUMN_URI, values, filteredValues);
-        copyString(DownloadsContract.COLUMN_APP_DATA, values, filteredValues);
-        copyBoolean(DownloadsContract.COLUMN_NO_INTEGRITY, values, filteredValues);
-        copyString(DownloadsContract.COLUMN_FILE_NAME_HINT, values, filteredValues);
-        copyString(DownloadsContract.COLUMN_MIME_TYPE, values, filteredValues);
+        copyString(DownloadContract.Downloads.COLUMN_URI, values, filteredValues);
+        copyString(DownloadContract.Downloads.COLUMN_APP_DATA, values, filteredValues);
+        copyBoolean(DownloadContract.Downloads.COLUMN_NO_INTEGRITY, values, filteredValues);
+        copyString(DownloadContract.Downloads.COLUMN_FILE_NAME_HINT, values, filteredValues);
+        copyString(DownloadContract.Downloads.COLUMN_MIME_TYPE, values, filteredValues);
 
         // validate the destination column
-        Integer dest = values.getAsInteger(DownloadsContract.COLUMN_DESTINATION);
+        Integer dest = values.getAsInteger(DownloadContract.Downloads.COLUMN_DESTINATION);
         if (dest != null) {
             if (getContext().checkCallingPermission(DownloadsPermission.PERMISSION_ACCESS_ADVANCED)
                     != PackageManager.PERMISSION_GRANTED
@@ -411,41 +411,41 @@ public final class DownloadProvider extends ContentProvider {
                 getContext().enforcePermission("android.permission.ACCESS_CACHE_FILESYSTEM", Binder.getCallingPid(), Binder.getCallingUid(),
                         "need ACCESS_CACHE_FILESYSTEM permission to use system cache");
             }
-            filteredValues.put(DownloadsContract.COLUMN_DESTINATION, dest);
+            filteredValues.put(DownloadContract.Downloads.COLUMN_DESTINATION, dest);
         }
 
         // copy the control column as is
-        copyInteger(DownloadsContract.COLUMN_CONTROL, values, filteredValues);
+        copyInteger(DownloadContract.Downloads.COLUMN_CONTROL, values, filteredValues);
 
         /*
          * requests coming from
          * DownloadManager.addCompletedDownload(String, String, String,
          * boolean, String, String, long) need special treatment
          */
-        if (values.getAsInteger(DownloadsContract.COLUMN_DESTINATION) == DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
+        if (values.getAsInteger(DownloadContract.Downloads.COLUMN_DESTINATION) == DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
             // these requests always are marked as 'completed'
-            filteredValues.put(DownloadsContract.COLUMN_STATUS, DownloadStatus.SUCCESS);
-            filteredValues.put(DownloadsContract.COLUMN_TOTAL_BYTES, values.getAsLong(DownloadsContract.COLUMN_TOTAL_BYTES));
-            filteredValues.put(DownloadsContract.COLUMN_CURRENT_BYTES, 0);
-            copyInteger(DownloadsContract.COLUMN_MEDIA_SCANNED, values, filteredValues);
-            copyString(DownloadsContract.COLUMN_DATA, values, filteredValues);
+            filteredValues.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.SUCCESS);
+            filteredValues.put(DownloadContract.Downloads.COLUMN_TOTAL_BYTES, values.getAsLong(DownloadContract.Downloads.COLUMN_TOTAL_BYTES));
+            filteredValues.put(DownloadContract.Downloads.COLUMN_CURRENT_BYTES, 0);
+            copyInteger(DownloadContract.Downloads.COLUMN_MEDIA_SCANNED, values, filteredValues);
+            copyString(DownloadContract.Downloads.COLUMN_DATA, values, filteredValues);
         } else {
-            filteredValues.put(DownloadsContract.COLUMN_STATUS, DownloadStatus.PENDING);
-            filteredValues.put(DownloadsContract.COLUMN_TOTAL_BYTES, -1);
-            filteredValues.put(DownloadsContract.COLUMN_CURRENT_BYTES, 0);
+            filteredValues.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.PENDING);
+            filteredValues.put(DownloadContract.Downloads.COLUMN_TOTAL_BYTES, -1);
+            filteredValues.put(DownloadContract.Downloads.COLUMN_CURRENT_BYTES, 0);
         }
 
         // set lastupdate to current time
         long lastMod = systemFacade.currentTimeMillis();
-        filteredValues.put(DownloadsContract.COLUMN_LAST_MODIFICATION, lastMod);
+        filteredValues.put(DownloadContract.Downloads.COLUMN_LAST_MODIFICATION, lastMod);
 
         // use packagename of the caller to set the notification columns
-        String clazz = values.getAsString(DownloadsContract.COLUMN_NOTIFICATION_CLASS);
+        String clazz = values.getAsString(DownloadContract.Downloads.COLUMN_NOTIFICATION_CLASS);
         if (clazz != null) {
             int uid = Binder.getCallingUid();
             try {
                 if ((uid == 0) || systemFacade.userOwnsPackage(uid, getContext().getPackageName())) {
-                    filteredValues.put(DownloadsContract.COLUMN_NOTIFICATION_CLASS, clazz);
+                    filteredValues.put(DownloadContract.Downloads.COLUMN_NOTIFICATION_CLASS, clazz);
                 }
             } catch (NameNotFoundException ex) {
                 /* ignored for now */
@@ -453,14 +453,14 @@ public final class DownloadProvider extends ContentProvider {
         }
 
         // copy some more columns as is
-        copyString(DownloadsContract.COLUMN_NOTIFICATION_EXTRAS, values, filteredValues);
-        copyString(DownloadsContract.COLUMN_COOKIE_DATA, values, filteredValues);
-        copyString(DownloadsContract.COLUMN_USER_AGENT, values, filteredValues);
-        copyString(DownloadsContract.COLUMN_REFERER, values, filteredValues);
+        copyString(DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS, values, filteredValues);
+        copyString(DownloadContract.Downloads.COLUMN_COOKIE_DATA, values, filteredValues);
+        copyString(DownloadContract.Downloads.COLUMN_USER_AGENT, values, filteredValues);
+        copyString(DownloadContract.Downloads.COLUMN_REFERER, values, filteredValues);
 
         // UID, PID columns
         if (getContext().checkCallingPermission(DownloadsPermission.PERMISSION_ACCESS_ADVANCED) == PackageManager.PERMISSION_GRANTED) {
-            copyInteger(DownloadsContract.COLUMN_OTHER_UID, values, filteredValues);
+            copyInteger(DownloadContract.Downloads.COLUMN_OTHER_UID, values, filteredValues);
         }
         filteredValues.put(Constants.UID, Binder.getCallingUid());
         if (Binder.getCallingUid() == 0) {
@@ -468,27 +468,27 @@ public final class DownloadProvider extends ContentProvider {
         }
 
         // is_visible_in_downloads_ui column
-        if (values.containsKey(DownloadsContract.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI)) {
-            copyBoolean(DownloadsContract.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, values, filteredValues);
+        if (values.containsKey(DownloadContract.Downloads.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI)) {
+            copyBoolean(DownloadContract.Downloads.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, values, filteredValues);
         } else {
             // by default, make external downloads visible in the UI
             boolean isExternal = (dest == null || dest == DownloadsDestination.DESTINATION_EXTERNAL);
-            filteredValues.put(DownloadsContract.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, isExternal);
+            filteredValues.put(DownloadContract.Downloads.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, isExternal);
         }
 
         // public api requests and networktypes/roaming columns
-        copyInteger(DownloadsContract.COLUMN_ALLOWED_NETWORK_TYPES, values, filteredValues);
-        copyBoolean(DownloadsContract.COLUMN_ALLOW_ROAMING, values, filteredValues);
-        copyBoolean(DownloadsContract.COLUMN_ALLOW_METERED, values, filteredValues);
+        copyInteger(DownloadContract.Downloads.COLUMN_ALLOWED_NETWORK_TYPES, values, filteredValues);
+        copyBoolean(DownloadContract.Downloads.COLUMN_ALLOW_ROAMING, values, filteredValues);
+        copyBoolean(DownloadContract.Downloads.COLUMN_ALLOW_METERED, values, filteredValues);
 
-        copyInteger(DownloadsContract.COLUMN_BATCH_ID, values, filteredValues);
+        copyInteger(DownloadContract.Downloads.COLUMN_BATCH_ID, values, filteredValues);
 
         Log.v("initiating download with UID " + filteredValues.getAsInteger(Constants.UID));
-        if (filteredValues.containsKey(DownloadsContract.COLUMN_OTHER_UID)) {
-            Log.v("other UID " + filteredValues.getAsInteger(DownloadsContract.COLUMN_OTHER_UID));
+        if (filteredValues.containsKey(DownloadContract.Downloads.COLUMN_OTHER_UID)) {
+            Log.v("other UID " + filteredValues.getAsInteger(DownloadContract.Downloads.COLUMN_OTHER_UID));
         }
 
-        long rowID = db.insert(DownloadsContract.DOWNLOADS_TABLE_NAME, null, filteredValues);
+        long rowID = db.insert(DownloadContract.Downloads.DOWNLOADS_TABLE_NAME, null, filteredValues);
         if (rowID == -1) {
             Log.d("couldn't insert into downloads database");
             return null;
@@ -510,7 +510,7 @@ public final class DownloadProvider extends ContentProvider {
      * Check that the file URI provided for DESTINATION_FILE_URI is valid.
      */
     private void checkFileUriDestination(ContentValues values) {
-        String fileUri = values.getAsString(DownloadsContract.COLUMN_FILE_NAME_HINT);
+        String fileUri = values.getAsString(DownloadContract.Downloads.COLUMN_FILE_NAME_HINT);
         if (fileUri == null) {
             throw new IllegalArgumentException(
                     "DESTINATION_FILE_URI must include a file URI under COLUMN_FILE_NAME_HINT");
@@ -555,35 +555,35 @@ public final class DownloadProvider extends ContentProvider {
         values = new ContentValues(values);
 
         // validate the destination column
-        if (values.getAsInteger(DownloadsContract.COLUMN_DESTINATION) == DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
+        if (values.getAsInteger(DownloadContract.Downloads.COLUMN_DESTINATION) == DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
             /* this row is inserted by
              * DownloadManager.addCompletedDownload(String, String, String, boolean, String, String, long)
              */
-            values.remove(DownloadsContract.COLUMN_TOTAL_BYTES);
-            values.remove(DownloadsContract.COLUMN_DATA);
-            values.remove(DownloadsContract.COLUMN_STATUS);
+            values.remove(DownloadContract.Downloads.COLUMN_TOTAL_BYTES);
+            values.remove(DownloadContract.Downloads.COLUMN_DATA);
+            values.remove(DownloadContract.Downloads.COLUMN_STATUS);
         }
         enforceAllowedValues(
-                values, DownloadsContract.COLUMN_DESTINATION,
+                values, DownloadContract.Downloads.COLUMN_DESTINATION,
                 DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE,
                 DownloadsDestination.DESTINATION_FILE_URI,
                 DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD);
 
         // remove the rest of the columns that are allowed (with any value)
-        values.remove(DownloadsContract.COLUMN_URI);
-        values.remove(DownloadsContract.COLUMN_NOTIFICATION_EXTRAS);
-        values.remove(DownloadsContract.COLUMN_BATCH_ID);
-        values.remove(DownloadsContract.COLUMN_MIME_TYPE);
-        values.remove(DownloadsContract.COLUMN_FILE_NAME_HINT); // checked later in insert()
-        values.remove(DownloadsContract.COLUMN_ALLOWED_NETWORK_TYPES);
-        values.remove(DownloadsContract.COLUMN_ALLOW_ROAMING);
-        values.remove(DownloadsContract.COLUMN_ALLOW_METERED);
-        values.remove(DownloadsContract.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI);
-        values.remove(DownloadsContract.COLUMN_MEDIA_SCANNED);
+        values.remove(DownloadContract.Downloads.COLUMN_URI);
+        values.remove(DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS);
+        values.remove(DownloadContract.Downloads.COLUMN_BATCH_ID);
+        values.remove(DownloadContract.Downloads.COLUMN_MIME_TYPE);
+        values.remove(DownloadContract.Downloads.COLUMN_FILE_NAME_HINT); // checked later in insert()
+        values.remove(DownloadContract.Downloads.COLUMN_ALLOWED_NETWORK_TYPES);
+        values.remove(DownloadContract.Downloads.COLUMN_ALLOW_ROAMING);
+        values.remove(DownloadContract.Downloads.COLUMN_ALLOW_METERED);
+        values.remove(DownloadContract.Downloads.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI);
+        values.remove(DownloadContract.Downloads.COLUMN_MEDIA_SCANNED);
         Iterator<Map.Entry<String, Object>> iterator = values.valueSet().iterator();
         while (iterator.hasNext()) {
             String key = iterator.next().getKey();
-            if (key.startsWith(RequestHeadersContract.INSERT_KEY_PREFIX)) {
+            if (key.startsWith(DownloadContract.RequestHeaders.INSERT_KEY_PREFIX)) {
                 iterator.remove();
             }
         }
@@ -642,10 +642,10 @@ public final class DownloadProvider extends ContentProvider {
             case BATCHES_ID:
                 SqlSelection batchSelection = getWhereClause(uri, selection, selectionArgs, match);
                 return db.query(
-                        BatchesContract.BATCHES_TABLE_NAME, projection, batchSelection.getSelection(),
+                        DownloadContract.Batches.BATCHES_TABLE_NAME, projection, batchSelection.getSelection(),
                         batchSelection.getParameters(), null, null, sort);
             case DOWNLOADS_BY_BATCH:
-                return db.query(DownloadsByBatchContract.VIEW_NAME_DOWNLOADS_BY_BATCH, projection, selection, selectionArgs, null, null, sort);
+                return db.query(DownloadContract.DownloadsByBatch.VIEW_NAME_DOWNLOADS_BY_BATCH, projection, selection, selectionArgs, null, null, sort);
             case REQUEST_HEADERS_URI:
                 if (projection != null || selection != null || sort != null) {
                     throw new UnsupportedOperationException(
@@ -690,7 +690,7 @@ public final class DownloadProvider extends ContentProvider {
         }
 
         Cursor ret = db.query(
-                DownloadsContract.DOWNLOADS_TABLE_NAME, projection, fullSelection.getSelection(),
+                DownloadContract.Downloads.DOWNLOADS_TABLE_NAME, projection, fullSelection.getSelection(),
                 fullSelection.getParameters(), null, null, sort);
 
         if (ret == null) {
@@ -757,18 +757,18 @@ public final class DownloadProvider extends ContentProvider {
      */
     private void insertRequestHeaders(SQLiteDatabase db, long downloadId, ContentValues values) {
         ContentValues rowValues = new ContentValues();
-        rowValues.put(RequestHeadersContract.COLUMN_DOWNLOAD_ID, downloadId);
+        rowValues.put(DownloadContract.RequestHeaders.COLUMN_DOWNLOAD_ID, downloadId);
         for (Map.Entry<String, Object> entry : values.valueSet()) {
             String key = entry.getKey();
-            if (key.startsWith(RequestHeadersContract.INSERT_KEY_PREFIX)) {
+            if (key.startsWith(DownloadContract.RequestHeaders.INSERT_KEY_PREFIX)) {
                 String headerLine = entry.getValue().toString();
                 if (!headerLine.contains(":")) {
                     throw new IllegalArgumentException("Invalid HTTP header line: " + headerLine);
                 }
                 String[] parts = headerLine.split(":", 2);
-                rowValues.put(RequestHeadersContract.COLUMN_HEADER, parts[0].trim());
-                rowValues.put(RequestHeadersContract.COLUMN_VALUE, parts[1].trim());
-                db.insert(RequestHeadersContract.HEADERS_DB_TABLE, null, rowValues);
+                rowValues.put(DownloadContract.RequestHeaders.COLUMN_HEADER, parts[0].trim());
+                rowValues.put(DownloadContract.RequestHeaders.COLUMN_VALUE, parts[1].trim());
+                db.insert(DownloadContract.RequestHeaders.HEADERS_DB_TABLE, null, rowValues);
             }
         }
     }
@@ -777,12 +777,12 @@ public final class DownloadProvider extends ContentProvider {
      * Handle a query for the custom request headers registered for a download.
      */
     private Cursor queryRequestHeaders(SQLiteDatabase db, Uri uri) {
-        String where = RequestHeadersContract.COLUMN_DOWNLOAD_ID + "="
+        String where = DownloadContract.RequestHeaders.COLUMN_DOWNLOAD_ID + "="
                 + getDownloadIdFromUri(uri);
-        String[] projection = new String[]{RequestHeadersContract.COLUMN_HEADER,
-                RequestHeadersContract.COLUMN_VALUE};
+        String[] projection = new String[]{DownloadContract.RequestHeaders.COLUMN_HEADER,
+                DownloadContract.RequestHeaders.COLUMN_VALUE};
         return db.query(
-                RequestHeadersContract.HEADERS_DB_TABLE, projection, where,
+                DownloadContract.RequestHeaders.HEADERS_DB_TABLE, projection, where,
                 null, null, null, null);
     }
 
@@ -790,13 +790,13 @@ public final class DownloadProvider extends ContentProvider {
      * Delete request headers for downloads matching the given query.
      */
     private void deleteRequestHeaders(SQLiteDatabase db, String where, String[] whereArgs) {
-        String[] projection = new String[]{DownloadsContract._ID};
-        Cursor cursor = db.query(DownloadsContract.DOWNLOADS_TABLE_NAME, projection, where, whereArgs, null, null, null, null);
+        String[] projection = new String[]{DownloadContract.Downloads._ID};
+        Cursor cursor = db.query(DownloadContract.Downloads.DOWNLOADS_TABLE_NAME, projection, where, whereArgs, null, null, null, null);
         try {
             for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
                 long id = cursor.getLong(0);
-                String idWhere = RequestHeadersContract.COLUMN_DOWNLOAD_ID + "=" + id;
-                db.delete(RequestHeadersContract.HEADERS_DB_TABLE, idWhere, null);
+                String idWhere = DownloadContract.RequestHeaders.COLUMN_DOWNLOAD_ID + "=" + id;
+                db.delete(DownloadContract.RequestHeaders.HEADERS_DB_TABLE, idWhere, null);
             }
         } finally {
             cursor.close();
@@ -826,8 +826,8 @@ public final class DownloadProvider extends ContentProvider {
         int count;
         boolean startService = false;
 
-        if (values.containsKey(DownloadsContract.COLUMN_DELETED)) {
-            if (values.getAsInteger(DownloadsContract.COLUMN_DELETED) == 1) {
+        if (values.containsKey(DownloadContract.Downloads.COLUMN_DELETED)) {
+            if (values.getAsInteger(DownloadContract.Downloads.COLUMN_DELETED) == 1) {
                 // some rows are to be 'deleted'. need to start DownloadService.
                 startService = true;
             }
@@ -836,23 +836,23 @@ public final class DownloadProvider extends ContentProvider {
         ContentValues filteredValues;
         if (Binder.getCallingPid() != Process.myPid()) {
             filteredValues = new ContentValues();
-            copyString(DownloadsContract.COLUMN_APP_DATA, values, filteredValues);
-            Integer i = values.getAsInteger(DownloadsContract.COLUMN_CONTROL);
+            copyString(DownloadContract.Downloads.COLUMN_APP_DATA, values, filteredValues);
+            Integer i = values.getAsInteger(DownloadContract.Downloads.COLUMN_CONTROL);
             if (i != null) {
-                filteredValues.put(DownloadsContract.COLUMN_CONTROL, i);
+                filteredValues.put(DownloadContract.Downloads.COLUMN_CONTROL, i);
                 startService = true;
             }
 
-            copyInteger(DownloadsContract.COLUMN_CONTROL, values, filteredValues);
-            copyString(DownloadsContract.COLUMN_MEDIAPROVIDER_URI, values, filteredValues);
-            copyInteger(DownloadsContract.COLUMN_DELETED, values, filteredValues);
+            copyInteger(DownloadContract.Downloads.COLUMN_CONTROL, values, filteredValues);
+            copyString(DownloadContract.Downloads.COLUMN_MEDIAPROVIDER_URI, values, filteredValues);
+            copyInteger(DownloadContract.Downloads.COLUMN_DELETED, values, filteredValues);
         } else {
             filteredValues = values;
 
-            Integer status = values.getAsInteger(DownloadsContract.COLUMN_STATUS);
+            Integer status = values.getAsInteger(DownloadContract.Downloads.COLUMN_STATUS);
             boolean isRestart = status != null && status == DownloadStatus.PENDING;
             boolean isUserBypassingSizeLimit =
-                    values.containsKey(DownloadsContract.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
+                    values.containsKey(DownloadContract.Downloads.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
             if (isRestart || isUserBypassingSizeLimit) {
                 startService = true;
             }
@@ -866,7 +866,7 @@ public final class DownloadProvider extends ContentProvider {
             case ALL_DOWNLOADS_ID:
                 SqlSelection selection = getWhereClause(uri, where, whereArgs, match);
                 if (filteredValues.size() > 0) {
-                    count = db.update(DownloadsContract.DOWNLOADS_TABLE_NAME, filteredValues, selection.getSelection(), selection.getParameters());
+                    count = db.update(DownloadContract.Downloads.DOWNLOADS_TABLE_NAME, filteredValues, selection.getSelection(), selection.getParameters());
                 } else {
                     count = 0;
                 }
@@ -874,7 +874,7 @@ public final class DownloadProvider extends ContentProvider {
             case BATCHES:
             case BATCHES_ID:
                 SqlSelection batchSelection = getWhereClause(uri, where, whereArgs, match);
-                count = db.update(BatchesContract.BATCHES_TABLE_NAME, values, batchSelection.getSelection(), batchSelection.getParameters());
+                count = db.update(DownloadContract.Batches.BATCHES_TABLE_NAME, values, batchSelection.getSelection(), batchSelection.getParameters());
                 break;
             default:
                 Log.d("updating unknown/invalid URI: " + uri);
@@ -914,17 +914,17 @@ public final class DownloadProvider extends ContentProvider {
         selection.appendClause(where, whereArgs);
         if (uriMatch == MY_DOWNLOADS_ID || uriMatch == ALL_DOWNLOADS_ID ||
                 uriMatch == PUBLIC_DOWNLOAD_ID) {
-            selection.appendClause(DownloadsContract._ID + " = ?", getDownloadIdFromUri(uri));
+            selection.appendClause(DownloadContract.Downloads._ID + " = ?", getDownloadIdFromUri(uri));
         }
         if (uriMatch == BATCHES_ID) {
-            selection.appendClause(BatchesContract._ID + " = ?", uri.getLastPathSegment());
+            selection.appendClause(DownloadContract.Batches._ID + " = ?", uri.getLastPathSegment());
         }
         if ((uriMatch == MY_DOWNLOADS || uriMatch == MY_DOWNLOADS_ID)
                 && getContext().checkCallingPermission(DownloadsPermission.PERMISSION_ACCESS_ALL)
                 != PackageManager.PERMISSION_GRANTED) {
             String callingUid = String.valueOf(Binder.getCallingUid());
             selection.appendClause(
-                    Constants.UID + "= ? OR " + DownloadsContract.COLUMN_OTHER_UID + "= ?",
+                    Constants.UID + "= ? OR " + DownloadContract.Downloads.COLUMN_OTHER_UID + "= ?",
                     callingUid, callingUid);
         }
         return selection;
@@ -948,12 +948,12 @@ public final class DownloadProvider extends ContentProvider {
             case ALL_DOWNLOADS_ID:
                 SqlSelection selection = getWhereClause(uri, where, whereArgs, match);
                 deleteRequestHeaders(db, selection.getSelection(), selection.getParameters());
-                count = db.delete(DownloadsContract.DOWNLOADS_TABLE_NAME, selection.getSelection(), selection.getParameters());
+                count = db.delete(DownloadContract.Downloads.DOWNLOADS_TABLE_NAME, selection.getSelection(), selection.getParameters());
                 break;
             case BATCHES:
             case BATCHES_ID:
                 SqlSelection batchSelection = getWhereClause(uri, where, whereArgs, match);
-                count = db.delete(BatchesContract.BATCHES_TABLE_NAME, batchSelection.getSelection(), batchSelection.getParameters());
+                count = db.delete(DownloadContract.Batches.BATCHES_TABLE_NAME, batchSelection.getSelection(), batchSelection.getParameters());
                 break;
 
             default:

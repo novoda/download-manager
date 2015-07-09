@@ -32,7 +32,7 @@ class DownloadDeleter {
         if (!TextUtils.isEmpty(info.getFileName())) {
             deleteFileIfExists(info.getFileName());
             ContentValues blankData = new ContentValues();
-            blankData.put(DownloadsContract.COLUMN_DATA, (String) null);
+            blankData.put(DownloadContract.Downloads.COLUMN_DATA, (String) null);
             resolver.update(info.getAllDownloadsUri(), blankData, null, null);
             info.setFileName(null);
         }

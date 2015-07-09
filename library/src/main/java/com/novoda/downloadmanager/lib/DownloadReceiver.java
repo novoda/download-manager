@@ -167,13 +167,13 @@ public class DownloadReceiver extends BroadcastReceiver {
         Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
         try {
             if (cursor.moveToFirst()) {
-                int status = getInt(cursor, BatchesContract.COLUMN_STATUS);
-                @NotificationVisibility.Value int visibility = getInt(cursor, BatchesContract.COLUMN_VISIBILITY);
+                int status = getInt(cursor, DownloadContract.Batches.COLUMN_STATUS);
+                @NotificationVisibility.Value int visibility = getInt(cursor, DownloadContract.Batches.COLUMN_VISIBILITY);
 
                 if ((DownloadStatus.isCancelled(status) || DownloadStatus.isCompleted(status))
                         && (visibility == ACTIVE_OR_COMPLETE || visibility == ONLY_WHEN_COMPLETE)) {
                     ContentValues values = new ContentValues(1);
-                    values.put(BatchesContract.COLUMN_VISIBILITY, NotificationVisibility.ONLY_WHEN_ACTIVE);
+                    values.put(DownloadContract.Batches.COLUMN_VISIBILITY, NotificationVisibility.ONLY_WHEN_ACTIVE);
                     context.getContentResolver().update(uri, values, null, null);
                 }
             } else {
@@ -189,16 +189,16 @@ public class DownloadReceiver extends BroadcastReceiver {
      */
     private void cancelBatchThroughDatabaseState(Context context, Intent intent) {
         ContentValues downloadValues = new ContentValues(1);
-        downloadValues.put(DownloadsContract.COLUMN_STATUS, DownloadStatus.CANCELED);
+        downloadValues.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.CANCELED);
         long batchId = getBatchId(intent);
         context.getContentResolver().update(
                 downloadsUriProvider.getAllDownloadsUri(),
                 downloadValues,
-                DownloadsContract.COLUMN_BATCH_ID + " = ?",
+                DownloadContract.Downloads.COLUMN_BATCH_ID + " = ?",
                 new String[]{String.valueOf(batchId)}
         );
         ContentValues batchValues = new ContentValues(1);
-        batchValues.put(BatchesContract.COLUMN_STATUS, DownloadStatus.CANCELED);
+        batchValues.put(DownloadContract.Batches.COLUMN_STATUS, DownloadStatus.CANCELED);
         context.getContentResolver().update(
                 ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), batchId),
                 batchValues,
@@ -213,7 +213,7 @@ public class DownloadReceiver extends BroadcastReceiver {
      */
     private void deleteDownloadThroughDatabaseState(Context context, Intent intent) {
         ContentValues values = new ContentValues(1);
-        values.put(DownloadsContract.COLUMN_DELETED, TRUE_THIS_IS_CLEARER_NOW);
+        values.put(DownloadContract.Downloads.COLUMN_DELETED, TRUE_THIS_IS_CLEARER_NOW);
         context.getContentResolver().update(getDownloadUri(intent), values, null, null);
     }
 

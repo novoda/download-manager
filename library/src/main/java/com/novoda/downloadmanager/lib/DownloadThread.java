@@ -586,7 +586,7 @@ class DownloadThread implements Runnable {
         if (state.currentBytes - state.bytesNotified > Constants.MIN_PROGRESS_STEP &&
                 now - state.timeLastNotification > Constants.MIN_PROGRESS_TIME) {
             ContentValues values = new ContentValues();
-            values.put(DownloadsContract.COLUMN_CURRENT_BYTES, state.currentBytes);
+            values.put(DownloadContract.Downloads.COLUMN_CURRENT_BYTES, state.currentBytes);
             getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
             state.bytesNotified = state.currentBytes;
             state.timeLastNotification = now;
@@ -628,9 +628,9 @@ class DownloadThread implements Runnable {
      */
     private void handleEndOfStream(State state) throws StopRequestException {
         ContentValues values = new ContentValues(2);
-        values.put(DownloadsContract.COLUMN_CURRENT_BYTES, state.currentBytes);
+        values.put(DownloadContract.Downloads.COLUMN_CURRENT_BYTES, state.currentBytes);
         if (state.contentLength == -1) {
-            values.put(DownloadsContract.COLUMN_TOTAL_BYTES, state.currentBytes);
+            values.put(DownloadContract.Downloads.COLUMN_TOTAL_BYTES, state.currentBytes);
         }
         getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
 
@@ -667,7 +667,7 @@ class DownloadThread implements Runnable {
             }
 
             ContentValues values = new ContentValues(1);
-            values.put(DownloadsContract.COLUMN_CURRENT_BYTES, state.currentBytes);
+            values.put(DownloadContract.Downloads.COLUMN_CURRENT_BYTES, state.currentBytes);
             getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
             if (cannotResume(state)) {
                 throw new StopRequestException(DownloadStatus.CANNOT_RESUME, "Failed reading response: " + ex + "; unable to resume", ex);
@@ -707,14 +707,14 @@ class DownloadThread implements Runnable {
      */
     private void updateDatabaseFromHeaders(State state) {
         ContentValues values = new ContentValues(4);
-        values.put(DownloadsContract.COLUMN_DATA, state.filename);
+        values.put(DownloadContract.Downloads.COLUMN_DATA, state.filename);
         if (state.headerETag != null) {
             values.put(Constants.ETAG, state.headerETag);
         }
         if (state.mimeType != null) {
-            values.put(DownloadsContract.COLUMN_MIME_TYPE, state.mimeType);
+            values.put(DownloadContract.Downloads.COLUMN_MIME_TYPE, state.mimeType);
         }
-        values.put(DownloadsContract.COLUMN_TOTAL_BYTES, originalDownloadInfo.getTotalBytes());
+        values.put(DownloadContract.Downloads.COLUMN_TOTAL_BYTES, originalDownloadInfo.getTotalBytes());
         getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
     }
 
@@ -847,20 +847,20 @@ class DownloadThread implements Runnable {
     private void notifyThroughDatabase(State state, int finalStatus, String errorMsg, int numFailed) {
         originalDownloadInfo.setStatus(finalStatus);
         ContentValues values = new ContentValues(8);
-        values.put(DownloadsContract.COLUMN_STATUS, finalStatus);
-        values.put(DownloadsContract.COLUMN_DATA, state.filename);
-        values.put(DownloadsContract.COLUMN_MIME_TYPE, state.mimeType);
-        values.put(DownloadsContract.COLUMN_LAST_MODIFICATION, systemFacade.currentTimeMillis());
-        values.put(DownloadsContract.COLUMN_FAILED_CONNECTIONS, numFailed);
+        values.put(DownloadContract.Downloads.COLUMN_STATUS, finalStatus);
+        values.put(DownloadContract.Downloads.COLUMN_DATA, state.filename);
+        values.put(DownloadContract.Downloads.COLUMN_MIME_TYPE, state.mimeType);
+        values.put(DownloadContract.Downloads.COLUMN_LAST_MODIFICATION, systemFacade.currentTimeMillis());
+        values.put(DownloadContract.Downloads.COLUMN_FAILED_CONNECTIONS, numFailed);
         values.put(Constants.RETRY_AFTER_X_REDIRECT_COUNT, state.retryAfter);
 
         if (!TextUtils.equals(originalDownloadInfo.getUri(), state.requestUri)) {
-            values.put(DownloadsContract.COLUMN_URI, state.requestUri);
+            values.put(DownloadContract.Downloads.COLUMN_URI, state.requestUri);
         }
 
         // save the error message. could be useful to developers.
         if (!TextUtils.isEmpty(errorMsg)) {
-            values.put(DownloadsContract.COLUMN_ERROR_MSG, errorMsg);
+            values.put(DownloadContract.Downloads.COLUMN_ERROR_MSG, errorMsg);
         }
         getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
 
@@ -878,15 +878,15 @@ class DownloadThread implements Runnable {
 
         if (DownloadStatus.isCancelled(batchStatus)) {
             ContentValues values = new ContentValues(1);
-            values.put(DownloadsContract.COLUMN_STATUS, DownloadStatus.CANCELED);
-            getContentResolver().update(downloadsUriProvider.getAllDownloadsUri(), values, DownloadsContract.COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
+            values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.CANCELED);
+            getContentResolver().update(downloadsUriProvider.getAllDownloadsUri(), values, DownloadContract.Downloads.COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
         } else if (DownloadStatus.isError(batchStatus)) {
             ContentValues values = new ContentValues(1);
-            values.put(DownloadsContract.COLUMN_STATUS, DownloadStatus.BATCH_FAILED);
+            values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.BATCH_FAILED);
             getContentResolver().update(
                     downloadsUriProvider.getAllDownloadsUri(),
                     values,
-                    DownloadsContract.COLUMN_BATCH_ID + " = ? AND " + DownloadsContract._ID + " <> ? ",
+                    DownloadContract.Downloads.COLUMN_BATCH_ID + " = ? AND " + DownloadContract.Downloads._ID + " <> ? ",
                     new String[]{String.valueOf(batchId), String.valueOf(downloadId)}
             );
         } else if (DownloadStatus.isSuccess(batchStatus)) {

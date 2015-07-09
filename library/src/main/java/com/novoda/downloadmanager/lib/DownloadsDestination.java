@@ -38,7 +38,7 @@ final class DownloadsDestination {
     public static final int DESTINATION_CACHE_PARTITION_NOROAMING = 3;
     /**
      * This download will be saved to the location given by the file URI in
-     * {@link DownloadsContract#COLUMN_FILE_NAME_HINT}.
+     * {@link DownloadContract.Downloads#COLUMN_FILE_NAME_HINT}.
      */
     public static final int DESTINATION_FILE_URI = 4;
     /**

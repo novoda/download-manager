@@ -75,7 +75,7 @@ public class SizeLimitActivity extends Activity implements DialogInterface.OnCan
     }
 
     private void showDialog(Cursor cursor) {
-        int size = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadsContract.COLUMN_TOTAL_BYTES));
+        int size = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadContract.Downloads.COLUMN_TOTAL_BYTES));
         String sizeString = Formatter.formatFileSize(this, size);
         String queueText = "Queue";//getString(R.string.button_queue_for_wifi);
         boolean isWifiRequired = currentIntent.getExtras().getBoolean(FileDownloadInfo.EXTRA_IS_WIFI_REQUIRED);
@@ -118,7 +118,7 @@ public class SizeLimitActivity extends Activity implements DialogInterface.OnCan
             getContentResolver().delete(currentUri, null, null);
         } else if (!isRequired && which == AlertDialog.BUTTON_POSITIVE) {
             ContentValues values = new ContentValues();
-            values.put(DownloadsContract.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT, true);
+            values.put(DownloadContract.Downloads.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT, true);
             getContentResolver().update(currentUri, values, null, null);
         }
         dialogClosed();
