@@ -79,9 +79,14 @@ public class DownloadManager {
     public static final String COLUMN_BATCH_ID = DownloadContract.Downloads.COLUMN_BATCH_ID;
 
     /**
-     * The extra supplied information for this download.
+     * The extra supplied information available to completion notifications for this download.
      */
     public static final String COLUMN_NOTIFICATION_EXTRAS = DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS;
+
+    /**
+     * The extra supplied information available with any query for this download.
+     */
+    public static final String COLUMN_EXTRA_DATA = DownloadContract.Downloads.COLUMN_EXTRA_DATA;
 
     /**
      * The status of the batch that contains this download.
@@ -332,6 +337,7 @@ public class DownloadManager {
             DownloadContract.Downloads.COLUMN_LAST_MODIFICATION + " AS " + COLUMN_LAST_MODIFIED_TIMESTAMP,
             DownloadContract.Downloads.COLUMN_CURRENT_BYTES + " AS " + COLUMN_BYTES_DOWNLOADED_SO_FAR,
             DownloadContract.Downloads.COLUMN_BATCH_ID,
+            DownloadContract.Downloads.COLUMN_EXTRA_DATA,
             DownloadContract.Batches.COLUMN_TITLE,
             DownloadContract.Batches.COLUMN_DESCRIPTION,
             DownloadContract.Batches.COLUMN_BIG_PICTURE,
@@ -408,14 +414,14 @@ public class DownloadManager {
     public void pauseBatch(long id) {
         ContentValues values = new ContentValues();
         values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_PAUSED);
-        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
+        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[]{String.valueOf(id)});
     }
 
     public void resumeBatch(long id) {
         ContentValues values = new ContentValues();
         values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
         values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.PENDING);
-        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
+        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[]{String.valueOf(id)});
     }
 
     public void removeDownload(URI uri) {

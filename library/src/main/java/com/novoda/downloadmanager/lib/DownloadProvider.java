@@ -455,6 +455,7 @@ public final class DownloadProvider extends ContentProvider {
 
         // copy some more columns as is
         copyString(DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS, values, filteredValues);
+        copyString(DownloadContract.Downloads.COLUMN_EXTRA_DATA, values, filteredValues);
         copyString(DownloadContract.Downloads.COLUMN_COOKIE_DATA, values, filteredValues);
         copyString(DownloadContract.Downloads.COLUMN_USER_AGENT, values, filteredValues);
         copyString(DownloadContract.Downloads.COLUMN_REFERER, values, filteredValues);
