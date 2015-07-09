@@ -1,6 +1,5 @@
-package com.novoda.downloadmanager.demo.extended;
+package com.novoda.downloadmanager.demo.extended.extra_data;
 
-import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -10,19 +9,14 @@ import android.widget.TextView;
 import com.novoda.downloadmanager.demo.R;
 import com.novoda.notils.caster.Views;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class DownloadAdapter extends BaseAdapter {
+public class ExtraDataAdapter extends BaseAdapter {
     private final List<Download> downloads;
-    private final Listener listener;
 
-    public DownloadAdapter(List<Download> downloads) {
-        this(downloads, null);
-    }
-
-    public DownloadAdapter(List<Download> downloads, Listener listener) {
-        this.downloads = downloads;
-        this.listener = listener;
+    public ExtraDataAdapter() {
+        this.downloads = new ArrayList<>();
     }
 
     @Override
@@ -42,7 +36,7 @@ public class DownloadAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = View.inflate(parent.getContext(), R.layout.list_item_batch_download, null);
+        View view = View.inflate(parent.getContext(), R.layout.list_item_extra_data_download, null);
 
         final Download download = getItem(position);
         TextView titleTextView = Views.findById(view, R.id.download_title_text);
@@ -50,21 +44,8 @@ public class DownloadAdapter extends BaseAdapter {
         Button deleteButton = Views.findById(view, R.id.download_delete_button);
 
         titleTextView.setText(download.getTitle());
-        String text = String.format("%1$s : %2$s\nBatch %3$d", download.getDownloadStatusText(), download.getFileName(), download.getBatchId());
+        String text = String.format("%1$s : %2$s", download.getTitle(), download.getExtraData());
         locationTextView.setText(text);
-
-        if (listener == null) {
-            deleteButton.setVisibility(View.GONE);
-            deleteButton.setOnClickListener(null);
-        } else {
-            deleteButton.setVisibility(View.VISIBLE);
-            deleteButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(@NonNull View v) {
-                    listener.onDelete(download);
-                }
-            });
-        }
 
         return view;
     }
@@ -73,9 +54,5 @@ public class DownloadAdapter extends BaseAdapter {
         this.downloads.clear();
         this.downloads.addAll(downloads);
         notifyDataSetChanged();
-    }
-
-    public interface Listener {
-        void onDelete(Download download);
     }
 }
