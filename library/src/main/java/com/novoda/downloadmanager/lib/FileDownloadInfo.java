@@ -222,6 +222,10 @@ class FileDownloadInfo {
         return bypassRecommendedSizeLimit == 0;
     }
 
+    public String getExtras() {
+        return extras;
+    }
+
     public Collection<Pair<String, String>> getHeaders() {
         return Collections.unmodifiableList(requestHeaders);
     }
@@ -296,7 +300,7 @@ class FileDownloadInfo {
         BatchRepository batchRepository = new BatchRepository(contentResolver, new DownloadDeleter(contentResolver), downloadsUriProvider);
         DownloadThread downloadThread = new DownloadThread(
                 context, systemFacade, this, storageManager, downloadNotifier,
-                batchCompletionBroadcaster, batchRepository, downloadsUriProvider, downloadsRepository, new NetworkChecker(systemFacade), downloadReadyChecker, id, batchId, extras);
+                batchCompletionBroadcaster, batchRepository, downloadsUriProvider, downloadsRepository, new NetworkChecker(systemFacade), downloadReadyChecker);
         executor.submit(downloadThread);
     }
 
@@ -327,7 +331,7 @@ class FileDownloadInfo {
                 || destination == DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE);
     }
 
-    private Uri getMyDownloadsUri() {
+    public Uri getMyDownloadsUri() {
         return ContentUris.withAppendedId(downloadsUriProvider.getContentUri(), id);
     }
 
