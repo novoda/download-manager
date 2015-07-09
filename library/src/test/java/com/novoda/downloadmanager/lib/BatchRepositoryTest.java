@@ -70,7 +70,7 @@ public class BatchRepositoryTest {
     public void givenADownloadInfoWhenRetrievingTheBatchThenTheBatchIdsMatch() {
         long expectedBatchId = 100L;
         when(mockFileDownloadInfo.getBatchId()).thenReturn(expectedBatchId);
-        Cursor batchCursor = new MockCursorWithBatchIds(Arrays.asList(expectedBatchId));
+        Cursor batchCursor = new MockCursorWithBatchIds(Collections.singletonList(expectedBatchId));
         when(mockContentResolver.query(any(Uri.class), any(String[].class), anyString(), any(String[].class), anyString())).thenReturn(batchCursor);
 
         DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(mockFileDownloadInfo);
