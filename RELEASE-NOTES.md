@@ -2,6 +2,7 @@
 -------
 #79 Query for batches
 #87 Fix current size for batches
+#88 Adds an extra column so you can pass data through the DLM
 
 0.1.7
 -------
