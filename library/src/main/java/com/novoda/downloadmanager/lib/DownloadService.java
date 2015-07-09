@@ -325,7 +325,7 @@ public class DownloadService extends Service {
                 continue;
             }
 
-            if (!isActive || downloadReadyChecker.canDownload(downloadBatch)) {
+            if (!isActive && downloadReadyChecker.canDownload(downloadBatch)) {
                 downloadOrContinueBatch(downloadBatch.getDownloads());
                 isActive = true;
             }
