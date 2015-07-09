@@ -31,14 +31,15 @@ public class Query {
      */
     public static final int ORDER_DESCENDING = 2;
 
-    private static final String ORDER_BY_LIVENESS = String.format("CASE status "
-                    + "WHEN %1$d THEN 1 "
-                    + "WHEN %2$d THEN 2 "
-                    + "WHEN %3$d THEN 3 "
-                    + "WHEN %4$d THEN 4 "
-                    + "WHEN %5$d THEN 5 "
+    private static final String ORDER_BY_LIVENESS = String.format("CASE %1$s "
+                    + "WHEN %2$d THEN 1 "
+                    + "WHEN %3$d THEN 2 "
+                    + "WHEN %4$d THEN 3 "
+                    + "WHEN %5$d THEN 4 "
+                    + "WHEN %6$d THEN 5 "
                     + "ELSE 6 "
                     + "END, _id ASC",
+            Downloads.Impl.COLUMN_STATUS,
             Downloads.Impl.STATUS_RUNNING,
             Downloads.Impl.STATUS_PENDING,
             Downloads.Impl.STATUS_PAUSED_BY_APP,
