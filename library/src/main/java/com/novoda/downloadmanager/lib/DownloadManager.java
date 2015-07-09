@@ -79,6 +79,16 @@ public class DownloadManager {
     public static final String COLUMN_BATCH_ID = DownloadContract.Downloads.COLUMN_BATCH_ID;
 
     /**
+     * The total size in bytes of the batch.
+     */
+    public static final String COLUMN_BATCH_TOTAL_SIZE_BYTES = DownloadContract.Batches.COLUMN_TOTAL_BYTES;
+
+    /**
+     * The current size in bytes of the batch.
+     */
+    public static final String COLUMN_BATCH_CURRENT_SIZE_BYTES = DownloadContract.Batches.COLUMN_CURRENT_BYTES;
+
+    /**
      * The extra supplied information for this download.
      */
     public static final String COLUMN_NOTIFICATION_EXTRAS = DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS;
@@ -408,14 +418,14 @@ public class DownloadManager {
     public void pauseBatch(long id) {
         ContentValues values = new ContentValues();
         values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_PAUSED);
-        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
+        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[]{String.valueOf(id)});
     }
 
     public void resumeBatch(long id) {
         ContentValues values = new ContentValues();
         values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
         values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.PENDING);
-        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
+        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[]{String.valueOf(id)});
     }
 
     public void removeDownload(URI uri) {
@@ -492,6 +502,22 @@ public class DownloadManager {
             return null;
         }
         return new CursorTranslator(underlyingCursor, downloadsUriProvider.getDownloadsByBatchUri());
+    }
+
+    /**
+     * Query the download manager about batches that have been requested.
+     *
+     * @param query parameters specifying filters for this query
+     * @return a Cursor over the result set of batches
+     */
+    public Cursor query(BatchQuery query) {
+        BatchRepository batchRepository = new BatchRepository(contentResolver, new DownloadDeleter(contentResolver), downloadsUriProvider);
+        Cursor cursor = batchRepository.retrieveFor(query);
+        if (cursor == null) {
+            return null;
+        }
+
+        return new CursorTranslator(cursor, downloadsUriProvider.getBatchesUri());
     }
 
     /**
@@ -734,6 +760,13 @@ public class DownloadManager {
      */
     public Uri getContentUri() {
         return downloadsUriProvider.getContentUri();
+    }
+
+    /**
+     * Uri for the batches table
+     */
+    public Uri getBatchesUri() {
+        return downloadsUriProvider.getBatchesUri();
     }
 
     /**

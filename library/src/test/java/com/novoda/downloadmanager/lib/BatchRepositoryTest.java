@@ -141,6 +141,18 @@ public class BatchRepositoryTest {
         verify(mockContentResolver, never()).delete(any(Uri.class), any(String.class), any(String[].class));
     }
 
+    @Test
+    public void givenABatchQueryWhenQueryingThenTheQueryIsUsed() {
+        BatchQuery query = new BatchQuery.Builder().withId(12).build();
+
+        batchRepository.retrieveFor(query);
+
+        String selection = query.getSelection();
+        String[] selectionArguments = query.getSelectionArguments();
+        String sortOrder = query.getSortOrder();
+        verify(mockContentResolver).query(any(Uri.class), any(String[].class), eq(selection), eq(selectionArguments), eq(sortOrder));
+    }
+
     private static class MockCursorWithBatchIds implements Cursor {
 
         private final List<Long> ids;

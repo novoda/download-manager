@@ -207,4 +207,8 @@ class BatchRepository {
         String[] selectionArgs = {selection};
         resolver.delete(downloadsUriProvider.getBatchesUri(), DownloadContract.Batches._ID + " IN (?)", selectionArgs);
     }
+
+    public Cursor retrieveFor(BatchQuery query) {
+        return resolver.query(downloadsUriProvider.getBatchesUri(), null, query.getSelection(), query.getSelectionArguments(), query.getSortOrder());
+    }
 }

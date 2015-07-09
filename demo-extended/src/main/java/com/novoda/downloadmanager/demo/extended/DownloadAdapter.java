@@ -8,7 +8,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.novoda.downloadmanager.demo.R;
-import com.novoda.notils.caster.Views;
 
 import java.util.List;
 
@@ -45,9 +44,9 @@ public class DownloadAdapter extends BaseAdapter {
         View view = View.inflate(parent.getContext(), R.layout.list_item_download, null);
 
         final Download download = getItem(position);
-        TextView titleTextView = Views.findById(view, R.id.download_title_text);
-        TextView locationTextView = Views.findById(view, R.id.download_location_text);
-        Button deleteButton = Views.findById(view, R.id.download_delete_button);
+        TextView titleTextView = (TextView) view.findViewById(R.id.download_title_text);
+        TextView locationTextView = (TextView) view.findViewById(R.id.download_location_text);
+        Button deleteButton = (Button) view.findViewById(R.id.download_delete_button);
 
         titleTextView.setText(download.getTitle());
         String text = String.format("%1$s : %2$s\nBatch %3$d", download.getDownloadStatusText(), download.getFileName(), download.getBatchId());
