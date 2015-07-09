@@ -728,6 +728,10 @@ public class DownloadManager {
         return ContentUris.withAppendedId(baseUri, id);
     }
 
+    /**
+     * This is the uri for the underlying table
+     * use this at your own risk as many of the constants defined here will not return you what you expect for raw cursor data
+     */
     public Uri getContentUri() {
         return downloadsUriProvider.getContentUri();
     }
