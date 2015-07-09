@@ -40,18 +40,19 @@ public class Batch {
     }
 
     public String getDownloadStatusText() {
-        if (status == DownloadManager.STATUS_RUNNING) {
-            return "Downloading";
-        } else if (status == DownloadManager.STATUS_SUCCESSFUL) {
-            return "Complete";
-        } else if (status == DownloadManager.STATUS_FAILED) {
-            return "Failed";
-        } else if (status == DownloadManager.STATUS_PENDING) {
-            return "Queued";
-        } else if (status == DownloadManager.STATUS_PAUSED) {
-            return "Paused";
-        } else {
-            return "WTH";
+        switch (status) {
+            case DownloadManager.STATUS_RUNNING:
+                return "Downloading";
+            case DownloadManager.STATUS_SUCCESSFUL:
+                return "Complete";
+            case DownloadManager.STATUS_FAILED:
+                return "Failed";
+            case DownloadManager.STATUS_PENDING:
+                return "Queued";
+            case DownloadManager.STATUS_PAUSED:
+                return "Paused";
+            default:
+                return "WTH";
         }
     }
 }
