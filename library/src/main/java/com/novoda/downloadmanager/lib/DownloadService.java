@@ -331,6 +331,10 @@ public class DownloadService extends Service {
             if (!isActive && downloadReadyChecker.canDownload(downloadBatch)) {
                 downloadOrContinueBatch(downloadBatch.getDownloads());
                 isActive = true;
+            } else {
+                if (downloadBatch.scanCompletedMediaIfReady(downloadScanner)) {
+                    isActive = true;
+                }
             }
 
             nextRetryTimeMillis = downloadBatch.nextActionMillis(now, nextRetryTimeMillis);
@@ -372,12 +376,6 @@ public class DownloadService extends Service {
             }
             batchRepository.updateCurrentSize(downloadInfo.getBatchId());
         }
-    }
-
-    private boolean kickOffMediaScanIfCompleted(boolean isActive, FileDownloadInfo info) {
-        final boolean activeScan = info.startScanIfReady(downloadScanner);
-        isActive |= activeScan;
-        return isActive;
     }
 
     private void updateUserVisibleNotification(Collection<DownloadBatch> batches) {

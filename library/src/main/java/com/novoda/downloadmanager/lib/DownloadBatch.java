@@ -120,4 +120,14 @@ class DownloadBatch {
         }
         return false;
     }
+
+    public boolean scanCompletedMediaIfReady(DownloadScanner downloadScanner) {
+        for (FileDownloadInfo info : downloads) {
+            if (info.startScanIfReady(downloadScanner)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
