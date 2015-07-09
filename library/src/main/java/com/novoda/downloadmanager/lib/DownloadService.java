@@ -313,14 +313,19 @@ public class DownloadService extends Service {
         updateTotalBytesFor(allDownloads);
 
         List<DownloadBatch> downloadBatches = batchRepository.retrieveBatchesFor(allDownloads);
+
+        for (DownloadBatch downloadBatch : downloadBatches) {
+            if (downloadBatch.isActive()) {
+                isActive = true;
+            }
+        }
+
         for (DownloadBatch downloadBatch : downloadBatches) {
             if (downloadBatch.isDeleted() || downloadBatch.prune(downloadDeleter)) {
                 continue;
             }
 
-            if (downloadBatch.isActive()) {
-                isActive = true;
-            } else if (downloadReadyChecker.canDownload(downloadBatch)) {
+            if (!isActive || downloadReadyChecker.canDownload(downloadBatch)) {
                 downloadOrContinueBatch(downloadBatch.getDownloads());
                 isActive = true;
             }
