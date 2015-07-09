@@ -3,11 +3,9 @@ package com.novoda.downloadmanager.demo.extended.extra_data;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.novoda.downloadmanager.demo.R;
-import com.novoda.notils.caster.Views;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,10 +36,9 @@ public class ExtraDataAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = View.inflate(parent.getContext(), R.layout.list_item_extra_data_download, null);
 
-        final Download download = getItem(position);
-        TextView titleTextView = Views.findById(view, R.id.download_title_text);
-        TextView locationTextView = Views.findById(view, R.id.download_location_text);
-        Button deleteButton = Views.findById(view, R.id.download_delete_button);
+        Download download = getItem(position);
+        TextView titleTextView = (TextView) view.findViewById(R.id.download_title_text);
+        TextView locationTextView = (TextView) view.findViewById(R.id.download_location_text);
 
         titleTextView.setText(download.getTitle());
         String text = String.format("%1$s : %2$s", download.getTitle(), download.getExtraData());
