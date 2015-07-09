@@ -13,6 +13,10 @@ package com.novoda.downloadmanager.lib;
 final class DownloadStatus {
 
     /**
+     * This download has been submitted to the download executor but not yet started
+     */
+    public static final int SUBMITTED = 189;
+    /**
      * This download hasn't stated yet
      */
     public static final int PENDING = 190;
@@ -140,11 +144,6 @@ final class DownloadStatus {
      * This download couldn't be completed because another download in the batch failed.
      */
     public static final int BATCH_FAILED = 498;
-
-    /**
-     * This download has been submitted to the download executor but not yet started
-     */
-    public static final int SUBMITTED = 189;
 
     /**
      * Returns whether the status is informational (i.e. 1xx).
