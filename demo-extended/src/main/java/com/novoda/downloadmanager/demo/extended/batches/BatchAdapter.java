@@ -6,7 +6,6 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.novoda.downloadmanager.demo.R;
-import com.novoda.notils.caster.Views;
 
 import java.util.List;
 import java.util.Locale;
@@ -38,11 +37,11 @@ public class BatchAdapter extends BaseAdapter {
         View view = View.inflate(parent.getContext(), R.layout.list_item_batch, null);
 
         final Batch batch = getItem(position);
-        TextView idTextView = Views.findById(view, R.id.batch_id_text);
-        TextView titleTextView = Views.findById(view, R.id.batch_title_text);
-        TextView statusTextView = Views.findById(view, R.id.batch_status_text);
-        TextView totalSizeTextView = Views.findById(view, R.id.batch_total_size_text);
-        TextView currentSizeTextView = Views.findById(view, R.id.batch_current_size_text);
+        TextView idTextView = (TextView) view.findViewById(R.id.batch_id_text);
+        TextView titleTextView = (TextView) view.findViewById(R.id.batch_title_text);
+        TextView statusTextView = (TextView) view.findViewById(R.id.batch_status_text);
+        TextView totalSizeTextView = (TextView) view.findViewById(R.id.batch_total_size_text);
+        TextView currentSizeTextView = (TextView) view.findViewById(R.id.batch_current_size_text);
 
         idTextView.setText(String.format(Locale.getDefault(), "Id: %d", batch.getId()));
         titleTextView.setText(batch.getTitle());
