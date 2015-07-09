@@ -81,7 +81,7 @@ public class ShowBatchesActivity extends AppCompatActivity implements QueryForBa
     @Override
     protected void onStart() {
         super.onStart();
-        getContentResolver().registerContentObserver(DownloadManager.BATCH_CONTENT_URI, true, updateSelf);
+        getContentResolver().registerContentObserver(downloadManager.getBatchesUri(), true, updateSelf);
     }
 
     private final ContentObserver updateSelf = new ContentObserver(handler) {

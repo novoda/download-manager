@@ -763,6 +763,13 @@ public class DownloadManager {
     }
 
     /**
+     * Uri for the batches table
+     */
+    public Uri getBatchesUri() {
+        return downloadsUriProvider.getBatchesUri();
+    }
+
+    /**
      * Get a parameterized SQL WHERE clause to select a bunch of IDs.
      */
     static String getWhereClauseForIds(long[] ids) {
