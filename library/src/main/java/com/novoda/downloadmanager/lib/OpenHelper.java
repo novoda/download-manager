@@ -25,15 +25,19 @@ import android.net.Uri;
 import java.io.File;
 
 import static android.app.DownloadManager.*;
-import static com.novoda.downloadmanager.lib.Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI;
-import static com.novoda.downloadmanager.lib.Downloads.Impl.RequestHeaders;
 
 class OpenHelper {
+
+    private final DownloadsUriProvider downloadsUriProvider;
+
+    public OpenHelper(DownloadsUriProvider downloadsUriProvider) {
+        this.downloadsUriProvider = downloadsUriProvider;
+    }
     /**
      * Build an {@link Intent} to view the download at current {@link Cursor}
      * position, handling subtleties around installing packages.
      */
-    public static Intent buildViewIntent(Context context, long id) {
+    public Intent buildViewIntent(Context context, long id) {
         final DownloadManager downManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
         downManager.setAccessAllDownloads(true);
 
@@ -62,7 +66,7 @@ class OpenHelper {
                 intent.putExtra("android.intent.extra.ORIGINATING_UID", getOriginatingUid(context, id));
             } else if ("file".equals(localUri.getScheme())) {
                 intent.setDataAndType(
-                        ContentUris.withAppendedId(ALL_DOWNLOADS_CONTENT_URI, id), mimeType);
+                        ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id), mimeType);
             } else {
                 intent.setDataAndType(localUri, mimeType);
             }
@@ -73,17 +77,17 @@ class OpenHelper {
         }
     }
 
-    private static Uri getRefererUri(Context context, long id) {
+    private Uri getRefererUri(Context context, long id) {
         final Uri headersUri = Uri.withAppendedPath(
-                ContentUris.withAppendedId(ALL_DOWNLOADS_CONTENT_URI, id),
-                RequestHeaders.URI_SEGMENT);
+                ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id),
+                DownloadContract.RequestHeaders.URI_SEGMENT);
         final Cursor headers = context.getContentResolver()
                 .query(headersUri, null, null, null, null);
         try {
             while (headers.moveToNext()) {
-                final String header = getCursorString(headers, RequestHeaders.COLUMN_HEADER);
+                final String header = getCursorString(headers, DownloadContract.RequestHeaders.COLUMN_HEADER);
                 if ("Referer".equalsIgnoreCase(header)) {
-                    return getCursorUri(headers, RequestHeaders.COLUMN_VALUE);
+                    return getCursorUri(headers, DownloadContract.RequestHeaders.COLUMN_VALUE);
                 }
             }
         } finally {
@@ -92,8 +96,8 @@ class OpenHelper {
         return null;
     }
 
-    private static int getOriginatingUid(Context context, long id) {
-        final Uri uri = ContentUris.withAppendedId(ALL_DOWNLOADS_CONTENT_URI, id);
+    private int getOriginatingUid(Context context, long id) {
+        final Uri uri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id);
         final Cursor cursor = context.getContentResolver().query(uri, new String[]{Constants.UID},
                 null, null, null);
         if (cursor != null) {

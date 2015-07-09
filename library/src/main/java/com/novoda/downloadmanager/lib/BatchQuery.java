@@ -42,14 +42,14 @@ public class BatchQuery {
 
         private final Criteria.Builder builder;
 
-        private static final String ORDER_BY_LIVENESS = "CASE " + Downloads.Impl.Batches.COLUMN_STATUS + " "
-                + "WHEN " + Downloads.Impl.STATUS_RUNNING + " THEN 1 "
-                + "WHEN " + Downloads.Impl.STATUS_PENDING + " THEN 2 "
-                + "WHEN " + Downloads.Impl.STATUS_PAUSED_BY_APP + " THEN 3 "
-                + "WHEN " + Downloads.Impl.STATUS_BATCH_FAILED + " THEN 4 "
-                + "WHEN " + Downloads.Impl.STATUS_SUCCESS + " THEN 5 "
+        private static final String ORDER_BY_LIVENESS = "CASE " + DownloadContract.Batches.COLUMN_STATUS + " "
+                + "WHEN " + DownloadStatus.RUNNING + " THEN 1 "
+                + "WHEN " + DownloadStatus.PENDING + " THEN 2 "
+                + "WHEN " + DownloadStatus.PAUSED_BY_APP + " THEN 3 "
+                + "WHEN " + DownloadStatus.BATCH_FAILED + " THEN 4 "
+                + "WHEN " + DownloadStatus.SUCCESS + " THEN 5 "
                 + "ELSE 6 "
-                + "END, " + Downloads.Impl.Batches._ID + " ASC";
+                + "END, " + DownloadContract.Batches._ID + " ASC";
 
         private Criteria.Builder criteriaIdBuilder;
         private Criteria.Builder criteriaStatusBuilder;
@@ -67,7 +67,7 @@ public class BatchQuery {
         public Builder withId(long id) {
             this.criteriaIdBuilder = new Criteria.Builder();
             criteriaIdBuilder
-                    .withSelection(Downloads.Impl.Batches._ID, Criteria.Wildcard.EQUALS)
+                    .withSelection(DownloadContract.Batches._ID, Criteria.Wildcard.EQUALS)
                     .withArgument(String.valueOf(id));
             return this;
         }
@@ -129,41 +129,41 @@ public class BatchQuery {
             List<Criteria> criteriaList = new ArrayList<>();
             if ((statusFlags & DownloadManager.STATUS_PENDING) != 0) {
                 Criteria pendingCriteria = new Criteria.Builder()
-                        .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
-                        .withArgument(String.valueOf(Downloads.Impl.STATUS_PENDING))
+                        .withSelection(DownloadContract.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
+                        .withArgument(String.valueOf(DownloadStatus.PENDING))
                         .build();
                 criteriaList.add(pendingCriteria);
             }
 
             if ((statusFlags & DownloadManager.STATUS_RUNNING) != 0) {
                 Criteria runningCriteria = new Criteria.Builder()
-                        .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
-                        .withArgument(String.valueOf(Downloads.Impl.STATUS_RUNNING))
+                        .withSelection(DownloadContract.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
+                        .withArgument(String.valueOf(DownloadStatus.RUNNING))
                         .build();
                 criteriaList.add(runningCriteria);
             }
 
             if ((statusFlags & DownloadManager.STATUS_PAUSED) != 0) {
                 Criteria pausedCriteria = new Criteria.Builder()
-                        .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
-                        .withArgument(String.valueOf(Downloads.Impl.STATUS_PAUSED_BY_APP))
+                        .withSelection(DownloadContract.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
+                        .withArgument(String.valueOf(DownloadStatus.PAUSED_BY_APP))
                         .or()
-                        .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
-                        .withArgument(String.valueOf(Downloads.Impl.STATUS_WAITING_TO_RETRY))
+                        .withSelection(DownloadContract.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
+                        .withArgument(String.valueOf(DownloadStatus.WAITING_TO_RETRY))
                         .or()
-                        .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
-                        .withArgument(String.valueOf(Downloads.Impl.STATUS_WAITING_FOR_NETWORK))
+                        .withSelection(DownloadContract.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
+                        .withArgument(String.valueOf(DownloadStatus.WAITING_FOR_NETWORK))
                         .or()
-                        .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
-                        .withArgument(String.valueOf(Downloads.Impl.STATUS_QUEUED_FOR_WIFI))
+                        .withSelection(DownloadContract.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
+                        .withArgument(String.valueOf(DownloadStatus.QUEUED_FOR_WIFI))
                         .build();
                 criteriaList.add(pausedCriteria);
             }
 
             if ((statusFlags & DownloadManager.STATUS_SUCCESSFUL) != 0) {
                 Criteria successfulCriteria = new Criteria.Builder()
-                        .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
-                        .withArgument(String.valueOf(Downloads.Impl.STATUS_SUCCESS))
+                        .withSelection(DownloadContract.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
+                        .withArgument(String.valueOf(DownloadStatus.SUCCESS))
                         .build();
                 criteriaList.add(successfulCriteria);
 
@@ -172,10 +172,10 @@ public class BatchQuery {
                 Criteria failedCriteria = new Criteria.Builder()
                         .withInnerCriteria(
                                 new Criteria.Builder()
-                                        .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.MORE_THAN_EQUAL)
+                                        .withSelection(DownloadContract.Batches.COLUMN_STATUS, Criteria.Wildcard.MORE_THAN_EQUAL)
                                         .withArgument(String.valueOf(LOW_END_FAILED_STATUS_CODE))
                                         .and()
-                                        .withSelection(Downloads.Impl.Batches.COLUMN_STATUS, Criteria.Wildcard.LESS_THAN)
+                                        .withSelection(DownloadContract.Batches.COLUMN_STATUS, Criteria.Wildcard.LESS_THAN)
                                         .withArgument(String.valueOf(HIGH_END_FAILED_STATUS_CODE))
                                         .build())
                         .build();

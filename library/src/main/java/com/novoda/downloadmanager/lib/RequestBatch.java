@@ -37,10 +37,10 @@ public class RequestBatch {
 
     ContentValues toContentValues() {
         ContentValues values = new ContentValues();
-        values.put(Downloads.Impl.Batches.COLUMN_TITLE, batchInfo.getTitle());
-        values.put(Downloads.Impl.Batches.COLUMN_DESCRIPTION, batchInfo.getDescription());
-        values.put(Downloads.Impl.Batches.COLUMN_BIG_PICTURE, batchInfo.getBigPictureUrl());
-        values.put(Downloads.Impl.Batches.COLUMN_VISIBILITY, batchInfo.getVisibility());
+        values.put(DownloadContract.Batches.COLUMN_TITLE, batchInfo.getTitle());
+        values.put(DownloadContract.Batches.COLUMN_DESCRIPTION, batchInfo.getDescription());
+        values.put(DownloadContract.Batches.COLUMN_BIG_PICTURE, batchInfo.getBigPictureUrl());
+        values.put(DownloadContract.Batches.COLUMN_VISIBILITY, batchInfo.getVisibility());
         return values;
     }
 

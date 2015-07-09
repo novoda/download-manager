@@ -21,7 +21,7 @@ public class BatchQueryTest {
         int id = 12;
         BatchQuery query = new BatchQuery.Builder().withId(id).build();
 
-        assertThat(query.getSelection()).isEqualTo("(" + Downloads.Impl.Batches._ID + "=?)");
+        assertThat(query.getSelection()).isEqualTo("(" + DownloadContract.Batches._ID + "=?)");
         assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), new Integer[]{id});
     }
 
@@ -29,16 +29,16 @@ public class BatchQueryTest {
     public void givenTheQueryIsWithPendingStatusFilterWhenItIsBuiltThenTheSelectionAndArgumentsAreCorrect() {
         BatchQuery query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_PENDING).build();
 
-        assertThat(query.getSelection()).isEqualTo("(" + Downloads.Impl.Batches.COLUMN_STATUS + "=?)");
-        assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), new Integer[]{Downloads.Impl.STATUS_PENDING});
+        assertThat(query.getSelection()).isEqualTo("(" + DownloadContract.Batches.COLUMN_STATUS + "=?)");
+        assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), new Integer[]{DownloadStatus.PENDING});
     }
 
     @Test
     public void givenTheQueryIsWithRunningStatusFilterWhenItIsBuiltThenTheSelectionAndArgumentsAreCorrect() {
         BatchQuery query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_RUNNING).build();
 
-        assertThat(query.getSelection()).isEqualTo("(" + Downloads.Impl.Batches.COLUMN_STATUS + "=?)");
-        assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), new Integer[]{Downloads.Impl.STATUS_RUNNING});
+        assertThat(query.getSelection()).isEqualTo("(" + DownloadContract.Batches.COLUMN_STATUS + "=?)");
+        assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), new Integer[]{DownloadStatus.RUNNING});
     }
 
     @Test
@@ -46,15 +46,15 @@ public class BatchQueryTest {
         BatchQuery query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_PAUSED).build();
 
         assertThat(query.getSelection()).isEqualTo(
-                "(" + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=?)");
+                "(" + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=?)");
         Integer[] expectedArguments = {
-                Downloads.Impl.STATUS_PAUSED_BY_APP,
-                Downloads.Impl.STATUS_WAITING_TO_RETRY,
-                Downloads.Impl.STATUS_WAITING_FOR_NETWORK,
-                Downloads.Impl.STATUS_QUEUED_FOR_WIFI
+                DownloadStatus.PAUSED_BY_APP,
+                DownloadStatus.WAITING_TO_RETRY,
+                DownloadStatus.WAITING_FOR_NETWORK,
+                DownloadStatus.QUEUED_FOR_WIFI
         };
         assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), expectedArguments);
     }
@@ -64,8 +64,8 @@ public class BatchQueryTest {
         BatchQuery query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_FAILED).build();
 
         assertThat(query.getSelection()).isEqualTo(
-                "((" + Downloads.Impl.Batches.COLUMN_STATUS + ">=? AND "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "<?))");
+                "((" + DownloadContract.Batches.COLUMN_STATUS + ">=? AND "
+                        + DownloadContract.Batches.COLUMN_STATUS + "<?))");
         Integer[] expectedArguments = {400, 600};
         assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), expectedArguments);
     }
@@ -78,17 +78,17 @@ public class BatchQueryTest {
                                 | DownloadManager.STATUS_FAILED).build();
 
         assertThat(query.getSelection()).isEqualTo(
-                "(" + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + "(" + Downloads.Impl.Batches.COLUMN_STATUS + ">=? AND "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "<?))");
+                "(" + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + "(" + DownloadContract.Batches.COLUMN_STATUS + ">=? AND "
+                        + DownloadContract.Batches.COLUMN_STATUS + "<?))");
         Integer[] expectedArguments = {
-                Downloads.Impl.STATUS_PAUSED_BY_APP,
-                Downloads.Impl.STATUS_WAITING_TO_RETRY,
-                Downloads.Impl.STATUS_WAITING_FOR_NETWORK,
-                Downloads.Impl.STATUS_QUEUED_FOR_WIFI,
+                DownloadStatus.PAUSED_BY_APP,
+                DownloadStatus.WAITING_TO_RETRY,
+                DownloadStatus.WAITING_FOR_NETWORK,
+                DownloadStatus.QUEUED_FOR_WIFI,
                 400,
                 600
         };
@@ -105,19 +105,19 @@ public class BatchQueryTest {
                 .build();
 
         assertThat(query.getSelection()).isEqualTo(
-                "(" + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=?)");
+                "(" + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=?)");
         Integer[] expectedArguments = {
-                Downloads.Impl.STATUS_PENDING,
-                Downloads.Impl.STATUS_RUNNING,
-                Downloads.Impl.STATUS_PAUSED_BY_APP,
-                Downloads.Impl.STATUS_WAITING_TO_RETRY,
-                Downloads.Impl.STATUS_WAITING_FOR_NETWORK,
-                Downloads.Impl.STATUS_QUEUED_FOR_WIFI
+                DownloadStatus.PENDING,
+                DownloadStatus.RUNNING,
+                DownloadStatus.PAUSED_BY_APP,
+                DownloadStatus.WAITING_TO_RETRY,
+                DownloadStatus.WAITING_FOR_NETWORK,
+                DownloadStatus.QUEUED_FOR_WIFI
         };
         assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), expectedArguments);
 
@@ -134,22 +134,22 @@ public class BatchQueryTest {
                 .build();
 
         assertThat(query.getSelection()).isEqualTo(
-                "(" + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=?)");
+                "(" + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=?)");
 
         Integer[] expectedArguments = {
-                Downloads.Impl.STATUS_PENDING,
-                Downloads.Impl.STATUS_RUNNING,
-                Downloads.Impl.STATUS_PAUSED_BY_APP,
-                Downloads.Impl.STATUS_WAITING_TO_RETRY,
-                Downloads.Impl.STATUS_WAITING_FOR_NETWORK,
-                Downloads.Impl.STATUS_QUEUED_FOR_WIFI,
-                Downloads.Impl.STATUS_SUCCESS
+                DownloadStatus.PENDING,
+                DownloadStatus.RUNNING,
+                DownloadStatus.PAUSED_BY_APP,
+                DownloadStatus.WAITING_TO_RETRY,
+                DownloadStatus.WAITING_FOR_NETWORK,
+                DownloadStatus.QUEUED_FOR_WIFI,
+                DownloadStatus.SUCCESS
         };
         assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), expectedArguments);
     }
@@ -166,24 +166,24 @@ public class BatchQueryTest {
                 .build();
 
         assertThat(query.getSelection()).isEqualTo(
-                "(" + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + "(" + Downloads.Impl.Batches.COLUMN_STATUS + ">=? AND "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "<?))");
+                "(" + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + "(" + DownloadContract.Batches.COLUMN_STATUS + ">=? AND "
+                        + DownloadContract.Batches.COLUMN_STATUS + "<?))");
 
         Integer[] expectedArguments = {
-                Downloads.Impl.STATUS_PENDING,
-                Downloads.Impl.STATUS_RUNNING,
-                Downloads.Impl.STATUS_PAUSED_BY_APP,
-                Downloads.Impl.STATUS_WAITING_TO_RETRY,
-                Downloads.Impl.STATUS_WAITING_FOR_NETWORK,
-                Downloads.Impl.STATUS_QUEUED_FOR_WIFI,
-                Downloads.Impl.STATUS_SUCCESS,
+                DownloadStatus.PENDING,
+                DownloadStatus.RUNNING,
+                DownloadStatus.PAUSED_BY_APP,
+                DownloadStatus.WAITING_TO_RETRY,
+                DownloadStatus.WAITING_FOR_NETWORK,
+                DownloadStatus.QUEUED_FOR_WIFI,
+                DownloadStatus.SUCCESS,
                 400,
                 600,
         };
@@ -204,26 +204,26 @@ public class BatchQueryTest {
                 .build();
 
         assertThat(query.getSelection()).isEqualTo(
-                "(" + Downloads.Impl.Batches._ID + "=?) AND "
-                        + "(" + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + "(" + Downloads.Impl.Batches.COLUMN_STATUS + ">=? AND "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "<?))");
+                "(" + DownloadContract.Batches._ID + "=?) AND "
+                        + "(" + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + "(" + DownloadContract.Batches.COLUMN_STATUS + ">=? AND "
+                        + DownloadContract.Batches.COLUMN_STATUS + "<?))");
 
         Integer[] expectedArguments = {
                 id,
-                Downloads.Impl.STATUS_PENDING,
-                Downloads.Impl.STATUS_RUNNING,
-                Downloads.Impl.STATUS_PAUSED_BY_APP,
-                Downloads.Impl.STATUS_WAITING_TO_RETRY,
-                Downloads.Impl.STATUS_WAITING_FOR_NETWORK,
-                Downloads.Impl.STATUS_QUEUED_FOR_WIFI,
-                Downloads.Impl.STATUS_SUCCESS,
+                DownloadStatus.PENDING,
+                DownloadStatus.RUNNING,
+                DownloadStatus.PAUSED_BY_APP,
+                DownloadStatus.WAITING_TO_RETRY,
+                DownloadStatus.WAITING_FOR_NETWORK,
+                DownloadStatus.QUEUED_FOR_WIFI,
+                DownloadStatus.SUCCESS,
                 400,
                 600
         };
@@ -238,8 +238,8 @@ public class BatchQueryTest {
                 .build();
 
         assertThat(query.getSelection()).isEqualTo(
-                "((" + Downloads.Impl.Batches.COLUMN_STATUS + ">=? AND "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "<?))");
+                "((" + DownloadContract.Batches.COLUMN_STATUS + ">=? AND "
+                        + DownloadContract.Batches.COLUMN_STATUS + "<?))");
 
         Integer[] expectedArguments = {
                 400,
@@ -258,7 +258,7 @@ public class BatchQueryTest {
                 .withId(secondId)
                 .build();
 
-        assertThat(query.getSelection()).isEqualTo("(" + Downloads.Impl.Batches._ID + "=?)");
+        assertThat(query.getSelection()).isEqualTo("(" + DownloadContract.Batches._ID + "=?)");
         Integer[] expectedArguments = {secondId};
         assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), expectedArguments);
 
@@ -279,13 +279,13 @@ public class BatchQueryTest {
                 .build();
 
         assertThat(query.getSelection()).isEqualTo(
-                "(" + Downloads.Impl.Batches._ID + "=?) AND "
-                        + "(" + Downloads.Impl.Batches.COLUMN_STATUS + "=? OR "
-                        + Downloads.Impl.Batches.COLUMN_STATUS + "=?)");
+                "(" + DownloadContract.Batches._ID + "=?) AND "
+                        + "(" + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=?)");
         Integer[] expectedArguments = {
                 thirdId,
-                Downloads.Impl.STATUS_PENDING,
-                Downloads.Impl.STATUS_RUNNING};
+                DownloadStatus.PENDING,
+                DownloadStatus.RUNNING};
         assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), expectedArguments);
 
     }
@@ -298,7 +298,7 @@ public class BatchQueryTest {
                 .withSortAscendingBy(sortColumn)
                 .build();
 
-        assertThat(query.getSelection()).isEqualTo("(" + Downloads.Impl.Batches.COLUMN_STATUS + "=?)");
+        assertThat(query.getSelection()).isEqualTo("(" + DownloadContract.Batches.COLUMN_STATUS + "=?)");
         assertThat(query.getSortOrder()).isEqualTo(sortColumn + " ASC ");
     }
 
@@ -310,7 +310,7 @@ public class BatchQueryTest {
                 .withSortDescendingBy(sortColumn)
                 .build();
 
-        assertThat(query.getSelection()).isEqualTo("(" + Downloads.Impl.Batches.COLUMN_STATUS + "=?)");
+        assertThat(query.getSelection()).isEqualTo("(" + DownloadContract.Batches.COLUMN_STATUS + "=?)");
         assertThat(query.getSortOrder()).isEqualTo(sortColumn + " DESC ");
     }
 
