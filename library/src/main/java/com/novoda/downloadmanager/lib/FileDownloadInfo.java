@@ -2,7 +2,6 @@ package com.novoda.downloadmanager.lib;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
-import android.content.Context;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -13,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Stores information about an individual download.
@@ -275,17 +273,6 @@ class FileDownloadInfo {
         return NetworkState.OK;
     }
 
-    public void startDownload(Context context, ExecutorService executor, StorageManager storageManager, DownloadNotifier downloadNotifier, DownloadsRepository downloadsRepository, DownloadReadyChecker downloadReadyChecker) {
-        String applicationPackageName = context.getApplicationContext().getPackageName();
-        BatchCompletionBroadcaster batchCompletionBroadcaster = new BatchCompletionBroadcaster(context, applicationPackageName);
-        ContentResolver contentResolver = context.getContentResolver();
-        BatchRepository batchRepository = new BatchRepository(contentResolver, new DownloadDeleter(contentResolver), downloadsUriProvider);
-        DownloadThread downloadThread = new DownloadThread(
-                context, systemFacade, this, storageManager, downloadNotifier,
-                batchCompletionBroadcaster, batchRepository, downloadsUriProvider, downloadsRepository, new NetworkChecker(systemFacade), downloadReadyChecker);
-        executor.submit(downloadThread);
-    }
-
     public boolean isSubmittedOrRunning() {
         return DownloadStatus.isSubmitted(status) || DownloadStatus.isRunning(status);
     }
@@ -378,9 +365,9 @@ class FileDownloadInfo {
             this.cursor = cursor;
         }
 
-        public FileDownloadInfo newDownloadInfo(Context context, SystemFacade systemFacade, DownloadsUriProvider downloadsUriProvider) {
+        public FileDownloadInfo newDownloadInfo(SystemFacade systemFacade, DownloadsUriProvider downloadsUriProvider) {
             RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
-            FileDownloadInfo info = new FileDownloadInfo(context, systemFacade, randomNumberGenerator, downloadsUriProvider);
+            FileDownloadInfo info = new FileDownloadInfo(systemFacade, randomNumberGenerator, downloadsUriProvider);
             updateFromDatabase(info);
             readRequestHeaders(info);
 
