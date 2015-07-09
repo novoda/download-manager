@@ -91,7 +91,7 @@ public class BatchRepositoryTest {
     }
 
     @Test
-    public void whenThereAreFourBatchesMarkedToBeDeletedAndFourBatchesThenRemoveAll() {
+    public void givenThereAreFourBatchesMarkedToBeDeletedWhenDeletingMarkedBatchesForAllDownloadsThenItRemovesAll() {
         Cursor cursorWithDownloadsIdToBeDeleted = new MockCursorWithBatchIds(Arrays.asList(1L, 2L, 3L, 4L));
         when(mockContentResolver.query(mockDownloadsUriProvider.getBatchesUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null)).thenReturn(cursorWithDownloadsIdToBeDeleted);
         when(mockContentResolver.query(any(Uri.class), any(String[].class), any(String.class), any(String[].class), any(String.class))).thenReturn(cursorWithDownloadsIdToBeDeleted);
