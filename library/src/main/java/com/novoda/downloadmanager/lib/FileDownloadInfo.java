@@ -4,7 +4,6 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -22,7 +21,6 @@ import java.util.concurrent.ExecutorService;
  */
 class FileDownloadInfo {
 
-    public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
     private static final int UNKNOWN_BYTES = -1;
 
     // TODO: move towards these in-memory objects being sources of truth, and periodically pushing to provider.
@@ -228,33 +226,6 @@ class FileDownloadInfo {
         return Collections.unmodifiableList(requestHeaders);
     }
 
-    public void broadcastIntentDownloadComplete(int finalStatus) {
-        Intent intent = new Intent(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-        intent.setPackage(getPackageName());
-        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, id);
-        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_STATUS, finalStatus);
-        intent.setData(getMyDownloadsUri());
-        if (extras != null) {
-            intent.putExtra(EXTRA_EXTRA, extras);
-        }
-        context.sendBroadcast(intent);
-    }
-
-    private String getPackageName() {
-        return context.getApplicationContext().getPackageName();
-    }
-
-    public void broadcastIntentDownloadFailedInsufficientSpace() {
-        Intent intent = new Intent(DownloadManager.ACTION_DOWNLOAD_INSUFFICIENT_SPACE);
-        intent.setPackage(getPackageName());
-        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, id);
-        intent.setData(getMyDownloadsUri());
-        if (extras != null) {
-            intent.putExtra(EXTRA_EXTRA, extras);
-        }
-        context.sendBroadcast(intent);
-    }
-
     /**
      * Returns the time when a download should be restarted.
      */
@@ -325,7 +296,7 @@ class FileDownloadInfo {
         BatchRepository batchRepository = new BatchRepository(contentResolver, new DownloadDeleter(contentResolver), downloadsUriProvider);
         DownloadThread downloadThread = new DownloadThread(
                 context, systemFacade, this, storageManager, downloadNotifier,
-                batchCompletionBroadcaster, batchRepository, downloadsUriProvider, downloadsRepository, new NetworkChecker(systemFacade), downloadReadyChecker, id, batchId);
+                batchCompletionBroadcaster, batchRepository, downloadsUriProvider, downloadsRepository, new NetworkChecker(systemFacade), downloadReadyChecker, id, batchId, extras);
         executor.submit(downloadThread);
     }
 

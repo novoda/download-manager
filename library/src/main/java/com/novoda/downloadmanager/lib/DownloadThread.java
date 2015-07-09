@@ -64,6 +64,8 @@ class DownloadThread implements Runnable {
      * is true, WiFi is required for this download size; otherwise, it is only recommended.
      */
     public static final String EXTRA_IS_WIFI_REQUIRED = "isWifiRequired";
+    public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
+
     private static final String TAG = "DownloadManager-DownloadThread";
 
     // TODO: bind each download to a specific network interface to avoid state
@@ -89,6 +91,8 @@ class DownloadThread implements Runnable {
     private final long id;
     private final long batchId;
     private final Uri allDownloadsUri;
+    private final Uri myDownloadsUri;
+    private final String extras;
 
     private volatile boolean policyDirty;
 
@@ -103,9 +107,10 @@ class DownloadThread implements Runnable {
                           DownloadsRepository downloadsRepository,
                           NetworkChecker networkChecker,
                           DownloadReadyChecker downloadReadyChecker,
-                          long downloadId, long batchId) {
+                          long downloadId, long batchId, String extras) {
         this.context = context;
         this.systemFacade = systemFacade;
+        this.extras = extras;
         this.originalDownloadInfo = originalDownloadInfo;
         this.storageManager = storageManager;
         this.downloadNotifier = downloadNotifier;
@@ -118,6 +123,7 @@ class DownloadThread implements Runnable {
         this.id = downloadId;
         this.batchId = batchId;
         this.allDownloadsUri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id);
+        this.myDownloadsUri = ContentUris.withAppendedId(downloadsUriProvider.getContentUri(), id);
     }
 
     /**
@@ -870,10 +876,37 @@ class DownloadThread implements Runnable {
     private void notifyDownloadCompleted(State state, int finalStatus, String errorMsg, int numFailed) {
         notifyThroughDatabase(state, finalStatus, errorMsg, numFailed);
         if (DownloadStatus.isCompleted(finalStatus)) {
-            originalDownloadInfo.broadcastIntentDownloadComplete(finalStatus);
+            broadcastIntentDownloadComplete(finalStatus);
         } else if (DownloadStatus.isInsufficientSpace(finalStatus)) {
-            originalDownloadInfo.broadcastIntentDownloadFailedInsufficientSpace();
+            broadcastIntentDownloadFailedInsufficientSpace();
         }
+    }
+
+    public void broadcastIntentDownloadComplete(int finalStatus) {
+        Intent intent = new Intent(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+        intent.setPackage(getPackageName());
+        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, id);
+        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_STATUS, finalStatus);
+        intent.setData(myDownloadsUri);
+        if (extras != null) {
+            intent.putExtra(EXTRA_EXTRA, extras);
+        }
+        context.sendBroadcast(intent);
+    }
+
+    public void broadcastIntentDownloadFailedInsufficientSpace() {
+        Intent intent = new Intent(DownloadManager.ACTION_DOWNLOAD_INSUFFICIENT_SPACE);
+        intent.setPackage(getPackageName());
+        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, id);
+        intent.setData(myDownloadsUri);
+        if (extras != null) {
+            intent.putExtra(EXTRA_EXTRA, extras);
+        }
+        context.sendBroadcast(intent);
+    }
+
+    private String getPackageName() {
+        return context.getApplicationContext().getPackageName();
     }
 
     private void notifyThroughDatabase(State state, int finalStatus, String errorMsg, int numFailed) {
