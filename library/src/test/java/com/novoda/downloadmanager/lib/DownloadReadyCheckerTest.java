@@ -7,7 +7,7 @@ import org.junit.Test;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
-public class FileDownloadInfoTest {
+public class DownloadReadyCheckerTest {
 
     private static final DownloadClientReadyChecker IS_READY = new DownloadClientReadyChecker() {
         @Override
@@ -25,32 +25,28 @@ public class FileDownloadInfoTest {
 
     @Test
     public void givenClientIsReadyToDownloadThenStartDownload() {
-        FileDownloadInfo fileDownloadInfo = new FileDownloadInfo(
-                null,
+        DownloadReadyChecker downloadReadyChecker = new DownloadReadyChecker(
                 null,
                 null,
                 IS_READY,
-                null,
-                mock(PublicFacingDownloadMarshaller.class),
-                canDownload);
+                mock(PublicFacingDownloadMarshaller.class)
+        );
 
-        boolean isReady = fileDownloadInfo.isReadyToDownload(mock(DownloadBatch.class));
+        boolean isReady = downloadReadyChecker.canDownload(mock(DownloadBatch.class));
 
         assertThat(isReady).isTrue();
     }
 
     @Test
     public void givenClientIsNotReadyToDownloadThenDownloadDoesNotStart() {
-        FileDownloadInfo fileDownloadInfo = new FileDownloadInfo(
-                null,
+        DownloadReadyChecker downloadReadyChecker = new DownloadReadyChecker(
                 null,
                 null,
                 IS_NOT_READY,
-                null,
-                mock(PublicFacingDownloadMarshaller.class),
-                canDownload);
+                mock(PublicFacingDownloadMarshaller.class)
+        );
 
-        boolean isReady = fileDownloadInfo.isReadyToDownload(mock(DownloadBatch.class));
+        boolean isReady = downloadReadyChecker.canDownload(mock(DownloadBatch.class));
 
         assertThat(isReady).isFalse();
     }
