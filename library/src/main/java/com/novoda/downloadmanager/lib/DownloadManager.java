@@ -418,14 +418,14 @@ public class DownloadManager {
     public void pauseBatch(long id) {
         ContentValues values = new ContentValues();
         values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_PAUSED);
-        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
+        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[]{String.valueOf(id)});
     }
 
     public void resumeBatch(long id) {
         ContentValues values = new ContentValues();
         values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
         values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.PENDING);
-        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
+        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[]{String.valueOf(id)});
     }
 
     public void removeDownload(URI uri) {
@@ -504,6 +504,12 @@ public class DownloadManager {
         return new CursorTranslator(underlyingCursor, downloadsUriProvider.getDownloadsByBatchUri());
     }
 
+    /**
+     * Query the download manager about batches that have been requested.
+     *
+     * @param query parameters specifying filters for this query
+     * @return a Cursor over the result set of batches
+     */
     public Cursor query(BatchQuery query) {
         BatchRepository batchRepository = new BatchRepository(contentResolver, new DownloadDeleter(contentResolver), downloadsUriProvider);
         Cursor cursor = batchRepository.retrieveFor(query);
