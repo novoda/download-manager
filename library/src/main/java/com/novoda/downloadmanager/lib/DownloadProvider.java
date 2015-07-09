@@ -325,7 +325,8 @@ public final class DownloadProvider extends ContentProvider {
                 // return the mimetype of this id from the database
                 final String id = getDownloadIdFromUri(uri);
                 final SQLiteDatabase db = openHelper.getReadableDatabase();
-                final String mimeType = DatabaseUtils.stringForQuery(db,
+                final String mimeType = DatabaseUtils.stringForQuery(
+                        db,
                         "SELECT " + DownloadContract.Downloads.COLUMN_MIME_TYPE + " FROM " + DownloadContract.Downloads.DOWNLOADS_TABLE_NAME +
                                 " WHERE " + DownloadContract.Downloads._ID + " = ?",
                         new String[]{id});
@@ -402,11 +403,13 @@ public final class DownloadProvider extends ContentProvider {
                 dest = DownloadsDestination.DESTINATION_CACHE_PARTITION;
             }
             if (dest == DownloadsDestination.DESTINATION_FILE_URI) {
-                getContext().enforcePermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, Binder.getCallingPid(), Binder.getCallingUid(),
+                getContext().enforcePermission(
+                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE, Binder.getCallingPid(), Binder.getCallingUid(),
                         "need WRITE_EXTERNAL_STORAGE permission to use DESTINATION_FILE_URI");
                 checkFileUriDestination(values);
             } else if (dest == DownloadsDestination.DESTINATION_SYSTEMCACHE_PARTITION) {
-                getContext().enforcePermission("android.permission.ACCESS_CACHE_FILESYSTEM", Binder.getCallingPid(), Binder.getCallingUid(),
+                getContext().enforcePermission(
+                        "android.permission.ACCESS_CACHE_FILESYSTEM", Binder.getCallingPid(), Binder.getCallingUid(),
                         "need ACCESS_CACHE_FILESYSTEM permission to use system cache");
             }
             filteredValues.put(DownloadContract.Downloads.COLUMN_DESTINATION, dest);
@@ -906,7 +909,8 @@ public final class DownloadProvider extends ContentProvider {
             throw new FileNotFoundException("Bad mode for " + uri + ": " + mode);
         }
 
-        ParcelFileDescriptor ret = ParcelFileDescriptor.open(new File(path),
+        ParcelFileDescriptor ret = ParcelFileDescriptor.open(
+                new File(path),
                 ParcelFileDescriptor.MODE_READ_ONLY);
 
         if (ret == null) {
@@ -922,8 +926,9 @@ public final class DownloadProvider extends ContentProvider {
     }
 
     private void logVerboseOpenFileInfo(Uri uri, String mode) {
-        Log.v("openFile uri: " + uri + ", mode: " + mode
-                + ", uid: " + Binder.getCallingUid());
+        Log.v(
+                "openFile uri: " + uri + ", mode: " + mode
+                        + ", uid: " + Binder.getCallingUid());
         Cursor cursor = query(downloadsUriProvider.getContentUri(), new String[]{"_id"}, null, null, "_id");
         if (cursor == null) {
             Log.v("null cursor in openFile");
