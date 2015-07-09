@@ -17,8 +17,10 @@
 package com.novoda.downloadmanager.lib;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.drm.DrmManagerClient;
 import android.net.NetworkInfo;
 import android.net.TrafficStats;
@@ -56,6 +58,11 @@ import static java.net.HttpURLConnection.*;
  */
 class DownloadThread implements Runnable {
 
+    /**
+     * For intents used to notify the user that a download exceeds a size threshold, if this extra
+     * is true, WiFi is required for this download size; otherwise, it is only recommended.
+     */
+    public static final String EXTRA_IS_WIFI_REQUIRED = "isWifiRequired";
     private static final String TAG = "DownloadManager-DownloadThread";
 
     // TODO: bind each download to a specific network interface to avoid state
@@ -491,13 +498,22 @@ class DownloadThread implements Runnable {
             int status = DownloadStatus.WAITING_FOR_NETWORK;
             if (networkUsable == NetworkState.UNUSABLE_DUE_TO_SIZE) {
                 status = DownloadStatus.QUEUED_FOR_WIFI;
-                originalDownloadInfo.notifyPauseDueToSize(true);
+                notifyPauseDueToSize(true);
             } else if (networkUsable == NetworkState.RECOMMENDED_UNUSABLE_DUE_TO_SIZE) {
                 status = DownloadStatus.QUEUED_FOR_WIFI;
-                originalDownloadInfo.notifyPauseDueToSize(false);
+                notifyPauseDueToSize(false);
             }
             throw new StopRequestException(status, networkUsable.name());
         }
+    }
+
+    void notifyPauseDueToSize(boolean isWifiRequired) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id));
+        intent.setClassName(SizeLimitActivity.class.getPackage().getName(), SizeLimitActivity.class.getName());
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(EXTRA_IS_WIFI_REQUIRED, isWifiRequired);
+        context.startActivity(intent);
     }
 
     /**

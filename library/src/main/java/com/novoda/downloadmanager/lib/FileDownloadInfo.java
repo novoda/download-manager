@@ -72,12 +72,6 @@ class FileDownloadInfo {
         BLOCKED
     }
 
-    /**
-     * For intents used to notify the user that a download exceeds a size threshold, if this extra
-     * is true, WiFi is required for this download size; otherwise, it is only recommended.
-     */
-    public static final String EXTRA_IS_WIFI_REQUIRED = "isWifiRequired";
-
     private long id;
     private String uri;
     private boolean scannable;
@@ -387,15 +381,6 @@ class FileDownloadInfo {
                 getDestination() == DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD)
                 && DownloadStatus.isSuccess(getStatus())
                 && scannable;
-    }
-
-    void notifyPauseDueToSize(boolean isWifiRequired) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(getAllDownloadsUri());
-        intent.setClassName(SizeLimitActivity.class.getPackage().getName(), SizeLimitActivity.class.getName());
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(EXTRA_IS_WIFI_REQUIRED, isWifiRequired);
-        context.startActivity(intent);
     }
 
     /**
