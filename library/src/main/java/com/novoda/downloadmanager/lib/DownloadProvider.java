@@ -49,7 +49,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -225,7 +224,7 @@ public final class DownloadProvider extends ContentProvider {
                 downloadsUriProvider.getContentUri(),
                 downloadsUriProvider.getAllDownloadsUri(),
                 downloadsUriProvider.getBatchesUri()
-        };;
+        };
     }
 
     /**
@@ -326,7 +325,8 @@ public final class DownloadProvider extends ContentProvider {
                 // return the mimetype of this id from the database
                 final String id = getDownloadIdFromUri(uri);
                 final SQLiteDatabase db = openHelper.getReadableDatabase();
-                final String mimeType = DatabaseUtils.stringForQuery(db,
+                final String mimeType = DatabaseUtils.stringForQuery(
+                        db,
                         "SELECT " + DownloadContract.Downloads.COLUMN_MIME_TYPE + " FROM " + DownloadContract.Downloads.DOWNLOADS_TABLE_NAME +
                                 " WHERE " + DownloadContract.Downloads._ID + " = ?",
                         new String[]{id});
@@ -362,7 +362,6 @@ public final class DownloadProvider extends ContentProvider {
         // note we disallow inserting into ALL_DOWNLOADS
         int match = URI_MATCHER.match(uri);
         if (match == MY_DOWNLOADS) {
-            checkDownloadInsertPermissions(values);
             return insertDownload(uri, values, db, match);
         }
         if (match == BATCHES) {
@@ -404,11 +403,13 @@ public final class DownloadProvider extends ContentProvider {
                 dest = DownloadsDestination.DESTINATION_CACHE_PARTITION;
             }
             if (dest == DownloadsDestination.DESTINATION_FILE_URI) {
-                getContext().enforcePermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE, Binder.getCallingPid(), Binder.getCallingUid(),
+                getContext().enforcePermission(
+                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE, Binder.getCallingPid(), Binder.getCallingUid(),
                         "need WRITE_EXTERNAL_STORAGE permission to use DESTINATION_FILE_URI");
                 checkFileUriDestination(values);
             } else if (dest == DownloadsDestination.DESTINATION_SYSTEMCACHE_PARTITION) {
-                getContext().enforcePermission("android.permission.ACCESS_CACHE_FILESYSTEM", Binder.getCallingPid(), Binder.getCallingUid(),
+                getContext().enforcePermission(
+                        "android.permission.ACCESS_CACHE_FILESYSTEM", Binder.getCallingPid(), Binder.getCallingUid(),
                         "need ACCESS_CACHE_FILESYSTEM permission to use system cache");
             }
             filteredValues.put(DownloadContract.Downloads.COLUMN_DESTINATION, dest);
@@ -454,6 +455,7 @@ public final class DownloadProvider extends ContentProvider {
 
         // copy some more columns as is
         copyString(DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS, values, filteredValues);
+        copyString(DownloadContract.Downloads.COLUMN_EXTRA_DATA, values, filteredValues);
         copyString(DownloadContract.Downloads.COLUMN_COOKIE_DATA, values, filteredValues);
         copyString(DownloadContract.Downloads.COLUMN_USER_AGENT, values, filteredValues);
         copyString(DownloadContract.Downloads.COLUMN_REFERER, values, filteredValues);
@@ -524,100 +526,6 @@ public final class DownloadProvider extends ContentProvider {
         if (path == null) {
             throw new IllegalArgumentException("Invalid file URI: " + uri);
         }
-//        try {
-//            final String canonicalPath = new File(path).getCanonicalPath();
-//            final String externalPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-//            if (!canonicalPath.startsWith(externalPath)) {
-//                throw new SecurityException("Destination must be on external storage: " + uri);
-//            }
-//        } catch (IOException e) {
-//            throw new SecurityException("Problem resolving path: " + uri);
-//        }
-    }
-
-    /**
-     * Apps with the ACCESS_DOWNLOAD_MANAGER permission can access this provider freely, subject to
-     * constraints in the rest of the code. Apps without that may still access this provider through
-     * the public API, but additional restrictions are imposed. We check those restrictions here.
-     *
-     * @param values ContentValues provided to insert()
-     * @throws SecurityException if the caller has insufficient permissions
-     */
-    private void checkDownloadInsertPermissions(ContentValues values) {
-        if (getContext().checkCallingOrSelfPermission(DownloadsPermission.PERMISSION_ACCESS) == PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-
-        getContext().enforceCallingOrSelfPermission(android.Manifest.permission.INTERNET, "INTERNET permission is required to use the download manager");
-
-        // ensure the request fits within the bounds of a public API request
-        // first copy so we can remove values
-        values = new ContentValues(values);
-
-        // validate the destination column
-        if (values.getAsInteger(DownloadContract.Downloads.COLUMN_DESTINATION) == DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
-            /* this row is inserted by
-             * DownloadManager.addCompletedDownload(String, String, String, boolean, String, String, long)
-             */
-            values.remove(DownloadContract.Downloads.COLUMN_TOTAL_BYTES);
-            values.remove(DownloadContract.Downloads.COLUMN_DATA);
-            values.remove(DownloadContract.Downloads.COLUMN_STATUS);
-        }
-        enforceAllowedValues(
-                values, DownloadContract.Downloads.COLUMN_DESTINATION,
-                DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE,
-                DownloadsDestination.DESTINATION_FILE_URI,
-                DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD);
-
-        // remove the rest of the columns that are allowed (with any value)
-        values.remove(DownloadContract.Downloads.COLUMN_URI);
-        values.remove(DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS);
-        values.remove(DownloadContract.Downloads.COLUMN_BATCH_ID);
-        values.remove(DownloadContract.Downloads.COLUMN_MIME_TYPE);
-        values.remove(DownloadContract.Downloads.COLUMN_FILE_NAME_HINT); // checked later in insert()
-        values.remove(DownloadContract.Downloads.COLUMN_ALLOWED_NETWORK_TYPES);
-        values.remove(DownloadContract.Downloads.COLUMN_ALLOW_ROAMING);
-        values.remove(DownloadContract.Downloads.COLUMN_ALLOW_METERED);
-        values.remove(DownloadContract.Downloads.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI);
-        values.remove(DownloadContract.Downloads.COLUMN_MEDIA_SCANNED);
-        Iterator<Map.Entry<String, Object>> iterator = values.valueSet().iterator();
-        while (iterator.hasNext()) {
-            String key = iterator.next().getKey();
-            if (key.startsWith(DownloadContract.RequestHeaders.INSERT_KEY_PREFIX)) {
-                iterator.remove();
-            }
-        }
-
-        // any extra columns are extraneous and disallowed
-        if (values.size() > 0) {
-            StringBuilder error = new StringBuilder("Invalid columns in request: ");
-            boolean first = true;
-            for (Map.Entry<String, Object> entry : values.valueSet()) {
-                if (!first) {
-                    error.append(", ");
-                }
-                error.append(entry.getKey());
-            }
-            throw new SecurityException(error.toString());
-        }
-    }
-
-    /**
-     * Remove column from values, and throw a SecurityException if the value isn't within the
-     * specified allowedValues.
-     */
-    private void enforceAllowedValues(ContentValues values, String column, Object... allowedValues) {
-        Object value = values.get(column);
-        values.remove(column);
-        for (Object allowedValue : allowedValues) {
-            if (value == null && allowedValue == null) {
-                return;
-            }
-            if (value != null && value.equals(allowedValue)) {
-                return;
-            }
-        }
-        throw new SecurityException("Invalid value for " + column + ": " + value);
     }
 
     /**
@@ -973,10 +881,10 @@ public final class DownloadProvider extends ContentProvider {
             logVerboseOpenFileInfo(uri, mode);
         }
 
-        Cursor cursor = query(uri, new String[]{"_data"}, null, null, null);
         String path;
+        Cursor cursor = query(uri, new String[]{"_data"}, null, null, null);
         try {
-            int count = (cursor != null) ? cursor.getCount() : 0;
+            int count = cursor.getCount();
             if (count != 1) {
                 // If there is not exactly one result, throw an appropriate exception.
                 if (count == 0) {
@@ -988,9 +896,7 @@ public final class DownloadProvider extends ContentProvider {
             cursor.moveToFirst();
             path = cursor.getString(0);
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            cursor.close();
         }
 
         if (path == null) {
@@ -1004,7 +910,8 @@ public final class DownloadProvider extends ContentProvider {
             throw new FileNotFoundException("Bad mode for " + uri + ": " + mode);
         }
 
-        ParcelFileDescriptor ret = ParcelFileDescriptor.open(new File(path),
+        ParcelFileDescriptor ret = ParcelFileDescriptor.open(
+                new File(path),
                 ParcelFileDescriptor.MODE_READ_ONLY);
 
         if (ret == null) {
@@ -1020,8 +927,9 @@ public final class DownloadProvider extends ContentProvider {
     }
 
     private void logVerboseOpenFileInfo(Uri uri, String mode) {
-        Log.v("openFile uri: " + uri + ", mode: " + mode
-                + ", uid: " + Binder.getCallingUid());
+        Log.v(
+                "openFile uri: " + uri + ", mode: " + mode
+                        + ", uid: " + Binder.getCallingUid());
         Cursor cursor = query(downloadsUriProvider.getContentUri(), new String[]{"_id"}, null, null, "_id");
         if (cursor == null) {
             Log.v("null cursor in openFile");

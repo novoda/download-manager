@@ -243,6 +243,12 @@ final class DownloadContract {
          */
         public static final int LAST_UPDATESRC_DONT_NOTIFY_DOWNLOADSVC = 1;
 
+        /**
+         * For you to store any extra data you want to pass through the download manager.
+         * <P>Type: TEXT</P>
+         */
+        public static final String COLUMN_EXTRA_DATA = "extra_data";
+
         private Downloads() {
             // non-instantiable class
         }

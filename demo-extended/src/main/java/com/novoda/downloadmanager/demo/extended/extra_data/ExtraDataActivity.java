@@ -1,10 +1,8 @@
-package com.novoda.downloadmanager.demo.extended.batches;
+package com.novoda.downloadmanager.demo.extended.extra_data;
 
-import android.content.Intent;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
@@ -14,55 +12,41 @@ import android.widget.ListView;
 
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
-import com.novoda.downloadmanager.demo.extended.Download;
-import com.novoda.downloadmanager.demo.extended.DownloadAdapter;
-import com.novoda.downloadmanager.demo.extended.QueryForDownloadsAsyncTask;
 import com.novoda.downloadmanager.demo.extended.QueryTimestamp;
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.NotificationVisibility;
 import com.novoda.downloadmanager.lib.Query;
 import com.novoda.downloadmanager.lib.Request;
-import com.novoda.downloadmanager.lib.RequestBatch;
 import com.novoda.notils.logger.simple.Log;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class BatchesActivity extends AppCompatActivity implements QueryForDownloadsAsyncTask.Callback {
-    private static final String BIG_FILE = "http://download.thinkbroadband.com/100MB.zip";
-    private static final String BEARD_IMAGE = "http://i.imgur.com/9JL2QVl.jpg";
+public class ExtraDataActivity extends AppCompatActivity implements QueryExtrasAsyncTask.Callback {
+    private static final String BIG_FILE = "http://download.thinkbroadband.com/20MB.zip";
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private DownloadManager downloadManager;
     private ListView listView;
-    private DownloadAdapter downloadAdapter;
+    private ExtraDataAdapter downloadAdapter;
 
     private final QueryTimestamp lastQueryTimestamp = new QueryTimestamp();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_batches);
+        setContentView(R.layout.activity_extra_data);
         listView = (ListView) findViewById(R.id.main_downloads_list);
         downloadManager = DownloadManagerBuilder.from(this)
                 .withVerboseLogging()
                 .build();
-        downloadAdapter = new DownloadAdapter(new ArrayList<Download>());
+        downloadAdapter = new ExtraDataAdapter();
         listView.setAdapter(downloadAdapter);
 
-        findViewById(R.id.batch_download_button).setOnClickListener(
+        findViewById(R.id.download_button).setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(@NonNull View v) {
-                        enqueueBatch();
-                    }
-                });
-
-        findViewById(R.id.batch_show_button).setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(@NonNull View v) {
-                        startActivity(new Intent(BatchesActivity.this, ShowBatchesActivity.class));
+                        enqueueSingleDownload();
                     }
                 });
 
@@ -75,28 +59,19 @@ public class BatchesActivity extends AppCompatActivity implements QueryForDownlo
     }
 
     private void queryForDownloads() {
-        QueryForDownloadsAsyncTask.newInstance(downloadManager, this).execute(new Query());
+        QueryExtrasAsyncTask.newInstance(downloadManager, this).execute(new Query());
     }
 
-    private void enqueueBatch() {
-        final RequestBatch batch = new RequestBatch.Builder()
-                .withTitle("Large Beard Shipment")
-                .withDescription("Goatees galore")
-                .withBigPictureUrl(BEARD_IMAGE)
-                .withVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE)
-                .build();
-
+    private void enqueueSingleDownload() {
         Uri uri = Uri.parse(BIG_FILE);
-        final Request request = new Request(uri);
-        request.setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "beard.shipment");
-        request.setNotificationExtra("beard_1");
-        batch.addRequest(request);
+        final Request request = new Request(uri)
+                .setTitle("A Single Beard")
+                .setDescription("Fine facial hair")
+                .setExtraData("Hey you forgot your beard comb.")
+                .setNotificationVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE);
 
-        request.setNotificationExtra("beard_2");
-        batch.addRequest(request);
-
-        long batchId = downloadManager.enqueue(batch);
-        Log.d("Download enqueued with batch ID: " + batchId);
+        long requestId = downloadManager.enqueue(request);
+        Log.d("Download enqueued with request ID: " + requestId);
     }
 
     @Override
@@ -128,5 +103,4 @@ public class BatchesActivity extends AppCompatActivity implements QueryForDownlo
     public void onQueryResult(List<Download> downloads) {
         downloadAdapter.updateDownloads(downloads);
     }
-
 }

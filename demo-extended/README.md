@@ -13,3 +13,4 @@ Here we show the following use cases
    - Changing the database name where all downloads are saved
    - Enqueuing batched requests
    - Querying batch information
+   - Pass extra data through download manager

@@ -28,20 +28,22 @@ import static android.app.DownloadManager.*;
 
 class OpenHelper {
 
+    private final DownloadManager downloadManager;
     private final DownloadsUriProvider downloadsUriProvider;
 
-    public OpenHelper(DownloadsUriProvider downloadsUriProvider) {
+    public OpenHelper(DownloadManager downloadManager, DownloadsUriProvider downloadsUriProvider) {
+        this.downloadManager = downloadManager;
         this.downloadsUriProvider = downloadsUriProvider;
     }
+
     /**
      * Build an {@link Intent} to view the download at current {@link Cursor}
      * position, handling subtleties around installing packages.
      */
     public Intent buildViewIntent(Context context, long id) {
-        final DownloadManager downManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-        downManager.setAccessAllDownloads(true);
+        downloadManager.setAccessAllDownloads(true);
 
-        final Cursor cursor = downManager.query(new Query().setFilterById(id));
+        final Cursor cursor = downloadManager.query(new Query().setFilterById(id));
         try {
             if (!cursor.moveToFirst()) {
                 throw new IllegalArgumentException("Missing download " + id);
@@ -98,7 +100,8 @@ class OpenHelper {
 
     private int getOriginatingUid(Context context, long id) {
         final Uri uri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id);
-        final Cursor cursor = context.getContentResolver().query(uri, new String[]{Constants.UID},
+        final Cursor cursor = context.getContentResolver().query(
+                uri, new String[]{Constants.UID},
                 null, null, null);
         if (cursor != null) {
             try {

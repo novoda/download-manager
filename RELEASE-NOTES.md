@@ -1,56 +1,62 @@
 0.1.8
 -------
-#79 Query for batches
-#87 Fix current size for batches
+
+- Query for batches #79
+- Fix current size for batches #87
+- Adds an extra column so you can pass data through the DLM #88
 
 0.1.7
 -------
-#86 - improves sort for live items
-#83 - update tests and injection
+
+- improves sort for live items #86
+- update tests and injection #83
 
 0.1.6
 -------
-#82 fix pause and resume
-#84 performance improvements around download checks
+
+- fix pause and resume #82
+- performance improvements around download checks #84
 
 0.1.5
 -------
-#74 - adds ability to sort queries by liveness
-#75 - calculate entire batch size
+
+- adds ability to sort queries by liveness #74
+- calculate entire batch size #75
 
 0.1.4
 -------
-Code cleanup #63
-Limit client knowledge of internals #59
-Adds static analysis #72
+
+- Code cleanup #63
+- Limit client knowledge of internals #59
+- Adds static analysis #72
 
 0.1.3
 -------
 
-Incorrect DownloadBatch passed to rule checker #71 
-splits demos #69
-batch id query error #67
-batch deletion bug #62
-replaces data structures #60
+- Incorrect DownloadBatch passed to rule checker #71
+- splits demos #69
+- batch id query error #67
+- batch deletion bug #62
+- replaces data structures #60
 
 0.1.2
 -------
 
-Fix bug batch deletion
+- Fix bug batch deletion
 
 0.1.1
 -------
 
-Adds download batch pausing and resuming
-Adds download batch deletion
-Adds current and total size to batches
+- Adds download batch pausing and resuming
+- Adds download batch deletion
+- Adds current and total size to batches
 
 0.1.0
 -------
 
-Broadcast batch completion events #47
-Optimisation - Get full batch size in one query #49
-Optimisation - Removes unnecessary full loop #50
+- Broadcast batch completion events #47
+- Optimisation - Get full batch size in one query #49
+- Optimisation - Removes unnecessary full loop #50
 
 0.0.14
 -------

@@ -1,8 +1,9 @@
 <resources>
   <string name="app_name">Beard Downloader</string>
-  <string name="pause_resume_activty_title">Pause and resume downloads</string>
-  <string name="delete_activty_title">Delete downloads</string>
-  <string name="batches_activty_title">Batch download</string>
+  <string name="pause_resume_activity_title">Pause and resume downloads</string>
+  <string name="delete_activity_title">Delete downloads</string>
+  <string name="batches_activity_title">Batch download</string>
+  <string name="extra_data_activity_title">Extra data</string>
 
   <string name="no_downloads">No downloads yet.\nTap the \'Download\' button to add items to the download queue.</string>
   <string name="no_batches">No batches yet.\nGo back and tap the \'Download\' button to begin downloading.</string>
@@ -13,7 +14,8 @@
   <string name="button_batch_show_text">Show batches</string>
   <string name="button_delete_text">Delete batch</string>
 
-  <string name="database_filename" translate="false">my_database.db</string>
+  <string name="database_filename"
+    translate="false">my_database.db</string>
   <string name="pause_resume_button">Pause and resume downloads example</string>
   <string name="delete_button">Delete downloads example</string>
   <string name="batches_button">Batch downloads example</string>
@@ -32,4 +34,6 @@
   <string name="failed">Failed</string>
   <string name="failed_or_pending">Failed or pending</string>
   <string name="live">Live</string>
+  <string name="extra_data_button">Add extra data example</string>
+  <string name="extra_data_description">This demo shows how you can pass extra information into the download manager for each download, and retrieve it out the other side.</string>
 </resources>
