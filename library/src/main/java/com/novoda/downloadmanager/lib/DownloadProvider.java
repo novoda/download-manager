@@ -424,13 +424,13 @@ public final class DownloadProvider extends ContentProvider {
          */
         if (values.getAsInteger(DownloadsContract.COLUMN_DESTINATION) == DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
             // these requests always are marked as 'completed'
-            filteredValues.put(DownloadsContract.COLUMN_STATUS, DownloadsStatus.STATUS_SUCCESS);
+            filteredValues.put(DownloadsContract.COLUMN_STATUS, DownloadStatus.SUCCESS);
             filteredValues.put(DownloadsContract.COLUMN_TOTAL_BYTES, values.getAsLong(DownloadsContract.COLUMN_TOTAL_BYTES));
             filteredValues.put(DownloadsContract.COLUMN_CURRENT_BYTES, 0);
             copyInteger(DownloadsContract.COLUMN_MEDIA_SCANNED, values, filteredValues);
             copyString(DownloadsContract.COLUMN_DATA, values, filteredValues);
         } else {
-            filteredValues.put(DownloadsContract.COLUMN_STATUS, DownloadsStatus.STATUS_PENDING);
+            filteredValues.put(DownloadsContract.COLUMN_STATUS, DownloadStatus.PENDING);
             filteredValues.put(DownloadsContract.COLUMN_TOTAL_BYTES, -1);
             filteredValues.put(DownloadsContract.COLUMN_CURRENT_BYTES, 0);
         }
@@ -850,7 +850,7 @@ public final class DownloadProvider extends ContentProvider {
             filteredValues = values;
 
             Integer status = values.getAsInteger(DownloadsContract.COLUMN_STATUS);
-            boolean isRestart = status != null && status == DownloadsStatus.STATUS_PENDING;
+            boolean isRestart = status != null && status == DownloadStatus.PENDING;
             boolean isUserBypassingSizeLimit =
                     values.containsKey(DownloadsContract.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
             if (isRestart || isUserBypassingSizeLimit) {

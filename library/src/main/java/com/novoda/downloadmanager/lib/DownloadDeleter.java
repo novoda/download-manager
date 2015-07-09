@@ -49,8 +49,8 @@ class DownloadDeleter {
      */
     private void deleteDownloadLocked(long id, Map<Long, FileDownloadInfo> downloads) {
         FileDownloadInfo info = downloads.get(id);
-        if (info.getStatus() == DownloadsStatus.STATUS_RUNNING) {
-            info.setStatus(DownloadsStatus.STATUS_CANCELED);
+        if (info.getStatus() == DownloadStatus.RUNNING) {
+            info.setStatus(DownloadStatus.CANCELED);
         }
         if (info.getDestination() != DownloadsDestination.DESTINATION_EXTERNAL && info.getFileName() != null) {
             Log.d("deleteDownloadLocked() deleting " + info.getFileName());

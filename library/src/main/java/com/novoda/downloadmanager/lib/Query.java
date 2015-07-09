@@ -39,11 +39,11 @@ public class Query {
                     + "WHEN %5$d THEN 5 "
                     + "ELSE 2 "
                     + "END",
-            DownloadsStatus.STATUS_RUNNING,
-            DownloadsStatus.STATUS_PENDING,
-            DownloadsStatus.STATUS_PAUSED_BY_APP,
-            DownloadsStatus.STATUS_BATCH_FAILED,
-            DownloadsStatus.STATUS_SUCCESS
+            DownloadStatus.RUNNING,
+            DownloadStatus.PENDING,
+            DownloadStatus.PAUSED_BY_APP,
+            DownloadStatus.BATCH_FAILED,
+            DownloadStatus.SUCCESS
     );
 
     private long[] downloadIds = null;
@@ -223,19 +223,19 @@ public class Query {
 
         List<String> parts = new ArrayList<>();
         if ((statusFlags & DownloadManager.STATUS_PENDING) != 0) {
-            parts.add(statusClause("=", DownloadsStatus.STATUS_PENDING));
+            parts.add(statusClause("=", DownloadStatus.PENDING));
         }
         if ((statusFlags & DownloadManager.STATUS_RUNNING) != 0) {
-            parts.add(statusClause("=", DownloadsStatus.STATUS_RUNNING));
+            parts.add(statusClause("=", DownloadStatus.RUNNING));
         }
         if ((statusFlags & DownloadManager.STATUS_PAUSED) != 0) {
-            parts.add(statusClause("=", DownloadsStatus.STATUS_PAUSED_BY_APP));
-            parts.add(statusClause("=", DownloadsStatus.STATUS_WAITING_TO_RETRY));
-            parts.add(statusClause("=", DownloadsStatus.STATUS_WAITING_FOR_NETWORK));
-            parts.add(statusClause("=", DownloadsStatus.STATUS_QUEUED_FOR_WIFI));
+            parts.add(statusClause("=", DownloadStatus.PAUSED_BY_APP));
+            parts.add(statusClause("=", DownloadStatus.WAITING_TO_RETRY));
+            parts.add(statusClause("=", DownloadStatus.WAITING_FOR_NETWORK));
+            parts.add(statusClause("=", DownloadStatus.QUEUED_FOR_WIFI));
         }
         if ((statusFlags & DownloadManager.STATUS_SUCCESSFUL) != 0) {
-            parts.add(statusClause("=", DownloadsStatus.STATUS_SUCCESS));
+            parts.add(statusClause("=", DownloadStatus.SUCCESS));
         }
         if ((statusFlags & DownloadManager.STATUS_FAILED) != 0) {
             parts.add("(" + statusClause(">=", 400) + " AND " + statusClause("<", 600) + ")");

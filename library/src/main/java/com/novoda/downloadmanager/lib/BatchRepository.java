@@ -16,17 +16,17 @@ import java.util.List;
 class BatchRepository {
 
     private static final List<Integer> PRIORITISED_STATUSES = Arrays.asList(
-            DownloadsStatus.STATUS_CANCELED,
-            DownloadsStatus.STATUS_RUNNING,
+            DownloadStatus.CANCELED,
+            DownloadStatus.RUNNING,
 
             // Paused statuses
-            DownloadsStatus.STATUS_PAUSED_BY_APP,
-            DownloadsStatus.STATUS_WAITING_TO_RETRY,
-            DownloadsStatus.STATUS_WAITING_FOR_NETWORK,
-            DownloadsStatus.STATUS_QUEUED_FOR_WIFI,
+            DownloadStatus.PAUSED_BY_APP,
+            DownloadStatus.WAITING_TO_RETRY,
+            DownloadStatus.WAITING_FOR_NETWORK,
+            DownloadStatus.QUEUED_FOR_WIFI,
 
-            DownloadsStatus.STATUS_PENDING,
-            DownloadsStatus.STATUS_SUCCESS
+            DownloadStatus.PENDING,
+            DownloadStatus.SUCCESS
     );
 
     private static final int PRIORITISED_STATUSES_SIZE = PRIORITISED_STATUSES.size();
@@ -103,7 +103,7 @@ class BatchRepository {
             while (cursor.moveToNext()) {
                 int statusCode = cursor.getInt(statusColumnIndex);
 
-                if (DownloadsStatus.isStatusError(statusCode)) {
+                if (DownloadStatus.isError(statusCode)) {
                     return statusCode;
                 }
 
@@ -122,7 +122,7 @@ class BatchRepository {
             }
         }
 
-        return DownloadsStatus.STATUS_UNKNOWN_ERROR;
+        return DownloadStatus.UNKNOWN_ERROR;
     }
 
     public DownloadBatch retrieveBatchFor(FileDownloadInfo download) {

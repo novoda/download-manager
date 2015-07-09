@@ -415,7 +415,7 @@ public class DownloadManager {
     public void resumeBatch(long id) {
         ContentValues values = new ContentValues();
         values.put(DownloadsContract.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
-        values.put(DownloadsContract.COLUMN_STATUS, DownloadsStatus.STATUS_PENDING);
+        values.put(DownloadsContract.COLUMN_STATUS, DownloadStatus.PENDING);
         contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
     }
 
@@ -616,7 +616,7 @@ public class DownloadManager {
         values.put(DownloadsContract.COLUMN_CURRENT_BYTES, 0);
         values.put(DownloadsContract.COLUMN_TOTAL_BYTES, -1);
         values.putNull(DownloadsContract.COLUMN_DATA);
-        values.put(DownloadsContract.COLUMN_STATUS, DownloadsStatus.STATUS_PENDING);
+        values.put(DownloadsContract.COLUMN_STATUS, DownloadStatus.PENDING);
         values.put(DownloadsContract.COLUMN_FAILED_CONNECTIONS, 0);
         contentResolver.update(baseUri, values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
     }
@@ -703,7 +703,7 @@ public class DownloadManager {
         ContentValues values = request.toContentValues();
         values.put(DownloadsContract.COLUMN_DESTINATION, DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD);
         values.put(DownloadsContract.COLUMN_DATA, path);
-        values.put(DownloadsContract.COLUMN_STATUS, DownloadsStatus.STATUS_SUCCESS);
+        values.put(DownloadsContract.COLUMN_STATUS, DownloadStatus.SUCCESS);
         values.put(DownloadsContract.COLUMN_TOTAL_BYTES, length);
         values.put(DownloadsContract.COLUMN_MEDIA_SCANNED, (isMediaScannerScannable) ? Request.SCANNABLE_VALUE_YES : Request.SCANNABLE_VALUE_NO);
         Uri downloadUri = contentResolver.insert(downloadsUriProvider.getContentUri(), values);
@@ -779,7 +779,7 @@ public class DownloadManager {
 
     private long insert(RequestBatch batch) {
         ContentValues values = batch.toContentValues();
-        values.put(BatchesContract.COLUMN_STATUS, DownloadsStatus.STATUS_PENDING);
+        values.put(BatchesContract.COLUMN_STATUS, DownloadStatus.PENDING);
         Uri batchUri = contentResolver.insert(downloadsUriProvider.getBatchesUri(), values);
         return ContentUris.parseId(batchUri);
     }
@@ -855,13 +855,13 @@ public class DownloadManager {
 
         private long getPausedReason(int status) {
             switch (status) {
-                case DownloadsStatus.STATUS_WAITING_TO_RETRY:
+                case DownloadStatus.WAITING_TO_RETRY:
                     return PAUSED_WAITING_TO_RETRY;
 
-                case DownloadsStatus.STATUS_WAITING_FOR_NETWORK:
+                case DownloadStatus.WAITING_FOR_NETWORK:
                     return PAUSED_WAITING_FOR_NETWORK;
 
-                case DownloadsStatus.STATUS_QUEUED_FOR_WIFI:
+                case DownloadStatus.QUEUED_FOR_WIFI:
                     return PAUSED_QUEUED_FOR_WIFI;
 
                 default:
@@ -870,36 +870,36 @@ public class DownloadManager {
         }
 
         private long getErrorCode(int status) {
-            if ((400 <= status && status < DownloadsStatus.MIN_ARTIFICIAL_ERROR_STATUS)
+            if ((400 <= status && status < DownloadStatus.MIN_ARTIFICIAL_ERROR_STATUS)
                     || (500 <= status && status < 600)) {
                 // HTTP status code
                 return status;
             }
 
             switch (status) {
-                case DownloadsStatus.STATUS_FILE_ERROR:
+                case DownloadStatus.FILE_ERROR:
                     return ERROR_FILE_ERROR;
 
-                case DownloadsStatus.STATUS_UNHANDLED_HTTP_CODE:
-                case DownloadsStatus.STATUS_UNHANDLED_REDIRECT:
+                case DownloadStatus.UNHANDLED_HTTP_CODE:
+                case DownloadStatus.UNHANDLED_REDIRECT:
                     return ERROR_UNHANDLED_HTTP_CODE;
 
-                case DownloadsStatus.STATUS_HTTP_DATA_ERROR:
+                case DownloadStatus.HTTP_DATA_ERROR:
                     return ERROR_HTTP_DATA_ERROR;
 
-                case DownloadsStatus.STATUS_TOO_MANY_REDIRECTS:
+                case DownloadStatus.TOO_MANY_REDIRECTS:
                     return ERROR_TOO_MANY_REDIRECTS;
 
-                case DownloadsStatus.STATUS_INSUFFICIENT_SPACE_ERROR:
+                case DownloadStatus.INSUFFICIENT_SPACE_ERROR:
                     return ERROR_INSUFFICIENT_SPACE;
 
-                case DownloadsStatus.STATUS_DEVICE_NOT_FOUND_ERROR:
+                case DownloadStatus.DEVICE_NOT_FOUND_ERROR:
                     return ERROR_DEVICE_NOT_FOUND;
 
-                case DownloadsStatus.STATUS_CANNOT_RESUME:
+                case DownloadStatus.CANNOT_RESUME:
                     return ERROR_CANNOT_RESUME;
 
-                case DownloadsStatus.STATUS_FILE_ALREADY_EXISTS_ERROR:
+                case DownloadStatus.FILE_ALREADY_EXISTS_ERROR:
                     return ERROR_FILE_ALREADY_EXISTS;
 
                 default:
@@ -909,19 +909,19 @@ public class DownloadManager {
 
         private int translateStatus(int status) {
             switch (status) {
-                case DownloadsStatus.STATUS_PENDING:
+                case DownloadStatus.PENDING:
                     return STATUS_PENDING;
 
-                case DownloadsStatus.STATUS_RUNNING:
+                case DownloadStatus.RUNNING:
                     return STATUS_RUNNING;
 
-                case DownloadsStatus.STATUS_PAUSED_BY_APP:
-                case DownloadsStatus.STATUS_WAITING_TO_RETRY:
-                case DownloadsStatus.STATUS_WAITING_FOR_NETWORK:
-                case DownloadsStatus.STATUS_QUEUED_FOR_WIFI:
+                case DownloadStatus.PAUSED_BY_APP:
+                case DownloadStatus.WAITING_TO_RETRY:
+                case DownloadStatus.WAITING_FOR_NETWORK:
+                case DownloadStatus.QUEUED_FOR_WIFI:
                     return STATUS_PAUSED;
 
-                case DownloadsStatus.STATUS_SUCCESS:
+                case DownloadStatus.SUCCESS:
                     return STATUS_SUCCESSFUL;
 
                 default:

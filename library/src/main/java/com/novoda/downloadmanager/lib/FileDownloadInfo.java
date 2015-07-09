@@ -276,23 +276,23 @@ class FileDownloadInfo {
         }
         switch (status) {
             case 0: // status hasn't been initialized yet, this is a new download
-            case DownloadsStatus.STATUS_PENDING: // download is explicit marked as ready to start
-            case DownloadsStatus.STATUS_RUNNING: // download interrupted (process killed etc) while
+            case DownloadStatus.PENDING: // download is explicit marked as ready to start
+            case DownloadStatus.RUNNING: // download interrupted (process killed etc) while
                 // running, without a chance to update the database
                 return true;
 
-            case DownloadsStatus.STATUS_WAITING_FOR_NETWORK:
-            case DownloadsStatus.STATUS_QUEUED_FOR_WIFI:
+            case DownloadStatus.WAITING_FOR_NETWORK:
+            case DownloadStatus.QUEUED_FOR_WIFI:
                 return checkCanUseNetwork() == NetworkState.OK;
 
-            case DownloadsStatus.STATUS_WAITING_TO_RETRY:
+            case DownloadStatus.WAITING_TO_RETRY:
                 // download was waiting for a delayed restart
                 final long now = systemFacade.currentTimeMillis();
                 return restartTime(now) <= now;
-            case DownloadsStatus.STATUS_DEVICE_NOT_FOUND_ERROR:
+            case DownloadStatus.DEVICE_NOT_FOUND_ERROR:
                 // is the media mounted?
                 return Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
-            case DownloadsStatus.STATUS_INSUFFICIENT_SPACE_ERROR:
+            case DownloadStatus.INSUFFICIENT_SPACE_ERROR:
                 // avoids repetition of retrying download
                 return false;
         }
@@ -427,7 +427,7 @@ class FileDownloadInfo {
     }
 
     public boolean isSubmittedOrRunning() {
-        return DownloadsStatus.isStatusSubmitted(status) || DownloadsStatus.isStatusRunning(status);
+        return DownloadStatus.isSubmitted(status) || DownloadStatus.isRunning(status);
     }
 
     public void updateStatus(int status) {
@@ -480,10 +480,10 @@ class FileDownloadInfo {
      * {@link Long#MAX_VALUE}, then download has no future actions.
      */
     public long nextActionMillis(long now) {
-        if (DownloadsStatus.isStatusCompleted(status)) {
+        if (DownloadStatus.isCompleted(status)) {
             return Long.MAX_VALUE;
         }
-        if (status != DownloadsStatus.STATUS_WAITING_TO_RETRY) {
+        if (status != DownloadStatus.WAITING_TO_RETRY) {
             return 0;
         }
         long when = restartTime(now);
@@ -501,7 +501,7 @@ class FileDownloadInfo {
                 && (getDestination() == DownloadsDestination.DESTINATION_EXTERNAL ||
                 getDestination() == DownloadsDestination.DESTINATION_FILE_URI ||
                 getDestination() == DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD)
-                && DownloadsStatus.isStatusSuccess(getStatus())
+                && DownloadStatus.isSuccess(getStatus())
                 && scannable;
     }
 
@@ -527,7 +527,7 @@ class FileDownloadInfo {
             } else {
                 // TODO: increase strictness of value returned for unknown
                 // downloads; this is safe default for now.
-                return DownloadsStatus.STATUS_PENDING;
+                return DownloadStatus.PENDING;
             }
         } finally {
             cursor.close();

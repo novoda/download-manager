@@ -191,7 +191,7 @@ class StorageManager {
         if (destination == DownloadsDestination.DESTINATION_FILE_URI ||
                 destination == DownloadsDestination.DESTINATION_EXTERNAL) {
             if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                throw new StopRequestException(DownloadsStatus.STATUS_DEVICE_NOT_FOUND_ERROR, "external media not mounted");
+                throw new StopRequestException(DownloadStatus.DEVICE_NOT_FOUND_ERROR, "external media not mounted");
             }
         }
         // is there enough space in the file system of the given param 'root'.
@@ -217,7 +217,7 @@ class StorageManager {
                     Log.w("System cache dir ('/cache') is running low on space." + "space available (in bytes): " + bytesAvailable);
                 } else {
                     throw new StopRequestException(
-                            DownloadsStatus.STATUS_INSUFFICIENT_SPACE_ERROR,
+                            DownloadStatus.INSUFFICIENT_SPACE_ERROR,
                             "space in the filesystem rooted at: " + root + " is below 10% availability. stopping this download.");
                 }
             }
@@ -238,7 +238,7 @@ class StorageManager {
         }
         if (bytesAvailable < targetBytes) {
             throw new StopRequestException(
-                    DownloadsStatus.STATUS_INSUFFICIENT_SPACE_ERROR,
+                    DownloadStatus.INSUFFICIENT_SPACE_ERROR,
                     "not enough free space in the filesystem rooted at: " + root + " and unable to free any more");
         }
     }
@@ -281,7 +281,7 @@ class StorageManager {
                 if (!base.isDirectory() && !base.mkdir()) {
                     // Can't create download directory, e.g. because a file called "download"
                     // already exists at the root level, or the SD card filesystem is read-only.
-                    throw new StopRequestException(DownloadsStatus.STATUS_FILE_ERROR, "unable to create external downloads directory " + base.getPath());
+                    throw new StopRequestException(DownloadStatus.FILE_ERROR, "unable to create external downloads directory " + base.getPath());
                 }
                 return base;
             default:
@@ -312,7 +312,7 @@ class StorageManager {
                 downloadsUriProvider.getAllDownloadsUri(),
                 null,
                 "( " +
-                        DownloadsContract.COLUMN_STATUS + " = '" + DownloadsStatus.STATUS_SUCCESS + "' AND " +
+                        DownloadsContract.COLUMN_STATUS + " = '" + DownloadStatus.SUCCESS + "' AND " +
                         DownloadsContract.COLUMN_DESTINATION + " = ? )",
                 bindArgs,
                 DownloadsContract.COLUMN_LAST_MODIFICATION);

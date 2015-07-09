@@ -132,7 +132,7 @@ class Helpers {
             try {
                 new File(path).createNewFile();
             } catch (IOException e) {
-                throw new StopRequestException(DownloadsStatus.STATUS_FILE_ERROR, "Failed to create target file " + path, e);
+                throw new StopRequestException(DownloadStatus.FILE_ERROR, "Failed to create target file " + path, e);
             }
             return path;
         }
@@ -297,7 +297,7 @@ class Helpers {
             }
         }
         throw new StopRequestException(
-                DownloadsStatus.STATUS_FILE_ERROR,
+                DownloadStatus.FILE_ERROR,
                 "failed to generate an unused filename on internal download storage");
     }
 

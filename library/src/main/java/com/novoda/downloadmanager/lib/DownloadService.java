@@ -321,7 +321,7 @@ public class DownloadService extends Service {
             for (FileDownloadInfo info : downloadBatch.getDownloads()) {
                 if (info.isDeleted()) {
                     downloadDeleter.deleteFileAndDatabaseRow(info);
-                } else if (DownloadsStatus.isStatusCancelled(info.getStatus()) || DownloadsStatus.isStatusError(info.getStatus())) {
+                } else if (DownloadStatus.isCancelled(info.getStatus()) || DownloadStatus.isError(info.getStatus())) {
                     downloadDeleter.deleteFileAndMediaReference(info);
                 } else {
                     if (downloadBatch.isDeleted()) {

@@ -110,7 +110,7 @@ class NotificationDisplayer {
             builder.setAutoCancel(true);
 
             final String action;
-            if (DownloadsStatus.isStatusError(batch.getStatus())) {
+            if (DownloadStatus.isError(batch.getStatus())) {
                 action = Constants.ACTION_LIST;
             } else {
                 action = Constants.ACTION_OPEN;
