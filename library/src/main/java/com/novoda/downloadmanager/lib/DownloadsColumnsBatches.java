@@ -5,7 +5,7 @@ import android.provider.BaseColumns;
 /**
  * Constants related to batches associated with each download.
  */
-public final class DownloadsColumnsBatches implements BaseColumns {
+final class DownloadsColumnsBatches implements BaseColumns {
 
     public static final String BATCHES_TABLE_NAME = "batches";
 
