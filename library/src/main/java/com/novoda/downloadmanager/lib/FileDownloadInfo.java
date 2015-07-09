@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
 /**
  * Stores information about an individual download.
@@ -112,12 +111,6 @@ class FileDownloadInfo {
     private int bypassRecommendedSizeLimit;
     private long batchId;
 
-    /**
-     * Result of last {DownloadThread} started by
-     * {@link #isReadyToDownload(DownloadBatch)}  && {@link #startDownloadIfNotActive(ExecutorService, StorageManager, DownloadNotifier)}.
-     */
-    private Future<?> submittedThread;
-
     private final List<Pair<String, String>> requestHeaders = new ArrayList<>();
     private final Context context;
     private final SystemFacade systemFacade;
@@ -181,6 +174,7 @@ class FileDownloadInfo {
     }
 
     public void setStatus(int status) {
+        // TODO remove me!
         this.status = status;
     }
 
@@ -413,27 +407,19 @@ class FileDownloadInfo {
         }
     }
 
-    public boolean startDownloadIfNotActive(ExecutorService executor, StorageManager storageManager, DownloadNotifier downloadNotifier) {
-        synchronized (this) {
-            boolean isActive;
-            if (submittedThread == null || submittedThread.isDone()) {
-                String applicationPackageName = context.getApplicationContext().getPackageName();
-                BatchCompletionBroadcaster batchCompletionBroadcaster = new BatchCompletionBroadcaster(context, applicationPackageName);
-                ContentResolver contentResolver = context.getContentResolver();
-                BatchRepository batchRepository = BatchRepository.newInstance(contentResolver, new DownloadDeleter(contentResolver));
-                DownloadThread downloadThread = new DownloadThread(context, systemFacade, this, storageManager, downloadNotifier,
-                        batchCompletionBroadcaster, batchRepository);
-                submittedThread = executor.submit(downloadThread);
-                isActive = true;
-            } else {
-                isActive = !submittedThread.isDone();
-            }
-            return isActive;
-        }
+    public void startDownload(ExecutorService executor, StorageManager storageManager, DownloadNotifier downloadNotifier
+            , DownloadsRepository downloadsRepository) {
+        String applicationPackageName = context.getApplicationContext().getPackageName();
+        BatchCompletionBroadcaster batchCompletionBroadcaster = new BatchCompletionBroadcaster(context, applicationPackageName);
+        ContentResolver contentResolver = context.getContentResolver();
+        BatchRepository batchRepository = BatchRepository.newInstance(contentResolver, new DownloadDeleter(contentResolver));
+        DownloadThread downloadThread = new DownloadThread(context, systemFacade, this, storageManager, downloadNotifier,
+                batchCompletionBroadcaster, batchRepository, downloadsRepository);
+        executor.submit(downloadThread);
     }
 
-    public boolean isActive() {
-        return submittedThread != null && !submittedThread.isDone();
+    public boolean isSubmittedOrRunning() {
+        return Downloads.Impl.isStatusSubmitted(status) || Downloads.Impl.isStatusRunning(status);
     }
 
     public void updateStatus(int status) {

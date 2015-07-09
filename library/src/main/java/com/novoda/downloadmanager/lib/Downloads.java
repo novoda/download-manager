@@ -528,12 +528,25 @@ final class Downloads {
             return status == STATUS_CANCELED;
         }
 
+        public static boolean isStatusSubmitted(int status) {
+            return status == STATUS_SUBMITTED;
+        }
+
+        public static boolean isStatusRunning(int status) {
+            return status == STATUS_RUNNING;
+        }
+
         /**
          * Returns whether the download did not start due to insufficient space
          */
         public static boolean isStatusInsufficientSpace(int finalStatus) {
             return finalStatus == STATUS_INSUFFICIENT_SPACE_ERROR;
         }
+
+        /**
+         * This download has been submitted to the download executor but not yet started
+         */
+        public static final int STATUS_SUBMITTED = 189;
 
         /**
          * This download hasn't stated yet

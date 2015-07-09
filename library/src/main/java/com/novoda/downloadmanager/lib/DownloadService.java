@@ -325,8 +325,11 @@ public class DownloadService extends Service {
                         break;
                     }
 
-                    isActive = kickOffDownloadTaskIfReady(isActive, info, downloadBatch);
-                    isActive = kickOffMediaScanIfCompleted(isActive, info);
+                    if (!isActive) {
+                        isActive = kickOffDownloadTaskIfReady(info, downloadBatch);
+                        isActive = kickOffMediaScanIfCompleted(isActive, info);
+                    }
+
                 }
 
                 // Keep track of nearest next action
@@ -365,14 +368,14 @@ public class DownloadService extends Service {
         }
     }
 
-    private boolean kickOffDownloadTaskIfReady(boolean isActive, FileDownloadInfo info, DownloadBatch downloadBatch) {
-        boolean isReadyToDownload = info.isReadyToDownload(downloadBatch);
-        boolean downloadIsActive = info.isActive();
+    private boolean kickOffDownloadTaskIfReady(FileDownloadInfo info, DownloadBatch downloadBatch) {
+        boolean downloadIsSubmittedOrActive = info.isSubmittedOrRunning();
 
-        if (isReadyToDownload || downloadIsActive) {
-            isActive |= info.startDownloadIfNotActive(executor, storageManager, downloadNotifier);
+        if (!downloadIsSubmittedOrActive && info.isReadyToDownload(downloadBatch)) {
+            info.startDownload(executor, storageManager, downloadNotifier, downloadsRepository);
+            return true;
         }
-        return isActive;
+        return downloadIsSubmittedOrActive;
     }
 
     private boolean kickOffMediaScanIfCompleted(boolean isActive, FileDownloadInfo info) {
