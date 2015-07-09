@@ -2,20 +2,28 @@ package com.novoda.downloadmanager.lib;
 
 import android.os.Environment;
 
-class CanDownload {
+import com.novoda.downloadmanager.Download;
+
+class DownloadReadyChecker {
 
     private final SystemFacade systemFacade;
     private final NetworkChecker networkChecker;
+    private final DownloadClientReadyChecker downloadClientReadyChecker;
 
-    CanDownload(SystemFacade systemFacade, NetworkChecker networkChecker) {
+    DownloadReadyChecker(SystemFacade systemFacade, NetworkChecker networkChecker, DownloadClientReadyChecker downloadClientReadyChecker) {
         this.systemFacade = systemFacade;
         this.networkChecker = networkChecker;
+        this.downloadClientReadyChecker = downloadClientReadyChecker;
+    }
+
+    public boolean canDownload(FileDownloadInfo downloadInfo, Download download) {
+        return isDownloadManagerReadyToDownload(downloadInfo) && downloadClientReadyChecker.isAllowedToDownload(download);
     }
 
     /**
      * Returns whether this download should be enqueued.
      */
-    public boolean isDownloadManagerReadyToDownload(FileDownloadInfo downloadInfo) {
+    private boolean isDownloadManagerReadyToDownload(FileDownloadInfo downloadInfo) {
         if (downloadInfo.getControl() == Downloads.Impl.CONTROL_PAUSED) {
             // the download is paused, so it's not going to start
             return false;

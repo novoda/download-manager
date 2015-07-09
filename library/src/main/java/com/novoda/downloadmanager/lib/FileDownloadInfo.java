@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -125,25 +124,24 @@ class FileDownloadInfo {
     private final List<Pair<String, String>> requestHeaders = new ArrayList<>();
     private final Context context;
     private final SystemFacade systemFacade;
-    private final DownloadClientReadyChecker downloadClientReadyChecker;
     private final RandomNumberGenerator randomNumberGenerator;
     private final ContentValues downloadStatusContentValues;
     private final PublicFacingDownloadMarshaller downloadMarshaller;
-    private final CanDownload canDownload;
+    private final DownloadReadyChecker downloadReadyChecker;
 
     FileDownloadInfo(
             Context context,
             SystemFacade systemFacade,
             RandomNumberGenerator randomNumberGenerator,
-            DownloadClientReadyChecker downloadClientReadyChecker,
-            ContentValues downloadStatusContentValues, PublicFacingDownloadMarshaller downloadMarshaller, CanDownload canDownload) {
+            ContentValues downloadStatusContentValues,
+            PublicFacingDownloadMarshaller downloadMarshaller,
+            DownloadReadyChecker downloadReadyChecker) {
         this.context = context;
         this.systemFacade = systemFacade;
         this.randomNumberGenerator = randomNumberGenerator;
-        this.downloadClientReadyChecker = downloadClientReadyChecker;
         this.downloadStatusContentValues = downloadStatusContentValues;
         this.downloadMarshaller = downloadMarshaller;
-        this.canDownload = canDownload;
+        this.downloadReadyChecker = downloadReadyChecker;
     }
 
     public long getId() {
@@ -321,29 +319,15 @@ class FileDownloadInfo {
         return NetworkState.OK;
     }
 
-    /**
-     * If download is ready to start, and isn't already pending or executing,
-     * create a {DownloadThread} and enqueue it into given
-     * {@link Executor}.
-     *
-     * @return If actively downloading.
-     */
-    public boolean isReadyToDownload(DownloadBatch downloadBatch) {
-        synchronized (this) {
-            // This order MATTERS
-            // it means completed downloads will not be accounted for in later downloadInfo queries
-            return canDownload.isDownloadManagerReadyToDownload(this) && isClientReadyToDownload(downloadBatch);
-        }
-    }
-
     public void startDownload(ExecutorService executor, StorageManager storageManager, DownloadNotifier downloadNotifier
             , DownloadsRepository downloadsRepository) {
         String applicationPackageName = context.getApplicationContext().getPackageName();
         BatchCompletionBroadcaster batchCompletionBroadcaster = new BatchCompletionBroadcaster(context, applicationPackageName);
         ContentResolver contentResolver = context.getContentResolver();
         BatchRepository batchRepository = BatchRepository.newInstance(contentResolver, new DownloadDeleter(contentResolver));
+
         DownloadThread downloadThread = new DownloadThread(context, systemFacade, this, storageManager, downloadNotifier,
-                batchCompletionBroadcaster, batchRepository, downloadsRepository, new NetworkChecker(systemFacade));
+                batchCompletionBroadcaster, batchRepository, downloadsRepository, new NetworkChecker(systemFacade), downloadMarshaller, downloadReadyChecker);
         executor.submit(downloadThread);
     }
 
@@ -356,10 +340,6 @@ class FileDownloadInfo {
         downloadStatusContentValues.clear();
         downloadStatusContentValues.put(Downloads.Impl.COLUMN_STATUS, status);
         context.getContentResolver().update(getAllDownloadsUri(), downloadStatusContentValues, null, null);
-    }
-
-    private boolean isClientReadyToDownload(DownloadBatch downloadBatch) {
-        return downloadClientReadyChecker.isAllowedToDownload(downloadMarshaller.marshall(downloadBatch));
     }
 
     /**
@@ -483,13 +463,14 @@ class FileDownloadInfo {
             RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
             ContentValues contentValues = new ContentValues();
             PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
-            CanDownload canDownload = new CanDownload(systemFacade, new NetworkChecker(systemFacade));
+            DownloadReadyChecker downloadReadyChecker = new DownloadReadyChecker(systemFacade, new NetworkChecker(systemFacade), downloadClientReadyChecker);
             FileDownloadInfo info = new FileDownloadInfo(
                     context,
                     systemFacade,
                     randomNumberGenerator,
-                    downloadClientReadyChecker,
-                    contentValues, downloadMarshaller, canDownload);
+                    contentValues,
+                    downloadMarshaller,
+                    downloadReadyChecker);
             updateFromDatabase(info);
             readRequestHeaders(info);
 
