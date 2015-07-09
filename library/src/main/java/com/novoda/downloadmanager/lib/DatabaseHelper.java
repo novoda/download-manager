@@ -139,7 +139,8 @@ final class DatabaseHelper extends SQLiteOpenHelper {
 
     private void createDownloadsByBatchView(SQLiteDatabase db) {
         db.execSQL("DROP VIEW IF EXISTS " + DownloadContract.DownloadsByBatch.VIEW_NAME_DOWNLOADS_BY_BATCH);
-        db.execSQL("CREATE VIEW " + DownloadContract.DownloadsByBatch.VIEW_NAME_DOWNLOADS_BY_BATCH
+        db.execSQL(
+                "CREATE VIEW " + DownloadContract.DownloadsByBatch.VIEW_NAME_DOWNLOADS_BY_BATCH
                         + " AS SELECT DISTINCT "
                         + projectionFrom(DOWNLOAD_BY_BATCH_VIEW_COLUMNS)
                         + " FROM " + DownloadContract.Downloads.DOWNLOADS_TABLE_NAME
