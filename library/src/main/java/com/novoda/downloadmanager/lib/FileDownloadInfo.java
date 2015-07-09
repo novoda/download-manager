@@ -433,7 +433,7 @@ class FileDownloadInfo {
     public void updateStatus(int status) {
         setStatus(status);
         downloadStatusContentValues.clear();
-        downloadStatusContentValues.put(DownloadsColumns.COLUMN_STATUS, status);
+        downloadStatusContentValues.put(DownloadsContract.COLUMN_STATUS, status);
         context.getContentResolver().update(getAllDownloadsUri(), downloadStatusContentValues, null, null);
     }
 
@@ -520,7 +520,7 @@ class FileDownloadInfo {
     public static int queryDownloadStatus(ContentResolver resolver, long id, DownloadsUriProvider downloadsUriProvider) {
         final Cursor cursor = resolver.query(
                 ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id),
-                new String[]{DownloadsColumns.COLUMN_STATUS}, null, null, null);
+                new String[]{DownloadsContract.COLUMN_STATUS}, null, null, null);
         try {
             if (cursor.moveToFirst()) {
                 return cursor.getInt(0);
@@ -578,51 +578,51 @@ class FileDownloadInfo {
         }
 
         public void updateFromDatabase(FileDownloadInfo info) {
-            info.id = getLong(DownloadsColumns._ID);
-            info.uri = getString(DownloadsColumns.COLUMN_URI);
-            info.scannable = getInt(DownloadsColumns.COLUMN_MEDIA_SCANNED) == 1;
-            info.noIntegrity = getInt(DownloadsColumns.COLUMN_NO_INTEGRITY) == 1;
-            info.hint = getString(DownloadsColumns.COLUMN_FILE_NAME_HINT);
-            info.fileName = getString(DownloadsColumns.COLUMN_DATA);
-            info.mimeType = getString(DownloadsColumns.COLUMN_MIME_TYPE);
-            info.destination = getInt(DownloadsColumns.COLUMN_DESTINATION);
-            info.status = getInt(DownloadsColumns.COLUMN_STATUS);
-            info.numFailed = getInt(DownloadsColumns.COLUMN_FAILED_CONNECTIONS);
+            info.id = getLong(DownloadsContract._ID);
+            info.uri = getString(DownloadsContract.COLUMN_URI);
+            info.scannable = getInt(DownloadsContract.COLUMN_MEDIA_SCANNED) == 1;
+            info.noIntegrity = getInt(DownloadsContract.COLUMN_NO_INTEGRITY) == 1;
+            info.hint = getString(DownloadsContract.COLUMN_FILE_NAME_HINT);
+            info.fileName = getString(DownloadsContract.COLUMN_DATA);
+            info.mimeType = getString(DownloadsContract.COLUMN_MIME_TYPE);
+            info.destination = getInt(DownloadsContract.COLUMN_DESTINATION);
+            info.status = getInt(DownloadsContract.COLUMN_STATUS);
+            info.numFailed = getInt(DownloadsContract.COLUMN_FAILED_CONNECTIONS);
             int retryRedirect = getInt(Constants.RETRY_AFTER_X_REDIRECT_COUNT);
             info.retryAfter = retryRedirect & 0xfffffff;
-            info.lastMod = getLong(DownloadsColumns.COLUMN_LAST_MODIFICATION);
-            info.notificationClassName = getString(DownloadsColumns.COLUMN_NOTIFICATION_CLASS);
-            info.extras = getString(DownloadsColumns.COLUMN_NOTIFICATION_EXTRAS);
-            info.cookies = getString(DownloadsColumns.COLUMN_COOKIE_DATA);
-            info.userAgent = getString(DownloadsColumns.COLUMN_USER_AGENT);
-            info.referer = getString(DownloadsColumns.COLUMN_REFERER);
-            info.totalBytes = getLong(DownloadsColumns.COLUMN_TOTAL_BYTES);
-            info.currentBytes = getLong(DownloadsColumns.COLUMN_CURRENT_BYTES);
+            info.lastMod = getLong(DownloadsContract.COLUMN_LAST_MODIFICATION);
+            info.notificationClassName = getString(DownloadsContract.COLUMN_NOTIFICATION_CLASS);
+            info.extras = getString(DownloadsContract.COLUMN_NOTIFICATION_EXTRAS);
+            info.cookies = getString(DownloadsContract.COLUMN_COOKIE_DATA);
+            info.userAgent = getString(DownloadsContract.COLUMN_USER_AGENT);
+            info.referer = getString(DownloadsContract.COLUMN_REFERER);
+            info.totalBytes = getLong(DownloadsContract.COLUMN_TOTAL_BYTES);
+            info.currentBytes = getLong(DownloadsContract.COLUMN_CURRENT_BYTES);
             info.eTag = getString(Constants.ETAG);
             info.uid = getInt(Constants.UID);
             info.mediaScanned = getInt(Constants.MEDIA_SCANNED);
-            info.deleted = getInt(DownloadsColumns.COLUMN_DELETED) == 1;
-            info.mediaProviderUri = getString(DownloadsColumns.COLUMN_MEDIAPROVIDER_URI);
-            info.allowedNetworkTypes = getInt(DownloadsColumns.COLUMN_ALLOWED_NETWORK_TYPES);
-            info.allowRoaming = getInt(DownloadsColumns.COLUMN_ALLOW_ROAMING) != 0;
-            info.allowMetered = getInt(DownloadsColumns.COLUMN_ALLOW_METERED) != 0;
-            info.bypassRecommendedSizeLimit = getInt(DownloadsColumns.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
-            info.batchId = getLong(DownloadsColumns.COLUMN_BATCH_ID);
+            info.deleted = getInt(DownloadsContract.COLUMN_DELETED) == 1;
+            info.mediaProviderUri = getString(DownloadsContract.COLUMN_MEDIAPROVIDER_URI);
+            info.allowedNetworkTypes = getInt(DownloadsContract.COLUMN_ALLOWED_NETWORK_TYPES);
+            info.allowRoaming = getInt(DownloadsContract.COLUMN_ALLOW_ROAMING) != 0;
+            info.allowMetered = getInt(DownloadsContract.COLUMN_ALLOW_METERED) != 0;
+            info.bypassRecommendedSizeLimit = getInt(DownloadsContract.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
+            info.batchId = getLong(DownloadsContract.COLUMN_BATCH_ID);
 
             synchronized (this) {
-                info.control = getInt(DownloadsColumns.COLUMN_CONTROL);
+                info.control = getInt(DownloadsContract.COLUMN_CONTROL);
             }
         }
 
         private void readRequestHeaders(FileDownloadInfo info) {
             info.clearHeaders();
-            Uri headerUri = Uri.withAppendedPath(info.getAllDownloadsUri(), DownloadsColumnsRequestHeaders.URI_SEGMENT);
+            Uri headerUri = Uri.withAppendedPath(info.getAllDownloadsUri(), RequestHeadersContract.URI_SEGMENT);
             Cursor cursor = resolver.query(headerUri, null, null, null, null);
             try {
                 int headerIndex =
-                        cursor.getColumnIndexOrThrow(DownloadsColumnsRequestHeaders.COLUMN_HEADER);
+                        cursor.getColumnIndexOrThrow(RequestHeadersContract.COLUMN_HEADER);
                 int valueIndex =
-                        cursor.getColumnIndexOrThrow(DownloadsColumnsRequestHeaders.COLUMN_VALUE);
+                        cursor.getColumnIndexOrThrow(RequestHeadersContract.COLUMN_VALUE);
                 for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
                     info.addHeader(cursor.getString(headerIndex), cursor.getString(valueIndex));
                 }

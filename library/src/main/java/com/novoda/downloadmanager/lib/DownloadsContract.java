@@ -2,8 +2,9 @@ package com.novoda.downloadmanager.lib;
 
 import android.provider.BaseColumns;
 
-final class DownloadsColumns implements BaseColumns {
+final class DownloadsContract implements BaseColumns {
 
+    public static final String DOWNLOADS_TABLE_NAME = "Downloads";
     /**
      * The name of the column containing the URI of the data being downloaded.
      * <P>Type: TEXT</P>
@@ -225,18 +226,18 @@ final class DownloadsColumns implements BaseColumns {
      */
     public static final String COLUMN_DATA = "_data";
     /**
-     * default value for {@link DownloadsColumns#COLUMN_LAST_UPDATESRC}.
+     * default value for {@link DownloadsContract#COLUMN_LAST_UPDATESRC}.
      * This value is used when this column's value is not relevant.
      */
     public static final int LAST_UPDATESRC_NOT_RELEVANT = 0;
     /**
-     * One of the values taken by {@link DownloadsColumns#COLUMN_LAST_UPDATESRC}.
+     * One of the values taken by {@link DownloadsContract#COLUMN_LAST_UPDATESRC}.
      * This value is used when the update is NOT to be relayed to the DownloadService
      * (and thus spare DownloadService from scanning the database when this change occurs)
      */
     public static final int LAST_UPDATESRC_DONT_NOTIFY_DOWNLOADSVC = 1;
 
-    private DownloadsColumns() {
+    private DownloadsContract() {
         // non-instantiable class
     }
 

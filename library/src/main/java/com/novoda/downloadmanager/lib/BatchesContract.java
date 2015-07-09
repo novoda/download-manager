@@ -5,7 +5,9 @@ import android.provider.BaseColumns;
 /**
  * Constants related to batches associated with each download.
  */
-final class DownloadsColumnsBatches implements BaseColumns {
+final class BatchesContract implements BaseColumns {
+
+    public static final String BATCHES_TABLE_NAME = "batches";
 
     /**
      * The name of the column where the initiating application can provided the
@@ -65,7 +67,7 @@ final class DownloadsColumnsBatches implements BaseColumns {
      */
     public static final String COLUMN_CURRENT_BYTES = "batch_current_bytes";
 
-    private DownloadsColumnsBatches() {
+    private BatchesContract() {
         // non-instantiable class
     }
 }

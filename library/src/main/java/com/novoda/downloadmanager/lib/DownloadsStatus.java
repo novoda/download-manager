@@ -183,9 +183,9 @@ final class DownloadsStatus {
 
     /**
      * this method determines if a notification should be displayed for a
-     * given {@link DownloadsColumns#COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI} value
+     * given {@link DownloadsContract#COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI} value
      *
-     * @param visibility the value of {@link DownloadsColumns#COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI}.
+     * @param visibility the value of {@link DownloadsContract#COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI}.
      * @return true if the notification should be displayed. false otherwise.
      */
     public static boolean isNotificationToBeDisplayed(int visibility) {

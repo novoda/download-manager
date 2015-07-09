@@ -312,16 +312,16 @@ class StorageManager {
                 downloadsUriProvider.getAllDownloadsUri(),
                 null,
                 "( " +
-                        DownloadsColumns.COLUMN_STATUS + " = '" + DownloadsStatus.STATUS_SUCCESS + "' AND " +
-                        DownloadsColumns.COLUMN_DESTINATION + " = ? )",
+                        DownloadsContract.COLUMN_STATUS + " = '" + DownloadsStatus.STATUS_SUCCESS + "' AND " +
+                        DownloadsContract.COLUMN_DESTINATION + " = ? )",
                 bindArgs,
-                DownloadsColumns.COLUMN_LAST_MODIFICATION);
+                DownloadsContract.COLUMN_LAST_MODIFICATION);
         if (cursor == null) {
             return 0;
         }
         long totalFreed = 0;
         try {
-            final int dataIndex = cursor.getColumnIndex(DownloadsColumns.COLUMN_DATA);
+            final int dataIndex = cursor.getColumnIndex(DownloadsContract.COLUMN_DATA);
             while (cursor.moveToNext() && totalFreed < targetBytes) {
                 final String data = cursor.getString(dataIndex);
                 if (TextUtils.isEmpty(data)) continue;
@@ -330,7 +330,7 @@ class StorageManager {
                 Log.d("purging " + file.getAbsolutePath() + " for " + file.length() + " bytes");
                 totalFreed += file.length();
                 file.delete();
-                long id = cursor.getLong(cursor.getColumnIndex(DownloadsColumns._ID));
+                long id = cursor.getLong(cursor.getColumnIndex(DownloadsContract._ID));
                 contentResolver.delete(ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id), null, null);
             }
         } finally {
@@ -363,7 +363,7 @@ class StorageManager {
             return;
         }
         Cursor cursor = contentResolver
-                .query(downloadsUriProvider.getAllDownloadsUri(), new String[]{DownloadsColumns.COLUMN_DATA}, null, null, null);
+                .query(downloadsUriProvider.getAllDownloadsUri(), new String[]{DownloadsContract.COLUMN_DATA}, null, null, null);
         try {
             if (cursor != null) {
                 while (cursor.moveToNext()) {
@@ -409,9 +409,9 @@ class StorageManager {
         try {
             cursor = contentResolver.query(
                     downloadsUriProvider.getAllDownloadsUri(),
-                    new String[]{DownloadsColumns._ID},
-                    DownloadsColumns.COLUMN_STATUS + " >= '200'", null,
-                    DownloadsColumns.COLUMN_LAST_MODIFICATION);
+                    new String[]{DownloadsContract._ID},
+                    DownloadsContract.COLUMN_STATUS + " >= '200'", null,
+                    DownloadsContract.COLUMN_LAST_MODIFICATION);
             if (cursor == null) {
                 // This isn't good - if we can't do basic queries in our database, nothings gonna work
                 Log.e("null cursor in trimDatabase");
@@ -419,7 +419,7 @@ class StorageManager {
             }
             if (cursor.moveToFirst()) {
                 int numDelete = cursor.getCount() - Constants.MAX_DOWNLOADS;
-                int columnId = cursor.getColumnIndexOrThrow(DownloadsColumns._ID);
+                int columnId = cursor.getColumnIndexOrThrow(DownloadsContract._ID);
                 while (numDelete > 0) {
                     Uri downloadUri = ContentUris.withAppendedId(
                             downloadsUriProvider.getAllDownloadsUri(), cursor.getLong(columnId));

@@ -51,7 +51,7 @@ public class Query {
     private Integer statusFlags = null;
     private boolean onlyIncludeVisibleInDownloadsUi = false;
     private String[] filterExtras;
-    private String orderString = DownloadsColumns.COLUMN_LAST_MODIFICATION + " DESC";
+    private String orderString = DownloadsContract.COLUMN_LAST_MODIFICATION + " DESC";
 
     /**
      * Include only the downloads with the given IDs.
@@ -124,10 +124,10 @@ public class Query {
         String resolvedOrderColumn;
         switch (column) {
             case DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP:
-                resolvedOrderColumn = DownloadsColumns.COLUMN_LAST_MODIFICATION;
+                resolvedOrderColumn = DownloadsContract.COLUMN_LAST_MODIFICATION;
                 break;
             case DownloadManager.COLUMN_TOTAL_SIZE_BYTES:
-                resolvedOrderColumn = DownloadsColumns.COLUMN_TOTAL_BYTES;
+                resolvedOrderColumn = DownloadsContract.COLUMN_TOTAL_BYTES;
                 break;
             default:
                 throw new IllegalArgumentException("Cannot order by " + column);
@@ -165,11 +165,11 @@ public class Query {
         filterByStatus(selectionParts);
 
         if (onlyIncludeVisibleInDownloadsUi) {
-            selectionParts.add(DownloadsColumns.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI + " != '0'");
+            selectionParts.add(DownloadsContract.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI + " != '0'");
         }
 
         // only return rows which are not marked 'deleted = 1'
-        selectionParts.add(DownloadsColumns.COLUMN_DELETED + " != '1'");
+        selectionParts.add(DownloadsContract.COLUMN_DELETED + " != '1'");
 
         String selection = joinStrings(" AND ", selectionParts);
 
@@ -202,7 +202,7 @@ public class Query {
      */
     private String getWhereClauseForBatchIds(long[] ids) {
         String[] idStrings = longArrayToStringArray(ids);
-        return DownloadsColumns.COLUMN_BATCH_ID + " IN (" + joinStrings(",", Arrays.asList(idStrings)) + ")";
+        return DownloadsContract.COLUMN_BATCH_ID + " IN (" + joinStrings(",", Arrays.asList(idStrings)) + ")";
     }
 
     private void filterByExtras(List<String> selectionParts) {
@@ -266,10 +266,10 @@ public class Query {
     }
 
     private String extrasClause(String extra) {
-        return DownloadsColumns.COLUMN_NOTIFICATION_EXTRAS + " = '" + extra + "'";
+        return DownloadsContract.COLUMN_NOTIFICATION_EXTRAS + " = '" + extra + "'";
     }
 
     private String statusClause(String operator, int value) {
-        return DownloadsColumns.COLUMN_STATUS + operator + "'" + value + "'";
+        return DownloadsContract.COLUMN_STATUS + operator + "'" + value + "'";
     }
 }

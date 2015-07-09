@@ -80,14 +80,14 @@ class OpenHelper {
     private Uri getRefererUri(Context context, long id) {
         final Uri headersUri = Uri.withAppendedPath(
                 ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id),
-                DownloadsColumnsRequestHeaders.URI_SEGMENT);
+                RequestHeadersContract.URI_SEGMENT);
         final Cursor headers = context.getContentResolver()
                 .query(headersUri, null, null, null, null);
         try {
             while (headers.moveToNext()) {
-                final String header = getCursorString(headers, DownloadsColumnsRequestHeaders.COLUMN_HEADER);
+                final String header = getCursorString(headers, RequestHeadersContract.COLUMN_HEADER);
                 if ("Referer".equalsIgnoreCase(header)) {
-                    return getCursorUri(headers, DownloadsColumnsRequestHeaders.COLUMN_VALUE);
+                    return getCursorUri(headers, RequestHeadersContract.COLUMN_VALUE);
                 }
             }
         } finally {

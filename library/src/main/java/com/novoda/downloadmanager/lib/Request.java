@@ -54,7 +54,7 @@ public class Request {
     private long batchId = -1L;
     /**
      * if a file is designated as a MediaScanner scannable file, the following value is
-     * stored in the database column {@link DownloadsColumns#COLUMN_MEDIA_SCANNED}.
+     * stored in the database column {@link DownloadsContract#COLUMN_MEDIA_SCANNED}.
      */
     static final int SCANNABLE_VALUE_YES = 0;
     // value of 1 is stored in the above column by DownloadProvider after it is scanned by
@@ -62,7 +62,7 @@ public class Request {
     /**
      * if a file is designated as a file that should not be scanned by MediaScanner,
      * the following value is stored in the database column
-     * {@link DownloadsColumns#COLUMN_MEDIA_SCANNED}.
+     * {@link DownloadsContract#COLUMN_MEDIA_SCANNED}.
      */
     static final int SCANNABLE_VALUE_NO = 2;
 
@@ -404,31 +404,31 @@ public class Request {
     ContentValues toContentValues() {
         ContentValues values = new ContentValues();
         assert uri != null;
-        values.put(DownloadsColumns.COLUMN_URI, uri.toString());
+        values.put(DownloadsContract.COLUMN_URI, uri.toString());
 
         if (destinationUri != null) {
-            values.put(DownloadsColumns.COLUMN_DESTINATION, DownloadsDestination.DESTINATION_FILE_URI);
-            values.put(DownloadsColumns.COLUMN_FILE_NAME_HINT, destinationUri.toString());
+            values.put(DownloadsContract.COLUMN_DESTINATION, DownloadsDestination.DESTINATION_FILE_URI);
+            values.put(DownloadsContract.COLUMN_FILE_NAME_HINT, destinationUri.toString());
         } else {
             values.put(
-                    DownloadsColumns.COLUMN_DESTINATION,
+                    DownloadsContract.COLUMN_DESTINATION,
                     DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE);
         }
         // is the file supposed to be media-scannable?
-        values.put(DownloadsColumns.COLUMN_MEDIA_SCANNED, (scannable) ? SCANNABLE_VALUE_YES : SCANNABLE_VALUE_NO);
+        values.put(DownloadsContract.COLUMN_MEDIA_SCANNED, (scannable) ? SCANNABLE_VALUE_YES : SCANNABLE_VALUE_NO);
 
         if (!requestHeaders.isEmpty()) {
             encodeHttpHeaders(values);
         }
 
-        putIfNonNull(values, DownloadsColumns.COLUMN_MIME_TYPE, mimeType);
+        putIfNonNull(values, DownloadsContract.COLUMN_MIME_TYPE, mimeType);
 
-        values.put(DownloadsColumns.COLUMN_ALLOWED_NETWORK_TYPES, allowedNetworkTypes);
-        values.put(DownloadsColumns.COLUMN_ALLOW_ROAMING, roamingAllowed);
-        values.put(DownloadsColumns.COLUMN_ALLOW_METERED, meteredAllowed);
-        values.put(DownloadsColumns.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, isVisibleInDownloadsUi);
-        values.put(DownloadsColumns.COLUMN_NOTIFICATION_EXTRAS, extraField);
-        values.put(DownloadsColumns.COLUMN_BATCH_ID, batchId);
+        values.put(DownloadsContract.COLUMN_ALLOWED_NETWORK_TYPES, allowedNetworkTypes);
+        values.put(DownloadsContract.COLUMN_ALLOW_ROAMING, roamingAllowed);
+        values.put(DownloadsContract.COLUMN_ALLOW_METERED, meteredAllowed);
+        values.put(DownloadsContract.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, isVisibleInDownloadsUi);
+        values.put(DownloadsContract.COLUMN_NOTIFICATION_EXTRAS, extraField);
+        values.put(DownloadsContract.COLUMN_BATCH_ID, batchId);
 
         return values;
     }
@@ -437,7 +437,7 @@ public class Request {
         int index = 0;
         for (Pair<String, String> header : requestHeaders) {
             String headerString = header.first + ": " + header.second;
-            values.put(DownloadsColumnsRequestHeaders.INSERT_KEY_PREFIX + index, headerString);
+            values.put(RequestHeadersContract.INSERT_KEY_PREFIX + index, headerString);
             index++;
         }
     }
