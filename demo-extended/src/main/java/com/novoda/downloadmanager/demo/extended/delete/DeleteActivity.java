@@ -96,11 +96,7 @@ public class DeleteActivity extends AppCompatActivity implements QueryForDownloa
 
         @Override
         public void onChange(boolean selfChange) {
-            if (lastQueryTimestamp.updatedRecently()) {
-                return;
-            }
             queryForDownloads();
-            lastQueryTimestamp.setJustUpdated();
         }
 
     };
