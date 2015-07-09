@@ -5,7 +5,7 @@ import android.provider.BaseColumns;
 /**
  * Constants related to HTTP request headers associated with each download.
  */
-public final class DownloadsColumnsRequestHeaders implements BaseColumns {
+final class DownloadsColumnsRequestHeaders implements BaseColumns {
 
     public static final String HEADERS_DB_TABLE = "request_headers";
     public static final String COLUMN_DOWNLOAD_ID = "download_id";
