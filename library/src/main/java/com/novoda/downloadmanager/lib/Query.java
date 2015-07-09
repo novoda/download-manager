@@ -39,12 +39,12 @@ public class Query {
                     + "WHEN %6$d THEN 5 "
                     + "ELSE 6 "
                     + "END, _id ASC",
-            Downloads.Impl.COLUMN_STATUS,
-            Downloads.Impl.STATUS_RUNNING,
-            Downloads.Impl.STATUS_PENDING,
-            Downloads.Impl.STATUS_PAUSED_BY_APP,
-            Downloads.Impl.STATUS_BATCH_FAILED,
-            Downloads.Impl.STATUS_SUCCESS
+            DownloadContract.Downloads.COLUMN_STATUS,
+            DownloadStatus.RUNNING,
+            DownloadStatus.PENDING,
+            DownloadStatus.PAUSED_BY_APP,
+            DownloadStatus.BATCH_FAILED,
+            DownloadStatus.SUCCESS
     );
 
     private long[] downloadIds = null;
