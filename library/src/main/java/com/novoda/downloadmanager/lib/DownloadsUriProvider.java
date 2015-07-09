@@ -4,7 +4,7 @@ import android.net.Uri;
 
 class DownloadsUriProvider {
 
-    private final Uri publicityAccessibleDownloadsUri;
+    private final Uri publiclyAccessibleDownloadsUri;
     private final Uri downloadsByBatchUri;
     private final Uri allDownloadsUri;
     private final Uri batchesUri;
@@ -21,14 +21,14 @@ class DownloadsUriProvider {
     private static DownloadsUriProvider newInstance() {
         String authority = "content://" + DownloadProvider.AUTHORITY;
 
-        Uri publicityAccessibleDownloadsUri = Uri.parse(authority + "/" + DownloadsDestination.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT);
+        Uri publiclyAccessibleDownloadsUri = Uri.parse(authority + "/" + DownloadsDestination.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT);
         Uri downloadsByBatchUri = Uri.parse(authority + "/downloads_by_batch");
         Uri allDownloadsUri = Uri.parse(authority + "/all_downloads");
         Uri batchesUri = Uri.parse(authority + "/batches");
         Uri contentUri = Uri.parse(authority + "/my_downloads");
 
         return new DownloadsUriProvider(
-                publicityAccessibleDownloadsUri,
+                publiclyAccessibleDownloadsUri,
                 downloadsByBatchUri,
                 allDownloadsUri,
                 batchesUri,
@@ -37,12 +37,12 @@ class DownloadsUriProvider {
     }
 
     DownloadsUriProvider(
-            Uri publicityAccessibleDownloadsUri,
+            Uri publiclyAccessibleDownloadsUri,
             Uri downloadsByBatchUri,
             Uri allDownloadsUri,
             Uri batchesUri,
             Uri contentUri) {
-        this.publicityAccessibleDownloadsUri = publicityAccessibleDownloadsUri;
+        this.publiclyAccessibleDownloadsUri = publiclyAccessibleDownloadsUri;
         this.downloadsByBatchUri = downloadsByBatchUri;
         this.allDownloadsUri = allDownloadsUri;
         this.batchesUri = batchesUri;
@@ -53,8 +53,8 @@ class DownloadsUriProvider {
      * The content URI for accessing publicly accessible downloads (i.e., it requires no
      * permissions to access this downloaded file)
      */
-    public Uri getPublicityAccessibleDownloadsUri() {
-        return publicityAccessibleDownloadsUri;
+    public Uri getPubliclyAccessibleDownloadsUri() {
+        return publiclyAccessibleDownloadsUri;
     }
 
     /**
