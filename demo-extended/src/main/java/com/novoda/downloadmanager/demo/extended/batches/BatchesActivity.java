@@ -80,11 +80,12 @@ public class BatchesActivity extends AppCompatActivity implements QueryForDownlo
         Uri uri = Uri.parse(BIG_FILE);
         final Request request = new Request(uri);
         request.setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "beard.shipment");
-        request.setExtra("beard_1");
+        request.setNotificationExtra("beard_1");
+        batch.addRequest(request);
 
+        request.setNotificationExtra("beard_2");
         batch.addRequest(request);
-        request.setExtra("beard_2");
-        batch.addRequest(request);
+
         long batchId = downloadManager.enqueue(batch);
         Log.d("Download enqueued with batch ID: " + batchId);
     }
