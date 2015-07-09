@@ -304,13 +304,6 @@ class FileDownloadInfo {
         return DownloadStatus.isSubmitted(status) || DownloadStatus.isRunning(status);
     }
 
-    public void updateStatus(int status) {
-        setStatus(status);
-        downloadStatusContentValues.clear();
-        downloadStatusContentValues.put(DownloadContract.Downloads.COLUMN_STATUS, status);
-        context.getContentResolver().update(getAllDownloadsUri(), downloadStatusContentValues, null, null);
-    }
-
     /**
      * If download is ready to be scanned, enqueue it into the given
      * {@link DownloadScanner}.

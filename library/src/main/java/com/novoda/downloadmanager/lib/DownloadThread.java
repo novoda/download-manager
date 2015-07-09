@@ -239,7 +239,9 @@ class DownloadThread implements Runnable {
         }
 
         if (downloadStatus != DownloadStatus.RUNNING) {
-            originalDownloadInfo.updateStatus(DownloadStatus.RUNNING);
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(DownloadContract.Downloads.COLUMN_STATUS, downloadStatus);
+            context.getContentResolver().update(allDownloadsUri, contentValues, null, null);
             updateBatchStatus(batchId, id);
         }
 
