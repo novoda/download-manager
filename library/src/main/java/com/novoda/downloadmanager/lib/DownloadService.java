@@ -333,7 +333,7 @@ public class DownloadService extends Service {
                 isActive = true;
             }
 
-            nextRetryTimeMillis = downloadBatch.nextActionMillis(now);
+            nextRetryTimeMillis = downloadBatch.nextActionMillis(now, nextRetryTimeMillis);
         }
 
         batchRepository.deleteMarkedBatchesFor(allDownloads);
