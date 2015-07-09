@@ -2,6 +2,7 @@ package com.novoda.downloadmanager.lib;
 
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -84,13 +85,14 @@ public class DownloadReceiver extends BroadcastReceiver {
         if (result == null) {
             handleNotificationBroadcast(context, intent);
         } else {
-            sAsyncHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    handleNotificationBroadcast(context, intent);
-                    result.finish();
-                }
-            });
+            sAsyncHandler.post(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            handleNotificationBroadcast(context, intent);
+                            result.finish();
+                        }
+                    });
         }
     }
 
@@ -148,7 +150,10 @@ public class DownloadReceiver extends BroadcastReceiver {
      * {@link DownloadManager#COLUMN_ID}.
      */
     private void openDownload(Context context, long id) {
-        Intent intent = new OpenHelper(downloadsUriProvider).buildViewIntent(context, id);
+        ContentResolver contentResolver = context.getContentResolver();
+        DownloadManager downloadManager = new DownloadManager(context, contentResolver);
+        OpenHelper openHelper = new OpenHelper(downloadManager, downloadsUriProvider);
+        Intent intent = openHelper.buildViewIntent(context, id);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         try {
             context.startActivity(intent);

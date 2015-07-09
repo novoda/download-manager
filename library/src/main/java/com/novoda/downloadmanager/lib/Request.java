@@ -49,9 +49,11 @@ public class Request {
     private boolean meteredAllowed = true;
     private boolean isVisibleInDownloadsUi = true;
     private boolean scannable = false;
-    private String extraField;
+    private String notificationExtras;
     private String bigPictureUrl;
     private long batchId = -1L;
+    private String extraData;
+
     /**
      * if a file is designated as a MediaScanner scannable file, the following value is
      * stored in the database column {@link DownloadContract.Downloads#COLUMN_MEDIA_SCANNED}.
@@ -390,8 +392,20 @@ public class Request {
         return this;
     }
 
-    public void setExtra(String extra) {
-        extraField = extra;
+    /**
+     * @param extra data that will be passed to you in the Intent on download completion.
+     */
+    public Request setNotificationExtra(String extra) {
+        notificationExtras = extra;
+        return this;
+    }
+
+    /**
+     * @param extra data you want to save alongside your download so you can query it later.
+     */
+    public Request setExtraData(String extra) {
+        extraData = extra;
+        return this;
     }
 
     long getBatchId() {
@@ -427,8 +441,9 @@ public class Request {
         values.put(DownloadContract.Downloads.COLUMN_ALLOW_ROAMING, roamingAllowed);
         values.put(DownloadContract.Downloads.COLUMN_ALLOW_METERED, meteredAllowed);
         values.put(DownloadContract.Downloads.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI, isVisibleInDownloadsUi);
-        values.put(DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS, extraField);
+        values.put(DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS, notificationExtras);
         values.put(DownloadContract.Downloads.COLUMN_BATCH_ID, batchId);
+        values.put(DownloadContract.Downloads.COLUMN_EXTRA_DATA, extraData);
 
         return values;
     }
