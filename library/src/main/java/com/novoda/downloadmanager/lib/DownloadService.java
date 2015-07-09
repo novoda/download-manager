@@ -360,7 +360,7 @@ public class DownloadService extends Service {
     private void updateTotalBytesFor(Collection<FileDownloadInfo> downloadInfos) {
         ContentValues values = new ContentValues();
         for (FileDownloadInfo downloadInfo : downloadInfos) {
-            if (downloadInfo.getTotalBytes() == -1) {
+            if (downloadInfo.hasUnknownTotalBytes()) {
                 long totalBytes = contentLengthFetcher.fetchContentLengthFor(downloadInfo);
                 values.put(DownloadContract.Downloads.COLUMN_TOTAL_BYTES, totalBytes);
                 getContentResolver().update(downloadInfo.getAllDownloadsUri(), values, null, null);
