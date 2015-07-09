@@ -327,7 +327,7 @@ class FileDownloadInfo {
         BatchRepository batchRepository = BatchRepository.newInstance(contentResolver, new DownloadDeleter(contentResolver));
 
         DownloadThread downloadThread = new DownloadThread(context, systemFacade, this, storageManager, downloadNotifier,
-                batchCompletionBroadcaster, batchRepository, downloadsRepository, new NetworkChecker(systemFacade), downloadMarshaller, downloadReadyChecker);
+                batchCompletionBroadcaster, batchRepository, downloadsRepository, new NetworkChecker(systemFacade), downloadReadyChecker);
         executor.submit(downloadThread);
     }
 
@@ -463,7 +463,7 @@ class FileDownloadInfo {
             RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
             ContentValues contentValues = new ContentValues();
             PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
-            DownloadReadyChecker downloadReadyChecker = new DownloadReadyChecker(systemFacade, new NetworkChecker(systemFacade), downloadClientReadyChecker);
+            DownloadReadyChecker downloadReadyChecker = new DownloadReadyChecker(systemFacade, new NetworkChecker(systemFacade), downloadClientReadyChecker, downloadMarshaller);
             FileDownloadInfo info = new FileDownloadInfo(
                     context,
                     systemFacade,

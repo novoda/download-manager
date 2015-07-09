@@ -80,7 +80,6 @@ public class DownloadService extends Service {
     private DownloadsRepository downloadsRepository;
     private DownloadDeleter downloadDeleter;
     private DownloadReadyChecker downloadReadyChecker;
-    private PublicFacingDownloadMarshaller downloadMarshaller;
 
     /**
      * Receives notifications when the data in the content provider changes
@@ -118,8 +117,8 @@ public class DownloadService extends Service {
 
         this.downloadDeleter = new DownloadDeleter(getContentResolver());
         this.batchRepository = BatchRepository.newInstance(getContentResolver(), downloadDeleter);
-        this.downloadReadyChecker = new DownloadReadyChecker(systemFacade, new NetworkChecker(systemFacade), downloadClientReadyChecker);
-        this.downloadMarshaller = new PublicFacingDownloadMarshaller();
+        PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
+        this.downloadReadyChecker = new DownloadReadyChecker(systemFacade, new NetworkChecker(systemFacade), downloadClientReadyChecker, downloadMarshaller);
 
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         ContentResolver contentResolver = getContentResolver();
@@ -375,7 +374,7 @@ public class DownloadService extends Service {
     private boolean kickOffDownloadTaskIfReady(FileDownloadInfo info, DownloadBatch downloadBatch) {
         boolean downloadIsSubmittedOrActive = info.isSubmittedOrRunning();
 
-        if (!downloadIsSubmittedOrActive && downloadReadyChecker.canDownload(info, downloadMarshaller.marshall(downloadBatch))) {
+        if (!downloadIsSubmittedOrActive && downloadReadyChecker.canDownload(downloadBatch)) {
             info.startDownload(executor, storageManager, downloadNotifier, downloadsRepository);
             return true;
         }

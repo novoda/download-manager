@@ -2,22 +2,29 @@ package com.novoda.downloadmanager.lib;
 
 import android.os.Environment;
 
-import com.novoda.downloadmanager.Download;
-
 class DownloadReadyChecker {
 
     private final SystemFacade systemFacade;
     private final NetworkChecker networkChecker;
     private final DownloadClientReadyChecker downloadClientReadyChecker;
+    private final PublicFacingDownloadMarshaller downloadMarshaller;
 
-    DownloadReadyChecker(SystemFacade systemFacade, NetworkChecker networkChecker, DownloadClientReadyChecker downloadClientReadyChecker) {
+    DownloadReadyChecker(SystemFacade systemFacade, NetworkChecker networkChecker, DownloadClientReadyChecker downloadClientReadyChecker,
+                         PublicFacingDownloadMarshaller downloadMarshaller) {
         this.systemFacade = systemFacade;
         this.networkChecker = networkChecker;
         this.downloadClientReadyChecker = downloadClientReadyChecker;
+        this.downloadMarshaller = downloadMarshaller;
     }
 
-    public boolean canDownload(FileDownloadInfo downloadInfo, Download download) {
-        return isDownloadManagerReadyToDownload(downloadInfo) && downloadClientReadyChecker.isAllowedToDownload(download);
+    public boolean canDownload(DownloadBatch downloadBatch) {
+        for (FileDownloadInfo fileDownloadInfo : downloadBatch.getDownloads()) {
+            if (!isDownloadManagerReadyToDownload(fileDownloadInfo)) {
+                return false;
+            }
+        }
+
+        return downloadClientReadyChecker.isAllowedToDownload(downloadMarshaller.marshall(downloadBatch));
     }
 
     /**

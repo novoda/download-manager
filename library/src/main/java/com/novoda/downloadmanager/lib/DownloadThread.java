@@ -75,7 +75,6 @@ class DownloadThread implements Runnable {
     private final BatchRepository batchRepository;
     private final DownloadsRepository downloadsRepository;
     private final NetworkChecker networkChecker;
-    private final PublicFacingDownloadMarshaller downloadMarshaller;
     private final DownloadReadyChecker downloadReadyChecker;
 
     private volatile boolean policyDirty;
@@ -84,7 +83,6 @@ class DownloadThread implements Runnable {
                           StorageManager storageManager, DownloadNotifier downloadNotifier,
                           BatchCompletionBroadcaster batchCompletionBroadcaster, BatchRepository batchRepository,
                           DownloadsRepository downloadsRepository, NetworkChecker networkChecker,
-                          PublicFacingDownloadMarshaller downloadMarshaller,
                           DownloadReadyChecker downloadReadyChecker) {
         this.context = context;
         this.systemFacade = systemFacade;
@@ -95,7 +93,6 @@ class DownloadThread implements Runnable {
         this.batchRepository = batchRepository;
         this.downloadsRepository = downloadsRepository;
         this.networkChecker = networkChecker;
-        this.downloadMarshaller = downloadMarshaller;
         this.downloadReadyChecker = downloadReadyChecker;
     }
 
@@ -206,7 +203,7 @@ class DownloadThread implements Runnable {
 
         DownloadBatch currentBatch = batchRepository.retrieveBatchFor(originalDownloadInfo);
 
-        if (!downloadReadyChecker.canDownload(originalDownloadInfo, downloadMarshaller.marshall(currentBatch))) {
+        if (!downloadReadyChecker.canDownload(currentBatch)) {
             Log.d("Download " + originalDownloadInfo.getId() + " is not ready to download: skipping");
             return;
         }
