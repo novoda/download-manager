@@ -198,6 +198,11 @@ public class DownloadManager {
     public static final int STATUS_FAILED = 1 << 4;
 
     /**
+     * Value of {@link #COLUMN_STATUS} when the download is marked for deletion.
+     */
+    public static final int STATUS_DELETING = 1 << 5;
+
+    /**
      * Value of COLUMN_ERROR_CODE when the download has completed with an error that doesn't fit
      * under any other error code.
      */
@@ -431,7 +436,11 @@ public class DownloadManager {
     public void removeDownload(URI uri) {
         Cursor cursor = null;
         try {
-            cursor = contentResolver.query(downloadsUriProvider.getContentUri(), new String[]{"_id"}, DownloadContract.Downloads.COLUMN_FILE_NAME_HINT + "=?", new String[]{uri.toString()}, null);
+            cursor = contentResolver.query(
+                    downloadsUriProvider.getContentUri(),
+                    new String[]{"_id"},
+                    DownloadContract.Downloads.COLUMN_FILE_NAME_HINT + "=?",
+                    new String[]{uri.toString()}, null);
             if (cursor.moveToFirst()) {
                 long id = cursor.getLong(cursor.getColumnIndexOrThrow("_id"));
                 removeDownloads(id);
@@ -479,14 +488,21 @@ public class DownloadManager {
         if (ids == null || ids.length == 0) {
             throw new IllegalArgumentException("called with nothing to remove. input param 'ids' can't be null");
         }
-        ContentValues values = new ContentValues();
-        values.put(DownloadContract.Batches.COLUMN_DELETED, 1);
+        ContentValues valuesDelete = new ContentValues(1);
+        valuesDelete.put(DownloadContract.Batches.COLUMN_DELETED, 1);
+
+        ContentValues valuesDeleteStatuses = new ContentValues(2);
+        valuesDeleteStatuses.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_PAUSED);
+        valuesDeleteStatuses.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.DELETING);
         // if only one id is passed in, then include it in the uri itself.
         // this will eliminate a full database scan in the download service.
         if (ids.length == 1) {
-            return contentResolver.update(ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), ids[0]), values, null, null);
+            contentResolver.update(downloadsUriProvider.getContentUri(), valuesDeleteStatuses, COLUMN_BATCH_ID + "=?", new String[]{String.valueOf(ids[0])});
+            return contentResolver.update(ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), ids[0]), valuesDelete, null, null);
         }
-        return contentResolver.update(downloadsUriProvider.getBatchesUri(), values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
+
+        contentResolver.update(downloadsUriProvider.getContentUri(), valuesDeleteStatuses, getWhereClauseFor(ids, COLUMN_BATCH_ID), longArrayToStringArray(ids));
+        return contentResolver.update(downloadsUriProvider.getBatchesUri(), valuesDelete, getWhereClauseForIds(ids), longArrayToStringArray(ids));
     }
 
     /**
@@ -773,13 +789,17 @@ public class DownloadManager {
      * Get a parameterized SQL WHERE clause to select a bunch of IDs.
      */
     static String getWhereClauseForIds(long[] ids) {
+        return getWhereClauseFor(ids, DownloadContract.Downloads._ID);
+    }
+
+    private static String getWhereClauseFor(long[] ids, String column) {
         StringBuilder whereClause = new StringBuilder();
         whereClause.append("(");
         for (int i = 0; i < ids.length; i++) {
             if (i > 0) {
                 whereClause.append("OR ");
             }
-            whereClause.append(DownloadContract.Downloads._ID);
+            whereClause.append(column);
             whereClause.append(" = ? ");
         }
         whereClause.append(")");
@@ -959,6 +979,9 @@ public class DownloadManager {
 
                 case DownloadStatus.SUCCESS:
                     return STATUS_SUCCESSFUL;
+
+                case DownloadStatus.DELETING:
+                    return STATUS_DELETING;
 
                 default:
                     return STATUS_FAILED;

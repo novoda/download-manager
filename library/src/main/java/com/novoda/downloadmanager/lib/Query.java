@@ -238,6 +238,9 @@ public class Query {
         if ((statusFlags & DownloadManager.STATUS_SUCCESSFUL) != 0) {
             parts.add(statusClause("=", DownloadStatus.SUCCESS));
         }
+        if ((statusFlags & DownloadManager.STATUS_DELETING) != 0) {
+            parts.add(statusClause("=", DownloadStatus.DELETING));
+        }
         if ((statusFlags & DownloadManager.STATUS_FAILED) != 0) {
             parts.add("(" + statusClause(">=", 400) + " AND " + statusClause("<", 600) + ")");
         }

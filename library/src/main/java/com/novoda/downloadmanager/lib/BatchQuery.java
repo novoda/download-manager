@@ -114,6 +114,7 @@ public class BatchQuery {
          *                    {@link DownloadManager#STATUS_PENDING},
          *                    {@link DownloadManager#STATUS_SUCCESSFUL},
          *                    {@link DownloadManager#STATUS_RUNNING}
+         *                    {@link DownloadManager#STATUS_DELETING}
          *                    <p/>
          *                    e.g. withStatusFilter(DownloadManager.STATUS_FAILED | DownloadManager.STATUS_PENDING)
          * @return {@link BatchQuery.Builder}
@@ -210,7 +211,8 @@ public class BatchQuery {
                     DownloadManager.STATUS_RUNNING,
                     DownloadManager.STATUS_PAUSED,
                     DownloadManager.STATUS_SUCCESSFUL,
-                    DownloadManager.STATUS_FAILED})
+                    DownloadManager.STATUS_FAILED,
+                    DownloadManager.STATUS_DELETING})
     public @interface Status {
         //marker interface that ensures the annotated fields are in within the above values
     }

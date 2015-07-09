@@ -202,6 +202,10 @@ class DownloadThread implements Runnable {
             Log.d("Download " + originalDownloadInfo.getId() + " already failed: status = " + downloadStatus + "; skipping");
             return;
         }
+        if (DownloadStatus.isDeleting(downloadStatus)) {
+            Log.d("Download " + originalDownloadInfo.getId() + " is deleting: status = " + downloadStatus + "; skipping");
+            return;
+        }
 
         DownloadBatch currentBatch = batchRepository.retrieveBatchFor(originalDownloadInfo);
         if (!originalDownloadInfo.isReadyToDownload(currentBatch)) {
