@@ -120,9 +120,9 @@ final class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     private void createBatchesTable(SQLiteDatabase db) {
-        db.execSQL("DROP TABLE IF EXISTS " + DownloadsColumnsBatches.BATCHES_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + DownloadsTables.BATCHES_TABLE_NAME);
         db.execSQL(
-                "CREATE TABLE " + DownloadsColumnsBatches.BATCHES_TABLE_NAME + "(" +
+                "CREATE TABLE " + DownloadsTables.BATCHES_TABLE_NAME + "(" +
                         DownloadsColumnsBatches._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                         DownloadsColumnsBatches.COLUMN_TITLE + " TEXT NOT NULL," +
                         DownloadsColumnsBatches.COLUMN_DESCRIPTION + " TEXT," +
@@ -141,9 +141,9 @@ final class DatabaseHelper extends SQLiteOpenHelper {
                         + " AS SELECT DISTINCT "
                         + projectionFrom(DOWNLOAD_BY_BATCH_VIEW_COLUMNS)
                         + " FROM " + DownloadsTables.DOWNLOADS_TABLE_NAME
-                        + " INNER JOIN " + DownloadsColumnsBatches.BATCHES_TABLE_NAME
+                        + " INNER JOIN " + DownloadsTables.BATCHES_TABLE_NAME
                         + " ON " + DownloadsTables.DOWNLOADS_TABLE_NAME + "." + DownloadsColumns.COLUMN_BATCH_ID
-                        + " = " + DownloadsColumnsBatches.BATCHES_TABLE_NAME + "." + DownloadsColumnsBatches._ID + ";"
+                        + " = " + DownloadsTables.BATCHES_TABLE_NAME + "." + DownloadsColumnsBatches._ID + ";"
         );
     }
 
@@ -170,7 +170,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             DownloadsColumnsBatches.COLUMN_BIG_PICTURE,
             DownloadsColumnsBatches.COLUMN_VISIBILITY,
             DownloadsColumnsBatches.COLUMN_STATUS,
-            DownloadsColumnsBatches.BATCHES_TABLE_NAME + "." + DownloadsColumnsBatches.COLUMN_DELETED,
+            DownloadsTables.BATCHES_TABLE_NAME + "." + DownloadsColumnsBatches.COLUMN_DELETED,
             DownloadsColumnsBatches.COLUMN_TOTAL_BYTES,
             DownloadsColumnsBatches.COLUMN_CURRENT_BYTES
     };

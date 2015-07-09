@@ -366,7 +366,7 @@ public final class DownloadProvider extends ContentProvider {
             return insertDownload(uri, values, db, match);
         }
         if (match == BATCHES) {
-            long rowId = db.insert(DownloadsColumnsBatches.BATCHES_TABLE_NAME, null, values);
+            long rowId = db.insert(DownloadsTables.BATCHES_TABLE_NAME, null, values);
             return ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), rowId);
         }
         Log.d("calling insert on an unknown/invalid URI: " + uri);
@@ -642,7 +642,7 @@ public final class DownloadProvider extends ContentProvider {
             case BATCHES_ID:
                 SqlSelection batchSelection = getWhereClause(uri, selection, selectionArgs, match);
                 return db.query(
-                        DownloadsColumnsBatches.BATCHES_TABLE_NAME, projection, batchSelection.getSelection(),
+                        DownloadsTables.BATCHES_TABLE_NAME, projection, batchSelection.getSelection(),
                         batchSelection.getParameters(), null, null, sort);
             case DOWNLOADS_BY_BATCH:
                 return db.query(DownloadsTables.VIEW_NAME_DOWNLOADS_BY_BATCH, projection, selection, selectionArgs, null, null, sort);
@@ -874,7 +874,7 @@ public final class DownloadProvider extends ContentProvider {
             case BATCHES:
             case BATCHES_ID:
                 SqlSelection batchSelection = getWhereClause(uri, where, whereArgs, match);
-                count = db.update(DownloadsColumnsBatches.BATCHES_TABLE_NAME, values, batchSelection.getSelection(), batchSelection.getParameters());
+                count = db.update(DownloadsTables.BATCHES_TABLE_NAME, values, batchSelection.getSelection(), batchSelection.getParameters());
                 break;
             default:
                 Log.d("updating unknown/invalid URI: " + uri);
@@ -953,7 +953,7 @@ public final class DownloadProvider extends ContentProvider {
             case BATCHES:
             case BATCHES_ID:
                 SqlSelection batchSelection = getWhereClause(uri, where, whereArgs, match);
-                count = db.delete(DownloadsColumnsBatches.BATCHES_TABLE_NAME, batchSelection.getSelection(), batchSelection.getParameters());
+                count = db.delete(DownloadsTables.BATCHES_TABLE_NAME, batchSelection.getSelection(), batchSelection.getParameters());
                 break;
 
             default:

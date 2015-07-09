@@ -7,8 +7,6 @@ import android.provider.BaseColumns;
  */
 final class DownloadsColumnsBatches implements BaseColumns {
 
-    public static final String BATCHES_TABLE_NAME = "batches";
-
     /**
      * The name of the column where the initiating application can provided the
      * title of this batch. The title will be displayed ito the user in the
