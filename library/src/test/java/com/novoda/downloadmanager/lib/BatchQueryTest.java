@@ -324,7 +324,7 @@ public class BatchQueryTest {
                 "WHEN 193 THEN 3 " +
                 "WHEN 498 THEN 4 " +
                 "WHEN 200 THEN 5 " +
-                "ELSE 2 END");
+                "ELSE 6 END, _id ASC");
     }
 
     private void assertThatSelectionArgumentAreEqualTo(Object[] firstArray, Object[] secondArray) {

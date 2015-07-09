@@ -42,20 +42,14 @@ public class BatchQuery {
 
         private final Criteria.Builder builder;
 
-        private static final String ORDER_BY_LIVENESS = String.format("CASE batch_status "
-                        + "WHEN %1$d THEN 1 "
-                        + "WHEN %2$d THEN 2 "
-                        + "WHEN %3$d THEN 3 "
-                        + "WHEN %4$d THEN 4 "
-                        + "WHEN %5$d THEN 5 "
-                        + "ELSE 2 "
-                        + "END",
-                Downloads.Impl.STATUS_RUNNING,
-                Downloads.Impl.STATUS_PENDING,
-                Downloads.Impl.STATUS_PAUSED_BY_APP,
-                Downloads.Impl.STATUS_BATCH_FAILED,
-                Downloads.Impl.STATUS_SUCCESS
-        );
+        private static final String ORDER_BY_LIVENESS = "CASE " + Downloads.Impl.Batches.COLUMN_STATUS + " "
+                + "WHEN " + Downloads.Impl.STATUS_RUNNING + " THEN 1 "
+                + "WHEN " + Downloads.Impl.STATUS_PENDING + " THEN 2 "
+                + "WHEN " + Downloads.Impl.STATUS_PAUSED_BY_APP + " THEN 3 "
+                + "WHEN " + Downloads.Impl.STATUS_BATCH_FAILED + " THEN 4 "
+                + "WHEN " + Downloads.Impl.STATUS_SUCCESS + " THEN 5 "
+                + "ELSE 6 "
+                + "END, " + Downloads.Impl.Batches._ID + " ASC";
 
         private Criteria.Builder criteriaIdBuilder;
         private Criteria.Builder criteriaStatusBuilder;
