@@ -25,18 +25,6 @@ class FileDownloadInfo {
     public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
     private static final int UNKNOWN_BYTES = -1;
 
-    public boolean allowMetered() {
-        return allowMetered;
-    }
-
-    public boolean allowRoaming() {
-        return allowRoaming;
-    }
-
-    public boolean isRecommendedSizeLimitBypassed() {
-        return bypassRecommendedSizeLimit == 0;
-    }
-
     // TODO: move towards these in-memory objects being sources of truth, and periodically pushing to provider.
 
     /**
@@ -228,6 +216,18 @@ class FileDownloadInfo {
 
     public long getBatchId() {
         return batchId;
+    }
+
+    public boolean allowMetered() {
+        return allowMetered;
+    }
+
+    public boolean allowRoaming() {
+        return allowRoaming;
+    }
+
+    public boolean isRecommendedSizeLimitBypassed() {
+        return bypassRecommendedSizeLimit == 0;
     }
 
     public Collection<Pair<String, String>> getHeaders() {
