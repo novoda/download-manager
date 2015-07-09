@@ -973,10 +973,10 @@ public final class DownloadProvider extends ContentProvider {
             logVerboseOpenFileInfo(uri, mode);
         }
 
-        Cursor cursor = query(uri, new String[]{"_data"}, null, null, null);
         String path;
+        Cursor cursor = query(uri, new String[]{"_data"}, null, null, null);
         try {
-            int count = (cursor != null) ? cursor.getCount() : 0;
+            int count = cursor.getCount();
             if (count != 1) {
                 // If there is not exactly one result, throw an appropriate exception.
                 if (count == 0) {
@@ -988,9 +988,7 @@ public final class DownloadProvider extends ContentProvider {
             cursor.moveToFirst();
             path = cursor.getString(0);
         } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            cursor.close();
         }
 
         if (path == null) {
