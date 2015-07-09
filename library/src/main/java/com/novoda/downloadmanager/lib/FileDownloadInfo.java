@@ -539,7 +539,7 @@ class FileDownloadInfo {
     }
 
     public boolean hasUnknownTotalBytes() {
-        return totalBytes == UNKNOWN_BYTES;
+        return !hasTotalBytes();
     }
 
     private void addHeader(String header, String value) {
