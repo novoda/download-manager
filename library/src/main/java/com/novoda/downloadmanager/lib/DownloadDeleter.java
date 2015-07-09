@@ -32,7 +32,7 @@ class DownloadDeleter {
         if (!TextUtils.isEmpty(info.getFileName())) {
             deleteFileIfExists(info.getFileName());
             ContentValues blankData = new ContentValues();
-            blankData.put(Downloads.Impl._DATA, (String) null);
+            blankData.put(DownloadContract.Downloads.COLUMN_DATA, (String) null);
             resolver.update(info.getAllDownloadsUri(), blankData, null, null);
             info.setFileName(null);
         }
@@ -49,10 +49,10 @@ class DownloadDeleter {
      */
     private void deleteDownloadLocked(long id, Map<Long, FileDownloadInfo> downloads) {
         FileDownloadInfo info = downloads.get(id);
-        if (info.getStatus() == Downloads.Impl.STATUS_RUNNING) {
-            info.setStatus(Downloads.Impl.STATUS_CANCELED);
+        if (info.getStatus() == DownloadStatus.RUNNING) {
+            info.setStatus(DownloadStatus.CANCELED);
         }
-        if (info.getDestination() != Downloads.Impl.DESTINATION_EXTERNAL && info.getFileName() != null) {
+        if (info.getDestination() != DownloadsDestination.DESTINATION_EXTERNAL && info.getFileName() != null) {
             Log.d("deleteDownloadLocked() deleting " + info.getFileName());
             deleteFileIfExists(info.getFileName());
         }

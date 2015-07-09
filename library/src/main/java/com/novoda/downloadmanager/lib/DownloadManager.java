@@ -56,48 +56,42 @@ import java.net.URI;
 public class DownloadManager {
 
     /**
-     * This is the uri for the underlying table
-     * use this at your own risk as many of the constants defined here will not return you what you expect for raw cursor data
-     */
-    public static final Uri CONTENT_URI = Downloads.Impl.CONTENT_URI;
-
-    /**
      * An identifier for a particular download, unique across the system.  Clients use this ID to
      * make subsequent calls related to the download.
      */
-    public static final String COLUMN_ID = Downloads.Impl._ID;
+    public static final String COLUMN_ID = DownloadContract.Downloads._ID;
 
     /**
      * The client-supplied title for this download.  This will be displayed in system notifications.
      * Defaults to the empty string.
      */
-    public static final String COLUMN_TITLE = Downloads.Impl.Batches.COLUMN_TITLE;
+    public static final String COLUMN_TITLE = DownloadContract.Batches.COLUMN_TITLE;
 
     /**
      * The client-supplied description of this download.  This will be displayed in system
      * notifications.  Defaults to the empty string.
      */
-    public static final String COLUMN_DESCRIPTION = Downloads.Impl.Batches.COLUMN_DESCRIPTION;
+    public static final String COLUMN_DESCRIPTION = DownloadContract.Batches.COLUMN_DESCRIPTION;
 
     /**
      * The ID of the batch that contains this download.
      */
-    public static final String COLUMN_BATCH_ID = Downloads.Impl.COLUMN_BATCH_ID;
+    public static final String COLUMN_BATCH_ID = DownloadContract.Downloads.COLUMN_BATCH_ID;
 
     /**
      * The extra supplied information for this download.
      */
-    public static final String COLUMN_NOTIFICATION_EXTRAS = Downloads.Impl.COLUMN_NOTIFICATION_EXTRAS;
+    public static final String COLUMN_NOTIFICATION_EXTRAS = DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS;
 
     /**
      * The status of the batch that contains this download.
      */
-    public static final String COLUMN_BATCH_STATUS = Downloads.Impl.Batches.COLUMN_STATUS;
+    public static final String COLUMN_BATCH_STATUS = DownloadContract.Batches.COLUMN_STATUS;
 
     /**
      * URI to be downloaded.
      */
-    public static final String COLUMN_URI = Downloads.Impl.COLUMN_URI;
+    public static final String COLUMN_URI = DownloadContract.Downloads.COLUMN_URI;
 
     /**
      * Internet Media Type of the downloaded file.  If no value is provided upon creation, this will
@@ -129,7 +123,7 @@ public class DownloadManager {
     /**
      * Current status of the download, as one of the STATUS_* constants.
      */
-    public static final String COLUMN_STATUS = Downloads.Impl.COLUMN_STATUS;
+    public static final String COLUMN_STATUS = DownloadContract.Downloads.COLUMN_STATUS;
 
     /**
      * Provides more detail on the status of the download.  Its meaning depends on the value of
@@ -166,7 +160,7 @@ public class DownloadManager {
      * used to delete the entries from MediaProvider database when it is deleted from the
      * downloaded list.
      */
-    public static final String COLUMN_MEDIAPROVIDER_URI = Downloads.Impl.COLUMN_MEDIAPROVIDER_URI;
+    public static final String COLUMN_MEDIAPROVIDER_URI = DownloadContract.Downloads.COLUMN_MEDIAPROVIDER_URI;
 
     /**
      * Value of {@link #COLUMN_STATUS} when the download is waiting to start.
@@ -291,7 +285,7 @@ public class DownloadManager {
      * Broadcast intent action sent by the download manager when the user clicks on a running
      * download, either from a system notification. The download's content: uri is specified
      * in the intent's data if the click is associated with a single download,
-     * or {@link DownloadManager#CONTENT_URI} if the notification is associated with
+     * or {@link DownloadsUriProvider#getContentUri()} if the notification is associated with
      * multiple downloads.
      */
     public static final String ACTION_NOTIFICATION_CLICKED = "com.novoda.downloadmaanger.DOWNLOAD_NOTIFICATION_CLICKED";
@@ -325,24 +319,24 @@ public class DownloadManager {
      * columns to request from DownloadProvider.
      */
     public static final String[] UNDERLYING_COLUMNS = new String[]{
-            Downloads.Impl._ID,
-            Downloads.Impl._DATA + " AS " + COLUMN_LOCAL_FILENAME,
-            Downloads.Impl.COLUMN_MEDIAPROVIDER_URI,
-            Downloads.Impl.COLUMN_DESTINATION,
-            Downloads.Impl.COLUMN_URI,
-            Downloads.Impl.COLUMN_STATUS,
-            Downloads.Impl.COLUMN_DELETED,
-            Downloads.Impl.COLUMN_FILE_NAME_HINT,
-            Downloads.Impl.COLUMN_MIME_TYPE + " AS " + COLUMN_MEDIA_TYPE,
-            Downloads.Impl.COLUMN_TOTAL_BYTES + " AS " + COLUMN_TOTAL_SIZE_BYTES,
-            Downloads.Impl.COLUMN_LAST_MODIFICATION + " AS " + COLUMN_LAST_MODIFIED_TIMESTAMP,
-            Downloads.Impl.COLUMN_CURRENT_BYTES + " AS " + COLUMN_BYTES_DOWNLOADED_SO_FAR,
-            Downloads.Impl.COLUMN_BATCH_ID,
-            Downloads.Impl.Batches.COLUMN_TITLE,
-            Downloads.Impl.Batches.COLUMN_DESCRIPTION,
-            Downloads.Impl.Batches.COLUMN_BIG_PICTURE,
-            Downloads.Impl.Batches.COLUMN_VISIBILITY,
-            Downloads.Impl.Batches.COLUMN_STATUS,
+            DownloadContract.Downloads._ID,
+            DownloadContract.Downloads.COLUMN_DATA + " AS " + COLUMN_LOCAL_FILENAME,
+            DownloadContract.Downloads.COLUMN_MEDIAPROVIDER_URI,
+            DownloadContract.Downloads.COLUMN_DESTINATION,
+            DownloadContract.Downloads.COLUMN_URI,
+            DownloadContract.Downloads.COLUMN_STATUS,
+            DownloadContract.Downloads.COLUMN_DELETED,
+            DownloadContract.Downloads.COLUMN_FILE_NAME_HINT,
+            DownloadContract.Downloads.COLUMN_MIME_TYPE + " AS " + COLUMN_MEDIA_TYPE,
+            DownloadContract.Downloads.COLUMN_TOTAL_BYTES + " AS " + COLUMN_TOTAL_SIZE_BYTES,
+            DownloadContract.Downloads.COLUMN_LAST_MODIFICATION + " AS " + COLUMN_LAST_MODIFIED_TIMESTAMP,
+            DownloadContract.Downloads.COLUMN_CURRENT_BYTES + " AS " + COLUMN_BYTES_DOWNLOADED_SO_FAR,
+            DownloadContract.Downloads.COLUMN_BATCH_ID,
+            DownloadContract.Batches.COLUMN_TITLE,
+            DownloadContract.Batches.COLUMN_DESCRIPTION,
+            DownloadContract.Batches.COLUMN_BIG_PICTURE,
+            DownloadContract.Batches.COLUMN_VISIBILITY,
+            DownloadContract.Batches.COLUMN_STATUS,
         /* add the following 'computed' columns to the cursor.
          * they are not 'returned' by the database, but their inclusion
          * eliminates need to have lot of methods in CursorTranslator
@@ -352,17 +346,28 @@ public class DownloadManager {
     };
 
     private final ContentResolver contentResolver;
+    private final DownloadsUriProvider downloadsUriProvider;
 
-    private Uri baseUri = Downloads.Impl.CONTENT_URI;
+    private Uri baseUri;
 
     public DownloadManager(Context context, ContentResolver resolver) {
-        this(context, resolver, false);
+        this(context, resolver, DownloadsUriProvider.getInstance(), false);
     }
 
-    public DownloadManager(Context context,
-                           ContentResolver contentResolver,
-                           boolean verboseLogging) {
+    public DownloadManager(Context context, ContentResolver contentResolver, boolean verboseLogging) {
+        this(context, contentResolver, DownloadsUriProvider.getInstance(), verboseLogging);
+    }
+
+    DownloadManager(Context context, ContentResolver resolver, DownloadsUriProvider downloadsUriProvider) {
+        this(context, resolver, downloadsUriProvider, false);
+    }
+
+    DownloadManager(Context context,
+                    ContentResolver contentResolver,
+                    DownloadsUriProvider downloadsUriProvider, boolean verboseLogging) {
         this.contentResolver = contentResolver;
+        this.downloadsUriProvider = downloadsUriProvider;
+        this.baseUri = downloadsUriProvider.getContentUri();
         GlobalState.setContext(context);
         GlobalState.setVerboseLogging(verboseLogging);
     }
@@ -373,9 +378,9 @@ public class DownloadManager {
      */
     void setAccessAllDownloads(boolean accessAllDownloads) {
         if (accessAllDownloads) {
-            baseUri = Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI;
+            baseUri = downloadsUriProvider.getAllDownloadsUri();
         } else {
-            baseUri = Downloads.Impl.CONTENT_URI;
+            baseUri = downloadsUriProvider.getContentUri();
         }
     }
 
@@ -396,27 +401,27 @@ public class DownloadManager {
 
     private long insert(Request request) {
         ContentValues values = request.toContentValues();
-        Uri downloadUri = contentResolver.insert(Downloads.Impl.CONTENT_URI, values);
+        Uri downloadUri = contentResolver.insert(downloadsUriProvider.getContentUri(), values);
         return ContentUris.parseId(downloadUri);
     }
 
     public void pauseBatch(long id) {
         ContentValues values = new ContentValues();
-        values.put(Downloads.Impl.COLUMN_CONTROL, Downloads.Impl.CONTROL_PAUSED);
-        contentResolver.update(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
+        values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_PAUSED);
+        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
     }
 
     public void resumeBatch(long id) {
         ContentValues values = new ContentValues();
-        values.put(Downloads.Impl.COLUMN_CONTROL, Downloads.Impl.CONTROL_RUN);
-        values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
-        contentResolver.update(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
+        values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
+        values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.PENDING);
+        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[] { String.valueOf(id) });
     }
 
     public void removeDownload(URI uri) {
         Cursor cursor = null;
         try {
-            cursor = contentResolver.query(Downloads.Impl.CONTENT_URI, new String[]{"_id"}, Downloads.Impl.COLUMN_FILE_NAME_HINT + "=?", new String[]{uri.toString()}, null);
+            cursor = contentResolver.query(downloadsUriProvider.getContentUri(), new String[]{"_id"}, DownloadContract.Downloads.COLUMN_FILE_NAME_HINT + "=?", new String[]{uri.toString()}, null);
             if (cursor.moveToFirst()) {
                 long id = cursor.getLong(cursor.getColumnIndexOrThrow("_id"));
                 removeDownloads(id);
@@ -443,7 +448,7 @@ public class DownloadManager {
             throw new IllegalArgumentException("called with nothing to remove. input param 'ids' can't be null");
         }
         ContentValues values = new ContentValues();
-        values.put(Downloads.Impl.COLUMN_DELETED, 1);
+        values.put(DownloadContract.Downloads.COLUMN_DELETED, 1);
         // if only one id is passed in, then include it in the uri itself.
         // this will eliminate a full database scan in the download service.
         if (ids.length == 1) {
@@ -465,13 +470,13 @@ public class DownloadManager {
             throw new IllegalArgumentException("called with nothing to remove. input param 'ids' can't be null");
         }
         ContentValues values = new ContentValues();
-        values.put(Downloads.Impl.Batches.COLUMN_DELETED, 1);
+        values.put(DownloadContract.Batches.COLUMN_DELETED, 1);
         // if only one id is passed in, then include it in the uri itself.
         // this will eliminate a full database scan in the download service.
         if (ids.length == 1) {
-            return contentResolver.update(ContentUris.withAppendedId(Downloads.Impl.BATCH_CONTENT_URI, ids[0]), values, null, null);
+            return contentResolver.update(ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), ids[0]), values, null, null);
         }
-        return contentResolver.update(Downloads.Impl.BATCH_CONTENT_URI, values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
+        return contentResolver.update(downloadsUriProvider.getBatchesUri(), values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
     }
 
     /**
@@ -482,11 +487,11 @@ public class DownloadManager {
      * COLUMN_* constants.
      */
     public Cursor query(Query query) {
-        Cursor underlyingCursor = query.runQuery(contentResolver, UNDERLYING_COLUMNS, Downloads.Impl.DOWNLOADS_BY_BATCH_URI);
+        Cursor underlyingCursor = query.runQuery(contentResolver, UNDERLYING_COLUMNS, downloadsUriProvider.getDownloadsByBatchUri());
         if (underlyingCursor == null) {
             return null;
         }
-        return new CursorTranslator(underlyingCursor, Downloads.Impl.DOWNLOADS_BY_BATCH_URI);
+        return new CursorTranslator(underlyingCursor, downloadsUriProvider.getDownloadsByBatchUri());
     }
 
     /**
@@ -525,17 +530,17 @@ public class DownloadManager {
                 int status = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_STATUS));
                 if (DownloadManager.STATUS_SUCCESSFUL == status) {
                     int indx = cursor.getColumnIndexOrThrow(
-                            Downloads.Impl.COLUMN_DESTINATION);
+                            DownloadContract.Downloads.COLUMN_DESTINATION);
                     int destination = cursor.getInt(indx);
                     // TODO: if we ever add API to DownloadManager to let the caller specify
                     // non-external storage for a downloaded file, then the following code
                     // should also check for that destination.
-                    if (destination == Downloads.Impl.DESTINATION_CACHE_PARTITION ||
-                            destination == Downloads.Impl.DESTINATION_SYSTEMCACHE_PARTITION ||
-                            destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_NOROAMING ||
-                            destination == Downloads.Impl.DESTINATION_CACHE_PARTITION_PURGEABLE) {
+                    if (destination == DownloadsDestination.DESTINATION_CACHE_PARTITION ||
+                            destination == DownloadsDestination.DESTINATION_SYSTEMCACHE_PARTITION ||
+                            destination == DownloadsDestination.DESTINATION_CACHE_PARTITION_NOROAMING ||
+                            destination == DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE) {
                         // return private uri
-                        return ContentUris.withAppendedId(Downloads.Impl.CONTENT_URI, id);
+                        return ContentUris.withAppendedId(downloadsUriProvider.getContentUri(), id);
                     } else {
                         // return public uri
                         String path = cursor.getString(
@@ -607,11 +612,11 @@ public class DownloadManager {
         }
 
         ContentValues values = new ContentValues();
-        values.put(Downloads.Impl.COLUMN_CURRENT_BYTES, 0);
-        values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, -1);
-        values.putNull(Downloads.Impl._DATA);
-        values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
-        values.put(Downloads.Impl.COLUMN_FAILED_CONNECTIONS, 0);
+        values.put(DownloadContract.Downloads.COLUMN_CURRENT_BYTES, 0);
+        values.put(DownloadContract.Downloads.COLUMN_TOTAL_BYTES, -1);
+        values.putNull(DownloadContract.Downloads.COLUMN_DATA);
+        values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.PENDING);
+        values.put(DownloadContract.Downloads.COLUMN_FAILED_CONNECTIONS, 0);
         contentResolver.update(baseUri, values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
     }
 
@@ -695,12 +700,12 @@ public class DownloadManager {
                 .setNotificationVisibility((showNotification) ? NotificationVisibility.ONLY_WHEN_COMPLETE : NotificationVisibility.HIDDEN);
 
         ContentValues values = request.toContentValues();
-        values.put(Downloads.Impl.COLUMN_DESTINATION, Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD);
-        values.put(Downloads.Impl._DATA, path);
-        values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_SUCCESS);
-        values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, length);
-        values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED, (isMediaScannerScannable) ? Request.SCANNABLE_VALUE_YES : Request.SCANNABLE_VALUE_NO);
-        Uri downloadUri = contentResolver.insert(Downloads.Impl.CONTENT_URI, values);
+        values.put(DownloadContract.Downloads.COLUMN_DESTINATION, DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD);
+        values.put(DownloadContract.Downloads.COLUMN_DATA, path);
+        values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.SUCCESS);
+        values.put(DownloadContract.Downloads.COLUMN_TOTAL_BYTES, length);
+        values.put(DownloadContract.Downloads.COLUMN_MEDIA_SCANNED, (isMediaScannerScannable) ? Request.SCANNABLE_VALUE_YES : Request.SCANNABLE_VALUE_NO);
+        Uri downloadUri = contentResolver.insert(downloadsUriProvider.getContentUri(), values);
         if (downloadUri == null) {
             return -1;
         }
@@ -724,6 +729,14 @@ public class DownloadManager {
     }
 
     /**
+     * This is the uri for the underlying table
+     * use this at your own risk as many of the constants defined here will not return you what you expect for raw cursor data
+     */
+    public Uri getContentUri() {
+        return downloadsUriProvider.getContentUri();
+    }
+
+    /**
      * Get a parameterized SQL WHERE clause to select a bunch of IDs.
      */
     static String getWhereClauseForIds(long[] ids) {
@@ -733,7 +746,7 @@ public class DownloadManager {
             if (i > 0) {
                 whereClause.append("OR ");
             }
-            whereClause.append(Downloads.Impl._ID);
+            whereClause.append(DownloadContract.Downloads._ID);
             whereClause.append(" = ? ");
         }
         whereClause.append(")");
@@ -769,8 +782,8 @@ public class DownloadManager {
 
     private long insert(RequestBatch batch) {
         ContentValues values = batch.toContentValues();
-        values.put(Downloads.Impl.Batches.COLUMN_STATUS, Downloads.Impl.STATUS_PENDING);
-        Uri batchUri = contentResolver.insert(Downloads.Impl.BATCH_CONTENT_URI, values);
+        values.put(DownloadContract.Batches.COLUMN_STATUS, DownloadStatus.PENDING);
+        Uri batchUri = contentResolver.insert(downloadsUriProvider.getBatchesUri(), values);
         return ContentUris.parseId(batchUri);
     }
 
@@ -798,11 +811,11 @@ public class DownloadManager {
             String columnName = getColumnName(columnIndex);
             switch (columnName) {
                 case COLUMN_REASON:
-                    return getReason(super.getInt(getColumnIndex(Downloads.Impl.COLUMN_STATUS)));
+                    return getReason(super.getInt(getColumnIndex(DownloadContract.Downloads.COLUMN_STATUS)));
                 case COLUMN_STATUS:
-                    return translateStatus(super.getInt(getColumnIndex(Downloads.Impl.COLUMN_STATUS)));
+                    return translateStatus(super.getInt(getColumnIndex(DownloadContract.Downloads.COLUMN_STATUS)));
                 case COLUMN_BATCH_STATUS:
-                    return translateStatus(super.getInt(getColumnIndex(Downloads.Impl.Batches.COLUMN_STATUS)));
+                    return translateStatus(super.getInt(getColumnIndex(DownloadContract.Batches.COLUMN_STATUS)));
                 default:
                     return super.getLong(columnIndex);
             }
@@ -814,10 +827,10 @@ public class DownloadManager {
         }
 
         private String getLocalUri() {
-            long destinationType = getLong(getColumnIndex(Downloads.Impl.COLUMN_DESTINATION));
-            if (destinationType == Downloads.Impl.DESTINATION_FILE_URI
-                    || destinationType == Downloads.Impl.DESTINATION_EXTERNAL
-                    || destinationType == Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
+            long destinationType = getLong(getColumnIndex(DownloadContract.Downloads.COLUMN_DESTINATION));
+            if (destinationType == DownloadsDestination.DESTINATION_FILE_URI
+                    || destinationType == DownloadsDestination.DESTINATION_EXTERNAL
+                    || destinationType == DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
                 String localPath = getString(getColumnIndex(COLUMN_LOCAL_FILENAME));
                 if (localPath == null) {
                     return null;
@@ -826,7 +839,7 @@ public class DownloadManager {
             }
 
             // return content URI for cache download
-            long downloadId = getLong(getColumnIndex(Downloads.Impl._ID));
+            long downloadId = getLong(getColumnIndex(DownloadContract.Downloads._ID));
             return ContentUris.withAppendedId(baseUri, downloadId).toString();
         }
 
@@ -845,13 +858,13 @@ public class DownloadManager {
 
         private long getPausedReason(int status) {
             switch (status) {
-                case Downloads.Impl.STATUS_WAITING_TO_RETRY:
+                case DownloadStatus.WAITING_TO_RETRY:
                     return PAUSED_WAITING_TO_RETRY;
 
-                case Downloads.Impl.STATUS_WAITING_FOR_NETWORK:
+                case DownloadStatus.WAITING_FOR_NETWORK:
                     return PAUSED_WAITING_FOR_NETWORK;
 
-                case Downloads.Impl.STATUS_QUEUED_FOR_WIFI:
+                case DownloadStatus.QUEUED_FOR_WIFI:
                     return PAUSED_QUEUED_FOR_WIFI;
 
                 default:
@@ -860,36 +873,36 @@ public class DownloadManager {
         }
 
         private long getErrorCode(int status) {
-            if ((400 <= status && status < Downloads.Impl.MIN_ARTIFICIAL_ERROR_STATUS)
+            if ((400 <= status && status < DownloadStatus.MIN_ARTIFICIAL_ERROR_STATUS)
                     || (500 <= status && status < 600)) {
                 // HTTP status code
                 return status;
             }
 
             switch (status) {
-                case Downloads.Impl.STATUS_FILE_ERROR:
+                case DownloadStatus.FILE_ERROR:
                     return ERROR_FILE_ERROR;
 
-                case Downloads.Impl.STATUS_UNHANDLED_HTTP_CODE:
-                case Downloads.Impl.STATUS_UNHANDLED_REDIRECT:
+                case DownloadStatus.UNHANDLED_HTTP_CODE:
+                case DownloadStatus.UNHANDLED_REDIRECT:
                     return ERROR_UNHANDLED_HTTP_CODE;
 
-                case Downloads.Impl.STATUS_HTTP_DATA_ERROR:
+                case DownloadStatus.HTTP_DATA_ERROR:
                     return ERROR_HTTP_DATA_ERROR;
 
-                case Downloads.Impl.STATUS_TOO_MANY_REDIRECTS:
+                case DownloadStatus.TOO_MANY_REDIRECTS:
                     return ERROR_TOO_MANY_REDIRECTS;
 
-                case Downloads.Impl.STATUS_INSUFFICIENT_SPACE_ERROR:
+                case DownloadStatus.INSUFFICIENT_SPACE_ERROR:
                     return ERROR_INSUFFICIENT_SPACE;
 
-                case Downloads.Impl.STATUS_DEVICE_NOT_FOUND_ERROR:
+                case DownloadStatus.DEVICE_NOT_FOUND_ERROR:
                     return ERROR_DEVICE_NOT_FOUND;
 
-                case Downloads.Impl.STATUS_CANNOT_RESUME:
+                case DownloadStatus.CANNOT_RESUME:
                     return ERROR_CANNOT_RESUME;
 
-                case Downloads.Impl.STATUS_FILE_ALREADY_EXISTS_ERROR:
+                case DownloadStatus.FILE_ALREADY_EXISTS_ERROR:
                     return ERROR_FILE_ALREADY_EXISTS;
 
                 default:
@@ -899,19 +912,19 @@ public class DownloadManager {
 
         private int translateStatus(int status) {
             switch (status) {
-                case Downloads.Impl.STATUS_PENDING:
+                case DownloadStatus.PENDING:
                     return STATUS_PENDING;
 
-                case Downloads.Impl.STATUS_RUNNING:
+                case DownloadStatus.RUNNING:
                     return STATUS_RUNNING;
 
-                case Downloads.Impl.STATUS_PAUSED_BY_APP:
-                case Downloads.Impl.STATUS_WAITING_TO_RETRY:
-                case Downloads.Impl.STATUS_WAITING_FOR_NETWORK:
-                case Downloads.Impl.STATUS_QUEUED_FOR_WIFI:
+                case DownloadStatus.PAUSED_BY_APP:
+                case DownloadStatus.WAITING_TO_RETRY:
+                case DownloadStatus.WAITING_FOR_NETWORK:
+                case DownloadStatus.QUEUED_FOR_WIFI:
                     return STATUS_PAUSED;
 
-                case Downloads.Impl.STATUS_SUCCESS:
+                case DownloadStatus.SUCCESS:
                     return STATUS_SUCCESSFUL;
 
                 default:

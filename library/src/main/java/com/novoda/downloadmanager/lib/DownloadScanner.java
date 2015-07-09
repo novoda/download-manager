@@ -40,6 +40,7 @@ class DownloadScanner implements MediaScannerConnectionClient {
 
     private final ContentResolver resolver;
     private final MediaScannerConnection mediaScannerConnection;
+    private final DownloadsUriProvider downloadsUriProvider;
 
     private static class ScanRequest {
         public final long id;
@@ -62,9 +63,10 @@ class DownloadScanner implements MediaScannerConnectionClient {
     //    @GuardedBy("mediaScannerConnection")
     private Map<String, ScanRequest> pendingRequests = new HashMap<>();
 
-    public DownloadScanner(ContentResolver resolver, Context context) {
+    public DownloadScanner(ContentResolver resolver, Context context, DownloadsUriProvider downloadsUriProvider) {
         this.resolver = resolver;
-        mediaScannerConnection = new MediaScannerConnection(context, this);
+        this.mediaScannerConnection = new MediaScannerConnection(context, this);
+        this.downloadsUriProvider = downloadsUriProvider;
     }
 
     /**
@@ -135,13 +137,13 @@ class DownloadScanner implements MediaScannerConnectionClient {
         // Update scanned column, which will kick off a database update pass,
         // eventually deciding if overall service is ready for teardown.
         final ContentValues values = new ContentValues();
-        values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED, 1);
+        values.put(DownloadContract.Downloads.COLUMN_MEDIA_SCANNED, 1);
         if (uri != null) {
-            values.put(Downloads.Impl.COLUMN_MEDIAPROVIDER_URI, uri.toString());
+            values.put(DownloadContract.Downloads.COLUMN_MEDIAPROVIDER_URI, uri.toString());
         }
 
         final Uri downloadUri = ContentUris.withAppendedId(
-                Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, req.id);
+                downloadsUriProvider.getAllDownloadsUri(), req.id);
         final int rows = resolver.update(downloadUri, values, null, null);
         if (rows == 0) {
             // Local row disappeared during scan; download was probably deleted

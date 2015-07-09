@@ -12,14 +12,16 @@ class DownloadsRepository {
 
     private final ContentResolver contentResolver;
     private final DownloadInfoCreator downloadInfoCreator;
+    private final DownloadsUriProvider downloadsUriProvider;
 
-    public DownloadsRepository(ContentResolver contentResolver, DownloadInfoCreator downloadInfoCreator) {
+    public DownloadsRepository(ContentResolver contentResolver, DownloadInfoCreator downloadInfoCreator, DownloadsUriProvider downloadsUriProvider) {
         this.contentResolver = contentResolver;
         this.downloadInfoCreator = downloadInfoCreator;
+        this.downloadsUriProvider = downloadsUriProvider;
     }
 
     public List<FileDownloadInfo> getAllDownloads() {
-        Cursor downloadsCursor = contentResolver.query(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, null, null, null, null);
+        Cursor downloadsCursor = contentResolver.query(downloadsUriProvider.getAllDownloadsUri(), null, null, null, null);
         try {
             List<FileDownloadInfo> downloads = new ArrayList<>();
             FileDownloadInfo.Reader reader = new FileDownloadInfo.Reader(contentResolver, downloadsCursor);
@@ -35,7 +37,7 @@ class DownloadsRepository {
     }
 
     public FileDownloadInfo getDownloadFor(long id) {
-        Uri uri = ContentUris.withAppendedId(Downloads.Impl.ALL_DOWNLOADS_CONTENT_URI, id);
+        Uri uri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id);
         Cursor downloadsCursor = contentResolver.query(uri, null, null, null, null);
         try {
             downloadsCursor.moveToFirst();

@@ -89,7 +89,7 @@ public class DeleteActivity extends AppCompatActivity implements QueryForDownloa
     @Override
     protected void onStart() {
         super.onStart();
-        getContentResolver().registerContentObserver(DownloadManager.CONTENT_URI, true, updateSelf);
+        getContentResolver().registerContentObserver(downloadManager.getContentUri(), true, updateSelf);
     }
 
     private final ContentObserver updateSelf = new ContentObserver(handler) {
