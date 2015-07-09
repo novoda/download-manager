@@ -1,8 +1,8 @@
 <resources>
   <string name="app_name">Beard Downloader</string>
-  <string name="pause_resume_activty_title">Pause and resume downloads</string>
-  <string name="delete_activty_title">Delete downloads</string>
-  <string name="batches_activty_title">Batch download</string>
+  <string name="pause_resume_activity_title">Pause and resume downloads</string>
+  <string name="delete_activity_title">Delete downloads</string>
+  <string name="batches_activity_title">Batch download</string>
   <string name="extra_data_activity_title">Extra data</string>
 
   <string name="no_downloads">No downloads yet.\nTap the \'Download\' button to add items to the download queue.</string>

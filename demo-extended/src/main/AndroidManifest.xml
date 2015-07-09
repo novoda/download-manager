@@ -23,15 +23,15 @@
 
     <activity
       android:name="com.novoda.downloadmanager.demo.extended.pause_resume.PauseResumeActivity"
-      android:label="@string/pause_resume_activty_title" />
+      android:label="@string/pause_resume_activity_title" />
 
     <activity
       android:name="com.novoda.downloadmanager.demo.extended.delete.DeleteActivity"
-      android:label="@string/delete_activty_title" />
+      android:label="@string/delete_activity_title" />
 
     <activity
       android:name="com.novoda.downloadmanager.demo.extended.batches.BatchesActivity"
-      android:label="@string/batches_activty_title" />
+      android:label="@string/batches_activity_title" />
 
     <activity
       android:name="com.novoda.downloadmanager.demo.extended.extra_data.ExtraDataActivity"
