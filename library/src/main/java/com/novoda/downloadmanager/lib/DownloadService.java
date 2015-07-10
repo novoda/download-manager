@@ -81,6 +81,7 @@ public class DownloadService extends Service {
     private DownloadReadyChecker downloadReadyChecker;
     private DownloadsUriProvider downloadsUriProvider;
     private BatchCompletionBroadcaster batchCompletionBroadcaster;
+    private NetworkChecker networkChecker;
 
     /**
      * Receives notifications when the data in the content provider changes
@@ -121,7 +122,8 @@ public class DownloadService extends Service {
         this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter, downloadsUriProvider);
         PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
         DownloadClientReadyChecker downloadClientReadyChecker = getDownloadClientReadyChecker();
-        this.downloadReadyChecker = new DownloadReadyChecker(systemFacade, new NetworkChecker(systemFacade), downloadClientReadyChecker, downloadMarshaller);
+        this.networkChecker = new NetworkChecker(systemFacade);
+        this.downloadReadyChecker = new DownloadReadyChecker(systemFacade, networkChecker, downloadClientReadyChecker, downloadMarshaller);
 
         String applicationPackageName = getApplicationContext().getPackageName();
         this.batchCompletionBroadcaster = new BatchCompletionBroadcaster(this, applicationPackageName);
@@ -370,7 +372,7 @@ public class DownloadService extends Service {
 
     private void download(FileDownloadInfo info) {
         DownloadThread downloadThread = new DownloadThread(this, systemFacade, info, storageManager, downloadNotifier,
-                batchCompletionBroadcaster, batchRepository, downloadsUriProvider, downloadsRepository, new NetworkChecker(systemFacade), downloadReadyChecker);
+                batchCompletionBroadcaster, batchRepository, downloadsUriProvider, downloadsRepository, networkChecker, downloadReadyChecker);
         executor.submit(downloadThread);
     }
 
