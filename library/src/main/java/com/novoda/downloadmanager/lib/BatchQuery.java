@@ -164,7 +164,7 @@ public class BatchQuery {
             if ((statusFlags & DownloadManager.STATUS_DELETING) != 0) {
                 Criteria deletingCriteria = new Criteria.Builder()
                         .withSelection(DownloadContract.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
-                        .withArgument(String.valueOf(DownloadManager.STATUS_DELETING))
+                        .withArgument(String.valueOf(DownloadStatus.DELETING))
                         .build();
                 criteriaList.add(deletingCriteria);
             }
