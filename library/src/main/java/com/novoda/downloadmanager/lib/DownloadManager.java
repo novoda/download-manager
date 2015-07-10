@@ -490,7 +490,7 @@ public class DownloadManager {
         }
 
         setDeletingStatusFor(batchesIds);
-        return markBatchesBeDeleted(batchesIds);
+        return markBatchesToBeDeleted(batchesIds);
     }
 
     private void setDeletingStatusFor(long[] batchesIds) {
@@ -504,7 +504,7 @@ public class DownloadManager {
         }
     }
 
-    private int markBatchesBeDeleted(long[] batchesIds) {
+    private int markBatchesToBeDeleted(long[] batchesIds) {
         ContentValues valuesDelete = new ContentValues(1);
         valuesDelete.put(DownloadContract.Batches.COLUMN_DELETED, 1);
 
