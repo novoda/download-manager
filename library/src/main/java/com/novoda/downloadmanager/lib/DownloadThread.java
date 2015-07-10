@@ -19,6 +19,7 @@ package com.novoda.downloadmanager.lib;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.drm.DrmManagerClient;
 import android.net.NetworkInfo;
 import android.net.TrafficStats;
@@ -55,6 +56,12 @@ import static java.net.HttpURLConnection.*;
  * persisting data to disk, and updating {@link DownloadProvider}.
  */
 class DownloadThread implements Runnable {
+
+    /**
+     * For intents used to notify the user that a download exceeds a size threshold, if this extra
+     * is true, WiFi is required for this download size; otherwise, it is only recommended.
+     */
+    public static final String EXTRA_IS_WIFI_REQUIRED = "isWifiRequired";
 
     private static final String TAG = "DownloadManager-DownloadThread";
 
@@ -217,7 +224,9 @@ class DownloadThread implements Runnable {
         }
 
         if (downloadStatus != DownloadStatus.RUNNING) {
-            originalDownloadInfo.updateStatus(DownloadStatus.RUNNING);
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(DownloadContract.Downloads.COLUMN_STATUS, downloadStatus);
+            context.getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), contentValues, null, null);
             updateBatchStatus(originalDownloadInfo.getBatchId(), originalDownloadInfo.getId());
         }
 
@@ -330,8 +339,7 @@ class DownloadThread implements Runnable {
 
         // skip when already finished; remove after fixing race in 5217390
         if (state.currentBytes == state.totalBytes) {
-            Log.i("Skipping initiating request for download " +
-                    originalDownloadInfo.getId() + "; already completed");
+            Log.i("Skipping initiating request for download " + originalDownloadInfo.getId() + "; already completed");
             return;
         }
 
@@ -485,13 +493,22 @@ class DownloadThread implements Runnable {
             int status = DownloadStatus.WAITING_FOR_NETWORK;
             if (networkUsable == NetworkState.UNUSABLE_DUE_TO_SIZE) {
                 status = DownloadStatus.QUEUED_FOR_WIFI;
-                originalDownloadInfo.notifyPauseDueToSize(true);
+                notifyPauseDueToSize(true);
             } else if (networkUsable == NetworkState.RECOMMENDED_UNUSABLE_DUE_TO_SIZE) {
                 status = DownloadStatus.QUEUED_FOR_WIFI;
-                originalDownloadInfo.notifyPauseDueToSize(false);
+                notifyPauseDueToSize(false);
             }
             throw new StopRequestException(status, networkUsable.name());
         }
+    }
+
+    void notifyPauseDueToSize(boolean isWifiRequired) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(originalDownloadInfo.getAllDownloadsUri());
+        intent.setClassName(SizeLimitActivity.class.getPackage().getName(), SizeLimitActivity.class.getName());
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(EXTRA_IS_WIFI_REQUIRED, isWifiRequired);
+        context.startActivity(intent);
     }
 
     /**
@@ -845,14 +862,40 @@ class DownloadThread implements Runnable {
     private void notifyDownloadCompleted(State state, int finalStatus, String errorMsg, int numFailed) {
         notifyThroughDatabase(state, finalStatus, errorMsg, numFailed);
         if (DownloadStatus.isCompleted(finalStatus)) {
-            originalDownloadInfo.broadcastIntentDownloadComplete(finalStatus);
+            broadcastIntentDownloadComplete(finalStatus);
         } else if (DownloadStatus.isInsufficientSpace(finalStatus)) {
-            originalDownloadInfo.broadcastIntentDownloadFailedInsufficientSpace();
+            broadcastIntentDownloadFailedInsufficientSpace();
         }
     }
 
+    public void broadcastIntentDownloadComplete(int finalStatus) {
+        Intent intent = new Intent(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+        intent.setPackage(getPackageName());
+        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, originalDownloadInfo.getId());
+        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_STATUS, finalStatus);
+        intent.setData(originalDownloadInfo.getMyDownloadsUri());
+        if (originalDownloadInfo.getExtras() != null) {
+            intent.putExtra(DownloadManager.EXTRA_EXTRA, originalDownloadInfo.getExtras());
+        }
+        context.sendBroadcast(intent);
+    }
+
+    public void broadcastIntentDownloadFailedInsufficientSpace() {
+        Intent intent = new Intent(DownloadManager.ACTION_DOWNLOAD_INSUFFICIENT_SPACE);
+        intent.setPackage(getPackageName());
+        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, originalDownloadInfo.getId());
+        intent.setData(originalDownloadInfo.getMyDownloadsUri());
+        if (originalDownloadInfo.getExtras() != null) {
+            intent.putExtra(DownloadManager.EXTRA_EXTRA, originalDownloadInfo.getExtras());
+        }
+        context.sendBroadcast(intent);
+    }
+
+    private String getPackageName() {
+        return context.getApplicationContext().getPackageName();
+    }
+
     private void notifyThroughDatabase(State state, int finalStatus, String errorMsg, int numFailed) {
-        originalDownloadInfo.setStatus(finalStatus);
         ContentValues values = new ContentValues(8);
         values.put(DownloadContract.Downloads.COLUMN_STATUS, finalStatus);
         values.put(DownloadContract.Downloads.COLUMN_DATA, state.filename);

@@ -80,6 +80,8 @@ public class DownloadService extends Service {
     private DownloadDeleter downloadDeleter;
     private DownloadReadyChecker downloadReadyChecker;
     private DownloadsUriProvider downloadsUriProvider;
+    private BatchCompletionBroadcaster batchCompletionBroadcaster;
+    private NetworkChecker networkChecker;
 
     /**
      * Receives notifications when the data in the content provider changes
@@ -120,7 +122,11 @@ public class DownloadService extends Service {
         this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter, downloadsUriProvider);
         PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
         DownloadClientReadyChecker downloadClientReadyChecker = getDownloadClientReadyChecker();
-        this.downloadReadyChecker = new DownloadReadyChecker(systemFacade, new NetworkChecker(systemFacade), downloadClientReadyChecker, downloadMarshaller);
+        this.networkChecker = new NetworkChecker(systemFacade);
+        this.downloadReadyChecker = new DownloadReadyChecker(systemFacade, networkChecker, downloadClientReadyChecker, downloadMarshaller);
+
+        String applicationPackageName = getApplicationContext().getPackageName();
+        this.batchCompletionBroadcaster = new BatchCompletionBroadcaster(this, applicationPackageName);
 
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         ContentResolver contentResolver = getContentResolver();
@@ -172,7 +178,7 @@ public class DownloadService extends Service {
      * download if appropriate.
      */
     private FileDownloadInfo createNewDownloadInfo(FileDownloadInfo.Reader reader) {
-        FileDownloadInfo info = reader.newDownloadInfo(this, systemFacade, downloadReadyChecker, downloadsUriProvider);
+        FileDownloadInfo info = reader.newDownloadInfo(systemFacade, downloadsUriProvider);
         Log.v("processing inserted download " + info.getId());
         return info;
     }
@@ -359,9 +365,15 @@ public class DownloadService extends Service {
     private void downloadOrContinueBatch(List<FileDownloadInfo> downloads) {
         for (FileDownloadInfo info : downloads) {
             if (!info.isSubmittedOrRunning()) {
-                info.startDownload(executor, storageManager, downloadNotifier, downloadsRepository);
+                download(info);
             }
         }
+    }
+
+    private void download(FileDownloadInfo info) {
+        DownloadThread downloadThread = new DownloadThread(this, systemFacade, info, storageManager, downloadNotifier,
+                batchCompletionBroadcaster, batchRepository, downloadsUriProvider, downloadsRepository, networkChecker, downloadReadyChecker);
+        executor.submit(downloadThread);
     }
 
     private void updateTotalBytesFor(Collection<FileDownloadInfo> downloadInfos) {

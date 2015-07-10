@@ -2,9 +2,6 @@ package com.novoda.downloadmanager.lib;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -15,14 +12,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Stores information about an individual download.
  */
 class FileDownloadInfo {
 
-    public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
     private static final int UNKNOWN_BYTES = -1;
 
     // TODO: move towards these in-memory objects being sources of truth, and periodically pushing to provider.
@@ -72,12 +67,6 @@ class FileDownloadInfo {
         BLOCKED
     }
 
-    /**
-     * For intents used to notify the user that a download exceeds a size threshold, if this extra
-     * is true, WiFi is required for this download size; otherwise, it is only recommended.
-     */
-    public static final String EXTRA_IS_WIFI_REQUIRED = "isWifiRequired";
-
     private long id;
     private String uri;
     private boolean scannable;
@@ -110,26 +99,13 @@ class FileDownloadInfo {
     private long batchId;
 
     private final List<Pair<String, String>> requestHeaders = new ArrayList<>();
-    private final Context context;
     private final SystemFacade systemFacade;
     private final RandomNumberGenerator randomNumberGenerator;
-    private final ContentValues downloadStatusContentValues;
-    private final DownloadReadyChecker downloadReadyChecker;
     private final DownloadsUriProvider downloadsUriProvider;
 
-    FileDownloadInfo(
-            Context context,
-            SystemFacade systemFacade,
-            RandomNumberGenerator randomNumberGenerator,
-            ContentValues downloadStatusContentValues,
-            PublicFacingDownloadMarshaller downloadMarshaller,
-            DownloadReadyChecker downloadReadyChecker,
-            DownloadsUriProvider downloadsUriProvider) {
-        this.context = context;
+    FileDownloadInfo(SystemFacade systemFacade, RandomNumberGenerator randomNumberGenerator, DownloadsUriProvider downloadsUriProvider) {
         this.systemFacade = systemFacade;
         this.randomNumberGenerator = randomNumberGenerator;
-        this.downloadStatusContentValues = downloadStatusContentValues;
-        this.downloadReadyChecker = downloadReadyChecker;
         this.downloadsUriProvider = downloadsUriProvider;
     }
 
@@ -230,35 +206,12 @@ class FileDownloadInfo {
         return bypassRecommendedSizeLimit == 0;
     }
 
+    public String getExtras() {
+        return extras;
+    }
+
     public Collection<Pair<String, String>> getHeaders() {
         return Collections.unmodifiableList(requestHeaders);
-    }
-
-    public void broadcastIntentDownloadComplete(int finalStatus) {
-        Intent intent = new Intent(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-        intent.setPackage(getPackageName());
-        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, id);
-        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_STATUS, finalStatus);
-        intent.setData(getMyDownloadsUri());
-        if (extras != null) {
-            intent.putExtra(EXTRA_EXTRA, extras);
-        }
-        context.sendBroadcast(intent);
-    }
-
-    private String getPackageName() {
-        return context.getApplicationContext().getPackageName();
-    }
-
-    public void broadcastIntentDownloadFailedInsufficientSpace() {
-        Intent intent = new Intent(DownloadManager.ACTION_DOWNLOAD_INSUFFICIENT_SPACE);
-        intent.setPackage(getPackageName());
-        intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, id);
-        intent.setData(getMyDownloadsUri());
-        if (extras != null) {
-            intent.putExtra(EXTRA_EXTRA, extras);
-        }
-        context.sendBroadcast(intent);
     }
 
     /**
@@ -320,30 +273,8 @@ class FileDownloadInfo {
         return NetworkState.OK;
     }
 
-    public void startDownload(
-            ExecutorService executor,
-            StorageManager storageManager,
-            DownloadNotifier downloadNotifier,
-            DownloadsRepository downloadsRepository) {
-        String applicationPackageName = context.getApplicationContext().getPackageName();
-        BatchCompletionBroadcaster batchCompletionBroadcaster = new BatchCompletionBroadcaster(context, applicationPackageName);
-        ContentResolver contentResolver = context.getContentResolver();
-        BatchRepository batchRepository = new BatchRepository(contentResolver, new DownloadDeleter(contentResolver), downloadsUriProvider);
-        DownloadThread downloadThread = new DownloadThread(
-                context, systemFacade, this, storageManager, downloadNotifier,
-                batchCompletionBroadcaster, batchRepository, downloadsUriProvider, downloadsRepository, new NetworkChecker(systemFacade), downloadReadyChecker);
-        executor.submit(downloadThread);
-    }
-
     public boolean isSubmittedOrRunning() {
         return DownloadStatus.isSubmitted(status) || DownloadStatus.isRunning(status);
-    }
-
-    public void updateStatus(int status) {
-        setStatus(status);
-        downloadStatusContentValues.clear();
-        downloadStatusContentValues.put(DownloadContract.Downloads.COLUMN_STATUS, status);
-        context.getContentResolver().update(getAllDownloadsUri(), downloadStatusContentValues, null, null);
     }
 
     /**
@@ -369,7 +300,7 @@ class FileDownloadInfo {
                 || destination == DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE);
     }
 
-    private Uri getMyDownloadsUri() {
+    public Uri getMyDownloadsUri() {
         return ContentUris.withAppendedId(downloadsUriProvider.getContentUri(), id);
     }
 
@@ -387,15 +318,6 @@ class FileDownloadInfo {
                 getDestination() == DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD)
                 && DownloadStatus.isSuccess(getStatus())
                 && scannable;
-    }
-
-    void notifyPauseDueToSize(boolean isWifiRequired) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(getAllDownloadsUri());
-        intent.setClassName(SizeLimitActivity.class.getPackage().getName(), SizeLimitActivity.class.getName());
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(EXTRA_IS_WIFI_REQUIRED, isWifiRequired);
-        context.startActivity(intent);
     }
 
     /**
@@ -443,22 +365,9 @@ class FileDownloadInfo {
             this.cursor = cursor;
         }
 
-        public FileDownloadInfo newDownloadInfo(
-                Context context,
-                SystemFacade systemFacade,
-                DownloadReadyChecker downloadReadyChecker,
-                DownloadsUriProvider downloadsUriProvider) {
+        public FileDownloadInfo newDownloadInfo(SystemFacade systemFacade, DownloadsUriProvider downloadsUriProvider) {
             RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
-            ContentValues contentValues = new ContentValues();
-            PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
-            FileDownloadInfo info = new FileDownloadInfo(
-                    context,
-                    systemFacade,
-                    randomNumberGenerator,
-                    contentValues,
-                    downloadMarshaller,
-                    downloadReadyChecker,
-                    downloadsUriProvider);
+            FileDownloadInfo info = new FileDownloadInfo(systemFacade, randomNumberGenerator, downloadsUriProvider);
             updateFromDatabase(info);
             readRequestHeaders(info);
 
