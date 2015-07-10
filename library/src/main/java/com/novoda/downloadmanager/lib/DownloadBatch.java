@@ -59,8 +59,8 @@ class DownloadBatch {
      */
     public long nextActionMillis(long now, long nextRetryTimeMillis) {
         for (FileDownloadInfo info : downloads) {
-            long foo = getNextActionMillisFor(now, info);
-            nextRetryTimeMillis = Math.min(foo, nextRetryTimeMillis);
+            long individualRetryTimeMillis = getNextActionMillisFor(now, info);
+            nextRetryTimeMillis = Math.min(individualRetryTimeMillis, nextRetryTimeMillis);
         }
         return nextRetryTimeMillis;
     }
