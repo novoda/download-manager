@@ -32,6 +32,8 @@ class Download {
             return "Queued";
         } else if (downloadStatus == DownloadManager.STATUS_PAUSED) {
             return "Paused";
+        } else if (downloadStatus == DownloadManager.STATUS_DELETING) {
+            return "Deleting";
         } else {
             return "WTH";
         }
