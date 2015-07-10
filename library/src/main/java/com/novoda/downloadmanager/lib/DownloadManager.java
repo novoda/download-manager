@@ -55,6 +55,10 @@ import java.net.URI;
  */
 public class DownloadManager {
 
+    /**
+     * Extra information available when you register for notications of download status changes
+     * see {@link Request#setNotificationExtra(String extra)`
+     */
     public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
 
     /**
