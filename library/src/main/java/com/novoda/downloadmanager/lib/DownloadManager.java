@@ -481,28 +481,38 @@ public class DownloadManager {
      * it was running, and it will no longer be accessible through the download manager.
      * If there are any downloaded files, partial or complete, they will be deleted.
      *
-     * @param ids the IDs of the batches to remove
+     * @param batchesIds the IDs of the batches to remove
      * @return the number of batches actually removed
      */
-    public int removeBatches(long... ids) {
-        if (ids == null || ids.length == 0) {
-            throw new IllegalArgumentException("called with nothing to remove. input param 'ids' can't be null");
+    public int removeBatches(long... batchesIds) {
+        if (batchesIds == null || batchesIds.length == 0) {
+            throw new IllegalArgumentException("called with nothing to remove. input param 'batchesIds' can't be null");
         }
+
+        setDeletingStatusFor(batchesIds);
+        return markBatchesBeDeleted(batchesIds);
+    }
+
+    private void setDeletingStatusFor(long[] batchesIds) {
+        ContentValues values = new ContentValues(1);
+        values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.DELETING);
+
+        if (batchesIds.length == 1) {
+            contentResolver.update(downloadsUriProvider.getContentUri(), values, COLUMN_BATCH_ID + "=?", new String[]{String.valueOf(batchesIds[0])});
+        }
+
+        contentResolver.update(downloadsUriProvider.getContentUri(), values, getWhereClauseFor(batchesIds, COLUMN_BATCH_ID), longArrayToStringArray(batchesIds));
+    }
+
+    private int markBatchesBeDeleted(long[] batchesIds) {
         ContentValues valuesDelete = new ContentValues(1);
         valuesDelete.put(DownloadContract.Batches.COLUMN_DELETED, 1);
 
-        ContentValues valuesDeleteStatuses = new ContentValues(2);
-        valuesDeleteStatuses.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_PAUSED);
-        valuesDeleteStatuses.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.DELETING);
-        // if only one id is passed in, then include it in the uri itself.
-        // this will eliminate a full database scan in the download service.
-        if (ids.length == 1) {
-            contentResolver.update(downloadsUriProvider.getContentUri(), valuesDeleteStatuses, COLUMN_BATCH_ID + "=?", new String[]{String.valueOf(ids[0])});
-            return contentResolver.update(ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), ids[0]), valuesDelete, null, null);
+        if (batchesIds.length == 1) {
+            return contentResolver.update(ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), batchesIds[0]), valuesDelete, null, null);
         }
 
-        contentResolver.update(downloadsUriProvider.getContentUri(), valuesDeleteStatuses, getWhereClauseFor(ids, COLUMN_BATCH_ID), longArrayToStringArray(ids));
-        return contentResolver.update(downloadsUriProvider.getBatchesUri(), valuesDelete, getWhereClauseForIds(ids), longArrayToStringArray(ids));
+        return contentResolver.update(downloadsUriProvider.getBatchesUri(), valuesDelete, getWhereClauseForIds(batchesIds), longArrayToStringArray(batchesIds));
     }
 
     /**
