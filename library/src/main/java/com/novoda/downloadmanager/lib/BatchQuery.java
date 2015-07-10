@@ -161,6 +161,14 @@ public class BatchQuery {
                 criteriaList.add(pausedCriteria);
             }
 
+            if ((statusFlags & DownloadManager.STATUS_DELETING) != 0) {
+                Criteria deletingCriteria = new Criteria.Builder()
+                        .withSelection(DownloadContract.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
+                        .withArgument(String.valueOf(DownloadManager.STATUS_DELETING))
+                        .build();
+                criteriaList.add(deletingCriteria);
+            }
+
             if ((statusFlags & DownloadManager.STATUS_SUCCESSFUL) != 0) {
                 Criteria successfulCriteria = new Criteria.Builder()
                         .withSelection(DownloadContract.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
