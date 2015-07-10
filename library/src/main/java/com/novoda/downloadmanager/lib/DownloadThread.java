@@ -62,7 +62,6 @@ class DownloadThread implements Runnable {
      * is true, WiFi is required for this download size; otherwise, it is only recommended.
      */
     public static final String EXTRA_IS_WIFI_REQUIRED = "isWifiRequired";
-    public static final String EXTRA_EXTRA = "com.novoda.download.lib.KEY_INTENT_EXTRA";
 
     private static final String TAG = "DownloadManager-DownloadThread";
 
@@ -876,7 +875,7 @@ class DownloadThread implements Runnable {
         intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_STATUS, finalStatus);
         intent.setData(originalDownloadInfo.getMyDownloadsUri());
         if (originalDownloadInfo.getExtras() != null) {
-            intent.putExtra(EXTRA_EXTRA, originalDownloadInfo.getExtras());
+            intent.putExtra(DownloadManager.EXTRA_EXTRA, originalDownloadInfo.getExtras());
         }
         context.sendBroadcast(intent);
     }
@@ -887,7 +886,7 @@ class DownloadThread implements Runnable {
         intent.putExtra(DownloadManager.EXTRA_DOWNLOAD_ID, originalDownloadInfo.getId());
         intent.setData(originalDownloadInfo.getMyDownloadsUri());
         if (originalDownloadInfo.getExtras() != null) {
-            intent.putExtra(EXTRA_EXTRA, originalDownloadInfo.getExtras());
+            intent.putExtra(DownloadManager.EXTRA_EXTRA, originalDownloadInfo.getExtras());
         }
         context.sendBroadcast(intent);
     }
