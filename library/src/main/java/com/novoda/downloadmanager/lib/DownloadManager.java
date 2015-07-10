@@ -499,9 +499,9 @@ public class DownloadManager {
 
         if (batchesIds.length == 1) {
             contentResolver.update(downloadsUriProvider.getContentUri(), values, COLUMN_BATCH_ID + "=?", new String[]{String.valueOf(batchesIds[0])});
+        } else {
+            contentResolver.update(downloadsUriProvider.getContentUri(), values, getWhereClauseFor(batchesIds, COLUMN_BATCH_ID), longArrayToStringArray(batchesIds));
         }
-
-        contentResolver.update(downloadsUriProvider.getContentUri(), values, getWhereClauseFor(batchesIds, COLUMN_BATCH_ID), longArrayToStringArray(batchesIds));
     }
 
     private int markBatchesBeDeleted(long[] batchesIds) {
