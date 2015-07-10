@@ -373,6 +373,11 @@ public class DownloadService extends Service {
     private void download(FileDownloadInfo info) {
         DownloadThread downloadThread = new DownloadThread(this, systemFacade, info, storageManager, downloadNotifier,
                 batchCompletionBroadcaster, batchRepository, downloadsUriProvider, downloadsRepository, networkChecker, downloadReadyChecker);
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.SUBMITTED);
+        getContentResolver().update(info.getAllDownloadsUri(), contentValues, null, null);
+
         executor.submit(downloadThread);
     }
 
