@@ -31,7 +31,8 @@ public class Query {
      */
     public static final int ORDER_DESCENDING = 2;
 
-    private static final String ORDER_BY_LIVENESS = String.format("CASE %1$s "
+    private static final String ORDER_BY_LIVENESS = String.format(
+            "CASE %1$s "
                     + "WHEN %2$d THEN 1 "
                     + "WHEN %3$d THEN 2 "
                     + "WHEN %4$d THEN 3 "
@@ -51,7 +52,8 @@ public class Query {
     private long[] batchIds = null;
     private Integer statusFlags = null;
     private boolean onlyIncludeVisibleInDownloadsUi = false;
-    private String[] filterExtras;
+    private String[] filterNotificiationExtras;
+    private String[] filterExtraData;
     private String orderString = DownloadContract.Downloads.COLUMN_LAST_MODIFICATION + " DESC";
 
     /**
@@ -75,12 +77,22 @@ public class Query {
     }
 
     /**
-     * Include only the downloads with the given extras.
+     * Include only the downloads with the given notification extras.
      *
      * @return this object
      */
-    public Query setFilterByExtras(String... extras) {
-        filterExtras = extras;
+    public Query setFilterByNotificationExtras(String... extras) {
+        filterNotificiationExtras = extras;
+        return this;
+    }
+
+    /**
+     * Include only the downloads with the given extra data.
+     *
+     * @return this object
+     */
+    public Query setFilterByExtraData(String... extraData) {
+        filterExtraData = extraData;
         return this;
     }
 
@@ -162,7 +174,8 @@ public class Query {
 
         filterByDownloadIds(selectionParts);
         filterByBatchIds(selectionParts);
-        filterByExtras(selectionParts);
+        filterByNotificationExtras(selectionParts);
+        filterByExtraData(selectionParts);
         filterByStatus(selectionParts);
 
         if (onlyIncludeVisibleInDownloadsUi) {
@@ -206,13 +219,24 @@ public class Query {
         return DownloadContract.Downloads.COLUMN_BATCH_ID + " IN (" + joinStrings(",", Arrays.asList(idStrings)) + ")";
     }
 
-    private void filterByExtras(List<String> selectionParts) {
-        if (filterExtras == null) {
+    private void filterByNotificationExtras(List<String> selectionParts) {
+        if (filterNotificiationExtras == null) {
             return;
         }
         List<String> parts = new ArrayList<>();
-        for (String filterExtra : filterExtras) {
-            parts.add(extrasClause(filterExtra));
+        for (String filterExtra : filterNotificiationExtras) {
+            parts.add(notificationExtrasClause(filterExtra));
+        }
+        selectionParts.add(joinStrings(" OR ", parts));
+    }
+
+    private void filterByExtraData(List<String> selectionParts) {
+        if (filterExtraData == null) {
+            return;
+        }
+        List<String> parts = new ArrayList<>();
+        for (String filterExtra : filterExtraData) {
+            parts.add(extraDataClause(filterExtra));
         }
         selectionParts.add(joinStrings(" OR ", parts));
     }
@@ -269,8 +293,12 @@ public class Query {
         return strings;
     }
 
-    private String extrasClause(String extra) {
+    private String notificationExtrasClause(String extra) {
         return DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS + " = '" + extra + "'";
+    }
+
+    private String extraDataClause(String extra) {
+        return DownloadContract.Downloads.COLUMN_EXTRA_DATA + " = '" + extra + "'";
     }
 
     private String statusClause(String operator, int value) {
