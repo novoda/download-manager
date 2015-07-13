@@ -124,4 +124,10 @@ public class DownloadStatusTest {
         assertThat(isStatusRunning).isTrue();
     }
 
+    @Test
+    public void whenStatusIs188ThenStatusIsDeleting() {
+        boolean isStatusDeleting = DownloadStatus.isDeleting(188);
+        assertThat(isStatusDeleting).isTrue();
+    }
+
 }

@@ -203,6 +203,11 @@ public class DownloadManager {
     public static final int STATUS_FAILED = 1 << 4;
 
     /**
+     * Value of {@link #COLUMN_STATUS} when the download is marked for deletion.
+     */
+    public static final int STATUS_DELETING = 1 << 5;
+
+    /**
      * Value of COLUMN_ERROR_CODE when the download has completed with an error that doesn't fit
      * under any other error code.
      */
@@ -437,7 +442,11 @@ public class DownloadManager {
     public void removeDownload(URI uri) {
         Cursor cursor = null;
         try {
-            cursor = contentResolver.query(downloadsUriProvider.getContentUri(), new String[]{"_id"}, DownloadContract.Downloads.COLUMN_FILE_NAME_HINT + "=?", new String[]{uri.toString()}, null);
+            cursor = contentResolver.query(
+                    downloadsUriProvider.getContentUri(),
+                    new String[]{"_id"},
+                    DownloadContract.Downloads.COLUMN_FILE_NAME_HINT + "=?",
+                    new String[]{uri.toString()}, null);
             if (cursor.moveToFirst()) {
                 long id = cursor.getLong(cursor.getColumnIndexOrThrow("_id"));
                 removeDownloads(id);
@@ -470,7 +479,7 @@ public class DownloadManager {
         if (ids.length == 1) {
             return contentResolver.update(ContentUris.withAppendedId(baseUri, ids[0]), values, null, null);
         }
-        return contentResolver.update(baseUri, values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
+        return contentResolver.update(baseUri, values, getWhereClauseFor(ids, DownloadContract.Downloads._ID), longArrayToStringArray(ids));
     }
 
     /**
@@ -478,21 +487,42 @@ public class DownloadManager {
      * it was running, and it will no longer be accessible through the download manager.
      * If there are any downloaded files, partial or complete, they will be deleted.
      *
-     * @param ids the IDs of the batches to remove
+     * @param batchIds the IDs of the batches to remove
      * @return the number of batches actually removed
      */
-    public int removeBatches(long... ids) {
-        if (ids == null || ids.length == 0) {
-            throw new IllegalArgumentException("called with nothing to remove. input param 'ids' can't be null");
+    public int removeBatches(long... batchIds) {
+        if (batchIds == null || batchIds.length == 0) {
+            throw new IllegalArgumentException("called with nothing to remove. input param 'batchIds' can't be null");
         }
-        ContentValues values = new ContentValues();
-        values.put(DownloadContract.Batches.COLUMN_DELETED, 1);
-        // if only one id is passed in, then include it in the uri itself.
-        // this will eliminate a full database scan in the download service.
-        if (ids.length == 1) {
-            return contentResolver.update(ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), ids[0]), values, null, null);
+
+        setDeletingStatusFor(batchIds);
+        return markBatchesToBeDeleted(batchIds);
+    }
+
+    private void setDeletingStatusFor(long[] batchesIds) {
+        ContentValues values = new ContentValues(1);
+        values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.DELETING);
+
+        if (batchesIds.length == 1) {
+            contentResolver.update(downloadsUriProvider.getContentUri(), values, COLUMN_BATCH_ID + "=?", new String[]{String.valueOf(batchesIds[0])});
+        } else {
+            contentResolver.update(downloadsUriProvider.getContentUri(), values, getWhereClauseFor(batchesIds, COLUMN_BATCH_ID), longArrayToStringArray(batchesIds));
         }
-        return contentResolver.update(downloadsUriProvider.getBatchesUri(), values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
+    }
+
+    private int markBatchesToBeDeleted(long[] batchesIds) {
+        ContentValues valuesDelete = new ContentValues(1);
+        valuesDelete.put(DownloadContract.Batches.COLUMN_DELETED, 1);
+
+        if (batchesIds.length == 1) {
+            return contentResolver.update(ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), batchesIds[0]), valuesDelete, null, null);
+        }
+
+        return contentResolver.update(
+                downloadsUriProvider.getBatchesUri(),
+                valuesDelete,
+                getWhereClauseFor(batchesIds, DownloadContract.Downloads._ID),
+                longArrayToStringArray(batchesIds));
     }
 
     /**
@@ -649,7 +679,7 @@ public class DownloadManager {
         values.putNull(DownloadContract.Downloads.COLUMN_DATA);
         values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.PENDING);
         values.put(DownloadContract.Downloads.COLUMN_FAILED_CONNECTIONS, 0);
-        contentResolver.update(baseUri, values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
+        contentResolver.update(baseUri, values, getWhereClauseFor(ids, DownloadContract.Downloads._ID), longArrayToStringArray(ids));
     }
 
     /**
@@ -775,26 +805,20 @@ public class DownloadManager {
         return downloadsUriProvider.getBatchesUri();
     }
 
-    /**
-     * Get a parameterized SQL WHERE clause to select a bunch of IDs.
-     */
-    static String getWhereClauseForIds(long[] ids) {
+    static String getWhereClauseFor(long[] ids, String column) {
         StringBuilder whereClause = new StringBuilder();
         whereClause.append("(");
         for (int i = 0; i < ids.length; i++) {
             if (i > 0) {
                 whereClause.append("OR ");
             }
-            whereClause.append(DownloadContract.Downloads._ID);
+            whereClause.append(column);
             whereClause.append(" = ? ");
         }
         whereClause.append(")");
         return whereClause.toString();
     }
 
-    /**
-     * Get the selection args for a clause returned by {@link #getWhereClauseForIds(long[])}.
-     */
     private static String[] longArrayToStringArray(long[] ids) {
         String[] whereArgs = new String[ids.length];
         for (int i = 0; i < ids.length; i++) {
@@ -965,6 +989,9 @@ public class DownloadManager {
 
                 case DownloadStatus.SUCCESS:
                     return STATUS_SUCCESSFUL;
+
+                case DownloadStatus.DELETING:
+                    return STATUS_DELETING;
 
                 default:
                     return STATUS_FAILED;

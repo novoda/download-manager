@@ -13,6 +13,10 @@ package com.novoda.downloadmanager.lib;
 final class DownloadStatus {
 
     /**
+     * This download has been marked for deletion and it will be deleted in the future
+     */
+    public static final int DELETING = 188;
+    /**
      * This download has been submitted to the download executor but not yet started
      */
     public static final int SUBMITTED = 189;
@@ -212,6 +216,10 @@ final class DownloadStatus {
 
     public static boolean isRunning(int status) {
         return status == RUNNING;
+    }
+
+    public static boolean isDeleting(int status) {
+        return status == DELETING;
     }
 
     /**
