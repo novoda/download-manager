@@ -810,8 +810,8 @@ public final class DownloadProvider extends ContentProvider {
     }
 
     private void notifyStatusUriIfStatusChanged(ContentValues values) {
-        if (values.containsKey(DownloadContract.Downloads.COLUMN_STATUS) ||
-                values.containsKey(DownloadContract.Batches.COLUMN_STATUS)) {
+        if (values.containsKey(DownloadContract.Downloads.COLUMN_STATUS)
+                || values.containsKey(DownloadContract.Batches.COLUMN_STATUS)) {
             notifyStatusUri();
         }
     }
