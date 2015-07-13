@@ -31,7 +31,8 @@ public class Query {
      */
     public static final int ORDER_DESCENDING = 2;
 
-    private static final String ORDER_BY_LIVENESS = String.format("CASE %1$s "
+    private static final String ORDER_BY_LIVENESS = String.format(
+            "CASE %1$s "
                     + "WHEN %2$d THEN 1 "
                     + "WHEN %3$d THEN 2 "
                     + "WHEN %4$d THEN 3 "
