@@ -320,9 +320,9 @@ public final class DownloadProvider extends ContentProvider {
         switch (match) {
             case MY_DOWNLOADS:
             case ALL_DOWNLOADS:
-            case DOWNLOADS_BY_STATUS: {
+            case DOWNLOADS_BY_STATUS:
                 return DOWNLOAD_LIST_TYPE;
-            }
+
             case MY_DOWNLOADS_ID:
             case ALL_DOWNLOADS_ID:
             case PUBLIC_DOWNLOAD_ID: {
@@ -340,19 +340,20 @@ public final class DownloadProvider extends ContentProvider {
                     return mimeType;
                 }
             }
-            case BATCHES: {
+
+            case BATCHES:
                 return BATCH_LIST_TYPE;
-            }
-            case BATCHES_ID: {
+
+            case BATCHES_ID:
                 return BATCH_TYPE;
-            }
-            case DOWNLOADS_BY_BATCH: {
+
+            case DOWNLOADS_BY_BATCH:
                 return DOWNLOADS_BY_BATCH_TYPE;
-            }
-            default: {
+
+            default:
                 Log.v("calling getType on an unknown URI: " + uri);
                 throw new IllegalArgumentException("Unknown URI: " + uri);
-            }
+
         }
     }
 
