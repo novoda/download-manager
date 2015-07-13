@@ -481,16 +481,16 @@ public class DownloadManager {
      * it was running, and it will no longer be accessible through the download manager.
      * If there are any downloaded files, partial or complete, they will be deleted.
      *
-     * @param batchesIds the IDs of the batches to remove
+     * @param batchIds the IDs of the batches to remove
      * @return the number of batches actually removed
      */
-    public int removeBatches(long... batchesIds) {
-        if (batchesIds == null || batchesIds.length == 0) {
-            throw new IllegalArgumentException("called with nothing to remove. input param 'batchesIds' can't be null");
+    public int removeBatches(long... batchIds) {
+        if (batchIds == null || batchIds.length == 0) {
+            throw new IllegalArgumentException("called with nothing to remove. input param 'batchIds' can't be null");
         }
 
-        setDeletingStatusFor(batchesIds);
-        return markBatchesToBeDeleted(batchesIds);
+        setDeletingStatusFor(batchIds);
+        return markBatchesToBeDeleted(batchIds);
     }
 
     private void setDeletingStatusFor(long[] batchesIds) {
