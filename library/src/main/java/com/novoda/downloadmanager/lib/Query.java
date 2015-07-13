@@ -162,7 +162,7 @@ public class Query {
 
         filterByDownloadIds(selectionParts);
         filterByBatchIds(selectionParts);
-        filterByExtras(selectionParts);
+        filterByNotificationExtras(selectionParts);
         filterByStatus(selectionParts);
 
         if (onlyIncludeVisibleInDownloadsUi) {
@@ -206,7 +206,7 @@ public class Query {
         return DownloadContract.Downloads.COLUMN_BATCH_ID + " IN (" + joinStrings(",", Arrays.asList(idStrings)) + ")";
     }
 
-    private void filterByExtras(List<String> selectionParts) {
+    private void filterByNotificationExtras(List<String> selectionParts) {
         if (filterNotificiationExtras == null) {
             return;
         }
