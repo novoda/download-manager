@@ -365,7 +365,7 @@ public class DownloadService extends Service {
 
     private void downloadOrContinueBatch(List<FileDownloadInfo> downloads) {
         for (FileDownloadInfo info : downloads) {
-            if (!info.isSubmittedOrRunning()) {
+            if (!DownloadStatus.isCompleted(info.getStatus()) && !info.isSubmittedOrRunning()) {
                 download(info);
             }
         }
