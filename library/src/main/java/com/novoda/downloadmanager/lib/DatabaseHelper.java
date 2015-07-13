@@ -36,8 +36,8 @@ final class DatabaseHelper extends SQLiteOpenHelper {
         createHeadersTable(db);
         createBatchesTable(db);
         createDownloadsByBatchView(db);
-        createDownloadsByStatusView(db);
-        createBatchesByStatusView(db);
+        createDownloadsWithoutProgressView(db);
+        createBatchesWithoutProgressView(db);
         makeCacheDownloadsInvisible(db);
     }
 
@@ -152,10 +152,10 @@ final class DatabaseHelper extends SQLiteOpenHelper {
         );
     }
 
-    private void createDownloadsByStatusView(SQLiteDatabase db) {
-        db.execSQL("DROP VIEW IF EXISTS " + DownloadContract.DownloadsByStatus.VIEW_NAME_DOWNLOADS_BY_STATUS);
+    private void createDownloadsWithoutProgressView(SQLiteDatabase db) {
+        db.execSQL("DROP VIEW IF EXISTS " + DownloadContract.DownloadsWithoutProgress.VIEW_NAME_DOWNLOADS_WITHOUT_PROGRESS);
         db.execSQL(
-                "CREATE VIEW " + DownloadContract.DownloadsByStatus.VIEW_NAME_DOWNLOADS_BY_STATUS
+                "CREATE VIEW " + DownloadContract.DownloadsWithoutProgress.VIEW_NAME_DOWNLOADS_WITHOUT_PROGRESS
                         + " AS SELECT DISTINCT "
                         + projectionFrom(DOWNLOAD_BY_STATUS_VIEW_COLUMNS)
                         + " FROM " + DownloadContract.Downloads.DOWNLOADS_TABLE_NAME
@@ -165,10 +165,10 @@ final class DatabaseHelper extends SQLiteOpenHelper {
         );
     }
 
-    private void createBatchesByStatusView(SQLiteDatabase db) {
-        db.execSQL("DROP VIEW IF EXISTS " + DownloadContract.BatchesByStatus.VIEW_NAME_BATCHES_BY_STATUS);
+    private void createBatchesWithoutProgressView(SQLiteDatabase db) {
+        db.execSQL("DROP VIEW IF EXISTS " + DownloadContract.BatchesWithoutProgress.VIEW_NAME_BATCHES_WITHOUT_PROGRESS);
         db.execSQL(
-                "CREATE VIEW " + DownloadContract.BatchesByStatus.VIEW_NAME_BATCHES_BY_STATUS
+                "CREATE VIEW " + DownloadContract.BatchesWithoutProgress.VIEW_NAME_BATCHES_WITHOUT_PROGRESS
                         + " AS SELECT DISTINCT "
                         + projectionFrom(BATCHES_BY_STATUS_VIEW_COLUMNS)
                         + " FROM " + DownloadContract.Batches.BATCHES_TABLE_NAME

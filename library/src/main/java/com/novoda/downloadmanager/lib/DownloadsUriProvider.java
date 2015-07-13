@@ -9,8 +9,8 @@ class DownloadsUriProvider {
     private final Uri allDownloadsUri;
     private final Uri batchesUri;
     private final Uri contentUri;
-    private final Uri downloadsByStatusUri;
-    private final Uri batchesByStatusUri;
+    private final Uri downloadsWithoutProgressUri;
+    private final Uri batchesWithoutProgressUri;
 
     public static DownloadsUriProvider getInstance() {
         return LazyInitialisationHelper.INSTANCE;
@@ -48,14 +48,14 @@ class DownloadsUriProvider {
             Uri allDownloadsUri,
             Uri batchesUri,
             Uri contentUri,
-            Uri downloadsByStatusUri, Uri batchesByStatusUri) {
+            Uri downloadsWithoutProgressUri, Uri batchesWithoutProgressUri) {
         this.publiclyAccessibleDownloadsUri = publiclyAccessibleDownloadsUri;
         this.downloadsByBatchUri = downloadsByBatchUri;
         this.allDownloadsUri = allDownloadsUri;
         this.batchesUri = batchesUri;
         this.contentUri = contentUri;
-        this.downloadsByStatusUri = downloadsByStatusUri;
-        this.batchesByStatusUri = batchesByStatusUri;
+        this.downloadsWithoutProgressUri = downloadsWithoutProgressUri;
+        this.batchesWithoutProgressUri = batchesWithoutProgressUri;
     }
 
     /**
@@ -98,13 +98,13 @@ class DownloadsUriProvider {
     /**
      * The content:// URI to access downloads without progress updates.
      */
-    public Uri getDownloadsByStatusUri() {
-        return downloadsByStatusUri;
+    public Uri getDownloadsWithoutProgressUri() {
+        return downloadsWithoutProgressUri;
     }
     /**
-     *
+     * The content:// URI to access batches without progress updates.
      */
-    public Uri getBatchesByStatusUri(){
-        return batchesByStatusUri;
+    public Uri getBatchesWithoutProgressUri() {
+        return batchesWithoutProgressUri;
     }
 }

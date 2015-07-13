@@ -516,11 +516,11 @@ public final class DownloadProvider extends ContentProvider {
     }
 
     private void notifyDownloadStatusChanged() {
-        getContext().getContentResolver().notifyChange(downloadsUriProvider.getDownloadsByStatusUri(), null);
+        getContext().getContentResolver().notifyChange(downloadsUriProvider.getDownloadsWithoutProgressUri(), null);
     }
 
     private void notifyBatchesStatusChanged() {
-        getContext().getContentResolver().notifyChange(downloadsUriProvider.getBatchesByStatusUri(), null);
+        getContext().getContentResolver().notifyChange(downloadsUriProvider.getBatchesWithoutProgressUri(), null);
     }
 
     /**
@@ -570,7 +570,7 @@ public final class DownloadProvider extends ContentProvider {
             case DOWNLOADS_BY_BATCH:
                 return db.query(DownloadContract.DownloadsByBatch.VIEW_NAME_DOWNLOADS_BY_BATCH, projection, selection, selectionArgs, null, null, sort);
             case DOWNLOADS_BY_STATUS:
-                return db.query(DownloadContract.DownloadsByStatus.VIEW_NAME_DOWNLOADS_BY_STATUS, projection, selection, selectionArgs, null, null, sort);
+                return db.query(DownloadContract.DownloadsWithoutProgress.VIEW_NAME_DOWNLOADS_WITHOUT_PROGRESS, projection, selection, selectionArgs, null, null, sort);
             case REQUEST_HEADERS_URI:
                 if (projection != null || selection != null || sort != null) {
                     throw new UnsupportedOperationException(

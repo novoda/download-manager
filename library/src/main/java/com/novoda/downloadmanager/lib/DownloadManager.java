@@ -826,12 +826,12 @@ public class DownloadManager {
         return ContentUris.parseId(batchUri);
     }
 
-    public Uri getDownloadsByStatusUri() {
-        return downloadsUriProvider.getDownloadsByStatusUri();
+    public Uri getDownloadsWithoutProgressUri() {
+        return downloadsUriProvider.getDownloadsWithoutProgressUri();
     }
 
-    public Uri getBatchesByStatusUri() {
-        return downloadsUriProvider.getBatchesByStatusUri();
+    public Uri getBatchesWithoutProgressUri() {
+        return downloadsUriProvider.getBatchesWithoutProgressUri();
     }
 
     /**

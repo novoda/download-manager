@@ -335,20 +335,20 @@ final class DownloadContract {
 
     }
 
-    static final class DownloadsByStatus {
+    static final class DownloadsWithoutProgress {
 
-        public static final String VIEW_NAME_DOWNLOADS_BY_STATUS = "DownloadsByStatus";
+        public static final String VIEW_NAME_DOWNLOADS_WITHOUT_PROGRESS = "DownloadsWithoutProgress";
 
-        private DownloadsByStatus() {
+        private DownloadsWithoutProgress() {
             // non-instantiable class
         }
     }
 
-    static final class BatchesByStatus {
+    static final class BatchesWithoutProgress {
 
-        public static final String VIEW_NAME_BATCHES_BY_STATUS = "BatchesByStatus";
+        public static final String VIEW_NAME_BATCHES_WITHOUT_PROGRESS = "BatchesWithoutProgress";
 
-        private BatchesByStatus() {
+        private BatchesWithoutProgress() {
             // non-instantiable class
         }
     }
