@@ -36,8 +36,6 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
     private ListView listView;
     private DownloadAdapter downloadAdapter;
 
-    private final QueryTimestamp lastQueryTimestamp = new QueryTimestamp();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
