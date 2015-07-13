@@ -503,7 +503,7 @@ public class DownloadManager {
      * COLUMN_* constants.
      */
     public Cursor query(Query query) {
-        Cursor underlyingCursor = query.runQuery(contentResolver, null, downloadsUriProvider.getDownloadsByStatusUri());
+        Cursor underlyingCursor = query.runQuery(contentResolver, UNDERLYING_COLUMNS, downloadsUriProvider.getDownloadsByBatchUri());
         if (underlyingCursor == null) {
             return null;
         }
