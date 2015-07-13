@@ -52,6 +52,7 @@ public class Query {
     private Integer statusFlags = null;
     private boolean onlyIncludeVisibleInDownloadsUi = false;
     private String[] filterNotificiationExtras;
+    private String[] filterExtraData;
     private String orderString = DownloadContract.Downloads.COLUMN_LAST_MODIFICATION + " DESC";
 
     /**
@@ -81,6 +82,16 @@ public class Query {
      */
     public Query setFilterByNotificationExtras(String... extras) {
         filterNotificiationExtras = extras;
+        return this;
+    }
+
+    /**
+     * Include only the downloads with the given extra data.
+     *
+     * @return this object
+     */
+    public Query setFilterByExtraData(String... extraData) {
+        filterExtraData = extraData;
         return this;
     }
 
@@ -163,6 +174,7 @@ public class Query {
         filterByDownloadIds(selectionParts);
         filterByBatchIds(selectionParts);
         filterByNotificationExtras(selectionParts);
+        filterByExtraData(selectionParts);
         filterByStatus(selectionParts);
 
         if (onlyIncludeVisibleInDownloadsUi) {
@@ -217,6 +229,13 @@ public class Query {
         selectionParts.add(joinStrings(" OR ", parts));
     }
 
+    private void filterByExtraData(List<String> selectionParts) {
+        if (filterExtraData == null) {
+            return;
+        }
+        List<String> parts = new ArrayList<>();
+        for (String filterExtra : filterExtraData) {
+            parts.add(extraDataClause(filterExtra));
         }
         selectionParts.add(joinStrings(" OR ", parts));
     }
@@ -275,6 +294,10 @@ public class Query {
 
     private String notificationExtrasClause(String extra) {
         return DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS + " = '" + extra + "'";
+    }
+
+    private String extraDataClause(String extra) {
+        return DownloadContract.Downloads.COLUMN_EXTRA_DATA + " = '" + extra + "'";
     }
 
     private String statusClause(String operator, int value) {

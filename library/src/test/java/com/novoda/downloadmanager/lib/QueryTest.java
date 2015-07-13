@@ -10,9 +10,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -69,13 +67,15 @@ public class QueryTest {
     public void whenOrderingByLivenessThenTheResolverIsQueriedWithTheExpectedSort() {
         new Query().orderByLiveness().runQuery(resolver, null, uri);
 
-        verify(resolver).query(any(Uri.class), any(String[].class), anyString(), any(String[].class), eq("CASE status " +
-                        "WHEN 192 THEN 1 " +
-                        "WHEN 190 THEN 2 " +
-                        "WHEN 193 THEN 3 " +
-                        "WHEN 498 THEN 4 " +
-                        "WHEN 200 THEN 5 " +
-                        "ELSE 6 END, _id ASC"));
+        verify(resolver).query(
+                any(Uri.class), any(String[].class), anyString(), any(String[].class), eq(
+                        "CASE status " +
+                                "WHEN 192 THEN 1 " +
+                                "WHEN 190 THEN 2 " +
+                                "WHEN 193 THEN 3 " +
+                                "WHEN 498 THEN 4 " +
+                                "WHEN 200 THEN 5 " +
+                                "ELSE 6 END, _id ASC"));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -85,4 +85,21 @@ public class QueryTest {
         // Expecting an exception
     }
 
+    @Test
+    public void givenExtraDataWhenTheQueryIsCreatedThenTheWhereStatementIsCorrect() {
+        new Query().setFilterByExtraData("something extra").runQuery(resolver, null, uri);
+
+        verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
+
+        assertThat(stringArgumentCaptor.getValue()).contains(DownloadContract.Downloads.COLUMN_EXTRA_DATA + " = 'something extra'");
+    }
+
+    @Test
+    public void givenNoExtraDataWhenTheQueryIsCreatedThenTheWhereStatementContainsNoBatchIdPredicate() {
+        new Query().runQuery(resolver, null, uri);
+
+        verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
+
+        assertThat(stringArgumentCaptor.getValue()).doesNotContain(DownloadContract.Downloads.COLUMN_EXTRA_DATA + " IN ");
+    }
 }
