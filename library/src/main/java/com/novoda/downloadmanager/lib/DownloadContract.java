@@ -344,6 +344,15 @@ final class DownloadContract {
         }
     }
 
+    static final class BatchesByStatus {
+
+        public static final String VIEW_NAME_BATCHES_BY_STATUS = "BatchesByStatus";
+
+        private BatchesByStatus() {
+            // non-instantiable class
+        }
+    }
+
     /**
      * Constants related to HTTP request headers associated with each download.
      */

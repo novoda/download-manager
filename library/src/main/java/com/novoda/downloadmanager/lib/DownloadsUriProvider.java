@@ -10,6 +10,7 @@ class DownloadsUriProvider {
     private final Uri batchesUri;
     private final Uri contentUri;
     private final Uri downloadsByStatusUri;
+    private final Uri batchesByStatusUri;
 
     public static DownloadsUriProvider getInstance() {
         return LazyInitialisationHelper.INSTANCE;
@@ -28,6 +29,7 @@ class DownloadsUriProvider {
         Uri batchesUri = Uri.parse(authority + "/batches");
         Uri contentUri = Uri.parse(authority + "/my_downloads");
         Uri downloadsByStatusUri = Uri.parse(authority + "/downloads_by_status");
+        Uri batchesByStatusUri = Uri.parse(authority + "/batches_by_status");
 
         return new DownloadsUriProvider(
                 publiclyAccessibleDownloadsUri,
@@ -35,7 +37,8 @@ class DownloadsUriProvider {
                 allDownloadsUri,
                 batchesUri,
                 contentUri,
-                downloadsByStatusUri
+                downloadsByStatusUri,
+                batchesByStatusUri
         );
     }
 
@@ -45,13 +48,14 @@ class DownloadsUriProvider {
             Uri allDownloadsUri,
             Uri batchesUri,
             Uri contentUri,
-            Uri downloadsByStatusUri) {
+            Uri downloadsByStatusUri, Uri batchesByStatusUri) {
         this.publiclyAccessibleDownloadsUri = publiclyAccessibleDownloadsUri;
         this.downloadsByBatchUri = downloadsByBatchUri;
         this.allDownloadsUri = allDownloadsUri;
         this.batchesUri = batchesUri;
         this.contentUri = contentUri;
         this.downloadsByStatusUri = downloadsByStatusUri;
+        this.batchesByStatusUri = batchesByStatusUri;
     }
 
     /**
@@ -96,5 +100,11 @@ class DownloadsUriProvider {
      */
     public Uri getDownloadsByStatusUri() {
         return downloadsByStatusUri;
+    }
+    /**
+     *
+     */
+    public Uri getBatchesByStatusUri(){
+        return batchesByStatusUri;
     }
 }

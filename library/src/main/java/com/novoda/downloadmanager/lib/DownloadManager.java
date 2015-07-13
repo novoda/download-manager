@@ -830,6 +830,10 @@ public class DownloadManager {
         return downloadsUriProvider.getDownloadsByStatusUri();
     }
 
+    public Uri getBatchesByStatusUri() {
+        return downloadsUriProvider.getBatchesByStatusUri();
+    }
+
     /**
      * This class wraps a cursor returned by DownloadProvider -- the "underlying cursor" -- and
      * presents a different set of columns, those defined in the DownloadManager.COLUMN_* constants.

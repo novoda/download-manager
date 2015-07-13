@@ -37,6 +37,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
         createBatchesTable(db);
         createDownloadsByBatchView(db);
         createDownloadsByStatusView(db);
+        createBatchesByStatusView(db);
         makeCacheDownloadsInvisible(db);
     }
 
@@ -164,6 +165,16 @@ final class DatabaseHelper extends SQLiteOpenHelper {
         );
     }
 
+    private void createBatchesByStatusView(SQLiteDatabase db) {
+        db.execSQL("DROP VIEW IF EXISTS " + DownloadContract.BatchesByStatus.VIEW_NAME_BATCHES_BY_STATUS);
+        db.execSQL(
+                "CREATE VIEW " + DownloadContract.BatchesByStatus.VIEW_NAME_BATCHES_BY_STATUS
+                        + " AS SELECT DISTINCT "
+                        + projectionFrom(BATCHES_BY_STATUS_VIEW_COLUMNS)
+                        + " FROM " + DownloadContract.Batches.BATCHES_TABLE_NAME
+                        + ";"
+        );
+    }
     /**
      * columns to request from DownloadProvider.
      */
@@ -193,9 +204,6 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             DownloadContract.Batches.COLUMN_CURRENT_BYTES
     };
 
-    /**
-     * columns to request from DownloadProvider.
-     */
     public static final String[] DOWNLOAD_BY_STATUS_VIEW_COLUMNS = new String[]{
             DownloadContract.Downloads.DOWNLOADS_TABLE_NAME + "." + DownloadContract.Downloads._ID + " AS _id ",
             DownloadContract.Downloads.COLUMN_DATA,
@@ -208,6 +216,13 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS,
             DownloadContract.Downloads.COLUMN_EXTRA_DATA,
             DownloadContract.Downloads.COLUMN_BATCH_ID,
+            DownloadContract.Batches.COLUMN_TITLE,
+            DownloadContract.Batches.COLUMN_DESCRIPTION,
+            DownloadContract.Batches.COLUMN_BIG_PICTURE,
+            DownloadContract.Batches.COLUMN_STATUS,
+    };
+
+    public static final String[] BATCHES_BY_STATUS_VIEW_COLUMNS = new String[]{
             DownloadContract.Batches.COLUMN_TITLE,
             DownloadContract.Batches.COLUMN_DESCRIPTION,
             DownloadContract.Batches.COLUMN_BIG_PICTURE,

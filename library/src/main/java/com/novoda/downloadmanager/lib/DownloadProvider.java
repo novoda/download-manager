@@ -370,6 +370,7 @@ public final class DownloadProvider extends ContentProvider {
         }
         if (match == BATCHES) {
             long rowId = db.insert(DownloadContract.Batches.BATCHES_TABLE_NAME, null, values);
+            notifyBatchesStatusChanged();
             return ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), rowId);
         }
         Log.d("calling insert on an unknown/invalid URI: " + uri);
@@ -509,12 +510,16 @@ public final class DownloadProvider extends ContentProvider {
         Context context = getContext();
         context.startService(new Intent(context, DownloadService.class));
         notifyContentChanged(uri, match);
-        notifyStatusUri();
+        notifyDownloadStatusChanged();
         return ContentUris.withAppendedId(downloadsUriProvider.getContentUri(), rowID);
     }
 
-    private void notifyStatusUri() {
+    private void notifyDownloadStatusChanged() {
         getContext().getContentResolver().notifyChange(downloadsUriProvider.getDownloadsByStatusUri(), null);
+    }
+
+    private void notifyBatchesStatusChanged(){
+        getContext().getContentResolver().notifyChange(downloadsUriProvider.getBatchesByStatusUri(), null);
     }
 
     /**
@@ -789,11 +794,13 @@ public final class DownloadProvider extends ContentProvider {
                 } else {
                     count = 0;
                 }
+                notifyStatusIfDownloadStatusChanged(values);
                 break;
             case BATCHES:
             case BATCHES_ID:
                 SqlSelection batchSelection = getWhereClause(uri, where, whereArgs, match);
                 count = db.update(DownloadContract.Batches.BATCHES_TABLE_NAME, values, batchSelection.getSelection(), batchSelection.getParameters());
+                notifyStatusIfBatchesStatusChanged(values);
                 break;
             default:
                 Log.d("updating unknown/invalid URI: " + uri);
@@ -801,7 +808,7 @@ public final class DownloadProvider extends ContentProvider {
         }
 
         notifyContentChanged(uri, match);
-        notifyStatusUriIfStatusChanged(values);
+
         if (startService) {
             Context context = getContext();
             context.startService(new Intent(context, DownloadService.class));
@@ -809,12 +816,19 @@ public final class DownloadProvider extends ContentProvider {
         return count;
     }
 
-    private void notifyStatusUriIfStatusChanged(ContentValues values) {
-        if (values.containsKey(DownloadContract.Downloads.COLUMN_STATUS)
-                || values.containsKey(DownloadContract.Batches.COLUMN_STATUS)) {
-            notifyStatusUri();
+    private void notifyStatusIfDownloadStatusChanged(ContentValues values) {
+        if (values.containsKey(DownloadContract.Downloads.COLUMN_STATUS)) {
+            notifyDownloadStatusChanged();
         }
     }
+
+    private void notifyStatusIfBatchesStatusChanged(ContentValues values) {
+        if (values.containsKey(DownloadContract.Batches.COLUMN_STATUS)){
+            notifyBatchesStatusChanged();
+        }
+    }
+
+
 
     /**
      * Notify of a change through both URIs (/my_downloads and /all_downloads)
@@ -876,11 +890,13 @@ public final class DownloadProvider extends ContentProvider {
                 SqlSelection selection = getWhereClause(uri, where, whereArgs, match);
                 deleteRequestHeaders(db, selection.getSelection(), selection.getParameters());
                 count = db.delete(DownloadContract.Downloads.DOWNLOADS_TABLE_NAME, selection.getSelection(), selection.getParameters());
+                notifyDownloadStatusChanged();
                 break;
             case BATCHES:
             case BATCHES_ID:
                 SqlSelection batchSelection = getWhereClause(uri, where, whereArgs, match);
                 count = db.delete(DownloadContract.Batches.BATCHES_TABLE_NAME, batchSelection.getSelection(), batchSelection.getParameters());
+                notifyBatchesStatusChanged();
                 break;
 
             default:
@@ -888,7 +904,6 @@ public final class DownloadProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Cannot delete URI: " + uri);
         }
         notifyContentChanged(uri, match);
-        notifyStatusUri();
         return count;
     }
 

@@ -17,7 +17,6 @@ import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.demo.extended.Download;
 import com.novoda.downloadmanager.demo.extended.DownloadAdapter;
 import com.novoda.downloadmanager.demo.extended.QueryForDownloadsAsyncTask;
-import com.novoda.downloadmanager.demo.extended.QueryTimestamp;
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.NotificationVisibility;
 import com.novoda.downloadmanager.lib.Query;
