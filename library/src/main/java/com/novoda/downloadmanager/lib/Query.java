@@ -51,7 +51,7 @@ public class Query {
     private long[] batchIds = null;
     private Integer statusFlags = null;
     private boolean onlyIncludeVisibleInDownloadsUi = false;
-    private String[] filterExtras;
+    private String[] filterNotificiationExtras;
     private String orderString = DownloadContract.Downloads.COLUMN_LAST_MODIFICATION + " DESC";
 
     /**
@@ -75,12 +75,12 @@ public class Query {
     }
 
     /**
-     * Include only the downloads with the given extras.
+     * Include only the downloads with the given notification extras.
      *
      * @return this object
      */
-    public Query setFilterByExtras(String... extras) {
-        filterExtras = extras;
+    public Query setFilterByNotificationExtras(String... extras) {
+        filterNotificiationExtras = extras;
         return this;
     }
 
@@ -207,11 +207,11 @@ public class Query {
     }
 
     private void filterByExtras(List<String> selectionParts) {
-        if (filterExtras == null) {
+        if (filterNotificiationExtras == null) {
             return;
         }
         List<String> parts = new ArrayList<>();
-        for (String filterExtra : filterExtras) {
+        for (String filterExtra : filterNotificiationExtras) {
             parts.add(extrasClause(filterExtra));
         }
         selectionParts.add(joinStrings(" OR ", parts));
