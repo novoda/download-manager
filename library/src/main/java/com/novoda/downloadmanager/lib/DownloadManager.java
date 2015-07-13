@@ -473,7 +473,7 @@ public class DownloadManager {
         if (ids.length == 1) {
             return contentResolver.update(ContentUris.withAppendedId(baseUri, ids[0]), values, null, null);
         }
-        return contentResolver.update(baseUri, values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
+        return contentResolver.update(baseUri, values, getWhereClauseFor(ids, DownloadContract.Downloads._ID), longArrayToStringArray(ids));
     }
 
     /**
@@ -512,7 +512,11 @@ public class DownloadManager {
             return contentResolver.update(ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), batchesIds[0]), valuesDelete, null, null);
         }
 
-        return contentResolver.update(downloadsUriProvider.getBatchesUri(), valuesDelete, getWhereClauseForIds(batchesIds), longArrayToStringArray(batchesIds));
+        return contentResolver.update(
+                downloadsUriProvider.getBatchesUri(),
+                valuesDelete,
+                getWhereClauseFor(batchesIds, DownloadContract.Downloads._ID),
+                longArrayToStringArray(batchesIds));
     }
 
     /**
@@ -669,7 +673,7 @@ public class DownloadManager {
         values.putNull(DownloadContract.Downloads.COLUMN_DATA);
         values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.PENDING);
         values.put(DownloadContract.Downloads.COLUMN_FAILED_CONNECTIONS, 0);
-        contentResolver.update(baseUri, values, getWhereClauseForIds(ids), longArrayToStringArray(ids));
+        contentResolver.update(baseUri, values, getWhereClauseFor(ids, DownloadContract.Downloads._ID), longArrayToStringArray(ids));
     }
 
     /**
@@ -795,14 +799,7 @@ public class DownloadManager {
         return downloadsUriProvider.getBatchesUri();
     }
 
-    /**
-     * Get a parameterized SQL WHERE clause to select a bunch of IDs.
-     */
-    static String getWhereClauseForIds(long[] ids) {
-        return getWhereClauseFor(ids, DownloadContract.Downloads._ID);
-    }
-
-    private static String getWhereClauseFor(long[] ids, String column) {
+    static String getWhereClauseFor(long[] ids, String column) {
         StringBuilder whereClause = new StringBuilder();
         whereClause.append("(");
         for (int i = 0; i < ids.length; i++) {
@@ -816,9 +813,6 @@ public class DownloadManager {
         return whereClause.toString();
     }
 
-    /**
-     * Get the selection args for a clause returned by {@link #getWhereClauseForIds(long[])}.
-     */
     private static String[] longArrayToStringArray(long[] ids) {
         String[] whereArgs = new String[ids.length];
         for (int i = 0; i < ids.length; i++) {

@@ -188,7 +188,7 @@ public class Query {
         if (downloadIds == null) {
             return;
         }
-        selectionParts.add(DownloadManager.getWhereClauseForIds(downloadIds));
+        selectionParts.add(DownloadManager.getWhereClauseFor(downloadIds, DownloadContract.Downloads._ID));
     }
 
     private void filterByBatchIds(List<String> selectionParts) {
