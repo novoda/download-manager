@@ -36,6 +36,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
         createHeadersTable(db);
         createBatchesTable(db);
         createDownloadsByBatchView(db);
+        createDownloadsByStatusView(db);
         makeCacheDownloadsInvisible(db);
     }
 
@@ -150,6 +151,19 @@ final class DatabaseHelper extends SQLiteOpenHelper {
         );
     }
 
+    private void createDownloadsByStatusView(SQLiteDatabase db) {
+        db.execSQL("DROP VIEW IF EXISTS " + DownloadContract.DownloadsByStatus.VIEW_NAME_DOWNLOADS_BY_STATUS);
+        db.execSQL(
+                "CREATE VIEW " + DownloadContract.DownloadsByStatus.VIEW_NAME_DOWNLOADS_BY_STATUS
+                        + " AS SELECT DISTINCT "
+                        + projectionFrom(DOWNLOAD_BY_STATUS_VIEW_COLUMNS)
+                        + " FROM " + DownloadContract.Downloads.DOWNLOADS_TABLE_NAME
+                        + " INNER JOIN " + DownloadContract.Batches.BATCHES_TABLE_NAME
+                        + " ON " + DownloadContract.Downloads.DOWNLOADS_TABLE_NAME + "." + DownloadContract.Downloads.COLUMN_BATCH_ID
+                        + " = " + DownloadContract.Batches.BATCHES_TABLE_NAME + "." + DownloadContract.Batches._ID + ";"
+        );
+    }
+
     /**
      * columns to request from DownloadProvider.
      */
@@ -177,6 +191,27 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             DownloadContract.Batches.BATCHES_TABLE_NAME + "." + DownloadContract.Batches.COLUMN_DELETED,
             DownloadContract.Batches.COLUMN_TOTAL_BYTES,
             DownloadContract.Batches.COLUMN_CURRENT_BYTES
+    };
+
+    /**
+     * columns to request from DownloadProvider.
+     */
+    public static final String[] DOWNLOAD_BY_STATUS_VIEW_COLUMNS = new String[]{
+            DownloadContract.Downloads.DOWNLOADS_TABLE_NAME + "." + DownloadContract.Downloads._ID + " AS _id ",
+            DownloadContract.Downloads.COLUMN_DATA,
+            DownloadContract.Downloads.COLUMN_MEDIAPROVIDER_URI,
+            DownloadContract.Downloads.COLUMN_DESTINATION,
+            DownloadContract.Downloads.COLUMN_URI,
+            DownloadContract.Downloads.COLUMN_STATUS,
+            DownloadContract.Downloads.COLUMN_FILE_NAME_HINT,
+            DownloadContract.Downloads.COLUMN_MIME_TYPE,
+            DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS,
+            DownloadContract.Downloads.COLUMN_EXTRA_DATA,
+            DownloadContract.Downloads.COLUMN_BATCH_ID,
+            DownloadContract.Batches.COLUMN_TITLE,
+            DownloadContract.Batches.COLUMN_DESCRIPTION,
+            DownloadContract.Batches.COLUMN_BIG_PICTURE,
+            DownloadContract.Batches.COLUMN_STATUS,
     };
 
     private String projectionFrom(String[] array) {

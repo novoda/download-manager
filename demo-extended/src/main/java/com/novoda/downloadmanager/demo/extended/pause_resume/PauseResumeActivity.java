@@ -101,18 +101,18 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
     @Override
     protected void onStart() {
         super.onStart();
-        getContentResolver().registerContentObserver(downloadManager.getContentUri(), true, updateSelf);
+        getContentResolver().registerContentObserver(downloadManager.getDownloadsByStatusUri(), true, updateSelf);
     }
 
+    private long lastUpdated = System.currentTimeMillis();
     private final ContentObserver updateSelf = new ContentObserver(handler) {
 
         @Override
         public void onChange(boolean selfChange) {
-            if (lastQueryTimestamp.updatedRecently()) {
-                return;
-            }
+            long updated = System.currentTimeMillis();
+            Log.d("Time since change: " + (updated - lastUpdated));
+            lastUpdated = updated;
             queryForDownloads();
-            lastQueryTimestamp.setJustUpdated();
         }
 
     };

@@ -335,6 +335,15 @@ final class DownloadContract {
 
     }
 
+    static final class DownloadsByStatus {
+
+        public static final String VIEW_NAME_DOWNLOADS_BY_STATUS = "DownloadsByStatus";
+
+        private DownloadsByStatus() {
+            // non-instantiable class
+        }
+    }
+
     /**
      * Constants related to HTTP request headers associated with each download.
      */

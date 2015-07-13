@@ -9,6 +9,7 @@ class DownloadsUriProvider {
     private final Uri allDownloadsUri;
     private final Uri batchesUri;
     private final Uri contentUri;
+    private final Uri downloadsByStatusUri;
 
     public static DownloadsUriProvider getInstance() {
         return LazyInitialisationHelper.INSTANCE;
@@ -26,13 +27,15 @@ class DownloadsUriProvider {
         Uri allDownloadsUri = Uri.parse(authority + "/all_downloads");
         Uri batchesUri = Uri.parse(authority + "/batches");
         Uri contentUri = Uri.parse(authority + "/my_downloads");
+        Uri downloadsByStatusUri = Uri.parse(authority + "/downloads_by_status");
 
         return new DownloadsUriProvider(
                 publiclyAccessibleDownloadsUri,
                 downloadsByBatchUri,
                 allDownloadsUri,
                 batchesUri,
-                contentUri
+                contentUri,
+                downloadsByStatusUri
         );
     }
 
@@ -41,12 +44,14 @@ class DownloadsUriProvider {
             Uri downloadsByBatchUri,
             Uri allDownloadsUri,
             Uri batchesUri,
-            Uri contentUri) {
+            Uri contentUri,
+            Uri downloadsByStatusUri) {
         this.publiclyAccessibleDownloadsUri = publiclyAccessibleDownloadsUri;
         this.downloadsByBatchUri = downloadsByBatchUri;
         this.allDownloadsUri = allDownloadsUri;
         this.batchesUri = batchesUri;
         this.contentUri = contentUri;
+        this.downloadsByStatusUri = downloadsByStatusUri;
     }
 
     /**
@@ -84,5 +89,12 @@ class DownloadsUriProvider {
      */
     public Uri getContentUri() {
         return contentUri;
+    }
+
+    /**
+     * The content:// URI to access downloads without progress updates.
+     */
+    public Uri getDownloadsByStatusUri() {
+        return downloadsByStatusUri;
     }
 }

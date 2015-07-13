@@ -133,6 +133,8 @@ public final class DownloadProvider extends ContentProvider {
      */
     private static final int DOWNLOADS_BY_BATCH = 9;
 
+    private static final int DOWNLOADS_BY_STATUS = 10;
+
     static {
         URI_MATCHER.addURI(AUTHORITY, "my_downloads", MY_DOWNLOADS);
         URI_MATCHER.addURI(AUTHORITY, "my_downloads/#", MY_DOWNLOADS_ID);
@@ -148,6 +150,7 @@ public final class DownloadProvider extends ContentProvider {
         URI_MATCHER.addURI(AUTHORITY, "download/#", MY_DOWNLOADS_ID);
         URI_MATCHER.addURI(AUTHORITY, "download/#/" + DownloadContract.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
         URI_MATCHER.addURI(AUTHORITY, DownloadsDestination.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT + "/#", PUBLIC_DOWNLOAD_ID);
+        URI_MATCHER.addURI(AUTHORITY, "downloads_by_status", DOWNLOADS_BY_STATUS);
     }
 
     private static final String[] APP_READABLE_COLUMNS_ARRAY = new String[]{
@@ -316,7 +319,8 @@ public final class DownloadProvider extends ContentProvider {
         int match = URI_MATCHER.match(uri);
         switch (match) {
             case MY_DOWNLOADS:
-            case ALL_DOWNLOADS: {
+            case ALL_DOWNLOADS:
+            case DOWNLOADS_BY_STATUS: {
                 return DOWNLOAD_LIST_TYPE;
             }
             case MY_DOWNLOADS_ID:
@@ -554,6 +558,8 @@ public final class DownloadProvider extends ContentProvider {
                         batchSelection.getParameters(), null, null, sort);
             case DOWNLOADS_BY_BATCH:
                 return db.query(DownloadContract.DownloadsByBatch.VIEW_NAME_DOWNLOADS_BY_BATCH, projection, selection, selectionArgs, null, null, sort);
+            case DOWNLOADS_BY_STATUS:
+                return db.query(DownloadContract.DownloadsByStatus.VIEW_NAME_DOWNLOADS_BY_STATUS, projection, selection, selectionArgs, null, null, sort);
             case REQUEST_HEADERS_URI:
                 if (projection != null || selection != null || sort != null) {
                     throw new UnsupportedOperationException(
@@ -790,11 +796,19 @@ public final class DownloadProvider extends ContentProvider {
         }
 
         notifyContentChanged(uri, match);
+        notifyStatusUriIfStatusChanged(values);
         if (startService) {
             Context context = getContext();
             context.startService(new Intent(context, DownloadService.class));
         }
         return count;
+    }
+
+    private void notifyStatusUriIfStatusChanged(ContentValues values) {
+        if (values.containsKey(DownloadContract.Downloads.COLUMN_STATUS) ||
+                values.containsKey(DownloadContract.Batches.COLUMN_STATUS)) {
+            getContext().getContentResolver().notifyChange(downloadsUriProvider.getDownloadsByStatusUri(), null);
+        }
     }
 
     /**

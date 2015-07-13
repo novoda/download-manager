@@ -503,7 +503,7 @@ public class DownloadManager {
      * COLUMN_* constants.
      */
     public Cursor query(Query query) {
-        Cursor underlyingCursor = query.runQuery(contentResolver, UNDERLYING_COLUMNS, downloadsUriProvider.getDownloadsByBatchUri());
+        Cursor underlyingCursor = query.runQuery(contentResolver, null, downloadsUriProvider.getDownloadsByStatusUri());
         if (underlyingCursor == null) {
             return null;
         }
@@ -824,6 +824,10 @@ public class DownloadManager {
         values.put(DownloadContract.Batches.COLUMN_STATUS, DownloadStatus.PENDING);
         Uri batchUri = contentResolver.insert(downloadsUriProvider.getBatchesUri(), values);
         return ContentUris.parseId(batchUri);
+    }
+
+    public Uri getDownloadsByStatusUri() {
+        return downloadsUriProvider.getDownloadsByStatusUri();
     }
 
     /**

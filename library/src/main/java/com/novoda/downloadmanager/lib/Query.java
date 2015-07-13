@@ -170,11 +170,11 @@ public class Query {
         }
 
         // only return rows which are not marked 'deleted = 1'
-        selectionParts.add(DownloadContract.Downloads.COLUMN_DELETED + " != '1'");
+//        selectionParts.add(DownloadContract.Downloads.COLUMN_DELETED + " != '1'");
 
         String selection = joinStrings(" AND ", selectionParts);
 
-        return resolver.query(baseUri, projection, selection, selectionArgs, orderString);
+        return resolver.query(baseUri, null, null, null, orderString);
     }
 
     private String[] getIdsAsStringArray(long[] ids) {
