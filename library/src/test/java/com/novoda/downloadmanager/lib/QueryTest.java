@@ -9,6 +9,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
+import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.*;
+import static com.novoda.downloadmanager.lib.DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP;
+import static com.novoda.downloadmanager.lib.DownloadManager.COLUMN_STATUS;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.verify;
@@ -39,7 +42,7 @@ public class QueryTest {
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
-        assertSelectionContains(DownloadContract.Downloads.COLUMN_BATCH_ID + " IN (1,2,3)");
+        assertSelectionContains(COLUMN_BATCH_ID + " IN (1,2,3)");
     }
 
     @Test
@@ -48,12 +51,12 @@ public class QueryTest {
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
-        assertSelectionDoesNotContain(DownloadContract.Downloads.COLUMN_BATCH_ID + " IN ");
+        assertSelectionDoesNotContain(COLUMN_BATCH_ID + " IN ");
     }
 
     @Test
     public void whenWeSetABatchStatusOrderByOnAQueryThenTheResolverIsQueriedWithTheCorrectSortOrder() {
-        query.orderBy(DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP, Query.ORDER_ASCENDING).runQuery(resolver, null, uri);
+        query.orderBy(COLUMN_LAST_MODIFIED_TIMESTAMP, Query.ORDER_ASCENDING).runQuery(resolver, null, uri);
 
         // Actually resolves to Downloads.Impl.COLUMN_LAST_MODIFIED
         verify(resolver).query(any(Uri.class), any(String[].class), anyString(), any(String[].class), eq("lastmod ASC"));
@@ -85,7 +88,7 @@ public class QueryTest {
     public void whenWeSetAnUnsupportedOrderByOnAQueryThenTheResolverIsQueriedWithTheCorrectSortOrder() {
         int anyOrder = Query.ORDER_ASCENDING;
 
-        query.orderBy(DownloadManager.COLUMN_STATUS, anyOrder).runQuery(resolver, null, uri);
+        query.orderBy(COLUMN_STATUS, anyOrder).runQuery(resolver, null, uri);
 
         // Expecting an exception
     }
@@ -96,7 +99,7 @@ public class QueryTest {
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
-        assertSelectionContains(DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS + " = 'something extra'");
+        assertSelectionContains(COLUMN_NOTIFICATION_EXTRAS + " = 'something extra'");
     }
 
     @Test
@@ -105,7 +108,7 @@ public class QueryTest {
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
-        assertSelectionDoesNotContain(DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS + " IN ");
+        assertSelectionDoesNotContain(COLUMN_NOTIFICATION_EXTRAS + " IN ");
     }
 
     @Test
@@ -114,7 +117,7 @@ public class QueryTest {
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
-        assertSelectionContains(DownloadContract.Downloads.COLUMN_EXTRA_DATA + " = 'something extra'");
+        assertSelectionContains(COLUMN_EXTRA_DATA + " = 'something extra'");
     }
 
     @Test
@@ -123,7 +126,7 @@ public class QueryTest {
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
-        assertSelectionDoesNotContain(DownloadContract.Downloads.COLUMN_EXTRA_DATA + " IN ");
+        assertSelectionDoesNotContain(COLUMN_EXTRA_DATA + " IN ");
     }
 
     private void assertSelectionContains(String sequence) {
