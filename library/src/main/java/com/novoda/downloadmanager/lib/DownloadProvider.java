@@ -519,7 +519,7 @@ public final class DownloadProvider extends ContentProvider {
         getContext().getContentResolver().notifyChange(downloadsUriProvider.getDownloadsByStatusUri(), null);
     }
 
-    private void notifyBatchesStatusChanged(){
+    private void notifyBatchesStatusChanged() {
         getContext().getContentResolver().notifyChange(downloadsUriProvider.getBatchesByStatusUri(), null);
     }
 
@@ -824,11 +824,10 @@ public final class DownloadProvider extends ContentProvider {
     }
 
     private void notifyStatusIfBatchesStatusChanged(ContentValues values) {
-        if (values.containsKey(DownloadContract.Batches.COLUMN_STATUS)){
+        if (values.containsKey(DownloadContract.Batches.COLUMN_STATUS)) {
             notifyBatchesStatusChanged();
         }
     }
-
 
 
     /**
