@@ -82,7 +82,7 @@ class NotificationDisplayer {
                 builder.setSmallIcon(android.R.drawable.stat_sys_download_done);
                 break;
             default:
-                //don't set an icon if none matches
+                builder.setSmallIcon(android.R.drawable.stat_sys_warning);
                 break;
         }
     }
