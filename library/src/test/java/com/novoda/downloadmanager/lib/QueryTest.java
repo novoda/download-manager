@@ -86,6 +86,24 @@ public class QueryTest {
     }
 
     @Test
+    public void givenNotificationExtrasWhenTheQueryIsCreatedThenTheWhereStatementIsCorrect() {
+        new Query().setFilterByNotificationExtras("something extra").runQuery(resolver, null, uri);
+
+        verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
+
+        assertThat(stringArgumentCaptor.getValue()).contains(DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS + " = 'something extra'");
+    }
+
+    @Test
+    public void givenNoNotificationExtrasWhenTheQueryIsCreatedThenTheWhereStatementContainsNoBatchIdPredicate() {
+        new Query().runQuery(resolver, null, uri);
+
+        verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
+
+        assertThat(stringArgumentCaptor.getValue()).doesNotContain(DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS + " IN ");
+    }
+
+    @Test
     public void givenExtraDataWhenTheQueryIsCreatedThenTheWhereStatementIsCorrect() {
         new Query().setFilterByExtraData("something extra").runQuery(resolver, null, uri);
 
