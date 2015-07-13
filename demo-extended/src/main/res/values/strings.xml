@@ -31,6 +31,7 @@
   <string name="successful">Successful</string>
   <string name="pending">Pending</string>
   <string name="downloading">Downloading</string>
+  <string name="deleting">Deleting</string>
   <string name="failed">Failed</string>
   <string name="failed_or_pending">Failed or pending</string>
   <string name="live">Live</string>

@@ -39,6 +39,8 @@ public class Download {
                 return "Queued";
             case DownloadManager.STATUS_PAUSED:
                 return "Paused";
+            case DownloadManager.STATUS_DELETING:
+                return "Deleting";
             default:
                 return "WTH";
         }

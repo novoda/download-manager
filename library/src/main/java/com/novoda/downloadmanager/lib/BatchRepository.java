@@ -18,6 +18,7 @@ class BatchRepository {
     private static final List<Integer> PRIORITISED_STATUSES = Arrays.asList(
             DownloadStatus.CANCELED,
             DownloadStatus.RUNNING,
+            DownloadStatus.DELETING,
 
             // Paused statuses
             DownloadStatus.PAUSED_BY_APP,

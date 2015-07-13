@@ -44,6 +44,11 @@
       android:layout_height="wrap_content"
       android:text="@string/downloading" />
 
+    <RadioButton
+      android:id="@+id/show_batches_query_deleting"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/deleting" />
 
     <RadioButton
       android:id="@+id/show_batches_query_failed"

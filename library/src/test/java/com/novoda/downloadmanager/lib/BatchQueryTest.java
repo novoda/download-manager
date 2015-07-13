@@ -42,6 +42,14 @@ public class BatchQueryTest {
     }
 
     @Test
+    public void givenTheQueryIsWithDeletingStatusFilterWhenItIsBuiltThenTheSelectionAndArgumentsAreCorrect() {
+        BatchQuery query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_DELETING).build();
+
+        assertThat(query.getSelection()).isEqualTo("(" + DownloadContract.Batches.COLUMN_STATUS + "=?)");
+        assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), new Integer[]{DownloadStatus.DELETING});
+    }
+
+    @Test
     public void givenTheQueryIsWithPausedStatusFilterWhenItIsBuiltThenTheSelectionAndArgumentsAreCorrect() {
         BatchQuery query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_PAUSED).build();
 
@@ -162,11 +170,13 @@ public class BatchQueryTest {
                                 | DownloadManager.STATUS_SUCCESSFUL
                                 | DownloadManager.STATUS_RUNNING
                                 | DownloadManager.STATUS_PENDING
-                                | DownloadManager.STATUS_PAUSED)
+                                | DownloadManager.STATUS_PAUSED
+                                | DownloadManager.STATUS_DELETING)
                 .build();
 
         assertThat(query.getSelection()).isEqualTo(
                 "(" + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
@@ -183,6 +193,7 @@ public class BatchQueryTest {
                 DownloadStatus.WAITING_TO_RETRY,
                 DownloadStatus.WAITING_FOR_NETWORK,
                 DownloadStatus.QUEUED_FOR_WIFI,
+                DownloadStatus.DELETING,
                 DownloadStatus.SUCCESS,
                 400,
                 600,
@@ -199,13 +210,15 @@ public class BatchQueryTest {
                                 | DownloadManager.STATUS_SUCCESSFUL
                                 | DownloadManager.STATUS_RUNNING
                                 | DownloadManager.STATUS_PENDING
-                                | DownloadManager.STATUS_PAUSED)
+                                | DownloadManager.STATUS_PAUSED
+                                | DownloadManager.STATUS_DELETING)
                 .withId(id)
                 .build();
 
         assertThat(query.getSelection()).isEqualTo(
                 "(" + DownloadContract.Batches._ID + "=?) AND "
                         + "(" + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
@@ -223,6 +236,7 @@ public class BatchQueryTest {
                 DownloadStatus.WAITING_TO_RETRY,
                 DownloadStatus.WAITING_FOR_NETWORK,
                 DownloadStatus.QUEUED_FOR_WIFI,
+                DownloadStatus.DELETING,
                 DownloadStatus.SUCCESS,
                 400,
                 600

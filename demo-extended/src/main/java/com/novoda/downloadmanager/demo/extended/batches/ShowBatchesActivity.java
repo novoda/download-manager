@@ -64,6 +64,10 @@ public class ShowBatchesActivity extends AppCompatActivity implements QueryForBa
                         break;
                     case R.id.show_batches_query_live:
                         query = new BatchQuery.Builder().withSortByLiveness().build();
+                        break;
+                    case R.id.show_batches_query_deleting:
+                        query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_DELETING).build();
+                        break;
                     default:
                         break;
                 }

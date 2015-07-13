@@ -188,7 +188,7 @@ public class Query {
         if (downloadIds == null) {
             return;
         }
-        selectionParts.add(DownloadManager.getWhereClauseForIds(downloadIds));
+        selectionParts.add(DownloadManager.getWhereClauseFor(downloadIds, DownloadContract.Downloads._ID));
     }
 
     private void filterByBatchIds(List<String> selectionParts) {
@@ -237,6 +237,9 @@ public class Query {
         }
         if ((statusFlags & DownloadManager.STATUS_SUCCESSFUL) != 0) {
             parts.add(statusClause("=", DownloadStatus.SUCCESS));
+        }
+        if ((statusFlags & DownloadManager.STATUS_DELETING) != 0) {
+            parts.add(statusClause("=", DownloadStatus.DELETING));
         }
         if ((statusFlags & DownloadManager.STATUS_FAILED) != 0) {
             parts.add("(" + statusClause(">=", 400) + " AND " + statusClause("<", 600) + ")");
