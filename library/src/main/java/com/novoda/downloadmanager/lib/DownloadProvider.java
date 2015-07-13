@@ -133,8 +133,6 @@ public final class DownloadProvider extends ContentProvider {
      */
     private static final int DOWNLOADS_BY_BATCH = 9;
 
-    private static final int DOWNLOADS_BY_STATUS = 10;
-
     static {
         URI_MATCHER.addURI(AUTHORITY, "my_downloads", MY_DOWNLOADS);
         URI_MATCHER.addURI(AUTHORITY, "my_downloads/#", MY_DOWNLOADS_ID);
@@ -150,7 +148,6 @@ public final class DownloadProvider extends ContentProvider {
         URI_MATCHER.addURI(AUTHORITY, "download/#", MY_DOWNLOADS_ID);
         URI_MATCHER.addURI(AUTHORITY, "download/#/" + DownloadContract.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
         URI_MATCHER.addURI(AUTHORITY, DownloadsDestination.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT + "/#", PUBLIC_DOWNLOAD_ID);
-        URI_MATCHER.addURI(AUTHORITY, "downloads_by_status", DOWNLOADS_BY_STATUS);
     }
 
     private static final String[] APP_READABLE_COLUMNS_ARRAY = new String[]{
@@ -320,7 +317,6 @@ public final class DownloadProvider extends ContentProvider {
         switch (match) {
             case MY_DOWNLOADS:
             case ALL_DOWNLOADS:
-            case DOWNLOADS_BY_STATUS:
                 return DOWNLOAD_LIST_TYPE;
 
             case MY_DOWNLOADS_ID:
@@ -569,8 +565,6 @@ public final class DownloadProvider extends ContentProvider {
                         batchSelection.getParameters(), null, null, sort);
             case DOWNLOADS_BY_BATCH:
                 return db.query(DownloadContract.DownloadsByBatch.VIEW_NAME_DOWNLOADS_BY_BATCH, projection, selection, selectionArgs, null, null, sort);
-            case DOWNLOADS_BY_STATUS:
-                return db.query(DownloadContract.DownloadsWithoutProgress.VIEW_NAME_DOWNLOADS_WITHOUT_PROGRESS, projection, selection, selectionArgs, null, null, sort);
             case REQUEST_HEADERS_URI:
                 if (projection != null || selection != null || sort != null) {
                     throw new UnsupportedOperationException(

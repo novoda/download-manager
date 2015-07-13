@@ -157,7 +157,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(
                 "CREATE VIEW " + DownloadContract.DownloadsWithoutProgress.VIEW_NAME_DOWNLOADS_WITHOUT_PROGRESS
                         + " AS SELECT DISTINCT "
-                        + projectionFrom(DOWNLOAD_BY_STATUS_VIEW_COLUMNS)
+                        + projectionFrom(DOWNLOADS_WITHOUT_PROGRESS_VIEW_COLUMNS)
                         + " FROM " + DownloadContract.Downloads.DOWNLOADS_TABLE_NAME
                         + " INNER JOIN " + DownloadContract.Batches.BATCHES_TABLE_NAME
                         + " ON " + DownloadContract.Downloads.DOWNLOADS_TABLE_NAME + "." + DownloadContract.Downloads.COLUMN_BATCH_ID
@@ -170,7 +170,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(
                 "CREATE VIEW " + DownloadContract.BatchesWithoutProgress.VIEW_NAME_BATCHES_WITHOUT_PROGRESS
                         + " AS SELECT DISTINCT "
-                        + projectionFrom(BATCHES_BY_STATUS_VIEW_COLUMNS)
+                        + projectionFrom(BATCHES_WITHOUT_PROGRESS_VIEW_COLUMNS)
                         + " FROM " + DownloadContract.Batches.BATCHES_TABLE_NAME
                         + ";"
         );
@@ -204,7 +204,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             DownloadContract.Batches.COLUMN_CURRENT_BYTES
     };
 
-    public static final String[] DOWNLOAD_BY_STATUS_VIEW_COLUMNS = new String[]{
+    public static final String[] DOWNLOADS_WITHOUT_PROGRESS_VIEW_COLUMNS = new String[]{
             DownloadContract.Downloads.DOWNLOADS_TABLE_NAME + "." + DownloadContract.Downloads._ID + " AS _id ",
             DownloadContract.Downloads.COLUMN_DATA,
             DownloadContract.Downloads.COLUMN_MEDIAPROVIDER_URI,
@@ -222,7 +222,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             DownloadContract.Batches.COLUMN_STATUS,
     };
 
-    public static final String[] BATCHES_BY_STATUS_VIEW_COLUMNS = new String[]{
+    public static final String[] BATCHES_WITHOUT_PROGRESS_VIEW_COLUMNS = new String[]{
             DownloadContract.Batches.COLUMN_TITLE,
             DownloadContract.Batches.COLUMN_DESCRIPTION,
             DownloadContract.Batches.COLUMN_BIG_PICTURE,

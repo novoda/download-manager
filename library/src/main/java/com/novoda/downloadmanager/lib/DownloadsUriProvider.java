@@ -28,8 +28,8 @@ class DownloadsUriProvider {
         Uri allDownloadsUri = Uri.parse(authority + "/all_downloads");
         Uri batchesUri = Uri.parse(authority + "/batches");
         Uri contentUri = Uri.parse(authority + "/my_downloads");
-        Uri downloadsByStatusUri = Uri.parse(authority + "/downloads_by_status");
-        Uri batchesByStatusUri = Uri.parse(authority + "/batches_by_status");
+        Uri downloadsByStatusUri = Uri.parse(authority + "/downloads_without_progress");
+        Uri batchesByStatusUri = Uri.parse(authority + "/batches_without_progress");
 
         return new DownloadsUriProvider(
                 publiclyAccessibleDownloadsUri,
