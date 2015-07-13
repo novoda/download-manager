@@ -212,7 +212,11 @@ public class Query {
         }
         List<String> parts = new ArrayList<>();
         for (String filterExtra : filterNotificiationExtras) {
-            parts.add(extrasClause(filterExtra));
+            parts.add(notificationExtrasClause(filterExtra));
+        }
+        selectionParts.add(joinStrings(" OR ", parts));
+    }
+
         }
         selectionParts.add(joinStrings(" OR ", parts));
     }
@@ -269,7 +273,7 @@ public class Query {
         return strings;
     }
 
-    private String extrasClause(String extra) {
+    private String notificationExtrasClause(String extra) {
         return DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS + " = '" + extra + "'";
     }
 
