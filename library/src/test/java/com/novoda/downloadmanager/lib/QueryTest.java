@@ -39,7 +39,7 @@ public class QueryTest {
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
-        assertThat(stringArgumentCaptor.getValue()).contains(DownloadContract.Downloads.COLUMN_BATCH_ID + " IN (1,2,3)");
+        assertSelectionContains(DownloadContract.Downloads.COLUMN_BATCH_ID + " IN (1,2,3)");
     }
 
     @Test
@@ -48,7 +48,7 @@ public class QueryTest {
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
-        assertThat(stringArgumentCaptor.getValue()).doesNotContain(DownloadContract.Downloads.COLUMN_BATCH_ID + " IN ");
+        assertSelectionDoesNotContain(DownloadContract.Downloads.COLUMN_BATCH_ID + " IN ");
     }
 
     @Test
@@ -84,7 +84,9 @@ public class QueryTest {
     @Test(expected = IllegalArgumentException.class)
     public void whenWeSetAnUnsupportedOrderByOnAQueryThenTheResolverIsQueriedWithTheCorrectSortOrder() {
         int anyOrder = Query.ORDER_ASCENDING;
+
         query.orderBy(DownloadManager.COLUMN_STATUS, anyOrder).runQuery(resolver, null, uri);
+
         // Expecting an exception
     }
 
@@ -94,7 +96,7 @@ public class QueryTest {
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
-        assertThat(stringArgumentCaptor.getValue()).contains(DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS + " = 'something extra'");
+        assertSelectionContains(DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS + " = 'something extra'");
     }
 
     @Test
@@ -103,7 +105,7 @@ public class QueryTest {
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
-        assertThat(stringArgumentCaptor.getValue()).doesNotContain(DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS + " IN ");
+        assertSelectionDoesNotContain(DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS + " IN ");
     }
 
     @Test
@@ -112,7 +114,7 @@ public class QueryTest {
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
-        assertThat(stringArgumentCaptor.getValue()).contains(DownloadContract.Downloads.COLUMN_EXTRA_DATA + " = 'something extra'");
+        assertSelectionContains(DownloadContract.Downloads.COLUMN_EXTRA_DATA + " = 'something extra'");
     }
 
     @Test
@@ -121,6 +123,14 @@ public class QueryTest {
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
-        assertThat(stringArgumentCaptor.getValue()).doesNotContain(DownloadContract.Downloads.COLUMN_EXTRA_DATA + " IN ");
+        assertSelectionDoesNotContain(DownloadContract.Downloads.COLUMN_EXTRA_DATA + " IN ");
+    }
+
+    private void assertSelectionContains(String sequence) {
+        assertThat(stringArgumentCaptor.getValue()).contains(sequence);
+    }
+
+    private void assertSelectionDoesNotContain(String sequence) {
+        assertThat(stringArgumentCaptor.getValue()).doesNotContain(sequence);
     }
 }
