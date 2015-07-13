@@ -25,14 +25,17 @@ public class QueryTest {
     @Captor
     ArgumentCaptor<String> stringArgumentCaptor;
 
+    private Query query;
+
     @Before
     public void setUp() throws Exception {
         initMocks(this);
+        query = new Query();
     }
 
     @Test
     public void givenBatchIdsWhenTheQueryIsCreatedThenTheWhereStatementIsCorrect() {
-        new Query().setFilterByBatchId(1, 2, 3).runQuery(resolver, null, uri);
+        query.setFilterByBatchId(1, 2, 3).runQuery(resolver, null, uri);
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
@@ -41,7 +44,7 @@ public class QueryTest {
 
     @Test
     public void givenNoBatchIdsWhenTheQueryIsCreatedThenTheWhereStatementContainsNoBatchIdPredicate() {
-        new Query().runQuery(resolver, null, uri);
+        query.runQuery(resolver, null, uri);
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
@@ -50,7 +53,7 @@ public class QueryTest {
 
     @Test
     public void whenWeSetABatchStatusOrderByOnAQueryThenTheResolverIsQueriedWithTheCorrectSortOrder() {
-        new Query().orderBy(DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP, Query.ORDER_ASCENDING).runQuery(resolver, null, uri);
+        query.orderBy(DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP, Query.ORDER_ASCENDING).runQuery(resolver, null, uri);
 
         // Actually resolves to Downloads.Impl.COLUMN_LAST_MODIFIED
         verify(resolver).query(any(Uri.class), any(String[].class), anyString(), any(String[].class), eq("lastmod ASC"));
@@ -58,14 +61,14 @@ public class QueryTest {
 
     @Test
     public void whenWeSetNoOrderByOnAQueryThenTheResolverIsQueriedWithTheLastModifiedSortOrder() {
-        new Query().runQuery(resolver, null, uri);
+        query.runQuery(resolver, null, uri);
 
         verify(resolver).query(any(Uri.class), any(String[].class), anyString(), any(String[].class), eq("lastmod DESC"));
     }
 
     @Test
     public void whenOrderingByLivenessThenTheResolverIsQueriedWithTheExpectedSort() {
-        new Query().orderByLiveness().runQuery(resolver, null, uri);
+        query.orderByLiveness().runQuery(resolver, null, uri);
 
         verify(resolver).query(
                 any(Uri.class), any(String[].class), anyString(), any(String[].class), eq(
@@ -81,13 +84,13 @@ public class QueryTest {
     @Test(expected = IllegalArgumentException.class)
     public void whenWeSetAnUnsupportedOrderByOnAQueryThenTheResolverIsQueriedWithTheCorrectSortOrder() {
         int anyOrder = Query.ORDER_ASCENDING;
-        new Query().orderBy(DownloadManager.COLUMN_STATUS, anyOrder).runQuery(resolver, null, uri);
+        query.orderBy(DownloadManager.COLUMN_STATUS, anyOrder).runQuery(resolver, null, uri);
         // Expecting an exception
     }
 
     @Test
     public void givenNotificationExtrasWhenTheQueryIsCreatedThenTheWhereStatementIsCorrect() {
-        new Query().setFilterByNotificationExtras("something extra").runQuery(resolver, null, uri);
+        query.setFilterByNotificationExtras("something extra").runQuery(resolver, null, uri);
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
@@ -96,7 +99,7 @@ public class QueryTest {
 
     @Test
     public void givenNoNotificationExtrasWhenTheQueryIsCreatedThenTheWhereStatementContainsNoBatchIdPredicate() {
-        new Query().runQuery(resolver, null, uri);
+        query.runQuery(resolver, null, uri);
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
@@ -105,7 +108,7 @@ public class QueryTest {
 
     @Test
     public void givenExtraDataWhenTheQueryIsCreatedThenTheWhereStatementIsCorrect() {
-        new Query().setFilterByExtraData("something extra").runQuery(resolver, null, uri);
+        query.setFilterByExtraData("something extra").runQuery(resolver, null, uri);
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
@@ -114,7 +117,7 @@ public class QueryTest {
 
     @Test
     public void givenNoExtraDataWhenTheQueryIsCreatedThenTheWhereStatementContainsNoBatchIdPredicate() {
-        new Query().runQuery(resolver, null, uri);
+        query.runQuery(resolver, null, uri);
 
         verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
 
