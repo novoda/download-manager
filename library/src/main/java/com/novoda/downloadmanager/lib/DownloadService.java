@@ -326,6 +326,7 @@ public class DownloadService extends Service {
         for (DownloadBatch downloadBatch : downloadBatches) {
             if (downloadBatch.isActive()) {
                 isActive = true;
+                break;
             }
         }
 
