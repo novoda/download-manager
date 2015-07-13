@@ -509,7 +509,12 @@ public final class DownloadProvider extends ContentProvider {
         Context context = getContext();
         context.startService(new Intent(context, DownloadService.class));
         notifyContentChanged(uri, match);
+        notifyStatusUri();
         return ContentUris.withAppendedId(downloadsUriProvider.getContentUri(), rowID);
+    }
+
+    private void notifyStatusUri() {
+        getContext().getContentResolver().notifyChange(downloadsUriProvider.getDownloadsByStatusUri(), null);
     }
 
     /**
@@ -807,7 +812,7 @@ public final class DownloadProvider extends ContentProvider {
     private void notifyStatusUriIfStatusChanged(ContentValues values) {
         if (values.containsKey(DownloadContract.Downloads.COLUMN_STATUS) ||
                 values.containsKey(DownloadContract.Batches.COLUMN_STATUS)) {
-            getContext().getContentResolver().notifyChange(downloadsUriProvider.getDownloadsByStatusUri(), null);
+            notifyStatusUri();
         }
     }
 
@@ -883,6 +888,7 @@ public final class DownloadProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Cannot delete URI: " + uri);
         }
         notifyContentChanged(uri, match);
+        notifyStatusUri();
         return count;
     }
 
