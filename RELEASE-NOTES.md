@@ -1,3 +1,8 @@
+0.1.9
+-------
+
+- Adds new DELETING status #94
+
 0.1.8
 -------
 
