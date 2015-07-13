@@ -34,7 +34,6 @@ class BatchRepository {
     private static final String[] PROJECT_BATCH_ID = {DownloadContract.Batches._ID};
     private static final String WHERE_DELETED_VALUE_IS = DownloadContract.Batches.COLUMN_DELETED + " = ?";
     private static final String[] MARKED_FOR_DELETION = {"1"};
-    private static final String SORT_BY_ID_DESCENDING = DownloadContract.Batches._ID + " DESC";
 
     private final ContentResolver resolver;
     private final DownloadDeleter downloadDeleter;
@@ -140,7 +139,7 @@ class BatchRepository {
     }
 
     public List<DownloadBatch> retrieveBatchesFor(Collection<FileDownloadInfo> downloads) {
-        Cursor batchesCursor = resolver.query(this.downloadsUriProvider.getBatchesUri(), null, null, null, SORT_BY_ID_DESCENDING);
+        Cursor batchesCursor = resolver.query(this.downloadsUriProvider.getBatchesUri(), null, null, null, null);
         List<DownloadBatch> batches = new ArrayList<>(batchesCursor.getCount());
         try {
             int idColumn = batchesCursor.getColumnIndexOrThrow(DownloadContract.Batches._ID);
