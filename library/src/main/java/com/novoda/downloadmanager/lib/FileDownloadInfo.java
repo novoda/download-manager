@@ -24,7 +24,6 @@ class FileDownloadInfo {
 
     /**
      * Constants used to indicate network state for a specific download, after
-     * private final CanDownload canDownload;
      * applying any requested constraints.
      */
     public enum NetworkState {
@@ -34,6 +33,7 @@ class FileDownloadInfo {
         OK,
 
         /**
+         *
          * There is no network connectivity.
          */
         NO_CONNECTION,
