@@ -335,6 +335,24 @@ final class DownloadContract {
 
     }
 
+    static final class DownloadsWithoutProgress {
+
+        public static final String VIEW_NAME_DOWNLOADS_WITHOUT_PROGRESS = "DownloadsWithoutProgress";
+
+        private DownloadsWithoutProgress() {
+            // non-instantiable class
+        }
+    }
+
+    static final class BatchesWithoutProgress {
+
+        public static final String VIEW_NAME_BATCHES_WITHOUT_PROGRESS = "BatchesWithoutProgress";
+
+        private BatchesWithoutProgress() {
+            // non-instantiable class
+        }
+    }
+
     /**
      * Constants related to HTTP request headers associated with each download.
      */
