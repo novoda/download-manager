@@ -63,6 +63,8 @@ public class DownloadService extends Service {
     // DownloadReceiver to protect our entire workflow.
 
     private static final boolean DEBUG_LIFECYCLE = false;
+    private static final long ONE_SECOND = TimeUnit.SECONDS.toMillis(1);
+
     private final ContentLengthFetcher contentLengthFetcher = new ContentLengthFetcher();
 
     private SystemFacade systemFacade;
@@ -387,7 +389,7 @@ public class DownloadService extends Service {
     private long lastUpdate;
 
     private void updateTotalBytesIfNecessaryFor(Collection<FileDownloadInfo> downloadInfos) {
-        if (SystemClock.elapsedRealtime() - lastUpdate < TimeUnit.SECONDS.toMillis(1)) {
+        if (SystemClock.elapsedRealtime() - lastUpdate < ONE_SECOND) {
             return;
         }
 
