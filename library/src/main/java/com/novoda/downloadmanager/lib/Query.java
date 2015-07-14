@@ -220,7 +220,7 @@ public class Query {
     }
 
     private void filterByNotificationExtras(List<String> selectionParts) {
-        if (filterNotificiationExtras == null) {
+        if (filterNotificiationExtras == null || filterNotificiationExtras.length == 0) {
             return;
         }
         List<String> parts = new ArrayList<>();
