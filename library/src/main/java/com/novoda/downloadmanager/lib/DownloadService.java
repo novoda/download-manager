@@ -384,7 +384,7 @@ public class DownloadService extends Service {
         executor.submit(downloadThread);
     }
 
-    private long lastUpdate = 0;
+    private long lastUpdate;
 
     private void updateTotalBytesFor(Collection<FileDownloadInfo> downloadInfos) {
         if (SystemClock.elapsedRealtime() - lastUpdate < TimeUnit.SECONDS.toMillis(1)) {
