@@ -227,7 +227,7 @@ public class Query {
         for (String filterExtra : filterNotificiationExtras) {
             parts.add(notificationExtrasClause(filterExtra));
         }
-        selectionParts.add(joinStrings(" OR ", parts));
+        selectionParts.add("(" + joinStrings(" OR ", parts) + ")");
     }
 
     private void filterByExtraData(List<String> selectionParts) {
