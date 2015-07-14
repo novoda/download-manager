@@ -32,6 +32,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 
 import com.novoda.notils.logger.simple.Log;
@@ -44,6 +45,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
@@ -259,6 +261,7 @@ public class DownloadService extends Service {
             // TODO: switch to asking real tasks to derive active state
             // TODO: handle media scanner timeouts
 
+            Log.d("Ferran, updateCallback");
             boolean isActive = updateLocked();
 
             if (msg.what == MSG_FINAL_UPDATE) {
@@ -377,18 +380,29 @@ public class DownloadService extends Service {
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.SUBMITTED);
+
+        Log.d("Ferran, download");
         getContentResolver().update(info.getAllDownloadsUri(), contentValues, null, null);
 
         executor.submit(downloadThread);
     }
 
+    private long lastUpdate = 0;
+
     private void updateTotalBytesFor(Collection<FileDownloadInfo> downloadInfos) {
-        ContentValues values = new ContentValues();
+        if (SystemClock.elapsedRealtime() - lastUpdate < TimeUnit.SECONDS.toMillis(1)) {
+            return;
+        }
+
+        lastUpdate = SystemClock.elapsedRealtime();
+
+        ContentValues values = new ContentValues(1);
         for (FileDownloadInfo downloadInfo : downloadInfos) {
             if (downloadInfo.hasUnknownTotalBytes()) {
                 long totalBytes = contentLengthFetcher.fetchContentLengthFor(downloadInfo);
                 values.put(DownloadContract.Downloads.COLUMN_TOTAL_BYTES, totalBytes);
                 getContentResolver().update(downloadInfo.getAllDownloadsUri(), values, null, null);
+                Log.d("Ferran, updateTotalBytesFor: " + downloadInfo.getFileName() + ", size: " + (totalBytes/1048576) + "MB");
 
                 batchRepository.updateTotalSize(downloadInfo.getBatchId());
             }
