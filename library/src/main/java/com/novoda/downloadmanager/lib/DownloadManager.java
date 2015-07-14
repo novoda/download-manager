@@ -847,6 +847,9 @@ public class DownloadManager {
             request.setBatchId(batchId);
             insert(request);
         }
+        contentResolver.notifyChange(getBatchesUri(), null);
+        contentResolver.notifyChange(getBatchesWithoutProgressUri(), null);
+
         return batchId;
     }
 
