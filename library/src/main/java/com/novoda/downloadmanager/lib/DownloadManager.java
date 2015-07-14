@@ -359,6 +359,7 @@ public class DownloadManager {
             DownloadContract.Downloads.COLUMN_CURRENT_BYTES + " AS " + COLUMN_BYTES_DOWNLOADED_SO_FAR,
             DownloadContract.Downloads.COLUMN_BATCH_ID,
             DownloadContract.Downloads.COLUMN_EXTRA_DATA,
+            DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS,
             DownloadContract.Batches.COLUMN_TITLE,
             DownloadContract.Batches.COLUMN_DESCRIPTION,
             DownloadContract.Batches.COLUMN_BIG_PICTURE,
