@@ -261,7 +261,6 @@ public class DownloadService extends Service {
             // TODO: switch to asking real tasks to derive active state
             // TODO: handle media scanner timeouts
 
-            Log.d("Ferran, updateCallback");
             boolean isActive = updateLocked();
 
             if (msg.what == MSG_FINAL_UPDATE) {
@@ -380,8 +379,6 @@ public class DownloadService extends Service {
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.SUBMITTED);
-
-        Log.d("Ferran, download");
         getContentResolver().update(info.getAllDownloadsUri(), contentValues, null, null);
 
         executor.submit(downloadThread);
@@ -402,7 +399,6 @@ public class DownloadService extends Service {
                 long totalBytes = contentLengthFetcher.fetchContentLengthFor(downloadInfo);
                 values.put(DownloadContract.Downloads.COLUMN_TOTAL_BYTES, totalBytes);
                 getContentResolver().update(downloadInfo.getAllDownloadsUri(), values, null, null);
-                Log.d("Ferran, updateTotalBytesFor: " + downloadInfo.getFileName() + ", size: " + (totalBytes/1048576) + "MB");
 
                 batchRepository.updateTotalSize(downloadInfo.getBatchId());
             }

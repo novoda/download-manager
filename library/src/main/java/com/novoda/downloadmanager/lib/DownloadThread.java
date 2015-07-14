@@ -613,9 +613,6 @@ class DownloadThread implements Runnable {
 
         if (state.currentBytes - state.bytesNotified > Constants.MIN_PROGRESS_STEP &&
                 now - state.timeLastNotification > Constants.MIN_PROGRESS_TIME) {
-
-            Log.d("Ferran, report progress with: " + (state.currentBytes / 1048576f));
-
             ContentValues values = new ContentValues();
             values.put(DownloadContract.Downloads.COLUMN_CURRENT_BYTES, state.currentBytes);
             getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
