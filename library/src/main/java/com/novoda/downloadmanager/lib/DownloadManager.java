@@ -177,6 +177,12 @@ public class DownloadManager {
     public static final String COLUMN_DOWNLOAD_LAST_MODIFIED_TIMESTAMP = "download_last_modified_timestamp";
 
     /**
+     * Timestamp when the batch was last modified, in {@link System#currentTimeMillis
+     * System.currentTimeMillis()} (wall clock time in UTC).
+     */
+    public static final String COLUMN_BATCH_LAST_MODIFIED_TIMESTAMP = "batch_last_modified_timestamp";
+
+    /**
      * The URI to the corresponding entry in MediaProvider for this downloaded entry. It is
      * used to delete the entries from MediaProvider database when it is deleted from the
      * downloaded list.
@@ -364,6 +370,7 @@ public class DownloadManager {
             DownloadContract.Batches.COLUMN_BIG_PICTURE,
             DownloadContract.Batches.COLUMN_VISIBILITY,
             DownloadContract.Batches.COLUMN_STATUS,
+            DownloadContract.Batches.COLUMN_LAST_MODIFICATION + " AS " + COLUMN_BATCH_LAST_MODIFIED_TIMESTAMP,
         /* add the following 'computed' columns to the cursor.
          * they are not 'returned' by the database, but their inclusion
          * eliminates need to have lot of methods in CursorTranslator

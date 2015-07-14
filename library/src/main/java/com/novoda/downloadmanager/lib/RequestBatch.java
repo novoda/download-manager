@@ -41,6 +41,7 @@ public class RequestBatch {
         values.put(DownloadContract.Batches.COLUMN_DESCRIPTION, batchInfo.getDescription());
         values.put(DownloadContract.Batches.COLUMN_BIG_PICTURE, batchInfo.getBigPictureUrl());
         values.put(DownloadContract.Batches.COLUMN_VISIBILITY, batchInfo.getVisibility());
+        values.put(DownloadContract.Batches.COLUMN_LAST_MODIFICATION, System.currentTimeMillis()); // Could be done using a Facade
         return values;
     }
 

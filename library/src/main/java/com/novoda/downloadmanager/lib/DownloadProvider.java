@@ -177,6 +177,7 @@ public final class DownloadProvider extends ContentProvider {
             DownloadContract.Batches.COLUMN_VISIBILITY,
             DownloadContract.Batches.COLUMN_TOTAL_BYTES,
             DownloadContract.Batches.COLUMN_CURRENT_BYTES,
+            DownloadContract.Batches.COLUMN_LAST_MODIFICATION,
             OpenableColumns.DISPLAY_NAME,
             OpenableColumns.SIZE,
     };
