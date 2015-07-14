@@ -389,10 +389,7 @@ public class DownloadService extends Service {
                 long totalBytes = contentLengthFetcher.fetchContentLengthFor(downloadInfo);
                 values.put(DownloadContract.Downloads.COLUMN_TOTAL_BYTES, totalBytes);
                 getContentResolver().update(downloadInfo.getAllDownloadsUri(), values, null, null);
-
-                batchRepository.updateTotalSize(downloadInfo.getBatchId());
             }
-            batchRepository.updateCurrentSize(downloadInfo.getBatchId());
         }
     }
 

@@ -87,12 +87,12 @@ public class DownloadManager {
     /**
      * The total size in bytes of the batch.
      */
-    public static final String COLUMN_BATCH_TOTAL_SIZE_BYTES = DownloadContract.Batches.COLUMN_TOTAL_BYTES;
+    public static final String COLUMN_BATCH_TOTAL_SIZE_BYTES = DownloadContract.BatchesWithSizes.COLUMN_TOTAL_BYTES;
 
     /**
      * The current size in bytes of the batch.
      */
-    public static final String COLUMN_BATCH_CURRENT_SIZE_BYTES = DownloadContract.Batches.COLUMN_CURRENT_BYTES;
+    public static final String COLUMN_BATCH_CURRENT_SIZE_BYTES = DownloadContract.BatchesWithSizes.COLUMN_CURRENT_BYTES;
 
     /**
      * The extra supplied information available to completion notifications for this download.

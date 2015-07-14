@@ -175,8 +175,8 @@ public final class DownloadProvider extends ContentProvider {
             DownloadContract.Batches.COLUMN_DESCRIPTION,
             DownloadContract.Batches.COLUMN_BIG_PICTURE,
             DownloadContract.Batches.COLUMN_VISIBILITY,
-            DownloadContract.Batches.COLUMN_TOTAL_BYTES,
-            DownloadContract.Batches.COLUMN_CURRENT_BYTES,
+            DownloadContract.BatchesWithSizes.COLUMN_TOTAL_BYTES,
+            DownloadContract.BatchesWithSizes.COLUMN_CURRENT_BYTES,
             OpenableColumns.DISPLAY_NAME,
             OpenableColumns.SIZE,
     };
@@ -550,7 +550,7 @@ public final class DownloadProvider extends ContentProvider {
             case BATCHES_ID:
                 SqlSelection batchSelection = getWhereClause(uri, selection, selectionArgs, match);
                 return db.query(
-                        DownloadContract.Batches.BATCHES_TABLE_NAME, projection, batchSelection.getSelection(),
+                        DownloadContract.BatchesWithSizes.VIEW_NAME_BATCHES_WITH_SIZES, projection, batchSelection.getSelection(),
                         batchSelection.getParameters(), null, null, sort);
             case DOWNLOADS_BY_BATCH:
                 return db.query(DownloadContract.DownloadsByBatch.VIEW_NAME_DOWNLOADS_BY_BATCH, projection, selection, selectionArgs, null, null, sort);
