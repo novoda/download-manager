@@ -174,7 +174,13 @@ public class DownloadManager {
      * Timestamp when the download was last modified, in {@link System#currentTimeMillis
      * System.currentTimeMillis()} (wall clock time in UTC).
      */
-    public static final String COLUMN_LAST_MODIFIED_TIMESTAMP = "last_modified_timestamp";
+    public static final String COLUMN_DOWNLOAD_LAST_MODIFIED_TIMESTAMP = "download_last_modified_timestamp";
+
+    /**
+     * Timestamp when the batch was last modified, in {@link System#currentTimeMillis
+     * System.currentTimeMillis()} (wall clock time in UTC).
+     */
+    public static final String COLUMN_BATCH_LAST_MODIFIED_TIMESTAMP = "batch_last_modified_timestamp";
 
     /**
      * The URI to the corresponding entry in MediaProvider for this downloaded entry. It is
@@ -355,7 +361,7 @@ public class DownloadManager {
             DownloadContract.Downloads.COLUMN_FILE_NAME_HINT,
             DownloadContract.Downloads.COLUMN_MIME_TYPE + " AS " + COLUMN_MEDIA_TYPE,
             DownloadContract.Downloads.COLUMN_TOTAL_BYTES + " AS " + COLUMN_TOTAL_SIZE_BYTES,
-            DownloadContract.Downloads.COLUMN_LAST_MODIFICATION + " AS " + COLUMN_LAST_MODIFIED_TIMESTAMP,
+            DownloadContract.Downloads.COLUMN_LAST_MODIFICATION + " AS " + COLUMN_DOWNLOAD_LAST_MODIFIED_TIMESTAMP,
             DownloadContract.Downloads.COLUMN_CURRENT_BYTES + " AS " + COLUMN_BYTES_DOWNLOADED_SO_FAR,
             DownloadContract.Downloads.COLUMN_BATCH_ID,
             DownloadContract.Downloads.COLUMN_EXTRA_DATA,
@@ -364,6 +370,7 @@ public class DownloadManager {
             DownloadContract.Batches.COLUMN_BIG_PICTURE,
             DownloadContract.Batches.COLUMN_VISIBILITY,
             DownloadContract.Batches.COLUMN_STATUS,
+            DownloadContract.Batches.COLUMN_LAST_MODIFICATION + " AS " + COLUMN_BATCH_LAST_MODIFIED_TIMESTAMP,
         /* add the following 'computed' columns to the cursor.
          * they are not 'returned' by the database, but their inclusion
          * eliminates need to have lot of methods in CursorTranslator

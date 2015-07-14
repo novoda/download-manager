@@ -10,9 +10,9 @@ public class Download {
     private final String title;
     private final String fileName;
     private final int downloadStatus;
-    private final long batchId;
+    private final int batchId;
 
-    public Download(String title, String fileName, int downloadStatus, long batchId) {
+    public Download(String title, String fileName, int downloadStatus, int batchId) {
         this.title = title;
         this.fileName = fileName;
         this.downloadStatus = downloadStatus;

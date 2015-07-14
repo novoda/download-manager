@@ -36,7 +36,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             DownloadContract.Downloads.COLUMN_FILE_NAME_HINT,
             DownloadContract.Downloads.COLUMN_MIME_TYPE,
             DownloadContract.Downloads.COLUMN_TOTAL_BYTES,
-            DownloadContract.Downloads.COLUMN_LAST_MODIFICATION,
+            DownloadContract.Downloads.DOWNLOADS_TABLE_NAME + "." + DownloadContract.Downloads.COLUMN_LAST_MODIFICATION,
             DownloadContract.Downloads.COLUMN_CURRENT_BYTES,
             DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS,
             DownloadContract.Downloads.COLUMN_EXTRA_DATA,
@@ -48,7 +48,8 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             DownloadContract.Batches.COLUMN_STATUS,
             DownloadContract.Batches.BATCHES_TABLE_NAME + "." + DownloadContract.Batches.COLUMN_DELETED,
             DownloadContract.Batches.COLUMN_TOTAL_BYTES,
-            DownloadContract.Batches.COLUMN_CURRENT_BYTES
+            DownloadContract.Batches.COLUMN_CURRENT_BYTES,
+            DownloadContract.Batches.BATCHES_TABLE_NAME + "." + DownloadContract.Batches.COLUMN_LAST_MODIFICATION
     };
 
     public static final String[] DOWNLOADS_WITHOUT_PROGRESS_VIEW_COLUMNS = new String[]{
@@ -63,10 +64,11 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS,
             DownloadContract.Downloads.COLUMN_EXTRA_DATA,
             DownloadContract.Downloads.COLUMN_BATCH_ID,
+            DownloadContract.Downloads.DOWNLOADS_TABLE_NAME + "." + DownloadContract.Downloads.COLUMN_LAST_MODIFICATION,
             DownloadContract.Batches.COLUMN_TITLE,
             DownloadContract.Batches.COLUMN_DESCRIPTION,
             DownloadContract.Batches.COLUMN_BIG_PICTURE,
-            DownloadContract.Batches.COLUMN_STATUS,
+            DownloadContract.Batches.COLUMN_STATUS
     };
 
     public static final String[] BATCHES_WITHOUT_PROGRESS_VIEW_COLUMNS = new String[]{
@@ -74,6 +76,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             DownloadContract.Batches.COLUMN_DESCRIPTION,
             DownloadContract.Batches.COLUMN_BIG_PICTURE,
             DownloadContract.Batches.COLUMN_STATUS,
+            DownloadContract.Batches.COLUMN_LAST_MODIFICATION
     };
 
     public DatabaseHelper(Context context, String dbName) {
@@ -189,7 +192,8 @@ final class DatabaseHelper extends SQLiteOpenHelper {
                         DownloadContract.Batches.COLUMN_VISIBILITY + " INTEGER," +
                         DownloadContract.Batches.COLUMN_DELETED + " BOOLEAN NOT NULL DEFAULT 0, " +
                         DownloadContract.Batches.COLUMN_TOTAL_BYTES + " INTEGER NOT NULL DEFAULT -1, " +
-                        DownloadContract.Batches.COLUMN_CURRENT_BYTES + " INTEGER NOT NULL DEFAULT 0 " +
+                        DownloadContract.Batches.COLUMN_CURRENT_BYTES + " INTEGER NOT NULL DEFAULT 0, " +
+                        DownloadContract.Downloads.COLUMN_LAST_MODIFICATION + " BIGINT " +
                         ");");
     }
 

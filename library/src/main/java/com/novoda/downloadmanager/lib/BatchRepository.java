@@ -49,12 +49,14 @@ class BatchRepository {
     void updateTotalSize(long batchId) {
         ContentValues updateValues = new ContentValues();
         updateValues.put(DownloadContract.Batches.COLUMN_TOTAL_BYTES, getSummedBatchSizeInBytes(batchId, DownloadContract.Downloads.COLUMN_TOTAL_BYTES));
+        updateValues.put(DownloadContract.Batches.COLUMN_LAST_MODIFICATION, System.currentTimeMillis());
         resolver.update(downloadsUriProvider.getBatchesUri(), updateValues, DownloadContract.Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
     }
 
     void updateCurrentSize(long batchId) {
         ContentValues updateValues = new ContentValues();
         updateValues.put(DownloadContract.Batches.COLUMN_CURRENT_BYTES, getSummedBatchSizeInBytes(batchId, DownloadContract.Downloads.COLUMN_CURRENT_BYTES));
+        updateValues.put(DownloadContract.Batches.COLUMN_LAST_MODIFICATION, System.currentTimeMillis());
         resolver.update(downloadsUriProvider.getBatchesUri(), updateValues, DownloadContract.Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
     }
 
@@ -82,9 +84,10 @@ class BatchRepository {
     }
 
     void updateBatchStatus(long batchId, int status) {
-        ContentValues values = new ContentValues();
-        values.put(DownloadContract.Batches.COLUMN_STATUS, status);
-        resolver.update(downloadsUriProvider.getBatchesUri(), values, DownloadContract.Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
+        ContentValues updateValues = new ContentValues();
+        updateValues.put(DownloadContract.Batches.COLUMN_STATUS, status);
+        updateValues.put(DownloadContract.Batches.COLUMN_LAST_MODIFICATION, System.currentTimeMillis());
+        resolver.update(downloadsUriProvider.getBatchesUri(), updateValues, DownloadContract.Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
     }
 
     int getBatchStatus(long batchId) {
