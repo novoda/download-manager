@@ -322,7 +322,7 @@ public class DownloadService extends Service {
         long now = systemFacade.currentTimeMillis();
 
         Collection<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
-        updateTotalBytesFor(allDownloads);
+        updateTotalBytesIfNecessaryFor(allDownloads);
 
         List<DownloadBatch> downloadBatches = batchRepository.retrieveBatchesFor(allDownloads);
         for (DownloadBatch downloadBatch : downloadBatches) {
@@ -386,7 +386,7 @@ public class DownloadService extends Service {
 
     private long lastUpdate;
 
-    private void updateTotalBytesFor(Collection<FileDownloadInfo> downloadInfos) {
+    private void updateTotalBytesIfNecessaryFor(Collection<FileDownloadInfo> downloadInfos) {
         if (SystemClock.elapsedRealtime() - lastUpdate < TimeUnit.SECONDS.toMillis(1)) {
             return;
         }
