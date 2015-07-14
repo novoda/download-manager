@@ -9,6 +9,8 @@ class DownloadsUriProvider {
     private final Uri allDownloadsUri;
     private final Uri batchesUri;
     private final Uri contentUri;
+    private final Uri downloadsWithoutProgressUri;
+    private final Uri batchesWithoutProgressUri;
 
     public static DownloadsUriProvider getInstance() {
         return LazyInitialisationHelper.INSTANCE;
@@ -26,13 +28,17 @@ class DownloadsUriProvider {
         Uri allDownloadsUri = Uri.parse(authority + "/all_downloads");
         Uri batchesUri = Uri.parse(authority + "/batches");
         Uri contentUri = Uri.parse(authority + "/my_downloads");
+        Uri downloadsByStatusUri = Uri.parse(authority + "/downloads_without_progress");
+        Uri batchesByStatusUri = Uri.parse(authority + "/batches_without_progress");
 
         return new DownloadsUriProvider(
                 publiclyAccessibleDownloadsUri,
                 downloadsByBatchUri,
                 allDownloadsUri,
                 batchesUri,
-                contentUri
+                contentUri,
+                downloadsByStatusUri,
+                batchesByStatusUri
         );
     }
 
@@ -41,12 +47,15 @@ class DownloadsUriProvider {
             Uri downloadsByBatchUri,
             Uri allDownloadsUri,
             Uri batchesUri,
-            Uri contentUri) {
+            Uri contentUri,
+            Uri downloadsWithoutProgressUri, Uri batchesWithoutProgressUri) {
         this.publiclyAccessibleDownloadsUri = publiclyAccessibleDownloadsUri;
         this.downloadsByBatchUri = downloadsByBatchUri;
         this.allDownloadsUri = allDownloadsUri;
         this.batchesUri = batchesUri;
         this.contentUri = contentUri;
+        this.downloadsWithoutProgressUri = downloadsWithoutProgressUri;
+        this.batchesWithoutProgressUri = batchesWithoutProgressUri;
     }
 
     /**
@@ -84,5 +93,18 @@ class DownloadsUriProvider {
      */
     public Uri getContentUri() {
         return contentUri;
+    }
+
+    /**
+     * The content:// URI to access downloads without progress updates.
+     */
+    public Uri getDownloadsWithoutProgressUri() {
+        return downloadsWithoutProgressUri;
+    }
+    /**
+     * The content:// URI to access batches without progress updates.
+     */
+    public Uri getBatchesWithoutProgressUri() {
+        return batchesWithoutProgressUri;
     }
 }

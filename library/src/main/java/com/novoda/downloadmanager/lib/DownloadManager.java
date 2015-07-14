@@ -856,6 +856,14 @@ public class DownloadManager {
         return ContentUris.parseId(batchUri);
     }
 
+    public Uri getDownloadsWithoutProgressUri() {
+        return downloadsUriProvider.getDownloadsWithoutProgressUri();
+    }
+
+    public Uri getBatchesWithoutProgressUri() {
+        return downloadsUriProvider.getBatchesWithoutProgressUri();
+    }
+
     /**
      * This class wraps a cursor returned by DownloadProvider -- the "underlying cursor" -- and
      * presents a different set of columns, those defined in the DownloadManager.COLUMN_* constants.

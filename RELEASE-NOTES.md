@@ -1,3 +1,11 @@
+0.2.0
+-------
+
+- download checks against the current download #89 
+- simplified download info object #92
+- fix for no icon being set for the notification #95
+- adds ability to query for extra data (api breaking!) #96
+
 0.1.9
 -------
 

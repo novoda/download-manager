@@ -34,6 +34,10 @@ android {
         }
     }
 
+    testVariants.all {
+        it.mergedFlavor.manifestPlaceholders = [downloadAuthority: "com.novoda.download-manager.android-test"]
+    }
+
     lintOptions {
         abortOnError false
     }
@@ -53,7 +57,7 @@ publish {
     userOrg = 'novoda'
     groupId = 'com.novoda'
     artifactId = 'download-manager'
-    publishVersion = '0.2.0'
+    publishVersion = '0.2.1'
     description = 'Download manager based on AOSP DM but allowing downloading to internal private storage.'
     website = 'https://github.com/novoda/download-manager'
 }
