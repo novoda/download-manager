@@ -10,7 +10,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 
 import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.*;
-import static com.novoda.downloadmanager.lib.DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP;
+import static com.novoda.downloadmanager.lib.DownloadManager.COLUMN_DOWNLOAD_LAST_MODIFIED_TIMESTAMP;
 import static com.novoda.downloadmanager.lib.DownloadManager.COLUMN_STATUS;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.*;
@@ -56,7 +56,7 @@ public class QueryTest {
 
     @Test
     public void whenWeSetABatchStatusOrderByOnAQueryThenTheResolverIsQueriedWithTheCorrectSortOrder() {
-        query.orderBy(COLUMN_LAST_MODIFIED_TIMESTAMP, Query.ORDER_ASCENDING).runQuery(resolver, null, uri);
+        query.orderBy(COLUMN_DOWNLOAD_LAST_MODIFIED_TIMESTAMP, Query.ORDER_ASCENDING).runQuery(resolver, null, uri);
 
         // Actually resolves to Downloads.Impl.COLUMN_LAST_MODIFIED
         verify(resolver).query(any(Uri.class), any(String[].class), anyString(), any(String[].class), eq("lastmod ASC"));

@@ -136,7 +136,7 @@ public class Query {
 
         String resolvedOrderColumn;
         switch (column) {
-            case DownloadManager.COLUMN_LAST_MODIFIED_TIMESTAMP:
+            case DownloadManager.COLUMN_DOWNLOAD_LAST_MODIFIED_TIMESTAMP:
                 resolvedOrderColumn = DownloadContract.Downloads.COLUMN_LAST_MODIFICATION;
                 break;
             case DownloadManager.COLUMN_TOTAL_SIZE_BYTES:
