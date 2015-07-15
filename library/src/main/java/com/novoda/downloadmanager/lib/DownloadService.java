@@ -63,9 +63,9 @@ public class DownloadService extends Service {
     // DownloadReceiver to protect our entire workflow.
 
     private static final boolean DEBUG_LIFECYCLE = false;
-    private static final long ONE_SECOND = TimeUnit.SECONDS.toMillis(1);
 
     private final ContentLengthFetcher contentLengthFetcher = new ContentLengthFetcher();
+    private Clock clock;
 
     private SystemFacade systemFacade;
     private AlarmManager alarmManager;
@@ -121,6 +121,7 @@ public class DownloadService extends Service {
             systemFacade = new RealSystemFacade(this);
         }
 
+        this.clock = new Clock();
         this.downloadsUriProvider = DownloadsUriProvider.getInstance();
         this.downloadDeleter = new DownloadDeleter(getContentResolver());
         this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter, downloadsUriProvider);
@@ -386,14 +387,12 @@ public class DownloadService extends Service {
         executor.submit(downloadThread);
     }
 
-    private long lastUpdate;
-
     private void updateTotalBytesIfNecessaryFor(Collection<FileDownloadInfo> downloadInfos) {
-        if (SystemClock.elapsedRealtime() - lastUpdate < ONE_SECOND) {
+        if (clock.intervalLessThan(Clock.Interval.ONE_SECOND)) {
             return;
         }
 
-        lastUpdate = SystemClock.elapsedRealtime();
+        clock.startInterval();
 
         ContentValues values = new ContentValues(1);
         for (FileDownloadInfo downloadInfo : downloadInfos) {
@@ -415,5 +414,32 @@ public class DownloadService extends Service {
     @Override
     protected void dump(FileDescriptor fd, @NonNull PrintWriter writer, String[] args) {
         Log.e("I want to dump but nothing to dump into");
+    }
+
+    private static final class Clock {
+
+        public enum Interval {
+            ONE_SECOND(TimeUnit.SECONDS.toMillis(1));
+
+            private final long interval;
+
+            Interval(long interval) {
+                this.interval = interval;
+            }
+
+            public long toMillis() {
+                return interval;
+            }
+        }
+
+        private long lastUpdate;
+
+        public void startInterval() {
+            lastUpdate = SystemClock.elapsedRealtime();
+        }
+
+        public boolean intervalLessThan(Interval interval) {
+            return SystemClock.elapsedRealtime() - lastUpdate < interval.toMillis();
+        }
     }
 }
