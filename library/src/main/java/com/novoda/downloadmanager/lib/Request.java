@@ -53,7 +53,7 @@ public class Request {
     private String bigPictureUrl;
     private long batchId = -1L;
     private String extraData;
-    private boolean alwaysResume = false;
+    private boolean alwaysResume;
 
     /**
      * if a file is designated as a MediaScanner scannable file, the following value is
