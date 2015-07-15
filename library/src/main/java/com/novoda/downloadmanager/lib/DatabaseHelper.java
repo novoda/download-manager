@@ -149,6 +149,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
                             DownloadContract.Downloads.COLUMN_ALLOW_METERED + " INTEGER NOT NULL DEFAULT 1, " +
                             DownloadContract.Downloads.COLUMN_BATCH_ID + " INTEGER, " +
                             DownloadContract.Downloads.COLUMN_EXTRA_DATA + " TEXT, " +
+                            DownloadContract.Downloads.COLUMN_ALWAYS_RESUME + " INTEGER NOT NULL DEFAULT 0, " +
                             Constants.MEDIA_SCANNED + " BOOLEAN);");
         } catch (SQLException ex) {
             Log.e("couldn't create table in downloads database");
