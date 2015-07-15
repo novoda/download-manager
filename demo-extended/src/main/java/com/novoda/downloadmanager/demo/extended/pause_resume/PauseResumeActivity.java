@@ -89,7 +89,8 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
                 .setDescription("Fine facial hair")
                 .setBigPictureUrl(BEARD_IMAGE)
                 .setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "pause_resume_example.beard")
-                .setNotificationVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE);
+                .setNotificationVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE)
+                .alwaysAttemptResume();
 
         long requestId = downloadManager.enqueue(request);
         Log.d("Download enqueued with request ID: " + requestId);

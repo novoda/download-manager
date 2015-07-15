@@ -53,6 +53,7 @@ public class Request {
     private String bigPictureUrl;
     private long batchId = -1L;
     private String extraData;
+    private boolean alwaysResume;
 
     /**
      * if a file is designated as a MediaScanner scannable file, the following value is
@@ -220,6 +221,16 @@ public class Request {
      */
     public void allowScanningByMediaScanner() {
         scannable = true;
+    }
+
+    /**
+     * Always attempt to resume the download, regardless of whether the server returns
+     * a Etag header or not. **CAUTION** if the file has changed then this flag will
+     * result in undefined behaviour.
+     */
+    public Request alwaysAttemptResume() {
+        alwaysResume = true;
+        return this;
     }
 
     /**
@@ -444,6 +455,7 @@ public class Request {
         values.put(DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS, notificationExtras);
         values.put(DownloadContract.Downloads.COLUMN_BATCH_ID, batchId);
         values.put(DownloadContract.Downloads.COLUMN_EXTRA_DATA, extraData);
+        values.put(DownloadContract.Downloads.COLUMN_ALWAYS_RESUME, alwaysResume);
 
         return values;
     }
