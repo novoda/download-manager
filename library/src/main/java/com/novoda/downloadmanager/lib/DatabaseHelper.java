@@ -210,15 +210,15 @@ final class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(
                 "CREATE VIEW " + DownloadContract.BatchesWithSizes.VIEW_NAME_BATCHES_WITH_SIZES
                         + " AS SELECT DISTINCT "
-                        + DownloadContract.Batches.BATCHES_TABLE_NAME + ".*"
-                        + ", " + DownloadContract.BatchesWithSizes.COLUMN_CURRENT_BYTES
-                        + ", " + DownloadContract.BatchesWithSizes.COLUMN_TOTAL_BYTES
+                        + DownloadContract.Batches.BATCHES_TABLE_NAME + ".*, "
+                        + DownloadContract.BatchesWithSizes.COLUMN_CURRENT_BYTES + ", "
+                        + DownloadContract.BatchesWithSizes.COLUMN_TOTAL_BYTES
                         + " FROM " + DownloadContract.Batches.BATCHES_TABLE_NAME
                         + " INNER JOIN "
                         + "  (SELECT "
                         + "    " + DownloadContract.Downloads.COLUMN_BATCH_ID + ","
-                        + "    SUM(" + DownloadContract.Downloads.COLUMN_CURRENT_BYTES + ") " + DownloadContract.BatchesWithSizes.COLUMN_CURRENT_BYTES + ","
-                        + "    SUM(" + DownloadContract.Downloads.COLUMN_TOTAL_BYTES + ") " + DownloadContract.BatchesWithSizes.COLUMN_TOTAL_BYTES
+                        + "    SUM(" + DownloadContract.Downloads.COLUMN_CURRENT_BYTES + ") AS " + DownloadContract.BatchesWithSizes.COLUMN_CURRENT_BYTES + ","
+                        + "    SUM(" + DownloadContract.Downloads.COLUMN_TOTAL_BYTES + ") AS " + DownloadContract.BatchesWithSizes.COLUMN_TOTAL_BYTES
                         + "    FROM " + DownloadContract.Downloads.DOWNLOADS_TABLE_NAME
                         + "    GROUP BY " + DownloadContract.Downloads.COLUMN_BATCH_ID
                         + "  ) " + DownloadContract.Downloads.DOWNLOADS_TABLE_NAME
