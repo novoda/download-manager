@@ -8,7 +8,6 @@
   <string name="no_downloads">No downloads yet.\nTap the \'Download\' button to add items to the download queue.</string>
   <string name="no_batches">No batches yet.\nGo back and tap the \'Download\' button to begin downloading.</string>
   <string name="button_download_text">Download a podcast</string>
-  <string name="button_refresh_text">Refresh</string>
   <string name="button_single_download_text">Download a single item</string>
   <string name="button_batch_download_text">Download a batch of items</string>
   <string name="button_batch_show_text">Show batches</string>
@@ -24,7 +23,6 @@
   <string name="batches_description">This demo shows how you can create a batch to download many files as one download (the list shows them separately to show a batch contains more than one item).</string>
   <string name="title_activity_show_batches">ShowBatchesActivity</string>
 
-  <string name="hello_world">Hello world!</string>
   <string name="action_settings">Settings</string>
   <string name="filter_batches_by_statuses">Filter the batches by following statuses:</string>
   <string name="all">All</string>
