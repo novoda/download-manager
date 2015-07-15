@@ -129,6 +129,25 @@ public class QueryTest {
         assertSelectionDoesNotContain(COLUMN_EXTRA_DATA + " IN ");
     }
 
+    @Test
+    public void givenMultipleNotificationExtrasWhenTheQueryIsCreatedThenTheWhereStatementIsCorrect() {
+        query.setFilterByNotificationExtras("13", "14").runQuery(resolver, null, uri);
+
+        verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
+
+        assertSelectionContains("(" + COLUMN_NOTIFICATION_EXTRAS + " = '13' OR " + COLUMN_NOTIFICATION_EXTRAS + " = '14')");
+    }
+
+    @Test
+    public void givenEmptyNotificationExtrasWhenTheQueryIsCreatedThenTheWhereStatementDoesNotContainExtrasPredicate() {
+        String[] empty = {};
+        query.setFilterByNotificationExtras(empty).runQuery(resolver, null, uri);
+
+        verify(resolver).query(any(Uri.class), any(String[].class), stringArgumentCaptor.capture(), any(String[].class), anyString());
+
+        assertSelectionDoesNotContain(COLUMN_NOTIFICATION_EXTRAS);
+    }
+
     private void assertSelectionContains(String sequence) {
         assertThat(stringArgumentCaptor.getValue()).contains(sequence);
     }
