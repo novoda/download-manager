@@ -9,6 +9,7 @@ import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.demo.extended.Download;
 
 import java.util.List;
+import java.util.Locale;
 
 public class BatchDownloadsAdapter extends BaseAdapter {
     private final List<Download> downloads;
@@ -41,7 +42,7 @@ public class BatchDownloadsAdapter extends BaseAdapter {
         TextView locationTextView = (TextView) view.findViewById(R.id.download_location_text);
 
         titleTextView.setText(download.getTitle());
-        String text = String.format("%1$s : %2$s\nBatch %3$d", download.getDownloadStatusText(), download.getFileName(), download.getBatchId());
+        String text = String.format(Locale.getDefault(), "%1$s : %2$s\nBatch %3$d", download.getDownloadStatusText(), download.getFileName(), download.getBatchId());
         locationTextView.setText(text);
 
         return view;

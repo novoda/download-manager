@@ -9,6 +9,7 @@ import com.novoda.downloadmanager.demo.R;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class ExtraDataAdapter extends BaseAdapter {
     private final List<ExtraDataDownload> extraDataDownloads;
@@ -41,7 +42,7 @@ public class ExtraDataAdapter extends BaseAdapter {
         TextView locationTextView = (TextView) view.findViewById(R.id.download_location_text);
 
         titleTextView.setText(extraDataDownload.getTitle());
-        String text = String.format("%1$s : %2$s", extraDataDownload.getTitle(), extraDataDownload.getExtraData());
+        String text = String.format(Locale.getDefault(), "%1$s : %2$s", extraDataDownload.getTitle(), extraDataDownload.getExtraData());
         locationTextView.setText(text);
 
         return view;
