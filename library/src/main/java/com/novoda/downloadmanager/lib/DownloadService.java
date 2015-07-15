@@ -32,6 +32,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 
 import com.novoda.notils.logger.simple.Log;
@@ -44,6 +45,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
@@ -61,7 +63,9 @@ public class DownloadService extends Service {
     // DownloadReceiver to protect our entire workflow.
 
     private static final boolean DEBUG_LIFECYCLE = false;
+
     private final ContentLengthFetcher contentLengthFetcher = new ContentLengthFetcher();
+    private Clock clock;
 
     private SystemFacade systemFacade;
     private AlarmManager alarmManager;
@@ -117,6 +121,7 @@ public class DownloadService extends Service {
             systemFacade = new RealSystemFacade(this);
         }
 
+        this.clock = new Clock();
         this.downloadsUriProvider = DownloadsUriProvider.getInstance();
         this.downloadDeleter = new DownloadDeleter(getContentResolver());
         this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter, downloadsUriProvider);
@@ -320,7 +325,7 @@ public class DownloadService extends Service {
         long now = systemFacade.currentTimeMillis();
 
         Collection<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
-        updateTotalBytesFor(allDownloads);
+        updateTotalBytesIfNecessaryFor(allDownloads);
 
         List<DownloadBatch> downloadBatches = batchRepository.retrieveBatchesFor(allDownloads);
         for (DownloadBatch downloadBatch : downloadBatches) {
@@ -382,8 +387,14 @@ public class DownloadService extends Service {
         executor.submit(downloadThread);
     }
 
-    private void updateTotalBytesFor(Collection<FileDownloadInfo> downloadInfos) {
-        ContentValues values = new ContentValues();
+    private void updateTotalBytesIfNecessaryFor(Collection<FileDownloadInfo> downloadInfos) {
+        if (clock.intervalLessThan(Clock.Interval.ONE_SECOND)) {
+            return;
+        }
+
+        clock.startInterval();
+
+        ContentValues values = new ContentValues(1);
         for (FileDownloadInfo downloadInfo : downloadInfos) {
             if (downloadInfo.hasUnknownTotalBytes()) {
                 long totalBytes = contentLengthFetcher.fetchContentLengthFor(downloadInfo);
@@ -403,5 +414,32 @@ public class DownloadService extends Service {
     @Override
     protected void dump(FileDescriptor fd, @NonNull PrintWriter writer, String[] args) {
         Log.e("I want to dump but nothing to dump into");
+    }
+
+    private static final class Clock {
+
+        public enum Interval {
+            ONE_SECOND(TimeUnit.SECONDS.toMillis(1));
+
+            private final long interval;
+
+            Interval(long interval) {
+                this.interval = interval;
+            }
+
+            public long toMillis() {
+                return interval;
+            }
+        }
+
+        private long lastUpdate;
+
+        public void startInterval() {
+            lastUpdate = SystemClock.elapsedRealtime();
+        }
+
+        public boolean intervalLessThan(Interval interval) {
+            return SystemClock.elapsedRealtime() - lastUpdate < interval.toMillis();
+        }
     }
 }
