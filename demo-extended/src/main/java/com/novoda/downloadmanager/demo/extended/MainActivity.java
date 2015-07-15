@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.novoda.downloadmanager.demo.R;
-import com.novoda.downloadmanager.demo.extended.batches.BatchesActivity;
+import com.novoda.downloadmanager.demo.extended.batches.BatchDownloadsActivity;
 import com.novoda.downloadmanager.demo.extended.delete.DeleteActivity;
 import com.novoda.downloadmanager.demo.extended.extra_data.ExtraDataActivity;
 import com.novoda.downloadmanager.demo.extended.pause_resume.PauseResumeActivity;
@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.batches_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, BatchesActivity.class));
+                startActivity(new Intent(MainActivity.this, BatchDownloadsActivity.class));
             }
         });
 

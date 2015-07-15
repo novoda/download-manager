@@ -30,12 +30,12 @@
       android:label="@string/delete_activity_title" />
 
     <activity
-      android:name="com.novoda.downloadmanager.demo.extended.batches.ShowBatchesActivity"
+      android:name="com.novoda.downloadmanager.demo.extended.batches.BatchesActivity"
       android:label="@string/title_activity_show_batches" />
 
 
     <activity
-      android:name="com.novoda.downloadmanager.demo.extended.batches.BatchesActivity"
+      android:name="com.novoda.downloadmanager.demo.extended.batches.BatchDownloadsActivity"
       android:label="@string/batches_activity_title" />
 
     <activity

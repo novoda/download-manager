@@ -1,4 +1,4 @@
-package com.novoda.downloadmanager.demo.extended;
+package com.novoda.downloadmanager.demo.extended.delete;
 
 import android.support.annotation.NonNull;
 import android.view.View;
@@ -8,18 +8,19 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.novoda.downloadmanager.demo.R;
+import com.novoda.downloadmanager.demo.extended.Download;
 
 import java.util.List;
 
-public class DownloadAdapter extends BaseAdapter {
+public class DeleteAdapter extends BaseAdapter {
     private final List<Download> downloads;
     private final Listener listener;
 
-    public DownloadAdapter(List<Download> downloads) {
+    public DeleteAdapter(List<Download> downloads) {
         this(downloads, null);
     }
 
-    public DownloadAdapter(List<Download> downloads, Listener listener) {
+    public DeleteAdapter(List<Download> downloads, Listener listener) {
         this.downloads = downloads;
         this.listener = listener;
     }

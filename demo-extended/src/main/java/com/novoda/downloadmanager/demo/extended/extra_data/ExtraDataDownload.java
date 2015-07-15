@@ -1,10 +1,10 @@
 package com.novoda.downloadmanager.demo.extended.extra_data;
 
-public class Download {
+public class ExtraDataDownload {
     private final String title;
     private final String extraData;
 
-    public Download(String title, String extraData) {
+    public ExtraDataDownload(String title, String extraData) {
         this.title = title;
         this.extraData = extraData;
     }

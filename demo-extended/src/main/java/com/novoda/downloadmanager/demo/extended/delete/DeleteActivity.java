@@ -14,9 +14,7 @@ import android.widget.ListView;
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.demo.extended.Download;
-import com.novoda.downloadmanager.demo.extended.DownloadAdapter;
 import com.novoda.downloadmanager.demo.extended.QueryForDownloadsAsyncTask;
-import com.novoda.downloadmanager.demo.extended.QueryTimestamp;
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.NotificationVisibility;
 import com.novoda.downloadmanager.lib.Query;
@@ -33,9 +31,7 @@ public class DeleteActivity extends AppCompatActivity implements QueryForDownloa
     private final Handler handler = new Handler(Looper.getMainLooper());
     private DownloadManager downloadManager;
     private ListView listView;
-    private DownloadAdapter downloadAdapter;
-
-    private final QueryTimestamp lastQueryTimestamp = new QueryTimestamp();
+    private DeleteAdapter deleteAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,13 +41,13 @@ public class DeleteActivity extends AppCompatActivity implements QueryForDownloa
         downloadManager = DownloadManagerBuilder.from(this)
                 .withVerboseLogging()
                 .build();
-        downloadAdapter = new DownloadAdapter(new ArrayList<Download>(), new DownloadAdapter.Listener() {
+        deleteAdapter = new DeleteAdapter(new ArrayList<Download>(), new DeleteAdapter.Listener() {
             @Override
             public void onDelete(Download download) {
                 downloadManager.removeBatches(download.getBatchId());
             }
         });
-        listView.setAdapter(downloadAdapter);
+        listView.setAdapter(deleteAdapter);
 
         findViewById(R.id.single_download_button).setOnClickListener(
                 new View.OnClickListener() {
@@ -109,7 +105,7 @@ public class DeleteActivity extends AppCompatActivity implements QueryForDownloa
 
     @Override
     public void onQueryResult(List<Download> downloads) {
-        downloadAdapter.updateDownloads(downloads);
+        deleteAdapter.updateDownloads(downloads);
     }
 
 }
