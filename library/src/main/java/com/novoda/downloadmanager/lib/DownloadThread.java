@@ -674,7 +674,7 @@ class DownloadThread implements Runnable {
     }
 
     private boolean cannotResume(State state) {
-        return (state.currentBytes > 0 && !originalDownloadInfo.isNoIntegrity() && state.headerETag == null) || DownloadDrmHelper.isDrmConvertNeeded(state.mimeType);
+        return (state.currentBytes > 0 && !originalDownloadInfo.isResumable() || DownloadDrmHelper.isDrmConvertNeeded(state.mimeType));
     }
 
     /**
@@ -816,7 +816,7 @@ class DownloadThread implements Runnable {
                 destinationFile.delete();
                 state.filename = null;
                 Log.i("resuming download for id: " + originalDownloadInfo.getId() + ", BUT starting from scratch again: ");
-            } else if (originalDownloadInfo.getETag() == null && !originalDownloadInfo.isNoIntegrity()) {
+            } else if (!originalDownloadInfo.isResumable()) {
                 // This should've been caught upon failure
                 Log.d("setupDestinationFile() unable to resume download, deleting " + state.filename);
                 destinationFile.delete();

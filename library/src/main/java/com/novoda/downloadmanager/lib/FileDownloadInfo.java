@@ -33,7 +33,6 @@ class FileDownloadInfo {
         OK,
 
         /**
-         *
          * There is no network connectivity.
          */
         NO_CONNECTION,
@@ -97,6 +96,7 @@ class FileDownloadInfo {
     private boolean allowMetered;
     private int bypassRecommendedSizeLimit;
     private long batchId;
+    private boolean alwaysResume;
 
     private final List<Pair<String, String>> requestHeaders = new ArrayList<>();
     private final SystemFacade systemFacade;
@@ -356,6 +356,10 @@ class FileDownloadInfo {
         requestHeaders.clear();
     }
 
+    public boolean isResumable() {
+        return alwaysResume || (eTag != null && isNoIntegrity());
+    }
+
     public static class Reader {
         private final ContentResolver resolver;
         private final Cursor cursor;
@@ -405,6 +409,7 @@ class FileDownloadInfo {
             info.allowMetered = getInt(DownloadContract.Downloads.COLUMN_ALLOW_METERED) != 0;
             info.bypassRecommendedSizeLimit = getInt(DownloadContract.Downloads.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
             info.batchId = getLong(DownloadContract.Downloads.COLUMN_BATCH_ID);
+            info.alwaysResume = getInt(DownloadContract.Downloads.COLUMN_ALWAYS_RESUME) != 0;
 
             synchronized (this) {
                 info.control = getInt(DownloadContract.Downloads.COLUMN_CONTROL);
