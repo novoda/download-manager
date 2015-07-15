@@ -42,7 +42,7 @@ public class DeleteAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = View.inflate(parent.getContext(), R.layout.list_item_batch_download, null);
+        View view = View.inflate(parent.getContext(), R.layout.list_item_download_delete, null);
 
         final Download download = getItem(position);
         TextView titleTextView = (TextView) view.findViewById(R.id.download_title_text);
