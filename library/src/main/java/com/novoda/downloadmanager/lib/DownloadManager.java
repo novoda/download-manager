@@ -847,10 +847,14 @@ public class DownloadManager {
             request.setBatchId(batchId);
             insert(request);
         }
-        contentResolver.notifyChange(getBatchesUri(), null);
-        contentResolver.notifyChange(getBatchesWithoutProgressUri(), null);
+        notifyAllBatchHasBeenEnqueued();
 
         return batchId;
+    }
+
+    private void notifyAllBatchHasBeenEnqueued() {
+        contentResolver.notifyChange(getBatchesUri(), null);
+        contentResolver.notifyChange(getBatchesWithoutProgressUri(), null);
     }
 
     private long insert(RequestBatch batch) {
