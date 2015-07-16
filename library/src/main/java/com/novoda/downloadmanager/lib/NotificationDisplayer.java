@@ -209,7 +209,7 @@ class NotificationDisplayer {
         } else if (type == DownloadNotifier.TYPE_SUCCESS) {
             setSecondaryNotificationText(builder, style, context.getString(R.string.dl__download_complete));
         } else if (type == DownloadNotifier.TYPE_FAILED) {
-            setSecondaryNotificationText(builder, style, context.getString(R.string.dl__download_unsucessful));
+            setSecondaryNotificationText(builder, style, context.getString(R.string.dl__download_unsuccessful));
         } else if (type == DownloadNotifier.TYPE_CANCELLED) {
             setSecondaryNotificationText(builder, style, context.getString(R.string.dl__download_cancelled));
         }
@@ -257,7 +257,7 @@ class NotificationDisplayer {
         } else if (type == DownloadNotifier.TYPE_SUCCESS) {
             setSecondaryNotificationText(builder, inboxStyle, context.getString(R.string.dl__download_complete));
         } else if (type == DownloadNotifier.TYPE_FAILED) {
-            setSecondaryNotificationText(builder, inboxStyle, context.getString(R.string.dl__download_unsucessful));
+            setSecondaryNotificationText(builder, inboxStyle, context.getString(R.string.dl__download_unsuccessful));
         } else if (type == DownloadNotifier.TYPE_CANCELLED) {
             setSecondaryNotificationText(builder, inboxStyle, context.getString(R.string.dl__download_cancelled));
         }
