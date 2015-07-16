@@ -365,6 +365,7 @@ public class DownloadManager {
             DownloadContract.Batches.COLUMN_BIG_PICTURE,
             DownloadContract.Batches.COLUMN_VISIBILITY,
             DownloadContract.Batches.COLUMN_STATUS,
+            DownloadContract.Batches.COLUMN_EXTRA_DATA,
         /* add the following 'computed' columns to the cursor.
          * they are not 'returned' by the database, but their inclusion
          * eliminates need to have lot of methods in CursorTranslator

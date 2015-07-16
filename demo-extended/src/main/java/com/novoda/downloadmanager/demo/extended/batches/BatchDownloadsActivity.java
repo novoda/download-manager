@@ -83,6 +83,7 @@ public class BatchDownloadsActivity extends AppCompatActivity implements QueryFo
                 .withDescription("Goatees galore")
                 .withBigPictureUrl(BEARD_IMAGE)
                 .withVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE)
+                .withExtraData("An extra beard.")
                 .build();
 
         Uri uri = Uri.parse(BIG_FILE);
