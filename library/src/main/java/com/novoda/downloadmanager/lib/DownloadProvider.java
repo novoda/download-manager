@@ -153,6 +153,7 @@ public final class DownloadProvider extends ContentProvider {
             DownloadContract.Downloads.COLUMN_DELETED,
             DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS,
             DownloadContract.Downloads.COLUMN_BATCH_ID,
+            DownloadContract.Downloads.COLUMN_ALWAYS_RESUME,
             DownloadContract.Batches._ID,
             DownloadContract.Batches.COLUMN_STATUS,
             DownloadContract.Batches.COLUMN_TITLE,
@@ -485,6 +486,7 @@ public final class DownloadProvider extends ContentProvider {
         copyInteger(DownloadContract.Downloads.COLUMN_ALLOWED_NETWORK_TYPES, values, filteredValues);
         copyBoolean(DownloadContract.Downloads.COLUMN_ALLOW_ROAMING, values, filteredValues);
         copyBoolean(DownloadContract.Downloads.COLUMN_ALLOW_METERED, values, filteredValues);
+        copyBoolean(DownloadContract.Downloads.COLUMN_ALWAYS_RESUME, values, filteredValues);
 
         copyInteger(DownloadContract.Downloads.COLUMN_BATCH_ID, values, filteredValues);
 

@@ -249,6 +249,12 @@ final class DownloadContract {
          */
         public static final String COLUMN_EXTRA_DATA = "extra_data";
 
+        /**
+         * The column used to flag whether a download should always attempt a resume
+         * if it is paused, regardless of what the server says
+         */
+        public static final String COLUMN_ALWAYS_RESUME = "always_resume";
+
         private Downloads() {
             // non-instantiable class
         }

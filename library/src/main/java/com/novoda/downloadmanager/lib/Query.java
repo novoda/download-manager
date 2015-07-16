@@ -220,14 +220,14 @@ public class Query {
     }
 
     private void filterByNotificationExtras(List<String> selectionParts) {
-        if (filterNotificiationExtras == null) {
+        if (filterNotificiationExtras == null || filterNotificiationExtras.length == 0) {
             return;
         }
         List<String> parts = new ArrayList<>();
         for (String filterExtra : filterNotificiationExtras) {
             parts.add(notificationExtrasClause(filterExtra));
         }
-        selectionParts.add(joinStrings(" OR ", parts));
+        selectionParts.add("(" + joinStrings(" OR ", parts) + ")");
     }
 
     private void filterByExtraData(List<String> selectionParts) {
