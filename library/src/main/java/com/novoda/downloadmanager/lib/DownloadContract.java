@@ -79,7 +79,7 @@ final class DownloadContract {
          * <P>Type: BIGINT</P>
          * <P>Owner can Read</P>
          */
-        public static final String COLUMN_LAST_MODIFICATION = "lastmod";
+        public static final String COLUMN_LAST_MODIFICATION = "last_modified_timestamp";
         /**
          * The name of the column containing the component name of the class that
          * will receive notifications associated with the download. The
@@ -322,7 +322,7 @@ final class DownloadContract {
          * <P>Type: BIGINT</P>
          * <P>Owner can Read</P>
          */
-        public static final String COLUMN_LAST_MODIFICATION = "lastmod";
+        public static final String COLUMN_LAST_MODIFICATION = "last_modified_timestamp";
 
         private Batches() {
             // non-instantiable class

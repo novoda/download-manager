@@ -174,7 +174,7 @@ public class DownloadManager {
      * Timestamp when the download was last modified, in {@link System#currentTimeMillis
      * System.currentTimeMillis()} (wall clock time in UTC).
      */
-    public static final String COLUMN_LAST_MODIFIED_TIMESTAMP = "last_modified_timestamp";
+    public static final String COLUMN_LAST_MODIFIED_TIMESTAMP = DownloadContract.Downloads.COLUMN_LAST_MODIFICATION;
 
     /**
      * The URI to the corresponding entry in MediaProvider for this downloaded entry. It is
@@ -355,7 +355,7 @@ public class DownloadManager {
             DownloadContract.Downloads.COLUMN_FILE_NAME_HINT,
             DownloadContract.Downloads.COLUMN_MIME_TYPE + " AS " + COLUMN_MEDIA_TYPE,
             DownloadContract.Downloads.COLUMN_TOTAL_BYTES + " AS " + COLUMN_TOTAL_SIZE_BYTES,
-            DownloadContract.Downloads.COLUMN_LAST_MODIFICATION + " AS " + COLUMN_LAST_MODIFIED_TIMESTAMP,
+            DownloadContract.Downloads.COLUMN_LAST_MODIFICATION,
             DownloadContract.Downloads.COLUMN_CURRENT_BYTES + " AS " + COLUMN_BYTES_DOWNLOADED_SO_FAR,
             DownloadContract.Downloads.COLUMN_BATCH_ID,
             DownloadContract.Downloads.COLUMN_EXTRA_DATA,
