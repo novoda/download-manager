@@ -1,7 +1,24 @@
+0.2.3
+-------
+
+- Batch sizes view #105
+- Notify batch modified after all downloads #109
+
+0.2.2
+-------
+
+- flag to allow any file resume #108
+- fixes to the instrumentation test build #99
+
+0.2.1
+-------
+
+- Adds the ability to listen to changes to status changes only #97
+
 0.2.0
 -------
 
-- download checks against the current download #89 
+- download checks against the current download #89
 - simplified download info object #92
 - fix for no icon being set for the notification #95
 - adds ability to query for extra data (api breaking!) #96
