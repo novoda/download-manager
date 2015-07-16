@@ -39,7 +39,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             DownloadContract.Downloads.COLUMN_LAST_MODIFICATION,
             DownloadContract.Downloads.COLUMN_CURRENT_BYTES,
             DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS,
-            DownloadContract.Downloads.COLUMN_EXTRA_DATA,
+            DownloadContract.Downloads.DOWNLOADS_TABLE_NAME + "." + DownloadContract.Downloads.COLUMN_EXTRA_DATA,
             DownloadContract.Downloads.COLUMN_BATCH_ID,
             DownloadContract.Batches.COLUMN_TITLE,
             DownloadContract.Batches.COLUMN_DESCRIPTION,
@@ -61,12 +61,12 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             DownloadContract.Downloads.COLUMN_FILE_NAME_HINT,
             DownloadContract.Downloads.COLUMN_MIME_TYPE,
             DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS,
-            DownloadContract.Downloads.COLUMN_EXTRA_DATA,
+            DownloadContract.Downloads.DOWNLOADS_TABLE_NAME + "." + DownloadContract.Downloads.COLUMN_EXTRA_DATA,
             DownloadContract.Downloads.COLUMN_BATCH_ID,
             DownloadContract.Batches.COLUMN_TITLE,
             DownloadContract.Batches.COLUMN_DESCRIPTION,
             DownloadContract.Batches.COLUMN_BIG_PICTURE,
-            DownloadContract.Batches.COLUMN_STATUS,
+            DownloadContract.Batches.COLUMN_STATUS
     };
 
     public static final String[] BATCHES_WITHOUT_PROGRESS_VIEW_COLUMNS = new String[]{
@@ -74,6 +74,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             DownloadContract.Batches.COLUMN_DESCRIPTION,
             DownloadContract.Batches.COLUMN_BIG_PICTURE,
             DownloadContract.Batches.COLUMN_STATUS,
+            DownloadContract.Batches.COLUMN_EXTRA_DATA
     };
 
     public DatabaseHelper(Context context, String dbName) {
@@ -189,8 +190,9 @@ final class DatabaseHelper extends SQLiteOpenHelper {
                         DownloadContract.Batches.COLUMN_BIG_PICTURE + " TEXT," +
                         DownloadContract.Batches.COLUMN_STATUS + " INTEGER," +
                         DownloadContract.Batches.COLUMN_VISIBILITY + " INTEGER," +
-                        DownloadContract.Batches.COLUMN_DELETED + " BOOLEAN NOT NULL DEFAULT 0" +
-                        ");");
+                        DownloadContract.Batches.COLUMN_DELETED + " BOOLEAN NOT NULL DEFAULT 0," +
+                        DownloadContract.Batches.COLUMN_EXTRA_DATA + " TEXT" +
+                ");");
     }
 
     private void createDownloadsByBatchView(SQLiteDatabase db) {
