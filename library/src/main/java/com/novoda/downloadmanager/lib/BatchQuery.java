@@ -133,7 +133,9 @@ public class BatchQuery {
          */
         public Builder withExtraData(String extraData) {
             this.criteriaExtraDataBuilder = new Criteria.Builder();
-            criteriaExtraDataBuilder.withSelection(DownloadContract.Batches.COLUMN_EXTRA_DATA, Criteria.Wildcard.EQUALS);
+            criteriaExtraDataBuilder
+                    .withSelection(DownloadContract.Batches.COLUMN_EXTRA_DATA, Criteria.Wildcard.EQUALS)
+                    .withArgument(extraData);
             return this;
         }
 
