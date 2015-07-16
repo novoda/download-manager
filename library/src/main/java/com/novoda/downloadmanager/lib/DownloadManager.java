@@ -997,6 +997,7 @@ public class DownloadManager {
 
         private int translateStatus(int status) {
             switch (status) {
+                case DownloadStatus.SUBMITTED:
                 case DownloadStatus.PENDING:
                     return STATUS_PENDING;
 
