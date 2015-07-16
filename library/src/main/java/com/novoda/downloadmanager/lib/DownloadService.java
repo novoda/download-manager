@@ -324,8 +324,6 @@ public class DownloadService extends Service {
      */
     private boolean updateLocked() {
 
-        Log.d("Ferran, updateLocked");
-
         boolean isActive = false;
         long nextRetryTimeMillis = Long.MAX_VALUE;
         long now = systemFacade.currentTimeMillis();
