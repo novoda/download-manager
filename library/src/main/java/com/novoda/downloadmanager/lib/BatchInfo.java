@@ -40,4 +40,5 @@ class BatchInfo {
     public String getExtraData() {
         return extraData;
     }
+
 }

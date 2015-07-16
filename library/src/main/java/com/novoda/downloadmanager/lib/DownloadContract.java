@@ -315,6 +315,14 @@ final class DownloadContract {
          * <P>Type: TEXT</P>
          */
         public static final String COLUMN_EXTRA_DATA = "extra_data";
+        /**
+         * The name of the column containing the date at which some interesting
+         * status changed in the batch. Stored as a System.currentTimeMillis()
+         * value.
+         * <P>Type: BIGINT</P>
+         * <P>Owner can Read</P>
+         */
+        public static final String COLUMN_LAST_MODIFICATION = "lastmod";
 
         private Batches() {
             // non-instantiable class
