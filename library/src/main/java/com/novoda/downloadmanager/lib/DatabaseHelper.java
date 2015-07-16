@@ -218,7 +218,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
                         + "  (SELECT "
                         + "    " + DownloadContract.Downloads.COLUMN_BATCH_ID + ","
                         + "    SUM(" + DownloadContract.Downloads.COLUMN_CURRENT_BYTES + ") AS " + DownloadContract.BatchesWithSizes.COLUMN_CURRENT_BYTES + ","
-                        + "    SUM(" + DownloadContract.Downloads.COLUMN_TOTAL_BYTES + ") AS " + DownloadContract.BatchesWithSizes.COLUMN_TOTAL_BYTES
+                        + "    MAX(SUM(" + DownloadContract.Downloads.COLUMN_TOTAL_BYTES + "), -1) AS " + DownloadContract.BatchesWithSizes.COLUMN_TOTAL_BYTES
                         + "    FROM " + DownloadContract.Downloads.DOWNLOADS_TABLE_NAME
                         + "    GROUP BY " + DownloadContract.Downloads.COLUMN_BATCH_ID
                         + "  ) " + DownloadContract.Downloads.DOWNLOADS_TABLE_NAME
