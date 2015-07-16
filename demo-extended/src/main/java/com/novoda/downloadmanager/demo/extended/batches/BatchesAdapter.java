@@ -10,10 +10,10 @@ import com.novoda.downloadmanager.demo.R;
 import java.util.List;
 import java.util.Locale;
 
-public class BatchAdapter extends BaseAdapter {
+public class BatchesAdapter extends BaseAdapter {
     private final List<Batch> batches;
 
-    public BatchAdapter(List<Batch> batches) {
+    public BatchesAdapter(List<Batch> batches) {
         this.batches = batches;
     }
 

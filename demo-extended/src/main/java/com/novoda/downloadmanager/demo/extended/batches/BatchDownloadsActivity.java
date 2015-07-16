@@ -1,5 +1,6 @@
-package com.novoda.downloadmanager.demo.extended.delete;
+package com.novoda.downloadmanager.demo.extended.batches;
 
+import android.content.Intent;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,45 +16,52 @@ import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.demo.extended.Download;
 import com.novoda.downloadmanager.demo.extended.QueryForDownloadsAsyncTask;
+import com.novoda.downloadmanager.demo.extended.QueryTimestamp;
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.NotificationVisibility;
 import com.novoda.downloadmanager.lib.Query;
 import com.novoda.downloadmanager.lib.Request;
+import com.novoda.downloadmanager.lib.RequestBatch;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DeleteActivity extends AppCompatActivity implements QueryForDownloadsAsyncTask.Callback {
+public class BatchDownloadsActivity extends AppCompatActivity implements QueryForDownloadsAsyncTask.Callback {
     private static final String BIG_FILE = "http://download.thinkbroadband.com/100MB.zip";
     private static final String BEARD_IMAGE = "http://i.imgur.com/9JL2QVl.jpg";
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private DownloadManager downloadManager;
     private ListView listView;
-    private DeleteAdapter deleteAdapter;
+    private BatchDownloadsAdapter batchDownloadsAdapter;
+
+    private final QueryTimestamp lastQueryTimestamp = new QueryTimestamp();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_delete);
+        setContentView(R.layout.activity_batches);
         listView = (ListView) findViewById(R.id.main_downloads_list);
         downloadManager = DownloadManagerBuilder.from(this)
                 .withVerboseLogging()
                 .build();
-        deleteAdapter = new DeleteAdapter(new ArrayList<Download>(), new DeleteAdapter.Listener() {
-            @Override
-            public void onDelete(Download download) {
-                downloadManager.removeBatches(download.getBatchId());
-            }
-        });
-        listView.setAdapter(deleteAdapter);
+        batchDownloadsAdapter = new BatchDownloadsAdapter(new ArrayList<Download>());
+        listView.setAdapter(batchDownloadsAdapter);
 
-        findViewById(R.id.single_download_button).setOnClickListener(
+        findViewById(R.id.batch_download_button).setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(@NonNull View v) {
-                        enqueueSingleDownload();
+                        enqueueBatch();
+                    }
+                });
+
+        findViewById(R.id.batch_show_button).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(@NonNull View v) {
+                        startActivity(new Intent(BatchDownloadsActivity.this, BatchesActivity.class));
                     }
                 });
 
@@ -69,17 +77,25 @@ public class DeleteActivity extends AppCompatActivity implements QueryForDownloa
         QueryForDownloadsAsyncTask.newInstance(downloadManager, this).execute(new Query());
     }
 
-    private void enqueueSingleDownload() {
-        Uri uri = Uri.parse(BIG_FILE);
-        final Request request = new Request(uri)
-                .setTitle("A Single Beard")
-                .setDescription("Fine facial hair")
-                .setBigPictureUrl(BEARD_IMAGE)
-                .setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "can_deleted_example.beard")
-                .setNotificationVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE);
+    private void enqueueBatch() {
+        final RequestBatch batch = new RequestBatch.Builder()
+                .withTitle("Large Beard Shipment")
+                .withDescription("Goatees galore")
+                .withBigPictureUrl(BEARD_IMAGE)
+                .withVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE)
+                .build();
 
-        long requestId = downloadManager.enqueue(request);
-        Log.d("Download enqueued with request ID: " + requestId);
+        Uri uri = Uri.parse(BIG_FILE);
+        final Request request = new Request(uri);
+        request.setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "beard.shipment");
+        request.setNotificationExtra("beard_1");
+        batch.addRequest(request);
+
+        request.setNotificationExtra("beard_2");
+        batch.addRequest(request);
+
+        long batchId = downloadManager.enqueue(batch);
+        Log.d("Download enqueued with batch ID: " + batchId);
     }
 
     @Override
@@ -92,7 +108,11 @@ public class DeleteActivity extends AppCompatActivity implements QueryForDownloa
 
         @Override
         public void onChange(boolean selfChange) {
+            if (lastQueryTimestamp.updatedRecently()) {
+                return;
+            }
             queryForDownloads();
+            lastQueryTimestamp.setJustUpdated();
         }
 
     };
@@ -105,7 +125,7 @@ public class DeleteActivity extends AppCompatActivity implements QueryForDownloa
 
     @Override
     public void onQueryResult(List<Download> downloads) {
-        deleteAdapter.updateDownloads(downloads);
+        batchDownloadsAdapter.updateDownloads(downloads);
     }
 
 }

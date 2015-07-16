@@ -15,7 +15,6 @@ import android.widget.ListView;
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.demo.extended.Download;
-import com.novoda.downloadmanager.demo.extended.DownloadAdapter;
 import com.novoda.downloadmanager.demo.extended.QueryForDownloadsAsyncTask;
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.NotificationVisibility;
@@ -33,7 +32,7 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
     private final Handler handler = new Handler(Looper.getMainLooper());
     private DownloadManager downloadManager;
     private ListView listView;
-    private DownloadAdapter downloadAdapter;
+    private PauseResumeAdapter pauseResumeAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +43,7 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                DownloadAdapter adapter = (DownloadAdapter) parent.getAdapter();
+                PauseResumeAdapter adapter = (PauseResumeAdapter) parent.getAdapter();
                 Download item = adapter.getItem(position);
                 long batchId = item.getBatchId();
                 if (item.isPaused()) {
@@ -58,8 +57,8 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
         downloadManager = DownloadManagerBuilder.from(this)
                 .withVerboseLogging()
                 .build();
-        downloadAdapter = new DownloadAdapter(new ArrayList<Download>());
-        listView.setAdapter(downloadAdapter);
+        pauseResumeAdapter = new PauseResumeAdapter(new ArrayList<Download>());
+        listView.setAdapter(pauseResumeAdapter);
 
         findViewById(R.id.single_download_button).setOnClickListener(
                 new View.OnClickListener() {
@@ -119,6 +118,6 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
 
     @Override
     public void onQueryResult(List<Download> downloads) {
-        downloadAdapter.updateDownloads(downloads);
+        pauseResumeAdapter.updateDownloads(downloads);
     }
 }

@@ -1,108 +1,91 @@
 package com.novoda.downloadmanager.demo.extended.batches;
 
-import android.content.Intent;
 import android.database.ContentObserver;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.widget.ListView;
+import android.widget.RadioGroup;
 
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
-import com.novoda.downloadmanager.demo.extended.Download;
-import com.novoda.downloadmanager.demo.extended.DownloadAdapter;
-import com.novoda.downloadmanager.demo.extended.QueryForDownloadsAsyncTask;
 import com.novoda.downloadmanager.demo.extended.QueryTimestamp;
+import com.novoda.downloadmanager.lib.BatchQuery;
 import com.novoda.downloadmanager.lib.DownloadManager;
-import com.novoda.downloadmanager.lib.NotificationVisibility;
-import com.novoda.downloadmanager.lib.Query;
-import com.novoda.downloadmanager.lib.Request;
-import com.novoda.downloadmanager.lib.RequestBatch;
-import com.novoda.notils.logger.simple.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BatchesActivity extends AppCompatActivity implements QueryForDownloadsAsyncTask.Callback {
-    private static final String BIG_FILE = "http://download.thinkbroadband.com/100MB.zip";
-    private static final String BEARD_IMAGE = "http://i.imgur.com/9JL2QVl.jpg";
+public class BatchesActivity extends AppCompatActivity implements QueryForBatchesAsyncTask.Callback {
 
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private DownloadManager downloadManager;
-    private ListView listView;
-    private DownloadAdapter downloadAdapter;
-
     private final QueryTimestamp lastQueryTimestamp = new QueryTimestamp();
+
+    private DownloadManager downloadManager;
+    private BatchesAdapter adapter;
+    private BatchQuery query = BatchQuery.ALL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_batches);
-        listView = (ListView) findViewById(R.id.main_downloads_list);
+        setContentView(R.layout.activity_show_batches);
+
+        ListView listView = (ListView) findViewById(R.id.show_batches_list);
         downloadManager = DownloadManagerBuilder.from(this)
                 .withVerboseLogging()
                 .build();
-        downloadAdapter = new DownloadAdapter(new ArrayList<Download>());
-        listView.setAdapter(downloadAdapter);
+        adapter = new BatchesAdapter(new ArrayList<Batch>());
+        listView.setAdapter(adapter);
 
-        findViewById(R.id.batch_download_button).setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(@NonNull View v) {
-                        enqueueBatch();
-                    }
-                });
+        listView.setEmptyView(findViewById(R.id.show_batches_no_batches_view));
+        RadioGroup queryGroup = (RadioGroup) findViewById(R.id.show_batches_query_radio_group);
+        queryGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                switch (checkedId) {
+                    case R.id.show_batches_query_all:
+                        query = BatchQuery.ALL;
+                        break;
+                    case R.id.show_batches_query_successful:
+                        query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_SUCCESSFUL).build();
+                        break;
+                    case R.id.show_batches_query_pending:
+                        query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_PENDING).build();
+                        break;
+                    case R.id.show_batches_query_downloading:
+                        query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_RUNNING).build();
+                        break;
+                    case R.id.show_batches_query_failed:
+                        query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_FAILED).build();
+                        break;
+                    case R.id.show_batches_query_failed_pending:
+                        query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_FAILED | DownloadManager.STATUS_PENDING).build();
+                        break;
+                    case R.id.show_batches_query_live:
+                        query = new BatchQuery.Builder().withSortByLiveness().build();
+                        break;
+                    case R.id.show_batches_query_deleting:
+                        query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_DELETING).build();
+                        break;
+                    default:
+                        break;
+                }
+                queryForBatches(query);
+            }
+        });
+        queryForBatches(BatchQuery.ALL);
 
-        findViewById(R.id.batch_show_button).setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(@NonNull View v) {
-                        startActivity(new Intent(BatchesActivity.this, ShowBatchesActivity.class));
-                    }
-                });
-
-        setupQueryingExample();
     }
 
-    private void setupQueryingExample() {
-        queryForDownloads();
-        listView.setEmptyView(findViewById(R.id.main_no_downloads_view));
-    }
-
-    private void queryForDownloads() {
-        QueryForDownloadsAsyncTask.newInstance(downloadManager, this).execute(new Query());
-    }
-
-    private void enqueueBatch() {
-        final RequestBatch batch = new RequestBatch.Builder()
-                .withTitle("Large Beard Shipment")
-                .withDescription("Goatees galore")
-                .withBigPictureUrl(BEARD_IMAGE)
-                .withVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE)
-                .build();
-
-        Uri uri = Uri.parse(BIG_FILE);
-        final Request request = new Request(uri);
-        request.setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "beard.shipment");
-        request.setNotificationExtra("beard_1");
-        batch.addRequest(request);
-
-        request.setNotificationExtra("beard_2");
-        batch.addRequest(request);
-
-        long batchId = downloadManager.enqueue(batch);
-        Log.d("Download enqueued with batch ID: " + batchId);
+    private void queryForBatches(BatchQuery query) {
+        QueryForBatchesAsyncTask.newInstance(downloadManager, this).execute(query);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        getContentResolver().registerContentObserver(downloadManager.getContentUri(), true, updateSelf);
+        getContentResolver().registerContentObserver(downloadManager.getBatchesUri(), true, updateSelf);
     }
 
     private final ContentObserver updateSelf = new ContentObserver(handler) {
@@ -112,7 +95,7 @@ public class BatchesActivity extends AppCompatActivity implements QueryForDownlo
             if (lastQueryTimestamp.updatedRecently()) {
                 return;
             }
-            queryForDownloads();
+            queryForBatches(query);
             lastQueryTimestamp.setJustUpdated();
         }
 
@@ -125,8 +108,7 @@ public class BatchesActivity extends AppCompatActivity implements QueryForDownlo
     }
 
     @Override
-    public void onQueryResult(List<Download> downloads) {
-        downloadAdapter.updateDownloads(downloads);
+    public void onQueryResult(List<Batch> batches) {
+        adapter.updateBatches(batches);
     }
-
 }

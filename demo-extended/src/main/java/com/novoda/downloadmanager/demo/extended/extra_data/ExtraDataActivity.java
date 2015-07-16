@@ -21,7 +21,7 @@ import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
 
-public class ExtraDataActivity extends AppCompatActivity implements QueryExtrasAsyncTask.Callback {
+public class ExtraDataActivity extends AppCompatActivity implements QueryForExtraDataDownloadsAsyncTask.Callback {
     private static final String BIG_FILE = "http://download.thinkbroadband.com/20MB.zip";
 
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -59,7 +59,7 @@ public class ExtraDataActivity extends AppCompatActivity implements QueryExtrasA
     }
 
     private void queryForDownloads() {
-        QueryExtrasAsyncTask.newInstance(downloadManager, this).execute(new Query());
+        QueryForExtraDataDownloadsAsyncTask.newInstance(downloadManager, this).execute(new Query());
     }
 
     private void enqueueSingleDownload() {
@@ -100,7 +100,7 @@ public class ExtraDataActivity extends AppCompatActivity implements QueryExtrasA
     }
 
     @Override
-    public void onQueryResult(List<Download> downloads) {
-        downloadAdapter.updateDownloads(downloads);
+    public void onQueryResult(List<ExtraDataDownload> extraDataDownloads) {
+        downloadAdapter.updateDownloads(extraDataDownloads);
     }
 }
