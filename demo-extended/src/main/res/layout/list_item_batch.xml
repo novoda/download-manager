@@ -40,4 +40,11 @@
     android:textAppearance="?android:attr/textAppearanceSmall"
     tools:text="Current size" />
 
+  <TextView
+    android:id="@+id/batch_extra_data_text"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textAppearance="?android:attr/textAppearanceSmall"
+    tools:text="Extra data" />
+
 </LinearLayout>
