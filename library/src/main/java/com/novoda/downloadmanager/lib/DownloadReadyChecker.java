@@ -37,6 +37,7 @@ class DownloadReadyChecker {
         }
         switch (downloadInfo.getStatus()) {
             case 0: // status hasn't been initialized yet, this is a new download
+            case DownloadStatus.SUCCESS:
             case DownloadStatus.PENDING: // download is explicit marked as ready to start
             case DownloadStatus.RUNNING: // download interrupted (process killed etc) while
                 // running, without a chance to update the database
