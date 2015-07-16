@@ -556,7 +556,9 @@ public class DownloadManager {
      * @return a Cursor over the result set of batches
      */
     public Cursor query(BatchQuery query) {
-        BatchRepository batchRepository = new BatchRepository(contentResolver, new DownloadDeleter(contentResolver), downloadsUriProvider);
+        DownloadDeleter downloadDeleter = new DownloadDeleter(contentResolver);
+        RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext());
+        BatchRepository batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
         Cursor cursor = batchRepository.retrieveFor(query);
         if (cursor == null) {
             return null;

@@ -39,16 +39,19 @@ class BatchRepository {
     private final ContentResolver resolver;
     private final DownloadDeleter downloadDeleter;
     private final DownloadsUriProvider downloadsUriProvider;
+    private final SystemFacade systemFacade;
 
-    BatchRepository(ContentResolver resolver, DownloadDeleter downloadDeleter, DownloadsUriProvider downloadsUriProvider) {
+    BatchRepository(ContentResolver resolver, DownloadDeleter downloadDeleter, DownloadsUriProvider downloadsUriProvider, SystemFacade systemFacade) {
         this.resolver = resolver;
         this.downloadDeleter = downloadDeleter;
         this.downloadsUriProvider = downloadsUriProvider;
+        this.systemFacade = systemFacade;
     }
 
     void updateBatchStatus(long batchId, int status) {
         ContentValues values = new ContentValues();
         values.put(DownloadContract.Batches.COLUMN_STATUS, status);
+        values.put(DownloadContract.Batches.COLUMN_LAST_MODIFICATION, systemFacade.currentTimeMillis());
         resolver.update(downloadsUriProvider.getBatchesUri(), values, DownloadContract.Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
     }
 
