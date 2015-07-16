@@ -10,6 +10,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * This class may be used to filter download manager queries.
@@ -31,7 +32,7 @@ public class Query {
      */
     public static final int ORDER_DESCENDING = 2;
 
-    private static final String ORDER_BY_LIVENESS = String.format(
+    private static final String ORDER_BY_LIVENESS = String.format(Locale.US,
             "CASE %1$s "
                     + "WHEN %2$d THEN 1 "
                     + "WHEN %3$d THEN 2 "

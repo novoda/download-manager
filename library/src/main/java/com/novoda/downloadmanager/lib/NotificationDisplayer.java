@@ -100,7 +100,7 @@ class NotificationDisplayer {
             Intent cancelIntent = new Intent(Constants.ACTION_CANCEL, null, context, DownloadReceiver.class);
             cancelIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getBatchId());
             PendingIntent pendingCancelIntent = PendingIntent.getBroadcast(context, 0, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            builder.addAction(R.drawable.dl__ic_action_cancel, "Cancel", pendingCancelIntent);
+            builder.addAction(R.drawable.dl__ic_action_cancel, context.getString(R.string.dl__cancel), pendingCancelIntent);
 
         } else if (type == DownloadNotifier.TYPE_SUCCESS) {
             DownloadBatch batch = cluster.iterator().next();
@@ -151,11 +151,11 @@ class NotificationDisplayer {
 
             if (totalBytes > 0) {
                 int percent = (int) ((currentBytes * 100) / totalBytes);
-                percentText = percent + "%";//res.getString(R.string.download_percent, percent);
+                percentText = context.getString(R.string.dl__download_percent, percent);
 
                 if (totalBytesPerSecond > 0) {
                     long remainingMillis = ((totalBytes - currentBytes) * 1000) / totalBytesPerSecond;
-                    remainingText = "Duration " + formatDuration(remainingMillis);
+                    remainingText = context.getString(R.string.dl__duration, formatDuration(remainingMillis));
                 }
 
                 builder.setProgress(100, percent, false);
@@ -204,14 +204,14 @@ class NotificationDisplayer {
             builder.setContentInfo(percentText);
 
         } else if (type == DownloadNotifier.TYPE_WAITING) {
-            setSecondaryNotificationText(builder, style, "Download size requires Wi-Fi.");
+            setSecondaryNotificationText(builder, style, context.getString(R.string.dl__download_size_requires_wifi));
 
         } else if (type == DownloadNotifier.TYPE_SUCCESS) {
-            setSecondaryNotificationText(builder, style, "Download complete.");
+            setSecondaryNotificationText(builder, style, context.getString(R.string.dl__download_complete));
         } else if (type == DownloadNotifier.TYPE_FAILED) {
-            setSecondaryNotificationText(builder, style, "Download unsuccessful.");
+            setSecondaryNotificationText(builder, style, context.getString(R.string.dl__download_unsuccessful));
         } else if (type == DownloadNotifier.TYPE_CANCELLED) {
-            setSecondaryNotificationText(builder, style, "Download cancelled.");
+            setSecondaryNotificationText(builder, style, context.getString(R.string.dl__download_cancelled));
         }
 
         if (!TextUtils.isEmpty(imageUrl)) {
@@ -223,7 +223,7 @@ class NotificationDisplayer {
     private CharSequence getDownloadTitle(BatchInfo batch) {
         String title = batch.getTitle();
         if (TextUtils.isEmpty(title)) {
-            return "unknown";
+            return context.getString(R.string.dl__title_unknown);
         } else {
             return title;
         }
@@ -253,13 +253,13 @@ class NotificationDisplayer {
             setSecondaryNotificationText(builder, inboxStyle, remainingText);
         } else if (type == DownloadNotifier.TYPE_WAITING) {
             builder.setContentTitle(resources.getQuantityString(R.plurals.dl__notif_summary_waiting, currentBatches.size(), currentBatches.size()));
-            setSecondaryNotificationText(builder, inboxStyle, "Download size requires Wi-Fi.");
+            setSecondaryNotificationText(builder, inboxStyle, context.getString(R.string.dl__download_size_requires_wifi));
         } else if (type == DownloadNotifier.TYPE_SUCCESS) {
-            setSecondaryNotificationText(builder, inboxStyle, "Download complete.");
+            setSecondaryNotificationText(builder, inboxStyle, context.getString(R.string.dl__download_complete));
         } else if (type == DownloadNotifier.TYPE_FAILED) {
-            setSecondaryNotificationText(builder, inboxStyle, "Download unsuccessful.");
+            setSecondaryNotificationText(builder, inboxStyle, context.getString(R.string.dl__download_unsuccessful));
         } else if (type == DownloadNotifier.TYPE_CANCELLED) {
-            setSecondaryNotificationText(builder, inboxStyle, "Download cancelled.");
+            setSecondaryNotificationText(builder, inboxStyle, context.getString(R.string.dl__download_cancelled));
         }
 
         return inboxStyle.build();

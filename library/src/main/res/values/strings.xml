@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="dl__cancel">Cancel</string>
+  <string name="dl__download_cancelled">Download cancelled.</string>
+  <string name="dl__download_unsuccessful">Download unsuccessful.</string>
+  <string name="dl__download_complete">Download complete.</string>
+  <string name="dl__download_size_requires_wifi">Download size requires Wi-Fi.</string>
+  <string name="dl__title_unknown">unknown</string>
+  <string name="dl__duration">Duration %1$s</string>
+  <string name="dl__download_percent">%1$d%%</string>
+</resources>
