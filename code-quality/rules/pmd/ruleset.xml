@@ -22,7 +22,10 @@
     <exclude name="AvoidThrowingNullPointerException" />
     <exclude name="AvoidCatchingGenericException" />
   </rule>
-  <rule ref="rulesets/java/strings.xml" />
+  <rule ref="rulesets/java/strings.xml">
+    <exclude name="AvoidDuplicateLiterals" />
+  </rule>
+
   <rule ref="rulesets/java/typeresolution.xml" />
   <rule ref="rulesets/java/unnecessary.xml">
     <exclude name="UselessParentheses" />
