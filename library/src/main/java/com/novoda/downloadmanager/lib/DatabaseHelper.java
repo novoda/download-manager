@@ -46,9 +46,9 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             DownloadContract.Batches.COLUMN_BIG_PICTURE,
             DownloadContract.Batches.COLUMN_VISIBILITY,
             DownloadContract.Batches.COLUMN_STATUS,
-            DownloadContract.Batches.BATCHES_TABLE_NAME + "." + DownloadContract.Batches.COLUMN_DELETED,
-            DownloadContract.Batches.COLUMN_TOTAL_BYTES,
-            DownloadContract.Batches.COLUMN_CURRENT_BYTES
+            DownloadContract.BatchesWithSizes.VIEW_NAME_BATCHES_WITH_SIZES + "." + DownloadContract.Batches.COLUMN_DELETED,
+            DownloadContract.BatchesWithSizes.COLUMN_TOTAL_BYTES,
+            DownloadContract.BatchesWithSizes.COLUMN_CURRENT_BYTES
     };
 
     public static final String[] DOWNLOADS_WITHOUT_PROGRESS_VIEW_COLUMNS = new String[]{
@@ -89,6 +89,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
         createDownloadsTable(db);
         createHeadersTable(db);
         createBatchesTable(db);
+        createBatchesWithSizesView(db);
         createDownloadsByBatchView(db);
         createDownloadsWithoutProgressView(db);
         createBatchesWithoutProgressView(db);
@@ -188,9 +189,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
                         DownloadContract.Batches.COLUMN_BIG_PICTURE + " TEXT," +
                         DownloadContract.Batches.COLUMN_STATUS + " INTEGER," +
                         DownloadContract.Batches.COLUMN_VISIBILITY + " INTEGER," +
-                        DownloadContract.Batches.COLUMN_DELETED + " BOOLEAN NOT NULL DEFAULT 0, " +
-                        DownloadContract.Batches.COLUMN_TOTAL_BYTES + " INTEGER NOT NULL DEFAULT -1, " +
-                        DownloadContract.Batches.COLUMN_CURRENT_BYTES + " INTEGER NOT NULL DEFAULT 0 " +
+                        DownloadContract.Batches.COLUMN_DELETED + " BOOLEAN NOT NULL DEFAULT 0" +
                         ");");
     }
 
@@ -201,7 +200,29 @@ final class DatabaseHelper extends SQLiteOpenHelper {
                         + " AS SELECT DISTINCT "
                         + projectionFrom(DOWNLOAD_BY_BATCH_VIEW_COLUMNS)
                         + " FROM " + DownloadContract.Downloads.DOWNLOADS_TABLE_NAME
-                        + " INNER JOIN " + DownloadContract.Batches.BATCHES_TABLE_NAME
+                        + " INNER JOIN " + DownloadContract.BatchesWithSizes.VIEW_NAME_BATCHES_WITH_SIZES
+                        + " ON " + DownloadContract.Downloads.DOWNLOADS_TABLE_NAME + "." + DownloadContract.Downloads.COLUMN_BATCH_ID
+                        + " = " + DownloadContract.BatchesWithSizes.VIEW_NAME_BATCHES_WITH_SIZES + "." + DownloadContract.Batches._ID + ";"
+        );
+    }
+
+    private void createBatchesWithSizesView(SQLiteDatabase db) {
+        db.execSQL("DROP VIEW IF EXISTS " + DownloadContract.BatchesWithSizes.VIEW_NAME_BATCHES_WITH_SIZES);
+        db.execSQL(
+                "CREATE VIEW " + DownloadContract.BatchesWithSizes.VIEW_NAME_BATCHES_WITH_SIZES
+                        + " AS SELECT DISTINCT "
+                        + DownloadContract.Batches.BATCHES_TABLE_NAME + ".*, "
+                        + DownloadContract.BatchesWithSizes.COLUMN_CURRENT_BYTES + ", "
+                        + DownloadContract.BatchesWithSizes.COLUMN_TOTAL_BYTES
+                        + " FROM " + DownloadContract.Batches.BATCHES_TABLE_NAME
+                        + " INNER JOIN "
+                        + "  (SELECT "
+                        + "    " + DownloadContract.Downloads.COLUMN_BATCH_ID + ","
+                        + "    SUM(" + DownloadContract.Downloads.COLUMN_CURRENT_BYTES + ") AS " + DownloadContract.BatchesWithSizes.COLUMN_CURRENT_BYTES + ","
+                        + "    MAX(SUM(" + DownloadContract.Downloads.COLUMN_TOTAL_BYTES + "), -1) AS " + DownloadContract.BatchesWithSizes.COLUMN_TOTAL_BYTES
+                        + "    FROM " + DownloadContract.Downloads.DOWNLOADS_TABLE_NAME
+                        + "    GROUP BY " + DownloadContract.Downloads.COLUMN_BATCH_ID
+                        + "  ) " + DownloadContract.Downloads.DOWNLOADS_TABLE_NAME
                         + " ON " + DownloadContract.Downloads.DOWNLOADS_TABLE_NAME + "." + DownloadContract.Downloads.COLUMN_BATCH_ID
                         + " = " + DownloadContract.Batches.BATCHES_TABLE_NAME + "." + DownloadContract.Batches._ID + ";"
         );

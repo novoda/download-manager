@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Allows application to interact with the download manager.
@@ -133,23 +134,6 @@ public final class DownloadProvider extends ContentProvider {
      */
     private static final int DOWNLOADS_BY_BATCH = 9;
 
-    static {
-        URI_MATCHER.addURI(AUTHORITY, "my_downloads", MY_DOWNLOADS);
-        URI_MATCHER.addURI(AUTHORITY, "my_downloads/#", MY_DOWNLOADS_ID);
-        URI_MATCHER.addURI(AUTHORITY, "all_downloads", ALL_DOWNLOADS);
-        URI_MATCHER.addURI(AUTHORITY, "all_downloads/#", ALL_DOWNLOADS_ID);
-        URI_MATCHER.addURI(AUTHORITY, "batches", BATCHES);
-        URI_MATCHER.addURI(AUTHORITY, "batches/#", BATCHES_ID);
-        URI_MATCHER.addURI(AUTHORITY, "downloads_by_batch", DOWNLOADS_BY_BATCH);
-        URI_MATCHER.addURI(AUTHORITY, "my_downloads/#/" + DownloadContract.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
-        URI_MATCHER.addURI(AUTHORITY, "all_downloads/#/" + DownloadContract.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
-        // temporary, for backwards compatibility
-        URI_MATCHER.addURI(AUTHORITY, "download", MY_DOWNLOADS);
-        URI_MATCHER.addURI(AUTHORITY, "download/#", MY_DOWNLOADS_ID);
-        URI_MATCHER.addURI(AUTHORITY, "download/#/" + DownloadContract.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
-        URI_MATCHER.addURI(AUTHORITY, DownloadsDestination.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT + "/#", PUBLIC_DOWNLOAD_ID);
-    }
-
     private static final String[] APP_READABLE_COLUMNS_ARRAY = new String[]{
             DownloadContract.Downloads._ID,
             DownloadContract.Downloads.COLUMN_APP_DATA,
@@ -176,16 +160,57 @@ public final class DownloadProvider extends ContentProvider {
             DownloadContract.Batches.COLUMN_DESCRIPTION,
             DownloadContract.Batches.COLUMN_BIG_PICTURE,
             DownloadContract.Batches.COLUMN_VISIBILITY,
-            DownloadContract.Batches.COLUMN_TOTAL_BYTES,
-            DownloadContract.Batches.COLUMN_CURRENT_BYTES,
+            DownloadContract.BatchesWithSizes.COLUMN_TOTAL_BYTES,
+            DownloadContract.BatchesWithSizes.COLUMN_CURRENT_BYTES,
             OpenableColumns.DISPLAY_NAME,
             OpenableColumns.SIZE,
     };
 
-    private static final HashSet<String> APP_READABLE_COLUMNS_SET;
-    private static final HashMap<String, String> COLUMNS_MAP;
+    private static final Set<String> APP_READABLE_COLUMNS_SET;
+
+    private static final Map<String, String> COLUMNS_MAP;
+
+    private static final List<String> DOWNLOAD_MANAGER_COLUMNS_LIST = Arrays.asList(DownloadManager.UNDERLYING_COLUMNS);
+
+    private final DownloadsUriProvider downloadsUriProvider;
+
+    /**
+     * Different base URIs that could be used to access an individual download
+     */
+    private final Uri[] baseUris;
+
+
+    /**
+     * The database that lies underneath this content provider
+     */
+    private SQLiteOpenHelper openHelper;
+
+    /**
+     * List of uids that can access the downloads
+     */
+    private int systemUid = -1;
+
+    private int defcontaineruid = -1;
+    private File downloadsDataDir;
+    //    @VisibleForTesting
+    SystemFacade systemFacade;
 
     static {
+        URI_MATCHER.addURI(AUTHORITY, "my_downloads", MY_DOWNLOADS);
+        URI_MATCHER.addURI(AUTHORITY, "my_downloads/#", MY_DOWNLOADS_ID);
+        URI_MATCHER.addURI(AUTHORITY, "all_downloads", ALL_DOWNLOADS);
+        URI_MATCHER.addURI(AUTHORITY, "all_downloads/#", ALL_DOWNLOADS_ID);
+        URI_MATCHER.addURI(AUTHORITY, "batches", BATCHES);
+        URI_MATCHER.addURI(AUTHORITY, "batches/#", BATCHES_ID);
+        URI_MATCHER.addURI(AUTHORITY, "downloads_by_batch", DOWNLOADS_BY_BATCH);
+        URI_MATCHER.addURI(AUTHORITY, "my_downloads/#/" + DownloadContract.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
+        URI_MATCHER.addURI(AUTHORITY, "all_downloads/#/" + DownloadContract.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
+        // temporary, for backwards compatibility
+        URI_MATCHER.addURI(AUTHORITY, "download", MY_DOWNLOADS);
+        URI_MATCHER.addURI(AUTHORITY, "download/#", MY_DOWNLOADS_ID);
+        URI_MATCHER.addURI(AUTHORITY, "download/#/" + DownloadContract.RequestHeaders.URI_SEGMENT, REQUEST_HEADERS_URI);
+        URI_MATCHER.addURI(AUTHORITY, DownloadsDestination.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT + "/#", PUBLIC_DOWNLOAD_ID);
+
         APP_READABLE_COLUMNS_SET = new HashSet<>();
         Collections.addAll(APP_READABLE_COLUMNS_SET, APP_READABLE_COLUMNS_ARRAY);
 
@@ -193,30 +218,6 @@ public final class DownloadProvider extends ContentProvider {
         COLUMNS_MAP.put(OpenableColumns.DISPLAY_NAME, DownloadContract.Batches.COLUMN_TITLE + " AS " + OpenableColumns.DISPLAY_NAME);
         COLUMNS_MAP.put(OpenableColumns.SIZE, DownloadContract.Downloads.COLUMN_TOTAL_BYTES + " AS " + OpenableColumns.SIZE);
     }
-
-    private static final List<String> DOWNLOAD_MANAGER_COLUMNS_LIST = Arrays.asList(DownloadManager.UNDERLYING_COLUMNS);
-
-    /**
-     * Different base URIs that could be used to access an individual download
-     */
-    private final Uri[] baseUris;
-
-    /**
-     * The database that lies underneath this content provider
-     */
-    private SQLiteOpenHelper openHelper = null;
-
-    /**
-     * List of uids that can access the downloads
-     */
-    private int systemUid = -1;
-    private int defcontaineruid = -1;
-    private File downloadsDataDir;
-
-    //    @VisibleForTesting
-    SystemFacade systemFacade;
-
-    private DownloadsUriProvider downloadsUriProvider;
 
     public DownloadProvider() {
         downloadsUriProvider = DownloadsUriProvider.getInstance();
@@ -563,7 +564,7 @@ public final class DownloadProvider extends ContentProvider {
             case BATCHES_ID:
                 SqlSelection batchSelection = getWhereClause(uri, selection, selectionArgs, match);
                 return db.query(
-                        DownloadContract.Batches.BATCHES_TABLE_NAME, projection, batchSelection.getSelection(),
+                        DownloadContract.BatchesWithSizes.VIEW_NAME_BATCHES_WITH_SIZES, projection, batchSelection.getSelection(),
                         batchSelection.getParameters(), null, null, sort);
             case DOWNLOADS_BY_BATCH:
                 return db.query(DownloadContract.DownloadsByBatch.VIEW_NAME_DOWNLOADS_BY_BATCH, projection, selection, selectionArgs, null, null, sort);

@@ -314,18 +314,6 @@ final class DownloadContract {
          */
         public static final String COLUMN_DELETED = "deleted";
 
-        /**
-         * The total size of the batch in bytes.
-         * <P>Type: INTEGER</P>
-         */
-        public static final String COLUMN_TOTAL_BYTES = "batch_total_bytes";
-
-        /**
-         * The current size of the batch in bytes (on device).
-         * <P>Type: INTEGER</P>
-         */
-        public static final String COLUMN_CURRENT_BYTES = "batch_current_bytes";
-
         private Batches() {
             // non-instantiable class
         }
@@ -338,6 +326,27 @@ final class DownloadContract {
         private DownloadsByBatch() {
             // non-instantiable class
         }
+
+    }
+    static final class BatchesWithSizes {
+
+        public static final String VIEW_NAME_BATCHES_WITH_SIZES = "BatchesWithSizes";
+
+        private BatchesWithSizes() {
+            // non-instantiable class
+        }
+
+        /**
+         * The total size of the batch in bytes.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String COLUMN_TOTAL_BYTES = "batch_total_bytes";
+
+        /**
+         * The current size of the batch in bytes (on device).
+         * <P>Type: INTEGER</P>
+         */
+        public static final String COLUMN_CURRENT_BYTES = "batch_current_bytes";
 
     }
 

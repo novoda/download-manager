@@ -46,41 +46,6 @@ class BatchRepository {
         this.downloadsUriProvider = downloadsUriProvider;
     }
 
-    void updateTotalSize(long batchId) {
-        ContentValues updateValues = new ContentValues();
-        updateValues.put(DownloadContract.Batches.COLUMN_TOTAL_BYTES, getSummedBatchSizeInBytes(batchId, DownloadContract.Downloads.COLUMN_TOTAL_BYTES));
-        resolver.update(downloadsUriProvider.getBatchesUri(), updateValues, DownloadContract.Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
-    }
-
-    void updateCurrentSize(long batchId) {
-        ContentValues updateValues = new ContentValues();
-        updateValues.put(DownloadContract.Batches.COLUMN_CURRENT_BYTES, getSummedBatchSizeInBytes(batchId, DownloadContract.Downloads.COLUMN_CURRENT_BYTES));
-        resolver.update(downloadsUriProvider.getBatchesUri(), updateValues, DownloadContract.Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
-    }
-
-    private long getSummedBatchSizeInBytes(long batchId, String columnName) {
-        Cursor cursor = null;
-        long totalSize = 0;
-        try {
-            String[] selectionArgs = {String.valueOf(batchId)};
-            cursor = resolver.query(
-                    downloadsUriProvider.getAllDownloadsUri(),
-                    new String[]{"sum(" + columnName + ")"},
-                    DownloadContract.Downloads.COLUMN_BATCH_ID + " = ?",
-                    selectionArgs,
-                    null);
-
-            cursor.moveToFirst();
-            totalSize = cursor.getLong(0);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-
-        return totalSize;
-    }
-
     void updateBatchStatus(long batchId, int status) {
         ContentValues values = new ContentValues();
         values.put(DownloadContract.Batches.COLUMN_STATUS, status);
@@ -149,8 +114,8 @@ class BatchRepository {
             int bigPictureUrlIndex = batchesCursor.getColumnIndexOrThrow(DownloadContract.Batches.COLUMN_BIG_PICTURE);
             int statusIndex = batchesCursor.getColumnIndexOrThrow(DownloadContract.Batches.COLUMN_STATUS);
             int visibilityColumn = batchesCursor.getColumnIndexOrThrow(DownloadContract.Batches.COLUMN_VISIBILITY);
-            int totalBatchSizeIndex = batchesCursor.getColumnIndexOrThrow(DownloadContract.Batches.COLUMN_TOTAL_BYTES);
-            int currentBatchSizeIndex = batchesCursor.getColumnIndexOrThrow(DownloadContract.Batches.COLUMN_CURRENT_BYTES);
+            int totalBatchSizeIndex = batchesCursor.getColumnIndexOrThrow(DownloadContract.BatchesWithSizes.COLUMN_TOTAL_BYTES);
+            int currentBatchSizeIndex = batchesCursor.getColumnIndexOrThrow(DownloadContract.BatchesWithSizes.COLUMN_CURRENT_BYTES);
 
             while (batchesCursor.moveToNext()) {
                 long id = batchesCursor.getLong(idColumn);
