@@ -7,4 +7,5 @@
   <string name="dl__download_size_requires_wifi">Download size requires Wi-Fi.</string>
   <string name="dl__title_unknown">unknown</string>
   <string name="dl__duration">Duration %1$s</string>
+  <string name="dl__download_percent">%1$d%</string>
 </resources>

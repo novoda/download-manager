@@ -151,7 +151,7 @@ class NotificationDisplayer {
 
             if (totalBytes > 0) {
                 int percent = (int) ((currentBytes * 100) / totalBytes);
-                percentText = percent + "%";//res.getString(R.string.download_percent, percent);
+                percentText = context.getString(R.string.dl__download_percent, percent);
 
                 if (totalBytesPerSecond > 0) {
                     long remainingMillis = ((totalBytes - currentBytes) * 1000) / totalBytesPerSecond;
