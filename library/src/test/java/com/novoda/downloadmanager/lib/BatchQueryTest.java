@@ -26,6 +26,15 @@ public class BatchQueryTest {
     }
 
     @Test
+    public void givenTheQueryIsWithExtraDataWhenItIsBuiltThenTheSelectionAndArgumentsAreCorrect() {
+        String extraData = "extraData";
+        BatchQuery query = new BatchQuery.Builder().withExtraData(extraData).build();
+
+        assertThat(query.getSelection()).isEqualTo("(" + DownloadContract.Batches.COLUMN_EXTRA_DATA + "=?)");
+        assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), new String[]{extraData});
+    }
+
+    @Test
     public void givenTheQueryIsWithPendingStatusFilterWhenItIsBuiltThenTheSelectionAndArgumentsAreCorrect() {
         BatchQuery query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_PENDING).build();
 

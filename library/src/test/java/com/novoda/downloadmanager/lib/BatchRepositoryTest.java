@@ -48,6 +48,8 @@ public class BatchRepositoryTest {
     private DownloadsUriProvider mockDownloadsUriProvider;
     @Mock
     private Uri mockUri;
+    @Mock
+    private SystemFacade mockSystem;
 
     private BatchRepository batchRepository;
 
@@ -58,7 +60,7 @@ public class BatchRepositoryTest {
         when(mockDownloadsUriProvider.getBatchesUri()).thenReturn(mockUri);
         when(mockDownloadsUriProvider.getAllDownloadsUri()).thenReturn(mockUri);
 
-        this.batchRepository = new BatchRepository(mockContentResolver, mockDownloadDeleter, mockDownloadsUriProvider);
+        this.batchRepository = new BatchRepository(mockContentResolver, mockDownloadDeleter, mockDownloadsUriProvider, mockSystem);
 
         when(mockFileDownloadInfoId1.getBatchId()).thenReturn(1L);
         when(mockFileDownloadInfoId2.getBatchId()).thenReturn(2L);

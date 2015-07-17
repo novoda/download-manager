@@ -58,15 +58,15 @@ public class QueryTest {
     public void whenWeSetABatchStatusOrderByOnAQueryThenTheResolverIsQueriedWithTheCorrectSortOrder() {
         query.orderBy(COLUMN_LAST_MODIFIED_TIMESTAMP, Query.ORDER_ASCENDING).runQuery(resolver, null, uri);
 
-        // Actually resolves to Downloads.Impl.COLUMN_LAST_MODIFIED
-        verify(resolver).query(any(Uri.class), any(String[].class), anyString(), any(String[].class), eq("lastmod ASC"));
+        // Actually resolves to DownloadContract.Downloads.COLUMN_LAST_MODIFIED
+        verify(resolver).query(any(Uri.class), any(String[].class), anyString(), any(String[].class), eq("last_modified_timestamp ASC"));
     }
 
     @Test
     public void whenWeSetNoOrderByOnAQueryThenTheResolverIsQueriedWithTheLastModifiedSortOrder() {
         query.runQuery(resolver, null, uri);
 
-        verify(resolver).query(any(Uri.class), any(String[].class), anyString(), any(String[].class), eq("lastmod DESC"));
+        verify(resolver).query(any(Uri.class), any(String[].class), anyString(), any(String[].class), eq("last_modified_timestamp DESC"));
     }
 
     @Test

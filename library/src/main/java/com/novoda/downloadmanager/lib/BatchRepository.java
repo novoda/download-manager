@@ -40,16 +40,19 @@ class BatchRepository {
     private final ContentResolver resolver;
     private final DownloadDeleter downloadDeleter;
     private final DownloadsUriProvider downloadsUriProvider;
+    private final SystemFacade systemFacade;
 
-    BatchRepository(ContentResolver resolver, DownloadDeleter downloadDeleter, DownloadsUriProvider downloadsUriProvider) {
+    BatchRepository(ContentResolver resolver, DownloadDeleter downloadDeleter, DownloadsUriProvider downloadsUriProvider, SystemFacade systemFacade) {
         this.resolver = resolver;
         this.downloadDeleter = downloadDeleter;
         this.downloadsUriProvider = downloadsUriProvider;
+        this.systemFacade = systemFacade;
     }
 
     void updateBatchStatus(long batchId, int status) {
         ContentValues values = new ContentValues();
         values.put(DownloadContract.Batches.COLUMN_STATUS, status);
+        values.put(DownloadContract.Batches.COLUMN_LAST_MODIFICATION, systemFacade.currentTimeMillis());
         resolver.update(downloadsUriProvider.getBatchesUri(), values, DownloadContract.Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
     }
 
@@ -114,7 +117,8 @@ class BatchRepository {
             int descriptionIndex = batchesCursor.getColumnIndexOrThrow(DownloadContract.Batches.COLUMN_DESCRIPTION);
             int bigPictureUrlIndex = batchesCursor.getColumnIndexOrThrow(DownloadContract.Batches.COLUMN_BIG_PICTURE);
             int statusIndex = batchesCursor.getColumnIndexOrThrow(DownloadContract.Batches.COLUMN_STATUS);
-            int visibilityColumn = batchesCursor.getColumnIndexOrThrow(DownloadContract.Batches.COLUMN_VISIBILITY);
+            int visibilityIndex = batchesCursor.getColumnIndexOrThrow(DownloadContract.Batches.COLUMN_VISIBILITY);
+            int extraDataIndex = batchesCursor.getColumnIndexOrThrow(DownloadContract.Batches.COLUMN_EXTRA_DATA);
             int totalBatchSizeIndex = batchesCursor.getColumnIndexOrThrow(DownloadContract.BatchesWithSizes.COLUMN_TOTAL_BYTES);
             int currentBatchSizeIndex = batchesCursor.getColumnIndexOrThrow(DownloadContract.BatchesWithSizes.COLUMN_CURRENT_BYTES);
 
@@ -124,10 +128,11 @@ class BatchRepository {
                 String description = batchesCursor.getString(descriptionIndex);
                 String bigPictureUrl = batchesCursor.getString(bigPictureUrlIndex);
                 int status = batchesCursor.getInt(statusIndex);
-                @NotificationVisibility.Value int visibility = batchesCursor.getInt(visibilityColumn);
+                @NotificationVisibility.Value int visibility = batchesCursor.getInt(visibilityIndex);
+                String extraData = batchesCursor.getString(extraDataIndex);
                 long totalSizeBytes = batchesCursor.getLong(totalBatchSizeIndex);
                 long currentSizeBytes = batchesCursor.getLong(currentBatchSizeIndex);
-                BatchInfo batchInfo = new BatchInfo(title, description, bigPictureUrl, visibility);
+                BatchInfo batchInfo = new BatchInfo(title, description, bigPictureUrl, visibility, extraData);
 
                 List<FileDownloadInfo> batchDownloads = new ArrayList<>(1);
                 for (FileDownloadInfo fileDownloadInfo : downloads) {

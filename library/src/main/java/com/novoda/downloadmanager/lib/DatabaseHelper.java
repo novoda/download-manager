@@ -36,10 +36,10 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             DownloadContract.Downloads.COLUMN_FILE_NAME_HINT,
             DownloadContract.Downloads.COLUMN_MIME_TYPE,
             DownloadContract.Downloads.COLUMN_TOTAL_BYTES,
-            DownloadContract.Downloads.COLUMN_LAST_MODIFICATION,
+            DownloadContract.Downloads.DOWNLOADS_TABLE_NAME + "." + DownloadContract.Downloads.COLUMN_LAST_MODIFICATION,
             DownloadContract.Downloads.COLUMN_CURRENT_BYTES,
             DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS,
-            DownloadContract.Downloads.COLUMN_EXTRA_DATA,
+            DownloadContract.Downloads.DOWNLOADS_TABLE_NAME + "." + DownloadContract.Downloads.COLUMN_EXTRA_DATA,
             DownloadContract.Downloads.COLUMN_BATCH_ID,
             DownloadContract.Batches.COLUMN_TITLE,
             DownloadContract.Batches.COLUMN_DESCRIPTION,
@@ -61,12 +61,12 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             DownloadContract.Downloads.COLUMN_FILE_NAME_HINT,
             DownloadContract.Downloads.COLUMN_MIME_TYPE,
             DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS,
-            DownloadContract.Downloads.COLUMN_EXTRA_DATA,
+            DownloadContract.Downloads.DOWNLOADS_TABLE_NAME + "." + DownloadContract.Downloads.COLUMN_EXTRA_DATA,
             DownloadContract.Downloads.COLUMN_BATCH_ID,
             DownloadContract.Batches.COLUMN_TITLE,
             DownloadContract.Batches.COLUMN_DESCRIPTION,
             DownloadContract.Batches.COLUMN_BIG_PICTURE,
-            DownloadContract.Batches.COLUMN_STATUS,
+            DownloadContract.Batches.COLUMN_STATUS
     };
 
     public static final String[] BATCHES_WITHOUT_PROGRESS_VIEW_COLUMNS = new String[]{
@@ -74,6 +74,8 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             DownloadContract.Batches.COLUMN_DESCRIPTION,
             DownloadContract.Batches.COLUMN_BIG_PICTURE,
             DownloadContract.Batches.COLUMN_STATUS,
+            DownloadContract.Batches.COLUMN_EXTRA_DATA,
+            DownloadContract.Batches.COLUMN_LAST_MODIFICATION
     };
 
     public DatabaseHelper(Context context, String dbName) {
@@ -115,43 +117,44 @@ final class DatabaseHelper extends SQLiteOpenHelper {
         try {
             db.execSQL("DROP TABLE IF EXISTS " + DownloadContract.Downloads.DOWNLOADS_TABLE_NAME);
             db.execSQL(
-                    "CREATE TABLE " + DownloadContract.Downloads.DOWNLOADS_TABLE_NAME + "(" +
-                            DownloadContract.Downloads._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                            DownloadContract.Downloads.COLUMN_URI + " TEXT, " +
-                            Constants.RETRY_AFTER_X_REDIRECT_COUNT + " INTEGER, " +
-                            DownloadContract.Downloads.COLUMN_APP_DATA + " TEXT, " +
-                            DownloadContract.Downloads.COLUMN_NO_INTEGRITY + " BOOLEAN, " +
-                            DownloadContract.Downloads.COLUMN_FILE_NAME_HINT + " TEXT, " +
-                            DownloadContract.Downloads.COLUMN_DATA + " TEXT, " +
-                            DownloadContract.Downloads.COLUMN_MIME_TYPE + " TEXT, " +
-                            DownloadContract.Downloads.COLUMN_DESTINATION + " INTEGER, " +
-                            Constants.NO_SYSTEM_FILES + " BOOLEAN, " +
-                            DownloadContract.Downloads.COLUMN_CONTROL + " INTEGER, " +
-                            DownloadContract.Downloads.COLUMN_STATUS + " INTEGER, " +
-                            DownloadContract.Downloads.COLUMN_FAILED_CONNECTIONS + " INTEGER, " +
-                            DownloadContract.Downloads.COLUMN_LAST_MODIFICATION + " BIGINT, " +
-                            DownloadContract.Downloads.COLUMN_NOTIFICATION_CLASS + " TEXT, " +
-                            DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS + " TEXT, " +
-                            DownloadContract.Downloads.COLUMN_COOKIE_DATA + " TEXT, " +
-                            DownloadContract.Downloads.COLUMN_USER_AGENT + " TEXT, " +
-                            DownloadContract.Downloads.COLUMN_REFERER + " TEXT, " +
-                            DownloadContract.Downloads.COLUMN_TOTAL_BYTES + " INTEGER NOT NULL DEFAULT -1, " +
-                            DownloadContract.Downloads.COLUMN_CURRENT_BYTES + " INTEGER NOT NULL DEFAULT 0, " +
-                            Constants.ETAG + " TEXT, " +
-                            Constants.UID + " INTEGER, " +
-                            DownloadContract.Downloads.COLUMN_OTHER_UID + " INTEGER, " +
-                            DownloadContract.Downloads.COLUMN_ALLOW_ROAMING + " INTEGER NOT NULL DEFAULT 0, " +
-                            DownloadContract.Downloads.COLUMN_ALLOWED_NETWORK_TYPES + " INTEGER NOT NULL DEFAULT 0, " +
-                            DownloadContract.Downloads.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI + " INTEGER NOT NULL DEFAULT 1, " +
-                            DownloadContract.Downloads.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT + " INTEGER NOT NULL DEFAULT 0, " +
-                            DownloadContract.Downloads.COLUMN_MEDIAPROVIDER_URI + " TEXT, " +
-                            DownloadContract.Downloads.COLUMN_DELETED + " BOOLEAN NOT NULL DEFAULT 0, " +
-                            DownloadContract.Downloads.COLUMN_ERROR_MSG + " TEXT, " +
-                            DownloadContract.Downloads.COLUMN_ALLOW_METERED + " INTEGER NOT NULL DEFAULT 1, " +
-                            DownloadContract.Downloads.COLUMN_BATCH_ID + " INTEGER, " +
-                            DownloadContract.Downloads.COLUMN_EXTRA_DATA + " TEXT, " +
-                            DownloadContract.Downloads.COLUMN_ALWAYS_RESUME + " INTEGER NOT NULL DEFAULT 0, " +
-                            Constants.MEDIA_SCANNED + " BOOLEAN);");
+                    "CREATE TABLE " + DownloadContract.Downloads.DOWNLOADS_TABLE_NAME + "("
+                            + DownloadContract.Downloads._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                            + DownloadContract.Downloads.COLUMN_URI + " TEXT, "
+                            + Constants.RETRY_AFTER_X_REDIRECT_COUNT + " INTEGER, "
+                            + DownloadContract.Downloads.COLUMN_APP_DATA + " TEXT, "
+                            + DownloadContract.Downloads.COLUMN_NO_INTEGRITY + " BOOLEAN, "
+                            + DownloadContract.Downloads.COLUMN_FILE_NAME_HINT + " TEXT, "
+                            + DownloadContract.Downloads.COLUMN_DATA + " TEXT, "
+                            + DownloadContract.Downloads.COLUMN_MIME_TYPE + " TEXT, "
+                            + DownloadContract.Downloads.COLUMN_DESTINATION + " INTEGER, "
+                            + Constants.NO_SYSTEM_FILES + " BOOLEAN, "
+                            + DownloadContract.Downloads.COLUMN_CONTROL + " INTEGER, "
+                            + DownloadContract.Downloads.COLUMN_STATUS + " INTEGER, "
+                            + DownloadContract.Downloads.COLUMN_FAILED_CONNECTIONS + " INTEGER, "
+                            + DownloadContract.Downloads.COLUMN_LAST_MODIFICATION + " BIGINT, "
+                            + DownloadContract.Downloads.COLUMN_NOTIFICATION_CLASS + " TEXT, "
+                            + DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS + " TEXT, "
+                            + DownloadContract.Downloads.COLUMN_COOKIE_DATA + " TEXT, "
+                            + DownloadContract.Downloads.COLUMN_USER_AGENT + " TEXT, "
+                            + DownloadContract.Downloads.COLUMN_REFERER + " TEXT, "
+                            + DownloadContract.Downloads.COLUMN_TOTAL_BYTES + " INTEGER NOT NULL DEFAULT -1, "
+                            + DownloadContract.Downloads.COLUMN_CURRENT_BYTES + " INTEGER NOT NULL DEFAULT 0, "
+                            + Constants.ETAG + " TEXT, "
+                            + Constants.UID + " INTEGER, "
+                            + DownloadContract.Downloads.COLUMN_OTHER_UID + " INTEGER, "
+                            + DownloadContract.Downloads.COLUMN_ALLOW_ROAMING + " INTEGER NOT NULL DEFAULT 0, "
+                            + DownloadContract.Downloads.COLUMN_ALLOWED_NETWORK_TYPES + " INTEGER NOT NULL DEFAULT 0, "
+                            + DownloadContract.Downloads.COLUMN_IS_VISIBLE_IN_DOWNLOADS_UI + " INTEGER NOT NULL DEFAULT 1, "
+                            + DownloadContract.Downloads.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT + " INTEGER NOT NULL DEFAULT 0, "
+                            + DownloadContract.Downloads.COLUMN_MEDIAPROVIDER_URI + " TEXT, "
+                            + DownloadContract.Downloads.COLUMN_DELETED + " BOOLEAN NOT NULL DEFAULT 0, "
+                            + DownloadContract.Downloads.COLUMN_ERROR_MSG + " TEXT, "
+                            + DownloadContract.Downloads.COLUMN_ALLOW_METERED + " INTEGER NOT NULL DEFAULT 1, "
+                            + DownloadContract.Downloads.COLUMN_BATCH_ID + " INTEGER, "
+                            + DownloadContract.Downloads.COLUMN_EXTRA_DATA + " TEXT, "
+                            + DownloadContract.Downloads.COLUMN_ALWAYS_RESUME + " INTEGER NOT NULL DEFAULT 0, "
+                            + Constants.MEDIA_SCANNED + " BOOLEAN);"
+            );
         } catch (SQLException ex) {
             Log.e("couldn't create table in downloads database");
             throw ex;
@@ -171,26 +174,30 @@ final class DatabaseHelper extends SQLiteOpenHelper {
     private void createHeadersTable(SQLiteDatabase db) {
         db.execSQL("DROP TABLE IF EXISTS " + DownloadContract.RequestHeaders.HEADERS_DB_TABLE);
         db.execSQL(
-                "CREATE TABLE " + DownloadContract.RequestHeaders.HEADERS_DB_TABLE + "(" +
-                        DownloadContract.RequestHeaders._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                        DownloadContract.RequestHeaders.COLUMN_DOWNLOAD_ID + " INTEGER NOT NULL," +
-                        DownloadContract.RequestHeaders.COLUMN_HEADER + " TEXT NOT NULL," +
-                        DownloadContract.RequestHeaders.COLUMN_VALUE + " TEXT NOT NULL" +
-                        ");");
+                "CREATE TABLE " + DownloadContract.RequestHeaders.HEADERS_DB_TABLE + "("
+                        + DownloadContract.RequestHeaders._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                        + DownloadContract.RequestHeaders.COLUMN_DOWNLOAD_ID + " INTEGER NOT NULL,"
+                        + DownloadContract.RequestHeaders.COLUMN_HEADER + " TEXT NOT NULL,"
+                        + DownloadContract.RequestHeaders.COLUMN_VALUE + " TEXT NOT NULL"
+                        + ");"
+        );
     }
 
     private void createBatchesTable(SQLiteDatabase db) {
         db.execSQL("DROP TABLE IF EXISTS " + DownloadContract.Batches.BATCHES_TABLE_NAME);
         db.execSQL(
-                "CREATE TABLE " + DownloadContract.Batches.BATCHES_TABLE_NAME + "(" +
-                        DownloadContract.Batches._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                        DownloadContract.Batches.COLUMN_TITLE + " TEXT NOT NULL," +
-                        DownloadContract.Batches.COLUMN_DESCRIPTION + " TEXT," +
-                        DownloadContract.Batches.COLUMN_BIG_PICTURE + " TEXT," +
-                        DownloadContract.Batches.COLUMN_STATUS + " INTEGER," +
-                        DownloadContract.Batches.COLUMN_VISIBILITY + " INTEGER," +
-                        DownloadContract.Batches.COLUMN_DELETED + " BOOLEAN NOT NULL DEFAULT 0" +
-                        ");");
+                "CREATE TABLE " + DownloadContract.Batches.BATCHES_TABLE_NAME + "("
+                        + DownloadContract.Batches._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                        + DownloadContract.Batches.COLUMN_TITLE + " TEXT NOT NULL,"
+                        + DownloadContract.Batches.COLUMN_DESCRIPTION + " TEXT,"
+                        + DownloadContract.Batches.COLUMN_BIG_PICTURE + " TEXT,"
+                        + DownloadContract.Batches.COLUMN_STATUS + " INTEGER,"
+                        + DownloadContract.Batches.COLUMN_VISIBILITY + " INTEGER,"
+                        + DownloadContract.Batches.COLUMN_DELETED + " BOOLEAN NOT NULL DEFAULT 0,"
+                        + DownloadContract.Batches.COLUMN_EXTRA_DATA + " TEXT,"
+                        + DownloadContract.Batches.COLUMN_LAST_MODIFICATION + " TEXT"
+                        + ");"
+        );
     }
 
     private void createDownloadsByBatchView(SQLiteDatabase db) {

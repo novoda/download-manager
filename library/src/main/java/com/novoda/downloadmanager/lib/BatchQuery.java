@@ -53,6 +53,7 @@ public class BatchQuery {
 
         private Criteria.Builder criteriaIdBuilder;
         private Criteria.Builder criteriaStatusBuilder;
+        private Criteria.Builder criteriaExtraDataBuilder;
 
         public Builder() {
             builder = new Criteria.Builder();
@@ -122,6 +123,19 @@ public class BatchQuery {
         public Builder withStatusFilter(@Status int statusFlags) {
             this.criteriaStatusBuilder = new Criteria.Builder()
                     .joinWithOr(buildCriteriaListFrom(statusFlags));
+            return this;
+        }
+
+        /**
+         * Filter by extra data.
+         *
+         * @return {@link BatchQuery.Builder}
+         */
+        public Builder withExtraData(String extraData) {
+            this.criteriaExtraDataBuilder = new Criteria.Builder();
+            criteriaExtraDataBuilder
+                    .withSelection(DownloadContract.Batches.COLUMN_EXTRA_DATA, Criteria.Wildcard.EQUALS)
+                    .withArgument(extraData);
             return this;
         }
 
@@ -203,6 +217,13 @@ public class BatchQuery {
 
             if (criteriaStatusBuilder != null) {
                 builder.withInnerCriteria(criteriaStatusBuilder.build());
+                if (criteriaExtraDataBuilder != null) {
+                    builder.and();
+                }
+            }
+
+            if (criteriaExtraDataBuilder != null) {
+                builder.withInnerCriteria(criteriaExtraDataBuilder.build());
             }
 
             Criteria criteria = builder.build();

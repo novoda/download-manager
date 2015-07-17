@@ -14,13 +14,15 @@ public class Batch {
     private final int status;
     private final long totalBytes;
     private final long currentBytes;
+    private final String extraData;
 
-    public Batch(int id, String title, int status, long totalBytes, long currentBytes) {
+    public Batch(int id, String title, int status, long totalBytes, long currentBytes, String extraData) {
         this.id = id;
         this.title = title;
         this.status = status;
         this.totalBytes = totalBytes;
         this.currentBytes = currentBytes;
+        this.extraData = extraData;
     }
 
     public String getTitle() {
@@ -56,5 +58,9 @@ public class Batch {
             default:
                 return "WTH";
         }
+    }
+
+    public String getExtraData() {
+        return extraData;
     }
 }

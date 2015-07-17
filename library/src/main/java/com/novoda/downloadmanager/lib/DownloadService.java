@@ -119,11 +119,11 @@ public class DownloadService extends Service {
 
         this.downloadsUriProvider = DownloadsUriProvider.getInstance();
         this.downloadDeleter = new DownloadDeleter(getContentResolver());
-        this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter, downloadsUriProvider);
+        this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter, downloadsUriProvider, systemFacade);
         PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
         DownloadClientReadyChecker downloadClientReadyChecker = getDownloadClientReadyChecker();
-        this.networkChecker = new NetworkChecker(systemFacade);
-        this.downloadReadyChecker = new DownloadReadyChecker(systemFacade, networkChecker, downloadClientReadyChecker, downloadMarshaller);
+        this.networkChecker = new NetworkChecker(this.systemFacade);
+        this.downloadReadyChecker = new DownloadReadyChecker(this.systemFacade, networkChecker, downloadClientReadyChecker, downloadMarshaller);
 
         String applicationPackageName = getApplicationContext().getPackageName();
         this.batchCompletionBroadcaster = new BatchCompletionBroadcaster(this, applicationPackageName);
@@ -164,10 +164,16 @@ public class DownloadService extends Service {
         DownloadExecutorFactory factory = new DownloadExecutorFactory(concurrentDownloadsLimitProvider);
         executor = factory.createExecutor();
 
-        this.downloadsRepository = new DownloadsRepository(getContentResolver(), new DownloadsRepository.DownloadInfoCreator() {
+        this.downloadsRepository = new DownloadsRepository(
+                getContentResolver(), new DownloadsRepository.DownloadInfoCreator() {
             @Override
             public FileDownloadInfo create(FileDownloadInfo.Reader reader) {
                 return createNewDownloadInfo(reader);
+            }
+
+            @Override
+            public FileDownloadInfo.ControlStatus create(FileDownloadInfo.ControlStatus.Reader reader, long id) {
+                return createNewDownloadInfoControlStatus(reader, id);
             }
         }, downloadsUriProvider);
 
@@ -181,6 +187,10 @@ public class DownloadService extends Service {
         FileDownloadInfo info = reader.newDownloadInfo(systemFacade, downloadsUriProvider);
         Log.v("processing inserted download " + info.getId());
         return info;
+    }
+
+    private FileDownloadInfo.ControlStatus createNewDownloadInfoControlStatus(FileDownloadInfo.ControlStatus.Reader reader, long id) {
+        return reader.newControlStatus(id);
     }
 
     private DownloadClientReadyChecker getDownloadClientReadyChecker() {
@@ -370,7 +380,8 @@ public class DownloadService extends Service {
     }
 
     private void download(FileDownloadInfo info) {
-        DownloadThread downloadThread = new DownloadThread(this, systemFacade, info, storageManager, downloadNotifier,
+        DownloadThread downloadThread = new DownloadThread(
+                this, systemFacade, info, storageManager, downloadNotifier,
                 batchCompletionBroadcaster, batchRepository, downloadsUriProvider, downloadsRepository, networkChecker, downloadReadyChecker);
 
         ContentValues contentValues = new ContentValues();

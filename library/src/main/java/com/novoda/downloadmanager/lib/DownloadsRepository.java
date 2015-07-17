@@ -54,8 +54,15 @@ class DownloadsRepository {
         }
     }
 
+    public FileDownloadInfo.ControlStatus getDownloadInfoControlStatusFor(long id) {
+        FileDownloadInfo.ControlStatus.Reader reader = new FileDownloadInfo.ControlStatus.Reader(contentResolver, downloadsUriProvider);
+        return downloadInfoCreator.create(reader, id);
+    }
+
     interface DownloadInfoCreator {
         FileDownloadInfo create(FileDownloadInfo.Reader reader);
+
+        FileDownloadInfo.ControlStatus create(FileDownloadInfo.ControlStatus.Reader reader, long id);
     }
 
 }

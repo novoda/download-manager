@@ -174,7 +174,7 @@ public class DownloadManager {
      * Timestamp when the download was last modified, in {@link System#currentTimeMillis
      * System.currentTimeMillis()} (wall clock time in UTC).
      */
-    public static final String COLUMN_LAST_MODIFIED_TIMESTAMP = "last_modified_timestamp";
+    public static final String COLUMN_LAST_MODIFIED_TIMESTAMP = DownloadContract.Downloads.COLUMN_LAST_MODIFICATION;
 
     /**
      * The URI to the corresponding entry in MediaProvider for this downloaded entry. It is
@@ -355,7 +355,7 @@ public class DownloadManager {
             DownloadContract.Downloads.COLUMN_FILE_NAME_HINT,
             DownloadContract.Downloads.COLUMN_MIME_TYPE + " AS " + COLUMN_MEDIA_TYPE,
             DownloadContract.Downloads.COLUMN_TOTAL_BYTES + " AS " + COLUMN_TOTAL_SIZE_BYTES,
-            DownloadContract.Downloads.COLUMN_LAST_MODIFICATION + " AS " + COLUMN_LAST_MODIFIED_TIMESTAMP,
+            DownloadContract.Downloads.COLUMN_LAST_MODIFICATION,
             DownloadContract.Downloads.COLUMN_CURRENT_BYTES + " AS " + COLUMN_BYTES_DOWNLOADED_SO_FAR,
             DownloadContract.Downloads.COLUMN_BATCH_ID,
             DownloadContract.Downloads.COLUMN_EXTRA_DATA,
@@ -365,6 +365,8 @@ public class DownloadManager {
             DownloadContract.Batches.COLUMN_BIG_PICTURE,
             DownloadContract.Batches.COLUMN_VISIBILITY,
             DownloadContract.Batches.COLUMN_STATUS,
+            DownloadContract.Batches.COLUMN_EXTRA_DATA,
+            DownloadContract.Batches.COLUMN_LAST_MODIFICATION,
         /* add the following 'computed' columns to the cursor.
          * they are not 'returned' by the database, but their inclusion
          * eliminates need to have lot of methods in CursorTranslator
@@ -375,27 +377,31 @@ public class DownloadManager {
 
     private final ContentResolver contentResolver;
     private final DownloadsUriProvider downloadsUriProvider;
+    private final SystemFacade systemFacade;
 
     private Uri baseUri;
 
     public DownloadManager(Context context, ContentResolver resolver) {
-        this(context, resolver, DownloadsUriProvider.getInstance(), false);
+        this(context, resolver, DownloadsUriProvider.getInstance(), new RealSystemFacade(context), false);
     }
 
     public DownloadManager(Context context, ContentResolver contentResolver, boolean verboseLogging) {
-        this(context, contentResolver, DownloadsUriProvider.getInstance(), verboseLogging);
+        this(context, contentResolver, DownloadsUriProvider.getInstance(), new RealSystemFacade(context), verboseLogging);
     }
 
     DownloadManager(Context context, ContentResolver resolver, DownloadsUriProvider downloadsUriProvider) {
-        this(context, resolver, downloadsUriProvider, false);
+        this(context, resolver, downloadsUriProvider, new RealSystemFacade(context), false);
     }
 
     DownloadManager(Context context,
                     ContentResolver contentResolver,
-                    DownloadsUriProvider downloadsUriProvider, boolean verboseLogging) {
+                    DownloadsUriProvider downloadsUriProvider,
+                    SystemFacade systemFacade,
+                    boolean verboseLogging) {
         this.contentResolver = contentResolver;
         this.downloadsUriProvider = downloadsUriProvider;
         this.baseUri = downloadsUriProvider.getContentUri();
+        this.systemFacade = systemFacade;
         GlobalState.setContext(context);
         GlobalState.setVerboseLogging(verboseLogging);
     }
@@ -559,7 +565,9 @@ public class DownloadManager {
      * @return a Cursor over the result set of batches
      */
     public Cursor query(BatchQuery query) {
-        BatchRepository batchRepository = new BatchRepository(contentResolver, new DownloadDeleter(contentResolver), downloadsUriProvider);
+        DownloadDeleter downloadDeleter = new DownloadDeleter(contentResolver);
+        RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext());
+        BatchRepository batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
         Cursor cursor = batchRepository.retrieveFor(query);
         if (cursor == null) {
             return null;
@@ -865,6 +873,7 @@ public class DownloadManager {
     private long insert(RequestBatch batch) {
         ContentValues values = batch.toContentValues();
         values.put(DownloadContract.Batches.COLUMN_STATUS, DownloadStatus.PENDING);
+        values.put(DownloadContract.Batches.COLUMN_LAST_MODIFICATION, systemFacade.currentTimeMillis());
         Uri batchUri = contentResolver.insert(downloadsUriProvider.getBatchesUri(), values);
         return ContentUris.parseId(batchUri);
     }

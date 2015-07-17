@@ -454,4 +454,48 @@ class FileDownloadInfo {
             return cursor.getLong(cursor.getColumnIndexOrThrow(column));
         }
     }
+
+    static final class ControlStatus {
+
+        private int control;
+        private int status;
+
+        public ControlStatus(int control, int status) {
+            this.control = control;
+            this.status = status;
+        }
+
+        public boolean isPaused() {
+            return control == DownloadsControl.CONTROL_PAUSED;
+        }
+
+        public boolean isCanceled() {
+            return status == DownloadStatus.CANCELED;
+        }
+
+        static final class Reader {
+
+            private final ContentResolver contentResolver;
+            private final DownloadsUriProvider downloadsUriProvider;
+
+            public Reader(ContentResolver contentResolver, DownloadsUriProvider downloadsUriProvider) {
+                this.contentResolver = contentResolver;
+                this.downloadsUriProvider = downloadsUriProvider;
+            }
+
+            public ControlStatus newControlStatus(long id) {
+                String[] projection = {DownloadContract.Downloads.COLUMN_CONTROL, DownloadContract.Downloads.COLUMN_STATUS};
+                Uri uri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id);
+                Cursor downloadsCursor = contentResolver.query(uri, projection, null, null, null);
+                try {
+                    downloadsCursor.moveToFirst();
+                    int control = downloadsCursor.getInt(0);
+                    int status = downloadsCursor.getInt(1);
+                    return new FileDownloadInfo.ControlStatus(control, status);
+                } finally {
+                    downloadsCursor.close();
+                }
+            }
+        }
+    }
 }
