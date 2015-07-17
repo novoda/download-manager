@@ -154,6 +154,7 @@ public final class DownloadProvider extends ContentProvider {
             DownloadContract.Downloads.COLUMN_NOTIFICATION_EXTRAS,
             DownloadContract.Downloads.COLUMN_BATCH_ID,
             DownloadContract.Downloads.COLUMN_ALWAYS_RESUME,
+            DownloadContract.Downloads.COLUMN_ALLOW_TAR_UPDATES,
             DownloadContract.Batches._ID,
             DownloadContract.Batches.COLUMN_STATUS,
             DownloadContract.Batches.COLUMN_TITLE,

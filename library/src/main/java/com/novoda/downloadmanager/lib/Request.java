@@ -54,6 +54,7 @@ public class Request {
     private long batchId = -1L;
     private String extraData;
     private boolean alwaysResume;
+    private boolean allowTarUpdates;
 
     /**
      * if a file is designated as a MediaScanner scannable file, the following value is
@@ -230,6 +231,15 @@ public class Request {
      */
     public Request alwaysAttemptResume() {
         alwaysResume = true;
+        return this;
+    }
+
+    /**
+     * Automatically pause the download when reaching the end of the file instead of writing the last bytes to disk.
+     * This allows for a resume of the download against an updated tar file.
+     */
+    public Request allowTarUpdates() {
+        allowTarUpdates = true;
         return this;
     }
 
@@ -456,6 +466,7 @@ public class Request {
         values.put(DownloadContract.Downloads.COLUMN_BATCH_ID, batchId);
         values.put(DownloadContract.Downloads.COLUMN_EXTRA_DATA, extraData);
         values.put(DownloadContract.Downloads.COLUMN_ALWAYS_RESUME, alwaysResume);
+        values.put(DownloadContract.Downloads.COLUMN_ALLOW_TAR_UPDATES, allowTarUpdates);
 
         return values;
     }

@@ -97,6 +97,7 @@ class FileDownloadInfo {
     private int bypassRecommendedSizeLimit;
     private long batchId;
     private boolean alwaysResume;
+    private boolean allowTarUpdates;
 
     private final List<Pair<String, String>> requestHeaders = new ArrayList<>();
     private final SystemFacade systemFacade;
@@ -360,6 +361,10 @@ class FileDownloadInfo {
         return alwaysResume || (eTag != null && isNoIntegrity());
     }
 
+    public boolean isAllowTarUpdates() {
+        return allowTarUpdates;
+    }
+
     public static class Reader {
         private final ContentResolver resolver;
         private final Cursor cursor;
@@ -410,6 +415,7 @@ class FileDownloadInfo {
             info.bypassRecommendedSizeLimit = getInt(DownloadContract.Downloads.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
             info.batchId = getLong(DownloadContract.Downloads.COLUMN_BATCH_ID);
             info.alwaysResume = getInt(DownloadContract.Downloads.COLUMN_ALWAYS_RESUME) != 0;
+            info.allowTarUpdates = getInt(DownloadContract.Downloads.COLUMN_ALLOW_TAR_UPDATES) != 0;
 
             synchronized (this) {
                 info.control = getInt(DownloadContract.Downloads.COLUMN_CONTROL);

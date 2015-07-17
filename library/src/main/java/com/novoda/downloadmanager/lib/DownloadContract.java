@@ -251,6 +251,12 @@ final class DownloadContract {
          */
         public static final String COLUMN_ALWAYS_RESUME = "always_resume";
 
+        /**
+         * A flag for tar files download to automatically pause the download when reaching the end of the file
+         * instead of writing the last bytes to disk. This allows for a resume of the download against an updated tar file
+         */
+        public static final String COLUMN_ALLOW_TAR_UPDATES = "allow_tar_updates";
+
         private Downloads() {
             // non-instantiable class
         }
