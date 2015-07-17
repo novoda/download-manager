@@ -345,6 +345,10 @@ class DownloadThread implements Runnable {
         state.resetBeforeExecute();
         setupDestinationFile(state);
 
+        if (originalDownloadInfo.shouldAllowTarUpdate(state.mimeType)) {
+            state.totalBytes = -1;
+        }
+
         // skip when already finished; remove after fixing race in 5217390
         if (state.currentBytes == state.totalBytes) {
             Log.i("Skipping initiating request for download " + originalDownloadInfo.getId() + "; already completed");
