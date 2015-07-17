@@ -377,6 +377,7 @@ public class DownloadManager {
 
     private final ContentResolver contentResolver;
     private final DownloadsUriProvider downloadsUriProvider;
+    private final SystemFacade systemFacade;
 
     private Uri baseUri;
 
@@ -394,10 +395,12 @@ public class DownloadManager {
 
     DownloadManager(Context context,
                     ContentResolver contentResolver,
-                    DownloadsUriProvider downloadsUriProvider, boolean verboseLogging) {
+                    DownloadsUriProvider downloadsUriProvider,
+                    boolean verboseLogging) {
         this.contentResolver = contentResolver;
         this.downloadsUriProvider = downloadsUriProvider;
         this.baseUri = downloadsUriProvider.getContentUri();
+        this.systemFacade = new RealSystemFacade(context);
         GlobalState.setContext(context);
         GlobalState.setVerboseLogging(verboseLogging);
     }
@@ -864,6 +867,7 @@ public class DownloadManager {
     private long insert(RequestBatch batch) {
         ContentValues values = batch.toContentValues();
         values.put(DownloadContract.Batches.COLUMN_STATUS, DownloadStatus.PENDING);
+        values.put(DownloadContract.Batches.COLUMN_LAST_MODIFICATION, systemFacade.currentTimeMillis());
         Uri batchUri = contentResolver.insert(downloadsUriProvider.getBatchesUri(), values);
         return ContentUris.parseId(batchUri);
     }
