@@ -443,7 +443,12 @@ public class DownloadManager {
         ContentValues values = new ContentValues();
         values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
         values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.PENDING);
-        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[]{String.valueOf(id)});
+        String where = COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
+        String[] selectionArgs = {String.valueOf(id), String.valueOf(DownloadStatus.PENDING)};
+        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
+
+        BatchRepository batchRepository = new BatchRepository(contentResolver, new DownloadDeleter(contentResolver), downloadsUriProvider);
+        batchRepository.updateBatchStatus(id, DownloadStatus.PENDING);
     }
 
     public void removeDownload(URI uri) {
