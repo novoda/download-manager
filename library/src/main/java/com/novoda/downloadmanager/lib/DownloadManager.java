@@ -382,25 +382,26 @@ public class DownloadManager {
     private Uri baseUri;
 
     public DownloadManager(Context context, ContentResolver resolver) {
-        this(context, resolver, DownloadsUriProvider.getInstance(), false);
+        this(context, resolver, DownloadsUriProvider.getInstance(), new RealSystemFacade(context), false);
     }
 
     public DownloadManager(Context context, ContentResolver contentResolver, boolean verboseLogging) {
-        this(context, contentResolver, DownloadsUriProvider.getInstance(), verboseLogging);
+        this(context, contentResolver, DownloadsUriProvider.getInstance(), new RealSystemFacade(context), verboseLogging);
     }
 
     DownloadManager(Context context, ContentResolver resolver, DownloadsUriProvider downloadsUriProvider) {
-        this(context, resolver, downloadsUriProvider, false);
+        this(context, resolver, downloadsUriProvider, new RealSystemFacade(context), false);
     }
 
     DownloadManager(Context context,
                     ContentResolver contentResolver,
                     DownloadsUriProvider downloadsUriProvider,
+                    SystemFacade systemFacade,
                     boolean verboseLogging) {
         this.contentResolver = contentResolver;
         this.downloadsUriProvider = downloadsUriProvider;
         this.baseUri = downloadsUriProvider.getContentUri();
-        this.systemFacade = new RealSystemFacade(context);
+        this.systemFacade = systemFacade;
         GlobalState.setContext(context);
         GlobalState.setVerboseLogging(verboseLogging);
     }
