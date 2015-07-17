@@ -8,7 +8,11 @@ class BatchInfo {
     private final int visibility;
     private final String extraData;
 
-    public BatchInfo(String title, String description, String bigPictureUrl, @NotificationVisibility.Value int visibility, String extraData) {
+    public BatchInfo(String title,
+                     String description,
+                     String bigPictureUrl,
+                     @NotificationVisibility.Value int visibility,
+                     String extraData) {
         this.title = title;
         this.description = description;
         this.bigPictureUrl = bigPictureUrl;
@@ -36,4 +40,5 @@ class BatchInfo {
     public String getExtraData() {
         return extraData;
     }
+
 }
