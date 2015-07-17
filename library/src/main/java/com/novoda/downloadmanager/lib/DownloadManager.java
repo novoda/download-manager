@@ -449,7 +449,14 @@ public class DownloadManager {
         ContentValues values = new ContentValues();
         values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
         values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.PENDING);
-        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[]{String.valueOf(id)});
+        String where = COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
+        String[] selectionArgs = {String.valueOf(id), String.valueOf(DownloadStatus.PENDING)};
+        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
+
+        DownloadDeleter downloadDeleter = new DownloadDeleter(contentResolver);
+        RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext());
+        BatchRepository batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
+        batchRepository.updateBatchStatus(id, DownloadStatus.PENDING);
     }
 
     public void removeDownload(URI uri) {
@@ -1006,6 +1013,7 @@ public class DownloadManager {
 
         private int translateStatus(int status) {
             switch (status) {
+                case DownloadStatus.SUBMITTED:
                 case DownloadStatus.PENDING:
                     return STATUS_PENDING;
 

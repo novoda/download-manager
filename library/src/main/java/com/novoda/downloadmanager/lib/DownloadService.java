@@ -348,10 +348,8 @@ public class DownloadService extends Service {
             if (!isActive && downloadReadyChecker.canDownload(downloadBatch)) {
                 downloadOrContinueBatch(downloadBatch.getDownloads());
                 isActive = true;
-            } else {
-                if (downloadBatch.scanCompletedMediaIfReady(downloadScanner)) {
-                    isActive = true;
-                }
+            } else if (downloadBatch.scanCompletedMediaIfReady(downloadScanner)) {
+                isActive = true;
             }
 
             nextRetryTimeMillis = downloadBatch.nextActionMillis(now, nextRetryTimeMillis);
@@ -394,7 +392,7 @@ public class DownloadService extends Service {
     }
 
     private void updateTotalBytesFor(Collection<FileDownloadInfo> downloadInfos) {
-        ContentValues values = new ContentValues();
+        ContentValues values = new ContentValues(1);
         for (FileDownloadInfo downloadInfo : downloadInfos) {
             if (downloadInfo.hasUnknownTotalBytes()) {
                 long totalBytes = contentLengthFetcher.fetchContentLengthFor(downloadInfo);

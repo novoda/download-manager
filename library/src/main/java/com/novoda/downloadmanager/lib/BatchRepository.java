@@ -26,6 +26,7 @@ class BatchRepository {
             DownloadStatus.WAITING_FOR_NETWORK,
             DownloadStatus.QUEUED_FOR_WIFI,
 
+            DownloadStatus.SUBMITTED,
             DownloadStatus.PENDING,
             DownloadStatus.SUCCESS
     );
@@ -59,18 +60,18 @@ class BatchRepository {
         Cursor cursor = null;
         SparseIntArray statusCounts = new SparseIntArray(PRIORITISED_STATUSES_SIZE);
         try {
+            String[] projection = {DownloadContract.Downloads.COLUMN_STATUS};
             String[] selectionArgs = {String.valueOf(batchId)};
+
             cursor = resolver.query(
                     downloadsUriProvider.getAllDownloadsUri(),
-                    null,
+                    projection,
                     DownloadContract.Downloads.COLUMN_BATCH_ID + " = ?",
                     selectionArgs,
                     null);
 
-            int statusColumnIndex = cursor.getColumnIndexOrThrow(DownloadContract.Downloads.COLUMN_STATUS);
-
             while (cursor.moveToNext()) {
-                int statusCode = cursor.getInt(statusColumnIndex);
+                int statusCode = cursor.getInt(0);
 
                 if (DownloadStatus.isError(statusCode)) {
                     return statusCode;
