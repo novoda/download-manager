@@ -488,6 +488,7 @@ public final class DownloadProvider extends ContentProvider {
         copyBoolean(DownloadContract.Downloads.COLUMN_ALLOW_ROAMING, values, filteredValues);
         copyBoolean(DownloadContract.Downloads.COLUMN_ALLOW_METERED, values, filteredValues);
         copyBoolean(DownloadContract.Downloads.COLUMN_ALWAYS_RESUME, values, filteredValues);
+        copyBoolean(DownloadContract.Downloads.COLUMN_ALLOW_TAR_UPDATES, values, filteredValues);
 
         copyInteger(DownloadContract.Downloads.COLUMN_BATCH_ID, values, filteredValues);
 

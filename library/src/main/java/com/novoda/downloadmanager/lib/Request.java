@@ -237,9 +237,11 @@ public class Request {
     /**
      * Automatically pause the download when reaching the end of the file instead of writing the last bytes to disk.
      * This allows for a resume of the download against an updated tar file.
+     * If used this also sets {@code alwaysAttemptResume()}
      */
     public Request allowTarUpdates() {
         allowTarUpdates = true;
+        alwaysAttemptResume();
         return this;
     }
 
