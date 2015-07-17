@@ -453,7 +453,9 @@ public class DownloadManager {
         String[] selectionArgs = {String.valueOf(id), String.valueOf(DownloadStatus.PENDING)};
         contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
 
-        BatchRepository batchRepository = new BatchRepository(contentResolver, new DownloadDeleter(contentResolver), downloadsUriProvider);
+        DownloadDeleter downloadDeleter = new DownloadDeleter(contentResolver);
+        RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext());
+        BatchRepository batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
         batchRepository.updateBatchStatus(id, DownloadStatus.PENDING);
     }
 
