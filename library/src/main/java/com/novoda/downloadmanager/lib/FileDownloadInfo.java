@@ -18,6 +18,7 @@ import java.util.List;
  */
 class FileDownloadInfo {
 
+    private static final String TAR_MIME_TYPE = "application/x-tar";
     private static final int UNKNOWN_BYTES = -1;
 
     // TODO: move towards these in-memory objects being sources of truth, and periodically pushing to provider.
@@ -361,8 +362,8 @@ class FileDownloadInfo {
         return alwaysResume || (eTag != null && isNoIntegrity());
     }
 
-    public boolean isAllowTarUpdates() {
-        return allowTarUpdates;
+    public boolean shouldAllowTarUpdate(String mimeType) {
+        return allowTarUpdates && TAR_MIME_TYPE.equals(mimeType);
     }
 
     public static class Reader {
