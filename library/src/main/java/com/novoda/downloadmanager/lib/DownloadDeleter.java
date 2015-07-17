@@ -32,7 +32,6 @@ class DownloadDeleter {
             ContentValues blankData = new ContentValues();
             blankData.put(DownloadContract.Downloads.COLUMN_DATA, (String) null);
             resolver.update(info.getAllDownloadsUri(), blankData, null, null);
-            info.setFileName(null);
         }
     }
 
