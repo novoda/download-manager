@@ -145,11 +145,6 @@ class FileDownloadInfo {
         return status;
     }
 
-    public void setStatus(int status) {
-        // TODO remove me!
-        this.status = status;
-    }
-
     public int getNumFailed() {
         return numFailed;
     }
