@@ -161,10 +161,6 @@ class FileDownloadInfo {
         return totalBytes;
     }
 
-    public void setTotalBytes(long totalBytes) {
-        this.totalBytes = totalBytes;
-    }
-
     public long getCurrentBytes() {
         return currentBytes;
     }
