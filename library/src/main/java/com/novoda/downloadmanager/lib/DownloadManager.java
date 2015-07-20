@@ -454,7 +454,6 @@ public class DownloadManager {
         contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
 
         DownloadDeleter downloadDeleter = new DownloadDeleter(contentResolver);
-        RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext());
         BatchRepository batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
         batchRepository.updateBatchStatus(id, DownloadStatus.PENDING);
     }
