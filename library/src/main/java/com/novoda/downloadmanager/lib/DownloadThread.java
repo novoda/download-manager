@@ -100,7 +100,8 @@ class DownloadThread implements Runnable {
                           DownloadsUriProvider downloadsUriProvider,
                           DownloadsRepository downloadsRepository,
                           NetworkChecker networkChecker,
-                          DownloadReadyChecker downloadReadyChecker, TarFileTruncator tarFileTruncator) {
+                          DownloadReadyChecker downloadReadyChecker,
+                          TarFileTruncator tarFileTruncator) {
         this.context = context;
         this.systemFacade = systemFacade;
         this.originalDownloadInfo = originalDownloadInfo;
