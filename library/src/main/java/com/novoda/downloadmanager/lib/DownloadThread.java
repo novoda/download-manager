@@ -656,8 +656,7 @@ class DownloadThread implements Runnable {
         if (originalDownloadInfo.shouldAllowTarUpdate(state.mimeType)) {
             closeAfterWrite(out, outFd);
             state.currentBytes = tarFileTruncator.truncateIfNeeded(state.filename);
-            updateDownloadedSize(state);
-            pause();
+            updateStatusAndPause(state);
             return;
         }
         ContentValues values = new ContentValues(2);
@@ -678,18 +677,13 @@ class DownloadThread implements Runnable {
         }
     }
 
-    private void pause() throws StopRequestException {
+    private void updateStatusAndPause(State state) throws StopRequestException {
         ContentValues values = new ContentValues();
         values.put(COLUMN_STATUS, DownloadStatus.PAUSED_BY_APP);
-        getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
-        throw new StopRequestException(DownloadStatus.PAUSED_BY_APP, "download paused by owner");
-    }
-
-    private void updateDownloadedSize(State state) {
-        ContentValues values = new ContentValues();
         values.put(COLUMN_CURRENT_BYTES, state.currentBytes);
         values.put(COLUMN_TOTAL_BYTES, state.currentBytes);
         getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
+        throw new StopRequestException(DownloadStatus.PAUSED_BY_APP, "download paused by owner");
     }
 
     private boolean cannotResume(State state) {
