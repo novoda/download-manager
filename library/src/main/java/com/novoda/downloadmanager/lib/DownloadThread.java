@@ -657,7 +657,6 @@ class DownloadThread implements Runnable {
             state.currentBytes = tarFileTruncator.truncateIfNeeded(state.filename);
             updateDownloadedSize(state);
             pause();
-            originalDownloadInfo.getBatchId();
             return;
         }
         ContentValues values = new ContentValues(2);
