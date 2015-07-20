@@ -47,6 +47,7 @@ import java.net.UnknownHostException;
 import java.util.Locale;
 
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
+import static com.novoda.downloadmanager.lib.Constants.UNKNOWN_BYTE_SIZE;
 import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.*;
 import static com.novoda.downloadmanager.lib.DownloadStatus.HTTP_DATA_ERROR;
 import static com.novoda.downloadmanager.lib.FileDownloadInfo.NetworkState;
@@ -136,7 +137,7 @@ class DownloadThread implements Runnable {
         public int retryAfter = 0;
         public boolean gotData = false;
         public String requestUri;
-        public long totalBytes = -1;
+        public long totalBytes = UNKNOWN_BYTE_SIZE;
         public long currentBytes = 0;
         public String headerETag;
         public boolean continuingDownload = false;
@@ -157,7 +158,7 @@ class DownloadThread implements Runnable {
          */
         public long speedSampleBytes;
 
-        public long contentLength = -1;
+        public long contentLength = UNKNOWN_BYTE_SIZE;
         public String contentDisposition;
         public String contentLocation;
 
@@ -174,7 +175,7 @@ class DownloadThread implements Runnable {
 
         public void resetBeforeExecute() {
             // Reset any state from previous execution
-            contentLength = -1;
+            contentLength = UNKNOWN_BYTE_SIZE;
             contentDisposition = null;
             contentLocation = null;
             redirectionCount = 0;
@@ -347,7 +348,7 @@ class DownloadThread implements Runnable {
         setupDestinationFile(state);
 
         if (originalDownloadInfo.shouldAllowTarUpdate(state.mimeType)) {
-            state.totalBytes = -1;
+            state.totalBytes = UNKNOWN_BYTE_SIZE;
         }
 
         // skip when already finished; remove after fixing race in 5217390
@@ -661,12 +662,12 @@ class DownloadThread implements Runnable {
         }
         ContentValues values = new ContentValues(2);
         values.put(COLUMN_CURRENT_BYTES, state.currentBytes);
-        if (state.contentLength == -1) {
+        if (state.contentLength == UNKNOWN_BYTE_SIZE) {
             values.put(COLUMN_TOTAL_BYTES, state.currentBytes);
         }
         getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
 
-        final boolean lengthMismatched = (state.contentLength != -1)
+        final boolean lengthMismatched = (state.contentLength != UNKNOWN_BYTE_SIZE)
                 && (state.currentBytes != state.contentLength);
         if (lengthMismatched) {
             if (cannotResume(state)) {
@@ -775,15 +776,15 @@ class DownloadThread implements Runnable {
 
         final String transferEncoding = conn.getHeaderField("Transfer-Encoding");
         if (transferEncoding == null) {
-            state.contentLength = getHeaderFieldLong(conn, "Content-Length", -1);
+            state.contentLength = getHeaderFieldLong(conn, "Content-Length", UNKNOWN_BYTE_SIZE);
         } else {
             Log.i("Ignoring Content-Length since Transfer-Encoding is also defined");
-            state.contentLength = -1;
+            state.contentLength = UNKNOWN_BYTE_SIZE;
         }
 
         state.totalBytes = state.contentLength;
 
-        final boolean noSizeInfo = state.contentLength == -1 && (transferEncoding == null || !transferEncoding.equalsIgnoreCase("chunked"));
+        final boolean noSizeInfo = state.contentLength == UNKNOWN_BYTE_SIZE && (transferEncoding == null || !transferEncoding.equalsIgnoreCase("chunked"));
         if (!originalDownloadInfo.isNoIntegrity() && noSizeInfo) {
             throw new StopRequestException(DownloadStatus.CANNOT_RESUME, "can't know size of download, giving up");
         }
@@ -838,7 +839,7 @@ class DownloadThread implements Runnable {
                 // All right, we'll be able to resume this download
                 Log.i("resuming download for id: " + originalDownloadInfo.getId() + ", and starting with file of length: " + fileLength);
                 state.currentBytes = (int) fileLength;
-                if (originalDownloadInfo.getTotalBytes() != -1) {
+                if (originalDownloadInfo.getTotalBytes() != UNKNOWN_BYTE_SIZE) {
                     state.contentLength = originalDownloadInfo.getTotalBytes();
                 }
                 state.headerETag = originalDownloadInfo.getETag();

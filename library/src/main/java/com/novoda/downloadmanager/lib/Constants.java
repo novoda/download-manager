@@ -170,4 +170,9 @@ class Constants {
      * The time is in seconds.
      */
     public static final int RETRY_FIRST_DELAY = 30;
+
+    /**
+     * The size used to represent an unkown byte size.
+     */
+    public static final int UNKNOWN_BYTE_SIZE = -1;
 }
