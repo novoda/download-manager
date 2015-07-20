@@ -742,7 +742,7 @@ class DownloadThread implements Runnable {
         if (state.mimeType != null) {
             values.put(DownloadContract.Downloads.COLUMN_MIME_TYPE, state.mimeType);
         }
-        values.put(DownloadContract.Downloads.COLUMN_TOTAL_BYTES, originalDownloadInfo.getTotalBytes());
+        values.put(DownloadContract.Downloads.COLUMN_TOTAL_BYTES, state.totalBytes);
         getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
     }
 
@@ -768,7 +768,6 @@ class DownloadThread implements Runnable {
         }
 
         state.totalBytes = state.contentLength;
-        originalDownloadInfo.setTotalBytes(state.contentLength);
 
         final boolean noSizeInfo = state.contentLength == -1 && (transferEncoding == null || !transferEncoding.equalsIgnoreCase("chunked"));
         if (!originalDownloadInfo.isNoIntegrity() && noSizeInfo) {
