@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Pair;
 
+import com.novoda.notils.logger.simple.Log;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -363,7 +365,16 @@ class FileDownloadInfo {
     }
 
     public boolean shouldAllowTarUpdate(String mimeType) {
-        return allowTarUpdates && TAR_MIME_TYPE.equals(mimeType);
+        if (!allowTarUpdates) {
+            return false;
+        }
+
+        if (TAR_MIME_TYPE.equals(mimeType)) {
+            return true;
+        }
+
+        Log.e("Flag allowTarUpdates set but file not matching Tar mimeType, functionality will be disabled.");
+        return false;
     }
 
     public static class Reader {
