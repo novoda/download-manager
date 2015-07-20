@@ -5,8 +5,10 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import static com.novoda.downloadmanager.lib.IOHelpers.closeAfterWrite;
+import static com.novoda.downloadmanager.lib.IOHelpers.closeQuietly;
 
 class TarFileTruncator {
 
@@ -23,11 +25,13 @@ class TarFileTruncator {
     private long copyFileTruncatingLastBytesIfNeeded(String fileOriginal, String fileCopy) throws StopRequestException {
         OutputStream out = null;
         FileDescriptor outFd = null;
+        InputStream in = null;
         try {
             FileInputStream fileInputStream = new FileInputStream(fileOriginal);
             FileOutputStream fileOutputStream = new FileOutputStream(fileCopy);
             out = fileOutputStream;
             outFd = fileOutputStream.getFD();
+            in = fileInputStream;
             byte[] buffer = new byte[BLOCK_SIZE];
             int readLast;
             int readTotal = 0;
@@ -44,6 +48,7 @@ class TarFileTruncator {
             throw new StopRequestException(DownloadStatus.FILE_ERROR, e);
         } finally {
             closeAfterWrite(out, outFd);
+            closeQuietly(in);
         }
     }
 
@@ -75,7 +80,7 @@ class TarFileTruncator {
         boolean deleted = oldFile.delete();
         boolean renamed = newFile.renameTo(oldFile);
         if(!deleted || !renamed) {
-           throw new IllegalStateException("Could not replace file by truncated one"); 
+           throw new IllegalStateException("Could not replace file by truncated one");
         }
     }
 
