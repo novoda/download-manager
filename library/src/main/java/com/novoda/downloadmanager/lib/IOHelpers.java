@@ -7,7 +7,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.OutputStream;
 
-class IOHelpers {
+final class IOHelpers {
 
     private IOHelpers() {
     }

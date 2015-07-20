@@ -384,7 +384,9 @@ public class DownloadService extends Service {
     private void download(FileDownloadInfo info) {
         DownloadThread downloadThread = new DownloadThread(
                 this, systemFacade, info, storageManager, downloadNotifier,
-                batchCompletionBroadcaster, batchRepository, downloadsUriProvider, downloadsRepository, networkChecker, downloadReadyChecker, tarFileTruncator);
+                batchCompletionBroadcaster, batchRepository, downloadsUriProvider,
+                downloadsRepository, networkChecker, downloadReadyChecker, tarFileTruncator
+        );
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.SUBMITTED);
