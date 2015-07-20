@@ -71,9 +71,12 @@ class TarFileTruncator {
 
     private void replace(String fileOriginal, String fileCopy) {
         File oldFile = new File(fileOriginal);
-        oldFile.delete();
         File newFile = new File(fileCopy);
-        newFile.renameTo(oldFile);
+        boolean deleted = oldFile.delete();
+        boolean renamed = newFile.renameTo(oldFile);
+        if(!deleted || !renamed) {
+           throw new IllegalStateException("Could not replace file by truncated one"); 
+        }
     }
 
 }
