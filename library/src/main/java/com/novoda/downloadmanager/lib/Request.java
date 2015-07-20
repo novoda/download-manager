@@ -41,8 +41,8 @@ public class Request {
 
     private Uri uri;
     private Uri destinationUri;
-    private CharSequence title;
-    private CharSequence description;
+    private CharSequence title = "";
+    private CharSequence description = "";
     private String mimeType;
     private int allowedNetworkTypes = ~0; // default to all network types allowed
     private boolean roamingAllowed = true;
@@ -50,7 +50,7 @@ public class Request {
     private boolean isVisibleInDownloadsUi = true;
     private boolean scannable = false;
     private String notificationExtras;
-    private String bigPictureUrl;
+    private String bigPictureUrl = "";
     private long batchId = -1L;
     private String extraData;
     private boolean alwaysResume;
