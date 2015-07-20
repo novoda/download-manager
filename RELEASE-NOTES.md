@@ -1,3 +1,9 @@
+0.2.5
+-------
+
+- FileDownloadInfo setter removal #118
+- Fix download goes to queued #116
+
 0.2.4
 -------
 
