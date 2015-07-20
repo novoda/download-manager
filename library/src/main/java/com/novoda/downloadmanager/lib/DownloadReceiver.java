@@ -151,8 +151,8 @@ public class DownloadReceiver extends BroadcastReceiver {
      */
     private void openDownload(Context context, long id) {
         ContentResolver contentResolver = context.getContentResolver();
-        DownloadManager downloadManager = new DownloadManager(context, contentResolver);
-        OpenHelper openHelper = new OpenHelper(downloadManager, downloadsUriProvider);
+        DownloadManager downloadManager = DownloadManager.newInstance(context, contentResolver);
+        OpenHelper openHelper = new OpenHelper(downloadManager, this.downloadsUriProvider);
         Intent intent = openHelper.buildViewIntent(context, id);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         try {

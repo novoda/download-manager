@@ -378,30 +378,50 @@ public class DownloadManager {
     private final ContentResolver contentResolver;
     private final DownloadsUriProvider downloadsUriProvider;
     private final SystemFacade systemFacade;
+    private final BatchRepository batchRepository;
 
     private Uri baseUri;
 
-    public DownloadManager(Context context, ContentResolver resolver) {
-        this(context, resolver, DownloadsUriProvider.getInstance(), new RealSystemFacade(context), false);
+    public static DownloadManager newInstance(Context context, ContentResolver contentResolver) {
+        DownloadsUriProvider downloadsUriProvider = DownloadsUriProvider.getInstance();
+        RealSystemFacade realSystemFacade = new RealSystemFacade(context);
+        BatchRepository batchRepository = new BatchRepository(
+                contentResolver,
+                new DownloadDeleter(contentResolver),
+                downloadsUriProvider,
+                realSystemFacade);
+        return new DownloadManager(context, contentResolver, downloadsUriProvider, realSystemFacade, batchRepository);
     }
 
-    public DownloadManager(Context context, ContentResolver contentResolver, boolean verboseLogging) {
-        this(context, contentResolver, DownloadsUriProvider.getInstance(), new RealSystemFacade(context), verboseLogging);
+    DownloadManager(Context context,
+                    ContentResolver resolver,
+                    DownloadsUriProvider downloadsUriProvider, SystemFacade realSystemFacade,
+                    BatchRepository batchRepository) {
+        this(context, resolver, downloadsUriProvider, realSystemFacade, batchRepository, false);
     }
 
-    DownloadManager(Context context, ContentResolver resolver, DownloadsUriProvider downloadsUriProvider) {
-        this(context, resolver, downloadsUriProvider, new RealSystemFacade(context), false);
+    public static DownloadManager newInstance(Context context, ContentResolver contentResolver, boolean verboseLogging) {
+        DownloadsUriProvider downloadsUriProvider = DownloadsUriProvider.getInstance();
+        RealSystemFacade realSystemFacade = new RealSystemFacade(context);
+        BatchRepository batchRepository = new BatchRepository(
+                contentResolver,
+                new DownloadDeleter(contentResolver),
+                downloadsUriProvider,
+                realSystemFacade);
+        return new DownloadManager(context, contentResolver, downloadsUriProvider, realSystemFacade, batchRepository, verboseLogging);
     }
 
     DownloadManager(Context context,
                     ContentResolver contentResolver,
                     DownloadsUriProvider downloadsUriProvider,
                     SystemFacade systemFacade,
+                    BatchRepository batchRepository,
                     boolean verboseLogging) {
         this.contentResolver = contentResolver;
         this.downloadsUriProvider = downloadsUriProvider;
         this.baseUri = downloadsUriProvider.getContentUri();
         this.systemFacade = systemFacade;
+        this.batchRepository = batchRepository;
         GlobalState.setContext(context);
         GlobalState.setVerboseLogging(verboseLogging);
     }
@@ -452,9 +472,6 @@ public class DownloadManager {
         String where = COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
         String[] selectionArgs = {String.valueOf(id), String.valueOf(DownloadStatus.PENDING)};
         contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
-
-        DownloadDeleter downloadDeleter = new DownloadDeleter(contentResolver);
-        BatchRepository batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
         batchRepository.updateBatchStatus(id, DownloadStatus.PENDING);
     }
 
