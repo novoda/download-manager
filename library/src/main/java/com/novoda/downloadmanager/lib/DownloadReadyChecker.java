@@ -18,6 +18,10 @@ class DownloadReadyChecker {
     }
 
     public boolean canDownload(DownloadBatch downloadBatch) {
+        if (downloadBatch.getStatus() == DownloadStatus.PENDING) {
+            return true;
+        }
+
         for (FileDownloadInfo fileDownloadInfo : downloadBatch.getDownloads()) {
             if (!isDownloadManagerReadyToDownload(fileDownloadInfo)) {
                 return false;

@@ -133,10 +133,6 @@ class FileDownloadInfo {
         return fileName;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
     public String getMimeType() {
         return mimeType;
     }
@@ -153,11 +149,6 @@ class FileDownloadInfo {
         return status;
     }
 
-    public void setStatus(int status) {
-        // TODO remove me!
-        this.status = status;
-    }
-
     public int getNumFailed() {
         return numFailed;
     }
@@ -172,10 +163,6 @@ class FileDownloadInfo {
 
     public long getTotalBytes() {
         return totalBytes;
-    }
-
-    public void setTotalBytes(long totalBytes) {
-        this.totalBytes = totalBytes;
     }
 
     public long getCurrentBytes() {

@@ -26,6 +26,7 @@ class BatchRepository {
             DownloadStatus.WAITING_FOR_NETWORK,
             DownloadStatus.QUEUED_FOR_WIFI,
 
+            DownloadStatus.SUBMITTED,
             DownloadStatus.PENDING,
             DownloadStatus.SUCCESS
     );
@@ -39,16 +40,19 @@ class BatchRepository {
     private final ContentResolver resolver;
     private final DownloadDeleter downloadDeleter;
     private final DownloadsUriProvider downloadsUriProvider;
+    private final SystemFacade systemFacade;
 
-    BatchRepository(ContentResolver resolver, DownloadDeleter downloadDeleter, DownloadsUriProvider downloadsUriProvider) {
+    BatchRepository(ContentResolver resolver, DownloadDeleter downloadDeleter, DownloadsUriProvider downloadsUriProvider, SystemFacade systemFacade) {
         this.resolver = resolver;
         this.downloadDeleter = downloadDeleter;
         this.downloadsUriProvider = downloadsUriProvider;
+        this.systemFacade = systemFacade;
     }
 
     void updateBatchStatus(long batchId, int status) {
         ContentValues values = new ContentValues();
         values.put(DownloadContract.Batches.COLUMN_STATUS, status);
+        values.put(DownloadContract.Batches.COLUMN_LAST_MODIFICATION, systemFacade.currentTimeMillis());
         resolver.update(downloadsUriProvider.getBatchesUri(), values, DownloadContract.Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
     }
 
@@ -56,18 +60,18 @@ class BatchRepository {
         Cursor cursor = null;
         SparseIntArray statusCounts = new SparseIntArray(PRIORITISED_STATUSES_SIZE);
         try {
+            String[] projection = {DownloadContract.Downloads.COLUMN_STATUS};
             String[] selectionArgs = {String.valueOf(batchId)};
+
             cursor = resolver.query(
                     downloadsUriProvider.getAllDownloadsUri(),
-                    null,
+                    projection,
                     DownloadContract.Downloads.COLUMN_BATCH_ID + " = ?",
                     selectionArgs,
                     null);
 
-            int statusColumnIndex = cursor.getColumnIndexOrThrow(DownloadContract.Downloads.COLUMN_STATUS);
-
             while (cursor.moveToNext()) {
-                int statusCode = cursor.getInt(statusColumnIndex);
+                int statusCode = cursor.getInt(0);
 
                 if (DownloadStatus.isError(statusCode)) {
                     return statusCode;

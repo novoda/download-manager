@@ -113,12 +113,7 @@ class DownloadBatch {
     }
 
     public boolean isActive() {
-        for (FileDownloadInfo info : downloads) {
-            if (info.isSubmittedOrRunning()) {
-                return true;
-            }
-        }
-        return false;
+        return status == DownloadStatus.SUBMITTED || status == DownloadStatus.RUNNING;
     }
 
     public boolean scanCompletedMediaIfReady(DownloadScanner downloadScanner) {

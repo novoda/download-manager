@@ -1,3 +1,17 @@
+0.2.5
+-------
+
+- FileDownloadInfo setter removal #118
+- Fix download goes to queued #116
+
+0.2.4
+-------
+
+- Simplify query (pull out status and control) #111
+- Better support for localization #112
+- Add EXTRA_DATA column to Batches table #114
+- Add LAST_MODIFIED column to Batches table #117
+
 0.2.3
 -------
 
