@@ -7,12 +7,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import static com.novoda.downloadmanager.lib.IOHelpers.closeAfterWrite;
 import static com.novoda.downloadmanager.lib.IOHelpers.closeQuietly;
 
 class TarFileTruncator {
 
     private static final String COPY_SUFFIX = ".tmp";
+    private static final byte BYTE_ZERO = 0x0;
     private static final int BLOCK_SIZE = 512;
 
     public long truncateIfNeeded(String fileOriginal) throws StopRequestException {
@@ -54,7 +56,7 @@ class TarFileTruncator {
 
     private boolean isFullOfZeroes(byte[] buffer) {
         for (byte b : buffer) {
-            if (b != 0x0) {
+            if (b != BYTE_ZERO) {
                 return false;
             }
         }
@@ -79,8 +81,8 @@ class TarFileTruncator {
         File newFile = new File(fileCopy);
         boolean deleted = oldFile.delete();
         boolean renamed = newFile.renameTo(oldFile);
-        if(!deleted || !renamed) {
-           throw new IllegalStateException("Could not replace file by truncated one");
+        if (!deleted || !renamed) {
+            throw new IllegalStateException("Could not replace file by truncated one");
         }
     }
 
