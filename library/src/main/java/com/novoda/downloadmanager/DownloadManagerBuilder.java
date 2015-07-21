@@ -31,7 +31,7 @@ public class DownloadManagerBuilder {
 
     public DownloadManager build() {
         ContentResolver contentResolver = context.getContentResolver();
-        return new DownloadManager(context, contentResolver, verboseLogging);
+        return DownloadManager.newInstance(context, contentResolver, verboseLogging);
     }
 
 }
