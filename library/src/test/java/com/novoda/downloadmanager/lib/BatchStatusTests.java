@@ -43,7 +43,7 @@ public class BatchStatusTests {
     }
 
     @Test
-    public void givenABatchWithAMixOfItemsThenTheBatchStatusIsNotRunning() {
+    public void givenABatchWithItemsThatAreNotSubmittedOrSuccessOrPendingThenTheBatchStatusIsNotRunning() {
         BatchRepository repository = givenABatchWithStatuses(DownloadStatus.PENDING, DownloadStatus.SUCCESS, DownloadStatus.BATCH_FAILED);
 
         int batchStatus = repository.getBatchStatus(1);
