@@ -5,10 +5,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import static com.novoda.downloadmanager.lib.IOHelpers.closeAfterWrite;
@@ -18,26 +18,24 @@ import static org.fest.assertions.api.Assertions.assertThat;
 public class TarFileTruncatorTest {
 
     private TarFileTruncator tarFileTruncator;
-
-    @Before
-    public void setUp() throws Exception {
-        tarFileTruncator = new TarFileTruncator();
-    }
+    private InputStream resourceAsStream;
+    private FileOutputStream fileOutputStream;
+    private DownloadThread.State state;
 
     @Test
     public void itTruncatesProperlyTarFileThatContainsEndBlockMarker() throws Exception {
         givenATarFileWithEndBlockMarker();
 
-        tarFileTruncator.truncateIfNeeded("TarFileTruncatorTest.tar");
+        state = tarFileTruncator.transferData(state, resourceAsStream);
 
         tarFileShouldHaveBeenTruncatedProperly();
     }
 
     @Test
-    public void itDoeNotModifyATarFileWithoutEndBlockMarker() throws Exception {
+    public void itDoesNotModifyATarFileWithoutEndBlockMarker() throws Exception {
         givenATarFileWithoutEndBlockMarker();
 
-        tarFileTruncator.truncateIfNeeded("TarFileTruncatorTest.tar");
+        state = tarFileTruncator.transferData(state, resourceAsStream);
 
         tarFileShouldBeUntouched();
     }
@@ -47,28 +45,30 @@ public class TarFileTruncatorTest {
         new File("TarFileTruncatorTest.tar").delete();
     }
 
-    private static void givenATarFileWithEndBlockMarker() throws IOException {
-        InputStream resourceAsStream = getResourceAsStream("tar/testOriginal.tar");
-        FileOutputStream fileOutputStream = new FileOutputStream("TarFileTruncatorTest.tar");
-        IOUtils.copy(resourceAsStream, fileOutputStream);
-        closeAfterWrite(fileOutputStream, fileOutputStream.getFD());
-        closeQuietly(resourceAsStream);
+    private void givenATarFileWithEndBlockMarker() throws IOException {
+        resourceAsStream = getResourceAsStream("tar/testOriginal.tar");
+        fileOutputStream = new FileOutputStream("TarFileTruncatorTest.tar");
+        tarFileTruncator = new TarFileTruncator(new TestDataWriter(fileOutputStream));
+        state = new DownloadThread.State();
     }
 
-    private static void givenATarFileWithoutEndBlockMarker() throws IOException {
-        InputStream resourceAsStream = getResourceAsStream("tar/testExpectedResult.tar");
-        FileOutputStream fileOutputStream = new FileOutputStream("TarFileTruncatorTest.tar");
-        IOUtils.copy(resourceAsStream, fileOutputStream);
-        closeAfterWrite(fileOutputStream, fileOutputStream.getFD());
-        closeQuietly(resourceAsStream);
+    private void givenATarFileWithoutEndBlockMarker() throws IOException {
+        resourceAsStream = getResourceAsStream("tar/testExpectedResult.tar");
+        fileOutputStream = new FileOutputStream("TarFileTruncatorTest.tar");
+        tarFileTruncator = new TarFileTruncator(new TestDataWriter(fileOutputStream));
+        state = new DownloadThread.State();
     }
 
-    private static void tarFileShouldHaveBeenTruncatedProperly() throws IOException {
+    private void tarFileShouldHaveBeenTruncatedProperly() throws IOException {
+        closeAfterWrite(fileOutputStream, fileOutputStream.getFD());
+        closeQuietly(resourceAsStream);
         boolean contentEquals = IOUtils.contentEquals(new FileInputStream("TarFileTruncatorTest.tar"), getResourceAsStream("tar/testExpectedResult.tar"));
         assertThat(contentEquals).isTrue();
     }
 
-    private static void tarFileShouldBeUntouched() throws IOException {
+    private void tarFileShouldBeUntouched() throws IOException {
+        closeAfterWrite(fileOutputStream, fileOutputStream.getFD());
+        closeQuietly(resourceAsStream);
         boolean contentEquals = IOUtils.contentEquals(new FileInputStream("TarFileTruncatorTest.tar"), getResourceAsStream("tar/testExpectedResult.tar"));
         assertThat(contentEquals).isTrue();
     }
@@ -77,4 +77,26 @@ public class TarFileTruncatorTest {
         return Thread.currentThread().getContextClassLoader().getResourceAsStream(resName);
     }
 
+    private static class TestDataWriter implements DataWriter {
+
+        private final OutputStream outputStream;
+
+        public TestDataWriter(OutputStream outputStream) {
+            this.outputStream = outputStream;
+        }
+
+        @Override
+        public DownloadThread.State write(DownloadThread.State state, byte[] buffer, int count) throws StopRequestException {
+            try {
+                state.gotData = true;
+                outputStream.write(buffer, 0, count);
+                state.currentBytes += count;
+                return state;
+            } catch (IOException e) {
+                throw new StopRequestException(
+                        DownloadStatus.FILE_ERROR,
+                        "Failed to write data: " + e);
+            }
+        }
+    }
 }

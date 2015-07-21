@@ -4,7 +4,7 @@ package com.novoda.downloadmanager.lib;
  * Contains the internal constants that are used in the download manager.
  * As a general rule, modifying these constants should be done with care.
  */
-class Constants {
+public class Constants {
 
     /**
      * The column that used to be used for the HTTP method of the request
@@ -126,6 +126,11 @@ class Constants {
      * The buffer size used to stream the data
      */
     public static final int BUFFER_SIZE = 4096;
+
+    /**
+     * The value representing the end of stream when, reading an InputStream
+     */
+    public static final int NO_BYTES_READ = -1;
 
     /**
      * The minimum amount of progress that has to be done before the progress bar gets updated
