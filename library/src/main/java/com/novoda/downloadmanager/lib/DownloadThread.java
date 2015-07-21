@@ -757,6 +757,9 @@ class DownloadThread implements Runnable {
             values.put(DownloadContract.Downloads.COLUMN_MIME_TYPE, state.mimeType);
         }
 
+        originalDownloadInfo.setETag(state.headerETag);
+        originalDownloadInfo.setMimeType(state.mimeType);
+
         values.put(COLUMN_TOTAL_BYTES, state.totalBytes);
         getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
     }
