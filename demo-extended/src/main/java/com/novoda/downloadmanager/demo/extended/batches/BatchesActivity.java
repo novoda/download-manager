@@ -10,7 +10,6 @@ import android.widget.RadioGroup;
 
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
-import com.novoda.downloadmanager.demo.extended.QueryTimestamp;
 import com.novoda.downloadmanager.lib.BatchQuery;
 import com.novoda.downloadmanager.lib.DownloadManager;
 
@@ -20,7 +19,6 @@ import java.util.List;
 public class BatchesActivity extends AppCompatActivity implements QueryForBatchesAsyncTask.Callback {
 
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private final QueryTimestamp lastQueryTimestamp = new QueryTimestamp();
 
     private DownloadManager downloadManager;
     private BatchesAdapter adapter;
@@ -92,11 +90,7 @@ public class BatchesActivity extends AppCompatActivity implements QueryForBatche
 
         @Override
         public void onChange(boolean selfChange) {
-            if (lastQueryTimestamp.updatedRecently()) {
-                return;
-            }
             queryForBatches(query);
-            lastQueryTimestamp.setJustUpdated();
         }
 
     };
