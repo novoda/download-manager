@@ -2,8 +2,11 @@ package com.novoda.downloadmanager.lib;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+
+import com.novoda.notils.string.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +60,41 @@ class DownloadsRepository {
     public FileDownloadInfo.ControlStatus getDownloadInfoControlStatusFor(long id) {
         FileDownloadInfo.ControlStatus.Reader reader = new FileDownloadInfo.ControlStatus.Reader(contentResolver, downloadsUriProvider);
         return downloadInfoCreator.create(reader, id);
+    }
+
+    public List<Long> getAllSubmittedIds() {
+        String[] projection = {DownloadContract.Downloads._ID};
+        String selection = DownloadContract.Downloads.COLUMN_STATUS + " = ?";
+        String[] selectionArgs = {String.valueOf(DownloadStatus.SUBMITTED)};
+
+        Cursor downloadsCursor = contentResolver.query(
+                downloadsUriProvider.getAllDownloadsUri(),
+                projection,
+                selection,
+                selectionArgs,
+                DownloadContract.Batches._ID + " ASC");
+
+        try {
+            List<Long> submittedIds = new ArrayList<>(downloadsCursor.getCount());
+
+            while (downloadsCursor.moveToNext()) {
+                submittedIds.add(downloadsCursor.getLong(0));
+            }
+
+            return submittedIds;
+        } finally {
+            downloadsCursor.close();
+        }
+    }
+
+    public void update(ContentResolver contentResolver, List<Long> downloadIds, int status) {
+        ContentValues values = new ContentValues(1);
+        values.put(DownloadContract.Downloads.COLUMN_STATUS, status);
+
+        String where = DownloadContract.Downloads._ID + " IN (?)";
+        String selection = StringUtils.join(downloadIds, ", ");
+        String[] selectionArgs = {selection};
+        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
     }
 
     interface DownloadInfoCreator {

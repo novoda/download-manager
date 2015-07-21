@@ -35,6 +35,7 @@ class DownloadReadyChecker {
         }
 
         switch (downloadBatch.getStatus()) {
+            case DownloadStatus.SUBMITTED:
             case DownloadStatus.PENDING: // download is explicit marked as ready to start
             case DownloadStatus.RUNNING: // download interrupted (process killed etc) while
                 // running, without a chance to update the database
