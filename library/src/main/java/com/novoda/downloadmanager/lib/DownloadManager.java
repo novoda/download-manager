@@ -28,6 +28,7 @@ import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.novoda.notils.logger.simple.Log;
@@ -446,17 +447,24 @@ public class DownloadManager {
     }
 
     public void resumeBatch(long id) {
-        ContentValues values = new ContentValues();
-        values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
-        values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.PENDING);
+        ContentValues values = getResumeContentValues();
         String where = COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
-        String[] selectionArgs = {String.valueOf(id), String.valueOf(DownloadStatus.PENDING)};
+        String[] selectionArgs = {String.valueOf(id), String.valueOf(DownloadStatus.SUCCESS)};
         contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
 
         DownloadDeleter downloadDeleter = new DownloadDeleter(contentResolver);
         RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext());
         BatchRepository batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
         batchRepository.updateBatchStatus(id, DownloadStatus.PENDING);
+        notifyBatchesHaveChanged();
+    }
+
+    @NonNull
+    private ContentValues getResumeContentValues() {
+        ContentValues values = new ContentValues();
+        values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
+        values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.PENDING);
+        return values;
     }
 
     public void removeDownload(URI uri) {
@@ -862,12 +870,12 @@ public class DownloadManager {
             request.setBatchId(batchId);
             insert(request);
         }
-        notifyAllBatchHasBeenEnqueued();
+        notifyBatchesHaveChanged();
 
         return batchId;
     }
 
-    private void notifyAllBatchHasBeenEnqueued() {
+    private void notifyBatchesHaveChanged() {
         contentResolver.notifyChange(getBatchesUri(), null);
         contentResolver.notifyChange(getBatchesWithoutProgressUri(), null);
     }
