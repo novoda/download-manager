@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BatchDownloadsActivity extends AppCompatActivity implements QueryForDownloadsAsyncTask.Callback {
-    private static final String BIG_FILE = "http://download.thinkbroadband.com/100MB.zip";
+    private static final String BIG_FILE = "http://download.thinkbroadband.com/10MB.zip";
     private static final String BEARD_IMAGE = "http://i.imgur.com/9JL2QVl.jpg";
 
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -93,6 +93,12 @@ public class BatchDownloadsActivity extends AppCompatActivity implements QueryFo
         batch.addRequest(request);
 
         request.setNotificationExtra("beard_2");
+        batch.addRequest(request);
+        request.setNotificationExtra("beard_3");
+        batch.addRequest(request);
+        request.setNotificationExtra("beard_4");
+        batch.addRequest(request);
+        request.setNotificationExtra("beard_5");
         batch.addRequest(request);
 
         long batchId = downloadManager.enqueue(batch);
