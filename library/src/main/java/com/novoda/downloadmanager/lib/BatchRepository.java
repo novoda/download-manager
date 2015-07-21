@@ -204,11 +204,11 @@ class BatchRepository {
         return resolver.query(downloadsUriProvider.getBatchesUri(), null, query.getSelection(), query.getSelectionArguments(), query.getSortOrder());
     }
 
-    private class StatusCountMap {
+    private static class StatusCountMap {
 
         private final SparseArrayCompat<Integer> statusCounts = new SparseArrayCompat<>(PRIORITISED_STATUSES_SIZE);
 
-        private boolean hasNoItemsWithStatuses(List<Integer> excludedStatuses) {
+        public boolean hasNoItemsWithStatuses(List<Integer> excludedStatuses) {
             boolean hasOtherItems = false;
             for (int status : excludedStatuses) {
                 boolean hasItemsForStatus = hasCountFor(status);
@@ -220,11 +220,11 @@ class BatchRepository {
             return hasOtherItems;
         }
 
-        private boolean hasCountFor(int status) {
+        public boolean hasCountFor(int status) {
             return statusCounts.get(status, 0) > 0;
         }
 
-        private void increment(int statusCode) {
+        public void increment(int statusCode) {
             int currentStatusCount = statusCounts.get(statusCode, 0);
             statusCounts.put(statusCode, currentStatusCount + 1);
         }
