@@ -32,6 +32,34 @@ public class BatchStatusTests {
 
         assertThat(batchStatus).isEqualTo(DownloadStatus.RUNNING);
     }
+
+    @Test
+    public void givenABatchWithSomePendingItemsAndSomeCompleteItemsAndSomeSubmittedItemsThenTheBatchStatusIsRunning() {
+        BatchRepository repository = givenABatchWithStatuses(DownloadStatus.PENDING, DownloadStatus.SUCCESS, DownloadStatus.SUBMITTED);
+
+        int batchStatus = repository.getBatchStatus(1);
+
+        assertThat(batchStatus).isEqualTo(DownloadStatus.RUNNING);
+    }
+
+    @Test
+    public void givenABatchWithAMixOfItemsThenTheBatchStatusIsNotRunning() {
+        BatchRepository repository = givenABatchWithStatuses(DownloadStatus.PENDING, DownloadStatus.SUCCESS, DownloadStatus.BATCH_FAILED);
+
+        int batchStatus = repository.getBatchStatus(1);
+
+        assertThat(batchStatus).isNotEqualTo(DownloadStatus.RUNNING);
+    }
+
+    @Test
+    public void givenABatchWithSubmittedAndSuccessStatesThenTheBatchStatusIsRunning() {
+        BatchRepository repository = givenABatchWithStatuses(DownloadStatus.SUBMITTED, DownloadStatus.SUBMITTED, DownloadStatus.SUBMITTED, DownloadStatus.SUCCESS);
+
+        int batchStatus = repository.getBatchStatus(1);
+
+        assertThat(batchStatus).isEqualTo(DownloadStatus.RUNNING);
+    }
+
     @Test
     public void givenABatchWithAllCompleteItemsThenTheBatchStatusIsSuccess() {
         BatchRepository repository = givenABatchWithStatuses(DownloadStatus.SUCCESS, DownloadStatus.SUCCESS);
@@ -48,15 +76,6 @@ public class BatchStatusTests {
         int batchStatus = repository.getBatchStatus(1);
 
         assertThat(batchStatus).isEqualTo(DownloadStatus.PENDING);
-    }
-
-    @Test
-    public void givenABatchWithAMixThenTheStatusIsNotRunning() {
-        BatchRepository repository = givenABatchWithStatuses(DownloadStatus.PENDING, DownloadStatus.SUCCESS, DownloadStatus.SUBMITTED);
-
-        int batchStatus = repository.getBatchStatus(1);
-
-        assertThat(batchStatus).isNotEqualTo(DownloadStatus.PENDING);
     }
 
     @NonNull

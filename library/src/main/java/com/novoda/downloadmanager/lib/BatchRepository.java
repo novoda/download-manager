@@ -31,7 +31,7 @@ class BatchRepository {
             DownloadStatus.SUCCESS
     );
 
-    private static final List<Integer> STATUSES_EXCEPT_PENDING_SUCCESS = Arrays.asList(
+    private static final List<Integer> STATUSES_EXCEPT_PENDING_SUCCESS_SUBMITTED = Arrays.asList(
             DownloadStatus.CANCELED,
             DownloadStatus.PAUSED_BY_APP,
             DownloadStatus.RUNNING,
@@ -40,9 +40,7 @@ class BatchRepository {
             // Paused statuses
             DownloadStatus.WAITING_TO_RETRY,
             DownloadStatus.WAITING_FOR_NETWORK,
-            DownloadStatus.QUEUED_FOR_WIFI,
-
-            DownloadStatus.SUBMITTED
+            DownloadStatus.QUEUED_FOR_WIFI
     );
 
     private static final int PRIORITISED_STATUSES_SIZE = PRIORITISED_STATUSES.size();
@@ -55,6 +53,7 @@ class BatchRepository {
     private final DownloadDeleter downloadDeleter;
     private final DownloadsUriProvider downloadsUriProvider;
     private final SystemFacade systemFacade;
+    private final StatusCountMap statusCountMap = new StatusCountMap();
 
     BatchRepository(ContentResolver resolver, DownloadDeleter downloadDeleter, DownloadsUriProvider downloadsUriProvider, SystemFacade systemFacade) {
         this.resolver = resolver;
@@ -72,7 +71,7 @@ class BatchRepository {
 
     int getBatchStatus(long batchId) {
         Cursor cursor = null;
-        SparseArrayCompat<Integer> statusCounts = new SparseArrayCompat<>(PRIORITISED_STATUSES_SIZE);
+        statusCountMap.clear();
         try {
             String[] projection = {DownloadContract.Downloads.COLUMN_STATUS};
             String[] selectionArgs = {String.valueOf(batchId)};
@@ -91,8 +90,7 @@ class BatchRepository {
                     return statusCode;
                 }
 
-                int currentStatusCount = statusCounts.get(statusCode, 0);
-                statusCounts.put(statusCode, currentStatusCount + 1);
+                statusCountMap.increment(statusCode);
             }
         } finally {
             if (cursor != null) {
@@ -100,22 +98,16 @@ class BatchRepository {
             }
         }
 
-        boolean hasCompleteItems = statusCounts.get(DownloadStatus.SUCCESS, 0) > 0;
-        boolean hasPendingItems = statusCounts.get(DownloadStatus.PENDING, 0) > 0;
-        boolean hasOtherItems = false;
-        for (int status : STATUSES_EXCEPT_PENDING_SUCCESS) {
-            boolean hasItemsForStatus = statusCounts.get(status, 0) != 0;
-            if (hasItemsForStatus) {
-                hasOtherItems = true;
-                break;
-            }
-        }
-        if (hasCompleteItems && hasPendingItems && !hasOtherItems) {
+        boolean hasCompleteItems = statusCountMap.hasCountFor(DownloadStatus.SUCCESS);
+        boolean hasPendingItems = statusCountMap.hasCountFor(DownloadStatus.PENDING);
+        boolean hasSubmittedItems = statusCountMap.hasCountFor(DownloadStatus.SUBMITTED);
+        boolean hasOtherItems = statusCountMap.hasNoItemsWithStatuses(STATUSES_EXCEPT_PENDING_SUCCESS_SUBMITTED);
+        if (hasCompleteItems && (hasPendingItems || hasSubmittedItems) && !hasOtherItems) {
             return DownloadStatus.RUNNING;
         }
 
         for (int status : PRIORITISED_STATUSES) {
-            if (statusCounts.get(status, 0) > 0) {
+            if (statusCountMap.hasCountFor(status)) {
                 return status;
             }
         }
@@ -211,4 +203,35 @@ class BatchRepository {
     public Cursor retrieveFor(BatchQuery query) {
         return resolver.query(downloadsUriProvider.getBatchesUri(), null, query.getSelection(), query.getSelectionArguments(), query.getSortOrder());
     }
+
+    private class StatusCountMap {
+
+        private final SparseArrayCompat<Integer> statusCounts = new SparseArrayCompat<>(PRIORITISED_STATUSES_SIZE);
+
+        private boolean hasNoItemsWithStatuses(List<Integer> excludedStatuses) {
+            boolean hasOtherItems = false;
+            for (int status : excludedStatuses) {
+                boolean hasItemsForStatus = hasCountFor(status);
+                if (hasItemsForStatus) {
+                    hasOtherItems = true;
+                    break;
+                }
+            }
+            return hasOtherItems;
+        }
+
+        private boolean hasCountFor(int status) {
+            return statusCounts.get(status, 0) > 0;
+        }
+
+        private void increment(int statusCode) {
+            int currentStatusCount = statusCounts.get(statusCode, 0);
+            statusCounts.put(statusCode, currentStatusCount + 1);
+        }
+
+        public void clear() {
+            statusCounts.clear();
+        }
+    }
+
 }
