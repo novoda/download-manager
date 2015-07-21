@@ -41,8 +41,8 @@ public class Request {
 
     private Uri uri;
     private Uri destinationUri;
-    private CharSequence title;
-    private CharSequence description;
+    private CharSequence title = "";
+    private CharSequence description = "";
     private String mimeType;
     private int allowedNetworkTypes = ~0; // default to all network types allowed
     private boolean roamingAllowed = true;
@@ -50,10 +50,11 @@ public class Request {
     private boolean isVisibleInDownloadsUi = true;
     private boolean scannable = false;
     private String notificationExtras;
-    private String bigPictureUrl;
+    private String bigPictureUrl = "";
     private long batchId = -1L;
     private String extraData;
     private boolean alwaysResume;
+    private boolean allowTarUpdates;
 
     /**
      * if a file is designated as a MediaScanner scannable file, the following value is
@@ -230,6 +231,17 @@ public class Request {
      */
     public Request alwaysAttemptResume() {
         alwaysResume = true;
+        return this;
+    }
+
+    /**
+     * Automatically pause the download when reaching the end of the file instead of writing the last bytes to disk.
+     * This allows for a resume of the download against an updated tar file.
+     * If used this also sets {@code alwaysAttemptResume()}
+     */
+    public Request allowTarUpdates() {
+        allowTarUpdates = true;
+        alwaysAttemptResume();
         return this;
     }
 
@@ -456,6 +468,7 @@ public class Request {
         values.put(DownloadContract.Downloads.COLUMN_BATCH_ID, batchId);
         values.put(DownloadContract.Downloads.COLUMN_EXTRA_DATA, extraData);
         values.put(DownloadContract.Downloads.COLUMN_ALWAYS_RESUME, alwaysResume);
+        values.put(DownloadContract.Downloads.COLUMN_ALLOW_TAR_UPDATES, allowTarUpdates);
 
         return values;
     }

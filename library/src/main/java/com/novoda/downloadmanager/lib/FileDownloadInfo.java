@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Pair;
 
+import com.novoda.notils.logger.simple.Log;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,7 +20,7 @@ import java.util.List;
  */
 class FileDownloadInfo {
 
-    private static final int UNKNOWN_BYTES = -1;
+    private static final String TAR_MIME_TYPE = "application/x-tar";
 
     // TODO: move towards these in-memory objects being sources of truth, and periodically pushing to provider.
 
@@ -97,6 +99,7 @@ class FileDownloadInfo {
     private int bypassRecommendedSizeLimit;
     private long batchId;
     private boolean alwaysResume;
+    private boolean allowTarUpdates;
 
     private final List<Pair<String, String>> requestHeaders = new ArrayList<>();
     private final SystemFacade systemFacade;
@@ -328,7 +331,7 @@ class FileDownloadInfo {
     }
 
     public boolean hasTotalBytes() {
-        return totalBytes != UNKNOWN_BYTES;
+        return totalBytes != Constants.UNKNOWN_BYTE_SIZE;
     }
 
     public boolean hasUnknownTotalBytes() {
@@ -345,6 +348,19 @@ class FileDownloadInfo {
 
     public boolean isResumable() {
         return alwaysResume || (eTag != null && isNoIntegrity());
+    }
+
+    public boolean shouldAllowTarUpdate(String mimeType) {
+        if (!allowTarUpdates) {
+            return false;
+        }
+
+        if (TAR_MIME_TYPE.equals(mimeType)) {
+            return true;
+        }
+
+        Log.e("Flag allowTarUpdates set but file not matching Tar mimeType, functionality will be disabled.");
+        return false;
     }
 
     public static class Reader {
@@ -397,6 +413,7 @@ class FileDownloadInfo {
             info.bypassRecommendedSizeLimit = getInt(DownloadContract.Downloads.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
             info.batchId = getLong(DownloadContract.Downloads.COLUMN_BATCH_ID);
             info.alwaysResume = getInt(DownloadContract.Downloads.COLUMN_ALWAYS_RESUME) != 0;
+            info.allowTarUpdates = getInt(DownloadContract.Downloads.COLUMN_ALLOW_TAR_UPDATES) != 0;
 
             synchronized (this) {
                 info.control = getInt(DownloadContract.Downloads.COLUMN_CONTROL);

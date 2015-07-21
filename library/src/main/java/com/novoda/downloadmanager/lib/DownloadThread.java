@@ -47,8 +47,11 @@ import java.net.UnknownHostException;
 import java.util.Locale;
 
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
+import static com.novoda.downloadmanager.lib.Constants.UNKNOWN_BYTE_SIZE;
+import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.*;
 import static com.novoda.downloadmanager.lib.DownloadStatus.HTTP_DATA_ERROR;
 import static com.novoda.downloadmanager.lib.FileDownloadInfo.NetworkState;
+import static com.novoda.downloadmanager.lib.IOHelpers.closeAfterWrite;
 import static java.net.HttpURLConnection.*;
 
 /**
@@ -84,6 +87,7 @@ class DownloadThread implements Runnable {
     private final DownloadsRepository downloadsRepository;
     private final NetworkChecker networkChecker;
     private final DownloadReadyChecker downloadReadyChecker;
+    private final TarFileTruncator tarFileTruncator;
 
     private volatile boolean policyDirty;
 
@@ -97,7 +101,8 @@ class DownloadThread implements Runnable {
                           DownloadsUriProvider downloadsUriProvider,
                           DownloadsRepository downloadsRepository,
                           NetworkChecker networkChecker,
-                          DownloadReadyChecker downloadReadyChecker) {
+                          DownloadReadyChecker downloadReadyChecker,
+                          TarFileTruncator tarFileTruncator) {
         this.context = context;
         this.systemFacade = systemFacade;
         this.originalDownloadInfo = originalDownloadInfo;
@@ -109,6 +114,7 @@ class DownloadThread implements Runnable {
         this.downloadsRepository = downloadsRepository;
         this.networkChecker = networkChecker;
         this.downloadReadyChecker = downloadReadyChecker;
+        this.tarFileTruncator = tarFileTruncator;
     }
 
     /**
@@ -131,7 +137,7 @@ class DownloadThread implements Runnable {
         public int retryAfter = 0;
         public boolean gotData = false;
         public String requestUri;
-        public long totalBytes = -1;
+        public long totalBytes = UNKNOWN_BYTE_SIZE;
         public long currentBytes = 0;
         public String headerETag;
         public boolean continuingDownload = false;
@@ -152,7 +158,7 @@ class DownloadThread implements Runnable {
          */
         public long speedSampleBytes;
 
-        public long contentLength = -1;
+        public long contentLength = UNKNOWN_BYTE_SIZE;
         public String contentDisposition;
         public String contentLocation;
 
@@ -169,7 +175,7 @@ class DownloadThread implements Runnable {
 
         public void resetBeforeExecute() {
             // Reset any state from previous execution
-            contentLength = -1;
+            contentLength = UNKNOWN_BYTE_SIZE;
             contentDisposition = null;
             contentLocation = null;
             redirectionCount = 0;
@@ -229,7 +235,7 @@ class DownloadThread implements Runnable {
 
         if (downloadStatus != DownloadStatus.RUNNING) {
             ContentValues contentValues = new ContentValues();
-            contentValues.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.RUNNING);
+            contentValues.put(COLUMN_STATUS, DownloadStatus.RUNNING);
             context.getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), contentValues, null, null);
             updateBatchStatus(originalDownloadInfo.getBatchId(), originalDownloadInfo.getId());
         }
@@ -340,6 +346,10 @@ class DownloadThread implements Runnable {
     private void executeDownload(State state) throws StopRequestException {
         state.resetBeforeExecute();
         setupDestinationFile(state);
+
+        if (originalDownloadInfo.shouldAllowTarUpdate(state.mimeType)) {
+            state.totalBytes = UNKNOWN_BYTE_SIZE;
+        }
 
         // skip when already finished; remove after fixing race in 5217390
         if (state.currentBytes == state.totalBytes) {
@@ -453,7 +463,7 @@ class DownloadThread implements Runnable {
 
             // Start streaming data, periodically watch for pause/cancel
             // commands and checking disk space as needed.
-            transferData(state, in, out);
+            transferData(state, in, out, outFd);
 
 //            try {
 //                if (out instanceof DrmOutputStream) {
@@ -470,18 +480,7 @@ class DownloadThread implements Runnable {
 
             closeQuietly(in);
 
-            try {
-                if (out != null) {
-                    out.flush();
-                }
-                if (outFd != null) {
-                    outFd.sync();
-                }
-            } catch (IOException e) {
-                Log.e("Fail sync");
-            } finally {
-                closeQuietly(out);
-            }
+            closeAfterWrite(out, outFd);
         }
     }
 
@@ -519,12 +518,12 @@ class DownloadThread implements Runnable {
      * Transfer as much data as possible from the HTTP response to the
      * destination file.
      */
-    private void transferData(State state, InputStream in, OutputStream out) throws StopRequestException {
+    private void transferData(State state, InputStream in, OutputStream out, FileDescriptor outFd) throws StopRequestException {
         final byte data[] = new byte[Constants.BUFFER_SIZE];
         for (; ; ) {
             int bytesRead = readFromResponse(state, data, in);
             if (bytesRead == -1) { // success, end of stream already reached
-                handleEndOfStream(state);
+                handleEndOfStream(state, out, outFd);
                 return;
             }
 
@@ -614,7 +613,7 @@ class DownloadThread implements Runnable {
         if (state.currentBytes - state.bytesNotified > Constants.MIN_PROGRESS_STEP &&
                 now - state.timeLastNotification > Constants.MIN_PROGRESS_TIME) {
             ContentValues values = new ContentValues();
-            values.put(DownloadContract.Downloads.COLUMN_CURRENT_BYTES, state.currentBytes);
+            values.put(COLUMN_CURRENT_BYTES, state.currentBytes);
             getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
             state.bytesNotified = state.currentBytes;
             state.timeLastNotification = now;
@@ -654,15 +653,21 @@ class DownloadThread implements Runnable {
      * Called when we've reached the end of the HTTP response stream, to update the database and
      * check for consistency.
      */
-    private void handleEndOfStream(State state) throws StopRequestException {
+    private void handleEndOfStream(State state, OutputStream out, FileDescriptor outFd) throws StopRequestException {
+        if (originalDownloadInfo.shouldAllowTarUpdate(state.mimeType)) {
+            closeAfterWrite(out, outFd);
+            state.currentBytes = tarFileTruncator.truncateIfNeeded(state.filename);
+            updateStatusAndPause(state);
+            return;
+        }
         ContentValues values = new ContentValues(2);
-        values.put(DownloadContract.Downloads.COLUMN_CURRENT_BYTES, state.currentBytes);
-        if (state.contentLength == -1) {
-            values.put(DownloadContract.Downloads.COLUMN_TOTAL_BYTES, state.currentBytes);
+        values.put(COLUMN_CURRENT_BYTES, state.currentBytes);
+        if (state.contentLength == UNKNOWN_BYTE_SIZE) {
+            values.put(COLUMN_TOTAL_BYTES, state.currentBytes);
         }
         getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
 
-        final boolean lengthMismatched = (state.contentLength != -1)
+        final boolean lengthMismatched = (state.contentLength != UNKNOWN_BYTE_SIZE)
                 && (state.currentBytes != state.contentLength);
         if (lengthMismatched) {
             if (cannotResume(state)) {
@@ -671,6 +676,15 @@ class DownloadThread implements Runnable {
                 throw new StopRequestException(HTTP_DATA_ERROR, "closed socket before end of file");
             }
         }
+    }
+
+    private void updateStatusAndPause(State state) throws StopRequestException {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_STATUS, DownloadStatus.PAUSED_BY_APP);
+        values.put(COLUMN_CURRENT_BYTES, state.currentBytes);
+        values.put(COLUMN_TOTAL_BYTES, state.currentBytes);
+        getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
+        throw new StopRequestException(DownloadStatus.PAUSED_BY_APP, "download paused by owner");
     }
 
     private boolean cannotResume(State state) {
@@ -695,7 +709,7 @@ class DownloadThread implements Runnable {
             }
 
             ContentValues values = new ContentValues(1);
-            values.put(DownloadContract.Downloads.COLUMN_CURRENT_BYTES, state.currentBytes);
+            values.put(COLUMN_CURRENT_BYTES, state.currentBytes);
             getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
             if (cannotResume(state)) {
                 throw new StopRequestException(DownloadStatus.CANNOT_RESUME, "Failed reading response: " + ex + "; unable to resume", ex);
@@ -742,7 +756,8 @@ class DownloadThread implements Runnable {
         if (state.mimeType != null) {
             values.put(DownloadContract.Downloads.COLUMN_MIME_TYPE, state.mimeType);
         }
-        values.put(DownloadContract.Downloads.COLUMN_TOTAL_BYTES, state.totalBytes);
+
+        values.put(COLUMN_TOTAL_BYTES, state.totalBytes);
         getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
     }
 
@@ -761,15 +776,15 @@ class DownloadThread implements Runnable {
 
         final String transferEncoding = conn.getHeaderField("Transfer-Encoding");
         if (transferEncoding == null) {
-            state.contentLength = getHeaderFieldLong(conn, "Content-Length", -1);
+            state.contentLength = getHeaderFieldLong(conn, "Content-Length", UNKNOWN_BYTE_SIZE);
         } else {
             Log.i("Ignoring Content-Length since Transfer-Encoding is also defined");
-            state.contentLength = -1;
+            state.contentLength = UNKNOWN_BYTE_SIZE;
         }
 
         state.totalBytes = state.contentLength;
 
-        final boolean noSizeInfo = state.contentLength == -1 && (transferEncoding == null || !transferEncoding.equalsIgnoreCase("chunked"));
+        final boolean noSizeInfo = state.contentLength == UNKNOWN_BYTE_SIZE && (transferEncoding == null || !transferEncoding.equalsIgnoreCase("chunked"));
         if (!originalDownloadInfo.isNoIntegrity() && noSizeInfo) {
             throw new StopRequestException(DownloadStatus.CANNOT_RESUME, "can't know size of download, giving up");
         }
@@ -824,7 +839,7 @@ class DownloadThread implements Runnable {
                 // All right, we'll be able to resume this download
                 Log.i("resuming download for id: " + originalDownloadInfo.getId() + ", and starting with file of length: " + fileLength);
                 state.currentBytes = (int) fileLength;
-                if (originalDownloadInfo.getTotalBytes() != -1) {
+                if (originalDownloadInfo.getTotalBytes() != UNKNOWN_BYTE_SIZE) {
                     state.contentLength = originalDownloadInfo.getTotalBytes();
                 }
                 state.headerETag = originalDownloadInfo.getETag();
@@ -900,7 +915,7 @@ class DownloadThread implements Runnable {
 
     private void notifyThroughDatabase(State state, int finalStatus, String errorMsg, int numFailed) {
         ContentValues values = new ContentValues(8);
-        values.put(DownloadContract.Downloads.COLUMN_STATUS, finalStatus);
+        values.put(COLUMN_STATUS, finalStatus);
         values.put(DownloadContract.Downloads.COLUMN_DATA, state.filename);
         values.put(DownloadContract.Downloads.COLUMN_MIME_TYPE, state.mimeType);
         values.put(DownloadContract.Downloads.COLUMN_LAST_MODIFICATION, systemFacade.currentTimeMillis());
@@ -931,15 +946,15 @@ class DownloadThread implements Runnable {
 
         if (DownloadStatus.isCancelled(batchStatus)) {
             ContentValues values = new ContentValues(1);
-            values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.CANCELED);
-            getContentResolver().update(downloadsUriProvider.getAllDownloadsUri(), values, DownloadContract.Downloads.COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
+            values.put(COLUMN_STATUS, DownloadStatus.CANCELED);
+            getContentResolver().update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
         } else if (DownloadStatus.isError(batchStatus)) {
             ContentValues values = new ContentValues(1);
-            values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.BATCH_FAILED);
+            values.put(COLUMN_STATUS, DownloadStatus.BATCH_FAILED);
             getContentResolver().update(
                     downloadsUriProvider.getAllDownloadsUri(),
                     values,
-                    DownloadContract.Downloads.COLUMN_BATCH_ID + " = ? AND " + DownloadContract.Downloads._ID + " <> ? ",
+                    COLUMN_BATCH_ID + " = ? AND " + DownloadContract.Downloads._ID + " <> ? ",
                     new String[]{String.valueOf(batchId), String.valueOf(downloadId)}
             );
         } else if (DownloadStatus.isSuccess(batchStatus)) {

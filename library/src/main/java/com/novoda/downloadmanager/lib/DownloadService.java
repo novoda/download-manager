@@ -79,6 +79,7 @@ public class DownloadService extends Service {
     private DownloadsRepository downloadsRepository;
     private DownloadDeleter downloadDeleter;
     private DownloadReadyChecker downloadReadyChecker;
+    private TarFileTruncator tarFileTruncator;
     private DownloadsUriProvider downloadsUriProvider;
     private BatchCompletionBroadcaster batchCompletionBroadcaster;
     private NetworkChecker networkChecker;
@@ -124,6 +125,7 @@ public class DownloadService extends Service {
         DownloadClientReadyChecker downloadClientReadyChecker = getDownloadClientReadyChecker();
         this.networkChecker = new NetworkChecker(this.systemFacade);
         this.downloadReadyChecker = new DownloadReadyChecker(this.systemFacade, networkChecker, downloadClientReadyChecker, downloadMarshaller);
+        this.tarFileTruncator = new TarFileTruncator();
 
         String applicationPackageName = getApplicationContext().getPackageName();
         this.batchCompletionBroadcaster = new BatchCompletionBroadcaster(this, applicationPackageName);
@@ -382,7 +384,9 @@ public class DownloadService extends Service {
     private void download(FileDownloadInfo info) {
         DownloadThread downloadThread = new DownloadThread(
                 this, systemFacade, info, storageManager, downloadNotifier,
-                batchCompletionBroadcaster, batchRepository, downloadsUriProvider, downloadsRepository, networkChecker, downloadReadyChecker);
+                batchCompletionBroadcaster, batchRepository, downloadsUriProvider,
+                downloadsRepository, networkChecker, downloadReadyChecker, tarFileTruncator
+        );
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.SUBMITTED);
