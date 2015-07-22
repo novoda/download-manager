@@ -1028,6 +1028,7 @@ public class DownloadManager {
                 case DownloadStatus.RUNNING:
                     return STATUS_RUNNING;
 
+                case DownloadStatus.QUEUED_DUE_CLIENT_PERMISSIONS:
                 case DownloadStatus.PAUSED_BY_APP:
                 case DownloadStatus.WAITING_TO_RETRY:
                 case DownloadStatus.WAITING_FOR_NETWORK:

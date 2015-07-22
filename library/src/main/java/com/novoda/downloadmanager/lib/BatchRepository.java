@@ -22,6 +22,7 @@ class BatchRepository {
             DownloadStatus.DELETING,
 
             // Paused statuses
+            DownloadStatus.QUEUED_DUE_CLIENT_PERMISSIONS,
             DownloadStatus.WAITING_TO_RETRY,
             DownloadStatus.WAITING_FOR_NETWORK,
             DownloadStatus.QUEUED_FOR_WIFI,
@@ -38,6 +39,7 @@ class BatchRepository {
             DownloadStatus.DELETING,
 
             // Paused statuses
+            DownloadStatus.QUEUED_DUE_CLIENT_PERMISSIONS,
             DownloadStatus.WAITING_TO_RETRY,
             DownloadStatus.WAITING_FOR_NETWORK,
             DownloadStatus.QUEUED_FOR_WIFI
@@ -99,10 +101,9 @@ class BatchRepository {
         }
 
         boolean hasCompleteItems = statusCountMap.hasCountFor(DownloadStatus.SUCCESS);
-        boolean hasPendingItems = statusCountMap.hasCountFor(DownloadStatus.PENDING);
         boolean hasSubmittedItems = statusCountMap.hasCountFor(DownloadStatus.SUBMITTED);
         boolean hasOtherItems = statusCountMap.hasNoItemsWithStatuses(STATUSES_EXCEPT_PENDING_SUCCESS_SUBMITTED);
-        if (hasCompleteItems && (hasPendingItems || hasSubmittedItems) && !hasOtherItems) {
+        if (hasCompleteItems && hasSubmittedItems && !hasOtherItems) {
             return DownloadStatus.RUNNING;
         }
 
@@ -231,6 +232,18 @@ class BatchRepository {
 
         public void clear() {
             statusCounts.clear();
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder stringBuilder = new StringBuilder("{");
+
+            int size = statusCounts.size();
+            for (int i = 0; i < size; i++) {
+                stringBuilder.append("status: " + statusCounts.keyAt(i) + ", count: " + statusCounts.valueAt(i));
+            }
+
+            return stringBuilder.append("}").toString();
         }
     }
 

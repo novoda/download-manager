@@ -63,40 +63,6 @@ class DownloadsRepository {
         return downloadInfoCreator.create(reader, id);
     }
 
-    public List<Long> getAllSubmittedIds() {
-        String[] projection = {DownloadContract.Downloads._ID};
-        String selection = DownloadContract.Downloads.COLUMN_STATUS + " = ?";
-        String[] selectionArgs = {String.valueOf(DownloadStatus.SUBMITTED)};
-
-        Cursor downloadsCursor = contentResolver.query(
-                downloadsUriProvider.getAllDownloadsUri(),
-                projection,
-                selection,
-                selectionArgs,
-                DownloadContract.Batches._ID + " ASC");
-
-        try {
-            List<Long> submittedIds = new ArrayList<>(downloadsCursor.getCount());
-
-            while (downloadsCursor.moveToNext()) {
-                submittedIds.add(downloadsCursor.getLong(0));
-            }
-
-            return submittedIds;
-        } finally {
-            downloadsCursor.close();
-        }
-    }
-
-    public void updateStatus(ContentResolver contentResolver, int currentStatus, int newStatus) {
-        ContentValues values = new ContentValues(1);
-        values.put(DownloadContract.Downloads.COLUMN_STATUS, newStatus);
-
-        String where = DownloadContract.Downloads.COLUMN_STATUS + " = ?";
-        String[] selectionArgs = {String.valueOf(currentStatus)};
-        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
-    }
-
     public void moveDownloadsStatusTo(List<Long> ids, int status) {
         ContentValues values = new ContentValues(1);
         values.put(DownloadContract.Downloads.COLUMN_STATUS, status);

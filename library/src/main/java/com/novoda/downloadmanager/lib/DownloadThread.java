@@ -50,6 +50,7 @@ import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 import static com.novoda.downloadmanager.lib.Constants.UNKNOWN_BYTE_SIZE;
 import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.*;
 import static com.novoda.downloadmanager.lib.DownloadStatus.HTTP_DATA_ERROR;
+import static com.novoda.downloadmanager.lib.DownloadStatus.QUEUED_DUE_CLIENT_PERMISSIONS;
 import static com.novoda.downloadmanager.lib.FileDownloadInfo.NetworkState;
 import static com.novoda.downloadmanager.lib.IOHelpers.closeAfterWrite;
 import static java.net.HttpURLConnection.*;
@@ -226,30 +227,30 @@ class DownloadThread implements Runnable {
             return;
         }
 
-        DownloadBatch currentBatch = batchRepository.retrieveBatchFor(originalDownloadInfo);
-
-        if (!downloadReadyChecker.canDownload(currentBatch)) {
-            Log.d("Download " + originalDownloadInfo.getId() + " is not ready to download: skipping");
-            return;
-        }
-
-        if (downloadStatus != DownloadStatus.RUNNING) {
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(COLUMN_STATUS, DownloadStatus.RUNNING);
-            context.getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), contentValues, null, null);
-            updateBatchStatus(originalDownloadInfo.getBatchId(), originalDownloadInfo.getId());
-        }
-
-        State state = new State(originalDownloadInfo);
         PowerManager.WakeLock wakeLock = null;
         int finalStatus = DownloadStatus.UNKNOWN_ERROR;
         int numFailed = originalDownloadInfo.getNumFailed();
         String errorMsg = null;
-
-//        final NetworkPolicyManager netPolicy = NetworkPolicyManager.from(context);
-        PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        State state = new State(originalDownloadInfo);
 
         try {
+            DownloadBatch currentBatch = batchRepository.retrieveBatchFor(originalDownloadInfo);
+
+            if (!downloadReadyChecker.canDownload(currentBatch)) {
+                throw new StopRequestException(DownloadStatus.QUEUED_DUE_CLIENT_PERMISSIONS, "Cannot proceed because client denies");
+            }
+
+            if (downloadStatus != DownloadStatus.RUNNING) {
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(COLUMN_STATUS, DownloadStatus.RUNNING);
+                context.getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), contentValues, null, null);
+                updateBatchStatus(originalDownloadInfo.getBatchId(), originalDownloadInfo.getId());
+            }
+
+    //        final NetworkPolicyManager netPolicy = NetworkPolicyManager.from(context);
+            PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+
+        //try {
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
             wakeLock.acquire();
 
@@ -302,7 +303,7 @@ class DownloadThread implements Runnable {
                     numFailed += 1;
                 }
 
-                if (numFailed < Constants.MAX_RETRIES) {
+                if (numFailed < Constants.MAX_RETRIES && finalStatus != QUEUED_DUE_CLIENT_PERMISSIONS) {
                     final NetworkInfo info = systemFacade.getActiveNetworkInfo(); // Param downloadInfo.uid removed TODO
                     if (info != null && info.getType() == state.networkType && info.isConnected()) {
                         // Underlying network is still intact, use normal backoff
@@ -917,6 +918,9 @@ class DownloadThread implements Runnable {
     }
 
     private void notifyThroughDatabase(State state, int finalStatus, String errorMsg, int numFailed) {
+
+        Log.d("Ferran, set download to status " + finalStatus);
+
         ContentValues values = new ContentValues(8);
         values.put(COLUMN_STATUS, finalStatus);
         values.put(DownloadContract.Downloads.COLUMN_DATA, state.filename);
@@ -982,6 +986,7 @@ class DownloadThread implements Runnable {
             case HTTP_DATA_ERROR:
             case HTTP_UNAVAILABLE:
             case HTTP_INTERNAL_ERROR:
+            case QUEUED_DUE_CLIENT_PERMISSIONS:
                 return true;
             default:
                 return false;
