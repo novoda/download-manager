@@ -515,7 +515,8 @@ class DownloadThread implements Runnable {
      * destination file.
      */
     private void transferData(State state, InputStream in, OutputStream out) throws StopRequestException {
-        DataWriter checkedWriter = new CheckedWriter(storageManager, originalDownloadInfo.getDestination(), state.filename, out);
+        StorageSpaceVerifier spaceVerifier = new StorageSpaceVerifier(storageManager, originalDownloadInfo.getDestination(), state.filename);
+        DataWriter checkedWriter = new CheckedWriter(spaceVerifier, out);
         DataWriter dataWriter = new NotifierWriter(getContentResolver(), checkedWriter, downloadNotifier, downloadsRepository, originalDownloadInfo);
 
         DataTransferer dataTransferer;

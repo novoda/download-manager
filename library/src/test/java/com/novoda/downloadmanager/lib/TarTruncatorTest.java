@@ -18,11 +18,12 @@ import static org.fest.assertions.api.Assertions.assertThat;
 public class TarTruncatorTest {
 
     private static final int TRUNCATED_TEST_FILE_SIZE = 349696;
-    
-    private TarTruncator tarTruncator;
+
     private InputStream resourceAsStream;
     private FileOutputStream fileOutputStream;
     private DownloadThread.State state;
+
+    private TarTruncator tarTruncator;
 
     @Test
     public void itTruncatesProperlyTarFileThatContainsEndBlockMarker() throws Exception {

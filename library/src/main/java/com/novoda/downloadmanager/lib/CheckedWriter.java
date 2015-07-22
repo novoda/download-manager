@@ -5,22 +5,18 @@ import java.io.OutputStream;
 
 public class CheckedWriter implements DataWriter {
 
-    private final StorageManager storageManager;
-    private final int destination;
-    private final String fileName;
+    private final SpaceVerifier spaceVerifier;
     private final OutputStream outputStream;
 
-    public CheckedWriter(StorageManager storageManager, int destination, String fileName, OutputStream outputStream) {
-        this.storageManager = storageManager;
-        this.destination = destination;
-        this.fileName = fileName;
+    public CheckedWriter(SpaceVerifier spaceVerifier, OutputStream outputStream) {
+        this.spaceVerifier = spaceVerifier;
         this.outputStream = outputStream;
     }
 
     @Override
     public DownloadThread.State write(DownloadThread.State state, byte[] buffer, int count) throws StopRequestException {
 
-        storageManager.verifySpaceBeforeWritingToFile(destination, fileName, count);
+        spaceVerifier.verifySpacePreemptively(count);
 
         boolean forceVerified = false;
         while (true) {
@@ -33,7 +29,7 @@ public class CheckedWriter implements DataWriter {
                 // TODO: better differentiate between DRM and disk failures
                 if (!forceVerified) {
                     // couldn't write to file. are we out of space? check.
-                    storageManager.verifySpace(destination, fileName, count);
+                    spaceVerifier.verifySpace(count);
                     forceVerified = true;
                 } else {
                     throw new StopRequestException(
