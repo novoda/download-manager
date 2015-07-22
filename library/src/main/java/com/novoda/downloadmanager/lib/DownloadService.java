@@ -82,6 +82,7 @@ public class DownloadService extends Service {
     private DownloadsUriProvider downloadsUriProvider;
     private BatchCompletionBroadcaster batchCompletionBroadcaster;
     private NetworkChecker networkChecker;
+    private RestartTimeCreator restartTimeCreator;
 
     /**
      * Receives notifications when the data in the content provider changes
@@ -123,7 +124,8 @@ public class DownloadService extends Service {
         PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
         DownloadClientReadyChecker downloadClientReadyChecker = getDownloadClientReadyChecker();
         this.networkChecker = new NetworkChecker(this.systemFacade);
-        this.downloadReadyChecker = new DownloadReadyChecker(this.systemFacade, networkChecker, downloadClientReadyChecker, downloadMarshaller);
+        this.restartTimeCreator = new RestartTimeCreator(new RandomNumberGenerator());
+        this.downloadReadyChecker = new DownloadReadyChecker(this.systemFacade, networkChecker, downloadClientReadyChecker, downloadMarshaller, restartTimeCreator);
 
         String applicationPackageName = getApplicationContext().getPackageName();
         this.batchCompletionBroadcaster = new BatchCompletionBroadcaster(this, applicationPackageName);
@@ -352,7 +354,7 @@ public class DownloadService extends Service {
                 isActive = true;
             }
 
-            nextRetryTimeMillis = downloadBatch.nextActionMillis(now, nextRetryTimeMillis);
+            nextRetryTimeMillis = downloadBatch.nextActionMillis(now, nextRetryTimeMillis, restartTimeCreator);
         }
 
         batchRepository.deleteMarkedBatchesFor(allDownloads);

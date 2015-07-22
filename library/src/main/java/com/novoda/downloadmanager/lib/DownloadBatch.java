@@ -57,22 +57,22 @@ class DownloadBatch {
      * @return If {@code 0}, download is ready to proceed immediately. If
      * {@link Long#MAX_VALUE}, then download has no future actions.
      */
-    public long nextActionMillis(long now, long nextRetryTimeMillis) {
+    public long nextActionMillis(long now, long nextRetryTimeMillis, RestartTimeCreator restartTimeCreator) {
         for (FileDownloadInfo info : downloads) {
-            long individualRetryTimeMillis = getNextActionMillisFor(now, info);
+            long individualRetryTimeMillis = getNextActionMillisFor(now, info, restartTimeCreator);
             nextRetryTimeMillis = Math.min(individualRetryTimeMillis, nextRetryTimeMillis);
         }
         return nextRetryTimeMillis;
     }
 
-    private long getNextActionMillisFor(long now, FileDownloadInfo info) {
+    private long getNextActionMillisFor(long now, FileDownloadInfo info, RestartTimeCreator restartTimeCreator) {
         if (DownloadStatus.isCompleted(status)) {
             return Long.MAX_VALUE;
         }
         if (status != DownloadStatus.WAITING_TO_RETRY) {
             return 0;
         }
-        long when = info.restartTime(now);
+        long when = restartTimeCreator.restartTime(info, now);
         if (when <= now) {
             return 0;
         }

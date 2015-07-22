@@ -29,8 +29,8 @@ public class DownloadReadyCheckerTest {
                 null,
                 null,
                 IS_READY,
-                mock(PublicFacingDownloadMarshaller.class)
-        );
+                mock(PublicFacingDownloadMarshaller.class),
+                restartTimeCreator);
 
         boolean isReady = downloadReadyChecker.canDownload(mock(DownloadBatch.class));
 
@@ -43,8 +43,8 @@ public class DownloadReadyCheckerTest {
                 null,
                 null,
                 IS_NOT_READY,
-                mock(PublicFacingDownloadMarshaller.class)
-        );
+                mock(PublicFacingDownloadMarshaller.class),
+                restartTimeCreator);
 
         boolean isReady = downloadReadyChecker.canDownload(mock(DownloadBatch.class));
 

@@ -102,11 +102,9 @@ class FileDownloadInfo {
     private boolean allowTarUpdates;
 
     private final List<Pair<String, String>> requestHeaders = new ArrayList<>();
-    private final RandomNumberGenerator randomNumberGenerator;
     private final DownloadsUriProvider downloadsUriProvider;
 
-    FileDownloadInfo(RandomNumberGenerator randomNumberGenerator, DownloadsUriProvider downloadsUriProvider) {
-        this.randomNumberGenerator = randomNumberGenerator;
+    FileDownloadInfo(DownloadsUriProvider downloadsUriProvider) {
         this.downloadsUriProvider = downloadsUriProvider;
     }
 
@@ -202,17 +200,12 @@ class FileDownloadInfo {
         return Collections.unmodifiableList(requestHeaders);
     }
 
-    /**
-     * Returns the time when a download should be restarted.
-     */
-    public long restartTime(long now) {
-        if (numFailed == 0) {
-            return now;
-        }
-        if (retryAfter > 0) {
-            return lastMod + retryAfter;
-        }
-        return lastMod + Constants.RETRY_FIRST_DELAY * (1000 + randomNumberGenerator.generate()) * (1 << (numFailed - 1));
+    public long getLastModification() {
+        return lastMod;
+    }
+
+    public int getRetryAfter() {
+        return retryAfter;
     }
 
     /**
@@ -345,8 +338,7 @@ class FileDownloadInfo {
         }
 
         public FileDownloadInfo newDownloadInfo(DownloadsUriProvider downloadsUriProvider) {
-            RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
-            FileDownloadInfo info = new FileDownloadInfo(randomNumberGenerator, downloadsUriProvider);
+            FileDownloadInfo info = new FileDownloadInfo(downloadsUriProvider);
             updateFromDatabase(info);
             readRequestHeaders(info);
 
@@ -472,6 +464,9 @@ class FileDownloadInfo {
                     downloadsCursor.close();
                 }
             }
+
         }
+
     }
+
 }
