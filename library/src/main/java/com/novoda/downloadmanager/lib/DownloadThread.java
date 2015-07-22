@@ -918,9 +918,6 @@ class DownloadThread implements Runnable {
     }
 
     private void notifyThroughDatabase(State state, int finalStatus, String errorMsg, int numFailed) {
-
-        Log.d("Ferran, set download to status " + finalStatus);
-
         ContentValues values = new ContentValues(8);
         values.put(COLUMN_STATUS, finalStatus);
         values.put(DownloadContract.Downloads.COLUMN_DATA, state.filename);
