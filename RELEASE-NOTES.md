@@ -1,3 +1,8 @@
+0.2.9
+-------
+
+- Tar truncation at download time #126
+
 0.2.6
 -------
 
