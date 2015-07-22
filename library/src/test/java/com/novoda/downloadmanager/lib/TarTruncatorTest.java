@@ -15,9 +15,11 @@ import static com.novoda.downloadmanager.lib.IOHelpers.closeAfterWrite;
 import static com.novoda.downloadmanager.lib.IOHelpers.closeQuietly;
 import static org.fest.assertions.api.Assertions.assertThat;
 
-public class TarFileTruncatorTest {
+public class TarTruncatorTest {
 
-    private TarFileTruncator tarFileTruncator;
+    private static final int TRUNCATED_TEST_FILE_SIZE = 349696;
+    
+    private TarTruncator tarTruncator;
     private InputStream resourceAsStream;
     private FileOutputStream fileOutputStream;
     private DownloadThread.State state;
@@ -26,7 +28,7 @@ public class TarFileTruncatorTest {
     public void itTruncatesProperlyTarFileThatContainsEndBlockMarker() throws Exception {
         givenATarFileWithEndBlockMarker();
 
-        state = tarFileTruncator.transferData(state, resourceAsStream);
+        state = tarTruncator.transferData(state, resourceAsStream);
 
         tarFileShouldHaveBeenTruncatedProperly();
     }
@@ -35,9 +37,27 @@ public class TarFileTruncatorTest {
     public void itDoesNotModifyATarFileWithoutEndBlockMarker() throws Exception {
         givenATarFileWithoutEndBlockMarker();
 
-        state = tarFileTruncator.transferData(state, resourceAsStream);
+        state = tarTruncator.transferData(state, resourceAsStream);
 
         tarFileShouldBeUntouched();
+    }
+
+    @Test
+    public void itShouldPauseWhenDataTransferIsOver() throws Exception {
+        givenATarFileWithEndBlockMarker();
+
+        state = tarTruncator.transferData(state, resourceAsStream);
+
+        stateShouldBeSetToShouldPause();
+    }
+
+    @Test
+    public void itShouldUpdateTotalBytesToMatchTruncatedFileSize() throws Exception {
+        givenATarFileWithEndBlockMarker();
+
+        state = tarTruncator.transferData(state, resourceAsStream);
+
+        stateShouldMatchTruncatedFileSize();
     }
 
     @After
@@ -48,14 +68,14 @@ public class TarFileTruncatorTest {
     private void givenATarFileWithEndBlockMarker() throws IOException {
         resourceAsStream = getResourceAsStream("tar/testOriginal.tar");
         fileOutputStream = new FileOutputStream("TarFileTruncatorTest.tar");
-        tarFileTruncator = new TarFileTruncator(new TestDataWriter(fileOutputStream));
+        tarTruncator = new TarTruncator(new TestDataWriter(fileOutputStream));
         state = new DownloadThread.State();
     }
 
     private void givenATarFileWithoutEndBlockMarker() throws IOException {
         resourceAsStream = getResourceAsStream("tar/testExpectedResult.tar");
         fileOutputStream = new FileOutputStream("TarFileTruncatorTest.tar");
-        tarFileTruncator = new TarFileTruncator(new TestDataWriter(fileOutputStream));
+        tarTruncator = new TarTruncator(new TestDataWriter(fileOutputStream));
         state = new DownloadThread.State();
     }
 
@@ -71,6 +91,14 @@ public class TarFileTruncatorTest {
         closeQuietly(resourceAsStream);
         boolean contentEquals = IOUtils.contentEquals(new FileInputStream("TarFileTruncatorTest.tar"), getResourceAsStream("tar/testExpectedResult.tar"));
         assertThat(contentEquals).isTrue();
+    }
+
+    private void stateShouldBeSetToShouldPause() {
+        assertThat(state.shouldPause).isTrue();
+    }
+
+    private void stateShouldMatchTruncatedFileSize() {
+        assertThat(state.totalBytes).isEqualTo(TRUNCATED_TEST_FILE_SIZE);
     }
 
     private static InputStream getResourceAsStream(String resName) {

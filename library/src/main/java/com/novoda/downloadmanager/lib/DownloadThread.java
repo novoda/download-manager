@@ -520,7 +520,7 @@ class DownloadThread implements Runnable {
 
         DataTransferer dataTransferer;
         if (originalDownloadInfo.shouldAllowTarUpdate(state.mimeType)) {
-            dataTransferer = new TarFileTruncator(dataWriter);
+            dataTransferer = new TarTruncator(dataWriter);
         } else {
             dataTransferer = new RegularDataTransferer(dataWriter);
         }

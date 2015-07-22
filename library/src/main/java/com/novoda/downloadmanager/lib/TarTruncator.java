@@ -3,7 +3,7 @@ package com.novoda.downloadmanager.lib;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class TarFileTruncator implements DataTransferer {
+public class TarTruncator implements DataTransferer {
 
     private static final byte BYTE_ZERO = 0x0;
     private static final int BLOCK_SIZE = 512;
@@ -11,7 +11,7 @@ public class TarFileTruncator implements DataTransferer {
 
     private final DataWriter dataWriter;
 
-    public TarFileTruncator(DataWriter dataWriter) {
+    public TarTruncator(DataWriter dataWriter) {
         this.dataWriter = dataWriter;
     }
 
@@ -25,11 +25,11 @@ public class TarFileTruncator implements DataTransferer {
                 newState = dataWriter.write(newState, buffer, readLast);
                 readLast = readBlock(in, buffer);
             }
+            state.shouldPause = true;
             state.totalBytes = state.currentBytes;
             return newState;
         } catch (IOException e) {
             // It was doing the same thing in regular and exception cases
-            state.totalBytes = state.currentBytes;
             return newState;
         }
     }
