@@ -9,6 +9,7 @@ import android.net.Uri;
 import com.novoda.notils.string.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 class DownloadsRepository {
@@ -87,14 +88,40 @@ class DownloadsRepository {
         }
     }
 
-    public void update(ContentResolver contentResolver, List<Long> downloadIds, int status) {
+    public void updateStatus(ContentResolver contentResolver, int currentStatus, int newStatus) {
+        ContentValues values = new ContentValues(1);
+        values.put(DownloadContract.Downloads.COLUMN_STATUS, newStatus);
+
+        String where = DownloadContract.Downloads.COLUMN_STATUS + " = ?";
+        String[] selectionArgs = {String.valueOf(currentStatus)};
+        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
+    }
+
+    public void moveDownloadsStatusTo(List<Long> ids, int status) {
         ContentValues values = new ContentValues(1);
         values.put(DownloadContract.Downloads.COLUMN_STATUS, status);
 
-        String where = DownloadContract.Downloads._ID + " IN (?)";
-        String selection = StringUtils.join(downloadIds, ", ");
-        String[] selectionArgs = {selection};
+        String where = DownloadContract.Downloads._ID + " IN (" + getPlaceHoldersOf(ids.size()) + ")";
+        String[] selectionArgs = getStringArrayFrom(ids.toArray());
         contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
+    }
+
+    private String getPlaceHoldersOf(int size) {
+        String[] questionMarks = new String[size];
+        for (int i = 0; i < size; i++) {
+            questionMarks[i] = "?";
+        }
+
+        return StringUtils.join(Arrays.asList(questionMarks), ", ");
+    }
+
+    private String[] getStringArrayFrom(Object[] objects) {
+        int length = objects.length;
+        String[] stringArray = new String[length];
+        for (int i = 0; i < length; i++) {
+            stringArray[i] = String.valueOf(objects[i]);
+        }
+        return stringArray;
     }
 
     interface DownloadInfoCreator {

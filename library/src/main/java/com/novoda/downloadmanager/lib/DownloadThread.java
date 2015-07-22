@@ -44,7 +44,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
-import java.util.List;
 import java.util.Locale;
 
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
@@ -937,8 +936,6 @@ class DownloadThread implements Runnable {
         getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
 
         updateBatchStatus(originalDownloadInfo.getBatchId(), originalDownloadInfo.getId());
-
-        updateSubmittedDownloads();
     }
 
     private ContentResolver getContentResolver() {
@@ -966,18 +963,6 @@ class DownloadThread implements Runnable {
         } else if (DownloadStatus.isSuccess(batchStatus)) {
             batchCompletionBroadcaster.notifyBatchCompletedFor(batchId);
         }
-    }
-
-    private void updateSubmittedDownloads() {
-        List<Long> submittedIds = downloadsRepository.getAllSubmittedIds();
-
-        if (submittedIds.size() == 0) {
-            return;
-        }
-
-        int status = batchRepository.getBatchStatus(originalDownloadInfo.getBatchId());
-
-        downloadsRepository.update(getContentResolver(), submittedIds, status);
     }
 
     private static long getHeaderFieldLong(URLConnection conn, String field, long defaultValue) {
