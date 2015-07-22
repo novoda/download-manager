@@ -7,7 +7,6 @@ class TarTruncator implements DataTransferer {
 
     private static final byte BYTE_ZERO = 0x0;
     private static final int BLOCK_SIZE = 512;
-    private static final int NO_BYTES_READ = -1;
 
     private final DataWriter dataWriter;
 
@@ -52,7 +51,7 @@ class TarTruncator implements DataTransferer {
         int readLast;
         while (read < BLOCK_SIZE) {
             readLast = fileInputStream.read(buffer, read, BLOCK_SIZE - read);
-            if (readLast == NO_BYTES_READ) {
+            if (readLast == Constants.NO_BYTES_READ) {
                 return read;
             }
             read += readLast;
