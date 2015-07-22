@@ -102,12 +102,10 @@ class FileDownloadInfo {
     private boolean allowTarUpdates;
 
     private final List<Pair<String, String>> requestHeaders = new ArrayList<>();
-    private final SystemFacade systemFacade;
     private final RandomNumberGenerator randomNumberGenerator;
     private final DownloadsUriProvider downloadsUriProvider;
 
-    FileDownloadInfo(SystemFacade systemFacade, RandomNumberGenerator randomNumberGenerator, DownloadsUriProvider downloadsUriProvider) {
-        this.systemFacade = systemFacade;
+    FileDownloadInfo(RandomNumberGenerator randomNumberGenerator, DownloadsUriProvider downloadsUriProvider) {
         this.randomNumberGenerator = randomNumberGenerator;
         this.downloadsUriProvider = downloadsUriProvider;
     }
@@ -237,32 +235,6 @@ class FileDownloadInfo {
         }
     }
 
-    /**
-     * Check if the download's size prohibits it from running over the current network.
-     *
-     * @return one of the NETWORK_* constants
-     */
-    private NetworkState checkSizeAllowedForNetwork(int networkType) {
-        if (totalBytes <= 0) {
-            return NetworkState.OK; // we don't know the size yet
-        }
-        if (networkType == ConnectivityManager.TYPE_WIFI) {
-            return NetworkState.OK; // anything goes over wifi
-        }
-        Long maxBytesOverMobile = systemFacade.getMaxBytesOverMobile();
-        if (maxBytesOverMobile != null && totalBytes > maxBytesOverMobile) {
-            return NetworkState.UNUSABLE_DUE_TO_SIZE;
-        }
-        if (bypassRecommendedSizeLimit == 0) {
-            Long recommendedMaxBytesOverMobile = systemFacade.getRecommendedMaxBytesOverMobile();
-            if (recommendedMaxBytesOverMobile != null
-                    && totalBytes > recommendedMaxBytesOverMobile) {
-                return NetworkState.RECOMMENDED_UNUSABLE_DUE_TO_SIZE;
-            }
-        }
-        return NetworkState.OK;
-    }
-
     public boolean isSubmittedOrRunning() {
         return DownloadStatus.isSubmitted(status) || DownloadStatus.isRunning(status);
     }
@@ -372,9 +344,9 @@ class FileDownloadInfo {
             this.cursor = cursor;
         }
 
-        public FileDownloadInfo newDownloadInfo(SystemFacade systemFacade, DownloadsUriProvider downloadsUriProvider) {
+        public FileDownloadInfo newDownloadInfo(DownloadsUriProvider downloadsUriProvider) {
             RandomNumberGenerator randomNumberGenerator = new RandomNumberGenerator();
-            FileDownloadInfo info = new FileDownloadInfo(systemFacade, randomNumberGenerator, downloadsUriProvider);
+            FileDownloadInfo info = new FileDownloadInfo(randomNumberGenerator, downloadsUriProvider);
             updateFromDatabase(info);
             readRequestHeaders(info);
 

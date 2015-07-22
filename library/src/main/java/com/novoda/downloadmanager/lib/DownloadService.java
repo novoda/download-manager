@@ -184,7 +184,7 @@ public class DownloadService extends Service {
      * download if appropriate.
      */
     private FileDownloadInfo createNewDownloadInfo(FileDownloadInfo.Reader reader) {
-        FileDownloadInfo info = reader.newDownloadInfo(systemFacade, downloadsUriProvider);
+        FileDownloadInfo info = reader.newDownloadInfo(downloadsUriProvider);
         Log.v("processing inserted download " + info.getId());
         return info;
     }
