@@ -4,7 +4,7 @@ package com.novoda.downloadmanager.lib;
  * Contains the internal constants that are used in the download manager.
  * As a general rule, modifying these constants should be done with care.
  */
-public class Constants {
+class Constants {
 
     /**
      * The column that used to be used for the HTTP method of the request

@@ -3,7 +3,7 @@ package com.novoda.downloadmanager.lib;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class CheckedWriter implements DataWriter {
+class CheckedWriter implements DataWriter {
 
     private final SpaceVerifier spaceVerifier;
     private final OutputStream outputStream;

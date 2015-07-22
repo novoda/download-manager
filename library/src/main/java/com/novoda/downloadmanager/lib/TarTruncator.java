@@ -3,7 +3,7 @@ package com.novoda.downloadmanager.lib;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class TarTruncator implements DataTransferer {
+class TarTruncator implements DataTransferer {
 
     private static final byte BYTE_ZERO = 0x0;
     private static final int BLOCK_SIZE = 512;

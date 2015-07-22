@@ -6,7 +6,7 @@ import android.os.SystemClock;
 
 import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.COLUMN_CURRENT_BYTES;
 
-public class NotifierWriter implements DataWriter {
+class NotifierWriter implements DataWriter {
 
     private final ContentResolver contentResolver;
     private final DataWriter dataWriter;

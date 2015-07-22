@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager.lib;
 
-public class StorageSpaceVerifier implements SpaceVerifier {
+class StorageSpaceVerifier implements SpaceVerifier {
 
     private final StorageManager storageManager;
     private final int destination;

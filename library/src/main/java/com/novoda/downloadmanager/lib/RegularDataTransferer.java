@@ -3,7 +3,7 @@ package com.novoda.downloadmanager.lib;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class RegularDataTransferer implements DataTransferer {
+class RegularDataTransferer implements DataTransferer {
 
     private final DataWriter dataWriter;
 

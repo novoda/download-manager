@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager.lib;
 
-public interface SpaceVerifier {
+interface SpaceVerifier {
 
     void verifySpacePreemptively(int count) throws StopRequestException;
 
