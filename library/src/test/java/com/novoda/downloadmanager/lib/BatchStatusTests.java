@@ -9,24 +9,22 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.Test;
+
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class BatchStatusTests {
 
     @Test
-    public void givenABatchWithSomePendingItemsAndSomeCompleteItemsThenTheBatchStatusIsRunning() {
-        BatchRepository repository = givenABatchWithStatuses(DownloadStatus.PENDING, DownloadStatus.SUCCESS, DownloadStatus.PENDING);
+    public void givenABatchWithSomeCompleteItemsAndSomeSubmittedItemsThenTheBatchStatusIsRunning() {
+        BatchRepository repository = givenABatchWithStatuses(DownloadStatus.SUCCESS, DownloadStatus.SUBMITTED);
 
         int batchStatus = repository.getBatchStatus(1);
 
@@ -34,17 +32,8 @@ public class BatchStatusTests {
     }
 
     @Test
-    public void givenABatchWithSomePendingItemsAndSomeCompleteItemsAndSomeSubmittedItemsThenTheBatchStatusIsRunning() {
-        BatchRepository repository = givenABatchWithStatuses(DownloadStatus.PENDING, DownloadStatus.SUCCESS, DownloadStatus.SUBMITTED);
-
-        int batchStatus = repository.getBatchStatus(1);
-
-        assertThat(batchStatus).isEqualTo(DownloadStatus.RUNNING);
-    }
-
-    @Test
-    public void givenABatchWithItemsThatAreNotSubmittedOrSuccessOrPendingThenTheBatchStatusIsNotRunning() {
-        BatchRepository repository = givenABatchWithStatuses(DownloadStatus.PENDING, DownloadStatus.SUCCESS, DownloadStatus.BATCH_FAILED);
+    public void givenABatchWithItemsThatAreNotSubmittedOrSuccessThenTheBatchStatusIsNotRunning() {
+        BatchRepository repository = givenABatchWithStatuses(DownloadStatus.SUCCESS, DownloadStatus.BATCH_FAILED);
 
         int batchStatus = repository.getBatchStatus(1);
 
