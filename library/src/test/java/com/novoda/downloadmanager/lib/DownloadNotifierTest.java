@@ -49,6 +49,7 @@ public class DownloadNotifierTest {
                 new ArrayList<FileDownloadInfo>(),
                 status,
                 1,
-                1, restartTimeCreator);
+                1
+        );
     }
 }
