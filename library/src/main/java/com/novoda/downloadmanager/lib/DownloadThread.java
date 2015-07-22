@@ -169,6 +169,7 @@ class DownloadThread implements Runnable {
         }
 
         State() {
+            // This constructor is intentionally empty. Only used for tests.
         }
 
         public void resetBeforeExecute() {
