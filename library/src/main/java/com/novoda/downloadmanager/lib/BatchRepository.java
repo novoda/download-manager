@@ -31,7 +31,7 @@ class BatchRepository {
             DownloadStatus.SUCCESS
     );
 
-    private static final List<Integer> STATUSES_EXCEPT_PENDING_SUCCESS_SUBMITTED = Arrays.asList(
+    private static final List<Integer> STATUSES_EXCEPT_SUCCESS_SUBMITTED = Arrays.asList(
             DownloadStatus.CANCELED,
             DownloadStatus.PAUSED_BY_APP,
             DownloadStatus.RUNNING,
@@ -40,7 +40,9 @@ class BatchRepository {
             // Paused statuses
             DownloadStatus.WAITING_TO_RETRY,
             DownloadStatus.WAITING_FOR_NETWORK,
-            DownloadStatus.QUEUED_FOR_WIFI
+            DownloadStatus.QUEUED_FOR_WIFI,
+
+            DownloadStatus.PENDING
     );
 
     private static final int PRIORITISED_STATUSES_SIZE = PRIORITISED_STATUSES.size();
@@ -99,10 +101,9 @@ class BatchRepository {
         }
 
         boolean hasCompleteItems = statusCountMap.hasCountFor(DownloadStatus.SUCCESS);
-        boolean hasPendingItems = statusCountMap.hasCountFor(DownloadStatus.PENDING);
         boolean hasSubmittedItems = statusCountMap.hasCountFor(DownloadStatus.SUBMITTED);
-        boolean hasOtherItems = statusCountMap.hasNoItemsWithStatuses(STATUSES_EXCEPT_PENDING_SUCCESS_SUBMITTED);
-        if (hasCompleteItems && (hasPendingItems || hasSubmittedItems) && !hasOtherItems) {
+        boolean hasOtherItems = statusCountMap.hasNoItemsWithStatuses(STATUSES_EXCEPT_SUCCESS_SUBMITTED);
+        if (hasCompleteItems && hasSubmittedItems && !hasOtherItems) {
             return DownloadStatus.RUNNING;
         }
 

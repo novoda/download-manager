@@ -227,6 +227,7 @@ public class DownloadService extends Service {
         Log.d("Shutting down service");
         getContentResolver().unregisterContentObserver(downloadManagerContentObserver);
         downloadScanner.shutdown();
+        executor.shutdownNow();
         updateThread.quit();
     }
 
@@ -383,7 +384,7 @@ public class DownloadService extends Service {
         DownloadThread downloadThread = new DownloadThread(
                 this, systemFacade, info, storageManager, downloadNotifier,
                 batchCompletionBroadcaster, batchRepository, downloadsUriProvider,
-                downloadsRepository, networkChecker, downloadReadyChecker
+                downloadsRepository, networkChecker, downloadReadyChecker, new Clock()
         );
 
         ContentValues contentValues = new ContentValues();
