@@ -383,15 +383,15 @@ public class DownloadManager {
     private Uri baseUri;
 
     public DownloadManager(Context context, ContentResolver resolver) {
-        this(context, resolver, DownloadsUriProvider.getInstance(), new RealSystemFacade(context), false);
+        this(context, resolver, DownloadsUriProvider.getInstance(), new RealSystemFacade(context, new Clock()), false);
     }
 
     public DownloadManager(Context context, ContentResolver contentResolver, boolean verboseLogging) {
-        this(context, contentResolver, DownloadsUriProvider.getInstance(), new RealSystemFacade(context), verboseLogging);
+        this(context, contentResolver, DownloadsUriProvider.getInstance(), new RealSystemFacade(context, new Clock()), verboseLogging);
     }
 
     DownloadManager(Context context, ContentResolver resolver, DownloadsUriProvider downloadsUriProvider) {
-        this(context, resolver, downloadsUriProvider, new RealSystemFacade(context), false);
+        this(context, resolver, downloadsUriProvider, new RealSystemFacade(context, new Clock()), false);
     }
 
     DownloadManager(Context context,
@@ -453,7 +453,7 @@ public class DownloadManager {
         contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
 
         DownloadDeleter downloadDeleter = new DownloadDeleter(contentResolver);
-        RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext());
+        RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext(), new Clock());
         BatchRepository batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
         batchRepository.updateBatchStatus(id, DownloadStatus.PENDING);
         notifyBatchesHaveChanged();
@@ -576,7 +576,7 @@ public class DownloadManager {
      */
     public Cursor query(BatchQuery query) {
         DownloadDeleter downloadDeleter = new DownloadDeleter(contentResolver);
-        RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext());
+        RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext(), new Clock());
         BatchRepository batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
         Cursor cursor = batchRepository.retrieveFor(query);
         if (cursor == null) {

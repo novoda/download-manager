@@ -518,7 +518,13 @@ class DownloadThread implements Runnable {
     private void transferData(State state, InputStream in, OutputStream out) throws StopRequestException {
         StorageSpaceVerifier spaceVerifier = new StorageSpaceVerifier(storageManager, originalDownloadInfo.getDestination(), state.filename);
         DataWriter checkedWriter = new CheckedWriter(spaceVerifier, out);
-        DataWriter dataWriter = new NotifierWriter(getContentResolver(), checkedWriter, downloadNotifier, downloadsRepository, originalDownloadInfo);
+        Clock clock = new Clock();
+        DataWriter dataWriter = new NotifierWriter(getContentResolver(),
+                                                   checkedWriter,
+                                                   downloadNotifier,
+                                                   downloadsRepository,
+                                                   originalDownloadInfo,
+                                                   clock);
 
         DataTransferer dataTransferer;
         if (originalDownloadInfo.shouldAllowTarUpdate(state.mimeType)) {
