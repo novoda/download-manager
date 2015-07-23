@@ -343,7 +343,7 @@ class DownloadThread implements Runnable {
      * handle the response, and transfer the data to the destination file.
      */
     private void executeDownload(State state) throws StopRequestException {
-        checkPausedOrCanceled();
+        checkPausedOrCanceled(originalDownloadInfo);
         state.resetBeforeExecute();
         setupDestinationFile(state);
 
@@ -425,6 +425,21 @@ class DownloadThread implements Runnable {
         }
 
         throw new StopRequestException(DownloadStatus.TOO_MANY_REDIRECTS, "Too many redirects");
+    }
+
+    /**
+     * Check if the download has been paused or canceled, stopping the request appropriately if it
+     * has been.
+     */
+    private void checkPausedOrCanceled(FileDownloadInfo downloadInfo) throws StopRequestException {
+        FileDownloadInfo.ControlStatus controlStatus = downloadsRepository.getDownloadInfoControlStatusFor(downloadInfo.getId());
+
+        if (controlStatus.isPaused()) {
+            throw new StopRequestException(DownloadStatus.PAUSED_BY_APP, "download paused by owner");
+        }
+        if (controlStatus.isCanceled()) {
+            throw new StopRequestException(DownloadStatus.CANCELED, "download canceled");
+        }
     }
 
     private boolean downloadAlreadyFinished(State state) {
@@ -519,7 +534,7 @@ class DownloadThread implements Runnable {
     private void transferData(State state, InputStream in, OutputStream out) throws StopRequestException {
         StorageSpaceVerifier spaceVerifier = new StorageSpaceVerifier(storageManager, originalDownloadInfo.getDestination(), state.filename);
         DataWriter checkedWriter = new CheckedWriter(spaceVerifier, out);
-        DataWriter dataWriter = new NotifierWriter(getContentResolver(), checkedWriter, downloadNotifier, downloadsRepository, originalDownloadInfo);
+        DataWriter dataWriter = new NotifierWriter(getContentResolver(), checkedWriter, downloadNotifier, originalDownloadInfo, checkOnWrite);
 
         DataTransferer dataTransferer;
         if (originalDownloadInfo.shouldAllowTarUpdate(state.mimeType)) {
@@ -531,6 +546,13 @@ class DownloadThread implements Runnable {
         State newState = dataTransferer.transferData(state, in);
         handleEndOfStream(newState);
     }
+
+    private final NotifierWriter.WriteChunkListener checkOnWrite = new NotifierWriter.WriteChunkListener() {
+        @Override
+        public void chunkWritten(FileDownloadInfo downloadInfo) throws StopRequestException {
+            checkPausedOrCanceled(downloadInfo);
+        }
+    };
 
     /**
      * Called after a successful completion to take any necessary action on the downloaded file.
