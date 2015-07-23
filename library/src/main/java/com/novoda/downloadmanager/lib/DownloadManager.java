@@ -292,6 +292,11 @@ public class DownloadManager {
     public static final int PAUSED_UNKNOWN = 4;
 
     /**
+     * Value of {@link #COLUMN_REASON} when the download is paused due client download check permissions.
+     */
+    public static final int PAUSED_QUEUED_DUE_CLIENT_PERMISSIONS = 5;
+
+    /**
      * Broadcast intent action sent by the download manager when a download completes. The
      * download's ID is specified in the intent's data.
      */
@@ -975,6 +980,9 @@ public class DownloadManager {
 
                 case DownloadStatus.QUEUED_FOR_WIFI:
                     return PAUSED_QUEUED_FOR_WIFI;
+
+                case DownloadStatus.QUEUED_DUE_CLIENT_PERMISSIONS:
+                    return PAUSED_QUEUED_DUE_CLIENT_PERMISSIONS;
 
                 default:
                     return PAUSED_UNKNOWN;
