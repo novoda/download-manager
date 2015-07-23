@@ -28,14 +28,16 @@ import com.novoda.notils.logger.simple.Log;
 
 class RealSystemFacade implements SystemFacade {
     private final Context context;
+    private final Clock clock;
 
-    public RealSystemFacade(Context context) {
+    public RealSystemFacade(Context context, Clock clock) {
         this.context = context;
+        this.clock = clock;
     }
 
     @Override
     public long currentTimeMillis() {
-        return System.currentTimeMillis();
+        return clock.currentTimeMillis();
     }
 
     @Override

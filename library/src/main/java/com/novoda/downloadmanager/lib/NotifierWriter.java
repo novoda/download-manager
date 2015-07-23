@@ -13,17 +13,20 @@ class NotifierWriter implements DataWriter {
     private final DownloadNotifier downloadNotifier;
     private final DownloadsRepository downloadsRepository;
     private final FileDownloadInfo downloadInfo;
+    private final Clock clock;
 
     public NotifierWriter(ContentResolver contentResolver,
                           DataWriter dataWriter,
                           DownloadNotifier downloadNotifier,
                           DownloadsRepository downloadsRepository,
-                          FileDownloadInfo downloadInfo) {
+                          FileDownloadInfo downloadInfo,
+                          Clock clock) {
         this.contentResolver = contentResolver;
         this.dataWriter = dataWriter;
         this.downloadNotifier = downloadNotifier;
         this.downloadsRepository = downloadsRepository;
         this.downloadInfo = downloadInfo;
+        this.clock = clock;
     }
 
     @Override
@@ -73,6 +76,12 @@ class NotifierWriter implements DataWriter {
      * has been.
      */
     private void checkPausedOrCanceled() throws StopRequestException {
+        if (clock.intervalLessThan(Clock.Interval.ONE_SECOND)) {
+            return;
+        }
+
+        clock.startInterval();
+
         FileDownloadInfo.ControlStatus controlStatus = downloadsRepository.getDownloadInfoControlStatusFor(downloadInfo.getId());
 
         if (controlStatus.isPaused()) {
