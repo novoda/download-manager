@@ -229,6 +229,7 @@ public class DownloadService extends Service {
         Log.d("Shutting down service");
         getContentResolver().unregisterContentObserver(downloadManagerContentObserver);
         downloadScanner.shutdown();
+        executor.shutdownNow();
         updateThread.quit();
     }
 
