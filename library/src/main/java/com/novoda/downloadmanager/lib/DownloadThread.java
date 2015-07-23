@@ -50,7 +50,7 @@ import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 import static com.novoda.downloadmanager.lib.Constants.UNKNOWN_BYTE_SIZE;
 import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.*;
 import static com.novoda.downloadmanager.lib.DownloadStatus.HTTP_DATA_ERROR;
-import static com.novoda.downloadmanager.lib.DownloadStatus.QUEUED_DUE_CLIENT_PERMISSIONS;
+import static com.novoda.downloadmanager.lib.DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS;
 import static com.novoda.downloadmanager.lib.FileDownloadInfo.NetworkState;
 import static com.novoda.downloadmanager.lib.IOHelpers.closeAfterWrite;
 import static java.net.HttpURLConnection.*;
@@ -237,7 +237,7 @@ class DownloadThread implements Runnable {
             DownloadBatch currentBatch = batchRepository.retrieveBatchFor(originalDownloadInfo);
 
             if (!downloadReadyChecker.canDownload(currentBatch)) {
-                throw new StopRequestException(DownloadStatus.QUEUED_DUE_CLIENT_PERMISSIONS, "Cannot proceed because client denies");
+                throw new StopRequestException(DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS, "Cannot proceed because client denies");
             }
 
             if (downloadStatus != DownloadStatus.RUNNING) {
@@ -303,7 +303,7 @@ class DownloadThread implements Runnable {
                     numFailed += 1;
                 }
 
-                if (numFailed < Constants.MAX_RETRIES && finalStatus != QUEUED_DUE_CLIENT_PERMISSIONS) {
+                if (numFailed < Constants.MAX_RETRIES && finalStatus != QUEUED_DUE_CLIENT_RESTRICTIONS) {
                     final NetworkInfo info = systemFacade.getActiveNetworkInfo(); // Param downloadInfo.uid removed TODO
                     if (info != null && info.getType() == state.networkType && info.isConnected()) {
                         // Underlying network is still intact, use normal backoff
@@ -983,7 +983,7 @@ class DownloadThread implements Runnable {
             case HTTP_DATA_ERROR:
             case HTTP_UNAVAILABLE:
             case HTTP_INTERNAL_ERROR:
-            case QUEUED_DUE_CLIENT_PERMISSIONS:
+            case QUEUED_DUE_CLIENT_RESTRICTIONS:
                 return true;
             default:
                 return false;

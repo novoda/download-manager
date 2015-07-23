@@ -22,7 +22,7 @@ class BatchRepository {
             DownloadStatus.DELETING,
 
             // Paused statuses
-            DownloadStatus.QUEUED_DUE_CLIENT_PERMISSIONS,
+            DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS,
             DownloadStatus.WAITING_TO_RETRY,
             DownloadStatus.WAITING_FOR_NETWORK,
             DownloadStatus.QUEUED_FOR_WIFI,
@@ -39,7 +39,7 @@ class BatchRepository {
             DownloadStatus.DELETING,
 
             // Paused statuses
-            DownloadStatus.QUEUED_DUE_CLIENT_PERMISSIONS,
+            DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS,
             DownloadStatus.WAITING_TO_RETRY,
             DownloadStatus.WAITING_FOR_NETWORK,
             DownloadStatus.QUEUED_FOR_WIFI,
