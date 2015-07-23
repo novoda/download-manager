@@ -344,6 +344,7 @@ class DownloadThread implements Runnable {
      * handle the response, and transfer the data to the destination file.
      */
     private void executeDownload(State state) throws StopRequestException {
+        checkPausedOrCanceled();
         state.resetBeforeExecute();
         setupDestinationFile(state);
 
