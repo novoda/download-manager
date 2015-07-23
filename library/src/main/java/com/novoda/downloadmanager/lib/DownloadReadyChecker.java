@@ -2,6 +2,8 @@ package com.novoda.downloadmanager.lib;
 
 import android.os.Environment;
 
+import com.novoda.downloadmanager.Download;
+
 import java.util.List;
 
 class DownloadReadyChecker {
@@ -21,7 +23,8 @@ class DownloadReadyChecker {
 
     public boolean canDownload(DownloadBatch downloadBatch) {
         if (isDownloadManagerReadyToDownload(downloadBatch)) {
-            return downloadClientReadyChecker.isAllowedToDownload(downloadMarshaller.marshall(downloadBatch));
+            Download download = downloadMarshaller.marshall(downloadBatch);
+            return downloadClientReadyChecker.isAllowedToDownload(download);
         }
 
         return false;
