@@ -11,22 +11,19 @@ class NotifierWriter implements DataWriter {
     private final ContentResolver contentResolver;
     private final DataWriter dataWriter;
     private final DownloadNotifier downloadNotifier;
-    private final DownloadsRepository downloadsRepository;
     private final FileDownloadInfo downloadInfo;
-    private final Clock clock;
+    private final WriteChunkListener writeChunkListener;
 
     public NotifierWriter(ContentResolver contentResolver,
                           DataWriter dataWriter,
                           DownloadNotifier downloadNotifier,
-                          DownloadsRepository downloadsRepository,
                           FileDownloadInfo downloadInfo,
-                          Clock clock) {
+                          WriteChunkListener writeChunkListener) {
         this.contentResolver = contentResolver;
         this.dataWriter = dataWriter;
         this.downloadNotifier = downloadNotifier;
-        this.downloadsRepository = downloadsRepository;
         this.downloadInfo = downloadInfo;
-        this.clock = clock;
+        this.writeChunkListener = writeChunkListener;
     }
 
     @Override
@@ -34,7 +31,7 @@ class NotifierWriter implements DataWriter {
         DownloadThread.State localState = state;
         localState = dataWriter.write(localState, buffer, count);
         localState = reportProgress(localState);
-        checkPausedOrCanceled();
+        writeChunkListener.chunkWritten(downloadInfo);
         return localState;
     }
 
@@ -71,25 +68,8 @@ class NotifierWriter implements DataWriter {
         return state;
     }
 
-    /**
-     * Check if the download has been paused or canceled, stopping the request appropriately if it
-     * has been.
-     */
-    private void checkPausedOrCanceled() throws StopRequestException {
-        if (clock.intervalLessThan(Clock.Interval.ONE_SECOND)) {
-            return;
-        }
-
-        clock.startInterval();
-
-        FileDownloadInfo.ControlStatus controlStatus = downloadsRepository.getDownloadInfoControlStatusFor(downloadInfo.getId());
-
-        if (controlStatus.isPaused()) {
-            throw new StopRequestException(DownloadStatus.PAUSED_BY_APP, "download paused by owner");
-        }
-        if (controlStatus.isCanceled()) {
-            throw new StopRequestException(DownloadStatus.CANCELED, "download canceled");
-        }
+    public interface WriteChunkListener {
+        void chunkWritten(FileDownloadInfo downloadInfo) throws StopRequestException;
     }
 
 }
