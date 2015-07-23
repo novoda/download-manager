@@ -25,8 +25,8 @@ import static org.mockito.Mockito.when;
 public class BatchStatusTests {
 
     @Test
-    public void givenABatchWithSomeCompleteItemsAndSomeSubmittedItemsThenTheBatchStatusIsRunning() {
-        BatchRepository repository = givenABatchWithStatuses(DownloadStatus.SUCCESS, DownloadStatus.SUBMITTED);
+    public void givenABatchWithSomePendingItemsAndSomeCompleteItemsThenTheBatchStatusIsRunning() {
+        BatchRepository repository = givenABatchWithStatuses(DownloadStatus.PENDING, DownloadStatus.SUCCESS, DownloadStatus.PENDING);
 
         int batchStatus = repository.getBatchStatus(1);
 
@@ -34,8 +34,17 @@ public class BatchStatusTests {
     }
 
     @Test
-    public void givenABatchWithItemsThatAreNotSubmittedOrSuccessThenTheBatchStatusIsNotRunning() {
-        BatchRepository repository = givenABatchWithStatuses(DownloadStatus.SUCCESS, DownloadStatus.BATCH_FAILED);
+    public void givenABatchWithSomePendingItemsAndSomeCompleteItemsAndSomeSubmittedItemsThenTheBatchStatusIsRunning() {
+        BatchRepository repository = givenABatchWithStatuses(DownloadStatus.PENDING, DownloadStatus.SUCCESS, DownloadStatus.SUBMITTED);
+
+        int batchStatus = repository.getBatchStatus(1);
+
+        assertThat(batchStatus).isEqualTo(DownloadStatus.RUNNING);
+    }
+
+    @Test
+    public void givenABatchWithItemsThatAreNotSubmittedOrSuccessOrPendingThenTheBatchStatusIsNotRunning() {
+        BatchRepository repository = givenABatchWithStatuses(DownloadStatus.PENDING, DownloadStatus.SUCCESS, DownloadStatus.BATCH_FAILED);
 
         int batchStatus = repository.getBatchStatus(1);
 
