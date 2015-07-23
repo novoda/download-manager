@@ -8,13 +8,15 @@ class DownloadReadyChecker {
     private final NetworkChecker networkChecker;
     private final DownloadClientReadyChecker downloadClientReadyChecker;
     private final PublicFacingDownloadMarshaller downloadMarshaller;
+    private final RestartTimeCreator restartTimeCreator;
 
     DownloadReadyChecker(SystemFacade systemFacade, NetworkChecker networkChecker, DownloadClientReadyChecker downloadClientReadyChecker,
-                         PublicFacingDownloadMarshaller downloadMarshaller) {
+                         PublicFacingDownloadMarshaller downloadMarshaller, RestartTimeCreator restartTimeCreator) {
         this.systemFacade = systemFacade;
         this.networkChecker = networkChecker;
         this.downloadClientReadyChecker = downloadClientReadyChecker;
         this.downloadMarshaller = downloadMarshaller;
+        this.restartTimeCreator = restartTimeCreator;
     }
 
     public boolean canDownload(DownloadBatch downloadBatch) {
@@ -53,7 +55,7 @@ class DownloadReadyChecker {
             case DownloadStatus.WAITING_TO_RETRY:
                 // download was waiting for a delayed restart
                 final long now = systemFacade.currentTimeMillis();
-                return downloadInfo.restartTime(now) <= now;
+                return restartTimeCreator.restartTime(downloadInfo, now) <= now;
             case DownloadStatus.DEVICE_NOT_FOUND_ERROR:
                 // is the media mounted?
                 return Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
