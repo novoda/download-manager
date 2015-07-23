@@ -86,6 +86,7 @@ class DownloadThread implements Runnable {
     private final DownloadsRepository downloadsRepository;
     private final NetworkChecker networkChecker;
     private final DownloadReadyChecker downloadReadyChecker;
+    private final Clock clock;
 
     public DownloadThread(Context context,
                           SystemFacade systemFacade,
@@ -97,7 +98,8 @@ class DownloadThread implements Runnable {
                           DownloadsUriProvider downloadsUriProvider,
                           DownloadsRepository downloadsRepository,
                           NetworkChecker networkChecker,
-                          DownloadReadyChecker downloadReadyChecker) {
+                          DownloadReadyChecker downloadReadyChecker,
+                          Clock clock) {
         this.context = context;
         this.systemFacade = systemFacade;
         this.originalDownloadInfo = originalDownloadInfo;
@@ -109,6 +111,7 @@ class DownloadThread implements Runnable {
         this.downloadsRepository = downloadsRepository;
         this.networkChecker = networkChecker;
         this.downloadReadyChecker = downloadReadyChecker;
+        this.clock = clock;
     }
 
     /**
@@ -432,6 +435,12 @@ class DownloadThread implements Runnable {
      * has been.
      */
     private void checkPausedOrCanceled(FileDownloadInfo downloadInfo) throws StopRequestException {
+        if (clock.intervalLessThan(Clock.Interval.ONE_SECOND)) {
+            return;
+        }
+
+        clock.startInterval();
+
         FileDownloadInfo.ControlStatus controlStatus = downloadsRepository.getDownloadInfoControlStatusFor(downloadInfo.getId());
 
         if (controlStatus.isPaused()) {
@@ -534,7 +543,11 @@ class DownloadThread implements Runnable {
     private void transferData(State state, InputStream in, OutputStream out) throws StopRequestException {
         StorageSpaceVerifier spaceVerifier = new StorageSpaceVerifier(storageManager, originalDownloadInfo.getDestination(), state.filename);
         DataWriter checkedWriter = new CheckedWriter(spaceVerifier, out);
-        DataWriter dataWriter = new NotifierWriter(getContentResolver(), checkedWriter, downloadNotifier, originalDownloadInfo, checkOnWrite);
+        DataWriter dataWriter = new NotifierWriter(getContentResolver(),
+                checkedWriter,
+                downloadNotifier,
+                originalDownloadInfo,
+                checkOnWrite);
 
         DataTransferer dataTransferer;
         if (originalDownloadInfo.shouldAllowTarUpdate(state.mimeType)) {

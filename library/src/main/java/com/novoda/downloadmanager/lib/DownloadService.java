@@ -114,7 +114,7 @@ public class DownloadService extends Service {
         Log.v("Service onCreate");
 
         if (systemFacade == null) {
-            systemFacade = new RealSystemFacade(this);
+            systemFacade = new RealSystemFacade(this, new Clock());
         }
 
         this.downloadsUriProvider = DownloadsUriProvider.getInstance();
@@ -384,7 +384,7 @@ public class DownloadService extends Service {
         DownloadThread downloadThread = new DownloadThread(
                 this, systemFacade, info, storageManager, downloadNotifier,
                 batchCompletionBroadcaster, batchRepository, downloadsUriProvider,
-                downloadsRepository, networkChecker, downloadReadyChecker
+                downloadsRepository, networkChecker, downloadReadyChecker, new Clock()
         );
 
         ContentValues contentValues = new ContentValues();
