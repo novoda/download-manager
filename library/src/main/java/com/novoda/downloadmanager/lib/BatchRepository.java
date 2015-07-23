@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.support.v4.util.SparseArrayCompat;
 
+import com.novoda.notils.string.QueryUtils;
 import com.novoda.notils.string.StringUtils;
 
 import java.util.ArrayList;
@@ -198,9 +199,9 @@ class BatchRepository {
             }
         }
 
-        String selection = StringUtils.join(batchIdsToDelete, ", ");
-        String[] selectionArgs = {selection};
-        resolver.delete(downloadsUriProvider.getBatchesUri(), DownloadContract.Batches._ID + " IN (?)", selectionArgs);
+        String where = DownloadContract.Batches._ID + " IN (" + QueryUtils.createSelectionPlaceholdersOfSize(batchIdsToDelete.size()) + ")";
+        String[] selectionArgs = StringUtils.toStringArray(batchIdsToDelete.toArray());
+        resolver.delete(downloadsUriProvider.getBatchesUri(), where, selectionArgs);
     }
 
     public Cursor retrieveFor(BatchQuery query) {
