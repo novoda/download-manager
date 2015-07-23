@@ -90,8 +90,6 @@ class DownloadThread implements Runnable {
     private final DownloadReadyChecker downloadReadyChecker;
     private final TarFileTruncator tarFileTruncator;
 
-    private volatile boolean policyDirty;
-
     public DownloadThread(Context context,
                           SystemFacade systemFacade,
                           FileDownloadInfo originalDownloadInfo,
@@ -490,7 +488,6 @@ class DownloadThread implements Runnable {
      */
     private void checkConnectivity() throws StopRequestException {
         // checking connectivity will apply current policy
-        policyDirty = false;
 
         final NetworkState networkUsable = networkChecker.checkCanUseNetwork(originalDownloadInfo);
         if (networkUsable != NetworkState.OK) {
@@ -578,11 +575,6 @@ class DownloadThread implements Runnable {
         }
         if (controlStatus.isCanceled()) {
             throw new StopRequestException(DownloadStatus.CANCELED, "download canceled");
-        }
-
-        // if policy has been changed, trigger connectivity check
-        if (policyDirty) {
-            checkConnectivity();
         }
     }
 
@@ -928,6 +920,9 @@ class DownloadThread implements Runnable {
 
         if (!TextUtils.equals(originalDownloadInfo.getUri(), state.requestUri)) {
             values.put(DownloadContract.Downloads.COLUMN_URI, state.requestUri);
+        }
+        if (DownloadStatus.isCompleted(finalStatus)) {
+            values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
         }
 
         // save the error message. could be useful to developers.
