@@ -71,7 +71,8 @@ class DownloadsRepository {
         ContentValues values = new ContentValues(1);
         values.put(DownloadContract.Downloads.COLUMN_STATUS, status);
 
-        String where = DownloadContract.Downloads._ID + " IN (" + QueryUtils.createSelectionPlaceholdersOfSize(ids.size()) + ")";
+        String selectionPlaceholders = QueryUtils.createSelectionPlaceholdersOfSize(ids.size());
+        String where = DownloadContract.Downloads._ID + " IN (" + selectionPlaceholders + ")";
         String[] selectionArgs = StringUtils.toStringArray(ids.toArray());
         contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
     }

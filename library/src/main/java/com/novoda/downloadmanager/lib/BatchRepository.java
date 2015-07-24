@@ -199,7 +199,8 @@ class BatchRepository {
             }
         }
 
-        String where = DownloadContract.Batches._ID + " IN (" + QueryUtils.createSelectionPlaceholdersOfSize(batchIdsToDelete.size()) + ")";
+        String selectionPlaceholders = QueryUtils.createSelectionPlaceholdersOfSize(batchIdsToDelete.size());
+        String where = DownloadContract.Batches._ID + " IN (" + selectionPlaceholders + ")";
         String[] selectionArgs = StringUtils.toStringArray(batchIdsToDelete.toArray());
         resolver.delete(downloadsUriProvider.getBatchesUri(), where, selectionArgs);
     }
