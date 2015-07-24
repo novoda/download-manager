@@ -165,6 +165,7 @@ public class DownloadService extends Service {
         DownloadExecutorFactory factory = new DownloadExecutorFactory(concurrentDownloadsLimitProvider);
         executor = factory.createExecutor();
 
+        FileDownloadInfo.ControlStatus.Reader controlReader = new FileDownloadInfo.ControlStatus.Reader(contentResolver, downloadsUriProvider);
         this.downloadsRepository = new DownloadsRepository(
                 getContentResolver(), new DownloadsRepository.DownloadInfoCreator() {
             @Override
@@ -176,7 +177,7 @@ public class DownloadService extends Service {
             public FileDownloadInfo.ControlStatus create(FileDownloadInfo.ControlStatus.Reader reader, long id) {
                 return createNewDownloadInfoControlStatus(reader, id);
             }
-        }, downloadsUriProvider);
+        }, downloadsUriProvider, controlReader);
 
     }
 
