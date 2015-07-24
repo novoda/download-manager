@@ -74,8 +74,6 @@ class DownloadsRepository {
 
     interface DownloadInfoCreator {
         FileDownloadInfo create(FileDownloadInfo.Reader reader);
-
-        FileDownloadInfo.ControlStatus create(FileDownloadInfo.ControlStatus.Reader reader, long id);
     }
 
 }

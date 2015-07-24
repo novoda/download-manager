@@ -173,11 +173,6 @@ public class DownloadService extends Service {
             public FileDownloadInfo create(FileDownloadInfo.Reader reader) {
                 return createNewDownloadInfo(reader);
             }
-
-            @Override
-            public FileDownloadInfo.ControlStatus create(FileDownloadInfo.ControlStatus.Reader reader, long id) {
-                return createNewDownloadInfoControlStatus(reader, id);
-            }
         }, downloadsUriProvider);
 
     }
@@ -190,10 +185,6 @@ public class DownloadService extends Service {
         FileDownloadInfo info = reader.newDownloadInfo(systemFacade, downloadsUriProvider);
         LLog.v("processing inserted download " + info.getId());
         return info;
-    }
-
-    private FileDownloadInfo.ControlStatus createNewDownloadInfoControlStatus(FileDownloadInfo.ControlStatus.Reader reader, long id) {
-        return reader.newControlStatus();
     }
 
     private DownloadClientReadyChecker getDownloadClientReadyChecker() {
