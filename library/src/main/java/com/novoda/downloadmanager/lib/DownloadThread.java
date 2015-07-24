@@ -251,15 +251,10 @@ class DownloadThread implements Runnable {
                 updateBatchStatus(originalDownloadInfo.getBatchId(), originalDownloadInfo.getId());
             }
 
-    //        final NetworkPolicyManager netPolicy = NetworkPolicyManager.from(context);
             PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
 
-        //try {
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
             wakeLock.acquire();
-
-            // while performing download, register for rules updates
-//            netPolicy.registerListener(mPolicyListener);
 
             Log.i("Download " + originalDownloadInfo.getId() + " starting");
 
@@ -273,7 +268,7 @@ class DownloadThread implements Runnable {
             // Network traffic on this thread should be counted against the
             // requesting UID, and is tagged with well-known value.
             TrafficStats.setThreadStatsTag(0xFFFFFF01); // TrafficStats.TAG_SYSTEM_DOWNLOAD
-//            TrafficStats.setThreadStatsUid(downloadInfo.uid); Won't need this as we will be an Android library (doing own work)
+            // TrafficStats.setThreadStatsUid(downloadInfo.uid); Won't need this as we will be an Android library (doing own work)
 
             try {
                 // TODO: migrate URL sanity checking into client side of API
@@ -328,14 +323,11 @@ class DownloadThread implements Runnable {
             // falls through to the code that reports an error
         } finally {
             TrafficStats.clearThreadStatsTag();
-//            TrafficStats.clearThreadStatsUid();
 
             cleanupDestination(state, finalStatus);
             notifyDownloadCompleted(state, finalStatus, errorMsg, numFailed);
 
             Log.i("Download " + originalDownloadInfo.getId() + " finished with status " + DownloadStatus.statusToString(finalStatus));
-
-//            netPolicy.unregisterListener(mPolicyListener);
 
             if (wakeLock != null) {
                 wakeLock.release();
