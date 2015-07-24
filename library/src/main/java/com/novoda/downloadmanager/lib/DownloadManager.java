@@ -451,7 +451,7 @@ public class DownloadManager {
         BatchRepository batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
 
         int batchStatus = batchRepository.getBatchStatus(batchId);
-        if (batchStatus == DownloadStatus.RUNNING) {
+        if (DownloadStatus.isRunning(batchStatus)) {
             ContentValues values = new ContentValues();
             String where = COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
             String[] selectionArgs = {String.valueOf(batchId), String.valueOf(DownloadStatus.SUCCESS)};
@@ -466,7 +466,7 @@ public class DownloadManager {
         BatchRepository batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
 
         int batchStatus = batchRepository.getBatchStatus(batchId);
-        if (batchStatus == DownloadStatus.PAUSED_BY_APP) {
+        if (DownloadStatus.isPausedByApp(batchStatus)) {
             ContentValues values = getResumeContentValues();
             String where = COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
             String[] selectionArgs = {String.valueOf(batchId), String.valueOf(DownloadStatus.SUCCESS)};
