@@ -5,7 +5,7 @@ import android.content.ContentValues;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.io.File;
 
@@ -37,10 +37,10 @@ class DownloadDeleter {
 
     private void deleteFileIfExists(String path) {
         if (!TextUtils.isEmpty(path)) {
-            Log.d("deleteFileIfExists() deleting " + path);
+            LLog.d("deleteFileIfExists() deleting " + path);
             final File file = new File(path);
             if (file.exists() && !file.delete()) {
-                Log.w("file: '" + path + "' couldn't be deleted");
+                LLog.w("file: '" + path + "' couldn't be deleted");
             }
         }
     }

@@ -38,7 +38,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -291,7 +291,7 @@ public final class DownloadProvider extends ContentProvider {
             appInfo = getContext().getPackageManager().
                     getApplicationInfo("com.android.defcontainer", 0);
         } catch (NameNotFoundException e) {
-            Log.wtf("Could not get ApplicationInfo for com.android.defconatiner", e);
+            LLog.wtf(e, "Could not get ApplicationInfo for com.android.defconatiner");
         }
         if (appInfo != null) {
             defcontaineruid = appInfo.uid;
@@ -304,7 +304,7 @@ public final class DownloadProvider extends ContentProvider {
 //        try {
 //            android.os.SELinux.restorecon(downloadsDataDir.getCanonicalPath());
 //        } catch (IOException e) {
-//            Log.wtf("Could not get canonical path for download directory", e);
+//            LLog.wtf("Could not get canonical path for download directory", e);
 //        }
         return true;
     }
@@ -350,7 +350,7 @@ public final class DownloadProvider extends ContentProvider {
                 return DOWNLOADS_BY_BATCH_TYPE;
 
             default:
-                Log.v("calling getType on an unknown URI: " + uri);
+                LLog.v("calling getType on an unknown URI: " + uri);
                 throw new IllegalArgumentException("Unknown URI: " + uri);
 
         }
@@ -373,7 +373,7 @@ public final class DownloadProvider extends ContentProvider {
             notifyBatchesStatusChanged();
             return ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), rowId);
         }
-        Log.d("calling insert on an unknown/invalid URI: " + uri);
+        LLog.d("calling insert on an unknown/invalid URI: " + uri);
         throw new IllegalArgumentException("Unknown/Invalid URI " + uri);
 
     }
@@ -492,14 +492,14 @@ public final class DownloadProvider extends ContentProvider {
 
         copyInteger(DownloadContract.Downloads.COLUMN_BATCH_ID, values, filteredValues);
 
-        Log.v("initiating download with UID " + filteredValues.getAsInteger(Constants.UID));
+        LLog.v("initiating download with UID " + filteredValues.getAsInteger(Constants.UID));
         if (filteredValues.containsKey(DownloadContract.Downloads.COLUMN_OTHER_UID)) {
-            Log.v("other UID " + filteredValues.getAsInteger(DownloadContract.Downloads.COLUMN_OTHER_UID));
+            LLog.v("other UID " + filteredValues.getAsInteger(DownloadContract.Downloads.COLUMN_OTHER_UID));
         }
 
         long rowID = db.insert(DownloadContract.Downloads.DOWNLOADS_TABLE_NAME, null, filteredValues);
         if (rowID == -1) {
-            Log.d("couldn't insert into downloads database");
+            LLog.d("couldn't insert into downloads database");
             return null;
         }
 
@@ -578,7 +578,7 @@ public final class DownloadProvider extends ContentProvider {
                 }
                 return queryRequestHeaders(db, uri);
             default:
-                Log.v("querying unknown URI: " + uri);
+                LLog.v("querying unknown URI: " + uri);
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
     }
@@ -618,10 +618,10 @@ public final class DownloadProvider extends ContentProvider {
                 fullSelection.getParameters(), null, null, sort);
 
         if (ret == null) {
-            Log.v("query failed in downloads database");
+            LLog.v("query failed in downloads database");
         } else {
             ret.setNotificationUri(getContext().getContentResolver(), uri);
-            Log.v("created cursor " + ret + " on behalf of " + Binder.getCallingPid());
+            LLog.v("created cursor " + ret + " on behalf of " + Binder.getCallingPid());
         }
         return ret;
     }
@@ -669,7 +669,7 @@ public final class DownloadProvider extends ContentProvider {
         sb.append("sort is ");
         sb.append(sort);
         sb.append(".");
-        Log.v(sb.toString());
+        LLog.v(sb.toString());
     }
 
     private String getDownloadIdFromUri(final Uri uri) {
@@ -803,7 +803,7 @@ public final class DownloadProvider extends ContentProvider {
                 notifyStatusIfBatchesStatusChanged(values);
                 break;
             default:
-                Log.d("updating unknown/invalid URI: " + uri);
+                LLog.d("updating unknown/invalid URI: " + uri);
                 throw new UnsupportedOperationException("Cannot update URI: " + uri);
         }
 
@@ -899,7 +899,7 @@ public final class DownloadProvider extends ContentProvider {
                 break;
 
             default:
-                Log.d("deleting unknown/invalid URI: " + uri);
+                LLog.d("deleting unknown/invalid URI: " + uri);
                 throw new UnsupportedOperationException("Cannot delete URI: " + uri);
         }
         notifyContentChanged(uri, match);
@@ -937,7 +937,7 @@ public final class DownloadProvider extends ContentProvider {
             throw new FileNotFoundException("No filename found.");
         }
         if (!Helpers.isFilenameValid(path, downloadsDataDir)) {
-            Log.d("INTERNAL FILE DOWNLOAD LOL COMMENTED EXCEPTION");
+            LLog.d("INTERNAL FILE DOWNLOAD LOL COMMENTED EXCEPTION");
 //            throw new FileNotFoundException("Invalid filename: " + path);
         }
         if (!"r".equals(mode)) {
@@ -949,7 +949,7 @@ public final class DownloadProvider extends ContentProvider {
                 ParcelFileDescriptor.MODE_READ_ONLY);
 
         if (ret == null) {
-            Log.v("couldn't open file");
+            LLog.v("couldn't open file");
             throw new FileNotFoundException("couldn't open file");
         }
         return ret;
@@ -957,37 +957,38 @@ public final class DownloadProvider extends ContentProvider {
 
     @Override
     public void dump(FileDescriptor fd, @NonNull PrintWriter writer, String[] args) {
-        Log.e("I want dump, but nothing to dump into");
+        LLog.e("I want dump, but nothing to dump into");
     }
 
     private void logVerboseOpenFileInfo(Uri uri, String mode) {
-        Log.v(
+        LLog.v(
                 "openFile uri: " + uri + ", mode: " + mode
-                        + ", uid: " + Binder.getCallingUid());
+                        + ", uid: " + Binder.getCallingUid()
+        );
         Cursor cursor = query(downloadsUriProvider.getContentUri(), new String[]{"_id"}, null, null, "_id");
         if (cursor == null) {
-            Log.v("null cursor in openFile");
+            LLog.v("null cursor in openFile");
         } else {
             if (!cursor.moveToFirst()) {
-                Log.v("empty cursor in openFile");
+                LLog.v("empty cursor in openFile");
             } else {
                 do {
-                    Log.v("row " + cursor.getInt(0) + " available");
+                    LLog.v("row " + cursor.getInt(0) + " available");
                 } while (cursor.moveToNext());
             }
             cursor.close();
         }
         cursor = query(uri, new String[]{"_data"}, null, null, null);
         if (cursor == null) {
-            Log.v("null cursor in openFile");
+            LLog.v("null cursor in openFile");
         } else {
             if (!cursor.moveToFirst()) {
-                Log.v("empty cursor in openFile");
+                LLog.v("empty cursor in openFile");
             } else {
                 String filename = cursor.getString(0);
-                Log.v("filename in openFile: " + filename);
+                LLog.v("filename in openFile: " + filename);
                 if (new java.io.File(filename).isFile()) {
-                    Log.v("file exists in openFile");
+                    LLog.v("file exists in openFile");
                 }
             }
             cursor.close();

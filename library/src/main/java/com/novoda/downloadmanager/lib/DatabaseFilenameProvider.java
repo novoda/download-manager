@@ -5,7 +5,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 class DatabaseFilenameProvider {
     private static final String DATABASE_FILENAME = "com.novoda.downloadmanager.DatabaseFilename";
@@ -24,7 +24,7 @@ class DatabaseFilenameProvider {
             ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
             return getDatabaseFilename(applicationInfo.metaData);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e("Application info not found for: " + packageName + " " + e.getMessage());
+            LLog.e("Application info not found for: " + packageName + " " + e.getMessage());
             return defaultFilename;
         }
     }

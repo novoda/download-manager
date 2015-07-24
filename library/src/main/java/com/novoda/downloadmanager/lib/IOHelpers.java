@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager.lib;
 
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.io.Closeable;
 import java.io.FileDescriptor;
@@ -24,7 +24,7 @@ final class IOHelpers {
                 outFd.sync();
             }
         } catch (IOException e) {
-            Log.e("Fail sync");
+            LLog.e("Fail sync");
         } finally {
             closeQuietly(out);
         }

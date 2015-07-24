@@ -8,7 +8,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Pair;
 
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -367,7 +367,7 @@ class FileDownloadInfo {
             return true;
         }
 
-        Log.e("Flag allowTarUpdates set but file not matching Tar mimeType, functionality will be disabled.");
+        LLog.e("Flag allowTarUpdates set but file not matching Tar mimeType, functionality will be disabled.");
         return false;
     }
 

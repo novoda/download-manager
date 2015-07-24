@@ -26,7 +26,7 @@ import android.os.Environment;
 import android.os.StatFs;
 import android.text.TextUtils;
 
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -145,7 +145,7 @@ class StorageManager {
     void verifySpace(int destination, String path, long length) throws StopRequestException {
         resetBytesDownloadedSinceLastCheckOnSpace();
         File dir = null;
-//        Log.i("in verifySpace, destination: " + destination + ", path: " + path + ", length: " + length);
+//        LLog.i("in verifySpace, destination: " + destination + ", path: " + path + ", length: " + length);
         if (path == null) {
             throw new IllegalArgumentException("path can't be null");
         }
@@ -214,7 +214,7 @@ class StorageManager {
                  * few MB of space left on the filesystem.
                  */
                 if (root.equals(systemCacheDir)) {
-                    Log.w("System cache dir ('/cache') is running low on space." + "space available (in bytes): " + bytesAvailable);
+                    LLog.w("System cache dir ('/cache') is running low on space." + "space available (in bytes): " + bytesAvailable);
                 } else {
                     throw new StopRequestException(
                             DownloadStatus.INSUFFICIENT_SPACE_ERROR,
@@ -227,7 +227,7 @@ class StorageManager {
             bytesAvailable = getAvailableBytesInDownloadsDataDir(downloadDataDir);
             if (bytesAvailable < DOWNLOAD_DATA_DIR_LOW_SPACE_THRESHOLD_BYTES) {
                 // print a warning
-                Log.w("Downloads data dir: " + root + " is running low on space. space available (in bytes): " + bytesAvailable);
+                LLog.w("Downloads data dir: " + root + " is running low on space. space available (in bytes): " + bytesAvailable);
             }
             if (bytesAvailable < targetBytes) {
                 // Insufficient space; make space.
@@ -303,7 +303,7 @@ class StorageManager {
      * the total byte size is greater than targetBytes
      */
     private long discardPurgeableFiles(int destination, long targetBytes) {
-        Log.i("discardPurgeableFiles: destination = " + destination + ", targetBytes = " + targetBytes);
+        LLog.i("discardPurgeableFiles: destination = " + destination + ", targetBytes = " + targetBytes);
         String destStr = (destination == DownloadsDestination.DESTINATION_SYSTEMCACHE_PARTITION) ?
                 String.valueOf(destination) :
                 String.valueOf(DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE);
@@ -327,7 +327,7 @@ class StorageManager {
                 if (TextUtils.isEmpty(data)) continue;
 
                 File file = new File(data);
-                Log.d("purging " + file.getAbsolutePath() + " for " + file.length() + " bytes");
+                LLog.d("purging " + file.getAbsolutePath() + " for " + file.length() + " bytes");
                 totalFreed += file.length();
                 file.delete();
                 long id = cursor.getLong(cursor.getColumnIndex(DownloadContract.Downloads._ID));
@@ -336,7 +336,7 @@ class StorageManager {
         } finally {
             cursor.close();
         }
-        Log.i("Purged files, freed " + totalFreed + " for " + targetBytes + " requested");
+        LLog.i("Purged files, freed " + totalFreed + " for " + targetBytes + " requested");
         return totalFreed;
     }
 
@@ -348,7 +348,7 @@ class StorageManager {
      * This is not a very common occurrence. So, do this only once in a while.
      */
     private void removeSpuriousFiles() {
-        Log.i("in removeSpuriousFiles");
+        LLog.i("in removeSpuriousFiles");
         // get a list of all files in system cache dir and downloads data dir
         List<File> files = new ArrayList<>();
         File[] listOfFiles = systemCacheDir.listFiles();
@@ -369,7 +369,7 @@ class StorageManager {
                 while (cursor.moveToNext()) {
                     String filename = cursor.getString(0);
                     if (!TextUtils.isEmpty(filename)) {
-                        Log.v("in removeSpuriousFiles, preserving file " + filename);
+                        LLog.v("in removeSpuriousFiles, preserving file " + filename);
                         files.remove(new File(filename));
                     }
                 }
@@ -387,13 +387,13 @@ class StorageManager {
 //            try {
 //                final StructStat stat = Libcore.os.stat(path);
 //                if (stat.st_uid == myUid) {
-            Log.v("deleting spurious file " + path);
+            LLog.v("deleting spurious file " + path);
             if (file.delete()) {
-                Log.v("spurious file deleted");
+                LLog.v("spurious file deleted");
             }
 //                }
 //            } catch (ErrnoException e) {
-//                Log.w("stat(" + path + ") result: " + e);
+//                LLog.w("stat(" + path + ") result: " + e);
 //            }
         }
     }
@@ -404,7 +404,7 @@ class StorageManager {
      * in memory - so that this method can limit the amount of data read.
      */
     private void trimDatabase() {
-        Log.i("in trimDatabase");
+        LLog.i("in trimDatabase");
         Cursor cursor = null;
         try {
             cursor = contentResolver.query(
@@ -414,7 +414,7 @@ class StorageManager {
                     DownloadContract.Downloads.COLUMN_LAST_MODIFICATION);
             if (cursor == null) {
                 // This isn't good - if we can't do basic queries in our database, nothings gonna work
-                Log.e("null cursor in trimDatabase");
+                LLog.e("null cursor in trimDatabase");
                 return;
             }
             if (cursor.moveToFirst()) {
@@ -434,7 +434,7 @@ class StorageManager {
             // trimming the database raised an exception. alright, ignore the exception
             // and return silently. trimming database is not exactly a critical operation
             // and there is no need to propagate the exception.
-            Log.w("trimDatabase failed with exception: " + e.getMessage());
+            LLog.w("trimDatabase failed with exception: " + e.getMessage());
             return;
         } finally {
             if (cursor != null) {

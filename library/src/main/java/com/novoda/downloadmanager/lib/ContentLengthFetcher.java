@@ -2,7 +2,7 @@ package com.novoda.downloadmanager.lib;
 
 import android.util.Pair;
 
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -37,7 +37,7 @@ class ContentLengthFetcher {
             }
 
         } catch (IOException e) {
-            Log.e("Could not fetch content length.");
+            LLog.e("Could not fetch content length.");
         } finally {
             if (conn != null) {
                 conn.disconnect();

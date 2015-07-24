@@ -34,7 +34,7 @@ import android.os.Message;
 import android.os.Process;
 import android.support.annotation.NonNull;
 
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -112,7 +112,7 @@ public class DownloadService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.v("Service onCreate");
+        LLog.v("Service onCreate");
 
         if (systemFacade == null) {
             systemFacade = new RealSystemFacade(this, new Clock());
@@ -186,7 +186,7 @@ public class DownloadService extends Service {
      */
     private FileDownloadInfo createNewDownloadInfo(FileDownloadInfo.Reader reader) {
         FileDownloadInfo info = reader.newDownloadInfo(systemFacade, downloadsUriProvider);
-        Log.v("processing inserted download " + info.getId());
+        LLog.v("processing inserted download " + info.getId());
         return info;
     }
 
@@ -211,7 +211,7 @@ public class DownloadService extends Service {
     @Override
     public int onStartCommand(@NonNull Intent intent, int flags, int startId) {
         int returnValue = super.onStartCommand(intent, flags, startId);
-        Log.v("Service onStart");
+        LLog.v("Service onStart");
         lastStartId = startId;
         enqueueUpdate();
         return returnValue;
@@ -220,12 +220,12 @@ public class DownloadService extends Service {
     @Override
     public void onDestroy() {
         shutDown();
-        Log.v("Service onDestroy");
+        LLog.v("Service onDestroy");
         super.onDestroy();
     }
 
     private void shutDown() {
-        Log.d("Shutting down service");
+        LLog.d("Shutting down service");
         getContentResolver().unregisterContentObserver(downloadManagerContentObserver);
         downloadScanner.shutdown();
         executor.shutdownNow();
@@ -261,7 +261,7 @@ public class DownloadService extends Service {
 
             final int startId = msg.arg1;
             if (DEBUG_LIFECYCLE) {
-                Log.v("Updating for startId " + startId);
+                LLog.v("Updating for startId " + startId);
             }
 
             // Since database is current source of truth, our "active" status
@@ -278,14 +278,14 @@ public class DownloadService extends Service {
                 for (Map.Entry<Thread, StackTraceElement[]> entry :
                         Thread.getAllStackTraces().entrySet()) {
                     if (entry.getKey().getName().startsWith("pool")) {
-                        Log.d(entry.getKey() + ": " + Arrays.toString(entry.getValue()));
+                        LLog.d(entry.getKey() + ": " + Arrays.toString(entry.getValue()));
                     }
                 }
 
                 // Dump speed and update details
                 downloadNotifier.dumpSpeeds();
 
-                Log.wtf("Final update pass triggered, isActive=" + isActive, new IllegalStateException("someone didn't update correctly"));
+                LLog.wtf(new IllegalStateException("someone didn't update correctly"), "Final update pass triggered, isActive=" + isActive);
             }
 
             if (isActive) {
@@ -303,7 +303,7 @@ public class DownloadService extends Service {
 
                 if (stopSelfResult(startId)) {
                     if (DEBUG_LIFECYCLE) {
-                        Log.v("Nothing left; stopped");
+                        LLog.v("Nothing left; stopped");
                     }
                     shutDown();
                 }
@@ -363,7 +363,7 @@ public class DownloadService extends Service {
         // Set alarm when next action is in future. It's okay if the service
         // continues to run in meantime, since it will kick off an update pass.
         if (nextRetryTimeMillis > 0 && nextRetryTimeMillis < Long.MAX_VALUE) {
-            Log.v("scheduling start in " + nextRetryTimeMillis + "ms");
+            LLog.v("scheduling start in " + nextRetryTimeMillis + "ms");
 
             Intent intent = new Intent(Constants.ACTION_RETRY);
             intent.setClass(this, DownloadReceiver.class);
@@ -437,6 +437,6 @@ public class DownloadService extends Service {
 
     @Override
     protected void dump(FileDescriptor fd, @NonNull PrintWriter writer, String[] args) {
-        Log.e("I want to dump but nothing to dump into");
+        LLog.e("I want to dump but nothing to dump into");
     }
 }

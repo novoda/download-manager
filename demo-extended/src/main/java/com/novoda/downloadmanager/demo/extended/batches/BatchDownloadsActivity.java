@@ -21,7 +21,7 @@ import com.novoda.downloadmanager.lib.NotificationVisibility;
 import com.novoda.downloadmanager.lib.Query;
 import com.novoda.downloadmanager.lib.Request;
 import com.novoda.downloadmanager.lib.RequestBatch;
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +41,6 @@ public class BatchDownloadsActivity extends AppCompatActivity implements QueryFo
         setContentView(R.layout.activity_batches);
         listView = (ListView) findViewById(R.id.main_downloads_list);
         downloadManager = DownloadManagerBuilder.from(this)
-                .withVerboseLogging()
                 .build();
         batchDownloadsAdapter = new BatchDownloadsAdapter(new ArrayList<Download>());
         listView.setAdapter(batchDownloadsAdapter);
@@ -100,7 +99,7 @@ public class BatchDownloadsActivity extends AppCompatActivity implements QueryFo
         batch.addRequest(request);
 
         long batchId = downloadManager.enqueue(batch);
-        Log.d("Download enqueued with batch ID: " + batchId);
+        LLog.d("Download enqueued with batch ID: " + batchId);
     }
 
     @Override

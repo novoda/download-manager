@@ -2,6 +2,8 @@ package com.novoda.downloadmanager.lib;
 
 import android.content.Context;
 
+import com.novoda.downloadmanager.lib.logger.LLog;
+
 class GlobalState {
 
     private static Context context;
@@ -20,6 +22,7 @@ class GlobalState {
     }
 
     public static void setVerboseLogging(boolean verboseLogging) {
+        LLog.setShowLogs(verboseLogging);
         GlobalState.verboseLogging = verboseLogging;
     }
 }
