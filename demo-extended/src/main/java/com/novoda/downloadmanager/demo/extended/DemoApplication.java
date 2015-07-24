@@ -5,7 +5,6 @@ import android.hardware.SensorManager;
 
 import com.novoda.downloadmanager.Download;
 import com.novoda.downloadmanager.lib.DownloadClientReadyChecker;
-import com.novoda.downloadmanager.lib.logger.LLog;
 
 public class DemoApplication extends Application implements DownloadClientReadyChecker {
 
@@ -15,7 +14,6 @@ public class DemoApplication extends Application implements DownloadClientReadyC
     public void onCreate() {
         super.onCreate();
         oneRuleToBindThem = new OneRuleToBindThem();
-        LLog.setShowLogs(true);
     }
 
     @Override
