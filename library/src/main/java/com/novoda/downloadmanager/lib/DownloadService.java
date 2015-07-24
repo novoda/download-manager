@@ -21,11 +21,13 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -165,7 +167,6 @@ public class DownloadService extends Service {
         DownloadExecutorFactory factory = new DownloadExecutorFactory(concurrentDownloadsLimitProvider);
         executor = factory.createExecutor();
 
-        FileDownloadInfo.ControlStatus.Reader controlReader = new FileDownloadInfo.ControlStatus.Reader(contentResolver, downloadsUriProvider);
         this.downloadsRepository = new DownloadsRepository(
                 getContentResolver(), new DownloadsRepository.DownloadInfoCreator() {
             @Override
@@ -177,7 +178,7 @@ public class DownloadService extends Service {
             public FileDownloadInfo.ControlStatus create(FileDownloadInfo.ControlStatus.Reader reader, long id) {
                 return createNewDownloadInfoControlStatus(reader, id);
             }
-        }, downloadsUriProvider, controlReader);
+        }, downloadsUriProvider);
 
     }
 
@@ -192,7 +193,7 @@ public class DownloadService extends Service {
     }
 
     private FileDownloadInfo.ControlStatus createNewDownloadInfoControlStatus(FileDownloadInfo.ControlStatus.Reader reader, long id) {
-        return reader.newControlStatus(id);
+        return reader.newControlStatus();
     }
 
     private DownloadClientReadyChecker getDownloadClientReadyChecker() {
@@ -408,10 +409,12 @@ public class DownloadService extends Service {
     }
 
     private void download(FileDownloadInfo info) {
+        Uri downloadUri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), info.getId());
+        FileDownloadInfo.ControlStatus.Reader controlReader = new FileDownloadInfo.ControlStatus.Reader(getContentResolver(), downloadUri);
         DownloadThread downloadThread = new DownloadThread(
                 this, systemFacade, info, storageManager, downloadNotifier,
                 batchCompletionBroadcaster, batchRepository, downloadsUriProvider,
-                downloadsRepository, networkChecker, downloadReadyChecker, new Clock()
+                controlReader, networkChecker, downloadReadyChecker, new Clock()
         );
 
         ContentValues contentValues = new ContentValues();
