@@ -7,7 +7,7 @@ public final class LLog {
 
     private static boolean INITIALISED = false;
 
-    public static String TAG = "DownloadManager";
+    private static final String TAG = "DownloadManager";
 
     private LLog() {
         // util class
