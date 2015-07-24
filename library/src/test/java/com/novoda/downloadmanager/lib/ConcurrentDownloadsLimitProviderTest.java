@@ -4,6 +4,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
+import com.novoda.notils.logger.simple.Log;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -26,6 +28,7 @@ public class ConcurrentDownloadsLimitProviderTest {
 
     @Before
     public void setUp() {
+        Log.setShowLogs(false);
         initMocks(this);
     }
 
