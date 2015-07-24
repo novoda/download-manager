@@ -8,6 +8,7 @@ public final class LLog {
     private static boolean INITIALISED = false;
 
     private static final String TAG = "DownloadManager";
+    private static final String SEPARATOR = " ";
 
     private LLog() {
         // util class
@@ -70,8 +71,7 @@ public final class LLog {
     private static String formatString(Object... msg) {
         StringBuilder stringBuilder = new StringBuilder();
         for (Object o : msg) {
-            String separator = " ";
-            stringBuilder.append(String.valueOf(o)).append(separator);
+            stringBuilder.append(String.valueOf(o)).append(SEPARATOR);
         }
         return stringBuilder.toString();
     }
