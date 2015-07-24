@@ -410,6 +410,7 @@ public class DownloadManager {
         this.systemFacade = systemFacade;
         GlobalState.setContext(context);
         GlobalState.setVerboseLogging(verboseLogging);
+        Log.setShowLogs(verboseLogging);
     }
 
     /**
