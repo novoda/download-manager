@@ -31,7 +31,7 @@ import android.provider.Settings.SettingNotFoundException;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -487,7 +487,7 @@ public class DownloadManager {
                 removeDownloads(id);
                 return;
             }
-            Log.e("Didn't delete anything for uri: " + uri);
+            LLog.e("Didn't delete anything for uri: " + uri);
         } finally {
             if (cursor != null) {
                 cursor.close();

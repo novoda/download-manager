@@ -21,7 +21,7 @@ import android.os.Environment;
 import android.os.SystemClock;
 import android.webkit.MimeTypeMap;
 
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.io.File;
 import java.io.IOException;
@@ -121,7 +121,7 @@ class Helpers {
             filename = base.getPath() + File.separator + filename;
         }
 
-        Log.v("target file: " + filename + extension);
+        LLog.v("target file: " + filename + extension);
 
         synchronized (UNIQUE_LOCK) {
             final String path = chooseUniqueFilenameLocked(
@@ -144,7 +144,7 @@ class Helpers {
 
         // First, try to use the hint from the application, if there's one
         if (hint != null && !hint.endsWith("/")) {
-            Log.v("getting filename from hint");
+            LLog.v("getting filename from hint");
             int index = hint.lastIndexOf('/') + 1;
             if (index > 0) {
                 filename = hint.substring(index);
@@ -157,7 +157,7 @@ class Helpers {
         if (filename == null && contentDisposition != null) {
             filename = parseContentDisposition(contentDisposition);
             if (filename != null) {
-                Log.v("getting filename from content-disposition");
+                LLog.v("getting filename from content-disposition");
                 int index = filename.lastIndexOf('/') + 1;
                 if (index > 0) {
                     filename = filename.substring(index);
@@ -171,7 +171,7 @@ class Helpers {
             if (decodedContentLocation != null
                     && !decodedContentLocation.endsWith("/")
                     && decodedContentLocation.indexOf('?') < 0) {
-                Log.v("getting filename from content-location");
+                LLog.v("getting filename from content-location");
                 int index = decodedContentLocation.lastIndexOf('/') + 1;
                 if (index > 0) {
                     filename = decodedContentLocation.substring(index);
@@ -188,7 +188,7 @@ class Helpers {
                     && !decodedUrl.endsWith("/") && decodedUrl.indexOf('?') < 0) {
                 int index = decodedUrl.lastIndexOf('/') + 1;
                 if (index > 0) {
-                    Log.v("getting filename from uri");
+                    LLog.v("getting filename from uri");
                     filename = decodedUrl.substring(index);
                 }
             }
@@ -196,7 +196,7 @@ class Helpers {
 
         // Finally, if couldn't get filename from URI, get a generic filename
         if (filename == null) {
-            Log.v("using default filename");
+            LLog.v("using default filename");
             filename = Constants.DEFAULT_DL_FILENAME;
         }
 
@@ -212,23 +212,23 @@ class Helpers {
         if (mimeType != null) {
             extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
             if (extension != null) {
-                Log.v("adding extension from type");
+                LLog.v("adding extension from type");
                 extension = "." + extension;
             } else {
-                Log.v("couldn't find extension for " + mimeType);
+                LLog.v("couldn't find extension for " + mimeType);
             }
         }
         if (extension == null) {
             if (mimeType != null && mimeType.toLowerCase(Locale.US).startsWith("text/")) {
                 if (mimeType.equalsIgnoreCase("text/html")) {
-                    Log.v("adding default html extension");
+                    LLog.v("adding default html extension");
                     extension = Constants.DEFAULT_DL_HTML_EXTENSION;
                 } else if (useDefaults) {
-                    Log.v("adding default text extension");
+                    LLog.v("adding default text extension");
                     extension = Constants.DEFAULT_DL_TEXT_EXTENSION;
                 }
             } else if (useDefaults) {
-                Log.v("adding default binary extension");
+                LLog.v("adding default binary extension");
                 extension = Constants.DEFAULT_DL_BINARY_EXTENSION;
             }
         }
@@ -246,14 +246,14 @@ class Helpers {
             if (typeFromExt == null || !typeFromExt.equalsIgnoreCase(mimeType)) {
                 extension = chooseExtensionFromMimeType(mimeType, false);
                 if (extension != null) {
-                    Log.v("substituting extension from type");
+                    LLog.v("substituting extension from type");
                 } else {
-                    Log.v("couldn't find extension for " + mimeType);
+                    LLog.v("couldn't find extension for " + mimeType);
                 }
             }
         }
         if (extension == null) {
-            Log.v("keeping extension");
+            LLog.v("keeping extension");
             extension = filename.substring(lastDotIndex);
         }
         return extension;
@@ -292,7 +292,7 @@ class Helpers {
                 if (!new File(fullFilename).exists()) {
                     return fullFilename;
                 }
-                Log.v("file with sequence number " + sequence + " exists");
+                LLog.v("file with sequence number " + sequence + " exists");
                 sequence += sRandom.nextInt(magnitude) + 1;
             }
         }
@@ -325,7 +325,7 @@ class Helpers {
                 throw new IllegalArgumentException("syntax error");
             }
         } catch (RuntimeException ex) {
-            Log.d("invalid selection [" + selection + "] triggered " + ex);
+            LLog.d("invalid selection [" + selection + "] triggered " + ex);
         }
 
     }

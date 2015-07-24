@@ -25,7 +25,7 @@ import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.net.Uri;
 import android.os.SystemClock;
 
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -97,7 +97,7 @@ class DownloadScanner implements MediaScannerConnectionClient {
      * @see #hasPendingScans()
      */
     public void requestScan(FileDownloadInfo info) {
-        Log.v("requestScan() for " + info.getFileName());
+        LLog.v("requestScan() for " + info.getFileName());
         synchronized (mediaScannerConnection) {
             final ScanRequest req = new ScanRequest(info.getId(), info.getFileName(), info.getMimeType());
             pendingRequests.put(req.path, req);
@@ -130,7 +130,7 @@ class DownloadScanner implements MediaScannerConnectionClient {
             req = pendingRequests.remove(path);
         }
         if (req == null) {
-            Log.w("Missing request for path " + path);
+            LLog.w("Missing request for path " + path);
             return;
         }
 

@@ -11,7 +11,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.text.format.Formatter;
 
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -64,7 +64,7 @@ public class SizeLimitActivity extends Activity implements DialogInterface.OnCan
         Cursor cursor = getContentResolver().query(currentUri, null, null, null, null);
         try {
             if (!cursor.moveToFirst()) {
-                Log.e("Empty cursor for URI " + currentUri);
+                LLog.e("Empty cursor for URI " + currentUri);
                 dialogClosed();
                 return;
             }

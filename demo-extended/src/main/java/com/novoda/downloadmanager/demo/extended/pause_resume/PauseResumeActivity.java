@@ -20,7 +20,7 @@ import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.NotificationVisibility;
 import com.novoda.downloadmanager.lib.Query;
 import com.novoda.downloadmanager.lib.Request;
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,22 +40,23 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
         setContentView(R.layout.activity_pause_resume);
 
         listView = (ListView) findViewById(R.id.main_downloads_list);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                PauseResumeAdapter adapter = (PauseResumeAdapter) parent.getAdapter();
-                Download item = adapter.getItem(position);
-                long batchId = item.getBatchId();
-                if (item.isPaused()) {
-                    downloadManager.resumeBatch(batchId);
-                } else {
-                    downloadManager.pauseBatch(batchId);
+        listView.setOnItemClickListener(
+                new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        PauseResumeAdapter adapter = (PauseResumeAdapter) parent.getAdapter();
+                        Download item = adapter.getItem(position);
+                        long batchId = item.getBatchId();
+                        if (item.isPaused()) {
+                            downloadManager.resumeBatch(batchId);
+                        } else {
+                            downloadManager.pauseBatch(batchId);
+                        }
+                        queryForDownloads();
+                    }
                 }
-                queryForDownloads();
-            }
-        });
+        );
         downloadManager = DownloadManagerBuilder.from(this)
-                .withVerboseLogging()
                 .build();
         pauseResumeAdapter = new PauseResumeAdapter(new ArrayList<Download>());
         listView.setAdapter(pauseResumeAdapter);
@@ -66,7 +67,8 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
                     public void onClick(@NonNull View v) {
                         enqueueSingleDownload();
                     }
-                });
+                }
+        );
 
         setupQueryingExample();
     }
@@ -92,7 +94,7 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
                 .alwaysAttemptResume();
 
         long requestId = downloadManager.enqueue(request);
-        Log.d("Download enqueued with request ID: " + requestId);
+        LLog.d("Download enqueued with request ID: " + requestId);
     }
 
     @Override

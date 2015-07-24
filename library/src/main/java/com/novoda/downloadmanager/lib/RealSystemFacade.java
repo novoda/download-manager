@@ -24,7 +24,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.telephony.TelephonyManager;
 
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 class RealSystemFacade implements SystemFacade {
     private final Context context;
@@ -61,7 +61,7 @@ class RealSystemFacade implements SystemFacade {
     public boolean isNetworkRoaming() {
         ConnectivityManager connectivity = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivity == null) {
-            Log.w("couldn't get connectivity manager");
+            LLog.w("couldn't get connectivity manager");
             return false;
         }
 
@@ -70,7 +70,7 @@ class RealSystemFacade implements SystemFacade {
         TelephonyManager telephony = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         boolean isRoaming = isMobile && telephony.isNetworkRoaming();
         if (isRoaming) {
-            Log.v("network is roaming");
+            LLog.v("network is roaming");
         }
         return isRoaming;
     }

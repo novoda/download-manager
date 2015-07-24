@@ -19,7 +19,7 @@ import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.NotificationVisibility;
 import com.novoda.downloadmanager.lib.Query;
 import com.novoda.downloadmanager.lib.Request;
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,14 +39,15 @@ public class DeleteActivity extends AppCompatActivity implements QueryForDownloa
         setContentView(R.layout.activity_delete);
         listView = (ListView) findViewById(R.id.main_downloads_list);
         downloadManager = DownloadManagerBuilder.from(this)
-                .withVerboseLogging()
                 .build();
-        deleteAdapter = new DeleteAdapter(new ArrayList<Download>(), new DeleteAdapter.Listener() {
+        deleteAdapter = new DeleteAdapter(
+                new ArrayList<Download>(), new DeleteAdapter.Listener() {
             @Override
             public void onDelete(Download download) {
                 downloadManager.removeBatches(download.getBatchId());
             }
-        });
+        }
+        );
         listView.setAdapter(deleteAdapter);
 
         findViewById(R.id.single_download_button).setOnClickListener(
@@ -55,7 +56,8 @@ public class DeleteActivity extends AppCompatActivity implements QueryForDownloa
                     public void onClick(@NonNull View v) {
                         enqueueSingleDownload();
                     }
-                });
+                }
+        );
 
         setupQueryingExample();
     }
@@ -79,7 +81,7 @@ public class DeleteActivity extends AppCompatActivity implements QueryForDownloa
                 .setNotificationVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE);
 
         long requestId = downloadManager.enqueue(request);
-        Log.d("Download enqueued with request ID: " + requestId);
+        LLog.d("Download enqueued with request ID: " + requestId);
     }
 
     @Override

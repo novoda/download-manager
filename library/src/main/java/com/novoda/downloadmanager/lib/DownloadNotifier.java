@@ -23,7 +23,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.util.SimpleArrayMap;
 
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -182,6 +182,6 @@ class DownloadNotifier {
     }
 
     public void dumpSpeeds() {
-        Log.e("dump at speed");
+        LLog.e("dump at speed");
     }
 }
