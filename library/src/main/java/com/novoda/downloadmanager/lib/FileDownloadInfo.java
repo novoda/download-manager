@@ -487,8 +487,11 @@ class FileDownloadInfo {
 
         static final class Reader {
 
+            private static final String[] PROJECTION = new String[]{
+                    DownloadContract.Downloads.COLUMN_CONTROL, DownloadContract.Downloads.COLUMN_STATUS
+            };
+
             private final ContentResolver contentResolver;
-            public static final String[] PROJECTION = new String[]{DownloadContract.Downloads.COLUMN_CONTROL, DownloadContract.Downloads.COLUMN_STATUS};
             private final Uri downloadUri;
 
             public Reader(ContentResolver contentResolver, Uri downloadUri) {
