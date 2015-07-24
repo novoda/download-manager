@@ -41,12 +41,13 @@ public class DeleteActivity extends AppCompatActivity implements QueryForDownloa
         downloadManager = DownloadManagerBuilder.from(this)
                 .build();
         deleteAdapter = new DeleteAdapter(
-                new ArrayList<Download>(), new DeleteAdapter.Listener() {
-            @Override
-            public void onDelete(Download download) {
-                downloadManager.removeBatches(download.getBatchId());
-            }
-        }
+                new ArrayList<Download>(),
+                new DeleteAdapter.Listener() {
+                    @Override
+                    public void onDelete(Download download) {
+                        downloadManager.removeBatches(download.getBatchId());
+                    }
+                }
         );
         listView.setAdapter(deleteAdapter);
 
