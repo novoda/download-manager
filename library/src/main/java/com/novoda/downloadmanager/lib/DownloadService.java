@@ -39,6 +39,7 @@ import com.novoda.notils.logger.simple.Log;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -369,7 +370,32 @@ public class DownloadService extends Service {
             alarmManager.set(AlarmManager.RTC_WAKEUP, now + nextRetryTimeMillis, PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_ONE_SHOT));
         }
 
+        if (!isActive) {
+            moveSubmittedTasksToBatchStatusIfNecessary();
+        }
+
         return isActive;
+    }
+
+    private void moveSubmittedTasksToBatchStatusIfNecessary() {
+        List<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
+        List<DownloadBatch> downloadBatches = batchRepository.retrieveBatchesFor(allDownloads);
+
+        for (DownloadBatch downloadBatch : downloadBatches) {
+            List<Long> ids = getSubmittedDownloadIdsFrom(downloadBatch);
+            downloadsRepository.moveDownloadsStatusTo(ids, downloadBatch.getStatus());
+        }
+    }
+
+    private List<Long> getSubmittedDownloadIdsFrom(DownloadBatch downloadBatch) {
+        List<Long> ids = new ArrayList<>();
+        List<FileDownloadInfo> downloads = downloadBatch.getDownloads();
+        for (FileDownloadInfo downloadInfo : downloads) {
+            if (downloadInfo.getStatus() == DownloadStatus.SUBMITTED) {
+                ids.add(downloadInfo.getId());
+            }
+        }
+        return ids;
     }
 
     private void downloadOrContinueBatch(List<FileDownloadInfo> downloads) {

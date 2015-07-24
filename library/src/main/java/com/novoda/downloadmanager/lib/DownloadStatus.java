@@ -11,7 +11,10 @@ package com.novoda.downloadmanager.lib;
  * 5xx: server errors
  */
 final class DownloadStatus {
-
+    /**
+     * This download cannot proceed because the client does not allow it yet
+     */
+    public static final int QUEUED_DUE_CLIENT_RESTRICTIONS = 187;
     /**
      * This download has been marked for deletion and it will be deleted in the future
      */

@@ -136,6 +136,10 @@ class FileDownloadInfo {
         return mimeType;
     }
 
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
     public int getDestination() {
         return destination;
     }
@@ -170,6 +174,10 @@ class FileDownloadInfo {
 
     public String getETag() {
         return eTag;
+    }
+
+    public void setETag(String eTag) {
+        this.eTag = eTag;
     }
 
     public boolean isDeleted() {

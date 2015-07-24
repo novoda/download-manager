@@ -49,6 +49,7 @@ import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 import static com.novoda.downloadmanager.lib.Constants.UNKNOWN_BYTE_SIZE;
 import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.*;
 import static com.novoda.downloadmanager.lib.DownloadStatus.HTTP_DATA_ERROR;
+import static com.novoda.downloadmanager.lib.DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS;
 import static com.novoda.downloadmanager.lib.FileDownloadInfo.NetworkState;
 import static com.novoda.downloadmanager.lib.IOHelpers.closeAfterWrite;
 import static java.net.HttpURLConnection.*;
@@ -228,35 +229,32 @@ class DownloadThread implements Runnable {
             return;
         }
 
-        DownloadBatch currentBatch = batchRepository.retrieveBatchFor(originalDownloadInfo);
-
-        if (!downloadReadyChecker.canDownload(currentBatch)) {
-            Log.d("Download " + originalDownloadInfo.getId() + " is not ready to download: skipping");
-            return;
-        }
-
-        if (downloadStatus != DownloadStatus.RUNNING) {
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(COLUMN_STATUS, DownloadStatus.RUNNING);
-            context.getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), contentValues, null, null);
-            updateBatchStatus(originalDownloadInfo.getBatchId(), originalDownloadInfo.getId());
-        }
-
-        State state = new State(originalDownloadInfo);
         PowerManager.WakeLock wakeLock = null;
         int finalStatus = DownloadStatus.UNKNOWN_ERROR;
         int numFailed = originalDownloadInfo.getNumFailed();
         String errorMsg = null;
-
-//        final NetworkPolicyManager netPolicy = NetworkPolicyManager.from(context);
-        PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        State state = new State(originalDownloadInfo);
 
         try {
+            checkPausedOrCanceled(originalDownloadInfo);
+
+            DownloadBatch currentBatch = batchRepository.retrieveBatchFor(originalDownloadInfo);
+
+            if (!downloadReadyChecker.canDownload(currentBatch)) {
+                throw new StopRequestException(DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS, "Cannot proceed because client denies");
+            }
+
+            if (downloadStatus != DownloadStatus.RUNNING) {
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(COLUMN_STATUS, DownloadStatus.RUNNING);
+                context.getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), contentValues, null, null);
+                updateBatchStatus(originalDownloadInfo.getBatchId(), originalDownloadInfo.getId());
+            }
+
+            PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
             wakeLock.acquire();
-
-            // while performing download, register for rules updates
-//            netPolicy.registerListener(mPolicyListener);
 
             Log.i("Download " + originalDownloadInfo.getId() + " starting");
 
@@ -270,7 +268,7 @@ class DownloadThread implements Runnable {
             // Network traffic on this thread should be counted against the
             // requesting UID, and is tagged with well-known value.
             TrafficStats.setThreadStatsTag(0xFFFFFF01); // TrafficStats.TAG_SYSTEM_DOWNLOAD
-//            TrafficStats.setThreadStatsUid(downloadInfo.uid); Won't need this as we will be an Android library (doing own work)
+            // TrafficStats.setThreadStatsUid(downloadInfo.uid); Won't need this as we will be an Android library (doing own work)
 
             try {
                 // TODO: migrate URL sanity checking into client side of API
@@ -304,7 +302,7 @@ class DownloadThread implements Runnable {
                     numFailed += 1;
                 }
 
-                if (numFailed < Constants.MAX_RETRIES) {
+                if (numFailed < Constants.MAX_RETRIES && finalStatus != QUEUED_DUE_CLIENT_RESTRICTIONS) {
                     final NetworkInfo info = systemFacade.getActiveNetworkInfo(); // Param downloadInfo.uid removed TODO
                     if (info != null && info.getType() == state.networkType && info.isConnected()) {
                         // Underlying network is still intact, use normal backoff
@@ -325,14 +323,11 @@ class DownloadThread implements Runnable {
             // falls through to the code that reports an error
         } finally {
             TrafficStats.clearThreadStatsTag();
-//            TrafficStats.clearThreadStatsUid();
 
             cleanupDestination(state, finalStatus);
             notifyDownloadCompleted(state, finalStatus, errorMsg, numFailed);
 
             Log.i("Download " + originalDownloadInfo.getId() + " finished with status " + DownloadStatus.statusToString(finalStatus));
-
-//            netPolicy.unregisterListener(mPolicyListener);
 
             if (wakeLock != null) {
                 wakeLock.release();
@@ -346,9 +341,12 @@ class DownloadThread implements Runnable {
      * handle the response, and transfer the data to the destination file.
      */
     private void executeDownload(State state) throws StopRequestException {
-        checkPausedOrCanceled(originalDownloadInfo);
         state.resetBeforeExecute();
         setupDestinationFile(state);
+
+        if (originalDownloadInfo.shouldAllowTarUpdate(state.mimeType)) {
+            state.totalBytes = UNKNOWN_BYTE_SIZE;
+        }
 
         // skip when already finished; remove after fixing race in 5217390
         if (downloadAlreadyFinished(state)) {
@@ -512,6 +510,7 @@ class DownloadThread implements Runnable {
      * Check if current connectivity is valid for this request.
      */
     private void checkConnectivity() throws StopRequestException {
+        // checking connectivity will apply current policy
 
         final NetworkState networkUsable = networkChecker.checkCanUseNetwork(originalDownloadInfo);
         if (networkUsable != NetworkState.OK) {
@@ -654,9 +653,15 @@ class DownloadThread implements Runnable {
                 state.contentLength,
                 storageManager);
 
+        updateDownloadInfoFieldsFrom(state);
         updateDatabaseFromHeaders(state);
         // check connectivity again now that we know the total size
         checkConnectivity();
+    }
+
+    private void updateDownloadInfoFieldsFrom(State state) {
+        originalDownloadInfo.setETag(state.headerETag);
+        originalDownloadInfo.setMimeType(state.mimeType);
     }
 
     /**
@@ -841,6 +846,9 @@ class DownloadThread implements Runnable {
         if (!TextUtils.equals(originalDownloadInfo.getUri(), state.requestUri)) {
             values.put(DownloadContract.Downloads.COLUMN_URI, state.requestUri);
         }
+        if (DownloadStatus.isCompleted(finalStatus)) {
+            values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
+        }
 
         // save the error message. could be useful to developers.
         if (!TextUtils.isEmpty(errorMsg)) {
@@ -895,6 +903,7 @@ class DownloadThread implements Runnable {
             case HTTP_DATA_ERROR:
             case HTTP_UNAVAILABLE:
             case HTTP_INTERNAL_ERROR:
+            case QUEUED_DUE_CLIENT_RESTRICTIONS:
                 return true;
             default:
                 return false;

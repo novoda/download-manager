@@ -55,6 +55,7 @@ public class Request {
     private String extraData;
     private boolean alwaysResume;
     private boolean allowTarUpdates;
+    private boolean noIntegrity;
 
     /**
      * if a file is designated as a MediaScanner scannable file, the following value is
@@ -242,6 +243,15 @@ public class Request {
     public Request allowTarUpdates() {
         allowTarUpdates = true;
         alwaysAttemptResume();
+        return this;
+    }
+
+    /**
+     * When a ETag header is present, the application should check the integrity of the
+     * downloaded file, otherwise the current download won't be able to be resumed
+     */
+    public Request applicationChecksFileIntegrity() {
+        noIntegrity = true;
         return this;
     }
 
@@ -469,6 +479,7 @@ public class Request {
         values.put(DownloadContract.Downloads.COLUMN_EXTRA_DATA, extraData);
         values.put(DownloadContract.Downloads.COLUMN_ALWAYS_RESUME, alwaysResume);
         values.put(DownloadContract.Downloads.COLUMN_ALLOW_TAR_UPDATES, allowTarUpdates);
+        values.put(DownloadContract.Downloads.COLUMN_NO_INTEGRITY, noIntegrity);
 
         return values;
     }

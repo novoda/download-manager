@@ -22,6 +22,7 @@ class BatchRepository {
             DownloadStatus.DELETING,
 
             // Paused statuses
+            DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS,
             DownloadStatus.WAITING_TO_RETRY,
             DownloadStatus.WAITING_FOR_NETWORK,
             DownloadStatus.QUEUED_FOR_WIFI,
@@ -38,6 +39,7 @@ class BatchRepository {
             DownloadStatus.DELETING,
 
             // Paused statuses
+            DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS,
             DownloadStatus.WAITING_TO_RETRY,
             DownloadStatus.WAITING_FOR_NETWORK,
             DownloadStatus.QUEUED_FOR_WIFI,
@@ -232,6 +234,18 @@ class BatchRepository {
 
         public void clear() {
             statusCounts.clear();
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder stringBuilder = new StringBuilder("{");
+
+            int size = statusCounts.size();
+            for (int i = 0; i < size; i++) {
+                stringBuilder.append("[status: ").append(statusCounts.keyAt(i)).append(", count: ").append(statusCounts.valueAt(i)).append("]");
+            }
+
+            return stringBuilder.append("}").toString();
         }
     }
 

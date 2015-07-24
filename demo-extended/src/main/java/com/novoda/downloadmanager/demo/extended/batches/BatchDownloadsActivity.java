@@ -16,7 +16,6 @@ import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.demo.extended.Download;
 import com.novoda.downloadmanager.demo.extended.QueryForDownloadsAsyncTask;
-import com.novoda.downloadmanager.demo.extended.QueryTimestamp;
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.NotificationVisibility;
 import com.novoda.downloadmanager.lib.Query;
@@ -35,8 +34,6 @@ public class BatchDownloadsActivity extends AppCompatActivity implements QueryFo
     private DownloadManager downloadManager;
     private ListView listView;
     private BatchDownloadsAdapter batchDownloadsAdapter;
-
-    private final QueryTimestamp lastQueryTimestamp = new QueryTimestamp();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +87,7 @@ public class BatchDownloadsActivity extends AppCompatActivity implements QueryFo
         final Request request = new Request(uri);
         request.setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "beard.shipment");
         request.setNotificationExtra("beard_1");
+        request.applicationChecksFileIntegrity();
         batch.addRequest(request);
 
         request.setNotificationExtra("beard_2");
@@ -115,11 +113,7 @@ public class BatchDownloadsActivity extends AppCompatActivity implements QueryFo
 
         @Override
         public void onChange(boolean selfChange) {
-            if (lastQueryTimestamp.updatedRecently()) {
-                return;
-            }
             queryForDownloads();
-            lastQueryTimestamp.setJustUpdated();
         }
 
     };

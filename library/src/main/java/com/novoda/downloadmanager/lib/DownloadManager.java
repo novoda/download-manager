@@ -292,6 +292,11 @@ public class DownloadManager {
     public static final int PAUSED_UNKNOWN = 4;
 
     /**
+     * Value of {@link #COLUMN_REASON} when the download is paused due client download check permissions.
+     */
+    public static final int PAUSED_QUEUED_DUE_CLIENT_RESTRICTIONS = 5;
+
+    /**
      * Broadcast intent action sent by the download manager when a download completes. The
      * download's ID is specified in the intent's data.
      */
@@ -442,8 +447,10 @@ public class DownloadManager {
 
     public void pauseBatch(long id) {
         ContentValues values = new ContentValues();
+        String where = COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
+        String[] selectionArgs = {String.valueOf(id), String.valueOf(DownloadStatus.SUCCESS)};
         values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_PAUSED);
-        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[]{String.valueOf(id)});
+        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
     }
 
     public void resumeBatch(long id) {
@@ -976,6 +983,9 @@ public class DownloadManager {
                 case DownloadStatus.QUEUED_FOR_WIFI:
                     return PAUSED_QUEUED_FOR_WIFI;
 
+                case DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS:
+                    return PAUSED_QUEUED_DUE_CLIENT_RESTRICTIONS;
+
                 default:
                     return PAUSED_UNKNOWN;
             }
@@ -1028,6 +1038,7 @@ public class DownloadManager {
                 case DownloadStatus.RUNNING:
                     return STATUS_RUNNING;
 
+                case DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS:
                 case DownloadStatus.PAUSED_BY_APP:
                 case DownloadStatus.WAITING_TO_RETRY:
                 case DownloadStatus.WAITING_FOR_NETWORK:
