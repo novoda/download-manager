@@ -80,7 +80,6 @@ public class DownloadService extends Service {
     private DownloadsRepository downloadsRepository;
     private DownloadDeleter downloadDeleter;
     private DownloadReadyChecker downloadReadyChecker;
-    private TarFileTruncator tarFileTruncator;
     private DownloadsUriProvider downloadsUriProvider;
     private BatchCompletionBroadcaster batchCompletionBroadcaster;
     private NetworkChecker networkChecker;
@@ -116,7 +115,7 @@ public class DownloadService extends Service {
         Log.v("Service onCreate");
 
         if (systemFacade == null) {
-            systemFacade = new RealSystemFacade(this);
+            systemFacade = new RealSystemFacade(this, new Clock());
         }
 
         this.downloadsUriProvider = DownloadsUriProvider.getInstance();
@@ -126,7 +125,6 @@ public class DownloadService extends Service {
         DownloadClientReadyChecker downloadClientReadyChecker = getDownloadClientReadyChecker();
         this.networkChecker = new NetworkChecker(this.systemFacade);
         this.downloadReadyChecker = new DownloadReadyChecker(this.systemFacade, networkChecker, downloadClientReadyChecker, downloadMarshaller);
-        this.tarFileTruncator = new TarFileTruncator();
 
         String applicationPackageName = getApplicationContext().getPackageName();
         this.batchCompletionBroadcaster = new BatchCompletionBroadcaster(this, applicationPackageName);
@@ -230,6 +228,7 @@ public class DownloadService extends Service {
         Log.d("Shutting down service");
         getContentResolver().unregisterContentObserver(downloadManagerContentObserver);
         downloadScanner.shutdown();
+        executor.shutdownNow();
         updateThread.quit();
     }
 
@@ -411,7 +410,7 @@ public class DownloadService extends Service {
         DownloadThread downloadThread = new DownloadThread(
                 this, systemFacade, info, storageManager, downloadNotifier,
                 batchCompletionBroadcaster, batchRepository, downloadsUriProvider,
-                downloadsRepository, networkChecker, downloadReadyChecker, tarFileTruncator
+                downloadsRepository, networkChecker, downloadReadyChecker, new Clock()
         );
 
         ContentValues contentValues = new ContentValues();

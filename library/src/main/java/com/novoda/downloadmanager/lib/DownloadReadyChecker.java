@@ -2,6 +2,8 @@ package com.novoda.downloadmanager.lib;
 
 import android.os.Environment;
 
+import com.novoda.downloadmanager.Download;
+
 import java.util.List;
 
 class DownloadReadyChecker {
@@ -21,7 +23,8 @@ class DownloadReadyChecker {
 
     public boolean canDownload(DownloadBatch downloadBatch) {
         if (isDownloadManagerReadyToDownload(downloadBatch)) {
-            return downloadClientReadyChecker.isAllowedToDownload(downloadMarshaller.marshall(downloadBatch));
+            Download download = downloadMarshaller.marshall(downloadBatch);
+            return downloadClientReadyChecker.isAllowedToDownload(download);
         }
 
         return false;
@@ -36,7 +39,7 @@ class DownloadReadyChecker {
 
         switch (downloadBatch.getStatus()) {
             case 0: // status hasn't been initialized yet, this is a new download
-            case DownloadStatus.QUEUED_DUE_CLIENT_PERMISSIONS:
+            case DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS:
             case DownloadStatus.SUBMITTED:
             case DownloadStatus.PENDING: // download is explicit marked as ready to start
             case DownloadStatus.RUNNING: // download interrupted (process killed etc) while

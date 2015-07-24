@@ -294,7 +294,7 @@ public class DownloadManager {
     /**
      * Value of {@link #COLUMN_REASON} when the download is paused due client download check permissions.
      */
-    public static final int PAUSED_QUEUED_DUE_CLIENT_PERMISSIONS = 5;
+    public static final int PAUSED_QUEUED_DUE_CLIENT_RESTRICTIONS = 5;
 
     /**
      * Broadcast intent action sent by the download manager when a download completes. The
@@ -388,15 +388,15 @@ public class DownloadManager {
     private Uri baseUri;
 
     public DownloadManager(Context context, ContentResolver resolver) {
-        this(context, resolver, DownloadsUriProvider.getInstance(), new RealSystemFacade(context), false);
+        this(context, resolver, DownloadsUriProvider.getInstance(), new RealSystemFacade(context, new Clock()), false);
     }
 
     public DownloadManager(Context context, ContentResolver contentResolver, boolean verboseLogging) {
-        this(context, contentResolver, DownloadsUriProvider.getInstance(), new RealSystemFacade(context), verboseLogging);
+        this(context, contentResolver, DownloadsUriProvider.getInstance(), new RealSystemFacade(context, new Clock()), verboseLogging);
     }
 
     DownloadManager(Context context, ContentResolver resolver, DownloadsUriProvider downloadsUriProvider) {
-        this(context, resolver, downloadsUriProvider, new RealSystemFacade(context), false);
+        this(context, resolver, downloadsUriProvider, new RealSystemFacade(context, new Clock()), false);
     }
 
     DownloadManager(Context context,
@@ -447,8 +447,10 @@ public class DownloadManager {
 
     public void pauseBatch(long id) {
         ContentValues values = new ContentValues();
+        String where = COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
+        String[] selectionArgs = {String.valueOf(id), String.valueOf(DownloadStatus.SUCCESS)};
         values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_PAUSED);
-        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + "=?", new String[]{String.valueOf(id)});
+        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
     }
 
     public void resumeBatch(long id) {
@@ -458,7 +460,7 @@ public class DownloadManager {
         contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
 
         DownloadDeleter downloadDeleter = new DownloadDeleter(contentResolver);
-        RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext());
+        RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext(), new Clock());
         BatchRepository batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
         batchRepository.updateBatchStatus(id, DownloadStatus.PENDING);
         notifyBatchesHaveChanged();
@@ -581,7 +583,7 @@ public class DownloadManager {
      */
     public Cursor query(BatchQuery query) {
         DownloadDeleter downloadDeleter = new DownloadDeleter(contentResolver);
-        RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext());
+        RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext(), new Clock());
         BatchRepository batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
         Cursor cursor = batchRepository.retrieveFor(query);
         if (cursor == null) {
@@ -981,8 +983,8 @@ public class DownloadManager {
                 case DownloadStatus.QUEUED_FOR_WIFI:
                     return PAUSED_QUEUED_FOR_WIFI;
 
-                case DownloadStatus.QUEUED_DUE_CLIENT_PERMISSIONS:
-                    return PAUSED_QUEUED_DUE_CLIENT_PERMISSIONS;
+                case DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS:
+                    return PAUSED_QUEUED_DUE_CLIENT_RESTRICTIONS;
 
                 default:
                     return PAUSED_UNKNOWN;
@@ -1036,7 +1038,7 @@ public class DownloadManager {
                 case DownloadStatus.RUNNING:
                     return STATUS_RUNNING;
 
-                case DownloadStatus.QUEUED_DUE_CLIENT_PERMISSIONS:
+                case DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS:
                 case DownloadStatus.PAUSED_BY_APP:
                 case DownloadStatus.WAITING_TO_RETRY:
                 case DownloadStatus.WAITING_FOR_NETWORK:

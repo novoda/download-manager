@@ -64,6 +64,10 @@ class DownloadsRepository {
     }
 
     public void moveDownloadsStatusTo(List<Long> ids, int status) {
+        if (ids.isEmpty()) {
+            return;
+        }
+
         ContentValues values = new ContentValues(1);
         values.put(DownloadContract.Downloads.COLUMN_STATUS, status);
 

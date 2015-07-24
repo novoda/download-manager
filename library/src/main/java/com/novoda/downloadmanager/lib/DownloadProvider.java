@@ -273,7 +273,7 @@ public final class DownloadProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
         if (systemFacade == null) {
-            systemFacade = new RealSystemFacade(getContext());
+            systemFacade = new RealSystemFacade(getContext(), new Clock());
         }
 
         Context context = getContext();
