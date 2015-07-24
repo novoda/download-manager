@@ -17,11 +17,14 @@ class DownloadsRepository {
     private final ContentResolver contentResolver;
     private final DownloadInfoCreator downloadInfoCreator;
     private final DownloadsUriProvider downloadsUriProvider;
+    private final FileDownloadInfo.ControlStatus.Reader controlReader;
 
-    public DownloadsRepository(ContentResolver contentResolver, DownloadInfoCreator downloadInfoCreator, DownloadsUriProvider downloadsUriProvider) {
+    public DownloadsRepository(ContentResolver contentResolver, DownloadInfoCreator downloadInfoCreator, DownloadsUriProvider downloadsUriProvider,
+                               FileDownloadInfo.ControlStatus.Reader controlReader) {
         this.contentResolver = contentResolver;
         this.downloadInfoCreator = downloadInfoCreator;
         this.downloadsUriProvider = downloadsUriProvider;
+        this.controlReader = controlReader;
     }
 
     public List<FileDownloadInfo> getAllDownloads() {
@@ -59,8 +62,7 @@ class DownloadsRepository {
     }
 
     public FileDownloadInfo.ControlStatus getDownloadInfoControlStatusFor(long id) {
-        FileDownloadInfo.ControlStatus.Reader reader = new FileDownloadInfo.ControlStatus.Reader(contentResolver, downloadsUriProvider);
-        return downloadInfoCreator.create(reader, id);
+        return downloadInfoCreator.create(controlReader, id);
     }
 
     public void moveDownloadsStatusTo(List<Long> ids, int status) {

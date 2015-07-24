@@ -176,7 +176,7 @@ public class DownloadService extends Service {
             public FileDownloadInfo.ControlStatus create(FileDownloadInfo.ControlStatus.Reader reader, long id) {
                 return createNewDownloadInfoControlStatus(reader, id);
             }
-        }, downloadsUriProvider);
+        }, downloadsUriProvider, new FileDownloadInfo.ControlStatus.Reader(contentResolver, downloadsUriProvider));
 
     }
 
