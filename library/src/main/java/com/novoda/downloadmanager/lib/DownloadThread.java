@@ -661,9 +661,15 @@ class DownloadThread implements Runnable {
                 state.contentLength,
                 storageManager);
 
+        updateDownloadInfoFieldsFrom(state);
         updateDatabaseFromHeaders(state);
         // check connectivity again now that we know the total size
         checkConnectivity();
+    }
+
+    private void updateDownloadInfoFieldsFrom(State state) {
+        originalDownloadInfo.setETag(state.headerETag);
+        originalDownloadInfo.setMimeType(state.mimeType);
     }
 
     /**
@@ -679,9 +685,6 @@ class DownloadThread implements Runnable {
         if (state.mimeType != null) {
             values.put(DownloadContract.Downloads.COLUMN_MIME_TYPE, state.mimeType);
         }
-
-        originalDownloadInfo.setETag(state.headerETag);
-        originalDownloadInfo.setMimeType(state.mimeType);
 
         values.put(COLUMN_TOTAL_BYTES, state.totalBytes);
         getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
