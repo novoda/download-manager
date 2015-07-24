@@ -9,8 +9,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.ListView;
 
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
@@ -32,18 +33,22 @@ public class BatchDownloadsActivity extends AppCompatActivity implements QueryFo
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private DownloadManager downloadManager;
-    private ListView listView;
     private BatchDownloadsAdapter batchDownloadsAdapter;
+    private View emptyView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_batches);
-        listView = (ListView) findViewById(R.id.main_downloads_list);
+
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.main_downloads_list);
         downloadManager = DownloadManagerBuilder.from(this)
                 .build();
         batchDownloadsAdapter = new BatchDownloadsAdapter(new ArrayList<Download>());
-        listView.setAdapter(batchDownloadsAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(batchDownloadsAdapter);
+
+        emptyView = findViewById(R.id.main_no_downloads_view);
 
         findViewById(R.id.batch_download_button).setOnClickListener(
                 new View.OnClickListener() {
@@ -66,7 +71,6 @@ public class BatchDownloadsActivity extends AppCompatActivity implements QueryFo
 
     private void setupQueryingExample() {
         queryForDownloads();
-        listView.setEmptyView(findViewById(R.id.main_no_downloads_view));
     }
 
     private void queryForDownloads() {
@@ -126,6 +130,7 @@ public class BatchDownloadsActivity extends AppCompatActivity implements QueryFo
     @Override
     public void onQueryResult(List<Download> downloads) {
         batchDownloadsAdapter.updateDownloads(downloads);
+        emptyView.setVisibility(downloads.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
 }
