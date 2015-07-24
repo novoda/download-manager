@@ -14,6 +14,8 @@ class NotifierWriter implements DataWriter {
     private final FileDownloadInfo downloadInfo;
     private final WriteChunkListener writeChunkListener;
 
+    private final ContentValues values = new ContentValues();
+
     public NotifierWriter(ContentResolver contentResolver,
                           DataWriter dataWriter,
                           DownloadNotifier downloadNotifier,
@@ -59,7 +61,7 @@ class NotifierWriter implements DataWriter {
 
         if (state.currentBytes - state.bytesNotified > Constants.MIN_PROGRESS_STEP &&
                 now - state.timeLastNotification > Constants.MIN_PROGRESS_TIME) {
-            ContentValues values = new ContentValues();
+            values.clear();
             values.put(COLUMN_CURRENT_BYTES, state.currentBytes);
             contentResolver.update(downloadInfo.getAllDownloadsUri(), values, null, null);
             state.bytesNotified = state.currentBytes;
