@@ -61,13 +61,16 @@ class NotifierWriter implements DataWriter {
 
         if (state.currentBytes - state.bytesNotified > Constants.MIN_PROGRESS_STEP &&
                 now - state.timeLastNotification > Constants.MIN_PROGRESS_TIME) {
-            values.clear();
-            values.put(COLUMN_CURRENT_BYTES, state.currentBytes);
+            updateCurrentBytesValues(state);
             contentResolver.update(downloadInfo.getAllDownloadsUri(), values, null, null);
             state.bytesNotified = state.currentBytes;
             state.timeLastNotification = now;
         }
         return state;
+    }
+
+    private void updateCurrentBytesValues(DownloadThread.State state) {
+        values.put(COLUMN_CURRENT_BYTES, state.currentBytes);
     }
 
     public interface WriteChunkListener {
