@@ -74,6 +74,28 @@ class BatchRepository {
     }
 
     int getBatchStatus(long batchId) {
+        String[] projection = {DownloadContract.Batches.COLUMN_STATUS};
+        String where = DownloadContract.Batches._ID + " = ?";
+        String[] selectionArgs = {String.valueOf(batchId)};
+
+        Cursor cursor = resolver.query(
+                downloadsUriProvider.getBatchesUri(),
+                projection,
+                where,
+                selectionArgs,
+                null);
+
+        try {
+            cursor.moveToFirst();
+            return cursor.getInt(0);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    int calculateBatchStatus(long batchId) {
         Cursor cursor = null;
         statusCountMap.clear();
         try {

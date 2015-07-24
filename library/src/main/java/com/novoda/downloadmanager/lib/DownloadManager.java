@@ -445,25 +445,37 @@ public class DownloadManager {
         return ContentUris.parseId(downloadUri);
     }
 
-    public void pauseBatch(long id) {
-        ContentValues values = new ContentValues();
-        String where = COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
-        String[] selectionArgs = {String.valueOf(id), String.valueOf(DownloadStatus.SUCCESS)};
-        values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_PAUSED);
-        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
-    }
-
-    public void resumeBatch(long id) {
-        ContentValues values = getResumeContentValues();
-        String where = COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
-        String[] selectionArgs = {String.valueOf(id), String.valueOf(DownloadStatus.SUCCESS)};
-        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
-
+    public void pauseBatch(long batchId) {
         DownloadDeleter downloadDeleter = new DownloadDeleter(contentResolver);
         RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext(), new Clock());
         BatchRepository batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
-        batchRepository.updateBatchStatus(id, DownloadStatus.PENDING);
-        notifyBatchesHaveChanged();
+
+        int batchStatus = batchRepository.getBatchStatus(batchId);
+        if (batchStatus == DownloadStatus.RUNNING) {
+            ContentValues values = new ContentValues();
+            String where = COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
+            String[] selectionArgs = {String.valueOf(batchId), String.valueOf(DownloadStatus.SUCCESS)};
+            values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_PAUSED);
+            contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
+        }
+    }
+
+    public void resumeBatch(long batchId) {
+        DownloadDeleter downloadDeleter = new DownloadDeleter(contentResolver);
+        RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext(), new Clock());
+        BatchRepository batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
+
+        int batchStatus = batchRepository.getBatchStatus(batchId);
+        if (batchStatus == DownloadStatus.PAUSED_BY_APP) {
+            ContentValues values = getResumeContentValues();
+            String where = COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
+            String[] selectionArgs = {String.valueOf(batchId), String.valueOf(DownloadStatus.SUCCESS)};
+            contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
+
+            batchRepository.updateBatchStatus(batchId, DownloadStatus.PENDING);
+
+            notifyBatchesHaveChanged();
+        }
     }
 
     @NonNull
