@@ -236,6 +236,8 @@ class DownloadThread implements Runnable {
         State state = new State(originalDownloadInfo);
 
         try {
+            checkPausedOrCanceled(originalDownloadInfo);
+
             DownloadBatch currentBatch = batchRepository.retrieveBatchFor(originalDownloadInfo);
 
             if (!downloadReadyChecker.canDownload(currentBatch)) {
@@ -347,7 +349,6 @@ class DownloadThread implements Runnable {
      * handle the response, and transfer the data to the destination file.
      */
     private void executeDownload(State state) throws StopRequestException {
-        checkPausedOrCanceled(originalDownloadInfo);
         state.resetBeforeExecute();
         setupDestinationFile(state);
 
