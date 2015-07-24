@@ -106,7 +106,7 @@ public class BatchRepositoryTest {
         verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockFileDownloadInfoId2);
         verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockFileDownloadInfoId3);
         verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockFileDownloadInfoId4);
-        verify(mockContentResolver).delete(this.mockDownloadsUriProvider.getBatchesUri(), _ID + " IN (?)", new String[]{"1, 2, 3, 4"});
+        verify(mockContentResolver).delete(this.mockDownloadsUriProvider.getBatchesUri(), _ID + " IN (?, ?, ?, ?)", new String[]{"1", "2", "3", "4"});
     }
 
     @Test
@@ -123,7 +123,7 @@ public class BatchRepositoryTest {
         verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockFileDownloadInfoId2);
         verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockFileDownloadInfoId3);
         verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockFileDownloadInfoId4);
-        verify(mockContentResolver).delete(this.mockDownloadsUriProvider.getBatchesUri(), _ID + " IN (?)", new String[]{"2, 3"});
+        verify(mockContentResolver).delete(this.mockDownloadsUriProvider.getBatchesUri(), _ID + " IN (?, ?)", new String[]{"2", "3"});
     }
 
     @Test
