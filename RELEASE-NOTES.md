@@ -1,3 +1,15 @@
+0.2.10
+-------
+
+- Prevent pause a non running task and prevent resume a non paused task #135
+- Reducing control reader query method allocations #138
+- Reducing transfer object creation #134
+- Simplifies logging #137
+- Fix deleteBatchesForIds when multiple selectionArgs #133
+- Resume downloads after loosing signal #128
+- Fix concurrent downloads and memory leaks #130
+- Avoid smashing the database while transferring bytes #129
+
 0.2.9
 -------
 
