@@ -21,7 +21,7 @@ public class TarTruncatorTest {
 
     private InputStream resourceAsStream;
     private FileOutputStream fileOutputStream;
-    private DownloadThread.State state;
+    private DownloadTask.State state;
 
     private TarTruncator tarTruncator;
 
@@ -70,14 +70,14 @@ public class TarTruncatorTest {
         resourceAsStream = getResourceAsStream("tar/testOriginal.tar");
         fileOutputStream = new FileOutputStream("TarFileTruncatorTest.tar");
         tarTruncator = new TarTruncator(new TestDataWriter(fileOutputStream));
-        state = new DownloadThread.State();
+        state = new DownloadTask.State();
     }
 
     private void givenATarFileWithoutEndBlockMarker() throws IOException {
         resourceAsStream = getResourceAsStream("tar/testExpectedResult.tar");
         fileOutputStream = new FileOutputStream("TarFileTruncatorTest.tar");
         tarTruncator = new TarTruncator(new TestDataWriter(fileOutputStream));
-        state = new DownloadThread.State();
+        state = new DownloadTask.State();
     }
 
     private void tarFileShouldHaveBeenTruncatedProperly() throws IOException {
@@ -115,7 +115,7 @@ public class TarTruncatorTest {
         }
 
         @Override
-        public DownloadThread.State write(DownloadThread.State state, byte[] buffer, int count) throws StopRequestException {
+        public DownloadTask.State write(DownloadTask.State state, byte[] buffer, int count) throws StopRequestException {
             try {
                 state.gotData = true;
                 outputStream.write(buffer, 0, count);

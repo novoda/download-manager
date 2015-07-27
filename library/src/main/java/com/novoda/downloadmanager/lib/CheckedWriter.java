@@ -14,7 +14,7 @@ class CheckedWriter implements DataWriter {
     }
 
     @Override
-    public DownloadThread.State write(DownloadThread.State state, byte[] buffer, int count) throws StopRequestException {
+    public DownloadTask.State write(DownloadTask.State state, byte[] buffer, int count) throws StopRequestException {
 
         spaceVerifier.verifySpacePreemptively(count);
 

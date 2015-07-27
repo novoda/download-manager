@@ -29,15 +29,15 @@ class NotifierWriter implements DataWriter {
     }
 
     @Override
-    public DownloadThread.State write(DownloadThread.State state, byte[] buffer, int count) throws StopRequestException {
-        DownloadThread.State localState = state;
+    public DownloadTask.State write(DownloadTask.State state, byte[] buffer, int count) throws StopRequestException {
+        DownloadTask.State localState = state;
         localState = dataWriter.write(localState, buffer, count);
         localState = reportProgress(localState);
         writeChunkListener.chunkWritten(downloadInfo);
         return localState;
     }
 
-    private DownloadThread.State reportProgress(DownloadThread.State state) {
+    private DownloadTask.State reportProgress(DownloadTask.State state) {
         final long now = SystemClock.elapsedRealtime();
 
         final long sampleDelta = now - state.speedSampleStart;
@@ -69,7 +69,7 @@ class NotifierWriter implements DataWriter {
         return state;
     }
 
-    private void updateCurrentBytesValues(DownloadThread.State state) {
+    private void updateCurrentBytesValues(DownloadTask.State state) {
         values.put(COLUMN_CURRENT_BYTES, state.currentBytes);
     }
 

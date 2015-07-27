@@ -78,7 +78,7 @@ public class SizeLimitActivity extends Activity implements DialogInterface.OnCan
         int size = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadContract.Downloads.COLUMN_TOTAL_BYTES));
         String sizeString = Formatter.formatFileSize(this, size);
         String queueText = "Queue";//getString(R.string.button_queue_for_wifi);
-        boolean isWifiRequired = currentIntent.getExtras().getBoolean(DownloadThread.EXTRA_IS_WIFI_REQUIRED);
+        boolean isWifiRequired = currentIntent.getExtras().getBoolean(DownloadTask.EXTRA_IS_WIFI_REQUIRED);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, AlertDialog.THEME_HOLO_DARK);
         if (isWifiRequired) {
@@ -113,7 +113,7 @@ public class SizeLimitActivity extends Activity implements DialogInterface.OnCan
 
     @Override
     public void onClick(@NonNull DialogInterface dialog, int which) {
-        boolean isRequired = currentIntent.getExtras().getBoolean(DownloadThread.EXTRA_IS_WIFI_REQUIRED);
+        boolean isRequired = currentIntent.getExtras().getBoolean(DownloadTask.EXTRA_IS_WIFI_REQUIRED);
         if (isRequired && which == AlertDialog.BUTTON_NEGATIVE) {
             getContentResolver().delete(currentUri, null, null);
         } else if (!isRequired && which == AlertDialog.BUTTON_POSITIVE) {
