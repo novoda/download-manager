@@ -17,7 +17,6 @@
 package com.novoda.downloadmanager.lib;
 
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.drm.DrmManagerClient;
@@ -47,7 +46,6 @@ import java.util.Locale;
 
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 import static com.novoda.downloadmanager.lib.Constants.UNKNOWN_BYTE_SIZE;
-import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.*;
 import static com.novoda.downloadmanager.lib.DownloadStatus.HTTP_DATA_ERROR;
 import static com.novoda.downloadmanager.lib.DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS;
 import static com.novoda.downloadmanager.lib.FileDownloadInfo.NetworkState;
@@ -824,18 +822,9 @@ class DownloadTask implements Runnable {
         batchRepository.updateBatchStatus(batchId, batchStatus);
 
         if (DownloadStatus.isCancelled(batchStatus)) {
-            ContentValues values = new ContentValues(1);
-            values.put(COLUMN_STATUS, DownloadStatus.CANCELED);
-            getContentResolver().update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
+            batchRepository.setBatchItemsCancelled(batchId);
         } else if (DownloadStatus.isError(batchStatus)) {
-            ContentValues values = new ContentValues(1);
-            values.put(COLUMN_STATUS, DownloadStatus.BATCH_FAILED);
-            getContentResolver().update(
-                    downloadsUriProvider.getAllDownloadsUri(),
-                    values,
-                    COLUMN_BATCH_ID + " = ? AND " + DownloadContract.Downloads._ID + " <> ? ",
-                    new String[]{String.valueOf(batchId), String.valueOf(downloadId)}
-            );
+            batchRepository.setBatchItemsFailed(batchId, downloadId);
         } else if (DownloadStatus.isSuccess(batchStatus)) {
             batchCompletionBroadcaster.notifyBatchCompletedFor(batchId);
         }

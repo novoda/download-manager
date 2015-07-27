@@ -14,6 +14,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.COLUMN_BATCH_ID;
+import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.COLUMN_STATUS;
+
 class BatchRepository {
 
     private static final List<Integer> PRIORITISED_STATUSES = Arrays.asList(
@@ -229,6 +232,23 @@ class BatchRepository {
 
     public Cursor retrieveFor(BatchQuery query) {
         return resolver.query(downloadsUriProvider.getBatchesUri(), null, query.getSelection(), query.getSelectionArguments(), query.getSortOrder());
+    }
+
+    public void setBatchItemsCancelled(long batchId) {
+        ContentValues values = new ContentValues(1);
+        values.put(COLUMN_STATUS, DownloadStatus.CANCELED);
+        resolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
+    }
+
+    public void setBatchItemsFailed(long batchId, long downloadId) {
+        ContentValues values = new ContentValues(1);
+        values.put(COLUMN_STATUS, DownloadStatus.BATCH_FAILED);
+        resolver.update(
+                downloadsUriProvider.getAllDownloadsUri(),
+                values,
+                COLUMN_BATCH_ID + " = ? AND " + DownloadContract.Downloads._ID + " <> ? ",
+                new String[]{String.valueOf(batchId), String.valueOf(downloadId)}
+        );
     }
 
     private static class StatusCountMap {
