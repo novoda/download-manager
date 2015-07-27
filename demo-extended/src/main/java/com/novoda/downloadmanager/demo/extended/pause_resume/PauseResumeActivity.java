@@ -47,9 +47,9 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
                 Download item = adapter.getItem(position);
                 long batchId = item.getBatchId();
                 if (item.isPaused()) {
-                    downloadManager.resumeBatch(batchId);
+                    pauseBatch(batchId);
                 } else {
-                    downloadManager.pauseBatch(batchId);
+                    resumeBatch(batchId);
                 }
                 queryForDownloads();
             }
@@ -69,6 +69,22 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
                 });
 
         setupQueryingExample();
+    }
+
+    private void resumeBatch(long batchId) {
+        try {
+            downloadManager.pauseBatch(batchId);
+        } catch (DownloadManager.ControlPauseException e) {
+            Log.w(e.getLocalizedMessage());
+        }
+    }
+
+    private void pauseBatch(long batchId) {
+        try {
+            downloadManager.resumeBatch(batchId);
+        } catch (DownloadManager.ControlResumeException e) {
+            Log.w(e.getLocalizedMessage());
+        }
     }
 
     private void setupQueryingExample() {

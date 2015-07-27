@@ -445,7 +445,7 @@ public class DownloadManager {
         return ContentUris.parseId(downloadUri);
     }
 
-    public void pauseBatch(long batchId) {
+    public void pauseBatch(long batchId) throws ControlPauseException {
         DownloadDeleter downloadDeleter = new DownloadDeleter(contentResolver);
         RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext(), new Clock());
         BatchRepository batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
@@ -457,10 +457,12 @@ public class DownloadManager {
             String[] selectionArgs = {String.valueOf(batchId), String.valueOf(DownloadStatus.SUCCESS)};
             values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_PAUSED);
             contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
+        } else {
+            throw new ControlPauseException("Batch " + batchId + " cannot be paused as is not currently running");
         }
     }
 
-    public void resumeBatch(long batchId) {
+    public void resumeBatch(long batchId) throws ControlResumeException {
         DownloadDeleter downloadDeleter = new DownloadDeleter(contentResolver);
         RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext(), new Clock());
         BatchRepository batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
@@ -475,6 +477,8 @@ public class DownloadManager {
             batchRepository.updateBatchStatus(batchId, DownloadStatus.PENDING);
 
             notifyBatchesHaveChanged();
+        } else {
+            throw new ControlResumeException("Batch " + batchId + " cannot be resumed as is not currently paused");
         }
     }
 
@@ -1066,6 +1070,18 @@ public class DownloadManager {
                 default:
                     return STATUS_FAILED;
             }
+        }
+    }
+
+    public static class ControlPauseException extends Exception {
+        public ControlPauseException(String message) {
+            super(message);
+        }
+    }
+
+    public static class ControlResumeException extends Exception {
+        public ControlResumeException(String message) {
+            super(message);
         }
     }
 }
