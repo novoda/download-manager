@@ -487,18 +487,20 @@ class FileDownloadInfo {
 
         static final class Reader {
 
-            private final ContentResolver contentResolver;
-            private final DownloadsUriProvider downloadsUriProvider;
+            private static final String[] PROJECTION = new String[]{
+                    DownloadContract.Downloads.COLUMN_CONTROL, DownloadContract.Downloads.COLUMN_STATUS
+            };
 
-            public Reader(ContentResolver contentResolver, DownloadsUriProvider downloadsUriProvider) {
+            private final ContentResolver contentResolver;
+            private final Uri downloadUri;
+
+            public Reader(ContentResolver contentResolver, Uri downloadUri) {
                 this.contentResolver = contentResolver;
-                this.downloadsUriProvider = downloadsUriProvider;
+                this.downloadUri = downloadUri;
             }
 
-            public ControlStatus newControlStatus(long id) {
-                String[] projection = {DownloadContract.Downloads.COLUMN_CONTROL, DownloadContract.Downloads.COLUMN_STATUS};
-                Uri uri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id);
-                Cursor downloadsCursor = contentResolver.query(uri, projection, null, null, null);
+            public ControlStatus newControlStatus() {
+                Cursor downloadsCursor = contentResolver.query(downloadUri, PROJECTION, null, null, null);
                 try {
                     downloadsCursor.moveToFirst();
                     int control = downloadsCursor.getInt(0);

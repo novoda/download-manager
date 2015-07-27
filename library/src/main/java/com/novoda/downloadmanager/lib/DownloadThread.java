@@ -84,7 +84,7 @@ class DownloadThread implements Runnable {
     private final BatchCompletionBroadcaster batchCompletionBroadcaster;
     private final BatchRepository batchRepository;
     private final DownloadsUriProvider downloadsUriProvider;
-    private final DownloadsRepository downloadsRepository;
+    private final FileDownloadInfo.ControlStatus.Reader controlReader;
     private final NetworkChecker networkChecker;
     private final DownloadReadyChecker downloadReadyChecker;
     private final Clock clock;
@@ -97,7 +97,7 @@ class DownloadThread implements Runnable {
                           BatchCompletionBroadcaster batchCompletionBroadcaster,
                           BatchRepository batchRepository,
                           DownloadsUriProvider downloadsUriProvider,
-                          DownloadsRepository downloadsRepository,
+                          FileDownloadInfo.ControlStatus.Reader controlReader,
                           NetworkChecker networkChecker,
                           DownloadReadyChecker downloadReadyChecker,
                           Clock clock) {
@@ -109,7 +109,7 @@ class DownloadThread implements Runnable {
         this.batchCompletionBroadcaster = batchCompletionBroadcaster;
         this.batchRepository = batchRepository;
         this.downloadsUriProvider = downloadsUriProvider;
-        this.downloadsRepository = downloadsRepository;
+        this.controlReader = controlReader;
         this.networkChecker = networkChecker;
         this.downloadReadyChecker = downloadReadyChecker;
         this.clock = clock;
@@ -236,7 +236,7 @@ class DownloadThread implements Runnable {
         State state = new State(originalDownloadInfo);
 
         try {
-            checkPausedOrCanceled(originalDownloadInfo);
+            checkPausedOrCanceled();
 
             DownloadBatch currentBatch = batchRepository.retrieveBatchFor(originalDownloadInfo);
 
@@ -432,14 +432,14 @@ class DownloadThread implements Runnable {
      * Check if the download has been paused or canceled, stopping the request appropriately if it
      * has been.
      */
-    private void checkPausedOrCanceled(FileDownloadInfo downloadInfo) throws StopRequestException {
+    private void checkPausedOrCanceled() throws StopRequestException {
         if (clock.intervalLessThan(Clock.Interval.ONE_SECOND)) {
             return;
         }
 
         clock.startInterval();
 
-        FileDownloadInfo.ControlStatus controlStatus = downloadsRepository.getDownloadInfoControlStatusFor(downloadInfo.getId());
+        FileDownloadInfo.ControlStatus controlStatus = controlReader.newControlStatus();
 
         if (controlStatus.isPaused()) {
             throw new StopRequestException(DownloadStatus.PAUSED_BY_APP, "download paused by owner");
@@ -562,7 +562,7 @@ class DownloadThread implements Runnable {
     private final NotifierWriter.WriteChunkListener checkOnWrite = new NotifierWriter.WriteChunkListener() {
         @Override
         public void chunkWritten(FileDownloadInfo downloadInfo) throws StopRequestException {
-            checkPausedOrCanceled(downloadInfo);
+            checkPausedOrCanceled();
         }
     };
 
