@@ -604,15 +604,9 @@ class DownloadTask implements Runnable {
             return;
         }
 
-        ContentValues values = new ContentValues(2);
-        values.put(COLUMN_CURRENT_BYTES, state.currentBytes);
-        if (state.contentLength == UNKNOWN_BYTE_SIZE) {
-            values.put(COLUMN_TOTAL_BYTES, state.currentBytes);
-        }
-        getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
+        downloadsRepository.updateDownloadEndOfStream(originalDownloadInfo, state.currentBytes, state.contentLength);
 
-        final boolean lengthMismatched = (state.contentLength != UNKNOWN_BYTE_SIZE)
-                && (state.currentBytes != state.contentLength);
+        final boolean lengthMismatched = (state.contentLength != UNKNOWN_BYTE_SIZE) && (state.currentBytes != state.contentLength);
         if (lengthMismatched) {
             if (cannotResume(state)) {
                 throw new StopRequestException(DownloadStatus.CANNOT_RESUME, "mismatched content length; unable to resume");
@@ -651,7 +645,7 @@ class DownloadTask implements Runnable {
                 storageManager);
 
         updateDownloadInfoFieldsFrom(state);
-        updateDatabaseFromHeaders(state);
+        downloadsRepository.updateDatabaseFromHeaders(originalDownloadInfo, state.filename, state.headerETag, state.mimeType, state.totalBytes);
         // check connectivity again now that we know the total size
         checkConnectivity();
     }
@@ -659,24 +653,6 @@ class DownloadTask implements Runnable {
     private void updateDownloadInfoFieldsFrom(State state) {
         originalDownloadInfo.setETag(state.headerETag);
         originalDownloadInfo.setMimeType(state.mimeType);
-    }
-
-    /**
-     * Update necessary database fields based on values of HTTP response headers that have been
-     * read.
-     */
-    private void updateDatabaseFromHeaders(State state) {
-        ContentValues values = new ContentValues(4);
-        values.put(DownloadContract.Downloads.COLUMN_DATA, state.filename);
-        if (state.headerETag != null) {
-            values.put(Constants.ETAG, state.headerETag);
-        }
-        if (state.mimeType != null) {
-            values.put(DownloadContract.Downloads.COLUMN_MIME_TYPE, state.mimeType);
-        }
-
-        values.put(COLUMN_TOTAL_BYTES, state.totalBytes);
-        getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
     }
 
     /**

@@ -14,6 +14,7 @@ import com.novoda.notils.string.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.novoda.downloadmanager.lib.Constants.UNKNOWN_BYTE_SIZE;
 import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.*;
 
 class DownloadsRepository {
@@ -133,6 +134,29 @@ class DownloadsRepository {
         ContentValues values = new ContentValues();
         values.put(COLUMN_STATUS, DownloadStatus.PAUSED_BY_APP);
         values.put(COLUMN_CURRENT_BYTES, currentBytes);
+        values.put(COLUMN_TOTAL_BYTES, totalBytes);
+        contentResolver.update(downloadInfo.getAllDownloadsUri(), values, null, null);
+    }
+
+    public void updateDownloadEndOfStream(FileDownloadInfo downloadInfo, long currentBytes, long contentLength) {
+        ContentValues values = new ContentValues(2);
+        values.put(COLUMN_CURRENT_BYTES, currentBytes);
+        if (contentLength == UNKNOWN_BYTE_SIZE) {
+            values.put(COLUMN_TOTAL_BYTES, currentBytes);
+        }
+        contentResolver.update(downloadInfo.getAllDownloadsUri(), values, null, null);
+    }
+
+    public void updateDatabaseFromHeaders(FileDownloadInfo downloadInfo, String filename, String headerETag, String mimeType, long totalBytes) {
+        ContentValues values = new ContentValues(4);
+        values.put(DownloadContract.Downloads.COLUMN_DATA, filename);
+        if (headerETag != null) {
+            values.put(Constants.ETAG, headerETag);
+        }
+        if (mimeType != null) {
+            values.put(DownloadContract.Downloads.COLUMN_MIME_TYPE, mimeType);
+        }
+
         values.put(COLUMN_TOTAL_BYTES, totalBytes);
         contentResolver.update(downloadInfo.getAllDownloadsUri(), values, null, null);
     }
