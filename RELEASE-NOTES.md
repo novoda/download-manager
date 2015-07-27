@@ -1,3 +1,8 @@
+0.2.11
+-------
+- Replace ListView with RecyclerView in demos #140
+- Adds missing status as a paused batch query filter #141
+
 0.2.10
 -------
 
