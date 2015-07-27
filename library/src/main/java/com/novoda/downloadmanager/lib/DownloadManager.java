@@ -30,8 +30,6 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 
-import com.novoda.downloadmanager.lib.BatchPauseResumeController.BatchPauseException;
-import com.novoda.downloadmanager.lib.BatchPauseResumeController.BatchResumeException;
 import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.io.File;
@@ -436,25 +434,27 @@ public class DownloadManager {
     }
 
     DownloadManager(Context context, ContentResolver contentResolver, DownloadsUriProvider downloadsUriProvider) {
-        this(context,
-             contentResolver,
-             downloadsUriProvider,
-             new RealSystemFacade(context, new Clock()),
-             new BatchPauseResumeController(contentResolver,
-                                            DownloadsUriProvider.getInstance(),
-                                            new BatchRepository(
-                                                    contentResolver,
-                                                    new DownloadDeleter(contentResolver),
-                                                    DownloadsUriProvider.getInstance(),
-                                                    new RealSystemFacade(GlobalState.getContext(), new Clock())),
-                                            new DownloadsRepository(
-                                                    contentResolver,
-                                                    DownloadsRepository.DownloadInfoCreator.NON_FUNCTIONAL,
-                                                    DownloadsUriProvider.getInstance(),
-                                                    new FileDownloadInfo.ControlStatus.Reader(contentResolver, DownloadsUriProvider.getInstance())
-                                            )
-             ),
-             false);
+        this(
+                context,
+                contentResolver,
+                downloadsUriProvider,
+                new RealSystemFacade(context, new Clock()),
+                new BatchPauseResumeController(
+                        contentResolver,
+                        DownloadsUriProvider.getInstance(),
+                        new BatchRepository(
+                                contentResolver,
+                                new DownloadDeleter(contentResolver),
+                                DownloadsUriProvider.getInstance(),
+                                new RealSystemFacade(GlobalState.getContext(), new Clock())),
+                        new DownloadsRepository(
+                                contentResolver,
+                                DownloadsRepository.DownloadInfoCreator.NON_FUNCTIONAL,
+                                DownloadsUriProvider.getInstance(),
+                                new FileDownloadInfo.ControlStatus.Reader(contentResolver, DownloadsUriProvider.getInstance())
+                        )
+                ),
+                false);
     }
 
     DownloadManager(Context context,
@@ -505,12 +505,18 @@ public class DownloadManager {
         return ContentUris.parseId(downloadUri);
     }
 
-    public void pauseBatch(long batchId) throws BatchPauseException {
-        batchPauseResumeController.pauseBatch(batchId);
+    /**
+     * {@link BatchPauseResumeController#pauseBatch(long)}
+     */
+    public boolean pauseBatch(long batchId) {
+        return batchPauseResumeController.pauseBatch(batchId);
     }
 
-    public void resumeBatch(long batchId) throws BatchResumeException {
-        batchPauseResumeController.resumeBatch(batchId);
+    /**
+     * {@link BatchPauseResumeController#resumeBatch(long)}}
+     */
+    public boolean resumeBatch(long batchId) {
+        return batchPauseResumeController.resumeBatch(batchId);
     }
 
     public void removeDownload(URI uri) {

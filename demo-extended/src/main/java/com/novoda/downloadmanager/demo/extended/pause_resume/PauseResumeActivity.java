@@ -16,8 +16,6 @@ import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.demo.extended.Download;
 import com.novoda.downloadmanager.demo.extended.QueryForDownloadsAsyncTask;
-import com.novoda.downloadmanager.lib.BatchPauseResumeController.BatchPauseException;
-import com.novoda.downloadmanager.lib.BatchPauseResumeController.BatchResumeException;
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.NotificationVisibility;
 import com.novoda.downloadmanager.lib.Query;
@@ -50,9 +48,9 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
                         Download item = adapter.getItem(position);
                         long batchId = item.getBatchId();
                         if (item.isPaused()) {
-                            resumeBatch(batchId);
+                            downloadManager.resumeBatch(batchId);
                         } else {
-                            pauseBatch(batchId);
+                            downloadManager.pauseBatch(batchId);
                         }
                         queryForDownloads();
                     }
@@ -73,22 +71,6 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
         );
 
         setupQueryingExample();
-    }
-
-    private void resumeBatch(long batchId) {
-        try {
-            downloadManager.pauseBatch(batchId);
-        } catch (BatchPauseException e) {
-            LLog.w(e.getLocalizedMessage());
-        }
-    }
-
-    private void pauseBatch(long batchId) {
-        try {
-            downloadManager.resumeBatch(batchId);
-        } catch (BatchResumeException e) {
-            LLog.w(e.getLocalizedMessage());
-        }
     }
 
     private void setupQueryingExample() {

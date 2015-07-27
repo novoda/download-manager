@@ -19,40 +19,36 @@ public class BatchPauseResumeController {
         this.downloadsUriProvider = downloadsUriProvider;
     }
 
-    public void pauseBatch(long batchId) throws BatchPauseException {
+    /**
+     * Returns true if the batch was paused, false otherwise
+     */
+    public boolean pauseBatch(long batchId) {
         int batchStatus = batchRepository.getBatchStatus(batchId);
         if (DownloadStatus.isRunning(batchStatus)) {
             downloadsRepository.pauseDownloadWithBatchId(batchId);
+            return true;
         } else {
-            throw new BatchPauseException("Batch " + batchId + " cannot be paused as is not currently running");
+            return false;
         }
     }
 
-    public void resumeBatch(long batchId) throws BatchResumeException {
+    /**
+     * Returns true if the batch was resumed, false otherwise
+     */
+    public boolean resumeBatch(long batchId) {
         int batchStatus = batchRepository.getBatchStatus(batchId);
         if (DownloadStatus.isPausedByApp(batchStatus)) {
             downloadsRepository.resumeDownloadWithBatchId(batchId);
             batchRepository.updateBatchStatus(batchId, DownloadStatus.PENDING);
             notifyBatchesHaveChanged();
+            return true;
         } else {
-            throw new BatchResumeException("Batch " + batchId + " cannot be resumed as is not currently paused");
+            return false;
         }
     }
 
     private void notifyBatchesHaveChanged() {
         contentResolver.notifyChange(downloadsUriProvider.getBatchesUri(), null);
         contentResolver.notifyChange(downloadsUriProvider.getBatchesWithoutProgressUri(), null);
-    }
-
-    public static class BatchPauseException extends Exception {
-        public BatchPauseException(String message) {
-            super(message);
-        }
-    }
-
-    public static class BatchResumeException extends Exception {
-        public BatchResumeException(String message) {
-            super(message);
-        }
     }
 }
