@@ -623,11 +623,7 @@ class DownloadTask implements Runnable {
     }
 
     private void updateStatusAndPause(State state) throws StopRequestException {
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_STATUS, DownloadStatus.PAUSED_BY_APP);
-        values.put(COLUMN_CURRENT_BYTES, state.currentBytes);
-        values.put(COLUMN_TOTAL_BYTES, state.totalBytes);
-        getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
+        downloadsRepository.pauseDownloadWithSize(originalDownloadInfo, state.currentBytes, state.totalBytes);
         throw new StopRequestException(DownloadStatus.PAUSED_BY_APP, "download paused by owner");
     }
 

@@ -14,7 +14,7 @@ import com.novoda.notils.string.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.COLUMN_STATUS;
+import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.*;
 
 class DownloadsRepository {
 
@@ -127,6 +127,14 @@ class DownloadsRepository {
         ContentValues contentValues = new ContentValues(1);
         contentValues.put(COLUMN_STATUS, DownloadStatus.RUNNING);
         contentResolver.update(downloadInfo.getAllDownloadsUri(), contentValues, null, null);
+    }
+
+    public void pauseDownloadWithSize(FileDownloadInfo downloadInfo, long currentBytes, long totalBytes) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_STATUS, DownloadStatus.PAUSED_BY_APP);
+        values.put(COLUMN_CURRENT_BYTES, currentBytes);
+        values.put(COLUMN_TOTAL_BYTES, totalBytes);
+        contentResolver.update(downloadInfo.getAllDownloadsUri(), values, null, null);
     }
 
     interface DownloadInfoCreator {
