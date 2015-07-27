@@ -248,9 +248,7 @@ class DownloadTask implements Runnable {
             }
 
             if (downloadStatus != DownloadStatus.RUNNING) {
-                ContentValues contentValues = new ContentValues();
-                contentValues.put(COLUMN_STATUS, DownloadStatus.RUNNING);
-                context.getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), contentValues, null, null);
+                downloadsRepository.setDownloadRunning(originalDownloadInfo);
                 updateBatchStatus(originalDownloadInfo.getBatchId(), originalDownloadInfo.getId());
             }
 

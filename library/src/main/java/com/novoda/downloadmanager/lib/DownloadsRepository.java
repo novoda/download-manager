@@ -123,6 +123,12 @@ class DownloadsRepository {
         contentResolver.update(downloadInfo.getAllDownloadsUri(), values, null, null);
     }
 
+    public void setDownloadRunning(FileDownloadInfo downloadInfo) {
+        ContentValues contentValues = new ContentValues(1);
+        contentValues.put(COLUMN_STATUS, DownloadStatus.RUNNING);
+        contentResolver.update(downloadInfo.getAllDownloadsUri(), contentValues, null, null);
+    }
+
     interface DownloadInfoCreator {
 
         DownloadInfoCreator NON_FUNCTIONAL = new NonFunctional();
