@@ -308,7 +308,7 @@ public class DownloadService extends Service {
 
     /**
      * Update {#downloads} to match {DownloadProvider} state.
-     * Depending on current download state it may enqueue {DownloadThread}
+     * Depending on current download state it may enqueue {DownloadTask}
      * instances, request {DownloadScanner} scans, update user-visible
      * notifications, and/or schedule future actions with {AlarmManager}.
      * <p/>
@@ -402,7 +402,7 @@ public class DownloadService extends Service {
     private void download(FileDownloadInfo info) {
         Uri downloadUri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), info.getId());
         FileDownloadInfo.ControlStatus.Reader controlReader = new FileDownloadInfo.ControlStatus.Reader(getContentResolver(), downloadUri);
-        DownloadThread downloadThread = new DownloadThread(
+        DownloadTask downloadTask = new DownloadTask(
                 this, systemFacade, info, storageManager, downloadNotifier,
                 batchCompletionBroadcaster, batchRepository, downloadsUriProvider,
                 controlReader, networkChecker, downloadReadyChecker, new Clock()
@@ -412,7 +412,7 @@ public class DownloadService extends Service {
         contentValues.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.SUBMITTED);
         getContentResolver().update(info.getAllDownloadsUri(), contentValues, null, null);
 
-        executor.submit(downloadThread);
+        executor.submit(downloadTask);
     }
 
     private void updateTotalBytesFor(Collection<FileDownloadInfo> downloadInfos) {

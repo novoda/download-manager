@@ -2,6 +2,6 @@ package com.novoda.downloadmanager.lib;
 
 interface DataWriter {
 
-    DownloadThread.State write(DownloadThread.State state, byte[] buffer, int count) throws StopRequestException;
+    DownloadTask.State write(DownloadTask.State state, byte[] buffer, int count) throws StopRequestException;
 
 }

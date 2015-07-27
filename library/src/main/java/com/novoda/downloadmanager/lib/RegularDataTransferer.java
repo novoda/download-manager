@@ -12,8 +12,8 @@ class RegularDataTransferer implements DataTransferer {
     }
 
     @Override
-    public DownloadThread.State transferData(DownloadThread.State state, InputStream in) throws StopRequestException {
-        DownloadThread.State newState = state;
+    public DownloadTask.State transferData(DownloadTask.State state, InputStream in) throws StopRequestException {
+        DownloadTask.State newState = state;
         try {
             byte[] buffer = new byte[Constants.BUFFER_SIZE];
             int readLast = in.read(buffer);

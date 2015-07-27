@@ -58,7 +58,7 @@ import static java.net.HttpURLConnection.*;
  * Task which executes a given {@link FileDownloadInfo}: making network requests,
  * persisting data to disk, and updating {@link DownloadProvider}.
  */
-class DownloadThread implements Runnable {
+class DownloadTask implements Runnable {
 
     /**
      * For intents used to notify the user that a download exceeds a size threshold, if this extra
@@ -66,7 +66,7 @@ class DownloadThread implements Runnable {
      */
     public static final String EXTRA_IS_WIFI_REQUIRED = "isWifiRequired";
 
-    private static final String TAG = "DownloadManager-DownloadThread";
+    private static final String TAG = "DownloadManager-DownloadTask";
 
     // TODO: bind each download to a specific network interface to avoid state
     // checking races once we have ConnectivityManager API
@@ -89,18 +89,18 @@ class DownloadThread implements Runnable {
     private final DownloadReadyChecker downloadReadyChecker;
     private final Clock clock;
 
-    public DownloadThread(Context context,
-                          SystemFacade systemFacade,
-                          FileDownloadInfo originalDownloadInfo,
-                          StorageManager storageManager,
-                          DownloadNotifier downloadNotifier,
-                          BatchCompletionBroadcaster batchCompletionBroadcaster,
-                          BatchRepository batchRepository,
-                          DownloadsUriProvider downloadsUriProvider,
-                          FileDownloadInfo.ControlStatus.Reader controlReader,
-                          NetworkChecker networkChecker,
-                          DownloadReadyChecker downloadReadyChecker,
-                          Clock clock) {
+    public DownloadTask(Context context,
+                        SystemFacade systemFacade,
+                        FileDownloadInfo originalDownloadInfo,
+                        StorageManager storageManager,
+                        DownloadNotifier downloadNotifier,
+                        BatchCompletionBroadcaster batchCompletionBroadcaster,
+                        BatchRepository batchRepository,
+                        DownloadsUriProvider downloadsUriProvider,
+                        FileDownloadInfo.ControlStatus.Reader controlReader,
+                        NetworkChecker networkChecker,
+                        DownloadReadyChecker downloadReadyChecker,
+                        Clock clock) {
         this.context = context;
         this.systemFacade = systemFacade;
         this.originalDownloadInfo = originalDownloadInfo;

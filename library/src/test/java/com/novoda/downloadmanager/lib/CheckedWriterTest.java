@@ -24,7 +24,7 @@ public class CheckedWriterTest {
 
     private int count;
     private long initialCurrentBytes;
-    private DownloadThread.State state;
+    private DownloadTask.State state;
     private byte[] buffer;
 
     private CheckedWriter checkedWriter;
@@ -73,7 +73,7 @@ public class CheckedWriterTest {
     }
 
     private void givenANormalStateForACopy() {
-        state = new DownloadThread.State();
+        state = new DownloadTask.State();
         count = 42;
         initialCurrentBytes = state.currentBytes;
         buffer = new byte[]{};
