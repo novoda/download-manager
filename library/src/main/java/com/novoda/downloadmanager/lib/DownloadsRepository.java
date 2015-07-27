@@ -6,7 +6,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
-import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.notils.string.QueryUtils;
 import com.novoda.notils.string.StringUtils;
 
@@ -18,7 +17,6 @@ class DownloadsRepository {
     private final ContentResolver contentResolver;
     private final DownloadInfoCreator downloadInfoCreator;
     private final DownloadsUriProvider downloadsUriProvider;
-    private final FileDownloadInfo.ControlStatus.Reader controlReader;
 
     public DownloadsRepository(ContentResolver contentResolver,
                                DownloadInfoCreator downloadInfoCreator,
@@ -27,7 +25,6 @@ class DownloadsRepository {
         this.contentResolver = contentResolver;
         this.downloadInfoCreator = downloadInfoCreator;
         this.downloadsUriProvider = downloadsUriProvider;
-        this.controlReader = controlReader;
     }
 
     public List<FileDownloadInfo> getAllDownloads() {
@@ -62,10 +59,6 @@ class DownloadsRepository {
         } finally {
             downloadsCursor.close();
         }
-    }
-
-    public FileDownloadInfo.ControlStatus getDownloadInfoControlStatusFor(long id) {
-        return downloadInfoCreator.create(controlReader, id);
     }
 
     public void moveDownloadsStatusTo(List<Long> ids, int status) {
