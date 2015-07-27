@@ -171,6 +171,9 @@ public class BatchQuery {
                         .or()
                         .withSelection(DownloadContract.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
                         .withArgument(String.valueOf(DownloadStatus.QUEUED_FOR_WIFI))
+                        .or()
+                        .withSelection(DownloadContract.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
+                        .withArgument(String.valueOf(DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS))
                         .build();
                 criteriaList.add(pausedCriteria);
             }
