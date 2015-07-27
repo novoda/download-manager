@@ -403,9 +403,7 @@ public class DownloadManager {
                      new DownloadsRepository(
                              contentResolver,
                              DownloadsRepository.DownloadInfoCreator.NON_FUNCTIONAL,
-                             DownloadsUriProvider.getInstance(),
-                             new FileDownloadInfo.ControlStatus.Reader(contentResolver, DownloadsUriProvider.getInstance())
-                     )
+                             DownloadsUriProvider.getInstance())
              ),
              false);
     }
@@ -426,9 +424,7 @@ public class DownloadManager {
                      new DownloadsRepository(
                              contentResolver,
                              DownloadsRepository.DownloadInfoCreator.NON_FUNCTIONAL,
-                             DownloadsUriProvider.getInstance(),
-                             new FileDownloadInfo.ControlStatus.Reader(contentResolver, DownloadsUriProvider.getInstance())
-                     )
+                             DownloadsUriProvider.getInstance())
              ),
              verboseLogging);
     }
@@ -450,9 +446,7 @@ public class DownloadManager {
                         new DownloadsRepository(
                                 contentResolver,
                                 DownloadsRepository.DownloadInfoCreator.NON_FUNCTIONAL,
-                                DownloadsUriProvider.getInstance(),
-                                new FileDownloadInfo.ControlStatus.Reader(contentResolver, DownloadsUriProvider.getInstance())
-                        )
+                                DownloadsUriProvider.getInstance())
                 ),
                 false);
     }

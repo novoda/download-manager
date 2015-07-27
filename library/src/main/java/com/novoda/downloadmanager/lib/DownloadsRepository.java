@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
+import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.notils.string.QueryUtils;
 import com.novoda.notils.string.StringUtils;
 
@@ -18,10 +19,7 @@ class DownloadsRepository {
     private final DownloadInfoCreator downloadInfoCreator;
     private final DownloadsUriProvider downloadsUriProvider;
 
-    public DownloadsRepository(ContentResolver contentResolver,
-                               DownloadInfoCreator downloadInfoCreator,
-                               DownloadsUriProvider downloadsUriProvider,
-                               FileDownloadInfo.ControlStatus.Reader controlReader) {
+    public DownloadsRepository(ContentResolver contentResolver, DownloadInfoCreator downloadInfoCreator, DownloadsUriProvider downloadsUriProvider) {
         this.contentResolver = contentResolver;
         this.downloadInfoCreator = downloadInfoCreator;
         this.downloadsUriProvider = downloadsUriProvider;
@@ -101,19 +99,11 @@ class DownloadsRepository {
 
         FileDownloadInfo create(FileDownloadInfo.Reader reader);
 
-        FileDownloadInfo.ControlStatus create(FileDownloadInfo.ControlStatus.Reader reader, long id);
-
         class NonFunctional implements DownloadInfoCreator {
 
             @Override
             public FileDownloadInfo create(FileDownloadInfo.Reader reader) {
                 LLog.w("DownloadInfoCreator.NonFunctional.create()");
-                return null;
-            }
-
-            @Override
-            public FileDownloadInfo.ControlStatus create(FileDownloadInfo.ControlStatus.Reader reader, long id) {
-                LLog.w("DownloadInfoCreator.NonFunctional.ControlStatus.create()");
                 return null;
             }
         }
