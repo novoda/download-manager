@@ -389,44 +389,44 @@ public class DownloadManager {
 
     public DownloadManager(Context context, ContentResolver contentResolver) {
         this(context,
-             contentResolver,
-             DownloadsUriProvider.getInstance(),
-             new RealSystemFacade(context, new Clock()),
-             new BatchPauseResumeController(
-                     contentResolver,
-                     DownloadsUriProvider.getInstance(),
-                     new BatchRepository(
-                             contentResolver,
-                             new DownloadDeleter(contentResolver),
-                             DownloadsUriProvider.getInstance(),
-                             new RealSystemFacade(GlobalState.getContext(), new Clock())),
-                     new DownloadsRepository(
-                             contentResolver,
-                             DownloadsRepository.DownloadInfoCreator.NON_FUNCTIONAL,
-                             DownloadsUriProvider.getInstance())
-             ),
-             false);
+                contentResolver,
+                DownloadsUriProvider.getInstance(),
+                new RealSystemFacade(context, new Clock()),
+                new BatchPauseResumeController(
+                        contentResolver,
+                        DownloadsUriProvider.getInstance(),
+                        new BatchRepository(
+                                contentResolver,
+                                new DownloadDeleter(contentResolver),
+                                DownloadsUriProvider.getInstance(),
+                                new RealSystemFacade(GlobalState.getContext(), new Clock())),
+                        new DownloadsRepository(
+                                new RealSystemFacade(GlobalState.getContext(), new Clock()), contentResolver,
+                                DownloadsRepository.DownloadInfoCreator.NON_FUNCTIONAL,
+                                DownloadsUriProvider.getInstance())
+                ),
+                false);
     }
 
     public DownloadManager(Context context, ContentResolver contentResolver, boolean verboseLogging) {
         this(context,
-             contentResolver,
-             DownloadsUriProvider.getInstance(),
-             new RealSystemFacade(context, new Clock()),
-             new BatchPauseResumeController(
-                     contentResolver,
-                     DownloadsUriProvider.getInstance(),
-                     new BatchRepository(
-                             contentResolver,
-                             new DownloadDeleter(contentResolver),
-                             DownloadsUriProvider.getInstance(),
-                             new RealSystemFacade(GlobalState.getContext(), new Clock())),
-                     new DownloadsRepository(
-                             contentResolver,
-                             DownloadsRepository.DownloadInfoCreator.NON_FUNCTIONAL,
-                             DownloadsUriProvider.getInstance())
-             ),
-             verboseLogging);
+                contentResolver,
+                DownloadsUriProvider.getInstance(),
+                new RealSystemFacade(context, new Clock()),
+                new BatchPauseResumeController(
+                        contentResolver,
+                        DownloadsUriProvider.getInstance(),
+                        new BatchRepository(
+                                contentResolver,
+                                new DownloadDeleter(contentResolver),
+                                DownloadsUriProvider.getInstance(),
+                                new RealSystemFacade(GlobalState.getContext(), new Clock())),
+                        new DownloadsRepository(
+                                new RealSystemFacade(GlobalState.getContext(), new Clock()), contentResolver,
+                                DownloadsRepository.DownloadInfoCreator.NON_FUNCTIONAL,
+                                DownloadsUriProvider.getInstance())
+                ),
+                verboseLogging);
     }
 
     DownloadManager(Context context, ContentResolver contentResolver, DownloadsUriProvider downloadsUriProvider) {
@@ -444,7 +444,7 @@ public class DownloadManager {
                                 DownloadsUriProvider.getInstance(),
                                 new RealSystemFacade(GlobalState.getContext(), new Clock())),
                         new DownloadsRepository(
-                                contentResolver,
+                                new RealSystemFacade(GlobalState.getContext(), new Clock()), contentResolver,
                                 DownloadsRepository.DownloadInfoCreator.NON_FUNCTIONAL,
                                 DownloadsUriProvider.getInstance())
                 ),

@@ -5,6 +5,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.text.TextUtils;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.notils.string.QueryUtils;
@@ -13,13 +14,18 @@ import com.novoda.notils.string.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.COLUMN_STATUS;
+
 class DownloadsRepository {
 
+    private final SystemFacade systemFacade;
     private final ContentResolver contentResolver;
     private final DownloadInfoCreator downloadInfoCreator;
     private final DownloadsUriProvider downloadsUriProvider;
 
-    public DownloadsRepository(ContentResolver contentResolver, DownloadInfoCreator downloadInfoCreator, DownloadsUriProvider downloadsUriProvider) {
+    public DownloadsRepository(SystemFacade systemFacade, ContentResolver contentResolver, DownloadInfoCreator downloadInfoCreator,
+                               DownloadsUriProvider downloadsUriProvider) {
+        this.systemFacade = systemFacade;
         this.contentResolver = contentResolver;
         this.downloadInfoCreator = downloadInfoCreator;
         this.downloadsUriProvider = downloadsUriProvider;
@@ -91,6 +97,30 @@ class DownloadsRepository {
         String where = DownloadContract.Downloads.COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
         String[] selectionArgs = {String.valueOf(batchId), String.valueOf(DownloadStatus.SUCCESS)};
         contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
+    }
+
+    public void updateDownload(FileDownloadInfo downloadInfo, String filename, String mimeType, int retryAfter, String requestUri, int finalStatus,
+                               String errorMsg, int numFailed) {
+        ContentValues values = new ContentValues(8);
+        values.put(COLUMN_STATUS, finalStatus);
+        values.put(DownloadContract.Downloads.COLUMN_DATA, filename);
+        values.put(DownloadContract.Downloads.COLUMN_MIME_TYPE, mimeType);
+        values.put(DownloadContract.Downloads.COLUMN_LAST_MODIFICATION, systemFacade.currentTimeMillis());
+        values.put(DownloadContract.Downloads.COLUMN_FAILED_CONNECTIONS, numFailed);
+        values.put(Constants.RETRY_AFTER_X_REDIRECT_COUNT, retryAfter);
+
+        if (!TextUtils.equals(downloadInfo.getUri(), requestUri)) {
+            values.put(DownloadContract.Downloads.COLUMN_URI, requestUri);
+        }
+        if (DownloadStatus.isCompleted(finalStatus)) {
+            values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
+        }
+
+        // save the error message. could be useful to developers.
+        if (!TextUtils.isEmpty(errorMsg)) {
+            values.put(DownloadContract.Downloads.COLUMN_ERROR_MSG, errorMsg);
+        }
+        contentResolver.update(downloadInfo.getAllDownloadsUri(), values, null, null);
     }
 
     interface DownloadInfoCreator {

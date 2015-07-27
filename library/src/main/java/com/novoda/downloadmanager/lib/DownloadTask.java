@@ -88,6 +88,7 @@ class DownloadTask implements Runnable {
     private final NetworkChecker networkChecker;
     private final DownloadReadyChecker downloadReadyChecker;
     private final Clock clock;
+    private final DownloadsRepository downloadsRepository;
 
     public DownloadTask(Context context,
                         SystemFacade systemFacade,
@@ -100,7 +101,8 @@ class DownloadTask implements Runnable {
                         FileDownloadInfo.ControlStatus.Reader controlReader,
                         NetworkChecker networkChecker,
                         DownloadReadyChecker downloadReadyChecker,
-                        Clock clock) {
+                        Clock clock,
+                        DownloadsRepository downloadsRepository) {
         this.context = context;
         this.systemFacade = systemFacade;
         this.originalDownloadInfo = originalDownloadInfo;
@@ -113,6 +115,7 @@ class DownloadTask implements Runnable {
         this.networkChecker = networkChecker;
         this.downloadReadyChecker = downloadReadyChecker;
         this.clock = clock;
+        this.downloadsRepository = downloadsRepository;
     }
 
     /**
@@ -835,26 +838,8 @@ class DownloadTask implements Runnable {
     }
 
     private void notifyThroughDatabase(State state, int finalStatus, String errorMsg, int numFailed) {
-        ContentValues values = new ContentValues(8);
-        values.put(COLUMN_STATUS, finalStatus);
-        values.put(DownloadContract.Downloads.COLUMN_DATA, state.filename);
-        values.put(DownloadContract.Downloads.COLUMN_MIME_TYPE, state.mimeType);
-        values.put(DownloadContract.Downloads.COLUMN_LAST_MODIFICATION, systemFacade.currentTimeMillis());
-        values.put(DownloadContract.Downloads.COLUMN_FAILED_CONNECTIONS, numFailed);
-        values.put(Constants.RETRY_AFTER_X_REDIRECT_COUNT, state.retryAfter);
-
-        if (!TextUtils.equals(originalDownloadInfo.getUri(), state.requestUri)) {
-            values.put(DownloadContract.Downloads.COLUMN_URI, state.requestUri);
-        }
-        if (DownloadStatus.isCompleted(finalStatus)) {
-            values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
-        }
-
-        // save the error message. could be useful to developers.
-        if (!TextUtils.isEmpty(errorMsg)) {
-            values.put(DownloadContract.Downloads.COLUMN_ERROR_MSG, errorMsg);
-        }
-        getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
+        downloadsRepository.updateDownload(originalDownloadInfo, state.filename,
+                state.mimeType, state.retryAfter, state.requestUri, finalStatus, errorMsg, numFailed);
 
         updateBatchStatus(originalDownloadInfo.getBatchId(), originalDownloadInfo.getId());
     }
