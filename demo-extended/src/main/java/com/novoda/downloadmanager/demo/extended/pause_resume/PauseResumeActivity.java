@@ -20,7 +20,7 @@ import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.NotificationVisibility;
 import com.novoda.downloadmanager.lib.Query;
 import com.novoda.downloadmanager.lib.Request;
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,15 +47,12 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
                 Download item = adapter.getItem(position);
                 long batchId = item.getBatchId();
                 if (item.isPaused()) {
-                    pauseBatch(batchId);
+                    downloadManager.resumeBatch(batchId);
                 } else {
-                    resumeBatch(batchId);
+                    downloadManager.pauseBatch(batchId);
                 }
-                queryForDownloads();
-            }
-        });
+        );
         downloadManager = DownloadManagerBuilder.from(this)
-                .withVerboseLogging()
                 .build();
         pauseResumeAdapter = new PauseResumeAdapter(new ArrayList<Download>());
         listView.setAdapter(pauseResumeAdapter);
@@ -66,7 +63,8 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
                     public void onClick(@NonNull View v) {
                         enqueueSingleDownload();
                     }
-                });
+                }
+        );
 
         setupQueryingExample();
     }
@@ -108,7 +106,7 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
                 .alwaysAttemptResume();
 
         long requestId = downloadManager.enqueue(request);
-        Log.d("Download enqueued with request ID: " + requestId);
+        LLog.d("Download enqueued with request ID: " + requestId);
     }
 
     @Override

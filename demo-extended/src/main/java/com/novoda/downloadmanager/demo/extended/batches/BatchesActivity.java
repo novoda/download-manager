@@ -31,47 +31,48 @@ public class BatchesActivity extends AppCompatActivity implements QueryForBatche
 
         ListView listView = (ListView) findViewById(R.id.show_batches_list);
         downloadManager = DownloadManagerBuilder.from(this)
-                .withVerboseLogging()
                 .build();
         adapter = new BatchesAdapter(new ArrayList<Batch>());
         listView.setAdapter(adapter);
 
         listView.setEmptyView(findViewById(R.id.show_batches_no_batches_view));
         RadioGroup queryGroup = (RadioGroup) findViewById(R.id.show_batches_query_radio_group);
-        queryGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                switch (checkedId) {
-                    case R.id.show_batches_query_all:
-                        query = BatchQuery.ALL;
-                        break;
-                    case R.id.show_batches_query_successful:
-                        query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_SUCCESSFUL).build();
-                        break;
-                    case R.id.show_batches_query_pending:
-                        query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_PENDING).build();
-                        break;
-                    case R.id.show_batches_query_downloading:
-                        query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_RUNNING).build();
-                        break;
-                    case R.id.show_batches_query_failed:
-                        query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_FAILED).build();
-                        break;
-                    case R.id.show_batches_query_failed_pending:
-                        query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_FAILED | DownloadManager.STATUS_PENDING).build();
-                        break;
-                    case R.id.show_batches_query_live:
-                        query = new BatchQuery.Builder().withSortByLiveness().build();
-                        break;
-                    case R.id.show_batches_query_deleting:
-                        query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_DELETING).build();
-                        break;
-                    default:
-                        break;
+        queryGroup.setOnCheckedChangeListener(
+                new RadioGroup.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(RadioGroup group, int checkedId) {
+                        switch (checkedId) {
+                            case R.id.show_batches_query_all:
+                                query = BatchQuery.ALL;
+                                break;
+                            case R.id.show_batches_query_successful:
+                                query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_SUCCESSFUL).build();
+                                break;
+                            case R.id.show_batches_query_pending:
+                                query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_PENDING).build();
+                                break;
+                            case R.id.show_batches_query_downloading:
+                                query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_RUNNING).build();
+                                break;
+                            case R.id.show_batches_query_failed:
+                                query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_FAILED).build();
+                                break;
+                            case R.id.show_batches_query_failed_pending:
+                                query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_FAILED | DownloadManager.STATUS_PENDING).build();
+                                break;
+                            case R.id.show_batches_query_live:
+                                query = new BatchQuery.Builder().withSortByLiveness().build();
+                                break;
+                            case R.id.show_batches_query_deleting:
+                                query = new BatchQuery.Builder().withStatusFilter(DownloadManager.STATUS_DELETING).build();
+                                break;
+                            default:
+                                break;
+                        }
+                        queryForBatches(query);
+                    }
                 }
-                queryForBatches(query);
-            }
-        });
+        );
         queryForBatches(BatchQuery.ALL);
 
     }

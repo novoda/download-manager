@@ -28,7 +28,7 @@ import android.os.Process;
 import android.text.TextUtils;
 import android.util.Pair;
 
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.io.Closeable;
 import java.io.File;
@@ -213,19 +213,19 @@ class DownloadThread implements Runnable {
         // Skip when download already marked as finished; this download was probably started again while racing with UpdateThread.
         int downloadStatus = FileDownloadInfo.queryDownloadStatus(getContentResolver(), originalDownloadInfo.getId(), downloadsUriProvider);
         if (downloadStatus == DownloadStatus.SUCCESS) {
-            Log.d("Download " + originalDownloadInfo.getId() + " already finished; skipping");
+            LLog.d("Download " + originalDownloadInfo.getId() + " already finished; skipping");
             return;
         }
         if (DownloadStatus.isCancelled(downloadStatus)) {
-            Log.d("Download " + originalDownloadInfo.getId() + " already cancelled; skipping");
+            LLog.d("Download " + originalDownloadInfo.getId() + " already cancelled; skipping");
             return;
         }
         if (DownloadStatus.isError(downloadStatus)) {
-            Log.d("Download " + originalDownloadInfo.getId() + " already failed: status = " + downloadStatus + "; skipping");
+            LLog.d("Download " + originalDownloadInfo.getId() + " already failed: status = " + downloadStatus + "; skipping");
             return;
         }
         if (DownloadStatus.isDeleting(downloadStatus)) {
-            Log.d("Download " + originalDownloadInfo.getId() + " is deleting: status = " + downloadStatus + "; skipping");
+            LLog.d("Download " + originalDownloadInfo.getId() + " is deleting: status = " + downloadStatus + "; skipping");
             return;
         }
 
@@ -256,7 +256,7 @@ class DownloadThread implements Runnable {
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
             wakeLock.acquire();
 
-            Log.i("Download " + originalDownloadInfo.getId() + " starting");
+            LLog.i("Download " + originalDownloadInfo.getId() + " starting");
 
             // Remember which network this download started on; used to
             // determine if errors were due to network changes.
@@ -285,7 +285,7 @@ class DownloadThread implements Runnable {
             // remove the cause before printing, in case it contains PII
             errorMsg = error.getMessage();
             String msg = "Aborting request for download " + originalDownloadInfo.getId() + ": " + errorMsg;
-            Log.w(msg, error);
+            LLog.w(msg, error);
             finalStatus = error.getFinalStatus();
 
             // Nobody below our level should request retries, since we handle
@@ -318,7 +318,7 @@ class DownloadThread implements Runnable {
         } catch (Throwable ex) {
             errorMsg = ex.getMessage();
             String msg = "Exception for id " + originalDownloadInfo.getId() + ": " + errorMsg;
-            Log.w(msg, ex);
+            LLog.w(msg, ex);
             finalStatus = DownloadStatus.UNKNOWN_ERROR;
             // falls through to the code that reports an error
         } finally {
@@ -327,7 +327,7 @@ class DownloadThread implements Runnable {
             cleanupDestination(state, finalStatus);
             notifyDownloadCompleted(state, finalStatus, errorMsg, numFailed);
 
-            Log.i("Download " + originalDownloadInfo.getId() + " finished with status " + DownloadStatus.statusToString(finalStatus));
+            LLog.i("Download " + originalDownloadInfo.getId() + " finished with status " + DownloadStatus.statusToString(finalStatus));
 
             if (wakeLock != null) {
                 wakeLock.release();
@@ -350,7 +350,7 @@ class DownloadThread implements Runnable {
 
         // skip when already finished; remove after fixing race in 5217390
         if (downloadAlreadyFinished(state)) {
-            Log.i("Skipping initiating request for download " + originalDownloadInfo.getId() + "; already completed");
+            LLog.i("Skipping initiating request for download " + originalDownloadInfo.getId() + "; already completed");
             return;
         }
 
@@ -584,10 +584,10 @@ class DownloadThread implements Runnable {
      */
     private void cleanupDestination(State state, int finalStatus) {
         if (state.filename != null && DownloadStatus.isError(finalStatus)) {
-            Log.d("cleanupDestination() deleting " + state.filename);
+            LLog.d("cleanupDestination() deleting " + state.filename);
             boolean deleted = new File(state.filename).delete();
             if (!deleted) {
-                Log.e("File not deleted");
+                LLog.e("File not deleted");
             }
             state.filename = null;
         }
@@ -699,7 +699,7 @@ class DownloadThread implements Runnable {
         if (transferEncoding == null) {
             state.contentLength = getHeaderFieldLong(conn, "Content-Length", UNKNOWN_BYTE_SIZE);
         } else {
-            Log.i("Ignoring Content-Length since Transfer-Encoding is also defined");
+            LLog.i("Ignoring Content-Length since Transfer-Encoding is also defined");
             state.contentLength = UNKNOWN_BYTE_SIZE;
         }
 
@@ -735,37 +735,37 @@ class DownloadThread implements Runnable {
             // only true if we've already run a thread for this download
             return;
         }
-        Log.i("have run thread before for id: " + originalDownloadInfo.getId() + ", and state.filename: " + state.filename);
+        LLog.i("have run thread before for id: " + originalDownloadInfo.getId() + ", and state.filename: " + state.filename);
         if (!Helpers.isFilenameValid(state.filename, storageManager.getDownloadDataDirectory())) {
-            Log.d("Yeah we know we are bad for downloading to internal storage");
+            LLog.d("Yeah we know we are bad for downloading to internal storage");
 //                throw new StopRequestException(Downloads.Impl.STATUS_FILE_ERROR, "found invalid internal destination filename");
         }
         // We're resuming a download that got interrupted
         File destinationFile = new File(state.filename);
         if (destinationFile.exists()) {
-            Log.i("resuming download for id: " + originalDownloadInfo.getId() + ", and state.filename: " + state.filename);
+            LLog.i("resuming download for id: " + originalDownloadInfo.getId() + ", and state.filename: " + state.filename);
             long fileLength = destinationFile.length();
             if (fileLength == 0) {
                 // The download hadn't actually started, we can restart from scratch
-                Log.d("setupDestinationFile() found fileLength=0, deleting " + state.filename);
+                LLog.d("setupDestinationFile() found fileLength=0, deleting " + state.filename);
                 destinationFile.delete();
                 state.filename = null;
-                Log.i("resuming download for id: " + originalDownloadInfo.getId() + ", BUT starting from scratch again: ");
+                LLog.i("resuming download for id: " + originalDownloadInfo.getId() + ", BUT starting from scratch again: ");
             } else if (!originalDownloadInfo.isResumable()) {
                 // This should've been caught upon failure
-                Log.d("setupDestinationFile() unable to resume download, deleting " + state.filename);
+                LLog.d("setupDestinationFile() unable to resume download, deleting " + state.filename);
                 destinationFile.delete();
                 throw new StopRequestException(DownloadStatus.CANNOT_RESUME, "Trying to resume a download that can't be resumed");
             } else {
                 // All right, we'll be able to resume this download
-                Log.i("resuming download for id: " + originalDownloadInfo.getId() + ", and starting with file of length: " + fileLength);
+                LLog.i("resuming download for id: " + originalDownloadInfo.getId() + ", and starting with file of length: " + fileLength);
                 state.currentBytes = (int) fileLength;
                 if (originalDownloadInfo.getTotalBytes() != UNKNOWN_BYTE_SIZE) {
                     state.contentLength = originalDownloadInfo.getTotalBytes();
                 }
                 state.headerETag = originalDownloadInfo.getETag();
                 state.continuingDownload = true;
-                Log.i("resuming download for id: " + originalDownloadInfo.getId() + ", state.currentBytes: " + state.currentBytes + ", and setting continuingDownload to true: ");
+                LLog.i("resuming download for id: " + originalDownloadInfo.getId() + ", state.currentBytes: " + state.currentBytes + ", and setting continuingDownload to true: ");
             }
         }
     }
@@ -926,7 +926,7 @@ class DownloadThread implements Runnable {
             Method setPermissions = fileUtils.getMethod("setPermissions", String.class, int.class, int.class, int.class);
             setPermissions.invoke(null, fileName, mode, uid, gid);
         } catch (Exception e) {
-            Log.e("Failed to set permissions. Unknown future behaviour.");
+            LLog.e("Failed to set permissions. Unknown future behaviour.");
         }
     }
 }

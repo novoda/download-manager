@@ -16,7 +16,7 @@ import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.widget.Toast;
 
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 import static android.content.Intent.ACTION_BOOT_COMPLETED;
 import static android.content.Intent.ACTION_MEDIA_MOUNTED;
@@ -158,7 +158,7 @@ public class DownloadReceiver extends BroadcastReceiver {
         try {
             context.startActivity(intent);
         } catch (ActivityNotFoundException ex) {
-            Log.d("no activity for " + intent, ex);
+            LLog.d("no activity for " + intent, ex);
             Toast.makeText(context, "Cannot open file", Toast.LENGTH_LONG).show();
         }
     }
@@ -182,7 +182,7 @@ public class DownloadReceiver extends BroadcastReceiver {
                     context.getContentResolver().update(uri, values, null, null);
                 }
             } else {
-                Log.w("Missing details for download " + batchId);
+                LLog.w("Missing details for download " + batchId);
             }
         } finally {
             cursor.close();

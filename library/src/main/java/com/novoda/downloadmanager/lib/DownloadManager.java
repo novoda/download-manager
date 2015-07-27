@@ -31,7 +31,7 @@ import android.provider.Settings.SettingNotFoundException;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -410,7 +410,6 @@ public class DownloadManager {
         this.systemFacade = systemFacade;
         GlobalState.setContext(context);
         GlobalState.setVerboseLogging(verboseLogging);
-        Log.setShowLogs(verboseLogging);
     }
 
     /**
@@ -498,13 +497,15 @@ public class DownloadManager {
                     downloadsUriProvider.getContentUri(),
                     new String[]{"_id"},
                     DownloadContract.Downloads.COLUMN_FILE_NAME_HINT + "=?",
-                    new String[]{uri.toString()}, null);
+                    new String[]{uri.toString()},
+                    null
+            );
             if (cursor.moveToFirst()) {
                 long id = cursor.getLong(cursor.getColumnIndexOrThrow("_id"));
                 removeDownloads(id);
                 return;
             }
-            Log.e("Didn't delete anything for uri: " + uri);
+            LLog.e("Didn't delete anything for uri: " + uri);
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -574,7 +575,8 @@ public class DownloadManager {
                 downloadsUriProvider.getBatchesUri(),
                 valuesDelete,
                 getWhereClauseFor(batchesIds, DownloadContract.Downloads._ID),
-                longArrayToStringArray(batchesIds));
+                longArrayToStringArray(batchesIds)
+        );
     }
 
     /**
@@ -646,7 +648,8 @@ public class DownloadManager {
                 int status = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_STATUS));
                 if (DownloadManager.STATUS_SUCCESSFUL == status) {
                     int indx = cursor.getColumnIndexOrThrow(
-                            DownloadContract.Downloads.COLUMN_DESTINATION);
+                            DownloadContract.Downloads.COLUMN_DESTINATION
+                    );
                     int destination = cursor.getInt(indx);
                     // TODO: if we ever add API to DownloadManager to let the caller specify
                     // non-external storage for a downloaded file, then the following code
@@ -660,7 +663,8 @@ public class DownloadManager {
                     } else {
                         // return public uri
                         String path = cursor.getString(
-                                cursor.getColumnIndexOrThrow(COLUMN_LOCAL_FILENAME));
+                                cursor.getColumnIndexOrThrow(COLUMN_LOCAL_FILENAME)
+                        );
                         return Uri.fromFile(new File(path));
                     }
                 }
@@ -720,7 +724,8 @@ public class DownloadManager {
                 if (status != STATUS_SUCCESSFUL && status != STATUS_FAILED) {
                     throw new IllegalArgumentException(
                             "Cannot restart incomplete download: "
-                                    + cursor.getLong(cursor.getColumnIndex(COLUMN_ID)));
+                                    + cursor.getLong(cursor.getColumnIndex(COLUMN_ID))
+                    );
                 }
             }
         } finally {

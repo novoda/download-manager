@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 /**
  * Creates and updated database on demand when opening it.
@@ -87,7 +87,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
      */
     @Override
     public void onCreate(@NonNull SQLiteDatabase db) {
-        Log.v("populating new database");
+        LLog.v("populating new database");
         createDownloadsTable(db);
         createHeadersTable(db);
         createBatchesTable(db);
@@ -157,7 +157,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
                             + Constants.MEDIA_SCANNED + " BOOLEAN);"
             );
         } catch (SQLException ex) {
-            Log.e("couldn't create table in downloads database");
+            LLog.e("couldn't create table in downloads database");
             throw ex;
         }
     }

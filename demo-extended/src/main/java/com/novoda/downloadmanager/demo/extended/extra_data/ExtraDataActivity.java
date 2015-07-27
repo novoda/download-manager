@@ -17,7 +17,7 @@ import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.NotificationVisibility;
 import com.novoda.downloadmanager.lib.Query;
 import com.novoda.downloadmanager.lib.Request;
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.util.List;
 
@@ -37,7 +37,6 @@ public class ExtraDataActivity extends AppCompatActivity implements QueryForExtr
         setContentView(R.layout.activity_extra_data);
         listView = (ListView) findViewById(R.id.main_downloads_list);
         downloadManager = DownloadManagerBuilder.from(this)
-                .withVerboseLogging()
                 .build();
         downloadAdapter = new ExtraDataAdapter();
         listView.setAdapter(downloadAdapter);
@@ -48,7 +47,8 @@ public class ExtraDataActivity extends AppCompatActivity implements QueryForExtr
                     public void onClick(@NonNull View v) {
                         enqueueSingleDownload();
                     }
-                });
+                }
+        );
 
         setupQueryingExample();
     }
@@ -71,7 +71,7 @@ public class ExtraDataActivity extends AppCompatActivity implements QueryForExtr
                 .setNotificationVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE);
 
         long requestId = downloadManager.enqueue(request);
-        Log.d("Download enqueued with request ID: " + requestId);
+        LLog.d("Download enqueued with request ID: " + requestId);
     }
 
     @Override
