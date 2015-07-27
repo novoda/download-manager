@@ -5,7 +5,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.ListView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.RadioGroup;
 
 import com.novoda.downloadmanager.DownloadManagerBuilder;
@@ -23,19 +25,21 @@ public class BatchesActivity extends AppCompatActivity implements QueryForBatche
     private DownloadManager downloadManager;
     private BatchesAdapter adapter;
     private BatchQuery query = BatchQuery.ALL;
+    private View emptyView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_batches);
 
-        ListView listView = (ListView) findViewById(R.id.show_batches_list);
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.show_batches_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         downloadManager = DownloadManagerBuilder.from(this)
                 .build();
         adapter = new BatchesAdapter(new ArrayList<Batch>());
-        listView.setAdapter(adapter);
+        recyclerView.setAdapter(adapter);
 
-        listView.setEmptyView(findViewById(R.id.show_batches_no_batches_view));
+        emptyView = findViewById(R.id.show_batches_no_batches_view);
         RadioGroup queryGroup = (RadioGroup) findViewById(R.id.show_batches_query_radio_group);
         queryGroup.setOnCheckedChangeListener(
                 new RadioGroup.OnCheckedChangeListener() {
@@ -105,5 +109,6 @@ public class BatchesActivity extends AppCompatActivity implements QueryForBatche
     @Override
     public void onQueryResult(List<Batch> batches) {
         adapter.updateBatches(batches);
+        emptyView.setVisibility(batches.isEmpty() ? View.VISIBLE : View.GONE);
     }
 }

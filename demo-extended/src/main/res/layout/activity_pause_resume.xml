@@ -28,7 +28,7 @@
     android:textAppearance="?android:textAppearanceMedium"
     android:text="@string/no_downloads" />
 
-  <ListView
+  <android.support.v7.widget.RecyclerView
     android:id="@+id/main_downloads_list"
     android:layout_width="match_parent"
     android:layout_height="wrap_content" />
