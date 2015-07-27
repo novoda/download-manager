@@ -225,6 +225,10 @@ final class DownloadStatus {
         return status == DELETING;
     }
 
+    public static boolean isPausedByApp(int status) {
+        return status == PAUSED_BY_APP;
+    }
+
     /**
      * Returns whether the download did not start due to insufficient space
      */

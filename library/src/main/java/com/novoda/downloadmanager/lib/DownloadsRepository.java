@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
+import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.notils.string.QueryUtils;
 import com.novoda.notils.string.StringUtils;
 
@@ -72,8 +73,40 @@ class DownloadsRepository {
         contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
     }
 
+    public void pauseDownloadWithBatchId(long batchId) {
+        ContentValues values = new ContentValues(1);
+        values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_PAUSED);
+
+        String where = DownloadContract.Downloads.COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
+        String[] selectionArgs = {String.valueOf(batchId), String.valueOf(DownloadStatus.SUCCESS)};
+
+        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
+    }
+
+    public void resumeDownloadWithBatchId(long batchId) {
+        ContentValues values = new ContentValues(2);
+        values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
+        values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.PENDING);
+
+        String where = DownloadContract.Downloads.COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
+        String[] selectionArgs = {String.valueOf(batchId), String.valueOf(DownloadStatus.SUCCESS)};
+        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
+    }
+
     interface DownloadInfoCreator {
+
+        DownloadInfoCreator NON_FUNCTIONAL = new NonFunctional();
+
         FileDownloadInfo create(FileDownloadInfo.Reader reader);
+
+        class NonFunctional implements DownloadInfoCreator {
+
+            @Override
+            public FileDownloadInfo create(FileDownloadInfo.Reader reader) {
+                LLog.w("DownloadInfoCreator.NonFunctional.create()");
+                return null;
+            }
+        }
     }
 
 }

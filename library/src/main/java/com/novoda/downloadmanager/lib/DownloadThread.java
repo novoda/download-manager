@@ -864,7 +864,7 @@ class DownloadThread implements Runnable {
     }
 
     private void updateBatchStatus(long batchId, long downloadId) {
-        int batchStatus = batchRepository.getBatchStatus(batchId);
+        int batchStatus = batchRepository.calculateBatchStatus(batchId);
 
         batchRepository.updateBatchStatus(batchId, batchStatus);
 

@@ -26,7 +26,7 @@ public class BatchStatusTests {
     public void givenABatchWithSomeCompleteItemsAndSomeSubmittedItemsThenTheBatchStatusIsRunning() {
         BatchRepository repository = givenABatchWithStatuses(DownloadStatus.SUCCESS, DownloadStatus.SUBMITTED);
 
-        int batchStatus = repository.getBatchStatus(1);
+        int batchStatus = repository.calculateBatchStatus(1);
 
         assertThat(batchStatus).isEqualTo(DownloadStatus.RUNNING);
     }
@@ -35,7 +35,7 @@ public class BatchStatusTests {
     public void givenABatchWithItemsThatAreNotSubmittedOrSuccessThenTheBatchStatusIsNotRunning() {
         BatchRepository repository = givenABatchWithStatuses(DownloadStatus.SUCCESS, DownloadStatus.BATCH_FAILED);
 
-        int batchStatus = repository.getBatchStatus(1);
+        int batchStatus = repository.calculateBatchStatus(1);
 
         assertThat(batchStatus).isNotEqualTo(DownloadStatus.RUNNING);
     }
@@ -44,7 +44,7 @@ public class BatchStatusTests {
     public void givenABatchWithSubmittedAndSuccessStatesThenTheBatchStatusIsRunning() {
         BatchRepository repository = givenABatchWithStatuses(DownloadStatus.SUBMITTED, DownloadStatus.SUBMITTED, DownloadStatus.SUBMITTED, DownloadStatus.SUCCESS);
 
-        int batchStatus = repository.getBatchStatus(1);
+        int batchStatus = repository.calculateBatchStatus(1);
 
         assertThat(batchStatus).isEqualTo(DownloadStatus.RUNNING);
     }
@@ -53,7 +53,7 @@ public class BatchStatusTests {
     public void givenABatchWithAllCompleteItemsThenTheBatchStatusIsSuccess() {
         BatchRepository repository = givenABatchWithStatuses(DownloadStatus.SUCCESS, DownloadStatus.SUCCESS);
 
-        int batchStatus = repository.getBatchStatus(1);
+        int batchStatus = repository.calculateBatchStatus(1);
 
         assertThat(batchStatus).isEqualTo(DownloadStatus.SUCCESS);
     }
@@ -62,7 +62,7 @@ public class BatchStatusTests {
     public void givenABatchWithAllPendingItemsThenTheBatchStatusIsPending() {
         BatchRepository repository = givenABatchWithStatuses(DownloadStatus.PENDING, DownloadStatus.PENDING);
 
-        int batchStatus = repository.getBatchStatus(1);
+        int batchStatus = repository.calculateBatchStatus(1);
 
         assertThat(batchStatus).isEqualTo(DownloadStatus.PENDING);
     }
