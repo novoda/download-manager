@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
+import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.notils.string.QueryUtils;
 import com.novoda.notils.string.StringUtils;
 
@@ -19,7 +20,9 @@ class DownloadsRepository {
     private final DownloadsUriProvider downloadsUriProvider;
     private final FileDownloadInfo.ControlStatus.Reader controlReader;
 
-    public DownloadsRepository(ContentResolver contentResolver, DownloadInfoCreator downloadInfoCreator, DownloadsUriProvider downloadsUriProvider,
+    public DownloadsRepository(ContentResolver contentResolver,
+                               DownloadInfoCreator downloadInfoCreator,
+                               DownloadsUriProvider downloadsUriProvider,
                                FileDownloadInfo.ControlStatus.Reader controlReader) {
         this.contentResolver = contentResolver;
         this.downloadInfoCreator = downloadInfoCreator;
@@ -79,10 +82,48 @@ class DownloadsRepository {
         contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
     }
 
+    public void pauseDownloadWithBatchId(long batchId) {
+        ContentValues values = new ContentValues(1);
+        values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_PAUSED);
+
+        String where = DownloadContract.Downloads.COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
+        String[] selectionArgs = {String.valueOf(batchId), String.valueOf(DownloadStatus.SUCCESS)};
+
+        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
+    }
+
+    public void resumeDownloadWithBatchId(long batchId) {
+        ContentValues values = new ContentValues(2);
+        values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
+        values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.PENDING);
+
+        String where = DownloadContract.Downloads.COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
+        String[] selectionArgs = {String.valueOf(batchId), String.valueOf(DownloadStatus.SUCCESS)};
+        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
+    }
+
     interface DownloadInfoCreator {
+
+        DownloadInfoCreator NON_FUNCTIONAL = new NonFunctional();
+
         FileDownloadInfo create(FileDownloadInfo.Reader reader);
 
         FileDownloadInfo.ControlStatus create(FileDownloadInfo.ControlStatus.Reader reader, long id);
+
+        class NonFunctional implements DownloadInfoCreator {
+
+            @Override
+            public FileDownloadInfo create(FileDownloadInfo.Reader reader) {
+                LLog.w("DownloadInfoCreator.NonFunctional.create()");
+                return null;
+            }
+
+            @Override
+            public FileDownloadInfo.ControlStatus create(FileDownloadInfo.ControlStatus.Reader reader, long id) {
+                LLog.w("DownloadInfoCreator.NonFunctional.ControlStatus.create()");
+                return null;
+            }
+        }
     }
 
 }

@@ -28,9 +28,10 @@ import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
+import com.novoda.downloadmanager.lib.BatchPauseResumeController.BatchPauseException;
+import com.novoda.downloadmanager.lib.BatchPauseResumeController.BatchResumeException;
 import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.io.File;
@@ -384,30 +385,89 @@ public class DownloadManager {
     private final ContentResolver contentResolver;
     private final DownloadsUriProvider downloadsUriProvider;
     private final SystemFacade systemFacade;
+    private final BatchPauseResumeController batchPauseResumeController;
 
     private Uri baseUri;
 
-    public DownloadManager(Context context, ContentResolver resolver) {
-        this(context, resolver, DownloadsUriProvider.getInstance(), new RealSystemFacade(context, new Clock()), false);
+    public DownloadManager(Context context, ContentResolver contentResolver) {
+        this(context,
+             contentResolver,
+             DownloadsUriProvider.getInstance(),
+             new RealSystemFacade(context, new Clock()),
+             new BatchPauseResumeController(
+                     contentResolver,
+                     DownloadsUriProvider.getInstance(),
+                     new BatchRepository(
+                             contentResolver,
+                             new DownloadDeleter(contentResolver),
+                             DownloadsUriProvider.getInstance(),
+                             new RealSystemFacade(GlobalState.getContext(), new Clock())),
+                     new DownloadsRepository(
+                             contentResolver,
+                             DownloadsRepository.DownloadInfoCreator.NON_FUNCTIONAL,
+                             DownloadsUriProvider.getInstance(),
+                             new FileDownloadInfo.ControlStatus.Reader(contentResolver, DownloadsUriProvider.getInstance())
+                     )
+             ),
+             false);
     }
 
     public DownloadManager(Context context, ContentResolver contentResolver, boolean verboseLogging) {
-        this(context, contentResolver, DownloadsUriProvider.getInstance(), new RealSystemFacade(context, new Clock()), verboseLogging);
+        this(context,
+             contentResolver,
+             DownloadsUriProvider.getInstance(),
+             new RealSystemFacade(context, new Clock()),
+             new BatchPauseResumeController(
+                     contentResolver,
+                     DownloadsUriProvider.getInstance(),
+                     new BatchRepository(
+                             contentResolver,
+                             new DownloadDeleter(contentResolver),
+                             DownloadsUriProvider.getInstance(),
+                             new RealSystemFacade(GlobalState.getContext(), new Clock())),
+                     new DownloadsRepository(
+                             contentResolver,
+                             DownloadsRepository.DownloadInfoCreator.NON_FUNCTIONAL,
+                             DownloadsUriProvider.getInstance(),
+                             new FileDownloadInfo.ControlStatus.Reader(contentResolver, DownloadsUriProvider.getInstance())
+                     )
+             ),
+             verboseLogging);
     }
 
-    DownloadManager(Context context, ContentResolver resolver, DownloadsUriProvider downloadsUriProvider) {
-        this(context, resolver, downloadsUriProvider, new RealSystemFacade(context, new Clock()), false);
+    DownloadManager(Context context, ContentResolver contentResolver, DownloadsUriProvider downloadsUriProvider) {
+        this(context,
+             contentResolver,
+             downloadsUriProvider,
+             new RealSystemFacade(context, new Clock()),
+             new BatchPauseResumeController(contentResolver,
+                                            DownloadsUriProvider.getInstance(),
+                                            new BatchRepository(
+                                                    contentResolver,
+                                                    new DownloadDeleter(contentResolver),
+                                                    DownloadsUriProvider.getInstance(),
+                                                    new RealSystemFacade(GlobalState.getContext(), new Clock())),
+                                            new DownloadsRepository(
+                                                    contentResolver,
+                                                    DownloadsRepository.DownloadInfoCreator.NON_FUNCTIONAL,
+                                                    DownloadsUriProvider.getInstance(),
+                                                    new FileDownloadInfo.ControlStatus.Reader(contentResolver, DownloadsUriProvider.getInstance())
+                                            )
+             ),
+             false);
     }
 
     DownloadManager(Context context,
                     ContentResolver contentResolver,
                     DownloadsUriProvider downloadsUriProvider,
                     SystemFacade systemFacade,
+                    BatchPauseResumeController batchPauseResumeController,
                     boolean verboseLogging) {
         this.contentResolver = contentResolver;
         this.downloadsUriProvider = downloadsUriProvider;
         this.baseUri = downloadsUriProvider.getContentUri();
         this.systemFacade = systemFacade;
+        this.batchPauseResumeController = batchPauseResumeController;
         GlobalState.setContext(context);
         GlobalState.setVerboseLogging(verboseLogging);
     }
@@ -445,49 +505,12 @@ public class DownloadManager {
         return ContentUris.parseId(downloadUri);
     }
 
-    public void pauseBatch(long batchId) throws ControlPauseException {
-        DownloadDeleter downloadDeleter = new DownloadDeleter(contentResolver);
-        RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext(), new Clock());
-        BatchRepository batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
-
-        int batchStatus = batchRepository.getBatchStatus(batchId);
-        if (DownloadStatus.isRunning(batchStatus)) {
-            ContentValues values = new ContentValues();
-            String where = COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
-            String[] selectionArgs = {String.valueOf(batchId), String.valueOf(DownloadStatus.SUCCESS)};
-            values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_PAUSED);
-            contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
-        } else {
-            throw new ControlPauseException("Batch " + batchId + " cannot be paused as is not currently running");
-        }
+    public void pauseBatch(long batchId) throws BatchPauseException {
+        batchPauseResumeController.pauseBatch(batchId);
     }
 
-    public void resumeBatch(long batchId) throws ControlResumeException {
-        DownloadDeleter downloadDeleter = new DownloadDeleter(contentResolver);
-        RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext(), new Clock());
-        BatchRepository batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
-
-        int batchStatus = batchRepository.getBatchStatus(batchId);
-        if (DownloadStatus.isPausedByApp(batchStatus)) {
-            ContentValues values = getResumeContentValues();
-            String where = COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
-            String[] selectionArgs = {String.valueOf(batchId), String.valueOf(DownloadStatus.SUCCESS)};
-            contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
-
-            batchRepository.updateBatchStatus(batchId, DownloadStatus.PENDING);
-
-            notifyBatchesHaveChanged();
-        } else {
-            throw new ControlResumeException("Batch " + batchId + " cannot be resumed as is not currently paused");
-        }
-    }
-
-    @NonNull
-    private ContentValues getResumeContentValues() {
-        ContentValues values = new ContentValues();
-        values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
-        values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.PENDING);
-        return values;
+    public void resumeBatch(long batchId) throws BatchResumeException {
+        batchPauseResumeController.resumeBatch(batchId);
     }
 
     public void removeDownload(URI uri) {
@@ -1076,18 +1099,6 @@ public class DownloadManager {
                 default:
                     return STATUS_FAILED;
             }
-        }
-    }
-
-    public static class ControlPauseException extends Exception {
-        public ControlPauseException(String message) {
-            super(message);
-        }
-    }
-
-    public static class ControlResumeException extends Exception {
-        public ControlResumeException(String message) {
-            super(message);
         }
     }
 }
