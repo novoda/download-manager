@@ -28,13 +28,12 @@
   <TextView
     android:id="@+id/main_no_downloads_view"
     android:layout_width="match_parent"
-    android:layout_height="0dip"
-    android:layout_weight="100"
+    android:layout_height="wrap_content"
     android:gravity="center"
     android:textAppearance="?android:textAppearanceMedium"
     android:text="@string/no_downloads" />
 
-  <ListView
+  <android.support.v7.widget.RecyclerView
     android:id="@+id/main_downloads_list"
     android:layout_width="match_parent"
     android:layout_height="wrap_content" />

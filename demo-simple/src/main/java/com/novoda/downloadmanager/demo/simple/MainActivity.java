@@ -5,8 +5,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.ListView;
 
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
@@ -18,18 +19,21 @@ import com.novoda.downloadmanager.lib.Request;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements QueryForDownloadsAsyncTask.Callback {
+
     private static final String BIG_FILE = "http://ipv4.download.thinkbroadband.com/200MB.zip";
     private static final String PENGUINS_IMAGE = "http://i.imgur.com/Y7pMO5Kb.jpg";
 
-
     private DownloadManager downloadManager;
-    private ListView listView;
+    private RecyclerView recyclerView;
+    private View emptyView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        listView = (ListView) findViewById(R.id.main_downloads_list);
+        emptyView = findViewById(R.id.main_no_downloads_view);
+        recyclerView = (RecyclerView) findViewById(R.id.main_downloads_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         downloadManager = DownloadManagerBuilder.from(this)
                 .build();
 
@@ -60,11 +64,11 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
         findViewById(R.id.main_refresh_button).setOnClickListener(
                 new View.OnClickListener() {
                     @Override
-                    public void onClick(View v) {
+                    public void onClick(@NonNull View v) {
                         queryForDownloads();
                     }
-                });
-        listView.setEmptyView(findViewById(R.id.main_no_downloads_view));
+                }
+        );
     }
 
     private void queryForDownloads() {
@@ -73,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
 
     @Override
     public void onQueryResult(List<Download> downloads) {
-        listView.setAdapter(new DownloadAdapter(downloads));
+        recyclerView.setAdapter(new DownloadAdapter(downloads));
+        emptyView.setVisibility(downloads.isEmpty() ? View.VISIBLE : View.GONE);
     }
 }

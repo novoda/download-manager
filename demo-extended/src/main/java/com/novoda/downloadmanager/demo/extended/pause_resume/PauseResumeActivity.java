@@ -8,9 +8,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
 
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
@@ -31,35 +31,34 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private DownloadManager downloadManager;
-    private ListView listView;
     private PauseResumeAdapter pauseResumeAdapter;
+    private View emptyView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pause_resume);
 
-        listView = (ListView) findViewById(R.id.main_downloads_list);
-        listView.setOnItemClickListener(
-                new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        PauseResumeAdapter adapter = (PauseResumeAdapter) parent.getAdapter();
-                        Download item = adapter.getItem(position);
-                        long batchId = item.getBatchId();
-                        if (item.isPaused()) {
-                            downloadManager.resumeBatch(batchId);
-                        } else {
-                            downloadManager.pauseBatch(batchId);
-                        }
-                        queryForDownloads();
-                    }
-                }
-        );
+        emptyView = findViewById(R.id.main_no_downloads_view);
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.main_downloads_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
         downloadManager = DownloadManagerBuilder.from(this)
                 .build();
-        pauseResumeAdapter = new PauseResumeAdapter(new ArrayList<Download>());
-        listView.setAdapter(pauseResumeAdapter);
+
+        PauseResumeAdapter.Listener clickListener = new PauseResumeAdapter.Listener() {
+            @Override
+            public void onItemClick(Download download) {
+                if (download.isPaused()) {
+                    downloadManager.resumeBatch(download.getBatchId());
+                } else {
+                    downloadManager.pauseBatch(download.getBatchId());
+                }
+                queryForDownloads();
+            }
+        };
+        pauseResumeAdapter = new PauseResumeAdapter(new ArrayList<Download>(), clickListener);
+        recyclerView.setAdapter(pauseResumeAdapter);
 
         findViewById(R.id.single_download_button).setOnClickListener(
                 new View.OnClickListener() {
@@ -75,7 +74,6 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
 
     private void setupQueryingExample() {
         queryForDownloads();
-        listView.setEmptyView(findViewById(R.id.main_no_downloads_view));
     }
 
     private void queryForDownloads() {
@@ -121,5 +119,6 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
     @Override
     public void onQueryResult(List<Download> downloads) {
         pauseResumeAdapter.updateDownloads(downloads);
+        emptyView.setVisibility(downloads.isEmpty() ? View.VISIBLE : View.GONE);
     }
 }

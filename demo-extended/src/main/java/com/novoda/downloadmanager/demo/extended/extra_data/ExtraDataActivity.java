@@ -7,8 +7,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.ListView;
 
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
@@ -25,21 +26,25 @@ public class ExtraDataActivity extends AppCompatActivity implements QueryForExtr
     private static final String BIG_FILE = "http://download.thinkbroadband.com/20MB.zip";
 
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private DownloadManager downloadManager;
-    private ListView listView;
-    private ExtraDataAdapter downloadAdapter;
-
     private final QueryTimestamp lastQueryTimestamp = new QueryTimestamp();
+
+    private DownloadManager downloadManager;
+    private ExtraDataAdapter downloadAdapter;
+    private View emptyView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_extra_data);
-        listView = (ListView) findViewById(R.id.main_downloads_list);
+
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.main_downloads_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         downloadManager = DownloadManagerBuilder.from(this)
                 .build();
         downloadAdapter = new ExtraDataAdapter();
-        listView.setAdapter(downloadAdapter);
+        recyclerView.setAdapter(downloadAdapter);
+
+        emptyView = findViewById(R.id.main_no_downloads_view);
 
         findViewById(R.id.download_button).setOnClickListener(
                 new View.OnClickListener() {
@@ -55,7 +60,6 @@ public class ExtraDataActivity extends AppCompatActivity implements QueryForExtr
 
     private void setupQueryingExample() {
         queryForDownloads();
-        listView.setEmptyView(findViewById(R.id.main_no_downloads_view));
     }
 
     private void queryForDownloads() {
@@ -102,5 +106,6 @@ public class ExtraDataActivity extends AppCompatActivity implements QueryForExtr
     @Override
     public void onQueryResult(List<ExtraDataDownload> extraDataDownloads) {
         downloadAdapter.updateDownloads(extraDataDownloads);
+        emptyView.setVisibility(extraDataDownloads.isEmpty() ? View.VISIBLE : View.GONE);
     }
 }
