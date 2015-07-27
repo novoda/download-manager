@@ -66,12 +66,14 @@ public class BatchQueryTest {
                 "(" + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=?)");
         Integer[] expectedArguments = {
                 DownloadStatus.PAUSED_BY_APP,
                 DownloadStatus.WAITING_TO_RETRY,
                 DownloadStatus.WAITING_FOR_NETWORK,
-                DownloadStatus.QUEUED_FOR_WIFI
+                DownloadStatus.QUEUED_FOR_WIFI,
+                DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS
         };
         assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), expectedArguments);
     }
@@ -99,6 +101,7 @@ public class BatchQueryTest {
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + "(" + DownloadContract.Batches.COLUMN_STATUS + ">=? AND "
                         + DownloadContract.Batches.COLUMN_STATUS + "<?))");
         Integer[] expectedArguments = {
@@ -106,6 +109,7 @@ public class BatchQueryTest {
                 DownloadStatus.WAITING_TO_RETRY,
                 DownloadStatus.WAITING_FOR_NETWORK,
                 DownloadStatus.QUEUED_FOR_WIFI,
+                DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS,
                 400,
                 600
         };
@@ -127,6 +131,7 @@ public class BatchQueryTest {
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=?)");
         Integer[] expectedArguments = {
                 DownloadStatus.PENDING,
@@ -134,7 +139,8 @@ public class BatchQueryTest {
                 DownloadStatus.PAUSED_BY_APP,
                 DownloadStatus.WAITING_TO_RETRY,
                 DownloadStatus.WAITING_FOR_NETWORK,
-                DownloadStatus.QUEUED_FOR_WIFI
+                DownloadStatus.QUEUED_FOR_WIFI,
+                DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS
         };
         assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), expectedArguments);
 
@@ -157,6 +163,7 @@ public class BatchQueryTest {
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=?)");
 
         Integer[] expectedArguments = {
@@ -166,6 +173,7 @@ public class BatchQueryTest {
                 DownloadStatus.WAITING_TO_RETRY,
                 DownloadStatus.WAITING_FOR_NETWORK,
                 DownloadStatus.QUEUED_FOR_WIFI,
+                DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS,
                 DownloadStatus.SUCCESS
         };
         assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), expectedArguments);
@@ -192,6 +200,7 @@ public class BatchQueryTest {
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + "(" + DownloadContract.Batches.COLUMN_STATUS + ">=? AND "
                         + DownloadContract.Batches.COLUMN_STATUS + "<?))");
 
@@ -202,6 +211,7 @@ public class BatchQueryTest {
                 DownloadStatus.WAITING_TO_RETRY,
                 DownloadStatus.WAITING_FOR_NETWORK,
                 DownloadStatus.QUEUED_FOR_WIFI,
+                DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS,
                 DownloadStatus.DELETING,
                 DownloadStatus.SUCCESS,
                 400,
@@ -234,6 +244,7 @@ public class BatchQueryTest {
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + "(" + DownloadContract.Batches.COLUMN_STATUS + ">=? AND "
                         + DownloadContract.Batches.COLUMN_STATUS + "<?))");
 
@@ -245,6 +256,7 @@ public class BatchQueryTest {
                 DownloadStatus.WAITING_TO_RETRY,
                 DownloadStatus.WAITING_FOR_NETWORK,
                 DownloadStatus.QUEUED_FOR_WIFI,
+                DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS,
                 DownloadStatus.DELETING,
                 DownloadStatus.SUCCESS,
                 400,
