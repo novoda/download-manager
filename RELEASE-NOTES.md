@@ -1,3 +1,8 @@
+0.2.12
+-------
+- Provide restart mechanism #146
+
+
 0.2.11
 -------
 - Replace ListView with RecyclerView in demos #140
