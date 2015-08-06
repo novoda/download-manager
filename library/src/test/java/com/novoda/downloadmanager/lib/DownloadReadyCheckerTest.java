@@ -32,7 +32,7 @@ public class DownloadReadyCheckerTest {
                 mock(PublicFacingDownloadMarshaller.class)
         );
 
-        boolean isReady = downloadReadyChecker.canDownload(mock(DownloadBatch.class));
+        boolean isReady = downloadReadyChecker.clientAllowToDownload(mock(DownloadBatch.class));
 
         assertThat(isReady).isTrue();
     }
@@ -46,7 +46,7 @@ public class DownloadReadyCheckerTest {
                 mock(PublicFacingDownloadMarshaller.class)
         );
 
-        boolean isReady = downloadReadyChecker.canDownload(mock(DownloadBatch.class));
+        boolean isReady = downloadReadyChecker.clientAllowToDownload(mock(DownloadBatch.class));
 
         assertThat(isReady).isFalse();
     }
