@@ -402,10 +402,12 @@ public class DownloadService extends Service {
     private void download(FileDownloadInfo info) {
         Uri downloadUri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), info.getId());
         FileDownloadInfo.ControlStatus.Reader controlReader = new FileDownloadInfo.ControlStatus.Reader(getContentResolver(), downloadUri);
+        DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(info);
         DownloadTask downloadTask = new DownloadTask(
-                this, systemFacade, info, storageManager, downloadNotifier,
-                batchCompletionBroadcaster, batchRepository, downloadsUriProvider,
-                controlReader, networkChecker, downloadReadyChecker, new Clock()
+                this, systemFacade, info, downloadBatch, storageManager,
+                downloadNotifier, batchCompletionBroadcaster, batchRepository,
+                downloadsUriProvider, controlReader, networkChecker, downloadReadyChecker,
+                new Clock()
         );
 
         ContentValues contentValues = new ContentValues();
