@@ -23,7 +23,7 @@ class DownloadReadyChecker {
 
     public boolean canDownload(DownloadBatch downloadBatch) {
         if (isDownloadManagerReadyToDownload(downloadBatch)) {
-            clientAllowToDownload(downloadBatch);
+            return clientAllowToDownload(downloadBatch);
         }
 
         return false;
