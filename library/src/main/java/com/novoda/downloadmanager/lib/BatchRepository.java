@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager.lib;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.support.v4.util.SparseArrayCompat;
@@ -238,6 +239,25 @@ class BatchRepository {
         ContentValues values = new ContentValues(1);
         values.put(COLUMN_STATUS, DownloadStatus.CANCELED);
         resolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
+    }
+
+    public void cancelBatch(long batchId) {
+        ContentValues downloadValues = new ContentValues(1);
+        downloadValues.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.CANCELED);
+        resolver.update(
+                downloadsUriProvider.getAllDownloadsUri(),
+                downloadValues,
+                DownloadContract.Downloads.COLUMN_BATCH_ID + " = ?",
+                new String[]{String.valueOf(batchId)}
+        );
+        ContentValues batchValues = new ContentValues(1);
+        batchValues.put(DownloadContract.Batches.COLUMN_STATUS, DownloadStatus.CANCELED);
+        resolver.update(
+                ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), batchId),
+                batchValues,
+                null,
+                null
+        );
     }
 
     public void setBatchItemsFailed(long batchId, long downloadId) {

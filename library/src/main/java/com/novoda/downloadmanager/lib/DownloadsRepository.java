@@ -19,6 +19,8 @@ import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.*;
 
 class DownloadsRepository {
 
+    private static final int TRUE_THIS_IS_CLEARER_NOW = 1;
+
     private final SystemFacade systemFacade;
     private final ContentResolver contentResolver;
     private final DownloadInfoCreator downloadInfoCreator;
@@ -159,6 +161,12 @@ class DownloadsRepository {
 
         values.put(COLUMN_TOTAL_BYTES, totalBytes);
         contentResolver.update(downloadInfo.getAllDownloadsUri(), values, null, null);
+    }
+
+    public void deleteDownload(Uri downloadUri) {
+        ContentValues values = new ContentValues(1);
+        values.put(DownloadContract.Downloads.COLUMN_DELETED, TRUE_THIS_IS_CLEARER_NOW);
+        contentResolver.update(downloadUri, values, null, null);
     }
 
     interface DownloadInfoCreator {
