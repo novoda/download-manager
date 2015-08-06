@@ -454,7 +454,7 @@ class DownloadTask implements Runnable {
     }
 
     private void checkClientRules() throws StopRequestException {
-        if (!downloadReadyChecker.clientAllowToDownload(originalDownloadBatch)) {
+        if (!downloadReadyChecker.clientAllowsToDownload(originalDownloadBatch)) {
             throw new StopRequestException(DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS, "Cannot proceed because client denies");
         }
     }
