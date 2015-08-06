@@ -409,9 +409,7 @@ public class DownloadService extends Service {
                 controlReader, networkChecker, downloadReadyChecker, new Clock(),
                 downloadsRepository);
 
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.SUBMITTED);
-        getContentResolver().update(info.getAllDownloadsUri(), contentValues, null, null);
+        downloadsRepository.setDownloadSubmitted(info);
 
         executor.submit(downloadTask);
     }

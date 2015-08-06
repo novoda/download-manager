@@ -169,6 +169,12 @@ class DownloadsRepository {
         contentResolver.update(downloadUri, values, null, null);
     }
 
+    public void setDownloadSubmitted(FileDownloadInfo info) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.SUBMITTED);
+        contentResolver.update(info.getAllDownloadsUri(), contentValues, null, null);
+    }
+
     interface DownloadInfoCreator {
 
         DownloadInfoCreator NON_FUNCTIONAL = new NonFunctional();
