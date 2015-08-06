@@ -78,6 +78,7 @@ class DownloadTask implements Runnable {
 
     private final Context context;
     private final FileDownloadInfo originalDownloadInfo;
+    private final DownloadBatch originalDownloadBatch;
     private final SystemFacade systemFacade;
     private final StorageManager storageManager;
     private final DownloadNotifier downloadNotifier;
@@ -92,6 +93,7 @@ class DownloadTask implements Runnable {
     public DownloadTask(Context context,
                         SystemFacade systemFacade,
                         FileDownloadInfo originalDownloadInfo,
+                        DownloadBatch originalDownloadBatch,
                         StorageManager storageManager,
                         DownloadNotifier downloadNotifier,
                         BatchCompletionBroadcaster batchCompletionBroadcaster,
@@ -104,6 +106,7 @@ class DownloadTask implements Runnable {
         this.context = context;
         this.systemFacade = systemFacade;
         this.originalDownloadInfo = originalDownloadInfo;
+        this.originalDownloadBatch = originalDownloadBatch;
         this.storageManager = storageManager;
         this.downloadNotifier = downloadNotifier;
         this.batchCompletionBroadcaster = batchCompletionBroadcaster;
@@ -236,13 +239,8 @@ class DownloadTask implements Runnable {
         State state = new State(originalDownloadInfo);
 
         try {
-            checkPausedOrCanceled();
 
-            DownloadBatch currentBatch = batchRepository.retrieveBatchFor(originalDownloadInfo);
-
-            if (!downloadReadyChecker.canDownload(currentBatch)) {
-                throw new StopRequestException(DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS, "Cannot proceed because client denies");
-            }
+            checkDownloadCanProceed();
 
             if (downloadStatus != DownloadStatus.RUNNING) {
                 ContentValues contentValues = new ContentValues();
@@ -432,13 +430,19 @@ class DownloadTask implements Runnable {
      * Check if the download has been paused or canceled, stopping the request appropriately if it
      * has been.
      */
-    private void checkPausedOrCanceled() throws StopRequestException {
+    private void checkDownloadCanProceed() throws StopRequestException {
         if (clock.intervalLessThan(Clock.Interval.ONE_SECOND)) {
             return;
         }
 
         clock.startInterval();
 
+        checkIsPausedOrCanceled();
+
+        checkClientRules();
+    }
+
+    private void checkIsPausedOrCanceled() throws StopRequestException {
         FileDownloadInfo.ControlStatus controlStatus = controlReader.newControlStatus();
 
         if (controlStatus.isPaused()) {
@@ -446,6 +450,12 @@ class DownloadTask implements Runnable {
         }
         if (controlStatus.isCanceled()) {
             throw new StopRequestException(DownloadStatus.CANCELED, "download canceled");
+        }
+    }
+
+    private void checkClientRules() throws StopRequestException {
+        if (!downloadReadyChecker.clientAllowToDownload(originalDownloadBatch)) {
+            throw new StopRequestException(DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS, "Cannot proceed because client denies");
         }
     }
 
@@ -562,7 +572,7 @@ class DownloadTask implements Runnable {
     private final NotifierWriter.WriteChunkListener checkOnWrite = new NotifierWriter.WriteChunkListener() {
         @Override
         public void chunkWritten(FileDownloadInfo downloadInfo) throws StopRequestException {
-            checkPausedOrCanceled();
+            checkDownloadCanProceed();
         }
     };
 

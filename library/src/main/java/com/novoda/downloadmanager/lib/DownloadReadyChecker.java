@@ -23,11 +23,15 @@ class DownloadReadyChecker {
 
     public boolean canDownload(DownloadBatch downloadBatch) {
         if (isDownloadManagerReadyToDownload(downloadBatch)) {
-            Download download = downloadMarshaller.marshall(downloadBatch);
-            return downloadClientReadyChecker.isAllowedToDownload(download);
+            clientAllowToDownload(downloadBatch);
         }
 
         return false;
+    }
+
+    boolean clientAllowToDownload(DownloadBatch downloadBatch) {
+        Download download = downloadMarshaller.marshall(downloadBatch);
+        return downloadClientReadyChecker.isAllowedToDownload(download);
     }
 
     private boolean isDownloadManagerReadyToDownload(DownloadBatch downloadBatch) {
