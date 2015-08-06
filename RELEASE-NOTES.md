@@ -1,3 +1,13 @@
+0.2.13
+-------
+- Add client checks along with pause and cancel checks and speed up calls #147
+
+
+0.2.12
+-------
+- Provide restart mechanism #146
+
+
 0.2.11
 -------
 - Replace ListView with RecyclerView in demos #140

@@ -21,6 +21,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.net.Uri;
@@ -1100,5 +1101,20 @@ public class DownloadManager {
                     return STATUS_FAILED;
             }
         }
+    }
+
+    /**
+     * Restart will activate the downloads workflow in case that it was not already active
+     * <p/>
+     * A possible scenario: A client denies a download for a particular business rule and that
+     * rule does not apply any more. Calling this method will reactivate the downloads workflow,
+     * check the client rules and proceed if necessary
+     * <p/>
+     * This method can be called as many times as desired as the system will take care that only
+     * one instance is running, ignoring further calls if is currently active
+     */
+    public void forceStart() {
+        Context context = GlobalState.getContext();
+        context.startService(new Intent(context, DownloadService.class));
     }
 }
