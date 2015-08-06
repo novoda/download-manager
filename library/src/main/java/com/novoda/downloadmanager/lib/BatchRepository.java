@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager.lib;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.support.v4.util.SparseArrayCompat;
@@ -13,6 +14,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.COLUMN_BATCH_ID;
+import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.COLUMN_STATUS;
 
 class BatchRepository {
 
@@ -229,6 +233,42 @@ class BatchRepository {
 
     public Cursor retrieveFor(BatchQuery query) {
         return resolver.query(downloadsUriProvider.getBatchesUri(), null, query.getSelection(), query.getSelectionArguments(), query.getSortOrder());
+    }
+
+    public void setBatchItemsCancelled(long batchId) {
+        ContentValues values = new ContentValues(1);
+        values.put(COLUMN_STATUS, DownloadStatus.CANCELED);
+        resolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
+    }
+
+    public void cancelBatch(long batchId) {
+        ContentValues downloadValues = new ContentValues(1);
+        downloadValues.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.CANCELED);
+        resolver.update(
+                downloadsUriProvider.getAllDownloadsUri(),
+                downloadValues,
+                DownloadContract.Downloads.COLUMN_BATCH_ID + " = ?",
+                new String[]{String.valueOf(batchId)}
+        );
+        ContentValues batchValues = new ContentValues(1);
+        batchValues.put(DownloadContract.Batches.COLUMN_STATUS, DownloadStatus.CANCELED);
+        resolver.update(
+                ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), batchId),
+                batchValues,
+                null,
+                null
+        );
+    }
+
+    public void setBatchItemsFailed(long batchId, long downloadId) {
+        ContentValues values = new ContentValues(1);
+        values.put(COLUMN_STATUS, DownloadStatus.BATCH_FAILED);
+        resolver.update(
+                downloadsUriProvider.getAllDownloadsUri(),
+                values,
+                COLUMN_BATCH_ID + " = ? AND " + DownloadContract.Downloads._ID + " <> ? ",
+                new String[]{String.valueOf(batchId), String.valueOf(downloadId)}
+        );
     }
 
     private static class StatusCountMap {

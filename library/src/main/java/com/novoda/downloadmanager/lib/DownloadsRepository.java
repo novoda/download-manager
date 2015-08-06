@@ -5,6 +5,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.text.TextUtils;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.notils.string.QueryUtils;
@@ -13,13 +14,21 @@ import com.novoda.notils.string.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.novoda.downloadmanager.lib.Constants.UNKNOWN_BYTE_SIZE;
+import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.*;
+
 class DownloadsRepository {
 
+    private static final int TRUE_THIS_IS_CLEARER_NOW = 1;
+
+    private final SystemFacade systemFacade;
     private final ContentResolver contentResolver;
     private final DownloadInfoCreator downloadInfoCreator;
     private final DownloadsUriProvider downloadsUriProvider;
 
-    public DownloadsRepository(ContentResolver contentResolver, DownloadInfoCreator downloadInfoCreator, DownloadsUriProvider downloadsUriProvider) {
+    public DownloadsRepository(SystemFacade systemFacade, ContentResolver contentResolver, DownloadInfoCreator downloadInfoCreator,
+                               DownloadsUriProvider downloadsUriProvider) {
+        this.systemFacade = systemFacade;
         this.contentResolver = contentResolver;
         this.downloadInfoCreator = downloadInfoCreator;
         this.downloadsUriProvider = downloadsUriProvider;
@@ -59,6 +68,26 @@ class DownloadsRepository {
         }
     }
 
+    /**
+     * Query and return status of requested download.
+     */
+    public int getDownloadStatus(long id) {
+        final Cursor cursor = contentResolver.query(
+                ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id),
+                new String[]{DownloadContract.Downloads.COLUMN_STATUS}, null, null, null);
+        try {
+            if (cursor.moveToFirst()) {
+                return cursor.getInt(0);
+            } else {
+                // TODO: increase strictness of value returned for unknown
+                // downloads; this is safe default for now.
+                return DownloadStatus.PENDING;
+            }
+        } finally {
+            cursor.close();
+        }
+    }
+
     public void moveDownloadsStatusTo(List<Long> ids, int status) {
         if (ids.isEmpty()) {
             return;
@@ -91,6 +120,79 @@ class DownloadsRepository {
         String where = DownloadContract.Downloads.COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
         String[] selectionArgs = {String.valueOf(batchId), String.valueOf(DownloadStatus.SUCCESS)};
         contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
+    }
+
+    public void updateDownload(FileDownloadInfo downloadInfo, String filename, String mimeType, int retryAfter, String requestUri, int finalStatus,
+                               String errorMsg, int numFailed) {
+        ContentValues values = new ContentValues(8);
+        values.put(COLUMN_STATUS, finalStatus);
+        values.put(DownloadContract.Downloads.COLUMN_DATA, filename);
+        values.put(DownloadContract.Downloads.COLUMN_MIME_TYPE, mimeType);
+        values.put(DownloadContract.Downloads.COLUMN_LAST_MODIFICATION, systemFacade.currentTimeMillis());
+        values.put(DownloadContract.Downloads.COLUMN_FAILED_CONNECTIONS, numFailed);
+        values.put(Constants.RETRY_AFTER_X_REDIRECT_COUNT, retryAfter);
+
+        if (!TextUtils.equals(downloadInfo.getUri(), requestUri)) {
+            values.put(DownloadContract.Downloads.COLUMN_URI, requestUri);
+        }
+        if (DownloadStatus.isCompleted(finalStatus)) {
+            values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
+        }
+
+        // save the error message. could be useful to developers.
+        if (!TextUtils.isEmpty(errorMsg)) {
+            values.put(DownloadContract.Downloads.COLUMN_ERROR_MSG, errorMsg);
+        }
+        contentResolver.update(downloadInfo.getAllDownloadsUri(), values, null, null);
+    }
+
+    public void setDownloadRunning(FileDownloadInfo downloadInfo) {
+        ContentValues contentValues = new ContentValues(1);
+        contentValues.put(COLUMN_STATUS, DownloadStatus.RUNNING);
+        contentResolver.update(downloadInfo.getAllDownloadsUri(), contentValues, null, null);
+    }
+
+    public void pauseDownloadWithSize(FileDownloadInfo downloadInfo, long currentBytes, long totalBytes) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_STATUS, DownloadStatus.PAUSED_BY_APP);
+        values.put(COLUMN_CURRENT_BYTES, currentBytes);
+        values.put(COLUMN_TOTAL_BYTES, totalBytes);
+        contentResolver.update(downloadInfo.getAllDownloadsUri(), values, null, null);
+    }
+
+    public void updateDownloadEndOfStream(FileDownloadInfo downloadInfo, long currentBytes, long contentLength) {
+        ContentValues values = new ContentValues(2);
+        values.put(COLUMN_CURRENT_BYTES, currentBytes);
+        if (contentLength == UNKNOWN_BYTE_SIZE) {
+            values.put(COLUMN_TOTAL_BYTES, currentBytes);
+        }
+        contentResolver.update(downloadInfo.getAllDownloadsUri(), values, null, null);
+    }
+
+    public void updateDatabaseFromHeaders(FileDownloadInfo downloadInfo, String filename, String headerETag, String mimeType, long totalBytes) {
+        ContentValues values = new ContentValues(4);
+        values.put(DownloadContract.Downloads.COLUMN_DATA, filename);
+        if (headerETag != null) {
+            values.put(Constants.ETAG, headerETag);
+        }
+        if (mimeType != null) {
+            values.put(DownloadContract.Downloads.COLUMN_MIME_TYPE, mimeType);
+        }
+
+        values.put(COLUMN_TOTAL_BYTES, totalBytes);
+        contentResolver.update(downloadInfo.getAllDownloadsUri(), values, null, null);
+    }
+
+    public void deleteDownload(Uri downloadUri) {
+        ContentValues values = new ContentValues(1);
+        values.put(DownloadContract.Downloads.COLUMN_DELETED, TRUE_THIS_IS_CLEARER_NOW);
+        contentResolver.update(downloadUri, values, null, null);
+    }
+
+    public void setDownloadSubmitted(FileDownloadInfo info) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.SUBMITTED);
+        contentResolver.update(info.getAllDownloadsUri(), contentValues, null, null);
     }
 
     interface DownloadInfoCreator {

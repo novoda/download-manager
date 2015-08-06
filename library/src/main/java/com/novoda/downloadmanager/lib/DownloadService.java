@@ -168,7 +168,7 @@ public class DownloadService extends Service {
         executor = factory.createExecutor();
 
         this.downloadsRepository = new DownloadsRepository(
-                getContentResolver(), new DownloadsRepository.DownloadInfoCreator() {
+                systemFacade, getContentResolver(), new DownloadsRepository.DownloadInfoCreator() {
             @Override
             public FileDownloadInfo create(FileDownloadInfo.Reader reader) {
                 return createNewDownloadInfo(reader);
@@ -404,15 +404,12 @@ public class DownloadService extends Service {
         FileDownloadInfo.ControlStatus.Reader controlReader = new FileDownloadInfo.ControlStatus.Reader(getContentResolver(), downloadUri);
         DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(info);
         DownloadTask downloadTask = new DownloadTask(
-                this, systemFacade, info, downloadBatch, storageManager,
-                downloadNotifier, batchCompletionBroadcaster, batchRepository,
-                downloadsUriProvider, controlReader, networkChecker, downloadReadyChecker,
-                new Clock()
-        );
+                this, systemFacade, info, downloadBatch, storageManager, downloadNotifier,
+                batchCompletionBroadcaster, batchRepository, downloadsUriProvider,
+                controlReader, networkChecker, downloadReadyChecker, new Clock(),
+                downloadsRepository);
 
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.SUBMITTED);
-        getContentResolver().update(info.getAllDownloadsUri(), contentValues, null, null);
+        downloadsRepository.setDownloadSubmitted(info);
 
         executor.submit(downloadTask);
     }

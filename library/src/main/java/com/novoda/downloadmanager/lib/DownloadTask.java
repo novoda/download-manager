@@ -17,7 +17,6 @@
 package com.novoda.downloadmanager.lib;
 
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.drm.DrmManagerClient;
@@ -47,7 +46,6 @@ import java.util.Locale;
 
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 import static com.novoda.downloadmanager.lib.Constants.UNKNOWN_BYTE_SIZE;
-import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.*;
 import static com.novoda.downloadmanager.lib.DownloadStatus.HTTP_DATA_ERROR;
 import static com.novoda.downloadmanager.lib.DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS;
 import static com.novoda.downloadmanager.lib.FileDownloadInfo.NetworkState;
@@ -89,6 +87,7 @@ class DownloadTask implements Runnable {
     private final NetworkChecker networkChecker;
     private final DownloadReadyChecker downloadReadyChecker;
     private final Clock clock;
+    private final DownloadsRepository downloadsRepository;
 
     public DownloadTask(Context context,
                         SystemFacade systemFacade,
@@ -102,7 +101,8 @@ class DownloadTask implements Runnable {
                         FileDownloadInfo.ControlStatus.Reader controlReader,
                         NetworkChecker networkChecker,
                         DownloadReadyChecker downloadReadyChecker,
-                        Clock clock) {
+                        Clock clock,
+                        DownloadsRepository downloadsRepository) {
         this.context = context;
         this.systemFacade = systemFacade;
         this.originalDownloadInfo = originalDownloadInfo;
@@ -116,6 +116,7 @@ class DownloadTask implements Runnable {
         this.networkChecker = networkChecker;
         this.downloadReadyChecker = downloadReadyChecker;
         this.clock = clock;
+        this.downloadsRepository = downloadsRepository;
     }
 
     /**
@@ -214,7 +215,7 @@ class DownloadTask implements Runnable {
 
     private void runInternal() {
         // Skip when download already marked as finished; this download was probably started again while racing with UpdateThread.
-        int downloadStatus = FileDownloadInfo.queryDownloadStatus(getContentResolver(), originalDownloadInfo.getId(), downloadsUriProvider);
+        int downloadStatus = downloadsRepository.getDownloadStatus(originalDownloadInfo.getId());
         if (downloadStatus == DownloadStatus.SUCCESS) {
             LLog.d("Download " + originalDownloadInfo.getId() + " already finished; skipping");
             return;
@@ -243,9 +244,7 @@ class DownloadTask implements Runnable {
             checkDownloadCanProceed();
 
             if (downloadStatus != DownloadStatus.RUNNING) {
-                ContentValues contentValues = new ContentValues();
-                contentValues.put(COLUMN_STATUS, DownloadStatus.RUNNING);
-                context.getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), contentValues, null, null);
+                downloadsRepository.setDownloadRunning(originalDownloadInfo);
                 updateBatchStatus(originalDownloadInfo.getBatchId(), originalDownloadInfo.getId());
             }
 
@@ -613,15 +612,9 @@ class DownloadTask implements Runnable {
             return;
         }
 
-        ContentValues values = new ContentValues(2);
-        values.put(COLUMN_CURRENT_BYTES, state.currentBytes);
-        if (state.contentLength == UNKNOWN_BYTE_SIZE) {
-            values.put(COLUMN_TOTAL_BYTES, state.currentBytes);
-        }
-        getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
+        downloadsRepository.updateDownloadEndOfStream(originalDownloadInfo, state.currentBytes, state.contentLength);
 
-        final boolean lengthMismatched = (state.contentLength != UNKNOWN_BYTE_SIZE)
-                && (state.currentBytes != state.contentLength);
+        final boolean lengthMismatched = (state.contentLength != UNKNOWN_BYTE_SIZE) && (state.currentBytes != state.contentLength);
         if (lengthMismatched) {
             if (cannotResume(state)) {
                 throw new StopRequestException(DownloadStatus.CANNOT_RESUME, "mismatched content length; unable to resume");
@@ -632,11 +625,7 @@ class DownloadTask implements Runnable {
     }
 
     private void updateStatusAndPause(State state) throws StopRequestException {
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_STATUS, DownloadStatus.PAUSED_BY_APP);
-        values.put(COLUMN_CURRENT_BYTES, state.currentBytes);
-        values.put(COLUMN_TOTAL_BYTES, state.totalBytes);
-        getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
+        downloadsRepository.pauseDownloadWithSize(originalDownloadInfo, state.currentBytes, state.totalBytes);
         throw new StopRequestException(DownloadStatus.PAUSED_BY_APP, "download paused by owner");
     }
 
@@ -664,7 +653,7 @@ class DownloadTask implements Runnable {
                 storageManager);
 
         updateDownloadInfoFieldsFrom(state);
-        updateDatabaseFromHeaders(state);
+        downloadsRepository.updateDatabaseFromHeaders(originalDownloadInfo, state.filename, state.headerETag, state.mimeType, state.totalBytes);
         // check connectivity again now that we know the total size
         checkConnectivity();
     }
@@ -672,24 +661,6 @@ class DownloadTask implements Runnable {
     private void updateDownloadInfoFieldsFrom(State state) {
         originalDownloadInfo.setETag(state.headerETag);
         originalDownloadInfo.setMimeType(state.mimeType);
-    }
-
-    /**
-     * Update necessary database fields based on values of HTTP response headers that have been
-     * read.
-     */
-    private void updateDatabaseFromHeaders(State state) {
-        ContentValues values = new ContentValues(4);
-        values.put(DownloadContract.Downloads.COLUMN_DATA, state.filename);
-        if (state.headerETag != null) {
-            values.put(Constants.ETAG, state.headerETag);
-        }
-        if (state.mimeType != null) {
-            values.put(DownloadContract.Downloads.COLUMN_MIME_TYPE, state.mimeType);
-        }
-
-        values.put(COLUMN_TOTAL_BYTES, state.totalBytes);
-        getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
     }
 
     /**
@@ -845,26 +816,8 @@ class DownloadTask implements Runnable {
     }
 
     private void notifyThroughDatabase(State state, int finalStatus, String errorMsg, int numFailed) {
-        ContentValues values = new ContentValues(8);
-        values.put(COLUMN_STATUS, finalStatus);
-        values.put(DownloadContract.Downloads.COLUMN_DATA, state.filename);
-        values.put(DownloadContract.Downloads.COLUMN_MIME_TYPE, state.mimeType);
-        values.put(DownloadContract.Downloads.COLUMN_LAST_MODIFICATION, systemFacade.currentTimeMillis());
-        values.put(DownloadContract.Downloads.COLUMN_FAILED_CONNECTIONS, numFailed);
-        values.put(Constants.RETRY_AFTER_X_REDIRECT_COUNT, state.retryAfter);
-
-        if (!TextUtils.equals(originalDownloadInfo.getUri(), state.requestUri)) {
-            values.put(DownloadContract.Downloads.COLUMN_URI, state.requestUri);
-        }
-        if (DownloadStatus.isCompleted(finalStatus)) {
-            values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
-        }
-
-        // save the error message. could be useful to developers.
-        if (!TextUtils.isEmpty(errorMsg)) {
-            values.put(DownloadContract.Downloads.COLUMN_ERROR_MSG, errorMsg);
-        }
-        getContentResolver().update(originalDownloadInfo.getAllDownloadsUri(), values, null, null);
+        downloadsRepository.updateDownload(originalDownloadInfo, state.filename,
+                state.mimeType, state.retryAfter, state.requestUri, finalStatus, errorMsg, numFailed);
 
         updateBatchStatus(originalDownloadInfo.getBatchId(), originalDownloadInfo.getId());
     }
@@ -879,18 +832,9 @@ class DownloadTask implements Runnable {
         batchRepository.updateBatchStatus(batchId, batchStatus);
 
         if (DownloadStatus.isCancelled(batchStatus)) {
-            ContentValues values = new ContentValues(1);
-            values.put(COLUMN_STATUS, DownloadStatus.CANCELED);
-            getContentResolver().update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
+            batchRepository.setBatchItemsCancelled(batchId);
         } else if (DownloadStatus.isError(batchStatus)) {
-            ContentValues values = new ContentValues(1);
-            values.put(COLUMN_STATUS, DownloadStatus.BATCH_FAILED);
-            getContentResolver().update(
-                    downloadsUriProvider.getAllDownloadsUri(),
-                    values,
-                    COLUMN_BATCH_ID + " = ? AND " + DownloadContract.Downloads._ID + " <> ? ",
-                    new String[]{String.valueOf(batchId), String.valueOf(downloadId)}
-            );
+            batchRepository.setBatchItemsFailed(batchId, downloadId);
         } else if (DownloadStatus.isSuccess(batchStatus)) {
             batchCompletionBroadcaster.notifyBatchCompletedFor(batchId);
         }

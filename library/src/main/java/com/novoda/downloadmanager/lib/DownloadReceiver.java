@@ -32,7 +32,6 @@ public class DownloadReceiver extends BroadcastReceiver {
     private static final String TAG = "DownloadReceiver";
 
     static final String EXTRA_BATCH_ID = "com.novoda.extra.BATCH_ID";
-    private static final int TRUE_THIS_IS_CLEARER_NOW = 1;
 
     private static Handler sAsyncHandler;
 
@@ -43,6 +42,8 @@ public class DownloadReceiver extends BroadcastReceiver {
     }
 
     private final DownloadsUriProvider downloadsUriProvider;
+    private DownloadsRepository downloadsRepository;
+    private BatchRepository batchRepository;
 
     public DownloadReceiver() {
         downloadsUriProvider = DownloadsUriProvider.getInstance();
@@ -50,6 +51,17 @@ public class DownloadReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(@NonNull Context context, @NonNull Intent intent) {
+        RealSystemFacade systemFacade = new RealSystemFacade(context, new Clock());
+        ContentResolver contentResolver = context.getContentResolver();
+        downloadsRepository = new DownloadsRepository(
+                systemFacade,
+                contentResolver,
+                DownloadsRepository.DownloadInfoCreator.NON_FUNCTIONAL,
+                downloadsUriProvider
+        );
+
+        batchRepository = new BatchRepository(contentResolver, new DownloadDeleter(contentResolver), downloadsUriProvider, systemFacade);
+
         switch (intent.getAction()) {
             case ACTION_BOOT_COMPLETED:
             case ACTION_MEDIA_MOUNTED:
@@ -116,10 +128,10 @@ public class DownloadReceiver extends BroadcastReceiver {
                 break;
             }
             case ACTION_CANCEL:
-                cancelBatchThroughDatabaseState(context, intent);
+                cancelBatchThroughDatabaseState(intent);
                 break;
             case ACTION_DELETE:
-                deleteDownloadThroughDatabaseState(context, intent);
+                deleteDownloadThroughDatabaseState(intent);
                 break;
             default:
                 // no need to handle any other cases
@@ -192,34 +204,18 @@ public class DownloadReceiver extends BroadcastReceiver {
     /**
      * Mark the given batch as being cancelled by user so it will be cancelled by the running thread.
      */
-    private void cancelBatchThroughDatabaseState(Context context, Intent intent) {
-        ContentValues downloadValues = new ContentValues(1);
-        downloadValues.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.CANCELED);
+    private void cancelBatchThroughDatabaseState(Intent intent) {
         long batchId = getBatchId(intent);
-        context.getContentResolver().update(
-                downloadsUriProvider.getAllDownloadsUri(),
-                downloadValues,
-                DownloadContract.Downloads.COLUMN_BATCH_ID + " = ?",
-                new String[]{String.valueOf(batchId)}
-        );
-        ContentValues batchValues = new ContentValues(1);
-        batchValues.put(DownloadContract.Batches.COLUMN_STATUS, DownloadStatus.CANCELED);
-        context.getContentResolver().update(
-                ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), batchId),
-                batchValues,
-                null,
-                null
-        );
+        batchRepository.cancelBatch(batchId);
     }
 
     /**
      * Mark the given {@link DownloadManager#COLUMN_ID} as being deleted by
      * user so it will be deleted by the running thread.
      */
-    private void deleteDownloadThroughDatabaseState(Context context, Intent intent) {
-        ContentValues values = new ContentValues(1);
-        values.put(DownloadContract.Downloads.COLUMN_DELETED, TRUE_THIS_IS_CLEARER_NOW);
-        context.getContentResolver().update(getDownloadUri(intent), values, null, null);
+    private void deleteDownloadThroughDatabaseState(Intent intent) {
+        Uri downloadUri = getDownloadUri(intent);
+        downloadsRepository.deleteDownload(downloadUri);
     }
 
     private Uri getDownloadUri(Intent intent) {
