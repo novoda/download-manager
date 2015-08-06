@@ -318,26 +318,6 @@ class FileDownloadInfo {
                 && scannable;
     }
 
-    /**
-     * Query and return status of requested download.
-     */
-    public static int queryDownloadStatus(ContentResolver resolver, long id, DownloadsUriProvider downloadsUriProvider) {
-        final Cursor cursor = resolver.query(
-                ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id),
-                new String[]{DownloadContract.Downloads.COLUMN_STATUS}, null, null, null);
-        try {
-            if (cursor.moveToFirst()) {
-                return cursor.getInt(0);
-            } else {
-                // TODO: increase strictness of value returned for unknown
-                // downloads; this is safe default for now.
-                return DownloadStatus.PENDING;
-            }
-        } finally {
-            cursor.close();
-        }
-    }
-
     public boolean hasTotalBytes() {
         return totalBytes != Constants.UNKNOWN_BYTE_SIZE;
     }

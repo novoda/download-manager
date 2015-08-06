@@ -68,6 +68,26 @@ class DownloadsRepository {
         }
     }
 
+    /**
+     * Query and return status of requested download.
+     */
+    public int getDownloadStatus(long id) {
+        final Cursor cursor = contentResolver.query(
+                ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id),
+                new String[]{DownloadContract.Downloads.COLUMN_STATUS}, null, null, null);
+        try {
+            if (cursor.moveToFirst()) {
+                return cursor.getInt(0);
+            } else {
+                // TODO: increase strictness of value returned for unknown
+                // downloads; this is safe default for now.
+                return DownloadStatus.PENDING;
+            }
+        } finally {
+            cursor.close();
+        }
+    }
+
     public void moveDownloadsStatusTo(List<Long> ids, int status) {
         if (ids.isEmpty()) {
             return;

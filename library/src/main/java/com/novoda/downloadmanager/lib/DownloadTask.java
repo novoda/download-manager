@@ -215,7 +215,7 @@ class DownloadTask implements Runnable {
 
     private void runInternal() {
         // Skip when download already marked as finished; this download was probably started again while racing with UpdateThread.
-        int downloadStatus = FileDownloadInfo.queryDownloadStatus(getContentResolver(), originalDownloadInfo.getId(), downloadsUriProvider);
+        int downloadStatus = downloadsRepository.getDownloadStatus(originalDownloadInfo.getId());
         if (downloadStatus == DownloadStatus.SUCCESS) {
             LLog.d("Download " + originalDownloadInfo.getId() + " already finished; skipping");
             return;
