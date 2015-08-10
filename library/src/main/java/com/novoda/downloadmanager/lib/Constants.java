@@ -123,9 +123,14 @@ class Constants {
     public static final String MIMETYPE_APK = "application/vnd.android.package";
 
     /**
+     * The size of a tar block
+     */
+    public static final int BLOCK_SIZE = 512;
+
+    /**
      * The buffer size used to stream the data
      */
-    public static final int BUFFER_SIZE = 4096;
+    public static final int BUFFER_SIZE = 8 * BLOCK_SIZE;
 
     /**
      * The value representing the end of stream when, reading an InputStream

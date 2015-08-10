@@ -28,7 +28,7 @@ public class TarTruncatorTest {
     @Test
     public void itTruncatesProperlyTarFileThatContainsEndBlockMarker() throws Exception {
         givenATarFileWithEndBlockMarker();
-
+        
         state = tarTruncator.transferData(state, resourceAsStream);
 
         tarFileShouldHaveBeenTruncatedProperly();

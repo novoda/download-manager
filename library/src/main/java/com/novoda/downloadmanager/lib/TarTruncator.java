@@ -6,7 +6,6 @@ import java.io.InputStream;
 class TarTruncator implements DataTransferer {
 
     private static final byte BYTE_ZERO = 0x0;
-    private static final int BLOCK_SIZE = 512;
 
     private final DataWriter dataWriter;
 
@@ -18,11 +17,10 @@ class TarTruncator implements DataTransferer {
     public DownloadTask.State transferData(DownloadTask.State state, InputStream in) throws StopRequestException {
         DownloadTask.State newState = state;
         try {
-            byte[] buffer = new byte[BLOCK_SIZE];
-            int readLast = readBlock(in, buffer);
-            while (readsData(readLast) && isNotFullOfZeroes(buffer)) {
+            byte[] buffer = new byte[Constants.BUFFER_SIZE];
+            int readLast;
+            while ((readLast = readBuffer(in, buffer)) > 0 && isNotFullOfZeroes(buffer)) {
                 newState = dataWriter.write(newState, buffer, readLast);
-                readLast = readBlock(in, buffer);
             }
             state.shouldPause = true;
             state.totalBytes = state.currentBytes;
@@ -31,10 +29,6 @@ class TarTruncator implements DataTransferer {
             // It was doing the same thing in regular and exception cases
             return newState;
         }
-    }
-
-    private boolean readsData(int readLast) {
-        return readLast != -1 && readLast != 0;
     }
 
     private boolean isNotFullOfZeroes(byte[] buffer) {
@@ -46,11 +40,22 @@ class TarTruncator implements DataTransferer {
         return false;
     }
 
+    private int readBuffer(InputStream fileInputStream, byte[] buffer) throws IOException {
+        int read = 0;
+        byte[] blockBuffer = new byte[Constants.BLOCK_SIZE];
+        int readLast;
+        while (read < Constants.BUFFER_SIZE && (readLast = readBlock(fileInputStream, blockBuffer)) > 0 && isNotFullOfZeroes(blockBuffer)) {
+            System.arraycopy(blockBuffer, 0, buffer, read, readLast);
+            read += readLast;
+        }
+        return read;
+    }
+
     private int readBlock(InputStream fileInputStream, byte[] buffer) throws IOException {
         int read = 0;
         int readLast;
-        while (read < BLOCK_SIZE) {
-            readLast = fileInputStream.read(buffer, read, BLOCK_SIZE - read);
+        while (read < Constants.BLOCK_SIZE) {
+            readLast = fileInputStream.read(buffer, read, Constants.BLOCK_SIZE - read);
             if (readLast == Constants.NO_BYTES_READ) {
                 return read;
             }
