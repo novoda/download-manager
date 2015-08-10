@@ -42,7 +42,7 @@ class TarTruncator implements DataTransferer {
 
     private int readBuffer(InputStream fileInputStream, byte[] buffer) throws IOException {
         int read = 0;
-        byte[] blockBuffer = new byte[Constants.BLOCK_SIZE];
+        byte[] blockBuffer = new byte[Constants.TAR_BLOCK_SIZE];
         int readLast;
         while (read < Constants.BUFFER_SIZE && (readLast = readBlock(fileInputStream, blockBuffer)) > 0 && isNotFullOfZeroes(blockBuffer)) {
             System.arraycopy(blockBuffer, 0, buffer, read, readLast);
@@ -54,8 +54,8 @@ class TarTruncator implements DataTransferer {
     private int readBlock(InputStream fileInputStream, byte[] buffer) throws IOException {
         int read = 0;
         int readLast;
-        while (read < Constants.BLOCK_SIZE) {
-            readLast = fileInputStream.read(buffer, read, Constants.BLOCK_SIZE - read);
+        while (read < Constants.TAR_BLOCK_SIZE) {
+            readLast = fileInputStream.read(buffer, read, Constants.TAR_BLOCK_SIZE - read);
             if (readLast == Constants.NO_BYTES_READ) {
                 return read;
             }
