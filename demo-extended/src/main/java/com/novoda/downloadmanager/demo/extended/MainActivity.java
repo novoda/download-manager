@@ -39,6 +39,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.completed_downloads_button).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        startActivity(new Intent(MainActivity.this, CompletedDownloadsActivity.class));
+                    }
+                });
+
         findViewById(R.id.extra_data_button).setOnClickListener(
                 new View.OnClickListener() {
                     @Override

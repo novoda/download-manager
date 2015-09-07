@@ -32,4 +32,10 @@
     android:layout_height="wrap_content"
     android:text="@string/extra_data_button" />
 
+  <Button
+    android:id="@+id/completed_downloads_button"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="@string/completed_downloads_button" />
+
 </LinearLayout>
