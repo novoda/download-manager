@@ -18,26 +18,32 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        findViewById(R.id.pause_resume_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, PauseResumeActivity.class));
-            }
-        });
+        findViewById(R.id.pause_resume_button).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        startActivity(new Intent(MainActivity.this, PauseResumeActivity.class));
+                    }
+                }
+        );
 
-        findViewById(R.id.delete_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, DeleteActivity.class));
-            }
-        });
+        findViewById(R.id.delete_button).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        startActivity(new Intent(MainActivity.this, DeleteActivity.class));
+                    }
+                }
+        );
 
-        findViewById(R.id.batches_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, BatchDownloadsActivity.class));
-            }
-        });
+        findViewById(R.id.batches_button).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        startActivity(new Intent(MainActivity.this, BatchDownloadsActivity.class));
+                    }
+                }
+        );
 
         findViewById(R.id.completed_downloads_button).setOnClickListener(
                 new View.OnClickListener() {
@@ -45,7 +51,8 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         startActivity(new Intent(MainActivity.this, CompletedDownloadsActivity.class));
                     }
-                });
+                }
+        );
 
         findViewById(R.id.extra_data_button).setOnClickListener(
                 new View.OnClickListener() {
@@ -53,7 +60,8 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         startActivity(new Intent(MainActivity.this, ExtraDataActivity.class));
                     }
-                });
+                }
+        );
     }
 
 }
