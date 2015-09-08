@@ -56,6 +56,7 @@ Here are a list of useful links:
  * If you have a problem check the [Issues Page](https://github.com/novoda/download-manager/issues) first to see if we are working on it
  * For further usage or to delve more deeply checkout the [Project Wiki](https://github.com/novoda/download-manager/wiki)
  * Looking for community help, browse the already asked [Stack Overflow Questions](http://stackoverflow.com/questions/tagged/support-download-manager) or use the tag: `support-download-manager` when posting a new question
+ * Release process on [the wiki](https://github.com/novoda/download-manager/wiki/Release-process)
 
 
  [1]: http://developer.android.com/reference/android/net/Uri.html
