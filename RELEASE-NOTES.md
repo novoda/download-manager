@@ -1,3 +1,7 @@
+0.2.14
+-----
+- Adds the ability to add a completed batch to the download manager #152 
+
 0.2.13
 -------
 - Add client checks along with pause and cancel checks and speed up calls #147
