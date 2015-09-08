@@ -4,7 +4,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 
 import com.novoda.downloadmanager.DownloadManagerBuilder;
@@ -25,21 +24,23 @@ public class CompletedDownloadsActivity extends AppCompatActivity {
         downloadManager = DownloadManagerBuilder.from(CompletedDownloadsActivity.this)
                 .build();
 
-        findViewById(R.id.add_completed_batch).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                RequestBatch requestBatch = new RequestBatch.Builder()
-                        .withTitle("Completed download")
-                        .withDescription("This download has already been downloaded, but will appear in the download manager API")
-                        .build();
-                Request request = new Request(REQUEST_URI)
-                        .setTitle("Download Manager release notes")
-                        .setDescription("This file has already been downloaded")
-                        .setMimeType("text/plain")
-                        .setDestinationInExternalFilesDir(null, "this-doesn't-really-exist.txt");
-                requestBatch.addRequest(request);
-                downloadManager.addCompletedBatch(requestBatch);
-            }
-        });
+        findViewById(R.id.add_completed_batch).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        RequestBatch requestBatch = new RequestBatch.Builder()
+                                .withTitle("Completed download")
+                                .withDescription("This download has already been downloaded, but will appear in the download manager API")
+                                .build();
+                        Request request = new Request(REQUEST_URI)
+                                .setTitle("Download Manager release notes")
+                                .setDescription("This file has already been downloaded")
+                                .setMimeType("text/plain")
+                                .setDestinationInExternalFilesDir(null, "this-doesn't-really-exist.txt");
+                        requestBatch.addRequest(request);
+                        downloadManager.addCompletedBatch(requestBatch);
+                    }
+                }
+        );
     }
 }
