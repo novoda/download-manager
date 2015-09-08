@@ -803,8 +803,7 @@ public class DownloadManager {
     }
 
     /**
-     * Adds a file to the downloads database system, so it could appear in Downloads App
-     * (and thus become eligible for management by the Downloads App).
+     * Adds a file to the downloads database system.
      * <p/>
      * It is helpful to make the file scannable by MediaScanner by setting the param
      * isMediaScannerScannable to true. It makes the file visible in media managing
@@ -824,7 +823,6 @@ public class DownloadManager {
      * @return an ID for the download entry added to the downloads app, unique across the system
      * This ID is used to make future calls related to this download.
      */
-    // TODO: Add batch to request
     public long addCompletedDownload(String title, String description,
                                      boolean isMediaScannerScannable, String mimeType, String path, long length,
                                      boolean showNotification) {
@@ -844,12 +842,44 @@ public class DownloadManager {
                 .setMimeType(mimeType)
                 .setNotificationVisibility((showNotification) ? NotificationVisibility.ONLY_WHEN_COMPLETE : NotificationVisibility.HIDDEN);
 
+        if (isMediaScannerScannable) {
+            request.allowScanningByMediaScanner();
+        }
+
+        return addCompletedBatch(request.asBatch());
+    }
+
+    /**
+     * Adds this batch to the downloads system.
+     *
+     * @param requestBatch A batch of completed downloads which have been downloaded not using this DownloadManager
+     * @return the id of the batch which can be used to query the download manager
+     */
+    public long addCompletedBatch(RequestBatch requestBatch) {
+        long completedBatchId = insertBatchAsCompleted(requestBatch);
+        for (Request request : requestBatch.getRequests()) {
+            request.setBatchId(completedBatchId);
+            File file = new File(request.getDestinationPath());
+            long length = file.exists() ? file.length() : 0;
+            insertRequestAsCompletedDownload(request.getDestinationPath(), length, request);
+        }
+        return completedBatchId;
+    }
+
+    private long insertBatchAsCompleted(RequestBatch batch) {
+        ContentValues values = batch.toContentValues();
+        values.put(DownloadContract.Batches.COLUMN_STATUS, DownloadStatus.SUCCESS);
+        values.put(DownloadContract.Batches.COLUMN_LAST_MODIFICATION, systemFacade.currentTimeMillis());
+        Uri batchUri = contentResolver.insert(downloadsUriProvider.getBatchesUri(), values);
+        return ContentUris.parseId(batchUri);
+    }
+
+    private long insertRequestAsCompletedDownload(String path, long length, Request request) {
         ContentValues values = request.toContentValues();
         values.put(DownloadContract.Downloads.COLUMN_DESTINATION, DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD);
         values.put(DownloadContract.Downloads.COLUMN_DATA, path);
         values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.SUCCESS);
         values.put(DownloadContract.Downloads.COLUMN_TOTAL_BYTES, length);
-        values.put(DownloadContract.Downloads.COLUMN_MEDIA_SCANNED, (isMediaScannerScannable) ? Request.SCANNABLE_VALUE_YES : Request.SCANNABLE_VALUE_NO);
         Uri downloadUri = contentResolver.insert(downloadsUriProvider.getContentUri(), values);
         if (downloadUri == null) {
             return -1;

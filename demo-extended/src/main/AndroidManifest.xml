@@ -42,6 +42,9 @@
       android:name="com.novoda.downloadmanager.demo.extended.extra_data.ExtraDataActivity"
       android:label="@string/extra_data_activity_title" />
 
+    <activity android:name=".extended.CompletedDownloadsActivity"
+      android:label="@string/completed_downloads_activity_title" />
+
     <meta-data
       android:name="com.novoda.downloadmanager.MaxConcurrentDownloads"
       android:value="@integer/max_concurrent_downloads" />

@@ -509,4 +509,8 @@ public class Request {
         requestBatch.addRequest(this);
         return requestBatch;
     }
+
+    String getDestinationPath() {
+        return destinationUri.toString();
+    }
 }

@@ -35,4 +35,7 @@
   <string name="live">Live</string>
   <string name="extra_data_button">Add extra data example</string>
   <string name="extra_data_description">This demo shows how you can pass extra information into the download manager for each download, and retrieve it out the other side.</string>
+  <string name="completed_downloads_button">Add completed downloads</string>
+  <string name="completed_downloads_activity_title">Completed downloads</string>
+  <string name="add_completed_batch">Add new completed batch</string>
 </resources>
