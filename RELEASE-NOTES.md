@@ -1,6 +1,7 @@
 0.2.14
 -----
 - Adds the ability to add a completed batch to the download manager #152 
+- Fixes "Download Cancelled" notifications returning after being dismissed #150
 
 0.2.13
 -------
