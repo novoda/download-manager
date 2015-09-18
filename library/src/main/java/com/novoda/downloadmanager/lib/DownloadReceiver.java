@@ -31,7 +31,7 @@ import static com.novoda.downloadmanager.lib.NotificationVisibility.ONLY_WHEN_CO
 public class DownloadReceiver extends BroadcastReceiver {
     private static final String TAG = "DownloadReceiver";
 
-    static final String EXTRA_BATCH_ID = "com.novoda.extra.BATCH_ID";
+    static final String EXTRA_BATCH_ID = "com.novoda.downloadmanager.extra.BATCH_ID";
 
     private static Handler sAsyncHandler;
 
