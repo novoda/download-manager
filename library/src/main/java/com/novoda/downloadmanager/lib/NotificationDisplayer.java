@@ -94,9 +94,9 @@ class NotificationDisplayer {
     private void buildActionIntents(String tag, int type, Collection<DownloadBatch> cluster, NotificationCompat.Builder builder) {
         DownloadBatch batch = cluster.iterator().next();
         if (type == DownloadNotifier.TYPE_ACTIVE || type == DownloadNotifier.TYPE_WAITING) {
-            Intent clickIntent = notificationCustomiser.createClickIntentForActiveBatch(batch, tag);
+            Intent clickIntent = notificationCustomiser.createClickIntentForActiveBatch(batch.getBatchId(), tag);
             if (clickIntent == null) {
-                defaultNotificationCustomiser.createClickIntentForActiveBatch(batch, tag);
+                defaultNotificationCustomiser.createClickIntentForActiveBatch(batch.getBatchId(), tag);
             }
             builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
             builder.setOngoing(true);
@@ -318,11 +318,11 @@ class NotificationDisplayer {
         }
 
         @Override
-        public Intent createClickIntentForActiveBatch(DownloadBatch batch, String tag) {
+        public Intent createClickIntentForActiveBatch(long batchId, String tag) {
             // build a synthetic uri for intent identification purposes
             Uri uri = new Uri.Builder().scheme("active-dl").appendPath(tag).build();
             Intent intent = new Intent(Constants.ACTION_LIST, uri, context, DownloadReceiver.class);
-            intent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, batch.getBatchId());
+            intent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, batchId);
             return intent;
         }
     }
