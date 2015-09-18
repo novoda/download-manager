@@ -1,7 +1,6 @@
 package com.novoda.downloadmanager.demo.extended;
 
 import android.app.Application;
-import android.content.Context;
 import android.hardware.SensorManager;
 
 import com.novoda.downloadmanager.Download;
@@ -17,7 +16,7 @@ public class DemoApplication extends Application implements DownloadClientReadyC
     @Override
     public void onCreate() {
         super.onCreate();
-        notificationCustomiser = new MyNotificationCustomiser(DemoApplication.this);
+        notificationCustomiser = new DemoNotificationCustomiser(DemoApplication.this);
         oneRuleToBindThem = new OneRuleToBindThem();
     }
 
@@ -43,13 +42,4 @@ public class DemoApplication extends Application implements DownloadClientReadyC
         }
     }
 
-    private class MyNotificationCustomiser implements NotificationCustomiser {
-
-        private final Context context;
-
-        public MyNotificationCustomiser(Context context) {
-            this.context = context;
-        }
-
-    }
 }
