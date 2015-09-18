@@ -34,18 +34,22 @@ class NotificationDisplayer {
      * to speed in bytes per second.
      */
     private final LongSparseArray<Long> downloadSpeed = new LongSparseArray<>();
+    private final NotificationCustomiser notificationCustomiser;
+    private final NotificationCustomiser defaultNotificationCustomiser;
 
     public NotificationDisplayer(
             Context context,
             NotificationManager notificationManager,
             NotificationImageRetriever imageRetriever,
             Resources resources,
-            DownloadsUriProvider downloadsUriProvider) {
+            DownloadsUriProvider downloadsUriProvider, NotificationCustomiser notificationCustomiser) {
         this.context = context;
         this.notificationManager = notificationManager;
         this.imageRetriever = imageRetriever;
         this.resources = resources;
         this.downloadsUriProvider = downloadsUriProvider;
+        this.notificationCustomiser = notificationCustomiser;
+        this.defaultNotificationCustomiser = new DefaultNotficationCustomiser(context);
     }
 
     public void buildAndShowNotification(SimpleArrayMap<String, Collection<DownloadBatch>> clusters, String notificationId, long firstShown) {
@@ -90,10 +94,10 @@ class NotificationDisplayer {
     private void buildActionIntents(String tag, int type, Collection<DownloadBatch> cluster, NotificationCompat.Builder builder) {
         DownloadBatch batch = cluster.iterator().next();
         if (type == DownloadNotifier.TYPE_ACTIVE || type == DownloadNotifier.TYPE_WAITING) {
-            // build a synthetic uri for intent identification purposes
-            Uri uri = new Uri.Builder().scheme("active-dl").appendPath(tag).build();
-            Intent clickIntent = new Intent(Constants.ACTION_LIST, uri, context, DownloadReceiver.class);
-            clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, getDownloadIds(cluster));
+            Intent clickIntent = notificationCustomiser.createClickIntentForActiveBatch(batch, tag);
+            if (clickIntent == null) {
+                defaultNotificationCustomiser.createClickIntentForActiveBatch(batch, tag);
+            }
             builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
             builder.setOngoing(true);
 
@@ -117,7 +121,7 @@ class NotificationDisplayer {
                 String action = DownloadStatus.isError(batch.getStatus()) ? Constants.ACTION_LIST : Constants.ACTION_OPEN;
 
                 Intent clickIntent = new Intent(action, uri, context, DownloadReceiver.class);
-                clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, getDownloadIds(cluster));
+                clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, batch.getBatchId());
                 clickIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getBatchId());
                 builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
             }
@@ -267,22 +271,6 @@ class NotificationDisplayer {
         style.setSummaryText(description);
     }
 
-    private long[] getDownloadIds(Collection<DownloadBatch> batches) {
-        List<Long> ids = new ArrayList<>();
-        for (DownloadBatch batch : batches) {
-            for (FileDownloadInfo fileDownloadInfo : batch.getDownloads()) {
-                ids.add(fileDownloadInfo.getId());
-            }
-        }
-
-        long[] idArray = new long[ids.size()];
-
-        for (int i = 0, idsSize = ids.size(); i < idsSize; i++) {
-            idArray[i] = ids.get(i);
-        }
-        return idArray;
-    }
-
     public void notifyDownloadSpeed(long id, long bytesPerSecond) {
         synchronized (downloadSpeed) {
             if (bytesPerSecond != 0) {
@@ -320,4 +308,23 @@ class NotificationDisplayer {
     public void cancelAll() {
         notificationManager.cancelAll();
     }
+
+    static class DefaultNotficationCustomiser implements NotificationCustomiser {
+
+        private final Context context;
+
+        public DefaultNotficationCustomiser(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        public Intent createClickIntentForActiveBatch(DownloadBatch batch, String tag) {
+            // build a synthetic uri for intent identification purposes
+            Uri uri = new Uri.Builder().scheme("active-dl").appendPath(tag).build();
+            Intent intent = new Intent(Constants.ACTION_LIST, uri, context, DownloadReceiver.class);
+            intent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, batch.getBatchId());
+            return intent;
+        }
+    }
+
 }
