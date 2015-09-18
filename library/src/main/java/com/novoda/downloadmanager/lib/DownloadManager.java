@@ -346,9 +346,10 @@ public class DownloadManager {
      * Intent using {@link android.content.Intent#getLongArrayExtra(String)}.
      */
     public static final String EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS = "extra_click_download_ids";
+
     /**
      * When clicks on multiple notifications are received, the following
-     * provides an array of download statuses corresponding to the download notification that was
+     * provides an int array of download statuses corresponding to the download notification that was
      * clicked (in the same order as @{link DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS}.
      * It can be retrieved by the receiver of this Intent using {@link android.content.Intent#getLongArrayExtra(String)}.
      */

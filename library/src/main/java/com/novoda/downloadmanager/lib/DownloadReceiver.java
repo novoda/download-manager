@@ -113,7 +113,8 @@ public class DownloadReceiver extends BroadcastReceiver {
         switch (action) {
             case ACTION_LIST:
                 long[] ids = intent.getLongArrayExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS);
-                sendNotificationClickedIntent(context, ids);
+                int[] statuses = intent.getIntArrayExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_STATUSES);
+                sendNotificationClickedIntent(context, ids, statuses);
                 break;
             case ACTION_OPEN: {
                 long id = ContentUris.parseId(intent.getData());
@@ -142,10 +143,11 @@ public class DownloadReceiver extends BroadcastReceiver {
     /**
      * Notify the owner of a running download that its notification was clicked.
      */
-    private void sendNotificationClickedIntent(Context context, long[] ids) {
+    private void sendNotificationClickedIntent(Context context, long[] ids, int[] statuses) {
         Intent appIntent = new Intent(DownloadManager.ACTION_NOTIFICATION_CLICKED);
         appIntent.setPackage(context.getPackageName());
         appIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, ids);
+        appIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_STATUSES, statuses);
 
         context.sendBroadcast(appIntent);
     }
