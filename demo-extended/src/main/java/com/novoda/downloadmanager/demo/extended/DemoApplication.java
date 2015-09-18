@@ -2,7 +2,6 @@ package com.novoda.downloadmanager.demo.extended;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
 import android.hardware.SensorManager;
 
 import com.novoda.downloadmanager.Download;
@@ -52,9 +51,5 @@ public class DemoApplication extends Application implements DownloadClientReadyC
             this.context = context;
         }
 
-        @Override
-        public Intent createClickIntentForActiveBatch(long batchId, String tag) {
-            return new Intent(context, MainActivity.class);
-        }
     }
 }

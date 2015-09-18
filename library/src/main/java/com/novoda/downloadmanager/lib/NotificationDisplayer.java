@@ -317,14 +317,6 @@ class NotificationDisplayer {
             this.context = context;
         }
 
-        @Override
-        public Intent createClickIntentForActiveBatch(long batchId, String tag) {
-            // build a synthetic uri for intent identification purposes
-            Uri uri = new Uri.Builder().scheme("active-dl").appendPath(tag).build();
-            Intent intent = new Intent(Constants.ACTION_LIST, uri, context, DownloadReceiver.class);
-            intent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, batchId);
-            return intent;
-        }
     }
 
 }
