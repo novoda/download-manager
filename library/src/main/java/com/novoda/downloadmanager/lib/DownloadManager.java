@@ -309,11 +309,6 @@ public class DownloadManager {
     public static final String ACTION_BATCH_COMPLETE = BatchCompletionBroadcaster.ACTION_BATCH_COMPLETE;
 
     /**
-     * Action to broadcast to cancel a download batch
-     */
-    public static final String ACTION_CANCEL = Constants.ACTION_CANCEL;
-
-    /**
      * Broadcast intent action sent by the download manager when a download wasn't started due to insufficient space
      */
     public static final String ACTION_DOWNLOAD_INSUFFICIENT_SPACE = "com.novoda.downloadmanager.DOWNLOAD_INSUFFICIENT_SPACE";
@@ -477,6 +472,17 @@ public class DownloadManager {
         this.batchPauseResumeController = batchPauseResumeController;
         GlobalState.setContext(context);
         GlobalState.setVerboseLogging(verboseLogging);
+    }
+
+    /**
+     * Create an intent which will cancel the batch with the supplied ID. Must be sent as a broadcast.
+     * @param batchId the ID of the batch to delete
+     * @return an {@link Intent} that can be broadcast
+     */
+    public static Intent createCancelBatchIntent(long batchId, Context context) {
+        Intent cancelIntent = new Intent(Constants.ACTION_CANCEL, null, context, DownloadReceiver.class);
+        cancelIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batchId);
+        return cancelIntent;
     }
 
     /**

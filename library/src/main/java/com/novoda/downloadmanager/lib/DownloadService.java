@@ -207,7 +207,7 @@ public class DownloadService extends Service {
         if (getApplication() instanceof NotificationCustomiserProvider) {
             return ((NotificationCustomiserProvider) getApplication()).getNotificationCustomiser();
         }
-        return new NotificationDisplayer.DefaultNotficationCustomiser(this);
+        return new DefaultNotficationCustomiser(this);
     }
 
     @Override

@@ -309,21 +309,4 @@ class NotificationDisplayer {
         notificationManager.cancelAll();
     }
 
-    static class DefaultNotficationCustomiser implements NotificationCustomiser {
-
-        private final Context context;
-
-        public DefaultNotficationCustomiser(Context context) {
-            this.context = context;
-        }
-
-        @Override
-        public void addActionsForBatch(NotificationCompat.Builder builder, long batchId) {
-            Intent cancelIntent = new Intent(Constants.ACTION_CANCEL, null, context, DownloadReceiver.class);
-            cancelIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batchId);
-            PendingIntent pendingCancelIntent = PendingIntent.getBroadcast(context, 0, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            builder.addAction(R.drawable.dl__ic_action_cancel, context.getString(R.string.dl__cancel), pendingCancelIntent);
-        }
-    }
-
 }
