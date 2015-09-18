@@ -93,18 +93,16 @@ class NotificationDisplayer {
 
     private void buildActionIntents(String tag, int type, Collection<DownloadBatch> cluster, NotificationCompat.Builder builder) {
         DownloadBatch batch = cluster.iterator().next();
+        long batchId = batch.getBatchId();
         if (type == DownloadNotifier.TYPE_ACTIVE || type == DownloadNotifier.TYPE_WAITING) {
             // build a synthetic uri for intent identification purposes
             Uri uri = new Uri.Builder().scheme("active-dl").appendPath(tag).build();
             Intent clickIntent = new Intent(Constants.ACTION_LIST, uri, context, DownloadReceiver.class);
-            clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, batch.getBatchId());
+            clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, batchId);
             builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
             builder.setOngoing(true);
 
-            Intent cancelIntent = new Intent(Constants.ACTION_CANCEL, null, context, DownloadReceiver.class);
-            cancelIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getBatchId());
-            PendingIntent pendingCancelIntent = PendingIntent.getBroadcast(context, 0, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            builder.addAction(R.drawable.dl__ic_action_cancel, context.getString(R.string.dl__cancel), pendingCancelIntent);
+            notificationCustomiser.addActionsForBatch(builder, batchId);
 
         } else if (type == DownloadNotifier.TYPE_SUCCESS || type == DownloadNotifier.TYPE_CANCELLED) {
             // TODO: Decide how we handle notification clicks
@@ -112,7 +110,7 @@ class NotificationDisplayer {
             Uri uri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), fileDownloadInfo.getId());
 
             Intent hideIntent = new Intent(Constants.ACTION_HIDE, uri, context, DownloadReceiver.class);
-            hideIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getBatchId());
+            hideIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batchId);
             builder.setDeleteIntent(PendingIntent.getBroadcast(context, 0, hideIntent, 0));
 
             if (type == DownloadNotifier.TYPE_SUCCESS) {
@@ -121,8 +119,8 @@ class NotificationDisplayer {
                 String action = DownloadStatus.isError(batch.getStatus()) ? Constants.ACTION_LIST : Constants.ACTION_OPEN;
 
                 Intent clickIntent = new Intent(action, uri, context, DownloadReceiver.class);
-                clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, batch.getBatchId());
-                clickIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batch.getBatchId());
+                clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, batchId);
+                clickIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batchId);
                 builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
             }
         }
@@ -317,6 +315,13 @@ class NotificationDisplayer {
             this.context = context;
         }
 
+        @Override
+        public void addActionsForBatch(NotificationCompat.Builder builder, long batchId) {
+            Intent cancelIntent = new Intent(Constants.ACTION_CANCEL, null, context, DownloadReceiver.class);
+            cancelIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batchId);
+            PendingIntent pendingCancelIntent = PendingIntent.getBroadcast(context, 0, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            builder.addAction(R.drawable.dl__ic_action_cancel, context.getString(R.string.dl__cancel), pendingCancelIntent);
+        }
     }
 
 }

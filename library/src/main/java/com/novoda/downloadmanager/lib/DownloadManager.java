@@ -309,6 +309,11 @@ public class DownloadManager {
     public static final String ACTION_BATCH_COMPLETE = BatchCompletionBroadcaster.ACTION_BATCH_COMPLETE;
 
     /**
+     * Action to broadcast to cancel a download batch
+     */
+    public static final String ACTION_CANCEL = Constants.ACTION_CANCEL;
+
+    /**
      * Broadcast intent action sent by the download manager when a download wasn't started due to insufficient space
      */
     public static final String ACTION_DOWNLOAD_INSUFFICIENT_SPACE = "com.novoda.downloadmanager.DOWNLOAD_INSUFFICIENT_SPACE";
