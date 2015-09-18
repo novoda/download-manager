@@ -94,10 +94,10 @@ class NotificationDisplayer {
     private void buildActionIntents(String tag, int type, Collection<DownloadBatch> cluster, NotificationCompat.Builder builder) {
         DownloadBatch batch = cluster.iterator().next();
         if (type == DownloadNotifier.TYPE_ACTIVE || type == DownloadNotifier.TYPE_WAITING) {
-            Intent clickIntent = notificationCustomiser.createClickIntentForActiveBatch(batch.getBatchId(), tag);
-            if (clickIntent == null) {
-                defaultNotificationCustomiser.createClickIntentForActiveBatch(batch.getBatchId(), tag);
-            }
+            // build a synthetic uri for intent identification purposes
+            Uri uri = new Uri.Builder().scheme("active-dl").appendPath(tag).build();
+            Intent clickIntent = new Intent(Constants.ACTION_LIST, uri, context, DownloadReceiver.class);
+            clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, batch.getBatchId());
             builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
             builder.setOngoing(true);
 
