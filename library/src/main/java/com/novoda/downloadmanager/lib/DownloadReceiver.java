@@ -143,16 +143,9 @@ public class DownloadReceiver extends BroadcastReceiver {
      * Notify the owner of a running download that its notification was clicked.
      */
     private void sendNotificationClickedIntent(Context context, long[] ids) {
-        Uri uri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), ids[0]);
-
         Intent appIntent = new Intent(DownloadManager.ACTION_NOTIFICATION_CLICKED);
         appIntent.setPackage(context.getPackageName());
         appIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, ids);
-        if (ids.length == 1) {
-            appIntent.setData(uri);
-        } else {
-            appIntent.setData(downloadsUriProvider.getContentUri());
-        }
 
         context.sendBroadcast(appIntent);
     }

@@ -16,7 +16,6 @@
       android:label="@string/app_name">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
-
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
@@ -58,6 +57,13 @@
       android:exported="false">
       <intent-filter>
         <action android:name="com.novoda.downloadmanager.action.BATCH_COMPLETE" />
+      </intent-filter>
+    </receiver>
+    
+    <receiver android:name="com.novoda.downloadmanager.demo.extended.NotificationReceiver"
+      android:exported="false">
+      <intent-filter>
+        <action android:name="com.novoda.downloadmanager.DOWNLOAD_NOTIFICATION_CLICKED" />
       </intent-filter>
     </receiver>
 
