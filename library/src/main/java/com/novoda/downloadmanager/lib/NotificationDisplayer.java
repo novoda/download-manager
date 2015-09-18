@@ -35,21 +35,20 @@ class NotificationDisplayer {
      */
     private final LongSparseArray<Long> downloadSpeed = new LongSparseArray<>();
     private final NotificationCustomiser notificationCustomiser;
-    private final NotificationCustomiser defaultNotificationCustomiser;
 
     public NotificationDisplayer(
             Context context,
             NotificationManager notificationManager,
             NotificationImageRetriever imageRetriever,
             Resources resources,
-            DownloadsUriProvider downloadsUriProvider, NotificationCustomiser notificationCustomiser) {
+            DownloadsUriProvider downloadsUriProvider,
+            NotificationCustomiser notificationCustomiser) {
         this.context = context;
         this.notificationManager = notificationManager;
         this.imageRetriever = imageRetriever;
         this.resources = resources;
         this.downloadsUriProvider = downloadsUriProvider;
         this.notificationCustomiser = notificationCustomiser;
-        this.defaultNotificationCustomiser = new DefaultNotficationCustomiser(context);
     }
 
     public void buildAndShowNotification(SimpleArrayMap<String, Collection<DownloadBatch>> clusters, String notificationId, long firstShown) {
