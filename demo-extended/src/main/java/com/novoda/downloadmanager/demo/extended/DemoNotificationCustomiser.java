@@ -18,7 +18,7 @@ class DemoNotificationCustomiser implements NotificationCustomiser {
     }
 
     @Override
-    public void addActionsForBatch(NotificationCompat.Builder builder, long batchId) {
+    public void addActionsForActiveOrWaitingBatch(NotificationCompat.Builder builder, long batchId) {
         Intent intent = new Intent(context, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Action action = new NotificationCompat.Action(R.drawable.ic_notif_info, "View", pendingIntent);

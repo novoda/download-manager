@@ -103,7 +103,7 @@ class NotificationDisplayer {
             builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
             builder.setOngoing(true);
 
-            notificationCustomiser.addActionsForBatch(builder, batchId);
+            notificationCustomiser.addActionsForActiveOrWaitingBatch(builder, batchId);
 
         } else if (type == DownloadNotifier.TYPE_SUCCESS || type == DownloadNotifier.TYPE_CANCELLED) {
             // TODO: Decide how we handle notification clicks

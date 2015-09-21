@@ -4,5 +4,5 @@ import android.support.v4.app.NotificationCompat;
 
 public interface NotificationCustomiser {
 
-    void addActionsForBatch(NotificationCompat.Builder builder, long batchId);
+    void addActionsForActiveOrWaitingBatch(NotificationCompat.Builder builder, long batchId);
 }
