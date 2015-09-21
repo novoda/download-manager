@@ -2,7 +2,7 @@
 -----
 - Add API to customise notifications #155
 
-- 0.2.14
+0.2.14
 -----
 - Adds the ability to add a completed batch to the download manager #152 
 - Fixes "Download Cancelled" notifications returning after being dismissed #150
