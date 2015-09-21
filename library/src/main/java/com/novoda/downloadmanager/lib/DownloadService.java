@@ -151,7 +151,9 @@ public class DownloadService extends Service {
                 notificationManager,
                 getNotificationImageRetriever(),
                 getResources(),
-                downloadsUriProvider);
+                downloadsUriProvider,
+                getNotificationCustomiser()
+        );
 
         downloadNotifier = new DownloadNotifier(this, notificationDisplayer);
         downloadNotifier.cancelAll();
@@ -199,6 +201,13 @@ public class DownloadService extends Service {
             return ((NotificationImageRetrieverFactory) getApplication()).createNotificationImageRetriever();
         }
         return new OkHttpNotificationImageRetriever();
+    }
+
+    private NotificationCustomiser getNotificationCustomiser() {
+        if (getApplication() instanceof NotificationCustomiserProvider) {
+            return ((NotificationCustomiserProvider) getApplication()).getNotificationCustomiser();
+        }
+        return new DefaultNotficationCustomiser(this);
     }
 
     @Override

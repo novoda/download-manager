@@ -31,7 +31,7 @@ import static com.novoda.downloadmanager.lib.NotificationVisibility.ONLY_WHEN_CO
 public class DownloadReceiver extends BroadcastReceiver {
     private static final String TAG = "DownloadReceiver";
 
-    static final String EXTRA_BATCH_ID = "com.novoda.extra.BATCH_ID";
+    static final String EXTRA_BATCH_ID = "com.novoda.downloadmanager.extra.BATCH_ID";
 
     private static Handler sAsyncHandler;
 
@@ -113,7 +113,8 @@ public class DownloadReceiver extends BroadcastReceiver {
         switch (action) {
             case ACTION_LIST:
                 long[] ids = intent.getLongArrayExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS);
-                sendNotificationClickedIntent(context, ids);
+                int[] statuses = intent.getIntArrayExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_STATUSES);
+                sendNotificationClickedIntent(context, ids, statuses);
                 break;
             case ACTION_OPEN: {
                 long id = ContentUris.parseId(intent.getData());
@@ -142,17 +143,11 @@ public class DownloadReceiver extends BroadcastReceiver {
     /**
      * Notify the owner of a running download that its notification was clicked.
      */
-    private void sendNotificationClickedIntent(Context context, long[] ids) {
-        Uri uri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), ids[0]);
-
+    private void sendNotificationClickedIntent(Context context, long[] ids, int[] statuses) {
         Intent appIntent = new Intent(DownloadManager.ACTION_NOTIFICATION_CLICKED);
         appIntent.setPackage(context.getPackageName());
         appIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, ids);
-        if (ids.length == 1) {
-            appIntent.setData(uri);
-        } else {
-            appIntent.setData(downloadsUriProvider.getContentUri());
-        }
+        appIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_STATUSES, statuses);
 
         context.sendBroadcast(appIntent);
     }

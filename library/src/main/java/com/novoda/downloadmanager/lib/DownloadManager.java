@@ -320,7 +320,7 @@ public class DownloadManager {
      * or {@link DownloadsUriProvider#getContentUri()} if the notification is associated with
      * multiple downloads.
      */
-    public static final String ACTION_NOTIFICATION_CLICKED = "com.novoda.downloadmaanger.DOWNLOAD_NOTIFICATION_CLICKED";
+    public static final String ACTION_NOTIFICATION_CLICKED = "com.novoda.downloadmanager.DOWNLOAD_NOTIFICATION_CLICKED";
 
     /**
      * Intent extra included with {@link #ACTION_DOWNLOAD_COMPLETE} intents, indicating the ID (as a
@@ -346,6 +346,14 @@ public class DownloadManager {
      * Intent using {@link android.content.Intent#getLongArrayExtra(String)}.
      */
     public static final String EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS = "extra_click_download_ids";
+
+    /**
+     * When clicks on multiple notifications are received, the following
+     * provides an int array of download statuses corresponding to the download notification that was
+     * clicked (in the same order as @{link DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS}.
+     * It can be retrieved by the receiver of this Intent using {@link android.content.Intent#getLongArrayExtra(String)}.
+     */
+    public static final String EXTRA_NOTIFICATION_CLICK_DOWNLOAD_STATUSES = "download_statuses";
 
     /**
      * columns to request from DownloadProvider.
@@ -465,6 +473,17 @@ public class DownloadManager {
         this.batchPauseResumeController = batchPauseResumeController;
         GlobalState.setContext(context);
         GlobalState.setVerboseLogging(verboseLogging);
+    }
+
+    /**
+     * Create an intent which will cancel the batch with the supplied ID. Must be sent as a broadcast.
+     * @param batchId the ID of the batch to delete
+     * @return an {@link Intent} that can be broadcast
+     */
+    public static Intent createCancelBatchIntent(long batchId, Context context) {
+        Intent cancelIntent = new Intent(Constants.ACTION_CANCEL, null, context, DownloadReceiver.class);
+        cancelIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batchId);
+        return cancelIntent;
     }
 
     /**

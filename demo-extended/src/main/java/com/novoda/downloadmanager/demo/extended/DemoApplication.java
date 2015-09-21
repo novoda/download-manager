@@ -5,14 +5,18 @@ import android.hardware.SensorManager;
 
 import com.novoda.downloadmanager.Download;
 import com.novoda.downloadmanager.lib.DownloadClientReadyChecker;
+import com.novoda.downloadmanager.lib.NotificationCustomiser;
+import com.novoda.downloadmanager.lib.NotificationCustomiserProvider;
 
-public class DemoApplication extends Application implements DownloadClientReadyChecker {
+public class DemoApplication extends Application implements DownloadClientReadyChecker, NotificationCustomiserProvider {
 
     private OneRuleToBindThem oneRuleToBindThem;
+    private NotificationCustomiser notificationCustomiser;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        notificationCustomiser = new DemoNotificationCustomiser(DemoApplication.this);
         oneRuleToBindThem = new OneRuleToBindThem();
     }
 
@@ -21,6 +25,11 @@ public class DemoApplication extends Application implements DownloadClientReadyC
         // Here you would add any reasons you may not want to download
         // For instance if you have some type of geo-location lock on your download capability
         return oneRuleToBindThem.shouldWeDownload(download);
+    }
+
+    @Override
+    public NotificationCustomiser getNotificationCustomiser() {
+        return notificationCustomiser;
     }
 
     private static final class OneRuleToBindThem {
@@ -32,4 +41,5 @@ public class DemoApplication extends Application implements DownloadClientReadyC
             return download.getTotalSize() > SensorManager.GRAVITY_DEATH_STAR_I;
         }
     }
+
 }
