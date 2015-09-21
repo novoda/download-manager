@@ -16,7 +16,7 @@ class DefaultNotficationCustomiser implements NotificationCustomiser {
     }
 
     @Override
-    public void addActionsForActiveOrWaitingBatch(NotificationCompat.Builder builder, long batchId) {
+    public void modifyQueuedOrDownloadingNotification(NotificationCompat.Builder builder, long batchId) {
         Intent cancelIntent = DownloadManager.createCancelBatchIntent(batchId, context);
         PendingIntent pendingCancelIntent = PendingIntent.getBroadcast(context, 0, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.addAction(R.drawable.dl__ic_action_cancel, context.getString(R.string.dl__cancel), pendingCancelIntent);
