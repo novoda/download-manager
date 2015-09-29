@@ -221,29 +221,45 @@ public class BatchQuery {
         }
 
         public BatchQuery build() {
-            if (criteriaIdBuilder != null) {
-                builder.withInnerCriteria(criteriaIdBuilder.build());
-                if (criteriaStatusBuilder != null) {
-                    builder.and();
-                }
-            }
 
-            if (criteriaStatusBuilder != null) {
-                builder.withInnerCriteria(criteriaStatusBuilder.build());
-                if (criteriaExtraDataBuilder != null) {
-                    builder.and();
-                }
-            }
-
-            if (criteriaExtraDataBuilder != null) {
-                builder.withInnerCriteria(criteriaExtraDataBuilder.build());
-            }
+            List<Criteria.Builder> criteriaBuilders = setCriteriaBuilders();
+            setCriteriaListFrom(criteriaBuilders);
 
             Criteria criteria = builder.build();
             String selection = criteria.getSelection();
             String sortOrder = criteria.getSort();
             String[] selectionArguments = criteria.getSelectionArguments();
             return new BatchQuery(selection, selectionArguments, sortOrder);
+        }
+
+        private void setCriteriaListFrom(List<Criteria.Builder> criteriaBuilders) {
+            for (Criteria.Builder criteriaBuilder : criteriaBuilders){
+                builder.withInnerCriteria(criteriaBuilder.build());
+                if (isNotLast(criteriaBuilder, criteriaBuilders)) {
+                    builder.and();
+                }
+            }
+        }
+
+        private boolean isNotLast(Criteria.Builder criteriaBuilder, List<Criteria.Builder> criteriaBuilders) {
+            return criteriaBuilders.indexOf(criteriaBuilder) != (criteriaBuilders.size() - 1);
+        }
+
+        private List<Criteria.Builder> setCriteriaBuilders() {
+            List<Criteria.Builder> criteriaBuilderList = new ArrayList<>();
+            if (criteriaIdBuilder != null) {
+                criteriaBuilderList.add(criteriaIdBuilder);
+            }
+            if (criteriaStatusBuilder != null) {
+                criteriaBuilderList.add(criteriaStatusBuilder);
+            }
+            if (criteriaExtraDataBuilder != null) {
+                criteriaBuilderList.add(criteriaExtraDataBuilder);
+            }
+            if (criteriaNoDeletionBuilder != null) {
+                criteriaBuilderList.add(criteriaNoDeletionBuilder);
+            }
+            return criteriaBuilderList;
         }
     }
 
