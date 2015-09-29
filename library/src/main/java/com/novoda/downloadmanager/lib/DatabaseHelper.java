@@ -75,7 +75,8 @@ final class DatabaseHelper extends SQLiteOpenHelper {
             DownloadContract.Batches.COLUMN_BIG_PICTURE,
             DownloadContract.Batches.COLUMN_STATUS,
             DownloadContract.Batches.COLUMN_EXTRA_DATA,
-            DownloadContract.Batches.COLUMN_LAST_MODIFICATION
+            DownloadContract.Batches.COLUMN_LAST_MODIFICATION,
+            DownloadContract.Batches.COLUMN_DELETED
     };
 
     public DatabaseHelper(Context context, String dbName) {
