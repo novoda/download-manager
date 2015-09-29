@@ -55,6 +55,7 @@ public class BatchQuery {
         private Criteria.Builder criteriaIdBuilder;
         private Criteria.Builder criteriaStatusBuilder;
         private Criteria.Builder criteriaExtraDataBuilder;
+        private Criteria.Builder criteriaNoDeletionBuilder;
 
         public Builder() {
             builder = new Criteria.Builder();
