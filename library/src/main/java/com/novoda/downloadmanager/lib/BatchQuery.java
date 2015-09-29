@@ -15,7 +15,6 @@ public class BatchQuery {
     public static final BatchQuery ALL = new BatchQuery(null, null, null);
     private static final int LOW_END_FAILED_STATUS_CODE = 400;
     private static final int HIGH_END_FAILED_STATUS_CODE = 600;
-    private static final int BATCH_DELETED = 1;
 
     private final String selection;
     private final String sortOrder;
@@ -145,7 +144,7 @@ public class BatchQuery {
             this.criteriaNoDeletionBuilder = new Criteria.Builder();
             criteriaNoDeletionBuilder
                     .withSelection(DownloadContract.Batches.COLUMN_DELETED, Criteria.Wildcard.NOT_EQUALS)
-                    .withArgument(String.valueOf(BATCH_DELETED));
+                    .withArgument(String.valueOf(DownloadContract.Batches.BATCH_DELETED));
             return this;
         }
 

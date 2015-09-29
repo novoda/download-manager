@@ -330,6 +330,12 @@ final class DownloadContract {
          */
         public static final String COLUMN_LAST_MODIFICATION = "last_modified_timestamp";
 
+        /**
+         * One of the values taken by {@link DownloadContract.Batches#COLUMN_DELETED}.
+         * This value is used when the batch is marked as deleted and will be actually removed soon.
+         */
+        public static final int BATCH_DELETED = 1;
+
         private Batches() {
             // non-instantiable class
         }
