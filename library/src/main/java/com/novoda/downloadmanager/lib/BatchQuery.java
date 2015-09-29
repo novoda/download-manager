@@ -141,6 +141,14 @@ public class BatchQuery {
             return this;
         }
 
+        public Builder withoutDeleted() {
+            this.criteriaNoDeletionBuilder = new Criteria.Builder();
+            criteriaNoDeletionBuilder
+                    .withSelection(DownloadContract.Batches.COLUMN_DELETED, Criteria.Wildcard.NOT_EQUALS)
+                    .withArgument(String.valueOf(BATCH_DELETED));
+            return this;
+        }
+
         @NonNull
         private List<Criteria> buildCriteriaListFrom(@Status int statusFlags) {
             List<Criteria> criteriaList = new ArrayList<>();
