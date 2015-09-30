@@ -221,7 +221,7 @@ public class BatchQuery {
 
         public BatchQuery build() {
 
-            List<Criteria.Builder> criteriaBuilders = setCriteriaBuilders();
+            List<Criteria.Builder> criteriaBuilders = combineCriteriaBuilders();
             setCriteriaListFrom(criteriaBuilders);
 
             Criteria criteria = builder.build();
@@ -244,7 +244,7 @@ public class BatchQuery {
             return criteriaBuilders.indexOf(criteriaBuilder) != (criteriaBuilders.size() - 1);
         }
 
-        private List<Criteria.Builder> setCriteriaBuilders() {
+        private List<Criteria.Builder> combineCriteriaBuilders() {
             List<Criteria.Builder> criteriaBuilderList = new ArrayList<>();
             if (criteriaIdBuilder != null) {
                 criteriaBuilderList.add(criteriaIdBuilder);
