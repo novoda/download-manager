@@ -370,7 +370,7 @@ public final class DownloadProvider extends ContentProvider {
         }
         if (match == BATCHES) {
             long rowId = db.insert(DownloadContract.Batches.BATCHES_TABLE_NAME, null, values);
-            notifyBatchesStatusChanged();
+            notifyBatchesChanged();
             return ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), rowId);
         }
         LLog.d("calling insert on an unknown/invalid URI: " + uri);
@@ -520,8 +520,9 @@ public final class DownloadProvider extends ContentProvider {
         getContext().getContentResolver().notifyChange(downloadsUriProvider.getDownloadsWithoutProgressUri(), null);
     }
 
-    private void notifyBatchesStatusChanged() {
+    private void notifyBatchesChanged() {
         getContext().getContentResolver().notifyChange(downloadsUriProvider.getBatchesWithoutProgressUri(), null);
+        getContext().getContentResolver().notifyChange(downloadsUriProvider.getBatchesUri(), null);
     }
 
     /**
@@ -800,7 +801,9 @@ public final class DownloadProvider extends ContentProvider {
             case BATCHES_ID:
                 SqlSelection batchSelection = getWhereClause(uri, where, whereArgs, match);
                 count = db.update(DownloadContract.Batches.BATCHES_TABLE_NAME, values, batchSelection.getSelection(), batchSelection.getParameters());
-                notifyStatusIfBatchesStatusChanged(values);
+                if (values.containsKey(DownloadContract.Batches.COLUMN_STATUS) || values.containsKey(DownloadContract.Batches.COLUMN_DELETED)){
+                    notifyBatchesChanged();
+                }
                 break;
             default:
                 LLog.d("updating unknown/invalid URI: " + uri);
@@ -819,12 +822,6 @@ public final class DownloadProvider extends ContentProvider {
     private void notifyStatusIfDownloadStatusChanged(ContentValues values) {
         if (values.containsKey(DownloadContract.Downloads.COLUMN_STATUS)) {
             notifyDownloadStatusChanged();
-        }
-    }
-
-    private void notifyStatusIfBatchesStatusChanged(ContentValues values) {
-        if (values.containsKey(DownloadContract.Batches.COLUMN_STATUS)) {
-            notifyBatchesStatusChanged();
         }
     }
 
@@ -895,7 +892,7 @@ public final class DownloadProvider extends ContentProvider {
             case BATCHES_ID:
                 SqlSelection batchSelection = getWhereClause(uri, where, whereArgs, match);
                 count = db.delete(DownloadContract.Batches.BATCHES_TABLE_NAME, batchSelection.getSelection(), batchSelection.getParameters());
-                notifyBatchesStatusChanged();
+                notifyBatchesChanged();
                 break;
 
             default:

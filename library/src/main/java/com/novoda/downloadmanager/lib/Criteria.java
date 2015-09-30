@@ -175,7 +175,8 @@ class Criteria {
         EQUALS("=?"),
         LESS_THAN("<?"),
         MORE_THAN(">?"),
-        MORE_THAN_EQUAL(">=?");
+        MORE_THAN_EQUAL(">=?"),
+        NOT_EQUALS("!=?");
 
         private final String sqlValue;
 
