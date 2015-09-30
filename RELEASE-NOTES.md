@@ -1,3 +1,7 @@
+0.2.16
+-----
+- Adds a method to exclude deleted batches from query #156
+
 0.2.15
 -----
 - Add API to customise notifications #155
