@@ -522,6 +522,7 @@ public final class DownloadProvider extends ContentProvider {
 
     private void notifyBatchesChanged() {
         getContext().getContentResolver().notifyChange(downloadsUriProvider.getBatchesWithoutProgressUri(), null);
+        getContext().getContentResolver().notifyChange(downloadsUriProvider.getBatchesUri(), null);
     }
 
     /**
