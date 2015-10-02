@@ -833,7 +833,7 @@ class DownloadTask implements Runnable {
 
         if (DownloadStatus.isCancelled(batchStatus)) {
             batchRepository.setBatchItemsCancelled(batchId);
-        } else if (DownloadStatus.isError(batchStatus)) {
+        } else if (DownloadStatus.isFailure(batchStatus)) {
             batchRepository.setBatchItemsFailed(batchId, downloadId);
             batchTerminationBroadcaster.notifyBatchFailedFor(batchId);
         } else if (DownloadStatus.isSuccess(batchStatus)) {
