@@ -83,7 +83,7 @@ public class DownloadService extends Service {
     private DownloadDeleter downloadDeleter;
     private DownloadReadyChecker downloadReadyChecker;
     private DownloadsUriProvider downloadsUriProvider;
-    private BatchCompletionBroadcaster batchCompletionBroadcaster;
+    private BatchTerminationBroadcaster batchTerminationBroadcaster;
     private NetworkChecker networkChecker;
 
     /**
@@ -129,7 +129,7 @@ public class DownloadService extends Service {
         this.downloadReadyChecker = new DownloadReadyChecker(this.systemFacade, networkChecker, downloadClientReadyChecker, downloadMarshaller);
 
         String applicationPackageName = getApplicationContext().getPackageName();
-        this.batchCompletionBroadcaster = new BatchCompletionBroadcaster(this, applicationPackageName);
+        this.batchTerminationBroadcaster = new BatchTerminationBroadcaster(this, applicationPackageName);
 
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         ContentResolver contentResolver = getContentResolver();
@@ -414,7 +414,7 @@ public class DownloadService extends Service {
         DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(info);
         DownloadTask downloadTask = new DownloadTask(
                 this, systemFacade, info, downloadBatch, storageManager, downloadNotifier,
-                batchCompletionBroadcaster, batchRepository, downloadsUriProvider,
+                batchTerminationBroadcaster, batchRepository, downloadsUriProvider,
                 controlReader, networkChecker, downloadReadyChecker, new Clock(),
                 downloadsRepository);
 
