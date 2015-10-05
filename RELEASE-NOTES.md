@@ -1,3 +1,7 @@
+0.2.17
+-----
+- Add a broadcast for batch failure #157
+
 0.2.16
 -----
 - Adds a method to exclude deleted batches from query #156
