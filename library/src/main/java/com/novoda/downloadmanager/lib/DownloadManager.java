@@ -306,13 +306,13 @@ public class DownloadManager {
      * Broadcast intent action sent by the download manager when a batch completes. The
      * batch's ID is specified in the intent's data.
      */
-    public static final String ACTION_BATCH_COMPLETE = BatchTerminationBroadcaster.ACTION_BATCH_COMPLETE;
+    public static final String ACTION_BATCH_COMPLETE = BatchInformationBroadcaster.ACTION_BATCH_COMPLETE;
 
     /**
      * Broadcast intent action sent by the download manager when a batch failed. The
      * batch's ID is specified in the intent's data.
      */
-    public static final String ACTION_BATCH_FAILED = BatchTerminationBroadcaster.ACTION_BATCH_FAILED;
+    public static final String ACTION_BATCH_FAILED = BatchInformationBroadcaster.ACTION_BATCH_FAILED;
 
     /**
      * Broadcast intent action sent by the download manager when a download wasn't started due to insufficient space
@@ -338,7 +338,7 @@ public class DownloadManager {
      * Intent extra included with {@link #ACTION_BATCH_COMPLETE} intents, indicating the ID (as a
      * long) of the batch that just completed.
      */
-    public static final String EXTRA_BATCH_ID = BatchTerminationBroadcaster.EXTRA_BATCH_ID;
+    public static final String EXTRA_BATCH_ID = BatchInformationBroadcaster.EXTRA_BATCH_ID;
 
     /**
      * Intent extra included with {@link #ACTION_DOWNLOAD_COMPLETE} intents, indicating the status code of the download that just completed.

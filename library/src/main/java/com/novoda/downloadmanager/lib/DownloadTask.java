@@ -80,7 +80,7 @@ class DownloadTask implements Runnable {
     private final SystemFacade systemFacade;
     private final StorageManager storageManager;
     private final DownloadNotifier downloadNotifier;
-    private final BatchTerminationBroadcaster batchTerminationBroadcaster;
+    private final BatchInformationBroadcaster batchInformationBroadcaster;
     private final BatchRepository batchRepository;
     private final DownloadsUriProvider downloadsUriProvider;
     private final FileDownloadInfo.ControlStatus.Reader controlReader;
@@ -95,7 +95,7 @@ class DownloadTask implements Runnable {
                         DownloadBatch originalDownloadBatch,
                         StorageManager storageManager,
                         DownloadNotifier downloadNotifier,
-                        BatchTerminationBroadcaster batchTerminationBroadcaster,
+                        BatchInformationBroadcaster batchInformationBroadcaster,
                         BatchRepository batchRepository,
                         DownloadsUriProvider downloadsUriProvider,
                         FileDownloadInfo.ControlStatus.Reader controlReader,
@@ -109,7 +109,7 @@ class DownloadTask implements Runnable {
         this.originalDownloadBatch = originalDownloadBatch;
         this.storageManager = storageManager;
         this.downloadNotifier = downloadNotifier;
-        this.batchTerminationBroadcaster = batchTerminationBroadcaster;
+        this.batchInformationBroadcaster = batchInformationBroadcaster;
         this.batchRepository = batchRepository;
         this.downloadsUriProvider = downloadsUriProvider;
         this.controlReader = controlReader;
@@ -835,9 +835,9 @@ class DownloadTask implements Runnable {
             batchRepository.setBatchItemsCancelled(batchId);
         } else if (DownloadStatus.isFailure(batchStatus)) {
             batchRepository.setBatchItemsFailed(batchId, downloadId);
-            batchTerminationBroadcaster.notifyBatchFailedFor(batchId);
+            batchInformationBroadcaster.notifyBatchFailedFor(batchId);
         } else if (DownloadStatus.isSuccess(batchStatus)) {
-            batchTerminationBroadcaster.notifyBatchCompletedFor(batchId);
+            batchInformationBroadcaster.notifyBatchCompletedFor(batchId);
         }
     }
 
