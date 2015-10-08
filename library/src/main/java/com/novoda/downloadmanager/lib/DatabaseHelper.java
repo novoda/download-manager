@@ -20,7 +20,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
     /**
      * Current database version
      */
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 2;
 
     /**
      * columns to request from DownloadProvider.
@@ -108,7 +108,17 @@ final class DatabaseHelper extends SQLiteOpenHelper {
      */
     @Override
     public void onUpgrade(@NonNull SQLiteDatabase db, int oldVersion, final int newVersion) {
-        // no upgrade path yet
+        if (oldVersion == 1 && newVersion == 2) {
+            try {
+                db.execSQL(
+                        "ALTER TABLE " + DownloadContract.Batches.BATCHES_TABLE_NAME
+                                + "ADD " + DownloadContract.Batches.COLUMN_HAS_STARTED + " BOOLEAN NOT NULL DEFAULT 0;"
+                );
+            } catch (SQLException ex) {
+                LLog.e("couldn't update table in downloads database");
+                throw ex;
+            }
+        }
     }
 
     /**
@@ -197,7 +207,8 @@ final class DatabaseHelper extends SQLiteOpenHelper {
                         + DownloadContract.Batches.COLUMN_VISIBILITY + " INTEGER,"
                         + DownloadContract.Batches.COLUMN_DELETED + " BOOLEAN NOT NULL DEFAULT 0,"
                         + DownloadContract.Batches.COLUMN_EXTRA_DATA + " TEXT,"
-                        + DownloadContract.Batches.COLUMN_LAST_MODIFICATION + " TEXT"
+                        + DownloadContract.Batches.COLUMN_LAST_MODIFICATION + " TEXT,"
+                        + DownloadContract.Batches.COLUMN_HAS_STARTED + " BOOLEAN NOT NULL DEFAULT 0"
                         + ");"
         );
     }
