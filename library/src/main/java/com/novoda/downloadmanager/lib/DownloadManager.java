@@ -315,6 +315,12 @@ public class DownloadManager {
     public static final String ACTION_BATCH_FAILED = BatchInformationBroadcaster.ACTION_BATCH_FAILED;
 
     /**
+     * Broadcast intent action sent by the download manager when a batch has started. The
+     * batch's ID is specified in the intent's data.
+     */
+    public static final String ACTION_BATCH_STARTED = BatchInformationBroadcaster.ACTION_BATCH_STARTED_FOR_FIRST_TIME;
+
+    /**
      * Broadcast intent action sent by the download manager when a download wasn't started due to insufficient space
      */
     public static final String ACTION_DOWNLOAD_INSUFFICIENT_SPACE = "com.novoda.downloadmanager.DOWNLOAD_INSUFFICIENT_SPACE";
