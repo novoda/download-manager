@@ -146,7 +146,7 @@ class BatchRepository {
         return DownloadStatus.UNKNOWN_ERROR;
     }
 
-    boolean isBatchDownloadStartingForTheFirstTime(long batchId) {
+    boolean isBatchStartingForTheFirstTime(long batchId) {
         Cursor cursor = null;
         int hasStarted = 0;
         try {
