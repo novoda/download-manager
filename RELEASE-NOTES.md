@@ -1,3 +1,7 @@
+0.2.18
+-----
+- Track and broacast when a batch starts for the first time #158
+
 0.2.17
 -----
 - Add a broadcast for batch failure #157
