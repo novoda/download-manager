@@ -170,7 +170,7 @@ class BatchRepository {
             }
         }
 
-        return hasStarted == DownloadContract.Batches.BATCH_HAS_STARTED ? false : true;
+        return hasStarted != DownloadContract.Batches.BATCH_HAS_STARTED;
     }
 
     public DownloadBatch retrieveBatchFor(FileDownloadInfo download) {
