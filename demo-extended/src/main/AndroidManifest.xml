@@ -59,7 +59,15 @@
         <action android:name="com.novoda.downloadmanager.action.BATCH_COMPLETE" />
       </intent-filter>
     </receiver>
-    
+
+    <receiver
+      android:name="com.novoda.downloadmanager.demo.extended.DownloadBatchStartedReceiver"
+      android:exported="false">
+      <intent-filter>
+        <action android:name="com.novoda.downloadmanager.action.BATCH_FIRST_TIME_START" />
+      </intent-filter>
+    </receiver>
+
     <receiver android:name="com.novoda.downloadmanager.demo.extended.NotificationReceiver"
       android:exported="false">
       <intent-filter>
