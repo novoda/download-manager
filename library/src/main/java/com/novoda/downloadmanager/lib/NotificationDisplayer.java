@@ -114,17 +114,15 @@ class NotificationDisplayer {
             hideIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batchId);
             builder.setDeleteIntent(PendingIntent.getBroadcast(context, 0, hideIntent, 0));
 
-            if (type == DownloadNotifier.TYPE_SUCCESS) {
-                builder.setAutoCancel(true);
+            builder.setAutoCancel(true);
 
-                String action = DownloadStatus.isError(batch.getStatus()) ? Constants.ACTION_LIST : Constants.ACTION_OPEN;
+            String action = DownloadStatus.isError(batch.getStatus()) ? Constants.ACTION_LIST : Constants.ACTION_OPEN;
 
-                Intent clickIntent = new Intent(action, uri, context, DownloadReceiver.class);
-                clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, new long[]{batchId});
-                clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_STATUSES, new int[]{batchStatus});
-                clickIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batchId);
-                builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
-            }
+            Intent clickIntent = new Intent(action, uri, context, DownloadReceiver.class);
+            clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, new long[]{batchId});
+            clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_STATUSES, new int[]{batchStatus});
+            clickIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batchId);
+            builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
         }
     }
 
