@@ -1,3 +1,7 @@
+0.2.19
+-----
+- Broadcast clicks on notifications for cancelled downloads #159
+
 0.2.18
 -----
 - Track and broacast when a batch starts for the first time #158
