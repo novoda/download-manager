@@ -1099,8 +1099,7 @@ public class DownloadManager {
         }
 
         private long getErrorCode(int status) {
-            if (400 <= status && status < DownloadStatus.MIN_ARTIFICIAL_ERROR_STATUS
-                    || 500 <= status && status < 600) {
+            if (isHttpClientError(status) || isHttpServerError(status)) {
                 // HTTP status code
                 return status;
             }
@@ -1134,6 +1133,14 @@ public class DownloadManager {
                 default:
                     return ERROR_UNKNOWN;
             }
+        }
+
+        private boolean isHttpClientError(int status) {
+            return 400 <= status && status < DownloadStatus.MIN_ARTIFICIAL_ERROR_STATUS;
+        }
+
+        private boolean isHttpServerError(int status) {
+            return 500 <= status && status < 600;
         }
 
         private int translateStatus(int status) {
