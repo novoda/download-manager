@@ -871,7 +871,7 @@ public class DownloadManager {
                 .setTitle(title)
                 .setDescription(description)
                 .setMimeType(mimeType)
-                .setNotificationVisibility((showNotification) ? NotificationVisibility.ONLY_WHEN_COMPLETE : NotificationVisibility.HIDDEN);
+                .setNotificationVisibility(showNotification ? NotificationVisibility.ONLY_WHEN_COMPLETE : NotificationVisibility.HIDDEN);
 
         if (isMediaScannerScannable) {
             request.allowScanningByMediaScanner();
@@ -1099,8 +1099,8 @@ public class DownloadManager {
         }
 
         private long getErrorCode(int status) {
-            if ((400 <= status && status < DownloadStatus.MIN_ARTIFICIAL_ERROR_STATUS)
-                    || (500 <= status && status < 600)) {
+            if (400 <= status && status < DownloadStatus.MIN_ARTIFICIAL_ERROR_STATUS
+                    || 500 <= status && status < 600) {
                 // HTTP status code
                 return status;
             }
