@@ -1,3 +1,8 @@
+0.2.20
+-----
+- Broadcast clicks on notifications for completed downloads #160
+- Sends the right values for the status in the Notification click broadcasts #160
+
 0.2.19
 -----
 - Broadcast clicks on notifications for cancelled downloads #159
