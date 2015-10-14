@@ -646,7 +646,8 @@ public class DownloadManager {
         if (underlyingCursor == null) {
             return null;
         }
-        return new CursorTranslator(underlyingCursor, downloadsUriProvider.getDownloadsByBatchUri());
+        StatusTranslator statusTranslator = new StatusTranslator();
+        return new CursorTranslator(underlyingCursor, downloadsUriProvider.getDownloadsByBatchUri(), statusTranslator);
     }
 
     /**
@@ -664,7 +665,8 @@ public class DownloadManager {
             return null;
         }
 
-        return new CursorTranslator(cursor, downloadsUriProvider.getBatchesUri());
+        StatusTranslator statusTranslator = new StatusTranslator();
+        return new CursorTranslator(cursor, downloadsUriProvider.getBatchesUri(), statusTranslator);
     }
 
     /**
@@ -1018,10 +1020,12 @@ public class DownloadManager {
      */
     private static class CursorTranslator extends CursorWrapper {
         private final Uri baseUri;
+        private final StatusTranslator statusTranslator;
 
-        public CursorTranslator(Cursor cursor, Uri baseUri) {
+        public CursorTranslator(Cursor cursor, Uri baseUri, StatusTranslator statusTranslator) {
             super(cursor);
             this.baseUri = baseUri;
+            this.statusTranslator = statusTranslator;
         }
 
         @Override
@@ -1036,9 +1040,9 @@ public class DownloadManager {
                 case COLUMN_REASON:
                     return getReason(super.getInt(getColumnIndex(DownloadContract.Downloads.COLUMN_STATUS)));
                 case COLUMN_STATUS:
-                    return translateStatus(super.getInt(getColumnIndex(DownloadContract.Downloads.COLUMN_STATUS)));
+                    return statusTranslator.translateStatus(super.getInt(getColumnIndex(DownloadContract.Downloads.COLUMN_STATUS)));
                 case COLUMN_BATCH_STATUS:
-                    return translateStatus(super.getInt(getColumnIndex(DownloadContract.Batches.COLUMN_STATUS)));
+                    return statusTranslator.translateStatus(super.getInt(getColumnIndex(DownloadContract.Batches.COLUMN_STATUS)));
                 default:
                     return super.getLong(columnIndex);
             }
@@ -1067,7 +1071,7 @@ public class DownloadManager {
         }
 
         private long getReason(int status) {
-            switch (translateStatus(status)) {
+            switch (statusTranslator.translateStatus(status)) {
                 case STATUS_FAILED:
                     return getErrorCode(status);
 
@@ -1143,32 +1147,6 @@ public class DownloadManager {
             return 500 <= status && status < 600;
         }
 
-        private int translateStatus(int status) {
-            switch (status) {
-                case DownloadStatus.SUBMITTED:
-                case DownloadStatus.PENDING:
-                    return STATUS_PENDING;
-
-                case DownloadStatus.RUNNING:
-                    return STATUS_RUNNING;
-
-                case DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS:
-                case DownloadStatus.PAUSED_BY_APP:
-                case DownloadStatus.WAITING_TO_RETRY:
-                case DownloadStatus.WAITING_FOR_NETWORK:
-                case DownloadStatus.QUEUED_FOR_WIFI:
-                    return STATUS_PAUSED;
-
-                case DownloadStatus.SUCCESS:
-                    return STATUS_SUCCESSFUL;
-
-                case DownloadStatus.DELETING:
-                    return STATUS_DELETING;
-
-                default:
-                    return STATUS_FAILED;
-            }
-        }
     }
 
     /**
