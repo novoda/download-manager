@@ -2,7 +2,7 @@ package com.novoda.downloadmanager.lib;
 
 class StatusTranslator {
 
-    public int translateStatus(int status) {
+    public int translate(int status) {
         switch (status) {
             case DownloadStatus.SUBMITTED:
             case DownloadStatus.PENDING:

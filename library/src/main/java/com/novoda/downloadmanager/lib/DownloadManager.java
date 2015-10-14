@@ -1040,9 +1040,9 @@ public class DownloadManager {
                 case COLUMN_REASON:
                     return getReason(super.getInt(getColumnIndex(DownloadContract.Downloads.COLUMN_STATUS)));
                 case COLUMN_STATUS:
-                    return statusTranslator.translateStatus(super.getInt(getColumnIndex(DownloadContract.Downloads.COLUMN_STATUS)));
+                    return statusTranslator.translate(super.getInt(getColumnIndex(DownloadContract.Downloads.COLUMN_STATUS)));
                 case COLUMN_BATCH_STATUS:
-                    return statusTranslator.translateStatus(super.getInt(getColumnIndex(DownloadContract.Batches.COLUMN_STATUS)));
+                    return statusTranslator.translate(super.getInt(getColumnIndex(DownloadContract.Batches.COLUMN_STATUS)));
                 default:
                     return super.getLong(columnIndex);
             }
@@ -1071,7 +1071,7 @@ public class DownloadManager {
         }
 
         private long getReason(int status) {
-            switch (statusTranslator.translateStatus(status)) {
+            switch (statusTranslator.translate(status)) {
                 case STATUS_FAILED:
                     return getErrorCode(status);
 

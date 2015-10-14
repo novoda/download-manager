@@ -128,7 +128,7 @@ class NotificationDisplayer {
         clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, new long[]{batchId});
         clickIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batchId);
 
-        int status = statusTranslator.translateStatus(batchStatus);
+        int status = statusTranslator.translate(batchStatus);
         clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_STATUSES, new int[]{status});
 
         return clickIntent;
