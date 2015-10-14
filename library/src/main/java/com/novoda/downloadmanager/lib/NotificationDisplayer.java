@@ -108,7 +108,6 @@ class NotificationDisplayer {
             notificationCustomiser.modifyQueuedOrDownloadingNotification(builder, batchId);
 
         } else if (type == DownloadNotifier.TYPE_SUCCESS || type == DownloadNotifier.TYPE_CANCELLED) {
-            // TODO: Decide how we handle notification clicks
             FileDownloadInfo fileDownloadInfo = batch.getDownloads().get(0);
             Uri uri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), fileDownloadInfo.getId());
 
