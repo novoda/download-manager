@@ -29,7 +29,7 @@ public class NotificationReceiver extends BroadcastReceiver {
             case DownloadManager.STATUS_FAILED:
                 return "failed";
             default:
-                return "unknown";
+                throw new UnsupportedOperationException("Dear dev: Add missing case for status " + statuses[0]);
         }
     }
 
