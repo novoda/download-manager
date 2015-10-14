@@ -23,7 +23,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.CursorWrapper;
 import android.net.Uri;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
@@ -646,7 +645,8 @@ public class DownloadManager {
         if (underlyingCursor == null) {
             return null;
         }
-        return new CursorTranslator(underlyingCursor, downloadsUriProvider.getDownloadsByBatchUri());
+        StatusTranslator statusTranslator = new StatusTranslator();
+        return new CursorTranslator(underlyingCursor, downloadsUriProvider.getDownloadsByBatchUri(), statusTranslator);
     }
 
     /**
@@ -664,7 +664,8 @@ public class DownloadManager {
             return null;
         }
 
-        return new CursorTranslator(cursor, downloadsUriProvider.getBatchesUri());
+        StatusTranslator statusTranslator = new StatusTranslator();
+        return new CursorTranslator(cursor, downloadsUriProvider.getBatchesUri(), statusTranslator);
     }
 
     /**
@@ -1008,167 +1009,6 @@ public class DownloadManager {
 
     public Uri getBatchesWithoutProgressUri() {
         return downloadsUriProvider.getBatchesWithoutProgressUri();
-    }
-
-    /**
-     * This class wraps a cursor returned by DownloadProvider -- the "underlying cursor" -- and
-     * presents a different set of columns, those defined in the DownloadManager.COLUMN_* constants.
-     * Some columns correspond directly to underlying values while others are computed from
-     * underlying data.
-     */
-    private static class CursorTranslator extends CursorWrapper {
-        private final Uri baseUri;
-
-        public CursorTranslator(Cursor cursor, Uri baseUri) {
-            super(cursor);
-            this.baseUri = baseUri;
-        }
-
-        @Override
-        public int getInt(int columnIndex) {
-            return (int) getLong(columnIndex);
-        }
-
-        @Override
-        public long getLong(int columnIndex) {
-            String columnName = getColumnName(columnIndex);
-            switch (columnName) {
-                case COLUMN_REASON:
-                    return getReason(super.getInt(getColumnIndex(DownloadContract.Downloads.COLUMN_STATUS)));
-                case COLUMN_STATUS:
-                    return translateStatus(super.getInt(getColumnIndex(DownloadContract.Downloads.COLUMN_STATUS)));
-                case COLUMN_BATCH_STATUS:
-                    return translateStatus(super.getInt(getColumnIndex(DownloadContract.Batches.COLUMN_STATUS)));
-                default:
-                    return super.getLong(columnIndex);
-            }
-        }
-
-        @Override
-        public String getString(int columnIndex) {
-            return getColumnName(columnIndex).equals(COLUMN_LOCAL_URI) ? getLocalUri() : super.getString(columnIndex);
-        }
-
-        private String getLocalUri() {
-            long destinationType = getLong(getColumnIndex(DownloadContract.Downloads.COLUMN_DESTINATION));
-            if (destinationType == DownloadsDestination.DESTINATION_FILE_URI
-                    || destinationType == DownloadsDestination.DESTINATION_EXTERNAL
-                    || destinationType == DownloadsDestination.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD) {
-                String localPath = getString(getColumnIndex(COLUMN_LOCAL_FILENAME));
-                if (localPath == null) {
-                    return null;
-                }
-                return Uri.fromFile(new File(localPath)).toString();
-            }
-
-            // return content URI for cache download
-            long downloadId = getLong(getColumnIndex(DownloadContract.Downloads._ID));
-            return ContentUris.withAppendedId(baseUri, downloadId).toString();
-        }
-
-        private long getReason(int status) {
-            switch (translateStatus(status)) {
-                case STATUS_FAILED:
-                    return getErrorCode(status);
-
-                case STATUS_PAUSED:
-                    return getPausedReason(status);
-
-                default:
-                    return 0; // arbitrary value when status is not an error
-            }
-        }
-
-        private long getPausedReason(int status) {
-            switch (status) {
-                case DownloadStatus.WAITING_TO_RETRY:
-                    return PAUSED_WAITING_TO_RETRY;
-
-                case DownloadStatus.WAITING_FOR_NETWORK:
-                    return PAUSED_WAITING_FOR_NETWORK;
-
-                case DownloadStatus.QUEUED_FOR_WIFI:
-                    return PAUSED_QUEUED_FOR_WIFI;
-
-                case DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS:
-                    return PAUSED_QUEUED_DUE_CLIENT_RESTRICTIONS;
-
-                default:
-                    return PAUSED_UNKNOWN;
-            }
-        }
-
-        private long getErrorCode(int status) {
-            if (isHttpClientError(status) || isHttpServerError(status)) {
-                // HTTP status code
-                return status;
-            }
-
-            switch (status) {
-                case DownloadStatus.FILE_ERROR:
-                    return ERROR_FILE_ERROR;
-
-                case DownloadStatus.UNHANDLED_HTTP_CODE:
-                case DownloadStatus.UNHANDLED_REDIRECT:
-                    return ERROR_UNHANDLED_HTTP_CODE;
-
-                case DownloadStatus.HTTP_DATA_ERROR:
-                    return ERROR_HTTP_DATA_ERROR;
-
-                case DownloadStatus.TOO_MANY_REDIRECTS:
-                    return ERROR_TOO_MANY_REDIRECTS;
-
-                case DownloadStatus.INSUFFICIENT_SPACE_ERROR:
-                    return ERROR_INSUFFICIENT_SPACE;
-
-                case DownloadStatus.DEVICE_NOT_FOUND_ERROR:
-                    return ERROR_DEVICE_NOT_FOUND;
-
-                case DownloadStatus.CANNOT_RESUME:
-                    return ERROR_CANNOT_RESUME;
-
-                case DownloadStatus.FILE_ALREADY_EXISTS_ERROR:
-                    return ERROR_FILE_ALREADY_EXISTS;
-
-                default:
-                    return ERROR_UNKNOWN;
-            }
-        }
-
-        private boolean isHttpClientError(int status) {
-            return 400 <= status && status < DownloadStatus.MIN_ARTIFICIAL_ERROR_STATUS;
-        }
-
-        private boolean isHttpServerError(int status) {
-            return 500 <= status && status < 600;
-        }
-
-        private int translateStatus(int status) {
-            switch (status) {
-                case DownloadStatus.SUBMITTED:
-                case DownloadStatus.PENDING:
-                    return STATUS_PENDING;
-
-                case DownloadStatus.RUNNING:
-                    return STATUS_RUNNING;
-
-                case DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS:
-                case DownloadStatus.PAUSED_BY_APP:
-                case DownloadStatus.WAITING_TO_RETRY:
-                case DownloadStatus.WAITING_FOR_NETWORK:
-                case DownloadStatus.QUEUED_FOR_WIFI:
-                    return STATUS_PAUSED;
-
-                case DownloadStatus.SUCCESS:
-                    return STATUS_SUCCESSFUL;
-
-                case DownloadStatus.DELETING:
-                    return STATUS_DELETING;
-
-                default:
-                    return STATUS_FAILED;
-            }
-        }
     }
 
     /**

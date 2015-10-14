@@ -35,6 +35,7 @@ class NotificationDisplayer {
      */
     private final LongSparseArray<Long> downloadSpeed = new LongSparseArray<>();
     private final NotificationCustomiser notificationCustomiser;
+    private final StatusTranslator statusTranslator;
 
     public NotificationDisplayer(
             Context context,
@@ -42,13 +43,15 @@ class NotificationDisplayer {
             NotificationImageRetriever imageRetriever,
             Resources resources,
             DownloadsUriProvider downloadsUriProvider,
-            NotificationCustomiser notificationCustomiser) {
+            NotificationCustomiser notificationCustomiser,
+            StatusTranslator statusTranslator) {
         this.context = context;
         this.notificationManager = notificationManager;
         this.imageRetriever = imageRetriever;
         this.resources = resources;
         this.downloadsUriProvider = downloadsUriProvider;
         this.notificationCustomiser = notificationCustomiser;
+        this.statusTranslator = statusTranslator;
     }
 
     public void buildAndShowNotification(SimpleArrayMap<String, Collection<DownloadBatch>> clusters, String notificationId, long firstShown) {
@@ -97,16 +100,14 @@ class NotificationDisplayer {
         if (type == DownloadNotifier.TYPE_ACTIVE || type == DownloadNotifier.TYPE_WAITING) {
             // build a synthetic uri for intent identification purposes
             Uri uri = new Uri.Builder().scheme("active-dl").appendPath(tag).build();
-            Intent clickIntent = new Intent(Constants.ACTION_LIST, uri, context, DownloadReceiver.class);
-            clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, new long[]{batchId});
-            clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_STATUSES, new int[]{batchStatus});
+
+            Intent clickIntent = createClickIntent(Constants.ACTION_LIST, batchId, batchStatus, uri);
             builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
             builder.setOngoing(true);
 
             notificationCustomiser.modifyQueuedOrDownloadingNotification(builder, batchId);
 
         } else if (type == DownloadNotifier.TYPE_SUCCESS || type == DownloadNotifier.TYPE_CANCELLED) {
-            // TODO: Decide how we handle notification clicks
             FileDownloadInfo fileDownloadInfo = batch.getDownloads().get(0);
             Uri uri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), fileDownloadInfo.getId());
 
@@ -117,13 +118,20 @@ class NotificationDisplayer {
             builder.setAutoCancel(true);
 
             String action = DownloadStatus.isError(batch.getStatus()) ? Constants.ACTION_LIST : Constants.ACTION_OPEN;
-
-            Intent clickIntent = new Intent(action, uri, context, DownloadReceiver.class);
-            clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, new long[]{batchId});
-            clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_STATUSES, new int[]{batchStatus});
-            clickIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batchId);
+            Intent clickIntent = createClickIntent(action, batchId, batchStatus, uri);
             builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
         }
+    }
+
+    private Intent createClickIntent(String action, long batchId, int batchStatus, Uri uri) {
+        Intent clickIntent = new Intent(action, uri, context, DownloadReceiver.class);
+        clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, new long[]{batchId});
+        clickIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batchId);
+
+        int status = statusTranslator.translate(batchStatus);
+        clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_STATUSES, new int[]{status});
+
+        return clickIntent;
     }
 
     private Notification buildTitlesAndDescription(int type, Collection<DownloadBatch> cluster, NotificationCompat.Builder builder) {

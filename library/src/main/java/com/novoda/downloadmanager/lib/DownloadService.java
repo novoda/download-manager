@@ -146,13 +146,15 @@ public class DownloadService extends Service {
         downloadScanner = new DownloadScanner(getContentResolver(), this, downloadsUriProvider);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        StatusTranslator statusTranslator = new StatusTranslator();
         NotificationDisplayer notificationDisplayer = new NotificationDisplayer(
                 this,
                 notificationManager,
                 getNotificationImageRetriever(),
                 getResources(),
                 downloadsUriProvider,
-                getNotificationCustomiser()
+                getNotificationCustomiser(),
+                statusTranslator
         );
 
         downloadNotifier = new DownloadNotifier(this, notificationDisplayer);
