@@ -52,7 +52,7 @@ public class BatchPauseResumeController {
         contentResolver.notifyChange(downloadsUriProvider.getBatchesWithoutProgressUri(), null);
     }
 
-    public void unlockStaleDownloads() {
+    void unlockStaleDownloads() {
         String batchToBeUnlocked = downloadsRepository.getCurrentDownloadingBatchId();
         if (batchToBeUnlocked == null) {
             batchToBeUnlocked = downloadsRepository.getCurrentSubmittedBatchId();

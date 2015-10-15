@@ -618,6 +618,10 @@ public class DownloadManager {
         return markBatchesToBeDeleted(batchIds);
     }
 
+    /**
+     * When the DownloadManager starts and the database contains downloads already in progress, the DownloadManager won't start them again.
+     * This method unlocks all the incorrect states of the downloads and let the DownloadManager to restart them again.
+     */
     public void sanityCheckBatchStatuses() {
         batchPauseResumeController.unlockStaleDownloads();
     }
