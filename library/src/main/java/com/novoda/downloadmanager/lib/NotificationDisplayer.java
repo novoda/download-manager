@@ -15,6 +15,7 @@ import android.support.v4.util.SimpleArrayMap;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 
+import com.novoda.downloadmanager.Download;
 import com.novoda.downloadmanager.R;
 
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ class NotificationDisplayer {
     private final LongSparseArray<Long> downloadSpeed = new LongSparseArray<>();
     private final NotificationCustomiser notificationCustomiser;
     private final StatusTranslator statusTranslator;
+    private final PublicFacingDownloadMarshaller downloadMarshaller;
 
     public NotificationDisplayer(
             Context context,
@@ -44,7 +46,8 @@ class NotificationDisplayer {
             Resources resources,
             DownloadsUriProvider downloadsUriProvider,
             NotificationCustomiser notificationCustomiser,
-            StatusTranslator statusTranslator) {
+            StatusTranslator statusTranslator,
+            PublicFacingDownloadMarshaller downloadMarshaller) {
         this.context = context;
         this.notificationManager = notificationManager;
         this.imageRetriever = imageRetriever;
@@ -52,6 +55,7 @@ class NotificationDisplayer {
         this.downloadsUriProvider = downloadsUriProvider;
         this.notificationCustomiser = notificationCustomiser;
         this.statusTranslator = statusTranslator;
+        this.downloadMarshaller = downloadMarshaller;
     }
 
     public void buildAndShowNotification(SimpleArrayMap<String, Collection<DownloadBatch>> clusters, String notificationId, long firstShown) {
@@ -105,7 +109,8 @@ class NotificationDisplayer {
             builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
             builder.setOngoing(true);
 
-            notificationCustomiser.modifyQueuedOrDownloadingNotification(builder, batchId);
+            Download download = downloadMarshaller.marshall(batch);
+            notificationCustomiser.modifyQueuedOrDownloadingNotification(builder, download);
 
         } else if (type == DownloadNotifier.TYPE_SUCCESS || type == DownloadNotifier.TYPE_CANCELLED) {
             FileDownloadInfo fileDownloadInfo = batch.getDownloads().get(0);

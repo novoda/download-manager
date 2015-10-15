@@ -123,9 +123,10 @@ public class DownloadService extends Service {
         this.downloadsUriProvider = DownloadsUriProvider.getInstance();
         this.downloadDeleter = new DownloadDeleter(getContentResolver());
         this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter, downloadsUriProvider, systemFacade);
-        PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
-        DownloadClientReadyChecker downloadClientReadyChecker = getDownloadClientReadyChecker();
         this.networkChecker = new NetworkChecker(this.systemFacade);
+        DownloadClientReadyChecker downloadClientReadyChecker = getDownloadClientReadyChecker();
+        StatusTranslator statusTranslator = new StatusTranslator();
+        PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller(statusTranslator);
         this.downloadReadyChecker = new DownloadReadyChecker(this.systemFacade, networkChecker, downloadClientReadyChecker, downloadMarshaller);
 
         String applicationPackageName = getApplicationContext().getPackageName();
@@ -146,7 +147,6 @@ public class DownloadService extends Service {
         downloadScanner = new DownloadScanner(getContentResolver(), this, downloadsUriProvider);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        StatusTranslator statusTranslator = new StatusTranslator();
         NotificationDisplayer notificationDisplayer = new NotificationDisplayer(
                 this,
                 notificationManager,
@@ -154,7 +154,8 @@ public class DownloadService extends Service {
                 getResources(),
                 downloadsUriProvider,
                 getNotificationCustomiser(),
-                statusTranslator
+                statusTranslator,
+                downloadMarshaller
         );
 
         downloadNotifier = new DownloadNotifier(this, notificationDisplayer);
