@@ -203,10 +203,10 @@ class DownloadsRepository {
     @Nullable
     String getCurrentDownloadingBatchId() {
         String[] projection = {DownloadContract.Downloads.COLUMN_BATCH_ID};
-        String where = "(" + DownloadContract.Downloads.COLUMN_CONTROL + " is ? or " + DownloadContract.Downloads.COLUMN_CONTROL + " = ? ) "
+        //Can't pass null as selection argument
+        String where = "(" + DownloadContract.Downloads.COLUMN_CONTROL + " is null or " + DownloadContract.Downloads.COLUMN_CONTROL + " = ? ) "
                 + " AND " + DownloadContract.Downloads.COLUMN_STATUS + " = ?";
         String[] selectionArgs = {
-                "null",
                 String.valueOf(DownloadsControl.CONTROL_RUN),
                 String.valueOf(DownloadStatus.RUNNING)
         };
@@ -242,13 +242,13 @@ class DownloadsRepository {
     int updatePendingOrSubmittedDownloadsToQueued() {
         ContentValues values = new ContentValues(2);
         values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
-        values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS);
+        values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.PENDING);
 
-        String where = "(" + DownloadContract.Downloads.COLUMN_CONTROL + " is ? or " + DownloadContract.Downloads.COLUMN_CONTROL + " = ? ) "
+        //Can't pass null as selection argument
+        String where = "(" + DownloadContract.Downloads.COLUMN_CONTROL + " is null or " + DownloadContract.Downloads.COLUMN_CONTROL + " = ? ) "
                 + " AND ( " + DownloadContract.Downloads.COLUMN_STATUS + " = ? or " + DownloadContract.Downloads.COLUMN_STATUS + " = ? )";
 
         String[] selectionArgs = {
-                "null",
                 String.valueOf(DownloadsControl.CONTROL_RUN),
                 String.valueOf(DownloadStatus.RUNNING),
                 String.valueOf(DownloadStatus.SUBMITTED)

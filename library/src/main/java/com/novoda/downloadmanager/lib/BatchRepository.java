@@ -277,7 +277,7 @@ class BatchRepository {
      */
     int updateBatchToQueuedStatus(@NonNull String batchIdToBeSanitised) {
         ContentValues values = new ContentValues(1);
-        values.put(DownloadContract.Batches.COLUMN_STATUS, DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS);
+        values.put(DownloadContract.Batches.COLUMN_STATUS, DownloadStatus.PENDING);
 
         String where = DownloadContract.Batches._ID + " = ?";
 
