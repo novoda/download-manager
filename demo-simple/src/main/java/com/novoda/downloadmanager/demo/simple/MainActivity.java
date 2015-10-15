@@ -76,8 +76,8 @@ public class MainActivity extends AppCompatActivity implements QueryForDownloads
     }
 
     @Override
-    public void onQueryResult(List<Download> downloads) {
-        recyclerView.setAdapter(new DownloadAdapter(downloads));
-        emptyView.setVisibility(downloads.isEmpty() ? View.VISIBLE : View.GONE);
+    public void onQueryResult(List<BeardDownload> beardDownloads) {
+        recyclerView.setAdapter(new BeardDownloadAdapter(beardDownloads));
+        emptyView.setVisibility(beardDownloads.isEmpty() ? View.VISIBLE : View.GONE);
     }
 }

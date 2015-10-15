@@ -8,23 +8,23 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.novoda.downloadmanager.demo.R;
-import com.novoda.downloadmanager.demo.extended.Download;
+import com.novoda.downloadmanager.demo.extended.BeardDownload;
 
 import java.util.List;
 import java.util.Locale;
 
 public class DeleteAdapter extends RecyclerView.Adapter<DeleteAdapter.ViewHolder> {
-    private final List<Download> downloads;
+    private final List<BeardDownload> beardDownloads;
     private final Listener listener;
 
-    public DeleteAdapter(List<Download> downloads, Listener listener) {
-        this.downloads = downloads;
+    public DeleteAdapter(List<BeardDownload> beardDownloads, Listener listener) {
+        this.beardDownloads = beardDownloads;
         this.listener = listener;
     }
 
-    public void updateDownloads(List<Download> downloads) {
-        this.downloads.clear();
-        this.downloads.addAll(downloads);
+    public void updateDownloads(List<BeardDownload> beardDownloads) {
+        this.beardDownloads.clear();
+        this.beardDownloads.addAll(beardDownloads);
         notifyDataSetChanged();
     }
 
@@ -35,10 +35,10 @@ public class DeleteAdapter extends RecyclerView.Adapter<DeleteAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
-        final Download download = downloads.get(position);
+        final BeardDownload beardDownload = beardDownloads.get(position);
 
-        viewHolder.titleTextView.setText(download.getTitle());
-        String text = String.format(Locale.getDefault(), "%1$s : %2$s\nBatch %3$d", download.getDownloadStatusText(), download.getFileName(), download.getBatchId());
+        viewHolder.titleTextView.setText(beardDownload.getTitle());
+        String text = String.format(Locale.getDefault(), "%1$s : %2$s\nBatch %3$d", beardDownload.getDownloadStatusText(), beardDownload.getFileName(), beardDownload.getBatchId());
         viewHolder.locationTextView.setText(text);
 
         if (listener == null) {
@@ -50,7 +50,7 @@ public class DeleteAdapter extends RecyclerView.Adapter<DeleteAdapter.ViewHolder
                     new View.OnClickListener() {
                         @Override
                         public void onClick(@NonNull View v) {
-                            listener.onDelete(download);
+                            listener.onDelete(beardDownload);
                         }
                     }
             );
@@ -59,11 +59,11 @@ public class DeleteAdapter extends RecyclerView.Adapter<DeleteAdapter.ViewHolder
 
     @Override
     public int getItemCount() {
-        return downloads.size();
+        return beardDownloads.size();
     }
 
     public interface Listener {
-        void onDelete(Download download);
+        void onDelete(BeardDownload beardDownload);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

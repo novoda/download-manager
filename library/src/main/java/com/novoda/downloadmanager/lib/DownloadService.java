@@ -37,7 +37,6 @@ import android.os.Process;
 import android.support.annotation.NonNull;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
-import com.novoda.notils.logger.simple.Log;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -84,7 +83,7 @@ public class DownloadService extends Service {
     private DownloadDeleter downloadDeleter;
     private DownloadReadyChecker downloadReadyChecker;
     private DownloadsUriProvider downloadsUriProvider;
-    private BatchCompletionBroadcaster batchCompletionBroadcaster;
+    private BatchInformationBroadcaster batchInformationBroadcaster;
     private NetworkChecker networkChecker;
 
     /**
@@ -130,7 +129,7 @@ public class DownloadService extends Service {
         this.downloadReadyChecker = new DownloadReadyChecker(this.systemFacade, networkChecker, downloadClientReadyChecker, downloadMarshaller);
 
         String applicationPackageName = getApplicationContext().getPackageName();
-        this.batchCompletionBroadcaster = new BatchCompletionBroadcaster(this, applicationPackageName);
+        this.batchInformationBroadcaster = new BatchInformationBroadcaster(this, applicationPackageName);
 
         alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         ContentResolver contentResolver = getContentResolver();
@@ -147,13 +146,15 @@ public class DownloadService extends Service {
         downloadScanner = new DownloadScanner(getContentResolver(), this, downloadsUriProvider);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        StatusTranslator statusTranslator = new StatusTranslator();
         NotificationDisplayer notificationDisplayer = new NotificationDisplayer(
                 this,
                 notificationManager,
                 getNotificationImageRetriever(),
                 getResources(),
                 downloadsUriProvider,
-                getNotificationCustomiser()
+                getNotificationCustomiser(),
+                statusTranslator
         );
 
         downloadNotifier = new DownloadNotifier(this, notificationDisplayer);
@@ -345,21 +346,20 @@ public class DownloadService extends Service {
             }
         }
 
-        Log.d("Test, active batches?: " + isActive);
-
         for (DownloadBatch downloadBatch : downloadBatches) {
-            Log.d("Test, downloadBatch id: " + downloadBatch.getBatchId() + ", status: " + downloadBatch.getStatus());
             if (downloadBatch.isDeleted() || downloadBatch.prune(downloadDeleter)) {
-                Log.d("Test, downloadBatch is deleted or prunned");
                 continue;
             }
 
             if (!isActive && downloadReadyChecker.canDownload(downloadBatch)) {
-                Log.d("Test, no active batches so far and client checks are ok");
+                boolean isBatchStartingForTheFirstTime = batchRepository.isBatchStartingForTheFirstTime(downloadBatch.getBatchId());
+                if (isBatchStartingForTheFirstTime) {
+                    handleBatchStartingForTheFirstTime(downloadBatch);
+                }
+
                 downloadOrContinueBatch(downloadBatch.getDownloads());
                 isActive = true;
             } else if (downloadBatch.scanCompletedMediaIfReady(downloadScanner)) {
-                Log.d("Test, we already have active downloads or client denies");
                 isActive = true;
             }
 
@@ -386,6 +386,11 @@ public class DownloadService extends Service {
         return isActive;
     }
 
+    private void handleBatchStartingForTheFirstTime(DownloadBatch downloadBatch) {
+        batchRepository.markBatchHasStarted(downloadBatch.getBatchId());
+        batchInformationBroadcaster.notifyBatchStartedFor(downloadBatch.getBatchId());
+    }
+
     private void moveSubmittedTasksToBatchStatusIfNecessary() {
         List<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
         List<DownloadBatch> downloadBatches = batchRepository.retrieveBatchesFor(allDownloads);
@@ -410,7 +415,6 @@ public class DownloadService extends Service {
     private void downloadOrContinueBatch(List<FileDownloadInfo> downloads) {
         for (FileDownloadInfo info : downloads) {
             if (!DownloadStatus.isCompleted(info.getStatus()) && !info.isSubmittedOrRunning()) {
-                Log.d("Test, download should start");
                 download(info);
             }
         }
@@ -422,7 +426,7 @@ public class DownloadService extends Service {
         DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(info);
         DownloadTask downloadTask = new DownloadTask(
                 this, systemFacade, info, downloadBatch, storageManager, downloadNotifier,
-                batchCompletionBroadcaster, batchRepository, downloadsUriProvider,
+                batchInformationBroadcaster, batchRepository, downloadsUriProvider,
                 controlReader, networkChecker, downloadReadyChecker, new Clock(),
                 downloadsRepository);
 

@@ -7,23 +7,23 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.novoda.downloadmanager.demo.R;
-import com.novoda.downloadmanager.demo.extended.Download;
+import com.novoda.downloadmanager.demo.extended.BeardDownload;
 
 import java.util.List;
 import java.util.Locale;
 
 public class PauseResumeAdapter extends RecyclerView.Adapter<PauseResumeAdapter.ViewHolder> {
-    private final List<Download> downloads;
+    private final List<BeardDownload> beardDownloads;
     private final Listener listener;
 
-    public PauseResumeAdapter(List<Download> downloads, Listener listener) {
-        this.downloads = downloads;
+    public PauseResumeAdapter(List<BeardDownload> beardDownloads, Listener listener) {
+        this.beardDownloads = beardDownloads;
         this.listener = listener;
     }
 
-    public void updateDownloads(List<Download> downloads) {
-        this.downloads.clear();
-        this.downloads.addAll(downloads);
+    public void updateDownloads(List<BeardDownload> beardDownloads) {
+        this.beardDownloads.clear();
+        this.beardDownloads.addAll(beardDownloads);
         notifyDataSetChanged();
     }
 
@@ -34,15 +34,15 @@ public class PauseResumeAdapter extends RecyclerView.Adapter<PauseResumeAdapter.
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
-        final Download download = downloads.get(position);
-        viewHolder.titleTextView.setText(download.getTitle());
-        String text = String.format(Locale.getDefault(), "%1$s : %2$s\nBatch %3$d", download.getDownloadStatusText(), download.getFileName(), download.getBatchId());
+        final BeardDownload beardDownload = beardDownloads.get(position);
+        viewHolder.titleTextView.setText(beardDownload.getTitle());
+        String text = String.format(Locale.getDefault(), "%1$s : %2$s\nBatch %3$d", beardDownload.getDownloadStatusText(), beardDownload.getFileName(), beardDownload.getBatchId());
         viewHolder.locationTextView.setText(text);
         viewHolder.root.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(@NonNull View v) {
-                        listener.onItemClick(download);
+                        listener.onItemClick(beardDownload);
                     }
                 }
         );
@@ -50,11 +50,11 @@ public class PauseResumeAdapter extends RecyclerView.Adapter<PauseResumeAdapter.
 
     @Override
     public int getItemCount() {
-        return downloads.size();
+        return beardDownloads.size();
     }
 
     interface Listener {
-        void onItemClick(Download download);
+        void onItemClick(BeardDownload beardDownload);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

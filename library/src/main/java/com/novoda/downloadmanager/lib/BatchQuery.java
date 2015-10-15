@@ -241,7 +241,8 @@ public class BatchQuery {
         }
 
         private boolean isNotLast(Criteria.Builder criteriaBuilder, List<Criteria.Builder> criteriaBuilders) {
-            return criteriaBuilders.indexOf(criteriaBuilder) != (criteriaBuilders.size() - 1);
+            int lastIndex = criteriaBuilders.size() - 1;
+            return criteriaBuilders.indexOf(criteriaBuilder) != lastIndex;
         }
 
         private List<Criteria.Builder> combineCriteriaBuilders() {

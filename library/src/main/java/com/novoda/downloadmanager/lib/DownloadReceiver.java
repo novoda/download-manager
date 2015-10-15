@@ -1,6 +1,5 @@
 package com.novoda.downloadmanager.lib;
 
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -14,7 +13,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
-import android.widget.Toast;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
 
@@ -110,15 +108,14 @@ public class DownloadReceiver extends BroadcastReceiver {
 
     private void handleNotificationBroadcast(Context context, Intent intent) {
         String action = intent.getAction();
+        long[] ids = intent.getLongArrayExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS);
+        int[] statuses = intent.getIntArrayExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_STATUSES);
         switch (action) {
             case ACTION_LIST:
-                long[] ids = intent.getLongArrayExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS);
-                int[] statuses = intent.getIntArrayExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_STATUSES);
                 sendNotificationClickedIntent(context, ids, statuses);
                 break;
             case ACTION_OPEN: {
-                long id = ContentUris.parseId(intent.getData());
-                openDownload(context, id);
+                sendNotificationClickedIntent(context, ids, statuses);
                 long batchId = getBatchId(intent);
                 hideNotification(context, batchId);
                 break;
@@ -150,24 +147,6 @@ public class DownloadReceiver extends BroadcastReceiver {
         appIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_STATUSES, statuses);
 
         context.sendBroadcast(appIntent);
-    }
-
-    /**
-     * Start activity to display the file represented by the given
-     * {@link DownloadManager#COLUMN_ID}.
-     */
-    private void openDownload(Context context, long id) {
-        ContentResolver contentResolver = context.getContentResolver();
-        DownloadManager downloadManager = new DownloadManager(context, contentResolver);
-        OpenHelper openHelper = new OpenHelper(downloadManager, downloadsUriProvider);
-        Intent intent = openHelper.buildViewIntent(context, id);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        try {
-            context.startActivity(intent);
-        } catch (ActivityNotFoundException ex) {
-            LLog.d("no activity for " + intent, ex);
-            Toast.makeText(context, "Cannot open file", Toast.LENGTH_LONG).show();
-        }
     }
 
     /**

@@ -36,7 +36,7 @@ public class BatchesActivity extends AppCompatActivity implements QueryForBatche
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         downloadManager = DownloadManagerBuilder.from(this)
                 .build();
-        adapter = new BatchesAdapter(new ArrayList<Batch>());
+        adapter = new BatchesAdapter(new ArrayList<BeardBatch>());
         recyclerView.setAdapter(adapter);
 
         emptyView = findViewById(R.id.show_batches_no_batches_view);
@@ -107,8 +107,8 @@ public class BatchesActivity extends AppCompatActivity implements QueryForBatche
     }
 
     @Override
-    public void onQueryResult(List<Batch> batches) {
-        adapter.updateBatches(batches);
-        emptyView.setVisibility(batches.isEmpty() ? View.VISIBLE : View.GONE);
+    public void onQueryResult(List<BeardBatch> beardBatches) {
+        adapter.updateBatches(beardBatches);
+        emptyView.setVisibility(beardBatches.isEmpty() ? View.VISIBLE : View.GONE);
     }
 }

@@ -6,13 +6,13 @@ import com.novoda.downloadmanager.lib.DownloadManager;
  * Model object to encapsulate data from the Downloads table.
  * It represents a single download containing the file name of the downloaded file.
  */
-public class Download {
+public class BeardDownload {
     private final String title;
     private final String fileName;
     private final int downloadStatus;
     private final long batchId;
 
-    public Download(String title, String fileName, int downloadStatus, long batchId) {
+    public BeardDownload(String title, String fileName, int downloadStatus, long batchId) {
         this.title = title;
         this.fileName = fileName;
         this.downloadStatus = downloadStatus;

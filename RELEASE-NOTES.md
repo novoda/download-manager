@@ -1,3 +1,24 @@
+0.2.20
+-----
+- Broadcast clicks on notifications for completed downloads #160
+- Sends the right values for the status in the Notification click broadcasts #160
+
+0.2.19
+-----
+- Broadcast clicks on notifications for cancelled downloads #159
+
+0.2.18
+-----
+- Track and broacast when a batch starts for the first time #158
+
+0.2.17
+-----
+- Add a broadcast for batch failure #157
+
+0.2.16
+-----
+- Adds a method to exclude deleted batches from query #156
+
 0.2.15
 -----
 - Add API to customise notifications #155

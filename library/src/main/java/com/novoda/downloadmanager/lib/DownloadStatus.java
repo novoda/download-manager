@@ -207,6 +207,13 @@ final class DownloadStatus {
     }
 
     /**
+     * Returns whether the download has failed
+     */
+    public static boolean isFailure(int batchStatus) {
+        return isError(batchStatus) && !isCancelled(batchStatus);
+    }
+
+    /**
      * Returns whether the download has been cancelled.
      */
     public static boolean isCancelled(int status) {

@@ -14,7 +14,7 @@ import android.view.View;
 
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
-import com.novoda.downloadmanager.demo.extended.Download;
+import com.novoda.downloadmanager.demo.extended.BeardDownload;
 import com.novoda.downloadmanager.demo.extended.QueryForDownloadsAsyncTask;
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.NotificationVisibility;
@@ -44,11 +44,11 @@ public class DeleteActivity extends AppCompatActivity implements QueryForDownloa
         downloadManager = DownloadManagerBuilder.from(this)
                 .build();
         deleteAdapter = new DeleteAdapter(
-                new ArrayList<Download>(),
+                new ArrayList<BeardDownload>(),
                 new DeleteAdapter.Listener() {
                     @Override
-                    public void onDelete(Download download) {
-                        downloadManager.removeBatches(download.getBatchId());
+                    public void onDelete(BeardDownload beardDownload) {
+                        downloadManager.removeBatches(beardDownload.getBatchId());
                     }
                 }
         );
@@ -111,9 +111,9 @@ public class DeleteActivity extends AppCompatActivity implements QueryForDownloa
     }
 
     @Override
-    public void onQueryResult(List<Download> downloads) {
-        deleteAdapter.updateDownloads(downloads);
-        emptyView.setVisibility(downloads.isEmpty() ? View.VISIBLE : View.GONE);
+    public void onQueryResult(List<BeardDownload> beardDownloads) {
+        deleteAdapter.updateDownloads(beardDownloads);
+        emptyView.setVisibility(beardDownloads.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
 }
