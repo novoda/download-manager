@@ -1,15 +1,11 @@
-package com.novoda.downloadmanager.lib;
+package com.novoda.downloadmanager.notifications;
 
 import android.support.v4.app.NotificationCompat;
 
-import com.novoda.downloadmanager.notifications.CancelledNotificationCustomiser;
-import com.novoda.downloadmanager.notifications.CompleteNotificationCustomiser;
 import com.novoda.downloadmanager.Download;
-import com.novoda.downloadmanager.notifications.DownloadingNotificationCustomiser;
-import com.novoda.downloadmanager.notifications.FailedNotificationCustomiser;
-import com.novoda.downloadmanager.notifications.QueuedNotificationCustomiser;
 
-class NotificationCustomiser implements QueuedNotificationCustomiser, DownloadingNotificationCustomiser,
+// TODO make this package - when everything notification-like is moved to /notifications/
+public class NotificationCustomiser implements QueuedNotificationCustomiser, DownloadingNotificationCustomiser,
         CompleteNotificationCustomiser, CancelledNotificationCustomiser, FailedNotificationCustomiser {
 
     private final QueuedNotificationCustomiser queuedCustomiser;

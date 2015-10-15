@@ -17,6 +17,7 @@ import android.text.format.DateUtils;
 
 import com.novoda.downloadmanager.Download;
 import com.novoda.downloadmanager.R;
+import com.novoda.downloadmanager.notifications.NotificationCustomiser;
 import com.novoda.downloadmanager.notifications.NotificationImageRetriever;
 
 import java.util.ArrayList;
