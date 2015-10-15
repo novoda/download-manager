@@ -14,7 +14,7 @@ import android.view.View;
 
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
-import com.novoda.downloadmanager.demo.extended.Download;
+import com.novoda.downloadmanager.demo.extended.BeardDownload;
 import com.novoda.downloadmanager.demo.extended.QueryForDownloadsAsyncTask;
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.NotificationVisibility;
@@ -48,7 +48,7 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
 
         PauseResumeAdapter.Listener clickListener = new PauseResumeAdapter.Listener() {
             @Override
-            public void onItemClick(Download download) {
+            public void onItemClick(BeardDownload download) {
                 if (download.isPaused()) {
                     downloadManager.resumeBatch(download.getBatchId());
                 } else {
@@ -57,7 +57,7 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
                 queryForDownloads();
             }
         };
-        pauseResumeAdapter = new PauseResumeAdapter(new ArrayList<Download>(), clickListener);
+        pauseResumeAdapter = new PauseResumeAdapter(new ArrayList<BeardDownload>(), clickListener);
         recyclerView.setAdapter(pauseResumeAdapter);
 
         findViewById(R.id.single_download_button).setOnClickListener(
@@ -117,8 +117,8 @@ public class PauseResumeActivity extends AppCompatActivity implements QueryForDo
     }
 
     @Override
-    public void onQueryResult(List<Download> downloads) {
-        pauseResumeAdapter.updateDownloads(downloads);
-        emptyView.setVisibility(downloads.isEmpty() ? View.VISIBLE : View.GONE);
+    public void onQueryResult(List<BeardDownload> beardDownloads) {
+        pauseResumeAdapter.updateDownloads(beardDownloads);
+        emptyView.setVisibility(beardDownloads.isEmpty() ? View.VISIBLE : View.GONE);
     }
 }

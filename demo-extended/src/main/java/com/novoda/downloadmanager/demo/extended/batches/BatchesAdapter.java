@@ -11,15 +11,15 @@ import java.util.List;
 import java.util.Locale;
 
 public class BatchesAdapter extends RecyclerView.Adapter<BatchesAdapter.ViewHolder> {
-    private final List<Batch> batches;
+    private final List<BeardBatch> beardBatches;
 
-    public BatchesAdapter(List<Batch> batches) {
-        this.batches = batches;
+    public BatchesAdapter(List<BeardBatch> beardBatches) {
+        this.beardBatches = beardBatches;
     }
 
-    public void updateBatches(List<Batch> batches) {
-        this.batches.clear();
-        this.batches.addAll(batches);
+    public void updateBatches(List<BeardBatch> beardBatches) {
+        this.beardBatches.clear();
+        this.beardBatches.addAll(beardBatches);
         notifyDataSetChanged();
     }
 
@@ -30,19 +30,19 @@ public class BatchesAdapter extends RecyclerView.Adapter<BatchesAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
-        Batch batch = batches.get(position);
-        viewHolder.idTextView.setText(String.format(Locale.getDefault(), "Id: %d", batch.getId()));
-        viewHolder.titleTextView.setText(batch.getTitle());
-        String status = String.format(Locale.getDefault(), "Status: %s", batch.getDownloadStatusText());
+        BeardBatch beardBatch = beardBatches.get(position);
+        viewHolder.idTextView.setText(String.format(Locale.getDefault(), "Id: %d", beardBatch.getId()));
+        viewHolder.titleTextView.setText(beardBatch.getTitle());
+        String status = String.format(Locale.getDefault(), "Status: %s", beardBatch.getDownloadStatusText());
         viewHolder.statusTextView.setText(status);
-        viewHolder.totalSizeTextView.setText(String.format(Locale.getDefault(), "Total size: %d bytes", batch.getTotalBytes()));
-        viewHolder.currentSizeTextView.setText(String.format(Locale.getDefault(), "Current size: %d bytes", batch.getCurrentBytes()));
-        viewHolder.extraDataTextView.setText(batch.getExtraData());
+        viewHolder.totalSizeTextView.setText(String.format(Locale.getDefault(), "Total size: %d bytes", beardBatch.getTotalBytes()));
+        viewHolder.currentSizeTextView.setText(String.format(Locale.getDefault(), "Current size: %d bytes", beardBatch.getCurrentBytes()));
+        viewHolder.extraDataTextView.setText(beardBatch.getExtraData());
     }
 
     @Override
     public int getItemCount() {
-        return batches.size();
+        return beardBatches.size();
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

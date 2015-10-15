@@ -11,7 +11,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QueryForDownloadsAsyncTask extends AsyncTask<Query, Void, List<Download>> {
+public class QueryForDownloadsAsyncTask extends AsyncTask<Query, Void, List<BeardDownload>> {
 
     private final DownloadManager downloadManager;
     private final WeakReference<Callback> weakCallback;
@@ -26,34 +26,34 @@ public class QueryForDownloadsAsyncTask extends AsyncTask<Query, Void, List<Down
     }
 
     @Override
-    protected List<Download> doInBackground(@NonNull Query... params) {
+    protected List<BeardDownload> doInBackground(@NonNull Query... params) {
         Cursor cursor = downloadManager.query(params[0]);
-        List<Download> downloads = new ArrayList<>();
+        List<BeardDownload> beardDownloads = new ArrayList<>();
         try {
             while (cursor.moveToNext()) {
                 String title = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_TITLE));
                 String fileName = cursor.getString(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_FILENAME));
                 int downloadStatus = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS));
                 long batchId = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_BATCH_ID));
-                downloads.add(new Download(title, fileName, downloadStatus, batchId));
+                beardDownloads.add(new BeardDownload(title, fileName, downloadStatus, batchId));
             }
         } finally {
             cursor.close();
         }
-        return downloads;
+        return beardDownloads;
     }
 
     @Override
-    protected void onPostExecute(@NonNull List<Download> downloads) {
-        super.onPostExecute(downloads);
+    protected void onPostExecute(@NonNull List<BeardDownload> beardDownloads) {
+        super.onPostExecute(beardDownloads);
         Callback callback = weakCallback.get();
         if (callback == null) {
             return;
         }
-        callback.onQueryResult(downloads);
+        callback.onQueryResult(beardDownloads);
     }
 
     public interface Callback {
-        void onQueryResult(List<Download> downloads);
+        void onQueryResult(List<BeardDownload> beardDownloads);
     }
 }
