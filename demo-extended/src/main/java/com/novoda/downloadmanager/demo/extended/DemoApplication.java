@@ -3,14 +3,12 @@ package com.novoda.downloadmanager.demo.extended;
 import android.app.Application;
 import android.hardware.SensorManager;
 
-import com.facebook.stetho.Stetho;
 import com.novoda.downloadmanager.Download;
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.lib.DownloadClientReadyChecker;
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.NotificationCustomiser;
 import com.novoda.downloadmanager.lib.NotificationCustomiserProvider;
-import com.novoda.notils.logger.simple.Log;
 
 public class DemoApplication extends Application implements DownloadClientReadyChecker, NotificationCustomiserProvider {
 
@@ -23,17 +21,9 @@ public class DemoApplication extends Application implements DownloadClientReadyC
         notificationCustomiser = new DemoNotificationCustomiser(DemoApplication.this);
         oneRuleToBindThem = new OneRuleToBindThem();
 
-        Stetho.initializeWithDefaults(this);
-
-        Log.setShowLogs(true);
-
-        Log.d("Test, DemoApplication sanity check download manager and force start");
         DownloadManager downloadManager = DownloadManagerBuilder.from(this).build();
         downloadManager.sanityCheckBatchStatuses();
         downloadManager.forceStart();
-
-
-
     }
 
     @Override
