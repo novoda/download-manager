@@ -1,8 +1,12 @@
 package com.novoda.downloadmanager.lib;
 
+import android.support.v4.util.LongSparseArray;
+
+import com.novoda.downloadmanager.notifications.NotificationVisibility;
+
 import java.util.List;
 
-class DownloadBatch {
+public class DownloadBatch {
 
     public static final DownloadBatch DELETED = new DownloadBatch(-1, null, null, -1, -1L, -1L);
 
@@ -44,6 +48,26 @@ class DownloadBatch {
 
     public int getStatus() {
         return status;
+    }
+
+    public boolean isQueuedForWifi() {
+        return this.status == DownloadStatus.QUEUED_FOR_WIFI;
+    }
+
+    public boolean isRunning() {
+        return this.status == DownloadStatus.RUNNING;
+    }
+
+    public boolean isError() {
+        return DownloadStatus.isError(status);
+    }
+
+    public boolean isCancelled() {
+        return DownloadStatus.isCancelled(status);
+    }
+
+    public boolean isSuccess() {
+        return DownloadStatus.isSuccess(status);
     }
 
     public boolean isDeleted() {
@@ -125,4 +149,77 @@ class DownloadBatch {
         return false;
     }
 
+    public boolean shouldShowActiveItem() {
+        int visibility = info.getVisibility();
+        return visibility == NotificationVisibility.ONLY_WHEN_ACTIVE
+                || visibility == NotificationVisibility.ACTIVE_OR_COMPLETE;
+    }
+
+    public boolean shouldShowCompletedItem() {
+        int visibility = info.getVisibility();
+        return visibility == NotificationVisibility.ONLY_WHEN_COMPLETE
+                || visibility == NotificationVisibility.ACTIVE_OR_COMPLETE;
+    }
+
+    public String getBigPictureUrl() {
+        return info.getBigPictureUrl();
+    }
+
+    public String getDescription() {
+        return info.getDescription();
+    }
+
+    public String getTitle() {
+        return info.getTitle();
+    }
+
+    public long getFirstDownloadBatchId() {
+        return downloads.get(0).getId();
+    }
+
+    public Statistics getLiveStatistics(LongSparseArray<Long> downloadSpeed) {
+        long currentBytes = 0;
+        long totalBytes = 0;
+        long totalBytesPerSecond = 0;
+        for (FileDownloadInfo info : downloads) {
+            if (info.hasTotalBytes()) {
+                currentBytes += info.getCurrentBytes();
+                totalBytes += info.getTotalBytes();
+                Long bytesPerSecond = downloadSpeed.get(info.getId());
+                if (bytesPerSecond != null) {
+                    totalBytesPerSecond += bytesPerSecond;
+                }
+            }
+        }
+        return new Statistics(currentBytes, totalBytes, totalBytesPerSecond);
+    }
+
+    public static class Statistics {
+
+        private final long currentBytes;
+        private final long totalBytes;
+        private final long totalBytesPerSecond;
+
+        public Statistics(long currentBytes, long totalBytes, long totalBytesPerSecond) {
+            this.currentBytes = currentBytes;
+            this.totalBytes = totalBytes;
+            this.totalBytesPerSecond = totalBytesPerSecond;
+        }
+
+        public int getPercentComplete() {
+            if (totalBytes > 0) {
+                return (int) ((currentBytes * 100) / totalBytes);
+            } else {
+                return 0;
+            }
+        }
+
+        public long getTimeRemaining() {
+            if (totalBytesPerSecond > 0) {
+                return ((totalBytes - currentBytes) * 1000) / totalBytesPerSecond;
+            } else {
+                return 0;
+            }
+        }
+    }
 }

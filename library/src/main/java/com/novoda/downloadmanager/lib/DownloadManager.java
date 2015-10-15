@@ -646,7 +646,7 @@ public class DownloadManager {
         if (underlyingCursor == null) {
             return null;
         }
-        StatusTranslator statusTranslator = new StatusTranslator();
+        PublicFacingStatusTranslator statusTranslator = new PublicFacingStatusTranslator();
         return new CursorTranslator(underlyingCursor, downloadsUriProvider.getDownloadsByBatchUri(), statusTranslator);
     }
 
@@ -665,7 +665,7 @@ public class DownloadManager {
             return null;
         }
 
-        StatusTranslator statusTranslator = new StatusTranslator();
+        PublicFacingStatusTranslator statusTranslator = new PublicFacingStatusTranslator();
         return new CursorTranslator(cursor, downloadsUriProvider.getBatchesUri(), statusTranslator);
     }
 

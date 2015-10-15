@@ -17,7 +17,6 @@
 package com.novoda.downloadmanager.lib;
 
 import android.app.AlarmManager;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentResolver;
@@ -36,13 +35,9 @@ import android.os.Message;
 import android.os.Process;
 import android.support.annotation.NonNull;
 
-import com.novoda.downloadmanager.notifications.CancelledNotificationCustomiser;
-import com.novoda.downloadmanager.notifications.CompleteNotificationCustomiser;
-import com.novoda.downloadmanager.notifications.DownloadingNotificationCustomiser;
-import com.novoda.downloadmanager.notifications.FailedNotificationCustomiser;
-import com.novoda.downloadmanager.notifications.NotificationCustomiser;
-import com.novoda.downloadmanager.notifications.QueuedNotificationCustomiser;
 import com.novoda.downloadmanager.lib.logger.LLog;
+import com.novoda.downloadmanager.notifications.DownloadNotifier;
+import com.novoda.downloadmanager.notifications.DownloadNotifierFactory;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -152,20 +147,9 @@ public class DownloadService extends Service {
 
         downloadScanner = new DownloadScanner(getContentResolver(), this, downloadsUriProvider);
 
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        StatusTranslator statusTranslator = new StatusTranslator();
-        NotificationDisplayer notificationDisplayer = new NotificationDisplayer(
-                this,
-                notificationManager,
-                modules.getNotificationImageRetriever(),
-                getResources(),
-                downloadsUriProvider,
-                createNotificationCustomiser(modules),
-                statusTranslator,
-                downloadMarshaller
-        );
-
-        downloadNotifier = new DownloadNotifier(this, notificationDisplayer);
+        DownloadNotifierFactory downloadNotifierFactory = new DownloadNotifierFactory();
+        PublicFacingStatusTranslator statusTranslator = new PublicFacingStatusTranslator();
+        downloadNotifier = downloadNotifierFactory.getDownloadNotifier(this, modules, downloadMarshaller, statusTranslator);
         downloadNotifier.cancelAll();
 
         downloadManagerContentObserver = new DownloadManagerContentObserver();
@@ -206,16 +190,6 @@ public class DownloadService extends Service {
             return ((DownloadManagerModules.Provider) getApplication()).provideDownloadManagerModules();
         }
         return new DefaultsDownloadManagerModules(getApplication());
-    }
-
-    private NotificationCustomiser createNotificationCustomiser(DownloadManagerModules downloadManagerModules) {
-        QueuedNotificationCustomiser queued = downloadManagerModules.getQueuedNotificationCustomiser();
-        DownloadingNotificationCustomiser downloading = downloadManagerModules.getDownloadingNotificationCustomiser();
-        CompleteNotificationCustomiser complete = downloadManagerModules.getCompleteNotificationCustomiser();
-        CancelledNotificationCustomiser cancelled = downloadManagerModules.getCancelledNotificationCustomiser();
-        FailedNotificationCustomiser failed = downloadManagerModules.getFailedNotificationCustomiser();
-
-        return new NotificationCustomiser(queued, downloading, complete, cancelled, failed);
     }
 
     @Override
@@ -292,9 +266,6 @@ public class DownloadService extends Service {
                         LLog.d(entry.getKey() + ": " + Arrays.toString(entry.getValue()));
                     }
                 }
-
-                // Dump speed and update details
-                downloadNotifier.dumpSpeeds();
 
                 LLog.wtf(new IllegalStateException("someone didn't update correctly"), "Final update pass triggered, isActive=" + isActive);
             }
