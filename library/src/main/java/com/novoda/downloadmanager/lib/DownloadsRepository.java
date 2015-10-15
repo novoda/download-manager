@@ -249,8 +249,10 @@ class DownloadsRepository {
         values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.PENDING);
 
         //Can't pass null as selection argument
-        String where = "(" + DownloadContract.Downloads.COLUMN_CONTROL + " is null or " + DownloadContract.Downloads.COLUMN_CONTROL + " = ? ) "
-                + " AND ( " + DownloadContract.Downloads.COLUMN_STATUS + " = ? or " + DownloadContract.Downloads.COLUMN_STATUS + " = ? )";
+        String where = "(" + DownloadContract.Downloads.COLUMN_CONTROL + " is null or "
+                + DownloadContract.Downloads.COLUMN_CONTROL + " = ? ) "
+                + " AND ( " + DownloadContract.Downloads.COLUMN_STATUS + " = ? or "
+                + DownloadContract.Downloads.COLUMN_STATUS + " = ? )";
 
         String[] selectionArgs = {
                 String.valueOf(DownloadsControl.CONTROL_RUN),
