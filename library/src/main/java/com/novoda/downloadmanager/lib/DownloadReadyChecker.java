@@ -3,6 +3,7 @@ package com.novoda.downloadmanager.lib;
 import android.os.Environment;
 
 import com.novoda.downloadmanager.Download;
+import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
 
@@ -22,8 +23,12 @@ class DownloadReadyChecker {
     }
 
     public boolean canDownload(DownloadBatch downloadBatch) {
+        Log.d("Test, check if can download");
         if (isDownloadManagerReadyToDownload(downloadBatch)) {
-            return clientAllowsToDownload(downloadBatch);
+            Log.d("Test, yes it can, check if client can download");
+            boolean clientAllowsToDownload = clientAllowsToDownload(downloadBatch);
+            Log.d("Test, clientAllowsToDownload:" + clientAllowsToDownload);
+            return clientAllowsToDownload;
         }
 
         return false;
@@ -38,6 +43,8 @@ class DownloadReadyChecker {
         List<FileDownloadInfo> downloads = downloadBatch.getDownloads();
 
         if (isThereAPausedDownload(downloads)) {
+
+            Log.d("Test, isThereAPausedDownload()");
             return false;
         }
 

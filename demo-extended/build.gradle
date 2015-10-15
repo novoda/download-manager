@@ -31,4 +31,9 @@ dependencies {
     compile project(':library')
     compile 'com.android.support:appcompat-v7:22.2.1'
     compile 'com.android.support:recyclerview-v7:22.2.1'
+
+    compile 'com.facebook.stetho:stetho:1.2.0'
+//    compile 'com.facebook.stetho:stetho-okhttp:1.2.0'
+    compile 'com.facebook.stetho:stetho-urlconnection:1.2.0'
+
 }

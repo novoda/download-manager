@@ -37,6 +37,7 @@ import android.os.Process;
 import android.support.annotation.NonNull;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
+import com.novoda.notils.logger.simple.Log;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -344,15 +345,21 @@ public class DownloadService extends Service {
             }
         }
 
+        Log.d("Test, active batches?: " + isActive);
+
         for (DownloadBatch downloadBatch : downloadBatches) {
+            Log.d("Test, downloadBatch id: " + downloadBatch.getBatchId() + ", status: " + downloadBatch.getStatus());
             if (downloadBatch.isDeleted() || downloadBatch.prune(downloadDeleter)) {
+                Log.d("Test, downloadBatch is deleted or prunned");
                 continue;
             }
 
             if (!isActive && downloadReadyChecker.canDownload(downloadBatch)) {
+                Log.d("Test, no active batches so far and client checks are ok");
                 downloadOrContinueBatch(downloadBatch.getDownloads());
                 isActive = true;
             } else if (downloadBatch.scanCompletedMediaIfReady(downloadScanner)) {
+                Log.d("Test, we already have active downloads or client denies");
                 isActive = true;
             }
 
@@ -403,6 +410,7 @@ public class DownloadService extends Service {
     private void downloadOrContinueBatch(List<FileDownloadInfo> downloads) {
         for (FileDownloadInfo info : downloads) {
             if (!DownloadStatus.isCompleted(info.getStatus()) && !info.isSubmittedOrRunning()) {
+                Log.d("Test, download should start");
                 download(info);
             }
         }

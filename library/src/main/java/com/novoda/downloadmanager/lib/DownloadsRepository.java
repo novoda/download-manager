@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
+import com.novoda.notils.logger.simple.Log;
 import com.novoda.notils.string.QueryUtils;
 import com.novoda.notils.string.StringUtils;
 
@@ -109,7 +110,8 @@ class DownloadsRepository {
         String where = DownloadContract.Downloads.COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
         String[] selectionArgs = {String.valueOf(batchId), String.valueOf(DownloadStatus.SUCCESS)};
 
-        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
+        int result = contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
+        Log.d("result: " + result);
     }
 
     public void resumeDownloadWithBatchId(long batchId) {
@@ -193,6 +195,50 @@ class DownloadsRepository {
         ContentValues contentValues = new ContentValues();
         contentValues.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.SUBMITTED);
         contentResolver.update(info.getAllDownloadsUri(), contentValues, null, null);
+    }
+
+    void updateDownloadsToBeQueued() {
+        ContentValues values = new ContentValues(2);
+        values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS);
+        values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
+
+        String where = "(" + DownloadContract.Downloads.COLUMN_CONTROL + " is null or " + DownloadContract.Downloads.COLUMN_CONTROL + " = ? ) "
+                + " AND ( " + DownloadContract.Downloads.COLUMN_STATUS + " = ? or " + DownloadContract.Downloads.COLUMN_STATUS + " = ? )";
+
+        String[] selectionArgs = {String.valueOf(DownloadsControl.CONTROL_RUN), String.valueOf(DownloadStatus.RUNNING), String.valueOf(DownloadStatus.SUBMITTED)};
+
+        int downloadsUpdated = contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
+
+        Log.d("updateDownloadsToBeQueued() from download manager, rows downloadsUpdated: " + downloadsUpdated);
+    }
+
+    private String getBatchIdFromDownload() {
+        String where = "(" + DownloadContract.Downloads.COLUMN_CONTROL + " is null or " + DownloadContract.Downloads.COLUMN_CONTROL + " = ? ) "
+                + " AND " + DownloadContract.Downloads.COLUMN_STATUS + " = ?";
+        String[] selectionArgs = {String.valueOf(DownloadsControl.CONTROL_RUN), String.valueOf(DownloadStatus.RUNNING)};
+
+        Cursor cursor = null;
+        try {
+            cursor = contentResolver.query(
+                    downloadsUriProvider.getAllDownloadsUri(),
+                    new String[]{DownloadContract.Downloads.COLUMN_BATCH_ID},
+                    where,
+                    selectionArgs,
+                    null
+            );
+
+            if (cursor.getCount() == 0) {
+                return null;
+            }
+
+            cursor.moveToFirst();
+            return cursor.getString(0);
+
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
     }
 
     interface DownloadInfoCreator {

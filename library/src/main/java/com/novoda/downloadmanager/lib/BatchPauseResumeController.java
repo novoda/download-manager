@@ -51,4 +51,12 @@ public class BatchPauseResumeController {
         contentResolver.notifyChange(downloadsUriProvider.getBatchesUri(), null);
         contentResolver.notifyChange(downloadsUriProvider.getBatchesWithoutProgressUri(), null);
     }
+
+    public void updateDownloadsToBeQueued() {
+        downloadsRepository.updateDownloadsToBeQueued();
+    }
+
+    public void updateDownloadsToBeQueued() {
+        downloadsRepository.updateDownloadsToBeQueued();
+    }
 }
