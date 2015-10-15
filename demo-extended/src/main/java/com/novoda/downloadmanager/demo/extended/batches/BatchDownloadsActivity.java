@@ -15,7 +15,7 @@ import android.view.View;
 
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.demo.R;
-import com.novoda.downloadmanager.demo.extended.Download;
+import com.novoda.downloadmanager.demo.extended.BeardDownload;
 import com.novoda.downloadmanager.demo.extended.QueryForDownloadsAsyncTask;
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.NotificationVisibility;
@@ -44,7 +44,7 @@ public class BatchDownloadsActivity extends AppCompatActivity implements QueryFo
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.main_downloads_list);
         downloadManager = DownloadManagerBuilder.from(this)
                 .build();
-        batchDownloadsAdapter = new BatchDownloadsAdapter(new ArrayList<Download>());
+        batchDownloadsAdapter = new BatchDownloadsAdapter(new ArrayList<BeardDownload>());
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(batchDownloadsAdapter);
 
@@ -128,9 +128,9 @@ public class BatchDownloadsActivity extends AppCompatActivity implements QueryFo
     }
 
     @Override
-    public void onQueryResult(List<Download> downloads) {
-        batchDownloadsAdapter.updateDownloads(downloads);
-        emptyView.setVisibility(downloads.isEmpty() ? View.VISIBLE : View.GONE);
+    public void onQueryResult(List<BeardDownload> beardDownloads) {
+        batchDownloadsAdapter.updateDownloads(beardDownloads);
+        emptyView.setVisibility(beardDownloads.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
 }

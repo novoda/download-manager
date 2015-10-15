@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
+import com.novoda.downloadmanager.Download;
 import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.NotificationCustomiser;
@@ -18,7 +19,7 @@ class DemoNotificationCustomiser implements NotificationCustomiser {
     }
 
     @Override
-    public void modifyQueuedOrDownloadingNotification(NotificationCompat.Builder builder, com.novoda.downloadmanager.Download download) {
+    public void modifyQueuedOrDownloadingNotification(NotificationCompat.Builder builder, Download download) {
         Intent intent = new Intent(context, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Action action = new NotificationCompat.Action(R.drawable.ic_notif_info, "View", pendingIntent);
