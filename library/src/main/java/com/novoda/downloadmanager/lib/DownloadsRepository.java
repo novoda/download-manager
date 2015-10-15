@@ -9,7 +9,6 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
-import com.novoda.notils.logger.simple.Log;
 import com.novoda.notils.string.QueryUtils;
 import com.novoda.notils.string.StringUtils;
 
@@ -113,8 +112,7 @@ class DownloadsRepository {
         String where = DownloadContract.Downloads.COLUMN_BATCH_ID + "= ? AND " + DownloadContract.Downloads.COLUMN_STATUS + " != ?";
         String[] selectionArgs = {String.valueOf(batchId), String.valueOf(DownloadStatus.SUCCESS)};
 
-        int result = contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
-        Log.d("result: " + result);
+        contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
     }
 
     public void resumeDownloadWithBatchId(long batchId) {
@@ -219,10 +217,9 @@ class DownloadsRepository {
                 String.valueOf(DownloadsControl.CONTROL_RUN),
                 String.valueOf(columnStatus)
         };
-
+        
         Cursor cursor = null;
         try {
-
             cursor = contentResolver.query(
                     downloadsUriProvider.getAllDownloadsUri(),
                     projection,
@@ -230,14 +227,11 @@ class DownloadsRepository {
                     selectionArgs,
                     null
             );
-
             if (cursor == null || cursor.getCount() == 0) {
                 return null;
             }
-
             cursor.moveToFirst();
             return cursor.getString(0);
-
         } finally {
             if (cursor != null) {
                 cursor.close();
