@@ -211,13 +211,14 @@ class DownloadsRepository {
     private String getCurrentBatchIdWithColumnStatus(int columnStatus) {
         String[] projection = {DownloadContract.Downloads.COLUMN_BATCH_ID};
         //Can't pass null as selection argument
-        String where = "(" + DownloadContract.Downloads.COLUMN_CONTROL + " is null or " + DownloadContract.Downloads.COLUMN_CONTROL + " = ? ) "
+        String where = "(" + DownloadContract.Downloads.COLUMN_CONTROL + " is null or "
+                + DownloadContract.Downloads.COLUMN_CONTROL + " = ? ) "
                 + " AND " + DownloadContract.Downloads.COLUMN_STATUS + " = ?";
         String[] selectionArgs = {
                 String.valueOf(DownloadsControl.CONTROL_RUN),
                 String.valueOf(columnStatus)
         };
-        
+
         Cursor cursor = null;
         try {
             cursor = contentResolver.query(
