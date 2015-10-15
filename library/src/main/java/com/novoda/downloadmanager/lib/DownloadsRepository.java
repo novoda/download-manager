@@ -202,13 +202,22 @@ class DownloadsRepository {
 
     @Nullable
     String getCurrentDownloadingBatchId() {
+        return getCurrentBatchIdWithColumnStatus(DownloadStatus.RUNNING);
+    }
+
+    @Nullable
+    String getCurrentSubmittedBatchId() {
+        return getCurrentBatchIdWithColumnStatus(DownloadStatus.SUBMITTED);
+    }
+
+    private String getCurrentBatchIdWithColumnStatus(int columnStatus) {
         String[] projection = {DownloadContract.Downloads.COLUMN_BATCH_ID};
         //Can't pass null as selection argument
         String where = "(" + DownloadContract.Downloads.COLUMN_CONTROL + " is null or " + DownloadContract.Downloads.COLUMN_CONTROL + " = ? ) "
                 + " AND " + DownloadContract.Downloads.COLUMN_STATUS + " = ?";
         String[] selectionArgs = {
                 String.valueOf(DownloadsControl.CONTROL_RUN),
-                String.valueOf(DownloadStatus.RUNNING)
+                String.valueOf(columnStatus)
         };
 
         Cursor cursor = null;
@@ -239,7 +248,7 @@ class DownloadsRepository {
     /**
      * @return Number of rows updated
      */
-    int updatePendingOrSubmittedDownloadsToQueued() {
+    int updateRunningOrSubmittedDownloadsToPending() {
         ContentValues values = new ContentValues(2);
         values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
         values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.PENDING);

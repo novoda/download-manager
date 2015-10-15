@@ -53,11 +53,14 @@ public class BatchPauseResumeController {
     }
 
     public void unlockStaleDownloads() {
-        String currentDownloadingBatchId = downloadsRepository.getCurrentDownloadingBatchId();
-        if (currentDownloadingBatchId == null) {
+        String batchToBeUnlocked = downloadsRepository.getCurrentDownloadingBatchId();
+        if (batchToBeUnlocked == null) {
+            batchToBeUnlocked = downloadsRepository.getCurrentSubmittedBatchId();
+        }
+        if (batchToBeUnlocked == null) {
             return;
         }
-        downloadsRepository.updatePendingOrSubmittedDownloadsToQueued();
-        batchRepository.updateBatchToQueuedStatus(currentDownloadingBatchId);
+        downloadsRepository.updateRunningOrSubmittedDownloadsToPending();
+        batchRepository.updateBatchToPendingStatus(batchToBeUnlocked);
     }
 }

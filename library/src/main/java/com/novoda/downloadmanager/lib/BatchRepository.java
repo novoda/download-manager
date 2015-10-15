@@ -89,7 +89,8 @@ class BatchRepository {
                 projection,
                 where,
                 selectionArgs,
-                null);
+                null
+        );
 
         try {
             cursor.moveToFirst();
@@ -113,7 +114,8 @@ class BatchRepository {
                     projection,
                     DownloadContract.Downloads.COLUMN_BATCH_ID + " = ?",
                     selectionArgs,
-                    null);
+                    null
+            );
 
             while (cursor.moveToNext()) {
                 int statusCode = cursor.getInt(0);
@@ -275,13 +277,13 @@ class BatchRepository {
     /**
      * @return Number of rows updated
      */
-    int updateBatchToQueuedStatus(@NonNull String batchIdToBeSanitised) {
+    int updateBatchToPendingStatus(@NonNull String batchIdToBeUnlocked) {
         ContentValues values = new ContentValues(1);
         values.put(DownloadContract.Batches.COLUMN_STATUS, DownloadStatus.PENDING);
 
         String where = DownloadContract.Batches._ID + " = ?";
 
-        String[] selectionArgs = new String[]{batchIdToBeSanitised};
+        String[] selectionArgs = new String[]{batchIdToBeUnlocked};
         return resolver.update(downloadsUriProvider.getBatchesUri(), values, where, selectionArgs);
     }
 
