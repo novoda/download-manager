@@ -5,10 +5,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
+import com.novoda.downloadmanager.CancelledNotificationCustomiser;
+import com.novoda.downloadmanager.CompleteNotificationCustomiser;
 import com.novoda.downloadmanager.Download;
+import com.novoda.downloadmanager.DownloadingNotificationCustomiser;
+import com.novoda.downloadmanager.FailedNotificationCustomiser;
+import com.novoda.downloadmanager.QueuedNotificationCustomiser;
 import com.novoda.downloadmanager.R;
 
-class DefaultNotificationCustomiser implements NotificationCustomiser {
+class DefaultNotificationCustomiser implements QueuedNotificationCustomiser, DownloadingNotificationCustomiser,
+        CompleteNotificationCustomiser, CancelledNotificationCustomiser, FailedNotificationCustomiser {
 
     private final Context context;
 
@@ -17,7 +23,12 @@ class DefaultNotificationCustomiser implements NotificationCustomiser {
     }
 
     @Override
-    public void modifyQueuedNotification(NotificationCompat.Builder builder, Download download) {
+    public void customiseQueued(Download download, NotificationCompat.Builder builder) {
+        addCancelButton(builder, download);
+    }
+
+    @Override
+    public void customiseDownloading(Download download, NotificationCompat.Builder builder) {
         addCancelButton(builder, download);
     }
 
@@ -28,17 +39,18 @@ class DefaultNotificationCustomiser implements NotificationCustomiser {
     }
 
     @Override
-    public void modifyDownloadingNotification(NotificationCompat.Builder builder, Download download) {
-        addCancelButton(builder, download);
+    public void customiseCancelled(Download download, NotificationCompat.Builder builder) {
+        // no-op
     }
 
     @Override
-    public void modifyCompletedNotification(NotificationCompat.Builder builder, Download download) {
-
+    public void customiseComplete(Download download, NotificationCompat.Builder builder) {
+        // no-op
     }
 
     @Override
-    public void modifyCancelledNotification(NotificationCompat.Builder builder, Download download) {
-
+    public void customiseFailed(Download download, NotificationCompat.Builder builder) {
+        // no-op
     }
+
 }

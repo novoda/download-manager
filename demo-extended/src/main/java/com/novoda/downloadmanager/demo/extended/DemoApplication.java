@@ -3,15 +3,19 @@ package com.novoda.downloadmanager.demo.extended;
 import android.app.Application;
 import android.hardware.SensorManager;
 
+import com.novoda.downloadmanager.CancelledNotificationCustomiser;
+import com.novoda.downloadmanager.CompleteNotificationCustomiser;
 import com.novoda.downloadmanager.Download;
+import com.novoda.downloadmanager.DownloadingNotificationCustomiser;
+import com.novoda.downloadmanager.FailedNotificationCustomiser;
+import com.novoda.downloadmanager.NotificationCustomiserProvider;
+import com.novoda.downloadmanager.QueuedNotificationCustomiser;
 import com.novoda.downloadmanager.lib.DownloadClientReadyChecker;
-import com.novoda.downloadmanager.lib.NotificationCustomiser;
-import com.novoda.downloadmanager.lib.NotificationCustomiserProvider;
 
 public class DemoApplication extends Application implements DownloadClientReadyChecker, NotificationCustomiserProvider {
 
     private OneRuleToBindThem oneRuleToBindThem;
-    private NotificationCustomiser notificationCustomiser;
+    private DemoNotificationCustomiser notificationCustomiser;
 
     @Override
     public void onCreate() {
@@ -28,8 +32,28 @@ public class DemoApplication extends Application implements DownloadClientReadyC
     }
 
     @Override
-    public NotificationCustomiser getNotificationCustomiser() {
+    public QueuedNotificationCustomiser getQueuedNotificationCustomiser() {
         return notificationCustomiser;
+    }
+
+    @Override
+    public DownloadingNotificationCustomiser getDownloadingNotificationCustomiser() {
+        return notificationCustomiser;
+    }
+
+    @Override
+    public CompleteNotificationCustomiser getCompleteNotificationCustomiser() {
+        return null;
+    }
+
+    @Override
+    public CancelledNotificationCustomiser getCancelledNotificationCustomiser() {
+        return null;
+    }
+
+    @Override
+    public FailedNotificationCustomiser getFailedNotificationCustomiser() {
+        return null;
     }
 
     private static final class OneRuleToBindThem {

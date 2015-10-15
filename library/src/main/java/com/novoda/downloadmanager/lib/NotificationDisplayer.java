@@ -108,10 +108,6 @@ class NotificationDisplayer {
             Intent clickIntent = createClickIntent(Constants.ACTION_LIST, batchId, batchStatus, uri);
             builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
             builder.setOngoing(true);
-
-            Download download = downloadMarshaller.marshall(batch);
-            notificationCustomiser.modifyQueuedOrDownloadingNotification(builder, download);
-
         } else if (type == DownloadNotifier.TYPE_SUCCESS || type == DownloadNotifier.TYPE_CANCELLED) {
             FileDownloadInfo fileDownloadInfo = batch.getDownloads().get(0);
             Uri uri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), fileDownloadInfo.getId());
@@ -125,6 +121,31 @@ class NotificationDisplayer {
             String action = DownloadStatus.isError(batch.getStatus()) ? Constants.ACTION_LIST : Constants.ACTION_OPEN;
             Intent clickIntent = createClickIntent(action, batchId, batchStatus, uri);
             builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
+        }
+
+        customiseNotification(type, builder, batch);
+    }
+
+    private void customiseNotification(int type, NotificationCompat.Builder builder, DownloadBatch batch) {
+        Download download = downloadMarshaller.marshall(batch);
+        switch (type) {
+            case DownloadNotifier.TYPE_WAITING:
+                notificationCustomiser.customiseQueued(download, builder);
+                break;
+            case DownloadNotifier.TYPE_ACTIVE:
+                notificationCustomiser.customiseDownloading(download, builder);
+                break;
+            case DownloadNotifier.TYPE_SUCCESS:
+                notificationCustomiser.customiseComplete(download, builder);
+                break;
+            case DownloadNotifier.TYPE_CANCELLED:
+                notificationCustomiser.customiseCancelled(download, builder);
+                break;
+            case DownloadNotifier.TYPE_FAILED:
+                notificationCustomiser.customiseFailed(download, builder);
+                break;
+            default:
+                throw new IllegalStateException("Deal with this new type " + type);
         }
     }
 

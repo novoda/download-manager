@@ -36,6 +36,12 @@ import android.os.Message;
 import android.os.Process;
 import android.support.annotation.NonNull;
 
+import com.novoda.downloadmanager.CancelledNotificationCustomiser;
+import com.novoda.downloadmanager.CompleteNotificationCustomiser;
+import com.novoda.downloadmanager.DownloadingNotificationCustomiser;
+import com.novoda.downloadmanager.FailedNotificationCustomiser;
+import com.novoda.downloadmanager.NotificationCustomiserProvider;
+import com.novoda.downloadmanager.QueuedNotificationCustomiser;
 import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.io.File;
@@ -125,8 +131,7 @@ public class DownloadService extends Service {
         this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter, downloadsUriProvider, systemFacade);
         this.networkChecker = new NetworkChecker(this.systemFacade);
         DownloadClientReadyChecker downloadClientReadyChecker = getDownloadClientReadyChecker();
-        StatusTranslator statusTranslator = new StatusTranslator();
-        PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller(statusTranslator);
+        PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
         this.downloadReadyChecker = new DownloadReadyChecker(this.systemFacade, networkChecker, downloadClientReadyChecker, downloadMarshaller);
 
         String applicationPackageName = getApplicationContext().getPackageName();
@@ -147,6 +152,7 @@ public class DownloadService extends Service {
         downloadScanner = new DownloadScanner(getContentResolver(), this, downloadsUriProvider);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        StatusTranslator statusTranslator = new StatusTranslator();
         NotificationDisplayer notificationDisplayer = new NotificationDisplayer(
                 this,
                 notificationManager,
@@ -164,7 +170,8 @@ public class DownloadService extends Service {
         downloadManagerContentObserver = new DownloadManagerContentObserver();
         getContentResolver().registerContentObserver(
                 downloadsUriProvider.getAllDownloadsUri(),
-                true, downloadManagerContentObserver);
+                true, downloadManagerContentObserver
+        );
 
         PackageManager packageManager = getPackageManager();
         String packageName = getApplicationContext().getPackageName();
@@ -178,7 +185,8 @@ public class DownloadService extends Service {
             public FileDownloadInfo create(FileDownloadInfo.Reader reader) {
                 return createNewDownloadInfo(reader);
             }
-        }, downloadsUriProvider);
+        }, downloadsUriProvider
+        );
 
     }
 
@@ -208,9 +216,33 @@ public class DownloadService extends Service {
 
     private NotificationCustomiser getNotificationCustomiser() {
         if (getApplication() instanceof NotificationCustomiserProvider) {
-            return ((NotificationCustomiserProvider) getApplication()).getNotificationCustomiser();
+            NotificationCustomiserProvider provider = (NotificationCustomiserProvider) getApplication();
+            QueuedNotificationCustomiser queued = provider.getQueuedNotificationCustomiser();
+            DownloadingNotificationCustomiser downloading = provider.getDownloadingNotificationCustomiser();
+            CompleteNotificationCustomiser complete = provider.getCompleteNotificationCustomiser();
+            CancelledNotificationCustomiser cancelled = provider.getCancelledNotificationCustomiser();
+            FailedNotificationCustomiser failed = provider.getFailedNotificationCustomiser();
+
+            if (queued == null) {
+                queued = new DefaultNotificationCustomiser(this);
+            }
+            if (downloading == null) {
+                downloading = new DefaultNotificationCustomiser(this);
+            }
+            if (complete == null) {
+                complete = new DefaultNotificationCustomiser(this);
+            }
+            if (cancelled == null) {
+                cancelled = new DefaultNotificationCustomiser(this);
+            }
+            if (failed == null) {
+                failed = new DefaultNotificationCustomiser(this);
+            }
+            return new NotificationCustomiser(queued, downloading, complete, cancelled, failed);
         }
-        return new DefaultNotficationCustomiser(this);
+
+        DefaultNotificationCustomiser defaultCustomiser = new DefaultNotificationCustomiser(this);
+        return new NotificationCustomiser(defaultCustomiser, defaultCustomiser, defaultCustomiser, defaultCustomiser, defaultCustomiser);
     }
 
     @Override
@@ -253,7 +285,8 @@ public class DownloadService extends Service {
         updateHandler.removeMessages(MSG_FINAL_UPDATE);
         updateHandler.sendMessageDelayed(
                 updateHandler.obtainMessage(MSG_FINAL_UPDATE, lastStartId, -1),
-                5 * MINUTE_IN_MILLIS);
+                5 * MINUTE_IN_MILLIS
+        );
     }
 
     private static final int MSG_UPDATE = 1;
@@ -429,7 +462,8 @@ public class DownloadService extends Service {
                 this, systemFacade, info, downloadBatch, storageManager, downloadNotifier,
                 batchInformationBroadcaster, batchRepository, downloadsUriProvider,
                 controlReader, networkChecker, downloadReadyChecker, new Clock(),
-                downloadsRepository);
+                downloadsRepository
+        );
 
         downloadsRepository.setDownloadSubmitted(info);
 
