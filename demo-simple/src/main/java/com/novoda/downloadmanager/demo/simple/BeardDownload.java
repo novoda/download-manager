@@ -2,12 +2,12 @@ package com.novoda.downloadmanager.demo.simple;
 
 import com.novoda.downloadmanager.lib.DownloadManager;
 
-class Download {
+class BeardDownload {
     private final String title;
     private final String fileName;
     private final int downloadStatus;
 
-    public Download(String title, String fileName, int downloadStatus) {
+    public BeardDownload(String title, String fileName, int downloadStatus) {
         this.title = title;
         this.fileName = fileName;
         this.downloadStatus = downloadStatus;

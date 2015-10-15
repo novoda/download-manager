@@ -9,11 +9,11 @@ import com.novoda.downloadmanager.demo.R;
 
 import java.util.List;
 
-class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHolder> {
-    private final List<Download> downloads;
+class BeardDownloadAdapter extends RecyclerView.Adapter<BeardDownloadAdapter.ViewHolder> {
+    private final List<BeardDownload> beardDownloads;
 
-    public DownloadAdapter(List<Download> downloads) {
-        this.downloads = downloads;
+    public BeardDownloadAdapter(List<BeardDownload> beardDownloads) {
+        this.beardDownloads = beardDownloads;
     }
 
     @Override
@@ -23,14 +23,14 @@ class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
-        final Download download = downloads.get(position);
-        viewHolder.titleTextView.setText(download.getTitle());
-        viewHolder.locationTextView.setText(download.getDownloadStatusText() + ": " + download.getFileName());
+        final BeardDownload beardDownload = beardDownloads.get(position);
+        viewHolder.titleTextView.setText(beardDownload.getTitle());
+        viewHolder.locationTextView.setText(beardDownload.getDownloadStatusText() + ": " + beardDownload.getFileName());
     }
 
     @Override
     public int getItemCount() {
-        return downloads.size();
+        return beardDownloads.size();
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
