@@ -40,7 +40,6 @@ import com.novoda.downloadmanager.CancelledNotificationCustomiser;
 import com.novoda.downloadmanager.CompleteNotificationCustomiser;
 import com.novoda.downloadmanager.DownloadingNotificationCustomiser;
 import com.novoda.downloadmanager.FailedNotificationCustomiser;
-import com.novoda.downloadmanager.NotificationCustomiserProvider;
 import com.novoda.downloadmanager.QueuedNotificationCustomiser;
 import com.novoda.downloadmanager.lib.logger.LLog;
 
@@ -130,7 +129,8 @@ public class DownloadService extends Service {
         this.downloadDeleter = new DownloadDeleter(getContentResolver());
         this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter, downloadsUriProvider, systemFacade);
         this.networkChecker = new NetworkChecker(this.systemFacade);
-        DownloadClientReadyChecker downloadClientReadyChecker = getDownloadClientReadyChecker();
+        DownloadManagerModules modules = getDownloadManagerModules();
+        DownloadClientReadyChecker downloadClientReadyChecker = modules.getDownloadClientReadyChecker();
         PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
         this.downloadReadyChecker = new DownloadReadyChecker(this.systemFacade, networkChecker, downloadClientReadyChecker, downloadMarshaller);
 
@@ -156,10 +156,10 @@ public class DownloadService extends Service {
         NotificationDisplayer notificationDisplayer = new NotificationDisplayer(
                 this,
                 notificationManager,
-                getNotificationImageRetriever(),
+                modules.getNotificationImageRetriever(),
                 getResources(),
                 downloadsUriProvider,
-                getNotificationCustomiser(),
+                createNotificationCustomiser(modules),
                 statusTranslator,
                 downloadMarshaller
         );
@@ -200,49 +200,21 @@ public class DownloadService extends Service {
         return info;
     }
 
-    private DownloadClientReadyChecker getDownloadClientReadyChecker() {
-        if (getApplication() instanceof DownloadClientReadyChecker) {
-            return (DownloadClientReadyChecker) getApplication();
+    private DownloadManagerModules getDownloadManagerModules() {
+        if (getApplication() instanceof DownloadManagerModules.Provider) {
+            return ((DownloadManagerModules.Provider) getApplication()).provideDownloadManagerModules();
         }
-        return DownloadClientReadyChecker.READY;
+        return new DefaultsDownloadManagerModules(getApplication());
     }
 
-    private NotificationImageRetriever getNotificationImageRetriever() {
-        if (getApplication() instanceof NotificationImageRetrieverFactory) {
-            return ((NotificationImageRetrieverFactory) getApplication()).createNotificationImageRetriever();
-        }
-        return new OkHttpNotificationImageRetriever();
-    }
+    private NotificationCustomiser createNotificationCustomiser(DownloadManagerModules downloadManagerModules) {
+        QueuedNotificationCustomiser queued = downloadManagerModules.getQueuedNotificationCustomiser();
+        DownloadingNotificationCustomiser downloading = downloadManagerModules.getDownloadingNotificationCustomiser();
+        CompleteNotificationCustomiser complete = downloadManagerModules.getCompleteNotificationCustomiser();
+        CancelledNotificationCustomiser cancelled = downloadManagerModules.getCancelledNotificationCustomiser();
+        FailedNotificationCustomiser failed = downloadManagerModules.getFailedNotificationCustomiser();
 
-    private NotificationCustomiser getNotificationCustomiser() {
-        if (getApplication() instanceof NotificationCustomiserProvider) {
-            NotificationCustomiserProvider provider = (NotificationCustomiserProvider) getApplication();
-            QueuedNotificationCustomiser queued = provider.getQueuedNotificationCustomiser();
-            DownloadingNotificationCustomiser downloading = provider.getDownloadingNotificationCustomiser();
-            CompleteNotificationCustomiser complete = provider.getCompleteNotificationCustomiser();
-            CancelledNotificationCustomiser cancelled = provider.getCancelledNotificationCustomiser();
-            FailedNotificationCustomiser failed = provider.getFailedNotificationCustomiser();
-
-            if (queued == null) {
-                queued = new DefaultNotificationCustomiser(this);
-            }
-            if (downloading == null) {
-                downloading = new DefaultNotificationCustomiser(this);
-            }
-            if (complete == null) {
-                complete = new DefaultNotificationCustomiser(this);
-            }
-            if (cancelled == null) {
-                cancelled = new DefaultNotificationCustomiser(this);
-            }
-            if (failed == null) {
-                failed = new DefaultNotificationCustomiser(this);
-            }
-            return new NotificationCustomiser(queued, downloading, complete, cancelled, failed);
-        }
-
-        DefaultNotificationCustomiser defaultCustomiser = new DefaultNotificationCustomiser(this);
-        return new NotificationCustomiser(defaultCustomiser, defaultCustomiser, defaultCustomiser, defaultCustomiser, defaultCustomiser);
+        return new NotificationCustomiser(queued, downloading, complete, cancelled, failed);
     }
 
     @Override

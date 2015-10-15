@@ -3,19 +3,14 @@ package com.novoda.downloadmanager.demo.extended;
 import android.app.Application;
 import android.hardware.SensorManager;
 
-import com.novoda.downloadmanager.CancelledNotificationCustomiser;
-import com.novoda.downloadmanager.CompleteNotificationCustomiser;
 import com.novoda.downloadmanager.Download;
-import com.novoda.downloadmanager.DownloadingNotificationCustomiser;
-import com.novoda.downloadmanager.FailedNotificationCustomiser;
-import com.novoda.downloadmanager.NotificationCustomiserProvider;
-import com.novoda.downloadmanager.QueuedNotificationCustomiser;
+import com.novoda.downloadmanager.lib.DownloadManagerModules;
 import com.novoda.downloadmanager.lib.DownloadClientReadyChecker;
 
-public class DemoApplication extends Application implements DownloadClientReadyChecker, NotificationCustomiserProvider {
+public class DemoApplication extends Application implements DownloadManagerModules.Provider {
 
-    private OneRuleToBindThem oneRuleToBindThem;
     private DemoNotificationCustomiser notificationCustomiser;
+    private OneRuleToBindThem oneRuleToBindThem;
 
     @Override
     public void onCreate() {
@@ -25,43 +20,23 @@ public class DemoApplication extends Application implements DownloadClientReadyC
     }
 
     @Override
-    public boolean isAllowedToDownload(Download download) {
-        // Here you would add any reasons you may not want to download
-        // For instance if you have some type of geo-location lock on your download capability
-        return oneRuleToBindThem.shouldWeDownload(download);
+    public DownloadManagerModules provideDownloadManagerModules() {
+        return DownloadManagerModules.Builder.from(this)
+                .withQueuedNotificationCustomiser(notificationCustomiser)
+                .withDownloadingNotificationCustomiser(notificationCustomiser)
+                .withDownloadClientReadyChecker(oneRuleToBindThem)
+                .build();
     }
 
-    @Override
-    public QueuedNotificationCustomiser getQueuedNotificationCustomiser() {
-        return notificationCustomiser;
-    }
-
-    @Override
-    public DownloadingNotificationCustomiser getDownloadingNotificationCustomiser() {
-        return notificationCustomiser;
-    }
-
-    @Override
-    public CompleteNotificationCustomiser getCompleteNotificationCustomiser() {
-        return null;
-    }
-
-    @Override
-    public CancelledNotificationCustomiser getCancelledNotificationCustomiser() {
-        return null;
-    }
-
-    @Override
-    public FailedNotificationCustomiser getFailedNotificationCustomiser() {
-        return null;
-    }
-
-    private static final class OneRuleToBindThem {
+    private static final class OneRuleToBindThem implements DownloadClientReadyChecker {
 
         /**
          * @return for our demo we expect always to return true ... unless you want to conquer the galaxy
          */
-        public boolean shouldWeDownload(Download download) {
+        @Override
+        public boolean isAllowedToDownload(Download download) {
+            // Here you would add any reasons you may not want to download
+            // For instance if you have some type of geo-location lock on your download capability
             return download.getTotalSize() > SensorManager.GRAVITY_DEATH_STAR_I;
         }
     }
