@@ -1,7 +1,13 @@
-package com.novoda.downloadmanager.lib;
+package com.novoda.downloadmanager.notifications;
 
 import android.content.Context;
 
+import com.novoda.downloadmanager.lib.BatchInfo;
+import com.novoda.downloadmanager.lib.DownloadBatch;
+import com.novoda.downloadmanager.lib.DownloadStatus;
+import com.novoda.downloadmanager.lib.FileDownloadInfo;
+import com.novoda.downloadmanager.notifications.DownloadNotifier;
+import com.novoda.downloadmanager.notifications.NotificationDisplayer;
 import com.novoda.downloadmanager.notifications.NotificationVisibility;
 
 import java.util.ArrayList;
@@ -29,17 +35,17 @@ public class DownloadNotifierTest {
     public void whenRemovingStaleNotificationsThenItDoesNotCrash() {
         Collection<DownloadBatch> batches = new ArrayList<>();
 
-        DownloadBatch batchQueuedForWifi = getDownloadBatchWith(DownloadStatus.QUEUED_FOR_WIFI);
-        DownloadBatch batchRunning = getDownloadBatchWith(DownloadStatus.RUNNING);
+        DownloadBatch batchQueuedForWifi = getDownloadBatchWith(196); // Queued for Wifi
+        DownloadBatch batchRunning = getDownloadBatchWith(192); // Running
 
         batches.add(batchQueuedForWifi);
         batches.add(batchRunning);
 
         Collection<DownloadBatch> updatedBatches = new ArrayList<>();
-        DownloadBatch batchQueuedForWifiUpdated = getDownloadBatchWith(DownloadStatus.QUEUED_FOR_WIFI);
+        DownloadBatch batchQueuedForWifiUpdated = getDownloadBatchWith(192); // Queued for Wifi
         updatedBatches.add(batchQueuedForWifiUpdated);
 
-        DownloadNotifier downloadNotifier = new DownloadNotifier(mockContext, mockNotificationDisplayer);
+        DownloadNotifier downloadNotifier = new SynchronisedDownloadNotifier(mockContext, mockNotificationDisplayer);
         downloadNotifier.updateWith(batches);
         downloadNotifier.updateWith(updatedBatches);
     }
