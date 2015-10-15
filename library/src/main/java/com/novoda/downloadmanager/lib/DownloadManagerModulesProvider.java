@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager.lib;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 
 import com.novoda.downloadmanager.CancelledNotificationCustomiser;
 import com.novoda.downloadmanager.CompleteNotificationCustomiser;
@@ -14,43 +15,97 @@ import com.novoda.downloadmanager.QueuedNotificationCustomiser;
 class DefaultsDownloadManagerModules implements DownloadManagerModules {
 
     private final Context context;
+    @Nullable
+    private final QueuedNotificationCustomiser queuedCustomiser;
+    @Nullable
+    private final DownloadingNotificationCustomiser downloadingCustomiser;
+    @Nullable
+    private final CompleteNotificationCustomiser completeCustomiser;
+    @Nullable
+    private final CancelledNotificationCustomiser cancelledCustomiser;
+    @Nullable
+    private final FailedNotificationCustomiser failedCustomiser;
+    @Nullable
+    private final DownloadClientReadyChecker readyChecker;
+    @Nullable
+    private final NotificationImageRetriever imageRetriever;
 
-    public DefaultsDownloadManagerModules(Context context) {
+    DefaultsDownloadManagerModules(Context context) {
+        this(context, null, null, null, null, null, null, null);
+    }
+
+    public DefaultsDownloadManagerModules(Context context,
+                                          @Nullable QueuedNotificationCustomiser queuedCustomiser,
+                                          @Nullable DownloadingNotificationCustomiser downloadingCustomiser,
+                                          @Nullable CompleteNotificationCustomiser completeCustomiser,
+                                          @Nullable CancelledNotificationCustomiser cancelledCustomiser,
+                                          @Nullable FailedNotificationCustomiser failedCustomiser,
+                                          @Nullable DownloadClientReadyChecker readyChecker,
+                                          @Nullable NotificationImageRetriever imageRetriever) {
         this.context = context;
+        this.queuedCustomiser = queuedCustomiser;
+        this.downloadingCustomiser = downloadingCustomiser;
+        this.completeCustomiser = completeCustomiser;
+        this.cancelledCustomiser = cancelledCustomiser;
+        this.failedCustomiser = failedCustomiser;
+        this.readyChecker = readyChecker;
+        this.imageRetriever = imageRetriever;
     }
 
     @Override
     public NotificationImageRetriever getNotificationImageRetriever() {
-        return new OkHttpNotificationImageRetriever();
+        if (imageRetriever == null) {
+            return new OkHttpNotificationImageRetriever();
+        }
+        return imageRetriever;
     }
 
     @Override
     public DownloadClientReadyChecker getDownloadClientReadyChecker() {
-        return DownloadClientReadyChecker.READY;
+        if (readyChecker == null) {
+            return DownloadClientReadyChecker.READY;
+        }
+        return readyChecker;
     }
 
     @Override
     public QueuedNotificationCustomiser getQueuedNotificationCustomiser() {
-        return new CancelButtonNotificationCustomiser(context);
+        if (queuedCustomiser == null) {
+            return new CancelButtonNotificationCustomiser(context);
+        }
+        return queuedCustomiser;
     }
 
     @Override
     public DownloadingNotificationCustomiser getDownloadingNotificationCustomiser() {
-        return new CancelButtonNotificationCustomiser(context);
+        if (downloadingCustomiser == null) {
+            return new CancelButtonNotificationCustomiser(context);
+        }
+        return downloadingCustomiser;
     }
 
     @Override
     public CompleteNotificationCustomiser getCompleteNotificationCustomiser() {
-        return new EmptyCompleteNotificationCustomiser();
+        if (completeCustomiser == null) {
+            return new EmptyCompleteNotificationCustomiser();
+        }
+        return completeCustomiser;
     }
 
     @Override
     public CancelledNotificationCustomiser getCancelledNotificationCustomiser() {
-        return new EmptyCancelledNotificationCustomiser();
+        if (cancelledCustomiser == null) {
+            return new EmptyCancelledNotificationCustomiser();
+        }
+        return cancelledCustomiser;
     }
 
     @Override
     public FailedNotificationCustomiser getFailedNotificationCustomiser() {
-        return new EmptyFailedNotificationCustomiser();
+        if (failedCustomiser == null) {
+            return new EmptyFailedNotificationCustomiser();
+        }
+        return failedCustomiser;
     }
+
 }

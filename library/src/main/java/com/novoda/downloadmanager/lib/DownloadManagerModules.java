@@ -80,64 +80,16 @@ public interface DownloadManagerModules {
         }
 
         public DownloadManagerModules build() {
-            DefaultsDownloadManagerModules defaultsDownloadManagerModules = new DefaultsDownloadManagerModules(context);
-            if (queuedCustomiser == null) {
-                queuedCustomiser = defaultsDownloadManagerModules.getQueuedNotificationCustomiser();
-            }
-            if (downloadingCustomiser == null) {
-                downloadingCustomiser = defaultsDownloadManagerModules.getDownloadingNotificationCustomiser();
-            }
-            if (completeCustomiser == null) {
-                completeCustomiser = defaultsDownloadManagerModules.getCompleteNotificationCustomiser();
-            }
-            if (cancelledCustomiser == null) {
-                cancelledCustomiser = defaultsDownloadManagerModules.getCancelledNotificationCustomiser();
-            }
-            if (failedCustomiser == null) {
-                failedCustomiser = defaultsDownloadManagerModules.getFailedNotificationCustomiser();
-            }
-            if (readyChecker == null) {
-                readyChecker = defaultsDownloadManagerModules.getDownloadClientReadyChecker();
-            }
-            if (imageRetriever == null) {
-                imageRetriever = defaultsDownloadManagerModules.getNotificationImageRetriever();
-            }
-            return new DownloadManagerModules() {
-                @Override
-                public NotificationImageRetriever getNotificationImageRetriever() {
-                    return imageRetriever;
-                }
-
-                @Override
-                public DownloadClientReadyChecker getDownloadClientReadyChecker() {
-                    return readyChecker;
-                }
-
-                @Override
-                public QueuedNotificationCustomiser getQueuedNotificationCustomiser() {
-                    return queuedCustomiser;
-                }
-
-                @Override
-                public DownloadingNotificationCustomiser getDownloadingNotificationCustomiser() {
-                    return downloadingCustomiser;
-                }
-
-                @Override
-                public CompleteNotificationCustomiser getCompleteNotificationCustomiser() {
-                    return completeCustomiser;
-                }
-
-                @Override
-                public CancelledNotificationCustomiser getCancelledNotificationCustomiser() {
-                    return cancelledCustomiser;
-                }
-
-                @Override
-                public FailedNotificationCustomiser getFailedNotificationCustomiser() {
-                    return failedCustomiser;
-                }
-            };
+            return new DefaultsDownloadManagerModules(
+                    context,
+                    queuedCustomiser,
+                    downloadingCustomiser,
+                    completeCustomiser,
+                    cancelledCustomiser,
+                    failedCustomiser,
+                    readyChecker,
+                    imageRetriever
+            );
         }
 
     }
