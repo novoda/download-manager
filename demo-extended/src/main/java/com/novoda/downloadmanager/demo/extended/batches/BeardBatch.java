@@ -8,7 +8,7 @@ import com.novoda.downloadmanager.lib.DownloadManager;
  * The difference between this and {@link BeardDownload} is that the batch doesn't
  * contain the file path as it represents a batch of downloads.
  */
-public class Batch {
+public class BeardBatch {
     private final int id;
     private final String title;
     private final int status;
@@ -16,7 +16,7 @@ public class Batch {
     private final long currentBytes;
     private final String extraData;
 
-    public Batch(int id, String title, int status, long totalBytes, long currentBytes, String extraData) {
+    public BeardBatch(int id, String title, int status, long totalBytes, long currentBytes, String extraData) {
         this.id = id;
         this.title = title;
         this.status = status;
