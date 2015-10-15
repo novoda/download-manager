@@ -32,7 +32,6 @@ import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
-import com.novoda.notils.logger.simple.Log;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -609,28 +608,7 @@ public class DownloadManager {
     }
 
     public void sanityCheckBatchStatuses() {
-        String batchId = batchPauseResumeController.getBatchIdFromDownload();
-        if (batchId == null) {
-            return;
-        }
-        batchPauseResumeController.updateDownloadsToBeQueued();
-        updateBatches(batchId);
-    }
-
-
-
-
-
-    private void updateBatches(String batchIdToBeSanitised) {
-        ContentValues values = new ContentValues(1);
-        values.put(DownloadContract.Batches.COLUMN_STATUS, DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS);
-
-        String where = DownloadContract.Batches._ID + " = ?";
-
-        String[] selectionArgs = new String[]{batchIdToBeSanitised};
-        int batchesUpdate = contentResolver.update(downloadsUriProvider.getBatchesUri(), values, where, selectionArgs);
-
-        Log.d("updateBatches() from download manager: batchesUpdate: " + batchesUpdate);
+        batchPauseResumeController.unlockStaleDownloads();
     }
 
     private void setDeletingStatusFor(long[] batchesIds) {

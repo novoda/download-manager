@@ -52,11 +52,12 @@ public class BatchPauseResumeController {
         contentResolver.notifyChange(downloadsUriProvider.getBatchesWithoutProgressUri(), null);
     }
 
-    public void updateDownloadsToBeQueued() {
-        downloadsRepository.updateDownloadsToBeQueued();
-    }
-
-    public void updateDownloadsToBeQueued() {
-        downloadsRepository.updateDownloadsToBeQueued();
+    public void unlockStaleDownloads() {
+        String currentDownloadingBatchId = downloadsRepository.getCurrentDownloadingBatchId();
+        if (currentDownloadingBatchId == null) {
+            return;
+        }
+        downloadsRepository.updatePendingOrSubmittedDownloadsToQueued();
+        batchRepository.updateBatchToQueuedStatus(currentDownloadingBatchId);
     }
 }

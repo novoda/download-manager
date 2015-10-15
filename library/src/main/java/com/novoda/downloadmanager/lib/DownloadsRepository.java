@@ -5,6 +5,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
@@ -41,7 +42,8 @@ class DownloadsRepository {
                 null,
                 null,
                 null,
-                DownloadContract.Batches._ID + " ASC");
+                DownloadContract.Batches._ID + " ASC"
+        );
 
         try {
             List<FileDownloadInfo> downloads = new ArrayList<>();
@@ -75,7 +77,8 @@ class DownloadsRepository {
     public int getDownloadStatus(long id) {
         final Cursor cursor = contentResolver.query(
                 ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id),
-                new String[]{DownloadContract.Downloads.COLUMN_STATUS}, null, null, null);
+                new String[]{DownloadContract.Downloads.COLUMN_STATUS}, null, null, null
+        );
         try {
             if (cursor.moveToFirst()) {
                 return cursor.getInt(0);
@@ -197,37 +200,29 @@ class DownloadsRepository {
         contentResolver.update(info.getAllDownloadsUri(), contentValues, null, null);
     }
 
-    void updateDownloadsToBeQueued() {
-        ContentValues values = new ContentValues(2);
-        values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS);
-        values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
-
-        String where = "(" + DownloadContract.Downloads.COLUMN_CONTROL + " is null or " + DownloadContract.Downloads.COLUMN_CONTROL + " = ? ) "
-                + " AND ( " + DownloadContract.Downloads.COLUMN_STATUS + " = ? or " + DownloadContract.Downloads.COLUMN_STATUS + " = ? )";
-
-        String[] selectionArgs = {String.valueOf(DownloadsControl.CONTROL_RUN), String.valueOf(DownloadStatus.RUNNING), String.valueOf(DownloadStatus.SUBMITTED)};
-
-        int downloadsUpdated = contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
-
-        Log.d("updateDownloadsToBeQueued() from download manager, rows downloadsUpdated: " + downloadsUpdated);
-    }
-
-    private String getBatchIdFromDownload() {
-        String where = "(" + DownloadContract.Downloads.COLUMN_CONTROL + " is null or " + DownloadContract.Downloads.COLUMN_CONTROL + " = ? ) "
+    @Nullable
+    String getCurrentDownloadingBatchId() {
+        String[] projection = {DownloadContract.Downloads.COLUMN_BATCH_ID};
+        String where = "(" + DownloadContract.Downloads.COLUMN_CONTROL + " is ? or " + DownloadContract.Downloads.COLUMN_CONTROL + " = ? ) "
                 + " AND " + DownloadContract.Downloads.COLUMN_STATUS + " = ?";
-        String[] selectionArgs = {String.valueOf(DownloadsControl.CONTROL_RUN), String.valueOf(DownloadStatus.RUNNING)};
+        String[] selectionArgs = {
+                "null",
+                String.valueOf(DownloadsControl.CONTROL_RUN),
+                String.valueOf(DownloadStatus.RUNNING)
+        };
 
         Cursor cursor = null;
         try {
+
             cursor = contentResolver.query(
                     downloadsUriProvider.getAllDownloadsUri(),
-                    new String[]{DownloadContract.Downloads.COLUMN_BATCH_ID},
+                    projection,
                     where,
                     selectionArgs,
                     null
             );
 
-            if (cursor.getCount() == 0) {
+            if (cursor == null || cursor.getCount() == 0) {
                 return null;
             }
 
@@ -239,6 +234,27 @@ class DownloadsRepository {
                 cursor.close();
             }
         }
+    }
+
+    /**
+     * @return Number of rows updated
+     */
+    int updatePendingOrSubmittedDownloadsToQueued() {
+        ContentValues values = new ContentValues(2);
+        values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
+        values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS);
+
+        String where = "(" + DownloadContract.Downloads.COLUMN_CONTROL + " is ? or " + DownloadContract.Downloads.COLUMN_CONTROL + " = ? ) "
+                + " AND ( " + DownloadContract.Downloads.COLUMN_STATUS + " = ? or " + DownloadContract.Downloads.COLUMN_STATUS + " = ? )";
+
+        String[] selectionArgs = {
+                "null",
+                String.valueOf(DownloadsControl.CONTROL_RUN),
+                String.valueOf(DownloadStatus.RUNNING),
+                String.valueOf(DownloadStatus.SUBMITTED)
+        };
+
+        return contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
     }
 
     interface DownloadInfoCreator {

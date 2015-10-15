@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.support.annotation.NonNull;
 import android.support.v4.util.SparseArrayCompat;
 
 import com.novoda.notils.string.QueryUtils;
@@ -269,6 +270,19 @@ class BatchRepository {
                 COLUMN_BATCH_ID + " = ? AND " + DownloadContract.Downloads._ID + " <> ? ",
                 new String[]{String.valueOf(batchId), String.valueOf(downloadId)}
         );
+    }
+
+    /**
+     * @return Number of rows updated
+     */
+    int updateBatchToQueuedStatus(@NonNull String batchIdToBeSanitised) {
+        ContentValues values = new ContentValues(1);
+        values.put(DownloadContract.Batches.COLUMN_STATUS, DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS);
+
+        String where = DownloadContract.Batches._ID + " = ?";
+
+        String[] selectionArgs = new String[]{batchIdToBeSanitised};
+        return resolver.update(downloadsUriProvider.getBatchesUri(), values, where, selectionArgs);
     }
 
     private static class StatusCountMap {
