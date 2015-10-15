@@ -31,6 +31,7 @@ import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
+import com.novoda.downloadmanager.notifications.NotificationVisibility;
 
 import java.io.File;
 import java.io.FileNotFoundException;

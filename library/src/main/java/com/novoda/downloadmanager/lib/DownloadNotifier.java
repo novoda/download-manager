@@ -24,6 +24,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.util.SimpleArrayMap;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
+import com.novoda.downloadmanager.notifications.NotificationVisibility;
 
 import java.util.ArrayList;
 import java.util.Collection;

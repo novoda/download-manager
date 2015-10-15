@@ -2,6 +2,8 @@ package com.novoda.downloadmanager.lib;
 
 import android.content.Context;
 
+import com.novoda.downloadmanager.notifications.NotificationVisibility;
+
 import java.util.ArrayList;
 import java.util.Collection;
 

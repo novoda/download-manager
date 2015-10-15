@@ -2,6 +2,8 @@ package com.novoda.downloadmanager.lib;
 
 import android.provider.BaseColumns;
 
+import com.novoda.downloadmanager.notifications.NotificationVisibility;
+
 final class DownloadContract {
 
     private DownloadContract() {

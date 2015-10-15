@@ -1,4 +1,4 @@
-package com.novoda.downloadmanager.lib;
+package com.novoda.downloadmanager.notifications;
 
 import android.graphics.Bitmap;
 

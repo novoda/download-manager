@@ -6,8 +6,8 @@ import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
 import com.novoda.downloadmanager.Download;
-import com.novoda.downloadmanager.DownloadingNotificationCustomiser;
-import com.novoda.downloadmanager.QueuedNotificationCustomiser;
+import com.novoda.downloadmanager.notifications.DownloadingNotificationCustomiser;
+import com.novoda.downloadmanager.notifications.QueuedNotificationCustomiser;
 import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.lib.DownloadManager;
 

@@ -15,13 +15,14 @@ import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
+import com.novoda.downloadmanager.notifications.NotificationVisibility;
 
 import static android.content.Intent.ACTION_BOOT_COMPLETED;
 import static android.content.Intent.ACTION_MEDIA_MOUNTED;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static com.novoda.downloadmanager.lib.Constants.*;
-import static com.novoda.downloadmanager.lib.NotificationVisibility.ACTIVE_OR_COMPLETE;
-import static com.novoda.downloadmanager.lib.NotificationVisibility.ONLY_WHEN_COMPLETE;
+import static com.novoda.downloadmanager.notifications.NotificationVisibility.ACTIVE_OR_COMPLETE;
+import static com.novoda.downloadmanager.notifications.NotificationVisibility.ONLY_WHEN_COMPLETE;
 
 /**
  * Receives system broadcasts (boot, network connectivity)

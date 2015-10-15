@@ -1,4 +1,4 @@
-package com.novoda.downloadmanager.lib;
+package com.novoda.downloadmanager.notifications;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -6,10 +6,10 @@ import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
 import com.novoda.downloadmanager.Download;
-import com.novoda.downloadmanager.DownloadingNotificationCustomiser;
-import com.novoda.downloadmanager.QueuedNotificationCustomiser;
 import com.novoda.downloadmanager.R;
+import com.novoda.downloadmanager.lib.DownloadManager;
 
+// TODO make this package - when everything notification-like is moved to /notifications/
 public class CancelButtonNotificationCustomiser implements QueuedNotificationCustomiser, DownloadingNotificationCustomiser {
 
     private final Context context;

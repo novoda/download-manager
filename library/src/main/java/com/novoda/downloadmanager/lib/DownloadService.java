@@ -36,11 +36,11 @@ import android.os.Message;
 import android.os.Process;
 import android.support.annotation.NonNull;
 
-import com.novoda.downloadmanager.CancelledNotificationCustomiser;
-import com.novoda.downloadmanager.CompleteNotificationCustomiser;
-import com.novoda.downloadmanager.DownloadingNotificationCustomiser;
-import com.novoda.downloadmanager.FailedNotificationCustomiser;
-import com.novoda.downloadmanager.QueuedNotificationCustomiser;
+import com.novoda.downloadmanager.notifications.CancelledNotificationCustomiser;
+import com.novoda.downloadmanager.notifications.CompleteNotificationCustomiser;
+import com.novoda.downloadmanager.notifications.DownloadingNotificationCustomiser;
+import com.novoda.downloadmanager.notifications.FailedNotificationCustomiser;
+import com.novoda.downloadmanager.notifications.QueuedNotificationCustomiser;
 import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.io.File;

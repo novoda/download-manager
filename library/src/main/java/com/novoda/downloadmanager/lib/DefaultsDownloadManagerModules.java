@@ -3,14 +3,17 @@ package com.novoda.downloadmanager.lib;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
-import com.novoda.downloadmanager.CancelledNotificationCustomiser;
-import com.novoda.downloadmanager.CompleteNotificationCustomiser;
-import com.novoda.downloadmanager.DownloadingNotificationCustomiser;
-import com.novoda.downloadmanager.EmptyCancelledNotificationCustomiser;
-import com.novoda.downloadmanager.EmptyCompleteNotificationCustomiser;
-import com.novoda.downloadmanager.EmptyFailedNotificationCustomiser;
-import com.novoda.downloadmanager.FailedNotificationCustomiser;
-import com.novoda.downloadmanager.QueuedNotificationCustomiser;
+import com.novoda.downloadmanager.notifications.CancelButtonNotificationCustomiser;
+import com.novoda.downloadmanager.notifications.CancelledNotificationCustomiser;
+import com.novoda.downloadmanager.notifications.CompleteNotificationCustomiser;
+import com.novoda.downloadmanager.notifications.DownloadingNotificationCustomiser;
+import com.novoda.downloadmanager.notifications.EmptyCancelledNotificationCustomiser;
+import com.novoda.downloadmanager.notifications.EmptyCompleteNotificationCustomiser;
+import com.novoda.downloadmanager.notifications.EmptyFailedNotificationCustomiser;
+import com.novoda.downloadmanager.notifications.FailedNotificationCustomiser;
+import com.novoda.downloadmanager.notifications.NotificationImageRetriever;
+import com.novoda.downloadmanager.notifications.OkHttpNotificationImageRetriever;
+import com.novoda.downloadmanager.notifications.QueuedNotificationCustomiser;
 
 class DefaultsDownloadManagerModules implements DownloadManagerModules {
 

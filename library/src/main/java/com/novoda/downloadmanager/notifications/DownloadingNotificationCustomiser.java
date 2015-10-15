@@ -1,4 +1,4 @@
-package com.novoda.downloadmanager;
+package com.novoda.downloadmanager.notifications;
 
 import android.support.v4.app.NotificationCompat;
 
