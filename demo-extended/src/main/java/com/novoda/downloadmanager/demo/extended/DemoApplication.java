@@ -23,7 +23,6 @@ public class DemoApplication extends Application implements DownloadClientReadyC
 
         DownloadManager downloadManager = DownloadManagerBuilder.from(this).build();
         downloadManager.sanityCheckBatchStatuses();
-        downloadManager.forceStart();
     }
 
     @Override
