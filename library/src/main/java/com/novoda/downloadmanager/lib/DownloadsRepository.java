@@ -241,7 +241,7 @@ class DownloadsRepository {
     /**
      * @return Number of rows updated
      */
-    int updateRunningOrSubmittedDownloadsToPending() {
+    public int updateRunningOrSubmittedDownloadsToPending() {
         ContentValues values = new ContentValues(2);
         values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
         values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.PENDING);
