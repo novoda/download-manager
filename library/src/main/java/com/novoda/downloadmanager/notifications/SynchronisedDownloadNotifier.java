@@ -120,6 +120,8 @@ class SynchronisedDownloadNotifier implements DownloadNotifier {
      * {@link Notification}.
      */
     private String buildNotificationTag(DownloadBatch batch) {
+        // TODO this method and NotificationDisplayer.#getNotificationTagType have an inherent contract
+        // If we pulled out a `NotificationTag` value object this would fix it
         if (batch.isQueuedForWifi()) {
             return TYPE_WAITING + ":" + context.getPackageName();
         } else if (batch.isRunning() && batch.shouldShowActiveItem()) {
