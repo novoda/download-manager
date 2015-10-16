@@ -182,7 +182,7 @@ public class DownloadService extends Service {
         updateHandler = new Handler(updateThread.getLooper(), updateCallback);
     }
 
-    void unlockStaleDownloads() {
+    private void unlockStaleDownloads() {
         List<String> batchesToBeUnlocked = downloadsRepository.getCurrentDownloadingBatchIds();
 
         if (batchesToBeUnlocked.isEmpty()) {
