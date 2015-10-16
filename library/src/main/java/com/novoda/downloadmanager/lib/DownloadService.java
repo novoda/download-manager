@@ -183,14 +183,11 @@ public class DownloadService extends Service {
     }
 
     private void unlockStaleDownloads() {
-        List<String> batchesToBeUnlocked = downloadsRepository.getCurrentDownloadingBatchIds();
-
-        if (batchesToBeUnlocked.isEmpty()) {
-            batchesToBeUnlocked = downloadsRepository.getCurrentSubmittedBatchIds();
-        }
+        List<String> batchesToBeUnlocked = downloadsRepository.getCurrentDownloadingOrSubmittedBatchIds();
         if (batchesToBeUnlocked.isEmpty()) {
             return;
         }
+
         downloadsRepository.updateRunningOrSubmittedDownloadsToPending();
         batchRepository.updateBatchToPendingStatus(batchesToBeUnlocked);
     }

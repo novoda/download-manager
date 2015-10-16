@@ -200,26 +200,17 @@ class DownloadsRepository {
     }
 
     @NonNull
-    List<String> getCurrentDownloadingBatchIds() {
-        return getCurrentBatchIdWithColumnStatus(DownloadStatus.RUNNING);
-    }
-
-    @NonNull
-    List<String> getCurrentSubmittedBatchIds() {
-        return getCurrentBatchIdWithColumnStatus(DownloadStatus.SUBMITTED);
-    }
-
-    @NonNull
-    private List<String> getCurrentBatchIdWithColumnStatus(int columnStatus) {
+    List<String> getCurrentDownloadingOrSubmittedBatchIds() {
         String[] projection = {"DISTINCT " + DownloadContract.Downloads.COLUMN_BATCH_ID};
         //Can't pass null as selection argument
         String where = "(" + DownloadContract.Downloads.COLUMN_CONTROL + " is null or "
                 + DownloadContract.Downloads.COLUMN_CONTROL + " = ? ) "
-                + "AND " + DownloadContract.Downloads.COLUMN_STATUS + " = ?) "
+                + "AND (" + DownloadContract.Downloads.COLUMN_STATUS + " = ? or " + DownloadContract.Downloads.COLUMN_STATUS + " = ?)) "
                 + "GROUP BY (" + DownloadContract.Downloads.COLUMN_BATCH_ID;
         String[] selectionArgs = {
                 String.valueOf(DownloadsControl.CONTROL_RUN),
-                String.valueOf(columnStatus)
+                String.valueOf(DownloadStatus.RUNNING),
+                String.valueOf(DownloadStatus.SUBMITTED)
         };
 
         Cursor cursor = null;
