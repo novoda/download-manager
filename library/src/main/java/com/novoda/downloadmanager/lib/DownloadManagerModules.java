@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager.lib;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import com.novoda.downloadmanager.notifications.CancelledNotificationCustomiser;
 import com.novoda.downloadmanager.notifications.CompleteNotificationCustomiser;
@@ -37,7 +38,7 @@ public interface DownloadManagerModules {
         private DownloadClientReadyChecker readyChecker;
         private NotificationImageRetriever imageRetriever;
 
-        public static Builder from(Context context) {
+        public static Builder from(@NonNull Context context) {
             return new Builder(context.getApplicationContext());
         }
 
@@ -45,37 +46,37 @@ public interface DownloadManagerModules {
             this.context = context;
         }
 
-        public Builder withQueuedNotificationCustomiser(QueuedNotificationCustomiser queuedCustomiser) {
+        public Builder withQueuedNotificationCustomiser(@NonNull QueuedNotificationCustomiser queuedCustomiser) {
             this.queuedCustomiser = queuedCustomiser;
             return this;
         }
 
-        public Builder withDownloadingNotificationCustomiser(DownloadingNotificationCustomiser downloadingCustomiser) {
+        public Builder withDownloadingNotificationCustomiser(@NonNull DownloadingNotificationCustomiser downloadingCustomiser) {
             this.downloadingCustomiser = downloadingCustomiser;
             return this;
         }
 
-        public Builder withCompleteNotificationCustomiser(CompleteNotificationCustomiser completeCustomiser) {
+        public Builder withCompleteNotificationCustomiser(@NonNull CompleteNotificationCustomiser completeCustomiser) {
             this.completeCustomiser = completeCustomiser;
             return this;
         }
 
-        public Builder withCancelledNotificationCustomiser(CancelledNotificationCustomiser cancelledCustomiser) {
+        public Builder withCancelledNotificationCustomiser(@NonNull CancelledNotificationCustomiser cancelledCustomiser) {
             this.cancelledCustomiser = cancelledCustomiser;
             return this;
         }
 
-        public Builder withFailedNotificationCustomiser(FailedNotificationCustomiser failedCustomiser) {
+        public Builder withFailedNotificationCustomiser(@NonNull FailedNotificationCustomiser failedCustomiser) {
             this.failedCustomiser = failedCustomiser;
             return this;
         }
 
-        public Builder withDownloadClientReadyChecker(DownloadClientReadyChecker readyChecker) {
+        public Builder withDownloadClientReadyChecker(@NonNull DownloadClientReadyChecker readyChecker) {
             this.readyChecker = readyChecker;
             return this;
         }
 
-        public Builder withNotificationImageRetrieverFactory(NotificationImageRetriever imageRetriever) {
+        public Builder withNotificationImageRetrieverFactory(@NonNull NotificationImageRetriever imageRetriever) {
             this.imageRetriever = imageRetriever;
             return this;
         }
