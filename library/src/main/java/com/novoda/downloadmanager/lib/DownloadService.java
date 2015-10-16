@@ -17,7 +17,6 @@
 package com.novoda.downloadmanager.lib;
 
 import android.app.AlarmManager;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentResolver;
@@ -37,6 +36,8 @@ import android.os.Process;
 import android.support.annotation.NonNull;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
+import com.novoda.downloadmanager.notifications.DownloadNotifier;
+import com.novoda.downloadmanager.notifications.DownloadNotifierFactory;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -123,9 +124,10 @@ public class DownloadService extends Service {
         this.downloadsUriProvider = DownloadsUriProvider.getInstance();
         this.downloadDeleter = new DownloadDeleter(getContentResolver());
         this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter, downloadsUriProvider, systemFacade);
-        PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
-        DownloadClientReadyChecker downloadClientReadyChecker = getDownloadClientReadyChecker();
         this.networkChecker = new NetworkChecker(this.systemFacade);
+        DownloadManagerModules modules = getDownloadManagerModules();
+        DownloadClientReadyChecker downloadClientReadyChecker = modules.getDownloadClientReadyChecker();
+        PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
         this.downloadReadyChecker = new DownloadReadyChecker(this.systemFacade, networkChecker, downloadClientReadyChecker, downloadMarshaller);
 
         String applicationPackageName = getApplicationContext().getPackageName();
@@ -145,25 +147,16 @@ public class DownloadService extends Service {
 
         downloadScanner = new DownloadScanner(getContentResolver(), this, downloadsUriProvider);
 
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        StatusTranslator statusTranslator = new StatusTranslator();
-        NotificationDisplayer notificationDisplayer = new NotificationDisplayer(
-                this,
-                notificationManager,
-                getNotificationImageRetriever(),
-                getResources(),
-                downloadsUriProvider,
-                getNotificationCustomiser(),
-                statusTranslator
-        );
-
-        downloadNotifier = new DownloadNotifier(this, notificationDisplayer);
+        DownloadNotifierFactory downloadNotifierFactory = new DownloadNotifierFactory();
+        PublicFacingStatusTranslator statusTranslator = new PublicFacingStatusTranslator();
+        downloadNotifier = downloadNotifierFactory.getDownloadNotifier(this, modules, downloadMarshaller, statusTranslator);
         downloadNotifier.cancelAll();
 
         downloadManagerContentObserver = new DownloadManagerContentObserver();
         getContentResolver().registerContentObserver(
                 downloadsUriProvider.getAllDownloadsUri(),
-                true, downloadManagerContentObserver);
+                true, downloadManagerContentObserver
+        );
 
         PackageManager packageManager = getPackageManager();
         String packageName = getApplicationContext().getPackageName();
@@ -177,7 +170,8 @@ public class DownloadService extends Service {
             public FileDownloadInfo create(FileDownloadInfo.Reader reader) {
                 return createNewDownloadInfo(reader);
             }
-        }, downloadsUriProvider);
+        }, downloadsUriProvider
+        );
 
     }
 
@@ -191,25 +185,11 @@ public class DownloadService extends Service {
         return info;
     }
 
-    private DownloadClientReadyChecker getDownloadClientReadyChecker() {
-        if (getApplication() instanceof DownloadClientReadyChecker) {
-            return (DownloadClientReadyChecker) getApplication();
+    private DownloadManagerModules getDownloadManagerModules() {
+        if (getApplication() instanceof DownloadManagerModules.Provider) {
+            return ((DownloadManagerModules.Provider) getApplication()).provideDownloadManagerModules();
         }
-        return DownloadClientReadyChecker.READY;
-    }
-
-    private NotificationImageRetriever getNotificationImageRetriever() {
-        if (getApplication() instanceof NotificationImageRetrieverFactory) {
-            return ((NotificationImageRetrieverFactory) getApplication()).createNotificationImageRetriever();
-        }
-        return new OkHttpNotificationImageRetriever();
-    }
-
-    private NotificationCustomiser getNotificationCustomiser() {
-        if (getApplication() instanceof NotificationCustomiserProvider) {
-            return ((NotificationCustomiserProvider) getApplication()).getNotificationCustomiser();
-        }
-        return new DefaultNotficationCustomiser(this);
+        return new DefaultsDownloadManagerModules(getApplication());
     }
 
     @Override
@@ -252,7 +232,8 @@ public class DownloadService extends Service {
         updateHandler.removeMessages(MSG_FINAL_UPDATE);
         updateHandler.sendMessageDelayed(
                 updateHandler.obtainMessage(MSG_FINAL_UPDATE, lastStartId, -1),
-                5 * MINUTE_IN_MILLIS);
+                5 * MINUTE_IN_MILLIS
+        );
     }
 
     private static final int MSG_UPDATE = 1;
@@ -285,9 +266,6 @@ public class DownloadService extends Service {
                         LLog.d(entry.getKey() + ": " + Arrays.toString(entry.getValue()));
                     }
                 }
-
-                // Dump speed and update details
-                downloadNotifier.dumpSpeeds();
 
                 LLog.wtf(new IllegalStateException("someone didn't update correctly"), "Final update pass triggered, isActive=" + isActive);
             }
@@ -428,7 +406,8 @@ public class DownloadService extends Service {
                 this, systemFacade, info, downloadBatch, storageManager, downloadNotifier,
                 batchInformationBroadcaster, batchRepository, downloadsUriProvider,
                 controlReader, networkChecker, downloadReadyChecker, new Clock(),
-                downloadsRepository);
+                downloadsRepository
+        );
 
         downloadsRepository.setDownloadSubmitted(info);
 

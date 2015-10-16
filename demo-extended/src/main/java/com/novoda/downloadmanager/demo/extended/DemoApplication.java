@@ -4,14 +4,13 @@ import android.app.Application;
 import android.hardware.SensorManager;
 
 import com.novoda.downloadmanager.Download;
+import com.novoda.downloadmanager.lib.DownloadManagerModules;
 import com.novoda.downloadmanager.lib.DownloadClientReadyChecker;
-import com.novoda.downloadmanager.lib.NotificationCustomiser;
-import com.novoda.downloadmanager.lib.NotificationCustomiserProvider;
 
-public class DemoApplication extends Application implements DownloadClientReadyChecker, NotificationCustomiserProvider {
+public class DemoApplication extends Application implements DownloadManagerModules.Provider {
 
+    private DemoNotificationCustomiser notificationCustomiser;
     private OneRuleToBindThem oneRuleToBindThem;
-    private NotificationCustomiser notificationCustomiser;
 
     @Override
     public void onCreate() {
@@ -21,23 +20,23 @@ public class DemoApplication extends Application implements DownloadClientReadyC
     }
 
     @Override
-    public boolean isAllowedToDownload(Download download) {
-        // Here you would add any reasons you may not want to download
-        // For instance if you have some type of geo-location lock on your download capability
-        return oneRuleToBindThem.shouldWeDownload(download);
+    public DownloadManagerModules provideDownloadManagerModules() {
+        return DownloadManagerModules.Builder.from(this)
+                .withQueuedNotificationCustomiser(notificationCustomiser)
+                .withDownloadingNotificationCustomiser(notificationCustomiser)
+                .withDownloadClientReadyChecker(oneRuleToBindThem)
+                .build();
     }
 
-    @Override
-    public NotificationCustomiser getNotificationCustomiser() {
-        return notificationCustomiser;
-    }
-
-    private static final class OneRuleToBindThem {
+    private static final class OneRuleToBindThem implements DownloadClientReadyChecker {
 
         /**
          * @return for our demo we expect always to return true ... unless you want to conquer the galaxy
          */
-        public boolean shouldWeDownload(Download download) {
+        @Override
+        public boolean isAllowedToDownload(Download download) {
+            // Here you would add any reasons you may not want to download
+            // For instance if you have some type of geo-location lock on your download capability
             return download.getTotalSize() > SensorManager.GRAVITY_DEATH_STAR_I;
         }
     }

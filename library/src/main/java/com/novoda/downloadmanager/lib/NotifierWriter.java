@@ -4,6 +4,8 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.os.SystemClock;
 
+import com.novoda.downloadmanager.notifications.DownloadNotifier;
+
 import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.COLUMN_CURRENT_BYTES;
 
 class NotifierWriter implements DataWriter {

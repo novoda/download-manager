@@ -42,29 +42,9 @@ class Constants {
     public static final String ACTION_RETRY = "android.intent.action.DOWNLOAD_WAKEUP";
 
     /**
-     * the intent that gets sent when clicking a successful download
-     */
-    public static final String ACTION_OPEN = "android.intent.action.DOWNLOAD_OPEN";
-
-    /**
-     * the intent that gets sent when clicking an incomplete/failed download
-     */
-    public static final String ACTION_LIST = "android.intent.action.DOWNLOAD_LIST";
-
-    /**
-     * the intent that gets sent when deleting the notification of a completed download
-     */
-    public static final String ACTION_HIDE = "android.intent.action.DOWNLOAD_HIDE";
-
-    /**
      * the intent that gets sent when cancelling a download via a notification action
      */
     public static final String ACTION_CANCEL = "android.intent.action.DOWNLOAD_CANCEL";
-
-    /**
-     * the intent that gets sent when deleting a download via a notification action
-     */
-    public static final String ACTION_DELETE = "android.intent.action.DOWNLOAD_DELETE";
 
     /**
      * The default base name for downloaded files if we can't get one at the HTTP level

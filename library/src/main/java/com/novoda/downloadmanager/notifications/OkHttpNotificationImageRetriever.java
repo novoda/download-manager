@@ -1,4 +1,4 @@
-package com.novoda.downloadmanager.lib;
+package com.novoda.downloadmanager.notifications;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,7 +10,8 @@ import com.squareup.okhttp.Response;
 import java.io.IOException;
 import java.io.InputStream;
 
-class OkHttpNotificationImageRetriever implements NotificationImageRetriever {
+// TODO make this package - when everything notification-like is moved to /notifications/
+public class OkHttpNotificationImageRetriever implements NotificationImageRetriever {
 
     private final OkHttpClient client;
 

@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager.lib;
 
-class StatusTranslator {
+public class PublicFacingStatusTranslator {
 
     public int translate(int status) {
         switch (status) {

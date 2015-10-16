@@ -5,11 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
+import com.novoda.downloadmanager.Download;
+import com.novoda.downloadmanager.notifications.DownloadingNotificationCustomiser;
+import com.novoda.downloadmanager.notifications.QueuedNotificationCustomiser;
 import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.lib.DownloadManager;
-import com.novoda.downloadmanager.lib.NotificationCustomiser;
 
-class DemoNotificationCustomiser implements NotificationCustomiser {
+class DemoNotificationCustomiser implements QueuedNotificationCustomiser, DownloadingNotificationCustomiser {
 
     private final Context context;
 
@@ -18,14 +20,27 @@ class DemoNotificationCustomiser implements NotificationCustomiser {
     }
 
     @Override
-    public void modifyQueuedOrDownloadingNotification(NotificationCompat.Builder builder, long batchId) {
+    public void customiseQueued(Download download, NotificationCompat.Builder builder) {
+        addViewAction(builder);
+        addCancelAction(builder, download);
+    }
+
+    @Override
+    public void customiseDownloading(Download download, NotificationCompat.Builder builder) {
+        addViewAction(builder);
+        addCancelAction(builder, download);
+    }
+
+    private void addViewAction(NotificationCompat.Builder builder) {
         Intent intent = new Intent(context, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Action action = new NotificationCompat.Action(R.drawable.ic_notif_info, "View", pendingIntent);
         builder.addAction(action);
-        Intent cancelIntent = DownloadManager.createCancelBatchIntent(batchId, context);
+    }
+
+    private void addCancelAction(NotificationCompat.Builder builder, Download download) {
+        Intent cancelIntent = DownloadManager.createCancelBatchIntent(download.getId(), context);
         PendingIntent pendingCancelIntent = PendingIntent.getBroadcast(context, 0, cancelIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.addAction(com.novoda.downloadmanager.R.drawable.dl__ic_action_cancel, context.getString(com.novoda.downloadmanager.R.string.dl__cancel), pendingCancelIntent);
     }
-
 }

@@ -31,6 +31,7 @@ import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
+import com.novoda.downloadmanager.notifications.NotificationVisibility;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -645,7 +646,7 @@ public class DownloadManager {
         if (underlyingCursor == null) {
             return null;
         }
-        StatusTranslator statusTranslator = new StatusTranslator();
+        PublicFacingStatusTranslator statusTranslator = new PublicFacingStatusTranslator();
         return new CursorTranslator(underlyingCursor, downloadsUriProvider.getDownloadsByBatchUri(), statusTranslator);
     }
 
@@ -664,7 +665,7 @@ public class DownloadManager {
             return null;
         }
 
-        StatusTranslator statusTranslator = new StatusTranslator();
+        PublicFacingStatusTranslator statusTranslator = new PublicFacingStatusTranslator();
         return new CursorTranslator(cursor, downloadsUriProvider.getBatchesUri(), statusTranslator);
     }
 

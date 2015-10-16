@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.support.v4.util.SparseArrayCompat;
 
+import com.novoda.downloadmanager.notifications.NotificationVisibility;
 import com.novoda.notils.string.QueryUtils;
 import com.novoda.notils.string.StringUtils;
 

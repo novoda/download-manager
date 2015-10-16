@@ -6,6 +6,8 @@ import android.net.Uri;
 import android.os.Environment;
 import android.util.Pair;
 
+import com.novoda.downloadmanager.notifications.NotificationVisibility;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;

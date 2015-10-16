@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager.lib;
 
+import com.novoda.downloadmanager.notifications.NotificationVisibility;
+
 class BatchInfo {
     private final String title;
     private final String description;
