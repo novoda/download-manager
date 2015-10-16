@@ -5,7 +5,6 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
@@ -199,8 +198,7 @@ class DownloadsRepository {
         contentResolver.update(info.getAllDownloadsUri(), contentValues, null, null);
     }
 
-    @NonNull
-    List<String> getCurrentDownloadingOrSubmittedBatchIds() {
+    public List<String> getCurrentDownloadingOrSubmittedBatchIds() {
         String[] projection = {"DISTINCT " + DownloadContract.Downloads.COLUMN_BATCH_ID};
         //Can't pass null as selection argument
         String where = "(" + DownloadContract.Downloads.COLUMN_CONTROL + " is null or "
