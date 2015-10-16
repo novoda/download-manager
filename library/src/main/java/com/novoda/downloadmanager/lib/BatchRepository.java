@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.support.annotation.NonNull;
 import android.support.v4.util.SparseArrayCompat;
 
 import com.novoda.downloadmanager.notifications.NotificationVisibility;
@@ -89,7 +90,8 @@ class BatchRepository {
                 projection,
                 where,
                 selectionArgs,
-                null);
+                null
+        );
 
         try {
             cursor.moveToFirst();
@@ -113,7 +115,8 @@ class BatchRepository {
                     projection,
                     DownloadContract.Downloads.COLUMN_BATCH_ID + " = ?",
                     selectionArgs,
-                    null);
+                    null
+            );
 
             while (cursor.moveToNext()) {
                 int statusCode = cursor.getInt(0);
@@ -309,6 +312,27 @@ class BatchRepository {
                 null,
                 null
         );
+    }
+
+    /**
+     * @return Number of rows updated
+     */
+    int updateBatchToPendingStatus(@NonNull List<String> batchIdsToBeUnlocked) {
+        ContentValues values = new ContentValues(1);
+        values.put(DownloadContract.Batches.COLUMN_STATUS, DownloadStatus.PENDING);
+
+        int batchIdsSize = batchIdsToBeUnlocked.size();
+        String[] whereArray = new String[batchIdsSize];
+        String[] selectionArgs = new String[batchIdsSize];
+
+        for (int i = 0; i < batchIdsSize; i++) {
+            whereArray[i] = DownloadContract.Batches._ID + " = ?";
+            selectionArgs[i] = batchIdsToBeUnlocked.get(i);
+        }
+
+        String where = StringUtils.join(Arrays.asList(whereArray), " or ");
+
+        return resolver.update(downloadsUriProvider.getBatchesUri(), values, where, selectionArgs);
     }
 
     private static class StatusCountMap {

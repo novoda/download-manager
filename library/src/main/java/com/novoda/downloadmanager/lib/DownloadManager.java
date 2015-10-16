@@ -409,7 +409,8 @@ public class DownloadManager {
     private Uri baseUri;
 
     public DownloadManager(Context context, ContentResolver contentResolver) {
-        this(context,
+        this(
+                context,
                 contentResolver,
                 DownloadsUriProvider.getInstance(),
                 new RealSystemFacade(context, new Clock()),
@@ -420,17 +421,21 @@ public class DownloadManager {
                                 contentResolver,
                                 new DownloadDeleter(contentResolver),
                                 DownloadsUriProvider.getInstance(),
-                                new RealSystemFacade(GlobalState.getContext(), new Clock())),
+                                new RealSystemFacade(GlobalState.getContext(), new Clock())
+                        ),
                         new DownloadsRepository(
                                 new RealSystemFacade(GlobalState.getContext(), new Clock()), contentResolver,
                                 DownloadsRepository.DownloadInfoCreator.NON_FUNCTIONAL,
-                                DownloadsUriProvider.getInstance())
+                                DownloadsUriProvider.getInstance()
+                        )
                 ),
-                false);
+                false
+        );
     }
 
     public DownloadManager(Context context, ContentResolver contentResolver, boolean verboseLogging) {
-        this(context,
+        this(
+                context,
                 contentResolver,
                 DownloadsUriProvider.getInstance(),
                 new RealSystemFacade(context, new Clock()),
@@ -441,13 +446,16 @@ public class DownloadManager {
                                 contentResolver,
                                 new DownloadDeleter(contentResolver),
                                 DownloadsUriProvider.getInstance(),
-                                new RealSystemFacade(GlobalState.getContext(), new Clock())),
+                                new RealSystemFacade(GlobalState.getContext(), new Clock())
+                        ),
                         new DownloadsRepository(
                                 new RealSystemFacade(GlobalState.getContext(), new Clock()), contentResolver,
                                 DownloadsRepository.DownloadInfoCreator.NON_FUNCTIONAL,
-                                DownloadsUriProvider.getInstance())
+                                DownloadsUriProvider.getInstance()
+                        )
                 ),
-                verboseLogging);
+                verboseLogging
+        );
     }
 
     DownloadManager(Context context, ContentResolver contentResolver, DownloadsUriProvider downloadsUriProvider) {
@@ -463,13 +471,16 @@ public class DownloadManager {
                                 contentResolver,
                                 new DownloadDeleter(contentResolver),
                                 DownloadsUriProvider.getInstance(),
-                                new RealSystemFacade(GlobalState.getContext(), new Clock())),
+                                new RealSystemFacade(GlobalState.getContext(), new Clock())
+                        ),
                         new DownloadsRepository(
                                 new RealSystemFacade(GlobalState.getContext(), new Clock()), contentResolver,
                                 DownloadsRepository.DownloadInfoCreator.NON_FUNCTIONAL,
-                                DownloadsUriProvider.getInstance())
+                                DownloadsUriProvider.getInstance()
+                        )
                 ),
-                false);
+                false
+        );
     }
 
     DownloadManager(Context context,
@@ -489,6 +500,7 @@ public class DownloadManager {
 
     /**
      * Create an intent which will cancel the batch with the supplied ID. Must be sent as a broadcast.
+     *
      * @param batchId the ID of the batch to delete
      * @return an {@link Intent} that can be broadcast
      */

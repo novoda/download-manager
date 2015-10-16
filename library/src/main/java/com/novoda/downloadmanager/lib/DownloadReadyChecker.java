@@ -25,7 +25,6 @@ class DownloadReadyChecker {
         if (isDownloadManagerReadyToDownload(downloadBatch)) {
             return clientAllowsToDownload(downloadBatch);
         }
-
         return false;
     }
 

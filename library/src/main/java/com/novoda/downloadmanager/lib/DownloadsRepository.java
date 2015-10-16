@@ -12,6 +12,7 @@ import com.novoda.notils.string.QueryUtils;
 import com.novoda.notils.string.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.novoda.downloadmanager.lib.Constants.UNKNOWN_BYTE_SIZE;
@@ -40,7 +41,8 @@ class DownloadsRepository {
                 null,
                 null,
                 null,
-                DownloadContract.Batches._ID + " ASC");
+                DownloadContract.Batches._ID + " ASC"
+        );
 
         try {
             List<FileDownloadInfo> downloads = new ArrayList<>();
@@ -74,7 +76,8 @@ class DownloadsRepository {
     public int getDownloadStatus(long id) {
         final Cursor cursor = contentResolver.query(
                 ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id),
-                new String[]{DownloadContract.Downloads.COLUMN_STATUS}, null, null, null);
+                new String[]{DownloadContract.Downloads.COLUMN_STATUS}, null, null, null
+        );
         try {
             if (cursor.moveToFirst()) {
                 return cursor.getInt(0);
@@ -193,6 +196,69 @@ class DownloadsRepository {
         ContentValues contentValues = new ContentValues();
         contentValues.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.SUBMITTED);
         contentResolver.update(info.getAllDownloadsUri(), contentValues, null, null);
+    }
+
+    public List<String> getCurrentDownloadingOrSubmittedBatchIds() {
+        String[] projection = {"DISTINCT " + DownloadContract.Downloads.COLUMN_BATCH_ID};
+        //Can't pass null as selection argument
+        String where = "(" + DownloadContract.Downloads.COLUMN_CONTROL + " is null or "
+                + DownloadContract.Downloads.COLUMN_CONTROL + " = ? ) "
+                + "AND (" + DownloadContract.Downloads.COLUMN_STATUS + " = ? or " + DownloadContract.Downloads.COLUMN_STATUS + " = ?)) "
+                + "GROUP BY (" + DownloadContract.Downloads.COLUMN_BATCH_ID;
+        String[] selectionArgs = {
+                String.valueOf(DownloadsControl.CONTROL_RUN),
+                String.valueOf(DownloadStatus.RUNNING),
+                String.valueOf(DownloadStatus.SUBMITTED)
+        };
+
+        Cursor cursor = null;
+        try {
+            cursor = contentResolver.query(
+                    downloadsUriProvider.getAllDownloadsUri(),
+                    projection,
+                    where,
+                    selectionArgs,
+                    null
+            );
+
+            if (cursor == null || cursor.getCount() == 0) {
+                return Collections.emptyList();
+            }
+
+            List<String> batchIdList = new ArrayList<>();
+
+            while (cursor.moveToNext()) {
+                batchIdList.add(cursor.getString(0));
+            }
+            return batchIdList;
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    /**
+     * @return Number of rows updated
+     */
+    public int updateRunningOrSubmittedDownloadsToPending() {
+        ContentValues values = new ContentValues(2);
+        values.put(DownloadContract.Downloads.COLUMN_CONTROL, DownloadsControl.CONTROL_RUN);
+        values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.PENDING);
+
+        //Can't pass null as selection argument
+        String where = "(" + DownloadContract.Downloads.COLUMN_CONTROL + " is null or "
+                + DownloadContract.Downloads.COLUMN_CONTROL + " = ? ) "
+                + " AND ( " + DownloadContract.Downloads.COLUMN_STATUS + " = ? or "
+                + DownloadContract.Downloads.COLUMN_STATUS + " = ? )";
+
+        String[] selectionArgs = {
+                String.valueOf(DownloadsControl.CONTROL_RUN),
+                String.valueOf(DownloadStatus.RUNNING),
+                String.valueOf(DownloadStatus.SUBMITTED)
+        };
+
+        return contentResolver.update(downloadsUriProvider.getAllDownloadsUri(), values, where, selectionArgs);
     }
 
     interface DownloadInfoCreator {
