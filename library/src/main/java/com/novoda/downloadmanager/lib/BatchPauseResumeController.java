@@ -51,16 +51,4 @@ public class BatchPauseResumeController {
         contentResolver.notifyChange(downloadsUriProvider.getBatchesUri(), null);
         contentResolver.notifyChange(downloadsUriProvider.getBatchesWithoutProgressUri(), null);
     }
-
-    void unlockStaleDownloads() {
-        String batchToBeUnlocked = downloadsRepository.getCurrentDownloadingBatchId();
-        if (batchToBeUnlocked == null) {
-            batchToBeUnlocked = downloadsRepository.getCurrentSubmittedBatchId();
-        }
-        if (batchToBeUnlocked == null) {
-            return;
-        }
-        downloadsRepository.updateRunningOrSubmittedDownloadsToPending();
-        batchRepository.updateBatchToPendingStatus(batchToBeUnlocked);
-    }
 }

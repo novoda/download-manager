@@ -4,9 +4,7 @@ import android.app.Application;
 import android.hardware.SensorManager;
 
 import com.novoda.downloadmanager.Download;
-import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.lib.DownloadClientReadyChecker;
-import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.NotificationCustomiser;
 import com.novoda.downloadmanager.lib.NotificationCustomiserProvider;
 
@@ -20,9 +18,6 @@ public class DemoApplication extends Application implements DownloadClientReadyC
         super.onCreate();
         notificationCustomiser = new DemoNotificationCustomiser(DemoApplication.this);
         oneRuleToBindThem = new OneRuleToBindThem();
-
-        DownloadManager downloadManager = DownloadManagerBuilder.from(this).build();
-        downloadManager.sanityCheckBatchStatuses();
     }
 
     @Override
