@@ -186,9 +186,6 @@ public class NotificationDisplayer {
             int totalPercent = 0;
             long remainingMillis = 0;
             synchronized (downloadSpeed) {
-                if (cluster.size() > 1) {
-                    throw new IllegalStateException("is this ever over 1? reading this in the log means yes");
-                }
                 for (DownloadBatch batch : cluster) {
                     DownloadBatch.Statistics statistics = batch.getLiveStatistics(downloadSpeed);
                     totalPercent += statistics.getPercentComplete();
