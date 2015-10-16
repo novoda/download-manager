@@ -1,3 +1,7 @@
+0.2.22
+-----
+- Restart stale downloads #163
+
 0.2.21
 -----
 - Moves more notification code to package #164
