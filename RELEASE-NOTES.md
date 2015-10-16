@@ -1,3 +1,8 @@
+0.2.21
+-----
+- Moves more notification code to package #164
+- Adds more fields to the Download object and passes that to the customiser #162
+
 0.2.20
 -----
 - Broadcast clicks on notifications for completed downloads #160
