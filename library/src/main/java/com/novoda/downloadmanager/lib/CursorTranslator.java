@@ -15,9 +15,9 @@ import java.io.File;
  */
 class CursorTranslator extends CursorWrapper {
     private final Uri baseUri;
-    private final StatusTranslator statusTranslator;
+    private final PublicFacingStatusTranslator statusTranslator;
 
-    public CursorTranslator(Cursor cursor, Uri baseUri, StatusTranslator statusTranslator) {
+    public CursorTranslator(Cursor cursor, Uri baseUri, PublicFacingStatusTranslator statusTranslator) {
         super(cursor);
         this.baseUri = baseUri;
         this.statusTranslator = statusTranslator;

@@ -14,28 +14,26 @@
  * limitations under the License.
  */
 
-package com.novoda.downloadmanager.lib;
+package com.novoda.downloadmanager.notifications;
 
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.support.v4.util.SimpleArrayMap;
 
-import com.novoda.downloadmanager.lib.logger.LLog;
-import com.novoda.downloadmanager.notifications.NotificationVisibility;
+import com.novoda.downloadmanager.lib.DownloadBatch;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 /**
- * Update {@link NotificationManager} to reflect current {@link FileDownloadInfo}
- * states. Collapses similar downloads into a single notification, and builds
+ * Update {@link NotificationManager} to reflect current {@link DownloadBatch} states.
+ * Collapses similar downloads into a single notification, and builds
  * {@link PendingIntent} that launch towards {DownloadReceiver}.
  */
-class DownloadNotifier {
+class SynchronisedDownloadNotifier implements DownloadNotifier {
 
     static final int TYPE_ACTIVE = 1;
     static final int TYPE_WAITING = 2;
@@ -55,11 +53,12 @@ class DownloadNotifier {
 
     private final NotificationDisplayer notificationDisplayer;
 
-    public DownloadNotifier(Context context, NotificationDisplayer notificationDisplayer) {
+    public SynchronisedDownloadNotifier(Context context, NotificationDisplayer notificationDisplayer) {
         this.context = context;
         this.notificationDisplayer = notificationDisplayer;
     }
 
+    @Override
     public void cancelAll() {
         notificationDisplayer.cancelAll();
     }
@@ -68,14 +67,16 @@ class DownloadNotifier {
      * Notify the current speed of an active download, used for calculating
      * estimated remaining time.
      */
+    @Override
     public void notifyDownloadSpeed(long id, long bytesPerSecond) {
         notificationDisplayer.notifyDownloadSpeed(id, bytesPerSecond);
     }
 
     /**
-     * Update {@link NotificationManager} to reflect the given set of
-     * {@link FileDownloadInfo}, adding, collapsing, and removing as needed.
+     * Update Notifications to reflect the given set of
+     * {@link DownloadBatch}, adding, collapsing, and removing as needed.
      */
+    @Override
     public void updateWith(Collection<DownloadBatch> batches) {
         synchronized (activeNotifications) {
             SimpleArrayMap<String, Collection<DownloadBatch>> clusters = getClustersByNotificationTag(batches);
@@ -102,7 +103,6 @@ class DownloadNotifier {
         return firstShown;
     }
 
-    @NonNull
     private SimpleArrayMap<String, Collection<DownloadBatch>> getClustersByNotificationTag(Collection<DownloadBatch> batches) {
         SimpleArrayMap<String, Collection<DownloadBatch>> clustered = new SimpleArrayMap<>();
 
@@ -116,39 +116,28 @@ class DownloadNotifier {
     }
 
     /**
-     * Build tag used for collapsing several {@link FileDownloadInfo} into a single
+     * Build tag used for collapsing several {@link DownloadBatch} into a single
      * {@link Notification}.
      */
     private String buildNotificationTag(DownloadBatch batch) {
-        int status = batch.getStatus();
-        int visibility = batch.getInfo().getVisibility();
-        if (status == DownloadStatus.QUEUED_FOR_WIFI) {
+        // TODO this method and NotificationDisplayer.#getNotificationTagType have an inherent contract
+        // If we pulled out a `NotificationTag` value object this would fix it
+        if (batch.isQueuedForWifi()) {
             return TYPE_WAITING + ":" + context.getPackageName();
-        } else if (status == DownloadStatus.RUNNING && shouldShowActiveItem(visibility)) {
+        } else if (batch.isRunning() && batch.shouldShowActiveItem()) {
             return TYPE_ACTIVE + ":" + context.getPackageName();
-        } else if (DownloadStatus.isError(status) && !DownloadStatus.isCancelled(status)
-                && shouldShowCompletedItem(visibility)) {
+        } else if (batch.isError() && !batch.isCancelled() && batch.shouldShowCompletedItem()) {
             // Failed downloads always have unique notifications
             return TYPE_FAILED + ":" + batch.getBatchId();
-        } else if (DownloadStatus.isCancelled(status) && shouldShowCompletedItem(visibility)) {
+        } else if (batch.isCancelled() && batch.shouldShowCompletedItem()) {
             // Cancelled downloads always have unique notifications
             return TYPE_CANCELLED + ":" + batch.getBatchId();
-        } else if (DownloadStatus.isSuccess(status) && shouldShowCompletedItem(visibility)) {
+        } else if (batch.isSuccess() && batch.shouldShowCompletedItem()) {
             // Complete downloads always have unique notifications
             return TYPE_SUCCESS + ":" + batch.getBatchId();
         } else {
             return null;
         }
-    }
-
-    private boolean shouldShowActiveItem(int visibility) {
-        return visibility == NotificationVisibility.ONLY_WHEN_ACTIVE
-                || visibility == NotificationVisibility.ACTIVE_OR_COMPLETE;
-    }
-
-    private boolean shouldShowCompletedItem(int visibility) {
-        return visibility == NotificationVisibility.ONLY_WHEN_COMPLETE
-                || visibility == NotificationVisibility.ACTIVE_OR_COMPLETE;
     }
 
     private void addBatchToCluster(String tag, SimpleArrayMap<String, Collection<DownloadBatch>> cluster, DownloadBatch batch) {
@@ -182,7 +171,4 @@ class DownloadNotifier {
         return staleTags;
     }
 
-    public void dumpSpeeds() {
-        LLog.e("dump at speed");
-    }
 }

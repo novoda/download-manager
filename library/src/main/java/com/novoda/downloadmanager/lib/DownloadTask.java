@@ -28,6 +28,7 @@ import android.text.TextUtils;
 import android.util.Pair;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
+import com.novoda.downloadmanager.notifications.DownloadNotifier;
 
 import java.io.Closeable;
 import java.io.File;
