@@ -139,10 +139,6 @@ public class DownloadService extends Service {
         File systemCacheDir = Environment.getDownloadCacheDirectory();
         storageManager = new StorageManager(contentResolver, externalStorageDir, internalStorageDir, systemCacheDir, downloadDataDir, downloadsUriProvider);
 
-        updateThread = new HandlerThread("DownloadManager-UpdateThread");
-        updateThread.start();
-        updateHandler = new Handler(updateThread.getLooper(), updateCallback);
-
         downloadScanner = new DownloadScanner(getContentResolver(), this, downloadsUriProvider);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -179,6 +175,24 @@ public class DownloadService extends Service {
             }
         }, downloadsUriProvider);
 
+        unlockStaleDownloads();
+
+        updateThread = new HandlerThread("DownloadManager-UpdateThread");
+        updateThread.start();
+        updateHandler = new Handler(updateThread.getLooper(), updateCallback);
+    }
+
+    void unlockStaleDownloads() {
+        List<String> batchesToBeUnlocked = downloadsRepository.getCurrentDownloadingBatchIds();
+
+        if (batchesToBeUnlocked.isEmpty()) {
+            batchesToBeUnlocked = downloadsRepository.getCurrentSubmittedBatchIds();
+        }
+        if (batchesToBeUnlocked.isEmpty()) {
+            return;
+        }
+        downloadsRepository.updateRunningOrSubmittedDownloadsToPending();
+        batchRepository.updateBatchToPendingStatus(batchesToBeUnlocked);
     }
 
     /**

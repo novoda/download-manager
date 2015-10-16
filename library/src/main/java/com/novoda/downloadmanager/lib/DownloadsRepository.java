@@ -5,7 +5,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
@@ -13,6 +13,7 @@ import com.novoda.notils.string.QueryUtils;
 import com.novoda.notils.string.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.novoda.downloadmanager.lib.Constants.UNKNOWN_BYTE_SIZE;
@@ -198,22 +199,24 @@ class DownloadsRepository {
         contentResolver.update(info.getAllDownloadsUri(), contentValues, null, null);
     }
 
-    @Nullable
-    String getCurrentDownloadingBatchId() {
+    @NonNull
+    List<String> getCurrentDownloadingBatchIds() {
         return getCurrentBatchIdWithColumnStatus(DownloadStatus.RUNNING);
     }
 
-    @Nullable
-    String getCurrentSubmittedBatchId() {
+    @NonNull
+    List<String> getCurrentSubmittedBatchIds() {
         return getCurrentBatchIdWithColumnStatus(DownloadStatus.SUBMITTED);
     }
 
-    private String getCurrentBatchIdWithColumnStatus(int columnStatus) {
-        String[] projection = {DownloadContract.Downloads.COLUMN_BATCH_ID};
+    @NonNull
+    private List<String> getCurrentBatchIdWithColumnStatus(int columnStatus) {
+        String[] projection = {"DISTINCT " + DownloadContract.Downloads.COLUMN_BATCH_ID};
         //Can't pass null as selection argument
         String where = "(" + DownloadContract.Downloads.COLUMN_CONTROL + " is null or "
                 + DownloadContract.Downloads.COLUMN_CONTROL + " = ? ) "
-                + " AND " + DownloadContract.Downloads.COLUMN_STATUS + " = ?";
+                + "AND " + DownloadContract.Downloads.COLUMN_STATUS + " = ?) "
+                + "GROUP BY (" + DownloadContract.Downloads.COLUMN_BATCH_ID;
         String[] selectionArgs = {
                 String.valueOf(DownloadsControl.CONTROL_RUN),
                 String.valueOf(columnStatus)
@@ -228,11 +231,17 @@ class DownloadsRepository {
                     selectionArgs,
                     null
             );
+
             if (cursor == null || cursor.getCount() == 0) {
-                return null;
+                return Collections.emptyList();
             }
-            cursor.moveToFirst();
-            return cursor.getString(0);
+
+            List<String> batchIdList = new ArrayList<>();
+
+            while (cursor.moveToNext()) {
+                batchIdList.add(cursor.getString(0));
+            }
+            return batchIdList;
         } finally {
             if (cursor != null) {
                 cursor.close();

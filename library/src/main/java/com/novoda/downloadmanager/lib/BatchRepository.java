@@ -316,13 +316,21 @@ class BatchRepository {
     /**
      * @return Number of rows updated
      */
-    int updateBatchToPendingStatus(@NonNull String batchIdToBeUnlocked) {
+    int updateBatchToPendingStatus(@NonNull List<String> batchIdsToBeUnlocked) {
         ContentValues values = new ContentValues(1);
         values.put(DownloadContract.Batches.COLUMN_STATUS, DownloadStatus.PENDING);
 
-        String where = DownloadContract.Batches._ID + " = ?";
+        int batchIdsSize = batchIdsToBeUnlocked.size();
+        String[] whereArray = new String[batchIdsSize];
+        String[] selectionArgs = new String[batchIdsSize];
 
-        String[] selectionArgs = new String[]{batchIdToBeUnlocked};
+        for (int i = 0; i < batchIdsSize; i++) {
+            whereArray[i] = DownloadContract.Batches._ID + " = ?";
+            selectionArgs[i] = batchIdsToBeUnlocked.get(i);
+        }
+
+        String where = StringUtils.join(Arrays.asList(whereArray), " or ");
+
         return resolver.update(downloadsUriProvider.getBatchesUri(), values, where, selectionArgs);
     }
 
