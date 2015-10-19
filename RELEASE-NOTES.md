@@ -1,3 +1,7 @@
+0.2.23
+-----
+- Adds a static text for downloading so that it can be overwritten #165
+
 0.2.22
 -----
 - Restart stale downloads #163
