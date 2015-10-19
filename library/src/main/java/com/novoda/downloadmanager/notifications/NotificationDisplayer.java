@@ -214,7 +214,7 @@ public class NotificationDisplayer {
 
         if (currentBatches.size() == 1) {
             DownloadBatch batch = currentBatches.iterator().next();
-            return buildSingleNotification(type, builder, batch, remainingText, percentText);
+            return buildSingleNotification(type, builder, batch, percentText);
         } else {
             return buildStackedNotification(type, builder, currentBatches, remainingText, percentText);
         }
@@ -223,7 +223,7 @@ public class NotificationDisplayer {
     private Notification buildSingleNotification(
             int type,
             NotificationCompat.Builder builder,
-            DownloadBatch batch, String remainingText,
+            DownloadBatch batch,
             String percentText) {
 
         NotificationCompat.BigPictureStyle style = new NotificationCompat.BigPictureStyle();
@@ -239,7 +239,7 @@ public class NotificationDisplayer {
         if (type == SynchronisedDownloadNotifier.TYPE_ACTIVE) {
             String description = batch.getDescription();
             if (TextUtils.isEmpty(description)) {
-                setSecondaryNotificationText(builder, style, remainingText);
+                setSecondaryNotificationText(builder, style, context.getString(R.string.dl__downloading));
             } else {
                 setSecondaryNotificationText(builder, style, description);
             }
