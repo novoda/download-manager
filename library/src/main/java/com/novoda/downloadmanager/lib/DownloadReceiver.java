@@ -129,7 +129,8 @@ public class DownloadReceiver extends BroadcastReceiver { // TODO split this int
                 cancelBatchThroughDatabaseState(batchId);
                 break;
             case NotificationDisplayer.ACTION_DOWNLOAD_OTHER_CLICK:
-                // no need for now, implement if needed
+                // not sure - but seems sensible to just dismiss the notification
+                hideNotification(context, batchId);
                 break;
             default:
                 // shouldn't happen - other cases should be handled in ACTION_DOWNLOAD_OTHER_CLICK
