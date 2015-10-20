@@ -1,3 +1,7 @@
+0.2.26
+-----
+ - Uses multiple actions for click events on notifications so they can be handled differently #170
+
 0.2.25
 -----
  - If user clicks on a failed download then we want to hide the notification forever #169
