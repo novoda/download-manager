@@ -203,14 +203,14 @@ final class DownloadStatus {
      * Returns whether the download has completed (either with success or error).
      */
     public static boolean isCompleted(int status) {
-        return isSuccess(status) || (isError(status) && !isCancelled(status));
+        return isSuccess(status) || isFailure(status);
     }
 
     /**
      * Returns whether the download has failed
      */
-    public static boolean isFailure(int batchStatus) {
-        return isError(batchStatus) && !isCancelled(batchStatus);
+    public static boolean isFailure(int status) {
+        return isError(status) && !isCancelled(status);
     }
 
     /**
