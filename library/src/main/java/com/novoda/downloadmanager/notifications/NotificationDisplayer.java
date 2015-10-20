@@ -120,14 +120,18 @@ public class NotificationDisplayer {
         DownloadBatch batch = cluster.iterator().next();
         long batchId = batch.getBatchId();
         int batchStatus = batch.getStatus();
+
         if (type == SynchronisedDownloadNotifier.TYPE_ACTIVE || type == SynchronisedDownloadNotifier.TYPE_WAITING) {
             // build a synthetic uri for intent identification purposes
             Uri uri = new Uri.Builder().scheme("active-dl").appendPath(tag).build();
 
-            Intent clickIntent = createClickIntent(ACTION_LIST, batchId, batchStatus, uri);
+            Intent clickIntent = createClickIntent(ACTION_LIST, batchId, batchStatus, uri); // TODO: the Uri doesn't seem to be ever read
             builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
             builder.setOngoing(true);
-        } else if (type == SynchronisedDownloadNotifier.TYPE_SUCCESS || type == SynchronisedDownloadNotifier.TYPE_CANCELLED) {
+
+        } else if (type == SynchronisedDownloadNotifier.TYPE_SUCCESS
+                || type == SynchronisedDownloadNotifier.TYPE_CANCELLED
+                || type == SynchronisedDownloadNotifier.TYPE_FAILED) {
             long firstDownloadBatchId = batch.getFirstDownloadBatchId(); // TODO why can't we just use getBatchId()?
             Uri uri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), firstDownloadBatchId);
 
@@ -138,7 +142,7 @@ public class NotificationDisplayer {
             builder.setAutoCancel(true);
 
             String action = batch.isError() ? ACTION_LIST : ACTION_OPEN;
-            Intent clickIntent = createClickIntent(action, batchId, batchStatus, uri);
+            Intent clickIntent = createClickIntent(action, batchId, batchStatus, uri);  // TODO: the Uri doesn't seem to be ever read
             builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
         }
 
