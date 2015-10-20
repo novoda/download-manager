@@ -1,3 +1,7 @@
+0.2.25
+-----
+ - If user clicks on a failed download then we want to hide the notification forever #169
+
 0.2.24
 -----
  - Handle failed notifications so that they get dismissed and click events work #167
