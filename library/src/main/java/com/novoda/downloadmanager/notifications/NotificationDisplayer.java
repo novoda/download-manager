@@ -123,7 +123,7 @@ public class NotificationDisplayer {
         }
 
         Intent clickIntent = createClickIntent(batchId, batchStatus);
-        builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_CANCEL_CURRENT));
+        builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
 
         customiseNotification(type, builder, batch);
     }
