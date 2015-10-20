@@ -125,7 +125,7 @@ public class NotificationDisplayer {
             // build a synthetic uri for intent identification purposes
             Uri uri = new Uri.Builder().scheme("active-dl").appendPath(tag).build();
 
-            Intent clickIntent = createClickIntent(ACTION_LIST, batchId, batchStatus, uri);
+            Intent clickIntent = createClickIntent(ACTION_LIST, batchId, batchStatus, uri); // TODO: the Uri doesn't seem to be ever read
             builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
             builder.setOngoing(true);
 
@@ -142,7 +142,7 @@ public class NotificationDisplayer {
             builder.setAutoCancel(true);
 
             String action = batch.isError() ? ACTION_LIST : ACTION_OPEN;
-            Intent clickIntent = createClickIntent(action, batchId, batchStatus, uri);
+            Intent clickIntent = createClickIntent(action, batchId, batchStatus, uri);  // TODO: the Uri doesn't seem to be ever read
             builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
         }
 
