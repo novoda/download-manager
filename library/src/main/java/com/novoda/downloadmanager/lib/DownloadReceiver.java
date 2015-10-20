@@ -65,9 +65,13 @@ public class DownloadReceiver extends BroadcastReceiver { // TODO split this int
             case CONNECTIVITY_ACTION:
                 checkConnectivityToStartService(context);
                 break;
-            case NotificationDisplayer.ACTION_OPEN:
-            case NotificationDisplayer.ACTION_LIST:
-            case NotificationDisplayer.ACTION_HIDE:
+            case NotificationDisplayer.ACTION_DOWNLOAD_CANCELLED_CLICK:
+            case NotificationDisplayer.ACTION_DOWNLOAD_FAILED_CLICK:
+            case NotificationDisplayer.ACTION_DOWNLOAD_SUCCESS_CLICK:
+            case NotificationDisplayer.ACTION_DOWNLOAD_RUNNING_CLICK:
+            case NotificationDisplayer.ACTION_DOWNLOAD_SUBMITTED_CLICK:
+            case NotificationDisplayer.ACTION_DOWNLOAD_OTHER_CLICK:
+            case NotificationDisplayer.ACTION_NOTIFICATION_DISMISSED:
             case ACTION_CANCEL:
                 handleSystemNotificationAction(context, intent);
                 break;
@@ -102,31 +106,33 @@ public class DownloadReceiver extends BroadcastReceiver { // TODO split this int
     }
 
     private void handleNotificationBroadcast(Context context, Intent intent) {
-        String action = intent.getAction();
         long[] ids = intent.getLongArrayExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS);
         int[] statuses = intent.getIntArrayExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_STATUSES);
         long batchId = getBatchId(intent);
+
+        String action = intent.getAction();
         switch (action) {
-            case NotificationDisplayer.ACTION_LIST:
-                sendNotificationClickedIntent(context, ids, statuses);
-                if (DownloadStatus.isFailure(statuses[0])) {
-                    hideNotification(context, batchId);
-                }
-                break;
-            case NotificationDisplayer.ACTION_OPEN: {
+            case NotificationDisplayer.ACTION_DOWNLOAD_CANCELLED_CLICK:
+            case NotificationDisplayer.ACTION_DOWNLOAD_FAILED_CLICK:
+            case NotificationDisplayer.ACTION_DOWNLOAD_SUCCESS_CLICK:
                 sendNotificationClickedIntent(context, ids, statuses);
                 hideNotification(context, batchId);
                 break;
-            }
-            case NotificationDisplayer.ACTION_HIDE: {
+            case NotificationDisplayer.ACTION_DOWNLOAD_RUNNING_CLICK:
+            case NotificationDisplayer.ACTION_DOWNLOAD_SUBMITTED_CLICK:
+                sendNotificationClickedIntent(context, ids, statuses);
+                break;
+            case NotificationDisplayer.ACTION_NOTIFICATION_DISMISSED:
                 hideNotification(context, batchId);
                 break;
-            }
             case ACTION_CANCEL:
                 cancelBatchThroughDatabaseState(batchId);
                 break;
+            case NotificationDisplayer.ACTION_DOWNLOAD_OTHER_CLICK:
+                // no need for now, implement if needed
+                break;
             default:
-                // no need to handle any other cases
+                // shouldn't happen - other cases should be handled in ACTION_DOWNLOAD_OTHER_CLICK
                 break;
         }
     }

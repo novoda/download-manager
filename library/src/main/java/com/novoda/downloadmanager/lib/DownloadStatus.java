@@ -10,7 +10,7 @@ package com.novoda.downloadmanager.lib;
  * 4xx: client errors<br>
  * 5xx: server errors
  */
-final class DownloadStatus {
+public final class DownloadStatus {
     /**
      * This download cannot proceed because the client does not allow it yet
      */
