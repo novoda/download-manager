@@ -3,7 +3,6 @@ package com.novoda.downloadmanager.notifications;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -20,7 +19,7 @@ import com.novoda.downloadmanager.R;
 import com.novoda.downloadmanager.lib.DownloadBatch;
 import com.novoda.downloadmanager.lib.DownloadManager;
 import com.novoda.downloadmanager.lib.DownloadReceiver;
-import com.novoda.downloadmanager.lib.DownloadsUriProvider;
+import com.novoda.downloadmanager.lib.DownloadStatus;
 import com.novoda.downloadmanager.lib.PublicFacingDownloadMarshaller;
 import com.novoda.downloadmanager.lib.PublicFacingStatusTranslator;
 
@@ -31,24 +30,18 @@ import java.util.concurrent.TimeUnit;
 
 public class NotificationDisplayer {
 
-    /**
-     * the intent that gets sent when deleting the notification of a completed download
-     */
-    public static final String ACTION_HIDE = "android.intent.action.DOWNLOAD_HIDE";
-    /**
-     * the intent that gets sent when clicking an incomplete/failed download
-     */
-    public static final String ACTION_LIST = "android.intent.action.DOWNLOAD_LIST";
-    /**
-     * the intent that gets sent when clicking a successful download
-     */
-    public static final String ACTION_OPEN = "android.intent.action.DOWNLOAD_OPEN";
+    public static final String ACTION_NOTIFICATION_DISMISSED = "com.novoda.downloadmanager.action.NOTIFICATION_DISMISSED";
+    public static final String ACTION_DOWNLOAD_FAILED_CLICK = "com.novoda.downloadmanager.action.DOWNLOAD_FAILED_CLICK";
+    public static final String ACTION_DOWNLOAD_RUNNING_CLICK = "com.novoda.downloadmanager.action.DOWNLOAD_RUNNING_CLICK";
+    public static final String ACTION_DOWNLOAD_SUCCESS_CLICK = "com.novoda.downloadmanager.action.DOWNLOAD_SUCCESS_CLICK";
+    public static final String ACTION_DOWNLOAD_CANCELLED_CLICK = "com.novoda.downloadmanager.action.DOWNLOAD_CANCELLED_CLICK";
+    public static final String ACTION_DOWNLOAD_SUBMITTED_CLICK = "com.novoda.downloadmanager.action.DOWNLOAD_SUBMITTED_CLICK";
+    public static final String ACTION_DOWNLOAD_OTHER_CLICK = "com.novoda.downloadmanager.action.DOWNLOAD_OTHER_CLICK";
 
     private final Context context;
     private final NotificationManager notificationManager;
     private final NotificationImageRetriever imageRetriever;
     private final Resources resources;
-    private final DownloadsUriProvider downloadsUriProvider;
     /**
      * Current speed of active downloads, mapped from {@link DownloadBatch#batchId}
      * to speed in bytes per second.
@@ -63,7 +56,6 @@ public class NotificationDisplayer {
             NotificationManager notificationManager,
             NotificationImageRetriever imageRetriever,
             Resources resources,
-            DownloadsUriProvider downloadsUriProvider,
             NotificationCustomiser notificationCustomiser,
             PublicFacingStatusTranslator statusTranslator,
             PublicFacingDownloadMarshaller downloadMarshaller) {
@@ -71,7 +63,6 @@ public class NotificationDisplayer {
         this.notificationManager = notificationManager;
         this.imageRetriever = imageRetriever;
         this.resources = resources;
-        this.downloadsUriProvider = downloadsUriProvider;
         this.notificationCustomiser = notificationCustomiser;
         this.statusTranslator = statusTranslator;
         this.downloadMarshaller = downloadMarshaller;
@@ -84,7 +75,7 @@ public class NotificationDisplayer {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
         builder.setWhen(firstShown);
         buildIcon(type, builder);
-        buildActionIntents(notificationId, type, cluster, builder);
+        buildActionIntents(type, cluster, builder);
 
         Notification notification = buildTitlesAndDescription(type, cluster, builder);
         notificationManager.notify(notificationId.hashCode(), notification);
@@ -116,37 +107,58 @@ public class NotificationDisplayer {
         }
     }
 
-    private void buildActionIntents(String tag, int type, Collection<DownloadBatch> cluster, NotificationCompat.Builder builder) {
+    private void buildActionIntents(int type, Collection<DownloadBatch> cluster, NotificationCompat.Builder builder) {
         DownloadBatch batch = cluster.iterator().next();
         long batchId = batch.getBatchId();
         int batchStatus = batch.getStatus();
 
         if (type == SynchronisedDownloadNotifier.TYPE_ACTIVE || type == SynchronisedDownloadNotifier.TYPE_WAITING) {
-            // build a synthetic uri for intent identification purposes
-            Uri uri = new Uri.Builder().scheme("active-dl").appendPath(tag).build();
-
-            Intent clickIntent = createClickIntent(ACTION_LIST, batchId, batchStatus, uri); // TODO: the Uri doesn't seem to be ever read
-            builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
             builder.setOngoing(true);
-
         } else if (type == SynchronisedDownloadNotifier.TYPE_SUCCESS
                 || type == SynchronisedDownloadNotifier.TYPE_CANCELLED
                 || type == SynchronisedDownloadNotifier.TYPE_FAILED) {
-            long firstDownloadBatchId = batch.getFirstDownloadBatchId(); // TODO why can't we just use getBatchId()?
-            Uri uri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), firstDownloadBatchId);
-
-            Intent hideIntent = new Intent(ACTION_HIDE, uri, context, DownloadReceiver.class);
-            hideIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batchId);
-            builder.setDeleteIntent(PendingIntent.getBroadcast(context, 0, hideIntent, 0));
-
+            Intent dismissedIntent = createNotificationDismissedIntent(batchId);
+            builder.setDeleteIntent(PendingIntent.getBroadcast(context, 0, dismissedIntent, 0));
             builder.setAutoCancel(true);
-
-            String action = batch.isError() ? ACTION_LIST : ACTION_OPEN;
-            Intent clickIntent = createClickIntent(action, batchId, batchStatus, uri);  // TODO: the Uri doesn't seem to be ever read
-            builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
         }
 
+        Intent clickIntent = createClickIntent(batchId, batchStatus);
+        builder.setContentIntent(PendingIntent.getBroadcast(context, 0, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT));
+
         customiseNotification(type, builder, batch);
+    }
+
+    private Intent createNotificationDismissedIntent(long batchId) {
+        Intent hideIntent = new Intent(ACTION_NOTIFICATION_DISMISSED, Uri.EMPTY, context, DownloadReceiver.class);
+        hideIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batchId);
+        return hideIntent;
+    }
+
+    private Intent createClickIntent(long batchId, int batchStatus) {
+        String action = getActionFrom(batchStatus);
+        Intent clickIntent = new Intent(action, Uri.EMPTY, context, DownloadReceiver.class);
+
+        clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, new long[]{batchId});
+        clickIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batchId);
+        int status = statusTranslator.translate(batchStatus);
+        clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_STATUSES, new int[]{status});
+
+        return clickIntent;
+    }
+
+    private String getActionFrom(int batchStatus) {
+        if (DownloadStatus.isFailure(batchStatus)) {
+            return ACTION_DOWNLOAD_FAILED_CLICK;
+        } else if (DownloadStatus.isRunning(batchStatus)) {
+            return ACTION_DOWNLOAD_RUNNING_CLICK;
+        } else if (DownloadStatus.isSuccess(batchStatus)) {
+            return ACTION_DOWNLOAD_SUCCESS_CLICK;
+        } else if (DownloadStatus.isCancelled(batchStatus)) {
+            return ACTION_DOWNLOAD_CANCELLED_CLICK;
+        } else if (DownloadStatus.isSubmitted(batchStatus)) {
+            return ACTION_DOWNLOAD_SUBMITTED_CLICK;
+        }
+        return ACTION_DOWNLOAD_OTHER_CLICK;
     }
 
     private void customiseNotification(int type, NotificationCompat.Builder builder, DownloadBatch batch) {
@@ -170,17 +182,6 @@ public class NotificationDisplayer {
             default:
                 throw new IllegalStateException("Deal with this new type " + type);
         }
-    }
-
-    private Intent createClickIntent(String action, long batchId, int batchStatus, Uri uri) {
-        Intent clickIntent = new Intent(action, uri, context, DownloadReceiver.class);
-        clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS, new long[]{batchId});
-        clickIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batchId);
-
-        int status = statusTranslator.translate(batchStatus);
-        clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_STATUSES, new int[]{status});
-
-        return clickIntent;
     }
 
     private Notification buildTitlesAndDescription(int type, Collection<DownloadBatch> cluster, NotificationCompat.Builder builder) {

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.res.Resources;
 
 import com.novoda.downloadmanager.lib.DownloadManagerModules;
-import com.novoda.downloadmanager.lib.DownloadsUriProvider;
 import com.novoda.downloadmanager.lib.PublicFacingDownloadMarshaller;
 import com.novoda.downloadmanager.lib.PublicFacingStatusTranslator;
 
@@ -22,7 +21,6 @@ public class DownloadNotifierFactory {
                 notificationManager,
                 modules.getNotificationImageRetriever(),
                 resources,
-                DownloadsUriProvider.getInstance(),
                 createNotificationCustomiser(modules),
                 statusTranslator,
                 downloadMarshaller

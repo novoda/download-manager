@@ -2,7 +2,7 @@ package com.novoda.downloadmanager.lib;
 
 import android.net.Uri;
 
-public class DownloadsUriProvider {
+public class DownloadsUriProvider { // Why is this a singleton if all fields are final?
 
     private final Uri publiclyAccessibleDownloadsUri;
     private final Uri downloadsByBatchUri;
