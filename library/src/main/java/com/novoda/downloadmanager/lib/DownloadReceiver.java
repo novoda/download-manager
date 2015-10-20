@@ -21,7 +21,8 @@ import com.novoda.downloadmanager.notifications.NotificationVisibility;
 import static android.content.Intent.ACTION_BOOT_COMPLETED;
 import static android.content.Intent.ACTION_MEDIA_MOUNTED;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
-import static com.novoda.downloadmanager.lib.Constants.*;
+import static com.novoda.downloadmanager.lib.Constants.ACTION_CANCEL;
+import static com.novoda.downloadmanager.lib.Constants.ACTION_RETRY;
 import static com.novoda.downloadmanager.notifications.NotificationVisibility.ACTIVE_OR_COMPLETE;
 import static com.novoda.downloadmanager.notifications.NotificationVisibility.ONLY_WHEN_COMPLETE;
 
@@ -104,23 +105,25 @@ public class DownloadReceiver extends BroadcastReceiver { // TODO split this int
         String action = intent.getAction();
         long[] ids = intent.getLongArrayExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS);
         int[] statuses = intent.getIntArrayExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_STATUSES);
+        long batchId = getBatchId(intent);
         switch (action) {
             case NotificationDisplayer.ACTION_LIST:
                 sendNotificationClickedIntent(context, ids, statuses);
+                if (DownloadStatus.isFailure(statuses[0])) {
+                    hideNotification(context, batchId);
+                }
                 break;
             case NotificationDisplayer.ACTION_OPEN: {
                 sendNotificationClickedIntent(context, ids, statuses);
-                long batchId = getBatchId(intent);
                 hideNotification(context, batchId);
                 break;
             }
             case NotificationDisplayer.ACTION_HIDE: {
-                long batchId = getBatchId(intent);
                 hideNotification(context, batchId);
                 break;
             }
             case ACTION_CANCEL:
-                cancelBatchThroughDatabaseState(intent);
+                cancelBatchThroughDatabaseState(batchId);
                 break;
             default:
                 // no need to handle any other cases
@@ -169,8 +172,7 @@ public class DownloadReceiver extends BroadcastReceiver { // TODO split this int
     /**
      * Mark the given batch as being cancelled by user so it will be cancelled by the running thread.
      */
-    private void cancelBatchThroughDatabaseState(Intent intent) {
-        long batchId = getBatchId(intent);
+    private void cancelBatchThroughDatabaseState(long batchId) {
         batchRepository.cancelBatch(batchId);
     }
 
