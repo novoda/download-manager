@@ -1,3 +1,7 @@
+0.2.24
+-----
+ - Handle failed notifications so that they get dismissed and click events work #167
+
 0.2.23
 -----
 - Adds a static text for downloading so that it can be overwritten #165
