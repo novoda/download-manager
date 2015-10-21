@@ -1,3 +1,7 @@
+0.2.27
+-----
+ - Uses FLAG_CANCEL_CURRENT instead of FLAG_UPDATE_CURRENT for the clicks #171
+
 0.2.26
 -----
  - Uses multiple actions for click events on notifications so they can be handled differently #170
