@@ -131,7 +131,12 @@ public class NotificationDisplayer {
     private Intent createNotificationDismissedIntent(long batchId) {
         Intent hideIntent = new Intent(ACTION_NOTIFICATION_DISMISSED, Uri.EMPTY, context, DownloadReceiver.class);
         hideIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batchId);
+        hideIntent.setData(createUniqueUri(hideIntent));
         return hideIntent;
+    }
+
+    private Uri createUniqueUri(Intent intent) {
+        return Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME));
     }
 
     private Intent createClickIntent(long batchId, int batchStatus) {
@@ -142,6 +147,7 @@ public class NotificationDisplayer {
         clickIntent.putExtra(DownloadReceiver.EXTRA_BATCH_ID, batchId);
         int status = statusTranslator.translate(batchStatus);
         clickIntent.putExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_STATUSES, new int[]{status});
+        clickIntent.setData(createUniqueUri(clickIntent));
 
         return clickIntent;
     }
