@@ -1,6 +1,7 @@
 0.2.28
 -----
  - Makes notifications uniques by setting different data on each of them #173
+ - Use the 'HIDDEN' state when hiding a notification #172
 
 0.2.27
 -----
