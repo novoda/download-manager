@@ -1,3 +1,7 @@
+0.2.28
+-----
+ - Makes notifications uniques by setting different data on each of them #173
+
 0.2.27
 -----
  - Uses FLAG_CANCEL_CURRENT instead of FLAG_UPDATE_CURRENT for the clicks #171
