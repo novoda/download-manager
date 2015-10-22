@@ -165,7 +165,7 @@ public class DownloadReceiver extends BroadcastReceiver { // TODO split this int
                 if ((DownloadStatus.isCancelled(status) || DownloadStatus.isCompleted(status))
                         && (visibility == ACTIVE_OR_COMPLETE || visibility == ONLY_WHEN_COMPLETE)) {
                     ContentValues values = new ContentValues(1);
-                    values.put(DownloadContract.Batches.COLUMN_VISIBILITY, NotificationVisibility.ONLY_WHEN_ACTIVE);
+                    values.put(DownloadContract.Batches.COLUMN_VISIBILITY, NotificationVisibility.HIDDEN);
                     context.getContentResolver().update(uri, values, null, null);
                 }
             } else {
