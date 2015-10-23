@@ -1,3 +1,7 @@
+0.2.32
+-----
+ - FIXES UPGRADE CRASH - previous release still contained the sql syntax error in the migration 
+
 0.2.31
 -----
  - Reverts 0.2.30 as this was actually unnecessary and just added complexity (and a bug upgrading 1 to 2 to 3)
