@@ -22,7 +22,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
      */
     private static final int DB_VERSION = 2;
 
-    private static final String VERSION_ONE_TO_VERSION_TWO_MIGRATION_SCRIPT = "ALTER TABLE"
+    private static final String VERSION_ONE_TO_VERSION_TWO_MIGRATION_SCRIPT = "ALTER TABLE "
             + DownloadContract.Batches.BATCHES_TABLE_NAME
             + " ADD "
             + DownloadContract.Batches.COLUMN_HAS_STARTED + " BOOLEAN NOT NULL DEFAULT 0;";
