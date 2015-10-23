@@ -1,4 +1,8 @@
-0.2.28
+0.2.30
+-----
+ - FIXES UPGRADE CRASH - another release for the people who had already experienced the crash
+
+0.2.29
 -----
  - FIXES UPGRADE CRASH - we had a missing space in our SQL statement
 
