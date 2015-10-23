@@ -1,5 +1,9 @@
 0.2.28
 -----
+ - FIXES UPGRADE CRASH - we had a missing space in our SQL statement
+
+0.2.28
+-----
  - Makes notifications uniques by setting different data on each of them #173
  - Use the 'HIDDEN' state when hiding a notification #172
 
