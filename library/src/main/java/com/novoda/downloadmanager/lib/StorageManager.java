@@ -294,7 +294,7 @@ class StorageManager {
     }
 
     public static File getDownloadDataDirectory(Context context) {
-        return context.getCacheDir();
+        return new File(context.getCacheDir().toString() + "/download-manager/");
     }
 
     /**
