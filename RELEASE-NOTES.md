@@ -1,3 +1,7 @@
+0.2.33
+-----
+- FIXES BUG - download manager deletes everything inside the application shared getCacheDir()
+
 0.2.32
 -----
  - FIXES UPGRADE CRASH - previous release still contained the sql syntax error in the migration 
