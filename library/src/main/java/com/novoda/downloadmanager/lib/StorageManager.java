@@ -83,6 +83,8 @@ class StorageManager {
     private final ContentResolver contentResolver;
     private final DownloadsUriProvider downloadsUriProvider;
 
+    private final static String FILE_SEPARATOR = File.separator;
+
     StorageManager(
             ContentResolver contentResolver, 
             File externalStorageDir, 
@@ -294,7 +296,7 @@ class StorageManager {
     }
 
     public static File getDownloadDataDirectory(Context context) {
-        return context.getCacheDir();
+        return new File(context.getCacheDir().getPath() + FILE_SEPARATOR + "download-manager" + FILE_SEPARATOR);
     }
 
     /**
