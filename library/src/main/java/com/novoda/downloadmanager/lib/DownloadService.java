@@ -231,8 +231,10 @@ public class DownloadService extends Service {
      * Enqueue an {#updateLocked()} pass to occur in future.
      */
     private void enqueueUpdate() {
-        updateHandler.removeMessages(MSG_UPDATE);
-        updateHandler.obtainMessage(MSG_UPDATE, lastStartId, -1).sendToTarget();
+        if (updateThread.isAlive()) {
+            updateHandler.removeMessages(MSG_UPDATE);
+            updateHandler.obtainMessage(MSG_UPDATE, lastStartId, -1).sendToTarget();
+        }
     }
 
     /**
