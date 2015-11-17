@@ -323,7 +323,11 @@ class DownloadTask implements Runnable {
             TrafficStats.clearThreadStatsTag();
 
             cleanupDestination(state, finalStatus);
-            notifyDownloadCompleted(state, finalStatus, errorMsg, numFailed);
+
+            // Paused by app has been already notified in the transferData method below, is a fast notify exception
+            if (finalStatus != DownloadStatus.PAUSED_BY_APP) {
+                notifyDownloadCompleted(state, finalStatus, errorMsg, numFailed);
+            }
 
             LLog.i("Download " + originalDownloadInfo.getId() + " finished with status " + DownloadStatus.statusToString(finalStatus));
 
@@ -505,6 +509,15 @@ class DownloadTask implements Runnable {
 //                throw new StopRequestException(STATUS_FILE_ERROR, e);
 //            }
 
+        } catch (StopRequestException exception) {
+            if (exception.getFinalStatus() == DownloadStatus.PAUSED_BY_APP) {
+                notifyThroughDatabase(state, exception.getFinalStatus(), exception.getMessage(), 0);
+
+                // We still have to throw the exception, otherwise the parent
+                // thinks that the download has been completed OK, when is not
+                // We should remove exceptions as a flow control in order to avoid this
+                throw exception;
+            }
         } finally {
 //            if (drmClient != null) {
 //                drmClient.release();
