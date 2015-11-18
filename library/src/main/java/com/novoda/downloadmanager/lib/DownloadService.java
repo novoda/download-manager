@@ -407,6 +407,7 @@ public class DownloadService extends Service {
         for (FileDownloadInfo info : downloads) {
             if (!DownloadStatus.isCompleted(info.getStatus()) && !info.isSubmittedOrRunning()) {
                 download(info);
+                return;
             }
         }
     }
