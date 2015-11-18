@@ -341,8 +341,7 @@ public class DownloadService extends Service {
             }
 
             if (!isActive && downloadReadyChecker.canDownload(downloadBatch)) {
-                boolean isBatchStartingForTheFirstTime = batchRepository.isBatchStartingForTheFirstTime(downloadBatch.getBatchId());
-                if (isBatchStartingForTheFirstTime) {
+                if (isBatchStartingForTheFirstTime(downloadBatch)) {
                     handleBatchStartingForTheFirstTime(downloadBatch);
                 }
 
@@ -375,8 +374,17 @@ public class DownloadService extends Service {
         return isActive;
     }
 
+    private boolean isBatchStartingForTheFirstTime(DownloadBatch downloadBatch) {
+        for (FileDownloadInfo fileDownloadInfo : downloadBatch.getDownloads()) {
+            if (fileDownloadInfo.getCurrentBytes() != 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private void handleBatchStartingForTheFirstTime(DownloadBatch downloadBatch) {
-        batchRepository.markBatchHasStarted(downloadBatch.getBatchId());
         batchInformationBroadcaster.notifyBatchStartedFor(downloadBatch.getBatchId());
     }
 

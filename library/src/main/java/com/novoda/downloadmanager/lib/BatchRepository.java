@@ -150,33 +150,6 @@ class BatchRepository {
         return DownloadStatus.UNKNOWN_ERROR;
     }
 
-    boolean isBatchStartingForTheFirstTime(long batchId) {
-        Cursor cursor = null;
-        int hasStarted = 0;
-        try {
-            String[] projection = {DownloadContract.Batches.COLUMN_HAS_STARTED};
-            String[] selectionArgs = {String.valueOf(batchId)};
-
-            cursor = resolver.query(
-                    downloadsUriProvider.getBatchesUri(),
-                    projection,
-                    DownloadContract.Batches._ID + " = ?",
-                    selectionArgs,
-                    null
-            );
-
-            if (cursor.moveToFirst()) {
-                hasStarted = cursor.getInt(0);
-            }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-
-        return hasStarted != DownloadContract.Batches.BATCH_HAS_STARTED;
-    }
-
     public DownloadBatch retrieveBatchFor(FileDownloadInfo download) {
         Collection<FileDownloadInfo> downloads = Collections.singletonList(download);
         List<DownloadBatch> batches = retrieveBatchesFor(downloads);
@@ -300,17 +273,6 @@ class BatchRepository {
                 values,
                 COLUMN_BATCH_ID + " = ? AND " + DownloadContract.Downloads._ID + " <> ? ",
                 new String[]{String.valueOf(batchId), String.valueOf(downloadId)}
-        );
-    }
-
-    public void markBatchHasStarted(long batchId) {
-        ContentValues values = new ContentValues(1);
-        values.put(DownloadContract.Batches.COLUMN_HAS_STARTED, DownloadContract.Batches.BATCH_HAS_STARTED);
-        resolver.update(
-                ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), batchId),
-                values,
-                null,
-                null
         );
     }
 
