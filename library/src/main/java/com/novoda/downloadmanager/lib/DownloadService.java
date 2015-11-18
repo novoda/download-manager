@@ -192,7 +192,7 @@ public class DownloadService extends Service {
      */
     private FileDownloadInfo createNewDownloadInfo(FileDownloadInfo.Reader reader) {
         FileDownloadInfo info = reader.newDownloadInfo(systemFacade, downloadsUriProvider);
-        LLog.v("processing inserted download " + info.getId());
+        //LLog.v("processing inserted download " + info.getId());
         return info;
     }
 
@@ -407,6 +407,7 @@ public class DownloadService extends Service {
         for (FileDownloadInfo info : downloads) {
             if (!DownloadStatus.isCompleted(info.getStatus()) && !info.isSubmittedOrRunning()) {
                 download(info);
+                return;
             }
         }
     }

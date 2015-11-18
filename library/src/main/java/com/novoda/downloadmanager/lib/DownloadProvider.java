@@ -622,7 +622,7 @@ public final class DownloadProvider extends ContentProvider {
             LLog.v("query failed in downloads database");
         } else {
             ret.setNotificationUri(getContext().getContentResolver(), uri);
-            LLog.v("created cursor " + ret + " on behalf of " + Binder.getCallingPid());
+            //LLog.v("created cursor " + ret + " on behalf of " + Binder.getCallingPid());
         }
         return ret;
     }
