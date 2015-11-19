@@ -461,7 +461,8 @@ public class Request {
         } else {
             values.put(
                     DownloadContract.Downloads.COLUMN_DESTINATION,
-                    DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE);
+                    DownloadsDestination.DESTINATION_CACHE_PARTITION_PURGEABLE
+            );
         }
         // is the file supposed to be media-scannable?
         values.put(DownloadContract.Downloads.COLUMN_MEDIA_SCANNED, (scannable) ? SCANNABLE_VALUE_YES : SCANNABLE_VALUE_NO);
