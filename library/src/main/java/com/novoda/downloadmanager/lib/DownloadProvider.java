@@ -432,7 +432,7 @@ public final class DownloadProvider extends ContentProvider {
             // these requests always are marked as 'completed'
             filteredValues.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.SUCCESS);
             filteredValues.put(DownloadContract.Downloads.COLUMN_TOTAL_BYTES, values.getAsLong(DownloadContract.Downloads.COLUMN_TOTAL_BYTES));
-            filteredValues.put(DownloadContract.Downloads.COLUMN_CURRENT_BYTES, 0);
+            filteredValues.put(DownloadContract.Downloads.COLUMN_CURRENT_BYTES, values.getAsLong(DownloadContract.Downloads.COLUMN_CURRENT_BYTES));
             copyInteger(DownloadContract.Downloads.COLUMN_MEDIA_SCANNED, values, filteredValues);
             copyString(DownloadContract.Downloads.COLUMN_DATA, values, filteredValues);
         } else {
