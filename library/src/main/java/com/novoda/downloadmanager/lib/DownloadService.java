@@ -346,7 +346,6 @@ public class DownloadService extends Service {
 
             if (!isActive && downloadReadyChecker.canDownload(downloadBatch)) {
                 if (isBatchStartingForTheFirstTime(downloadBatch)) {
-                    Log.v("Ferran, bach started the first time");
                     handleBatchStartingForTheFirstTime(downloadBatch);
                 }
 
