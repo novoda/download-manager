@@ -1,3 +1,7 @@
+0.2.35
+-----
+- FIXES BUG - allows the download manager to insert the current bytes into the database for addCompletedDownloads
+
 0.2.34
 -----
 - FIXES BUG - sets the current download size to the total size when adding completed downloads
