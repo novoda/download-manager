@@ -22,6 +22,9 @@ final class DatabaseHelper extends SQLiteOpenHelper {
      */
     private static final int DB_VERSION = 3;
 
+    private static final int OLD_DATABASE_VERSION = 2;
+    private static final int NEW_DATABASE_VERSION = 3;
+
     /**
      * columns to request from DownloadProvider.
      */
@@ -108,7 +111,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
      */
     @Override
     public void onUpgrade(@NonNull SQLiteDatabase db, int oldVersion, final int newVersion) {
-        if (oldVersion == 2 && newVersion == 3) {
+        if (oldVersion == OLD_DATABASE_VERSION && newVersion == NEW_DATABASE_VERSION) {
             upgradeFromVersionTwoToVersionThree(db);
         }
     }
