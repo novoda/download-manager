@@ -925,6 +925,7 @@ public class DownloadManager {
         values.put(DownloadContract.Downloads.COLUMN_DATA, path);
         values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.SUCCESS);
         values.put(DownloadContract.Downloads.COLUMN_TOTAL_BYTES, length);
+        values.put(DownloadContract.Downloads.COLUMN_CURRENT_BYTES, length);
         Uri downloadUri = contentResolver.insert(downloadsUriProvider.getContentUri(), values);
         if (downloadUri == null) {
             return -1;
