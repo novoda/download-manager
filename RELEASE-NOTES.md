@@ -1,3 +1,7 @@
+0.2.34
+-----
+- FIXES BUG - sets the current download size to the total size when adding completed downloads
+
 0.2.33
 -----
 - FIXES BUG - download manager deletes everything inside the application shared getCacheDir()
