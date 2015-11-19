@@ -333,6 +333,13 @@ final class DownloadContract {
         public static final String COLUMN_LAST_MODIFICATION = "last_modified_timestamp";
 
         /**
+         * Store whether this specific batch was ever started.
+         * <P>Type: BOOLEAN</P>
+         * <P>Owner can Read</P>
+         */
+        public static final String COLUMN_HAS_STARTED = "batch_has_started";
+
+        /**
          * One of the values taken by {@link DownloadContract.Batches#COLUMN_DELETED}.
          * This value is used when the batch is marked as deleted and will be actually removed soon.
          */
