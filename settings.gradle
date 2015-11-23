@@ -1,3 +1,2 @@
 include ':library'
 include ':demo-simple'
-include ':demo-extended'

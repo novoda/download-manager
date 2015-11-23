@@ -1,6 +1,6 @@
 <manifest
-  package="com.novoda.downloadmanager"
-  xmlns:android="http://schemas.android.com/apk/res/android">
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.novoda.downloadmanager">
 
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
   <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -9,27 +9,12 @@
 
   <application>
 
-    <activity android:name="com.novoda.downloadmanager.lib.SizeLimitActivity" />
-
-    <service android:name="com.novoda.downloadmanager.lib.DownloadService" />
+    <service android:name=".Service" />
 
     <provider
-      android:name="com.novoda.downloadmanager.lib.DownloadProvider"
-      android:authorities="${downloadAuthority}"
+      android:name=".Provider"
+      android:authorities="com.novoda.downloadmanager.demo.simple"
       android:exported="false" />
-
-    <receiver
-      android:name="com.novoda.downloadmanager.lib.DownloadReceiver"
-      android:exported="false">
-      <intent-filter>
-        <action android:name="android.intent.action.BOOT_COMPLETED" />
-        <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-      </intent-filter>
-      <intent-filter>
-        <action android:name="android.intent.action.MEDIA_MOUNTED" />
-        <data android:scheme="file" />
-      </intent-filter>
-    </receiver>
 
   </application>
 

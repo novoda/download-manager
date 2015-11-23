@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager.lib;
 
-import com.novoda.downloadmanager.Download;
+import com.novoda.downloadmanager.domain.Download;
 
 import org.junit.Test;
 
