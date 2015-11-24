@@ -215,6 +215,11 @@ public class DownloadManager {
     public static final int STATUS_DELETING = 1 << 5;
 
     /**
+     * Value of {@link #COLUMN_STATUS} when the download is marked for pausing.
+     */
+    public static final int STATUS_PAUSING = 1 << 6;
+
+    /**
      * Value of COLUMN_ERROR_CODE when the download has completed with an error that doesn't fit
      * under any other error code.
      */
