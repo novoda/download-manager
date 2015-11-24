@@ -55,6 +55,7 @@ import java.net.URI;
  * permission to use this class.
  */
 public class DownloadManager {
+    //CHECKSTYLE IGNORE MagicNumber
 
     /**
      * Extra information available when you register for notications of download status changes
@@ -405,6 +406,8 @@ public class DownloadManager {
             "'placeholder' AS " + COLUMN_LOCAL_URI,
             "'placeholder' AS " + COLUMN_REASON
     };
+
+    //CHECKSTYLE END IGNORE MagicNumber
 
     private final ContentResolver contentResolver;
     private final DownloadsUriProvider downloadsUriProvider;
