@@ -244,7 +244,7 @@ public class BatchQuery {
         }
 
         private void setCriteriaListFrom(List<Criteria.Builder> criteriaBuilders) {
-            for (Criteria.Builder criteriaBuilder : criteriaBuilders){
+            for (Criteria.Builder criteriaBuilder : criteriaBuilders) {
                 builder.withInnerCriteria(criteriaBuilder.build());
                 if (isNotLast(criteriaBuilder, criteriaBuilders)) {
                     builder.and();
