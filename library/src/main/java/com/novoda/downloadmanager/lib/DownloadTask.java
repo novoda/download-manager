@@ -324,10 +324,7 @@ class DownloadTask implements Runnable {
 
             cleanupDestination(state, finalStatus);
 
-            // Paused by app has been already notified in the transferData method below, is a fast notify exception
-            if (finalStatus != DownloadStatus.PAUSED_BY_APP) {
-                notifyDownloadCompleted(state, finalStatus, errorMsg, numFailed);
-            }
+            notifyDownloadCompleted(state, finalStatus, errorMsg, numFailed);
 
             LLog.i("Download " + originalDownloadInfo.getId() + " finished with status " + DownloadStatus.statusToString(finalStatus));
 
@@ -511,7 +508,7 @@ class DownloadTask implements Runnable {
 
         } catch (StopRequestException exception) {
             if (exception.getFinalStatus() == DownloadStatus.PAUSED_BY_APP) {
-                notifyThroughDatabase(state, exception.getFinalStatus(), exception.getMessage(), 0);
+                notifyThroughDatabase(state, DownloadStatus.PAUSING, exception.getMessage(), 0);
 
                 // We still have to throw the exception, otherwise the parent
                 // thinks that the download has been completed OK, when is not
