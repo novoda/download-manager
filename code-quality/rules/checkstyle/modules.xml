@@ -149,7 +149,6 @@
       <property name="severity" value="warning" />
       <property name="ignoreHashCodeMethod" value="true" />
       <property name="ignoreAnnotation" value="true" />
-      <property name="ignoreFieldDeclaration" value="true" />
     </module>
     <module name="MissingSwitchDefault" />
     <module name="SimplifyBooleanExpression" />
