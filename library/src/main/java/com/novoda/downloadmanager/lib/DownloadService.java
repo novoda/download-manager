@@ -425,6 +425,9 @@ public class DownloadService extends Service {
 
         downloadsRepository.setDownloadSubmitted(info);
 
+        int batchStatus = batchRepository.calculateBatchStatus(info.getBatchId());
+        batchRepository.updateBatchStatus(info.getBatchId(), batchStatus);
+
         executor.submit(downloadTask);
     }
 
