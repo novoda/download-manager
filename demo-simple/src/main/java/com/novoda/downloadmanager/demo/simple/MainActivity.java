@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.Toast;
 
 import com.novoda.downloadmanager.Downloader;
 import com.novoda.downloadmanager.demo.R;
@@ -75,11 +76,28 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(@NonNull View v) {
                         List<Download> allDownloads = downloader.getAllDownloads();
-                        recyclerView.setAdapter(new BeardDownloadAdapter(allDownloads));
+                        recyclerView.setAdapter(new BeardDownloadAdapter(allDownloads, onDownloadClickedListener));
                         emptyView.setVisibility(allDownloads.isEmpty() ? View.VISIBLE : View.GONE);
                     }
                 }
         );
     }
+
+    private final BeardDownloadAdapter.OnDownloadClickedListener onDownloadClickedListener = new BeardDownloadAdapter.OnDownloadClickedListener() {
+        @Override
+        public void onDownloadClicked(Download download) {
+            switch (download.getStatus()) {
+                case RUNNING:
+                    Toast.makeText(MainActivity.this, "Pausing download!", Toast.LENGTH_SHORT).show();
+                    downloader.pause(download.getId());
+                    break;
+
+                case PAUSED:
+                    Toast.makeText(MainActivity.this, "Resuming download!", Toast.LENGTH_SHORT).show();
+                    downloader.resume(download.getId());
+                    break;
+            }
+        }
+    };
 
 }

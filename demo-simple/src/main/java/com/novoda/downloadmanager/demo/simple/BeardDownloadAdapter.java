@@ -12,10 +12,13 @@ import com.novoda.downloadmanager.domain.DownloadFile;
 import java.util.List;
 
 class BeardDownloadAdapter extends RecyclerView.Adapter<BeardDownloadAdapter.ViewHolder> {
-    private final List<Download> beardDownloads;
 
-    public BeardDownloadAdapter(List<Download> beardDownloads) {
-        this.beardDownloads = beardDownloads;
+    private final List<Download> downloads;
+    private final OnDownloadClickedListener downloadClickedListener;
+
+    public BeardDownloadAdapter(List<Download> downloads, OnDownloadClickedListener downloadClickedListener) {
+        this.downloads = downloads;
+        this.downloadClickedListener = downloadClickedListener;
     }
 
     @Override
@@ -25,28 +28,13 @@ class BeardDownloadAdapter extends RecyclerView.Adapter<BeardDownloadAdapter.Vie
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
-        final Download beardDownload = beardDownloads.get(position);
-        viewHolder.statusText.setText(beardDownload.getStatus().name());
-        viewHolder.filesText.setText(getFilesCompeted(beardDownload));
-        viewHolder.idText.setText("Id : " + beardDownload.getId().toString());
-        viewHolder.sizeText.setText(beardDownload.getCurrentSize() + " / " + beardDownload.getTotalSize());
-    }
-
-    private String getFilesCompeted(Download beardDownload) {
-        int completedFiles = 0;
-
-        for (DownloadFile file : beardDownload.getFiles()) {
-            if (file.getStatus() == DownloadFile.FileStatus.COMPLETE) {
-                completedFiles++;
-            }
-        }
-
-        return "Files " + completedFiles + " / " + beardDownload.getFiles().size();
+        Download download = downloads.get(position);
+        viewHolder.bind(download, downloadClickedListener);
     }
 
     @Override
     public int getItemCount() {
-        return beardDownloads.size();
+        return downloads.size();
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -63,5 +51,37 @@ class BeardDownloadAdapter extends RecyclerView.Adapter<BeardDownloadAdapter.Vie
             idText = (TextView) itemView.findViewById(R.id.download_id_text);
             sizeText = (TextView) itemView.findViewById(R.id.download_size_text);
         }
+
+        public void bind(final Download download, final OnDownloadClickedListener downloadClickedListener) {
+            statusText.setText(download.getStatus().name());
+            filesText.setText(getFilesCompeted(download));
+            idText.setText("Id : " + download.getId().toString());
+            sizeText.setText(download.getCurrentSize() + " / " + download.getTotalSize());
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    downloadClickedListener.onDownloadClicked(download);
+                }
+            });
+        }
+
+        private String getFilesCompeted(Download beardDownload) {
+            int completedFiles = 0;
+
+            for (DownloadFile file : beardDownload.getFiles()) {
+                if (file.getStatus() == DownloadFile.FileStatus.COMPLETE) {
+                    completedFiles++;
+                }
+            }
+
+            return "Files " + completedFiles + " / " + beardDownload.getFiles().size();
+        }
+
     }
+
+    public interface OnDownloadClickedListener {
+        void onDownloadClicked(Download download);
+    }
+
 }
