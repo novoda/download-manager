@@ -1,3 +1,7 @@
+0.2.36
+-----
+- Adds an immediate notification for a new status PAUSING
+
 0.2.35
 -----
 - FIXES BUG - allows the download manager to insert the current bytes into the database for addCompletedDownloads
