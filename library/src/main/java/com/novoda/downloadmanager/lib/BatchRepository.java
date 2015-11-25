@@ -24,6 +24,7 @@ class BatchRepository {
 
     private static final List<Integer> PRIORITISED_STATUSES = Arrays.asList(
             DownloadStatus.CANCELED,
+            DownloadStatus.PAUSING,
             DownloadStatus.PAUSED_BY_APP,
             DownloadStatus.RUNNING,
             DownloadStatus.DELETING,
@@ -232,7 +233,12 @@ class BatchRepository {
     }
 
     public void deleteMarkedBatchesFor(Collection<FileDownloadInfo> downloads) {
-        Cursor batchesCursor = resolver.query(downloadsUriProvider.getBatchesUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null);
+        Cursor batchesCursor = resolver.query(
+                downloadsUriProvider.getBatchesUri(),
+                PROJECT_BATCH_ID,
+                WHERE_DELETED_VALUE_IS,
+                MARKED_FOR_DELETION,
+                null);
         List<Long> batchIdsToDelete = new ArrayList<>();
         try {
             while (batchesCursor.moveToNext()) {

@@ -55,6 +55,7 @@ import java.net.URI;
  * permission to use this class.
  */
 public class DownloadManager {
+    //CHECKSTYLE IGNORE MagicNumber
 
     /**
      * Extra information available when you register for notications of download status changes
@@ -213,6 +214,11 @@ public class DownloadManager {
      * Value of {@link #COLUMN_STATUS} when the download is marked for deletion.
      */
     public static final int STATUS_DELETING = 1 << 5;
+
+    /**
+     * Value of {@link #COLUMN_STATUS} when the download is marked for pausing.
+     */
+    public static final int STATUS_PAUSING = 1 << 6;
 
     /**
      * Value of COLUMN_ERROR_CODE when the download has completed with an error that doesn't fit
@@ -400,6 +406,8 @@ public class DownloadManager {
             "'placeholder' AS " + COLUMN_LOCAL_URI,
             "'placeholder' AS " + COLUMN_REASON
     };
+
+    //CHECKSTYLE END IGNORE MagicNumber
 
     private final ContentResolver contentResolver;
     private final DownloadsUriProvider downloadsUriProvider;

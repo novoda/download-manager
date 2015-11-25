@@ -15,6 +15,8 @@ public class PublicFacingStatusTranslator {
             case DownloadStatus.WAITING_FOR_NETWORK:
             case DownloadStatus.QUEUED_FOR_WIFI:
                 return DownloadManager.STATUS_PAUSED;
+            case DownloadStatus.PAUSING:
+                return DownloadManager.STATUS_PAUSING;
             case DownloadStatus.SUCCESS:
                 return DownloadManager.STATUS_SUCCESSFUL;
             case DownloadStatus.DELETING:

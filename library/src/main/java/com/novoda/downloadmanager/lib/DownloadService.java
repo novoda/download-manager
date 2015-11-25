@@ -231,8 +231,10 @@ public class DownloadService extends Service {
      * Enqueue an {#updateLocked()} pass to occur in future.
      */
     private void enqueueUpdate() {
-        updateHandler.removeMessages(MSG_UPDATE);
-        updateHandler.obtainMessage(MSG_UPDATE, lastStartId, -1).sendToTarget();
+        if (updateThread.isAlive()) {
+            updateHandler.removeMessages(MSG_UPDATE);
+            updateHandler.obtainMessage(MSG_UPDATE, lastStartId, -1).sendToTarget();
+        }
     }
 
     /**
@@ -405,6 +407,7 @@ public class DownloadService extends Service {
         for (FileDownloadInfo info : downloads) {
             if (!DownloadStatus.isCompleted(info.getStatus()) && !info.isSubmittedOrRunning()) {
                 download(info);
+                return;
             }
         }
     }
@@ -421,6 +424,9 @@ public class DownloadService extends Service {
         );
 
         downloadsRepository.setDownloadSubmitted(info);
+
+        int batchStatus = batchRepository.calculateBatchStatus(info.getBatchId());
+        batchRepository.updateBatchStatus(info.getBatchId(), batchStatus);
 
         executor.submit(downloadTask);
     }

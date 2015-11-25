@@ -112,6 +112,7 @@ public class BatchQuery {
          *
          * @param statusFlags status flags that can be combined with "|"
          *                    one of {@link DownloadManager#STATUS_PAUSED},
+         *                    {@link DownloadManager#STATUS_PAUSING}
          *                    {@link DownloadManager#STATUS_FAILED},
          *                    {@link DownloadManager#STATUS_PENDING},
          *                    {@link DownloadManager#STATUS_SUCCESSFUL},
@@ -155,6 +156,9 @@ public class BatchQuery {
                 Criteria pendingCriteria = new Criteria.Builder()
                         .withSelection(DownloadContract.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
                         .withArgument(String.valueOf(DownloadStatus.PENDING))
+                        .or()
+                        .withSelection(DownloadContract.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
+                        .withArgument(String.valueOf(DownloadStatus.SUBMITTED))
                         .build();
                 criteriaList.add(pendingCriteria);
             }
@@ -163,6 +167,14 @@ public class BatchQuery {
                 Criteria runningCriteria = new Criteria.Builder()
                         .withSelection(DownloadContract.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
                         .withArgument(String.valueOf(DownloadStatus.RUNNING))
+                        .build();
+                criteriaList.add(runningCriteria);
+            }
+
+            if ((statusFlags & DownloadManager.STATUS_PAUSING) != 0) {
+                Criteria runningCriteria = new Criteria.Builder()
+                        .withSelection(DownloadContract.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
+                        .withArgument(String.valueOf(DownloadStatus.PAUSING))
                         .build();
                 criteriaList.add(runningCriteria);
             }
@@ -232,7 +244,7 @@ public class BatchQuery {
         }
 
         private void setCriteriaListFrom(List<Criteria.Builder> criteriaBuilders) {
-            for (Criteria.Builder criteriaBuilder : criteriaBuilders){
+            for (Criteria.Builder criteriaBuilder : criteriaBuilders) {
                 builder.withInnerCriteria(criteriaBuilder.build());
                 if (isNotLast(criteriaBuilder, criteriaBuilders)) {
                     builder.and();
@@ -267,6 +279,7 @@ public class BatchQuery {
     @IntDef(flag = true,
             value = {DownloadManager.STATUS_PENDING,
                     DownloadManager.STATUS_RUNNING,
+                    DownloadManager.STATUS_PAUSING,
                     DownloadManager.STATUS_PAUSED,
                     DownloadManager.STATUS_SUCCESSFUL,
                     DownloadManager.STATUS_FAILED,

@@ -12,6 +12,10 @@ package com.novoda.downloadmanager.lib;
  */
 public final class DownloadStatus {
     /**
+     * This download is marked as paused and will be effectively paused in the near future
+     */
+    public static final int PAUSING = 186;
+    /**
      * This download cannot proceed because the client does not allow it yet
      */
     public static final int QUEUED_DUE_CLIENT_RESTRICTIONS = 187;
