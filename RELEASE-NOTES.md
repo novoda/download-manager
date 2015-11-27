@@ -1,6 +1,11 @@
+0.2.37
+-----
+- Reverts okhttp version to 2.3.0
+
 0.2.36
 -----
 - Adds an immediate notification for a new status PAUSING
+- Updates okhttp version to 2.5.0
 
 0.2.35
 -----
