@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        downloader.startListeningForDownloadUpdates();
+        downloader.startListeningForDownloadUpdates(Downloader.WatchType.PROGRESS);
     }
 
     @Override

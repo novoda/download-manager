@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.content.LocalBroadcastManager;
@@ -81,14 +82,13 @@ public class Downloader {
         listeners.notify(allDownloads);
     }
 
-    public void startListeningForDownloadUpdates() {
-        watcher.startListeningForDownloadUpdates(onDownloadsChangedListener);
+    public void startListeningForDownloadUpdates(WatchType watchType) {
+        watcher.startListeningForDownloadUpdates(watchType, onDownloadsChangedListener);
     }
 
     private final Watcher.OnDownloadsChangedListener onDownloadsChangedListener = new Watcher.OnDownloadsChangedListener() {
         @Override
         public void onDownloadsChanged() {
-            Log.e("!!!", "downloads changed");
             requestDownloadsUpdate();
         }
     };
@@ -117,9 +117,9 @@ public class Downloader {
             this.contentResolver = contentResolver;
         }
 
-        public void startListeningForDownloadUpdates(OnDownloadsChangedListener onDownloadsChangedListener) {
+        public void startListeningForDownloadUpdates(WatchType watchType, OnDownloadsChangedListener onDownloadsChangedListener) {
             this.onDownloadsChangedListener = onDownloadsChangedListener;
-            contentResolver.registerContentObserver(Provider.DOWNLOAD_WITH_SIZE, true, contentObserver);
+            contentResolver.registerContentObserver(watchType.toUri(), true, contentObserver);
         }
 
         public void stopListeningForDownloadUpdates() {
@@ -184,6 +184,23 @@ public class Downloader {
 
         }
 
+    }
+
+    public enum WatchType {
+        STATUS_CHANGE {
+            @Override
+            Uri toUri() {
+                return Provider.DOWNLOAD_STATUS_UPDATE;
+            }
+        },
+        PROGRESS {
+            @Override
+            Uri toUri() {
+                return Provider.DOWNLOAD_PROGRESS_UPDATE;
+            }
+        };
+
+        abstract Uri toUri();
     }
 
 }

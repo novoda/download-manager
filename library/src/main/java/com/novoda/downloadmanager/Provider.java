@@ -16,6 +16,9 @@ public class Provider extends SQLiteContentProviderImpl {
     public static final Uri FILE = buildUri(DB.Tables.File);
     public static final Uri DOWNLOAD_WITH_SIZE = buildUri(DB.Tables.DownloadsWithSize);
 
+    public static final Uri DOWNLOAD_STATUS_UPDATE = buildUri("DOWNLOAD_STATUS_UPDATE");
+    public static final Uri DOWNLOAD_PROGRESS_UPDATE = buildUri("DOWNLOAD_PROGRESS_UPDATE");
+
     private static Uri buildUri(String tableOrView) {
         return Uri.parse(AUTHORITY).buildUpon().appendPath(tableOrView).build();
     }
@@ -42,8 +45,13 @@ public class Provider extends SQLiteContentProviderImpl {
     }
 
     private void notifyViews(Uri uri) {
-        if (FILE.equals(uri) || DOWNLOAD.equals(uri)) {
-            notifyUriChange(DOWNLOAD_WITH_SIZE);
+        if (FILE.equals(uri)) {
+            notifyUriChange(DOWNLOAD_PROGRESS_UPDATE);
+        }
+
+        if (DOWNLOAD.equals(uri)) {
+            notifyUriChange(DOWNLOAD_STATUS_UPDATE);
+            notifyUriChange(DOWNLOAD_PROGRESS_UPDATE);
         }
     }
 
