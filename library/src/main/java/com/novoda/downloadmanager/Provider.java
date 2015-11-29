@@ -18,6 +18,7 @@ public class Provider extends SQLiteContentProviderImpl {
 
     public static final Uri DOWNLOAD_STATUS_UPDATE = buildUri("DOWNLOAD_STATUS_UPDATE");
     public static final Uri DOWNLOAD_PROGRESS_UPDATE = buildUri("DOWNLOAD_PROGRESS_UPDATE");
+    public static final Uri DOWNLOAD_SERVICE_UPDATE = buildUri("DOWNLOAD_SERVICE_UPDATE");
 
     private static Uri buildUri(String tableOrView) {
         return Uri.parse(AUTHORITY).buildUpon().appendPath(tableOrView).build();
@@ -26,25 +27,25 @@ public class Provider extends SQLiteContentProviderImpl {
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         int update = super.update(uri, values, selection, selectionArgs);
-        notifyViews(uri);
+        notifyObservers(uri);
         return update;
     }
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         Uri insert = super.insert(uri, values);
-        notifyViews(uri);
+        notifyObservers(uri);
         return insert;
     }
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         int delete = super.delete(uri, selection, selectionArgs);
-        notifyViews(uri);
+        notifyObservers(uri);
         return delete;
     }
 
-    private void notifyViews(Uri uri) {
+    private void notifyObservers(Uri uri) {
         if (FILE.equals(uri)) {
             notifyUriChange(DOWNLOAD_PROGRESS_UPDATE);
         }
@@ -52,6 +53,7 @@ public class Provider extends SQLiteContentProviderImpl {
         if (DOWNLOAD.equals(uri)) {
             notifyUriChange(DOWNLOAD_STATUS_UPDATE);
             notifyUriChange(DOWNLOAD_PROGRESS_UPDATE);
+            notifyUriChange(DOWNLOAD_SERVICE_UPDATE);
         }
     }
 

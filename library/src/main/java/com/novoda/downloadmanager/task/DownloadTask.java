@@ -53,7 +53,7 @@ public class DownloadTask implements Runnable {
     }
 
     private boolean downloadStatusIsIgnored(Download download) {
-        return download.getStatus().ignoredFoo();
+        return download.getStage().noActionRequired();
     }
 
     private void download(Download download) {

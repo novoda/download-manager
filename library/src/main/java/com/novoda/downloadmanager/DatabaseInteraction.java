@@ -9,6 +9,7 @@ import com.novoda.downloadmanager.domain.Download;
 import com.novoda.downloadmanager.domain.DownloadFile;
 import com.novoda.downloadmanager.domain.DownloadId;
 import com.novoda.downloadmanager.domain.DownloadRequest;
+import com.novoda.downloadmanager.domain.DownloadStage;
 import com.novoda.downloadmanager.domain.DownloadStatus;
 
 import java.util.ArrayList;
@@ -76,9 +77,10 @@ class DatabaseInteraction {
         DownloadId id = new DownloadId(DB.Download.getDownloadId(cursor));
         long currentSize = Long.valueOf(cursor.getString(cursor.getColumnIndex(DB.Columns.DownloadsWithSize.CurrentSize)));
         long totalSize = Long.valueOf(cursor.getString(cursor.getColumnIndex(DB.Columns.DownloadsWithSize.TotalSize)));
-        DownloadStatus downloadStatus = DownloadStatus.valueOf(DB.Download.getDownloadStatus(cursor));
+        DownloadStage downloadStage = DownloadStage.valueOf(DB.Download.getDownloadStage(cursor));
+        DownloadStatus downloadStatus = DownloadStatus.from(downloadStage);
         List<DownloadFile> files = getFilesforId(id);
-        return new Download(id, currentSize, totalSize, downloadStatus, files);
+        return new Download(id, currentSize, totalSize, downloadStage, downloadStatus, files);
     }
 
     private List<DownloadFile> getFilesforId(DownloadId id) {
@@ -103,7 +105,7 @@ class DatabaseInteraction {
         ContentValues values = new ContentValues();
         long downloadId = downloadRequest.getId().toLong();
         DB.Download.setDownloadId((int) downloadId, values);
-        DB.Download.setDownloadStatus(DownloadStatus.QUEUED.name(), values);
+        DB.Download.setDownloadStage(DownloadStage.QUEUED.name(), values);
         contentResolver.insert(Provider.DOWNLOAD, values);
 
         ContentValues[] fileValues = createFileValues(downloadRequest.getFiles(), downloadId);
@@ -132,9 +134,9 @@ class DatabaseInteraction {
         contentResolver.update(Provider.FILE, values, DB.Columns.File.FileUri + "=?", new String[]{file.getUri()});
     }
 
-    public void updateStatus(DownloadId downloadId, DownloadStatus status) {
+    public void updateStatus(DownloadId downloadId, DownloadStage stage) {
         ContentValues values = new ContentValues(1);
-        DB.Download.setDownloadStatus(status.name(), values);
+        DB.Download.setDownloadStage(stage.name(), values);
         contentResolver.update(Provider.DOWNLOAD, values, DB.Columns.Download.DownloadId + "=?", new String[]{downloadId.toString()});
     }
 

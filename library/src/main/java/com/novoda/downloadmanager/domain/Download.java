@@ -7,13 +7,15 @@ public class Download {
     private final DownloadId id;
     private final long currentSize;
     private final long totalSize;
+    private final DownloadStage downloadStage;
     private final DownloadStatus downloadStatus;
     private final List<DownloadFile> files;
 
-    public Download(DownloadId id, long currentSize, long totalSize, DownloadStatus downloadStatus, List<DownloadFile> files) {
+    public Download(DownloadId id, long currentSize, long totalSize, DownloadStage downloadStage, DownloadStatus downloadStatus, List<DownloadFile> files) {
         this.id = id;
         this.currentSize = currentSize;
         this.totalSize = totalSize;
+        this.downloadStage = downloadStage;
         this.downloadStatus = downloadStatus;
         this.files = files;
     }
@@ -32,6 +34,10 @@ public class Download {
 
     public List<DownloadFile> getFiles() {
         return files;
+    }
+
+    public DownloadStage getStage() {
+        return downloadStage;
     }
 
     public DownloadStatus getStatus() {

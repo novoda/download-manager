@@ -67,12 +67,12 @@ class DownloadUpdater {
     }
 
     private boolean canSkipDownload(Download download) {
-        return download.getStatus().ignoredFoo();
+        return download.getStage().noActionRequired();
     }
 
     private boolean hasActiveDownload(List<Download> allDownloads) {
         for (Download download : allDownloads) {
-            if (download.getStatus().isActive()) {
+            if (download.getStage().isActive()) {
                 return true;
             }
         }

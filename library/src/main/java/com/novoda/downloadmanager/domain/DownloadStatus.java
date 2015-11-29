@@ -1,19 +1,36 @@
 package com.novoda.downloadmanager.domain;
 
 public enum DownloadStatus {
-    SUBMITTED,
     QUEUED,
     RUNNING,
     PAUSED,
+    COMPLETED,
     FAILED,
-    MARKED_FOR_DELETION,
-    COMPLETED;
+    TRANSITIONING;
 
-    public boolean ignoredFoo() {
-        return this == MARKED_FOR_DELETION || this == PAUSED || this == FAILED || this == COMPLETED;
+    public static DownloadStatus from(DownloadStage stage) {
+        switch (stage) {
+            case QUEUED:
+            case SUBMITTED:
+                return QUEUED;
+
+            case RUNNING:
+                return RUNNING;
+
+            case PAUSED:
+                return PAUSED;
+
+            case COMPLETED:
+                return COMPLETED;
+
+            case FAILED:
+                return FAILED;
+
+            case MARKED_FOR_DELETION:
+                return TRANSITIONING;
+
+        }
+        throw new IllegalArgumentException("Does not handle stage : " + stage.name());
     }
 
-    public boolean isActive() {
-        return this == DownloadStatus.SUBMITTED || this == DownloadStatus.RUNNING;
-    }
 }

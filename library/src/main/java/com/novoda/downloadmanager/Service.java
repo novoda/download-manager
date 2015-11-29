@@ -47,7 +47,7 @@ public class Service extends android.app.Service {
         updateThread = new HandlerThread("DownloadManager-UpdateThread");
         updateThread.start();
         updateHandler = new Handler(updateThread.getLooper());
-        getContentResolver().registerContentObserver(Provider.DOWNLOAD, true, contentObserver);
+        getContentResolver().registerContentObserver(Provider.DOWNLOAD_SERVICE_UPDATE, true, contentObserver);
     }
 
     private final ContentObserver contentObserver = new ContentObserver(new Handler(Looper.getMainLooper())) {

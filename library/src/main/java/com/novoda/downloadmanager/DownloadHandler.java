@@ -4,7 +4,7 @@ import com.novoda.downloadmanager.domain.Download;
 import com.novoda.downloadmanager.domain.DownloadFile;
 import com.novoda.downloadmanager.domain.DownloadId;
 import com.novoda.downloadmanager.domain.DownloadRequest;
-import com.novoda.downloadmanager.domain.DownloadStatus;
+import com.novoda.downloadmanager.domain.DownloadStage;
 
 import java.util.List;
 
@@ -36,7 +36,7 @@ public class DownloadHandler {
     }
 
     public void setDownloadSubmitted(DownloadId downloadId) {
-        databaseInteraction.updateStatus(downloadId, DownloadStatus.SUBMITTED);
+        databaseInteraction.updateStatus(downloadId, DownloadStage.SUBMITTED);
     }
 
     public void updateFileProgress(DownloadFile file, long bytesWritten) {
@@ -48,13 +48,13 @@ public class DownloadHandler {
     }
 
     public void setDownloadRunning(DownloadId downloadId) {
-        databaseInteraction.updateStatus(downloadId, DownloadStatus.RUNNING);
+        databaseInteraction.updateStatus(downloadId, DownloadStage.RUNNING);
     }
 
     public void syncDownloadStatus(DownloadId downloadId) {
         Download download = databaseInteraction.getDownload(downloadId);
         if (download.getCurrentSize() == download.getTotalSize()) {
-            databaseInteraction.updateStatus(downloadId, DownloadStatus.COMPLETED);
+            databaseInteraction.updateStatus(downloadId, DownloadStage.COMPLETED);
         }
     }
 
@@ -63,15 +63,15 @@ public class DownloadHandler {
     }
 
     public void setDownloadFailed(DownloadId downloadId) {
-        databaseInteraction.updateStatus(downloadId, DownloadStatus.FAILED);
+        databaseInteraction.updateStatus(downloadId, DownloadStage.FAILED);
     }
 
     public void setDownloadPaused(DownloadId downloadId) {
-        databaseInteraction.updateStatus(downloadId, DownloadStatus.PAUSED);
+        databaseInteraction.updateStatus(downloadId, DownloadStage.PAUSED);
     }
 
     public void resumeDownload(DownloadId downloadId) {
-        databaseInteraction.updateStatus(downloadId, DownloadStatus.QUEUED);
+        databaseInteraction.updateStatus(downloadId, DownloadStage.QUEUED);
     }
 
 }
