@@ -23,7 +23,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String PENGUINS_IMAGE = "http://i.imgur.com/Y7pMO5Kb.jpg";
 
     private Downloader downloader;
-    private RecyclerView recyclerView;
     private View emptyView;
     private BeardDownloadAdapter adapter;
 
@@ -31,10 +30,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        emptyView = findViewById(R.id.main_no_downloads_view);
-        recyclerView = (RecyclerView) findViewById(R.id.main_downloads_list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         downloader = Downloader.from(this);
+
+        emptyView = findViewById(R.id.main_no_downloads_view);
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.main_downloads_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new BeardDownloadAdapter(onDownloadClickedListener);
         recyclerView.setAdapter(adapter);
 
@@ -74,15 +74,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupQueryingExample() {
-        downloader.addOnDownloadsUpdateListener(new Downloader.OnDownloadsUpdateListener() {
-            @Override
-            public void onDownloadsUpdate(List<Download> downloads) {
-                adapter.update(downloads);
-                emptyView.setVisibility(downloads.isEmpty() ? View.VISIBLE : View.GONE);
-            }
-        });
+        downloader.addOnDownloadsUpdateListener(onDownloadsUpdate);
         downloader.requestDownloadsUpdate();
     }
+
+    private final Downloader.OnDownloadsUpdateListener onDownloadsUpdate = new Downloader.OnDownloadsUpdateListener() {
+        @Override
+        public void onDownloadsUpdate(List<Download> downloads) {
+            adapter.update(downloads);
+            emptyView.setVisibility(downloads.isEmpty() ? View.VISIBLE : View.GONE);
+        }
+    };
 
     private final BeardDownloadAdapter.OnDownloadClickedListener onDownloadClickedListener = new BeardDownloadAdapter.OnDownloadClickedListener() {
         @Override
@@ -109,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
+        downloader.removeOnDownloadsUpdateListener(onDownloadsUpdate);
         downloader.stopListeningForDownloadUpdates();
         super.onPause();
     }
