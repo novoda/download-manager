@@ -45,6 +45,10 @@ public class DownloadFile {
         return localUri;
     }
 
+    public int getPercentage() {
+        return Percentage.of(currentSize, totalSize);
+    }
+
     public static class NetworkRequest {
 
         public List<Pair<String, String>> getHeaders() {

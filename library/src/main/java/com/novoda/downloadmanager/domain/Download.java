@@ -45,7 +45,7 @@ public class Download {
     }
 
     public int getPercentage() {
-        return (int) (((float) currentSize / (float) totalSize) * 100);
+        return Percentage.of(currentSize, totalSize);
     }
 
 }

@@ -61,8 +61,10 @@ class BeardDownloadAdapter extends RecyclerView.Adapter<BeardDownloadAdapter.Vie
         }
 
         public void bind(final Download download, final OnDownloadClickedListener downloadClickedListener) {
+            List<DownloadFile> files = download.getFiles();
+
             statusText.setText(download.getStatus().name());
-            filesText.setText(getFilesCompeted(download));
+            filesText.setText(getCurrentFile(files) + " : " + getFilePercentage(files));
             idText.setText("Id : " + download.getId().toString());
             sizeText.setText(download.getCurrentSize() + " / " + download.getTotalSize());
             percentText.setText("" + download.getPercentage() + "%");
@@ -75,14 +77,30 @@ class BeardDownloadAdapter extends RecyclerView.Adapter<BeardDownloadAdapter.Vie
             });
         }
 
-        private String getFilesCompeted(Download beardDownload) {
-            int completedFiles = 0;
-            for (DownloadFile file : beardDownload.getFiles()) {
-                if (file.getStatus() == DownloadFile.FileStatus.COMPLETE) {
-                    completedFiles++;
+        private String getFilePercentage(List<DownloadFile> files) {
+            for (DownloadFile file : files) {
+                if (file.getStatus() == DownloadFile.FileStatus.INCOMPLETE) {
+                    return file.getPercentage() + "%";
                 }
             }
-            return "Files " + completedFiles + " / " + beardDownload.getFiles().size();
+            // going to assume that all the files have completed
+            return "100%";
+        }
+
+        private String getCurrentFile(List<DownloadFile> files) {
+            for (int i = 0; i < files.size(); i++) {
+                DownloadFile file = files.get(i);
+
+                if (file.getStatus() == DownloadFile.FileStatus.INCOMPLETE) {
+                    return formatCurrentFile(files, i + 1);
+                }
+            }
+            // going to assume that all the files have completed
+            return formatCurrentFile(files, files.size());
+        }
+
+        private String formatCurrentFile(List<DownloadFile> files, int currentFilePosition) {
+            return "Files " + currentFilePosition + " / " + files.size();
         }
 
     }
