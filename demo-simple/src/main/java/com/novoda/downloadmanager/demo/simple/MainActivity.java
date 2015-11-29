@@ -71,16 +71,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupQueryingExample() {
-        findViewById(R.id.main_refresh_button).setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(@NonNull View v) {
-                        List<Download> allDownloads = downloader.getAllDownloads();
-                        recyclerView.setAdapter(new BeardDownloadAdapter(allDownloads, onDownloadClickedListener));
-                        emptyView.setVisibility(allDownloads.isEmpty() ? View.VISIBLE : View.GONE);
-                    }
-                }
-        );
+        downloader.addOnDownloadsUpdateListener(new Downloader.OnDownloadsUpdateListener() {
+            @Override
+            public void onDownloadsUpdate(List<Download> downloads) {
+                recyclerView.setAdapter(new BeardDownloadAdapter(downloads, onDownloadClickedListener));
+                emptyView.setVisibility(downloads.isEmpty() ? View.VISIBLE : View.GONE);
+            }
+        });
+        downloader.requestDownloadsUpdate();
     }
 
     private final BeardDownloadAdapter.OnDownloadClickedListener onDownloadClickedListener = new BeardDownloadAdapter.OnDownloadClickedListener() {
@@ -100,4 +98,15 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        downloader.startListeningForDownloadUpdates();
+    }
+
+    @Override
+    protected void onPause() {
+        downloader.stopListeningForDownloadUpdates();
+        super.onPause();
+    }
 }

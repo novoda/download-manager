@@ -31,6 +31,8 @@ class DownloadUpdater {
 
         boolean isActive = hasActiveDownload(allDownloads);
 
+        Log.e("!!!", "are we active? " + isActive);
+
         if (!isActive) {
             isActive = triggerDownload(allDownloads);
         }
@@ -47,11 +49,16 @@ class DownloadUpdater {
     private boolean triggerDownload(List<Download> allDownloads) {
         boolean triggeredDownload = false;
         for (Download download : allDownloads) {
+
+            Log.e("!!!", "trigger download? : " + download.getId().toString());
+
             if (canSkipDownload(download)) {
+                Log.e("!!!", "skipping : " + download.getId().toString());
                 continue;
             }
 
 //            if (downloadReadyChecker.canDownload(downloadBatch)) {  todo client can download checks
+            Log.e("!!!", "downloading : " + download.getId().toString());
             download(download.getId());
             triggeredDownload = true;
 //             }

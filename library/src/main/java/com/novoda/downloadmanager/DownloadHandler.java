@@ -70,4 +70,8 @@ public class DownloadHandler {
         databaseInteraction.updateStatus(downloadId, DownloadStatus.PAUSED);
     }
 
+    public void resumeDownload(DownloadId downloadId) {
+        databaseInteraction.updateStatus(downloadId, DownloadStatus.QUEUED);
+    }
+
 }

@@ -5,14 +5,14 @@ CREATE TABLE IF NOT EXISTS 'request' (
 );
 
 CREATE TABLE IF NOT EXISTS 'download' (
-                                _id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                _id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                                 download_status TEXT NOT NULL,
                                 download_id INTEGER NOT NULL,
                                 UNIQUE (download_id) ON CONFLICT REPLACE
 );
 
 CREATE TABLE IF NOT EXISTS 'file' (
-                                _id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                _id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                                 file_status TEXT NOT NULL,
                                 file_total_size INTEGER NOT NULL DEFAULT -1,
                                 file_current_size INTEGER NOT NULL DEFAULT 0,
@@ -25,12 +25,11 @@ CREATE TABLE IF NOT EXISTS 'file' (
 
 CREATE VIEW IF NOT EXISTS "downloads_with_size" AS
                                 SELECT
-                                    SUM(file.file_current_size) as current_size,
-                                    SUM(file.file_total_size) as total_size,
-                                    download._id,
                                     download_status,
-                                    download_id
-                                    FROM file
-                                LEFT OUTER JOIN
-                                    download ON file.file_download_id = download.download_id;
-
+                                    download_id,
+                                    SUM(file.file_current_size) AS current_size,
+                                    SUM(file.file_total_size) AS total_size
+                                    FROM
+                                        download
+                                        LEFT OUTER JOIN file ON file.file_download_id = download.download_id
+                                    GROUP BY download_id;

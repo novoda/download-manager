@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager.task;
 
+import android.util.Log;
+
 import com.novoda.downloadmanager.DownloadHandler;
 import com.novoda.downloadmanager.domain.DownloadFile;
 import com.squareup.okhttp.Call;
@@ -27,13 +29,21 @@ class FileDownloader {
 
     public void downloadFile(DownloadFile file) throws IOException {
         File downloadedFile = new File(file.getLocalUri());
-        downloadedFile.createNewFile();
-        Request.Builder requestBuilder = createRequest(file);
+
+
+        Log.e("!!!", "download file : " + file.getLocalUri() + " : " + (downloadedFile.exists() ? downloadedFile.length() : "0"));
+
+        if (!downloadedFile.exists()) {
+            downloadedFile.createNewFile();
+        }
+        Request.Builder requestBuilder = createRequest(file, downloadedFile.length());
         Call call = httpClient.newCall(requestBuilder.build());
         Response response = call.execute();
 
+        Log.e("!!!", "response code : " + response.code());
+
         InputStream in = response.body().byteStream();
-        OutputStream out = new FileOutputStream(downloadedFile);
+        OutputStream out = new FileOutputStream(downloadedFile, downloadedFile.length() != 0);
 
         DataWriter checkedWriter = new CheckedWriter(getSpaceVerifier(), out);
 
@@ -41,17 +51,20 @@ class FileDownloader {
         DataTransferer dataTransferer = new RegularDataTransferer(dataWriter);
 
         State state = new State();
-        State endState = dataTransferer.transferData(state, in);
 
-        syncDatabase(file, endState);
+        try {
+            State endState = dataTransferer.transferData(state, in);
+        } finally {
+            syncDatabase(file, downloadedFile.length());
+        }
     }
 
-    private Request.Builder createRequest(DownloadFile file) {
+    private Request.Builder createRequest(DownloadFile file, long fileSize) {
         Request.Builder requestBuilder = new Request.Builder()
                 .url(file.getUri());
 
         if (file.currentSize() > 0) {
-            requestBuilder.addHeader("Range", "bytes=" + file.currentSize() + "-");
+            requestBuilder.addHeader("Range", "bytes=" + fileSize + "-" + file.totalSize());
         }
         return requestBuilder;
     }
@@ -79,8 +92,12 @@ class FileDownloader {
         }
     };
 
-    private void syncDatabase(DownloadFile file, State endState) {
-        downloadHandler.updateFile(file, DownloadFile.FileStatus.COMPLETE, endState.currentBytes);
+    private void syncDatabase(DownloadFile file, long fileSize) {
+        if (file.totalSize() == fileSize) {
+            downloadHandler.updateFile(file, DownloadFile.FileStatus.COMPLETE, fileSize);
+        } else {
+            downloadHandler.updateFile(file, DownloadFile.FileStatus.INCOMPLETE, fileSize);
+        }
     }
 
     interface PausedProvider {

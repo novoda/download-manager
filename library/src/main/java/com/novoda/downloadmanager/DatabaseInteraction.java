@@ -3,7 +3,6 @@ package com.novoda.downloadmanager;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.util.Log;
 
 import com.novoda.downloadmanager.demo.simple.DB;
 import com.novoda.downloadmanager.domain.Download;
@@ -55,17 +54,20 @@ class DatabaseInteraction {
     }
 
     public List<Download> getAllDownloads() {
-        Cursor cursor = contentResolver.query(Provider.DOWNLOAD_WITH_SIZE, null, null, null, null);
-
         List<Download> downloads = new ArrayList<>();
-
-        cursor.moveToFirst();
-        do {
-            Download download = getDownload(cursor);
-            downloads.add(download);
-        } while (cursor.moveToNext());
-
-        cursor.close();
+        Cursor cursor = contentResolver.query(Provider.DOWNLOAD_WITH_SIZE, null, null, null, null);
+        try {
+            if (cursor.moveToFirst()) {
+                do {
+                    Download download = getDownload(cursor);
+                    downloads.add(download);
+                } while (cursor.moveToNext());
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
 
         return downloads;
     }
@@ -143,8 +145,6 @@ class DatabaseInteraction {
     }
 
     public void updateFile(DownloadFile file, DownloadFile.FileStatus status, long currentSize) {
-        Log.e("!!!", "current size : " + currentSize + " : " + file.getLocalUri());
-
         ContentValues values = new ContentValues(2);
         DB.File.setFileCurrentSize((int) currentSize, values);
         DB.File.setFileStatus(status.name(), values);

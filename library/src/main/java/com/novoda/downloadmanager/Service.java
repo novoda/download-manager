@@ -47,10 +47,10 @@ public class Service extends android.app.Service {
         updateThread = new HandlerThread("DownloadManager-UpdateThread");
         updateThread.start();
         updateHandler = new Handler(updateThread.getLooper());
-        getContentResolver().registerContentObserver(Provider.DOWNLOAD, false, contentObserver);
+        getContentResolver().registerContentObserver(Provider.DOWNLOAD, true, contentObserver);
     }
 
-    private final ContentObserver contentObserver = new ContentObserver(updateHandler) {
+    private final ContentObserver contentObserver = new ContentObserver(new Handler(Looper.getMainLooper())) {
         @Override
         public void onChange(boolean selfChange) {
             update();
@@ -88,6 +88,7 @@ public class Service extends android.app.Service {
     }
 
     private void shutDown() {
+        Log.e("!!!", "shutting down service");
         getContentResolver().unregisterContentObserver(contentObserver);
         executor.shutdownNow();
         updateThread.quit();
