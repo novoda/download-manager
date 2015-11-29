@@ -44,4 +44,8 @@ public class Download {
         return downloadStatus;
     }
 
+    public int getPercentage() {
+        return (int) (((float) currentSize / (float) totalSize) * 100);
+    }
+
 }

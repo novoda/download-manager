@@ -1,7 +1,6 @@
 package com.novoda.downloadmanager.demo.simple;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -50,6 +49,7 @@ class BeardDownloadAdapter extends RecyclerView.Adapter<BeardDownloadAdapter.Vie
         private final TextView filesText;
         private final TextView idText;
         private final TextView sizeText;
+        private final TextView percentText;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -57,6 +57,7 @@ class BeardDownloadAdapter extends RecyclerView.Adapter<BeardDownloadAdapter.Vie
             filesText = (TextView) itemView.findViewById(R.id.download_files_text);
             idText = (TextView) itemView.findViewById(R.id.download_id_text);
             sizeText = (TextView) itemView.findViewById(R.id.download_size_text);
+            percentText = (TextView) itemView.findViewById(R.id.download_percent_text);
         }
 
         public void bind(final Download download, final OnDownloadClickedListener downloadClickedListener) {
@@ -64,6 +65,7 @@ class BeardDownloadAdapter extends RecyclerView.Adapter<BeardDownloadAdapter.Vie
             filesText.setText(getFilesCompeted(download));
             idText.setText("Id : " + download.getId().toString());
             sizeText.setText(download.getCurrentSize() + " / " + download.getTotalSize());
+            percentText.setText("" + download.getPercentage() + "%");
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -75,15 +77,11 @@ class BeardDownloadAdapter extends RecyclerView.Adapter<BeardDownloadAdapter.Vie
 
         private String getFilesCompeted(Download beardDownload) {
             int completedFiles = 0;
-
             for (DownloadFile file : beardDownload.getFiles()) {
                 if (file.getStatus() == DownloadFile.FileStatus.COMPLETE) {
                     completedFiles++;
                 }
             }
-
-            Log.e("!!!", "completed files : " + completedFiles);
-
             return "Files " + completedFiles + " / " + beardDownload.getFiles().size();
         }
 
