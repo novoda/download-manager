@@ -12,6 +12,7 @@ import com.novoda.downloadmanager.domain.DownloadRequest;
 import com.novoda.downloadmanager.domain.DownloadStage;
 import com.novoda.downloadmanager.domain.DownloadStatus;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -164,5 +165,36 @@ class DatabaseInteraction {
             cursor.close();
         }
     }
+
+    public void addCompletedRequest(DownloadRequest downloadRequest) {
+        ContentValues values = new ContentValues();
+        long downloadId = downloadRequest.getId().toLong();
+        DB.Download.setDownloadId((int) downloadId, values);
+        DB.Download.setDownloadStage(DownloadStage.COMPLETED.name(), values);
+        contentResolver.insert(Provider.DOWNLOAD, values);
+
+        ContentValues[] fileValues = createCompletedFileValues(downloadRequest.getFiles(), downloadId);
+        contentResolver.bulkInsert(Provider.FILE, fileValues);
+    }
+
+    private ContentValues[] createCompletedFileValues(List<DownloadRequest.File> files, long downloadId) {
+        ContentValues[] allValues = new ContentValues[files.size()];
+        for (int index = 0; index < allValues.length; index++) {
+            DownloadRequest.File requestFile = files.get(index);
+            File file = new File(requestFile.getUri());
+            ContentValues fileValues = new ContentValues();
+            DB.File.setFileDownloadId((int) downloadId, fileValues);
+            DB.File.setFileIdentifier(requestFile.getIdentifier(), fileValues);
+            DB.File.setFileUri(requestFile.getUri(), fileValues);
+            DB.File.setFileLocalUri(requestFile.getLocalUri(), fileValues);
+            DB.File.setFileStatus(DownloadFile.FileStatus.COMPLETE.name(), fileValues);
+            DB.File.setFileTotalSize((int) file.length(), fileValues);
+            DB.File.setFileCurrentSize((int) file.length(), fileValues);
+
+            allValues[index] = fileValues;
+        }
+        return allValues;
+    }
+
 
 }

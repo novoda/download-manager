@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.novoda.downloadmanager.Downloader;
+import com.novoda.downloadmanager.OnDownloadsUpdateListener;
+import com.novoda.downloadmanager.WatchType;
 import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.domain.Download;
 import com.novoda.downloadmanager.domain.DownloadRequest;
@@ -78,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
         downloader.requestDownloadsUpdate();
     }
 
-    private final Downloader.OnDownloadsUpdateListener onDownloadsUpdate = new Downloader.OnDownloadsUpdateListener() {
+    private final OnDownloadsUpdateListener onDownloadsUpdate = new OnDownloadsUpdateListener() {
         @Override
         public void onDownloadsUpdate(List<Download> downloads) {
             adapter.update(downloads);
@@ -106,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        downloader.startListeningForDownloadUpdates(Downloader.WatchType.PROGRESS);
+        downloader.startListeningForDownloadUpdates(WatchType.PROGRESS);
     }
 
     @Override

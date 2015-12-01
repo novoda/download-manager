@@ -26,6 +26,10 @@ public class DownloadHandler {
         databaseInteraction.submitRequest(downloadRequest);
     }
 
+    public void addCompletedRequest(DownloadRequest downloadRequest) {
+        databaseInteraction.addCompletedRequest(downloadRequest);
+    }
+
     public List<Download> getAllDownloads() {
         return databaseInteraction.getAllDownloads();
     }
