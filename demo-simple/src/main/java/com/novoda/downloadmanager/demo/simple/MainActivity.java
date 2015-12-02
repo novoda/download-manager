@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupDownloadingExample() {
 //        final Request request = new Request(uri)
-//                .setDestinationInInternalFilesDir(Environment.DIRECTORY_MOVIES, "penguins.dat")
 //                .setNotificationVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE)
 //                .setTitle("Family of Penguins")
 //                .setDescription("These are not the beards you're looking for")
