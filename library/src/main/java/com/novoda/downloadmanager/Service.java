@@ -31,7 +31,6 @@ public class Service extends android.app.Service {
     public void onCreate() {
         super.onCreate();
         Log.e("!!!", "service created");
-
         DownloadExecutorFactory factory = new DownloadExecutorFactory();
         executor = factory.createExecutor();
         ContentLengthFetcher contentLengthFetcher = new ContentLengthFetcher(new OkHttpClient());
@@ -40,7 +39,6 @@ public class Service extends android.app.Service {
         Pauser pauser = new Pauser(LocalBroadcastManager.getInstance(this));
         downloadUpdater = new DownloadUpdater(downloadHandler, executor, pauser);
         startMonitoringDownloadChanges();
-        updateHandler.post(updateCallback);
     }
 
     private void startMonitoringDownloadChanges() {
@@ -56,6 +54,12 @@ public class Service extends android.app.Service {
             update();
         }
     };
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        updateHandler.post(updateCallback);
+        return super.onStartCommand(intent, flags, startId);
+    }
 
     private final Runnable updateCallback = new Runnable() {
         @Override
