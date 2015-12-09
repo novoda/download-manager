@@ -48,7 +48,7 @@ public class Service extends android.app.Service {
         getContentResolver().registerContentObserver(Provider.DOWNLOAD_SERVICE_UPDATE, true, contentObserver);
     }
 
-    private final ContentObserver contentObserver = new ContentObserver(new Handler(Looper.getMainLooper())) {
+    private final ContentObserver contentObserver = new ContentObserver(updateHandler) {
         @Override
         public void onChange(boolean selfChange) {
             update();
