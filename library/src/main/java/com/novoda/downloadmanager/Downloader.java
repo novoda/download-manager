@@ -2,7 +2,6 @@ package com.novoda.downloadmanager;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.novoda.downloadmanager.domain.Download;
@@ -15,10 +14,10 @@ import java.util.List;
 public class Downloader {
 
     private final DownloadHandler downloadHandler;
-    private final Context context;
     private final Pauser pauser;
     private final Listeners listeners;
     private final Watcher watcher;
+    private final ServiceStarter serviceStarter;
 
     public static Downloader from(Context context) {
         Context applicationContext = context.getApplicationContext();
@@ -29,15 +28,17 @@ public class Downloader {
         Pauser pauser = new Pauser(LocalBroadcastManager.getInstance(context));
         Listeners listeners = Listeners.newInstance();
         Watcher watcher = Watcher.newInstance(context);
-        return new Downloader(downloadHandler, applicationContext, pauser, listeners, watcher);
+        ServiceStarter serviceStarter = new ServiceStarter(applicationContext);
+
+        return new Downloader(downloadHandler, pauser, listeners, watcher, serviceStarter);
     }
 
-    public Downloader(DownloadHandler downloadHandler, Context context, Pauser pauser, Listeners listeners, Watcher watcher) {
+    public Downloader(DownloadHandler downloadHandler, Pauser pauser, Listeners listeners, Watcher watcher, ServiceStarter serviceStarter) {
         this.downloadHandler = downloadHandler;
-        this.context = context;
         this.pauser = pauser;
         this.listeners = listeners;
         this.watcher = watcher;
+        this.serviceStarter = serviceStarter;
     }
 
     public DownloadId createDownloadId() {
@@ -46,7 +47,7 @@ public class Downloader {
 
     public void submit(DownloadRequest downloadRequest) {
         downloadHandler.submitRequest(downloadRequest);
-        context.startService(new Intent(context, Service.class));
+        serviceStarter.start();
     }
 
     public void pause(DownloadId downloadId) {
@@ -55,7 +56,7 @@ public class Downloader {
 
     public void resume(DownloadId downloadId) {
         downloadHandler.resumeDownload(downloadId);
-        context.startService(new Intent(context, Service.class));
+        serviceStarter.start();
     }
 
     public List<Download> getAllDownloads() {
