@@ -15,11 +15,13 @@ class DownloadUpdater {
     private final DownloadHandler downloadHandler;
     private final ExecutorService executor;
     private final Pauser pauser;
+    private final DownloadCheck downloadCheck;
 
-    DownloadUpdater(DownloadHandler downloadHandler, ExecutorService executor, Pauser pauser) {
+    DownloadUpdater(DownloadHandler downloadHandler, ExecutorService executor, Pauser pauser, DownloadCheck downloadCheck) {
         this.downloadHandler = downloadHandler;
         this.executor = executor;
         this.pauser = pauser;
+        this.downloadCheck = downloadCheck;
     }
 
     public boolean update() {
@@ -57,11 +59,13 @@ class DownloadUpdater {
                 continue;
             }
 
-//            if (downloadReadyChecker.canDownload(downloadBatch)) {  todo client can download checks
-            Log.e("!!!", "downloading : " + download.getId().toString());
-            download(download.getId());
-            triggeredDownload = true;
-//             }
+            if (downloadCheck.isAllowedToDownload(download)) {
+                Log.e("!!!", "downloading : " + download.getId().toString());
+                download(download.getId());
+                triggeredDownload = true;
+            } else {
+                Log.e("!!!", "download denied by client");
+            }
         }
         return triggeredDownload;
     }

@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.novoda.notils.caster.Classes;
 import com.squareup.okhttp.OkHttpClient;
 
 import java.util.concurrent.ExecutorService;
@@ -33,19 +34,6 @@ public class Service extends android.app.Service {
         Log.e("!!!", "service created");
         DownloadExecutorFactory factory = new DownloadExecutorFactory();
         executor = factory.createExecutor();
-        ContentLengthFetcher contentLengthFetcher = new ContentLengthFetcher(new OkHttpClient());
-        DatabaseInteraction databaseInteraction = new DatabaseInteraction(getContentResolver());
-        DownloadHandler downloadHandler = new DownloadHandler(databaseInteraction, contentLengthFetcher);
-        Pauser pauser = new Pauser(LocalBroadcastManager.getInstance(this));
-        downloadUpdater = new DownloadUpdater(downloadHandler, executor, pauser);
-        startMonitoringDownloadChanges();
-    }
-
-    private void startMonitoringDownloadChanges() {
-        updateThread = new HandlerThread("DownloadManager-UpdateThread");
-        updateThread.start();
-        updateHandler = new Handler(updateThread.getLooper());
-        getContentResolver().registerContentObserver(Provider.DOWNLOAD_SERVICE_UPDATE, true, contentObserver);
     }
 
     private final ContentObserver contentObserver = new ContentObserver(updateHandler) {
@@ -57,8 +45,33 @@ public class Service extends android.app.Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        updateHandler.post(updateCallback);
+        GlobalClientCheck globalClientCheck = Classes.from(intent.getSerializableExtra("foo"));
+        DownloadCheck downloadCheck = Classes.from(intent.getSerializableExtra("bar"));
+
+        if (globalClientCheck.onGlobalCheck()) {
+            downloadUpdater = createDownloadUpdater(downloadCheck);
+            startMonitoringDownloadChanges();
+
+            updateHandler.post(updateCallback);
+        } else {
+            stopSelf();
+        }
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    private DownloadUpdater createDownloadUpdater(DownloadCheck downloadCheck) {
+        ContentLengthFetcher contentLengthFetcher = new ContentLengthFetcher(new OkHttpClient());
+        DatabaseInteraction databaseInteraction = new DatabaseInteraction(getContentResolver());
+        DownloadHandler downloadHandler = new DownloadHandler(databaseInteraction, contentLengthFetcher);
+        Pauser pauser = new Pauser(LocalBroadcastManager.getInstance(this));
+        return new DownloadUpdater(downloadHandler, executor, pauser, downloadCheck);
+    }
+
+    private void startMonitoringDownloadChanges() {
+        updateThread = new HandlerThread("DownloadManager-UpdateThread");
+        updateThread.start();
+        updateHandler = new Handler(updateThread.getLooper());
+        getContentResolver().registerContentObserver(Provider.DOWNLOAD_SERVICE_UPDATE, true, contentObserver);
     }
 
     private final Runnable updateCallback = new Runnable() {
