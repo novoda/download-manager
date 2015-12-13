@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        downloader = Downloader.from(this);
+        downloader = new Downloader.Builder().build(this);
 
         emptyView = findViewById(R.id.main_no_downloads_view);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.main_downloads_list);

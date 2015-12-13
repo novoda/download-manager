@@ -2,6 +2,7 @@ package com.novoda.downloadmanager;
 
 import android.util.Log;
 
+import com.novoda.downloadmanager.client.ClientCheckResult;
 import com.novoda.downloadmanager.client.DownloadCheck;
 import com.novoda.downloadmanager.domain.Download;
 import com.novoda.downloadmanager.domain.DownloadFile;

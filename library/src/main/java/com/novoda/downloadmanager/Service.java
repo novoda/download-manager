@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.novoda.downloadmanager.client.ClientCheckResult;
 import com.novoda.downloadmanager.client.DownloadCheck;
 import com.novoda.downloadmanager.client.GlobalClientCheck;
 import com.novoda.notils.caster.Classes;
@@ -37,13 +38,6 @@ public class Service extends android.app.Service {
         DownloadExecutorFactory factory = new DownloadExecutorFactory();
         executor = factory.createExecutor();
     }
-
-    private final ContentObserver contentObserver = new ContentObserver(updateHandler) {
-        @Override
-        public void onChange(boolean selfChange) {
-            update();
-        }
-    };
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -76,6 +70,13 @@ public class Service extends android.app.Service {
         updateHandler = new Handler(updateThread.getLooper());
         getContentResolver().registerContentObserver(Provider.DOWNLOAD_SERVICE_UPDATE, true, contentObserver);
     }
+
+    private final ContentObserver contentObserver = new ContentObserver(updateHandler) {
+        @Override
+        public void onChange(boolean selfChange) {
+            update();
+        }
+    };
 
     private final Runnable updateCallback = new Runnable() {
         @Override
