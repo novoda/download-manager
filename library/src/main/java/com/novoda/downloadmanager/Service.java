@@ -8,6 +8,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.novoda.downloadmanager.client.DownloadCheck;
+import com.novoda.downloadmanager.client.GlobalClientCheck;
 import com.novoda.notils.caster.Classes;
 import com.squareup.okhttp.OkHttpClient;
 
@@ -47,8 +49,9 @@ public class Service extends android.app.Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         GlobalClientCheck globalClientCheck = Classes.from(intent.getSerializableExtra("foo"));
         DownloadCheck downloadCheck = Classes.from(intent.getSerializableExtra("bar"));
+        ClientCheckResult clientCheckResult = globalClientCheck.onGlobalCheck();
 
-        if (globalClientCheck.onGlobalCheck()) {
+        if (clientCheckResult.isAllowed()) {
             downloadUpdater = createDownloadUpdater(downloadCheck);
             startMonitoringDownloadChanges();
 

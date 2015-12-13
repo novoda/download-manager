@@ -2,6 +2,7 @@ package com.novoda.downloadmanager;
 
 import android.util.Log;
 
+import com.novoda.downloadmanager.client.DownloadCheck;
 import com.novoda.downloadmanager.domain.Download;
 import com.novoda.downloadmanager.domain.DownloadFile;
 import com.novoda.downloadmanager.domain.DownloadId;
@@ -59,7 +60,8 @@ class DownloadUpdater {
                 continue;
             }
 
-            if (downloadCheck.isAllowedToDownload(download)) {
+            ClientCheckResult clientCheckResult = downloadCheck.isAllowedToDownload(download);
+            if (clientCheckResult.isAllowed()) {
                 Log.e("!!!", "downloading : " + download.getId().toString());
                 download(download.getId());
                 triggeredDownload = true;
