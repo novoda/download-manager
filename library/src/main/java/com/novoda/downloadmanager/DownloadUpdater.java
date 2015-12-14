@@ -51,9 +51,7 @@ class DownloadUpdater {
     }
 
     private boolean triggerDownload(List<Download> allDownloads) {
-        boolean triggeredDownload = false;
         for (Download download : allDownloads) {
-
             Log.e("!!!", "trigger download? : " + download.getId().toString());
 
             if (canSkipDownload(download)) {
@@ -62,15 +60,14 @@ class DownloadUpdater {
             }
 
             ClientCheckResult clientCheckResult = downloadCheck.isAllowedToDownload(download);
-            if (clientCheckResult.isAllowed()) {
+            boolean allowed = clientCheckResult.isAllowed();
+            if (allowed) {
                 Log.e("!!!", "downloading : " + download.getId().toString());
                 download(download.getId());
-                triggeredDownload = true;
-            } else {
-                Log.e("!!!", "download denied by client");
             }
+            return allowed;
         }
-        return triggeredDownload;
+        return false;
     }
 
     private boolean canSkipDownload(Download download) {
