@@ -60,12 +60,14 @@ class DownloadUpdater {
             }
 
             ClientCheckResult clientCheckResult = downloadCheck.isAllowedToDownload(download);
-            boolean allowed = clientCheckResult.isAllowed();
-            if (allowed) {
+            if (clientCheckResult.isAllowed()) {
                 Log.e("!!!", "downloading : " + download.getId().toString());
                 download(download.getId());
+                return true;
+            } else {
+                // todo broadcast/callback download denied
+                return false;
             }
-            return allowed;
         }
         return false;
     }
