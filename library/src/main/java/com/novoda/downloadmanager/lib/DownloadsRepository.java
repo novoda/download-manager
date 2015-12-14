@@ -205,6 +205,9 @@ class DownloadsRepository {
                 + DownloadContract.Downloads.COLUMN_CONTROL + " = ? ) "
                 + "AND (" + DownloadContract.Downloads.COLUMN_STATUS + " = ? or " + DownloadContract.Downloads.COLUMN_STATUS + " = ?)) "
                 + "GROUP BY (" + DownloadContract.Downloads.COLUMN_BATCH_ID;
+                // GROUP BY does not need a closing parenthesis because is a hack, Helpers.validateSelection will warn with
+                // java.lang.IllegalArgumentException: unrecognized column or keyword but the group by works as expected
+                // reference http://stackoverflow.com/questions/2315203/android-distinct-and-groupby-in-contentresolver
         String[] selectionArgs = {
                 String.valueOf(DownloadsControl.CONTROL_RUN),
                 String.valueOf(DownloadStatus.RUNNING),
