@@ -108,6 +108,11 @@ class Constants {
     public static final int TAR_BLOCK_SIZE = 512;
 
     /**
+     * The size of a tar record
+     */
+    public static final int TAR_RECORD_SIZE = TAR_BLOCK_SIZE * 20;
+
+    /**
      * The buffer size used to stream the data
      */
     public static final int BUFFER_SIZE = 8 * TAR_BLOCK_SIZE;
