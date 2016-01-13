@@ -18,20 +18,20 @@ class TarTruncator implements DataTransferer {
         DownloadTask.State newState = state;
         try {
             byte[] buffer = new byte[Constants.TAR_RECORD_SIZE];
-            byte[] buffer2 = new byte[Constants.TAR_RECORD_SIZE];
+            byte[] previousBuffer = new byte[Constants.TAR_RECORD_SIZE];
             byte[] swappingRef;
             int read;
-            int readLast = 0;
+            int previouslyRead = 0;
 
             while ((read = readRecord(in, buffer)) > 0) {
-                newState = dataWriter.write(newState, buffer2, readLast);
-                swappingRef = buffer2;
-                buffer2 = buffer;
+                newState = dataWriter.write(newState, previousBuffer, previouslyRead);
+                swappingRef = previousBuffer;
+                previousBuffer = buffer;
                 buffer = swappingRef;
-                readLast = read;
+                previouslyRead = read;
             }
 
-            newState = dataWriter.write(newState, buffer2, truncateEOFMarker(buffer2, readLast));
+            newState = dataWriter.write(newState, previousBuffer, truncateEOFMarker(previousBuffer, previouslyRead));
 
             state.shouldPause = true;
             state.totalBytes = state.currentBytes;
