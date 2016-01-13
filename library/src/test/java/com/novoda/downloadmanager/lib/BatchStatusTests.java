@@ -55,13 +55,15 @@ public class BatchStatusTests {
     public static final long CURRENT_TIME_MILLIS = 1l;
 
     @RunWith(PowerMockRunner.class)
-    @PrepareForTest({BatchRepository.class})
+    @PrepareForTest({ContentUris.class, BatchStatusService.class})
     public static class UpdateBatchStatus {
 
         @Test
         public void whenUpdatingABatchStatusThenTheCorrectBatchIsUpdated() throws Exception {
             final ContentValues mockContentValues = mock(ContentValues.class);
             whenNew(ContentValues.class).withAnyArguments().thenReturn(mockContentValues);
+            mockStatic(ContentUris.class);
+            when(ContentUris.withAppendedId(BATCHES_URI, ANY_BATCH_ID)).thenReturn(BATCH_BY_ID_URI);
 
             ContentResolver mockResolver = mock(ContentResolver.class);
             BatchRepository batchRepository = givenBatchRepositoryAtCurrentTime(mockResolver);
@@ -71,10 +73,10 @@ public class BatchStatusTests {
             verify(mockContentValues).put(Batches.COLUMN_STATUS, ANY_BATCH_STATUS);
             verify(mockContentValues).put(Batches.COLUMN_LAST_MODIFICATION, CURRENT_TIME_MILLIS);
             verify(mockResolver).update(
-                    BATCHES_URI,
+                    BATCH_BY_ID_URI,
                     mockContentValues,
-                    Batches._ID + " = ?",
-                    new String[]{String.valueOf(ANY_BATCH_ID)}
+                    null,
+                    null
             );
         }
     }
@@ -168,7 +170,7 @@ public class BatchStatusTests {
     }
 
     @RunWith(PowerMockRunner.class)
-    @PrepareForTest({ContentUris.class, BatchRepository.class})
+    @PrepareForTest({ContentUris.class, BatchStatusService.class})
     public static class CancelBatch {
 
         private ContentValues mockContentValues;
@@ -222,7 +224,7 @@ public class BatchStatusTests {
     }
 
     @RunWith(PowerMockRunner.class)
-    @PrepareForTest({BatchRepository.class})
+    @PrepareForTest({BatchStatusService.class})
     public static class SetBatchItemsFailed {
 
         @Test
@@ -246,7 +248,7 @@ public class BatchStatusTests {
     }
 
     @RunWith(PowerMockRunner.class)
-    @PrepareForTest({BatchRepository.class, StringUtils.class})
+    @PrepareForTest({BatchStatusService.class, StringUtils.class})
     public static class UpdateBatchToPendingStatus {
 
         @Test
@@ -261,7 +263,7 @@ public class BatchStatusTests {
             ContentResolver mockResolver = mock(ContentResolver.class);
             BatchRepository batchRepository = givenBatchRepositoryAtCurrentTime(mockResolver);
 
-            batchRepository.updateBatchToPendingStatus(Collections.singletonList(String.valueOf(ANY_BATCH_ID)));
+            batchRepository.updateBatchesToPendingStatus(Collections.singletonList(String.valueOf(ANY_BATCH_ID)));
 
             verify(mockContentValues).put(Batches.COLUMN_STATUS, DownloadStatus.PENDING);
             verify(mockResolver).update(
