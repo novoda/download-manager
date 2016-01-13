@@ -108,9 +108,14 @@ class Constants {
     public static final int TAR_BLOCK_SIZE = 512;
 
     /**
+     * The default blocking factor used by tar
+     */
+    private static final int DEFAULT_TAR_BLOCKING_FACTOR = 20;
+
+    /**
      * The size of a tar record
      */
-    public static final int TAR_RECORD_SIZE = TAR_BLOCK_SIZE * 20;
+    public static final int TAR_RECORD_SIZE = TAR_BLOCK_SIZE * DEFAULT_TAR_BLOCKING_FACTOR;
 
     /**
      * The buffer size used to stream the data
