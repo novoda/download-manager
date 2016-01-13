@@ -31,7 +31,7 @@ class TarTruncator implements DataTransferer {
                 previouslyRead = read;
             }
 
-            newState = dataWriter.write(newState, previousBuffer, truncateEOFMarker(previousBuffer, previouslyRead));
+            newState = dataWriter.write(newState, previousBuffer, findMarkerToTruncateEof(previousBuffer, previouslyRead));
 
             state.shouldPause = true;
             state.totalBytes = state.currentBytes;
@@ -42,7 +42,7 @@ class TarTruncator implements DataTransferer {
         }
     }
 
-    private static int truncateEOFMarker(byte[] buffer, int length) {
+    private static int findMarkerToTruncateEof(byte[] buffer, int length) {
         int position = length;
 
         while (position >= Constants.TAR_BLOCK_SIZE && isRangeFullOfZeroes(buffer, position - Constants.TAR_BLOCK_SIZE, position)) {
