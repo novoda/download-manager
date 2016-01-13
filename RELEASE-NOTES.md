@@ -1,3 +1,7 @@
+0.2.38
+-----
+- Support large files (with blocking factor of 20) in the tar resume logic.
+
 0.2.37
 -----
 - Reverts okhttp version to 2.3.0
