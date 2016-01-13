@@ -17,11 +17,22 @@ class TarTruncator implements DataTransferer {
     public DownloadTask.State transferData(DownloadTask.State state, InputStream in) throws StopRequestException {
         DownloadTask.State newState = state;
         try {
-            byte[] buffer = new byte[Constants.BUFFER_SIZE];
-            int readLast;
-            while ((readLast = readBuffer(in, buffer)) > 0 && isNotFullOfZeroes(buffer)) {
-                newState = dataWriter.write(newState, buffer, readLast);
+            byte[] buffer = new byte[Constants.TAR_RECORD_SIZE];
+            byte[] previousBuffer = new byte[Constants.TAR_RECORD_SIZE];
+            byte[] swappingRef;
+            int read;
+            int previouslyRead = 0;
+
+            while ((read = readRecord(in, buffer)) > 0) {
+                newState = dataWriter.write(newState, previousBuffer, previouslyRead);
+                swappingRef = previousBuffer;
+                previousBuffer = buffer;
+                buffer = swappingRef;
+                previouslyRead = read;
             }
+
+            newState = dataWriter.write(newState, previousBuffer, findMarkerToTruncateEof(previousBuffer, previouslyRead));
+
             state.shouldPause = true;
             state.totalBytes = state.currentBytes;
             return newState;
@@ -31,31 +42,30 @@ class TarTruncator implements DataTransferer {
         }
     }
 
-    private boolean isNotFullOfZeroes(byte[] buffer) {
-        for (byte b : buffer) {
-            if (b != BYTE_ZERO) {
-                return true;
+    private static int findMarkerToTruncateEof(byte[] buffer, int length) {
+        int position = length;
+
+        while (position >= Constants.TAR_BLOCK_SIZE && isRangeFullOfZeroes(buffer, position - Constants.TAR_BLOCK_SIZE, position)) {
+            position = position - Constants.TAR_BLOCK_SIZE;
+        }
+
+        return position;
+    }
+
+    private static boolean isRangeFullOfZeroes(byte[] buffer, int start, int end) {
+        for (int i = start; i < end; i++) {
+            if (buffer[i] != BYTE_ZERO) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
-    private int readBuffer(InputStream fileInputStream, byte[] buffer) throws IOException {
-        int read = 0;
-        byte[] blockBuffer = new byte[Constants.TAR_BLOCK_SIZE];
-        int readLast;
-        while (read < Constants.BUFFER_SIZE && (readLast = readBlock(fileInputStream, blockBuffer)) > 0 && isNotFullOfZeroes(blockBuffer)) {
-            System.arraycopy(blockBuffer, 0, buffer, read, readLast);
-            read += readLast;
-        }
-        return read;
-    }
-
-    private int readBlock(InputStream fileInputStream, byte[] buffer) throws IOException {
+    private static int readRecord(InputStream fileInputStream, byte[] buffer) throws IOException {
         int read = 0;
         int readLast;
-        while (read < Constants.TAR_BLOCK_SIZE) {
-            readLast = fileInputStream.read(buffer, read, Constants.TAR_BLOCK_SIZE - read);
+        while (read < Constants.TAR_RECORD_SIZE) {
+            readLast = fileInputStream.read(buffer, read, Constants.TAR_RECORD_SIZE - read);
             if (readLast == Constants.NO_BYTES_READ) {
                 return read;
             }
