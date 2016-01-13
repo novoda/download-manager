@@ -42,17 +42,17 @@ class TarTruncator implements DataTransferer {
         }
     }
 
-    private int truncateEOFMarker(byte[] buffer, int length) {
+    private static int truncateEOFMarker(byte[] buffer, int length) {
         int position = length;
 
-        while (position >= Constants.TAR_BLOCK_SIZE && isFullOfZeroes(buffer, position - Constants.TAR_BLOCK_SIZE, position)) {
+        while (position >= Constants.TAR_BLOCK_SIZE && isRangeFullOfZeroes(buffer, position - Constants.TAR_BLOCK_SIZE, position)) {
             position = position - Constants.TAR_BLOCK_SIZE;
         }
 
         return position;
     }
 
-    private boolean isFullOfZeroes(byte[] buffer, int start, int end) {
+    private static boolean isRangeFullOfZeroes(byte[] buffer, int start, int end) {
         for (int i = start; i < end; i++) {
             if (buffer[i] != BYTE_ZERO) {
                 return false;
@@ -61,7 +61,7 @@ class TarTruncator implements DataTransferer {
         return true;
     }
 
-    private int readRecord(InputStream fileInputStream, byte[] buffer) throws IOException {
+    private static int readRecord(InputStream fileInputStream, byte[] buffer) throws IOException {
         int read = 0;
         int readLast;
         while (read < Constants.TAR_RECORD_SIZE) {
