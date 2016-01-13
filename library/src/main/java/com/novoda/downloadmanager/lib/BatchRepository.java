@@ -1,8 +1,6 @@
 package com.novoda.downloadmanager.lib;
 
 import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 
@@ -25,12 +23,14 @@ class BatchRepository {
     private final DownloadDeleter downloadDeleter;
     private final DownloadsUriProvider downloadsUriProvider;
     private final BatchStatusService batchStatusService;
+    private final BatchStartingService batchStartingService;
 
     BatchRepository(ContentResolver resolver, DownloadDeleter downloadDeleter, DownloadsUriProvider downloadsUriProvider, SystemFacade systemFacade) {
         this.resolver = resolver;
         this.downloadDeleter = downloadDeleter;
         this.downloadsUriProvider = downloadsUriProvider;
         this.batchStatusService = new BatchStatusService(resolver, downloadsUriProvider, systemFacade);
+        this.batchStartingService = new BatchStartingService(resolver, downloadsUriProvider);
     }
 
     void updateBatchStatus(long batchId, int status) {
@@ -65,40 +65,11 @@ class BatchRepository {
     }
 
     boolean isBatchStartingForTheFirstTime(long batchId) {
-        Cursor cursor = null;
-        int hasStarted = 0;
-        try {
-            String[] projection = {DownloadContract.Batches.COLUMN_HAS_STARTED};
-
-            cursor = resolver.query(
-                    ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), batchId),
-                    projection,
-                    null,
-                    null,
-                    null
-            );
-
-            if (cursor.moveToFirst()) {
-                hasStarted = cursor.getInt(0);
-            }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-
-        return hasStarted != DownloadContract.Batches.BATCH_HAS_STARTED;
+        return batchStartingService.isBatchStartingForTheFirstTime(batchId);
     }
 
     public void markBatchAsStarted(long batchId) {
-        ContentValues values = new ContentValues(1);
-        values.put(DownloadContract.Batches.COLUMN_HAS_STARTED, DownloadContract.Batches.BATCH_HAS_STARTED);
-        resolver.update(
-                ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), batchId),
-                values,
-                null,
-                null
-        );
+        batchStartingService.markMatchAsStarted(batchId);
     }
 
     public DownloadBatch retrieveBatchFor(FileDownloadInfo download) {

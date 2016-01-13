@@ -27,7 +27,7 @@ import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ContentUris.class, BatchRepository.class})
+@PrepareForTest({ContentUris.class, BatchStartingService.class})
 public class BatchStartingTest {
 
     private static final Uri ACCESSIBLE_DOWNLOADS_URI = mock(Uri.class);
