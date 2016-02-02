@@ -345,12 +345,6 @@ final class DownloadContract {
          */
         public static final int BATCH_DELETED = 1;
 
-        /**
-         * One of the values taken by {@link DownloadContract.Batches#COLUMN_HAS_STARTED}.
-         * This value is used when the batch is starting for the first tme.
-         */
-        public static final int BATCH_HAS_STARTED = 1;
-
         private Batches() {
             // non-instantiable class
         }

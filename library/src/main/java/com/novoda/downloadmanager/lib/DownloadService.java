@@ -38,6 +38,7 @@ import android.support.annotation.NonNull;
 import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.downloadmanager.notifications.DownloadNotifier;
 import com.novoda.downloadmanager.notifications.DownloadNotifierFactory;
+import com.novoda.notils.logger.simple.Log;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -45,8 +46,10 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
@@ -86,6 +89,7 @@ public class DownloadService extends Service {
     private DownloadsUriProvider downloadsUriProvider;
     private BatchInformationBroadcaster batchInformationBroadcaster;
     private NetworkChecker networkChecker;
+    private Set<Long> batchesWithoutWrittenBytes = new HashSet<>();
 
     /**
      * Receives notifications when the data in the content provider changes
@@ -343,8 +347,7 @@ public class DownloadService extends Service {
             }
 
             if (!isActive && downloadReadyChecker.canDownload(downloadBatch)) {
-                boolean isBatchStartingForTheFirstTime = batchRepository.isBatchStartingForTheFirstTime(downloadBatch.getBatchId());
-                if (isBatchStartingForTheFirstTime) {
+                if (isBatchStartingForTheFirstTime(downloadBatch)) {
                     handleBatchStartingForTheFirstTime(downloadBatch);
                 }
 
@@ -377,8 +380,30 @@ public class DownloadService extends Service {
         return isActive;
     }
 
+    private boolean isBatchStartingForTheFirstTime(DownloadBatch downloadBatch) {
+        boolean isBatchWithoutWrittenBytes = downloadBatch.getCurrentSize() == 0;
+
+        long batchId = downloadBatch.getBatchId();
+        if (batchWithoutWrittenBytesAlreadyChecked(isBatchWithoutWrittenBytes, batchId)) {
+            // if two times in a row we get zero bytes written, we won't accept this as a first time
+            // as we would have already notify in the previous iteration, this is a corner case
+            return false;
+        }
+
+        if (isBatchWithoutWrittenBytes) {
+            batchesWithoutWrittenBytes.add(batchId);
+        } else if (batchesWithoutWrittenBytes.contains(batchId)) {
+            batchesWithoutWrittenBytes.remove(batchId);
+        }
+
+        return isBatchWithoutWrittenBytes;
+    }
+
+    private boolean batchWithoutWrittenBytesAlreadyChecked(boolean isBatchWithoutWrittenBytes, long batchId) {
+        return isBatchWithoutWrittenBytes && batchesWithoutWrittenBytes.contains(batchId);
+    }
+
     private void handleBatchStartingForTheFirstTime(DownloadBatch downloadBatch) {
-        batchRepository.markBatchHasStarted(downloadBatch.getBatchId());
         batchInformationBroadcaster.notifyBatchStartedFor(downloadBatch.getBatchId());
     }
 

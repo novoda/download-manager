@@ -20,12 +20,10 @@ final class DatabaseHelper extends SQLiteOpenHelper {
     /**
      * Current database version
      */
-    private static final int DB_VERSION = 2;
+    private static final int DB_VERSION = 3;
 
-    private static final String VERSION_ONE_TO_VERSION_TWO_MIGRATION_SCRIPT = "ALTER TABLE "
-            + DownloadContract.Batches.BATCHES_TABLE_NAME
-            + " ADD "
-            + DownloadContract.Batches.COLUMN_HAS_STARTED + " BOOLEAN NOT NULL DEFAULT 0;";
+    private static final int OLD_DATABASE_VERSION = 2;
+    private static final int NEW_DATABASE_VERSION = 3;
 
     /**
      * columns to request from DownloadProvider.
@@ -113,18 +111,13 @@ final class DatabaseHelper extends SQLiteOpenHelper {
      */
     @Override
     public void onUpgrade(@NonNull SQLiteDatabase db, int oldVersion, final int newVersion) {
-        if (oldVersion == 1 && newVersion == 2) {
-            upgradeFromVersionOneToVersionTwo(db);
+        if (oldVersion == OLD_DATABASE_VERSION && newVersion == NEW_DATABASE_VERSION) {
+            upgradeFromVersionTwoToVersionThree(db);
         }
     }
 
-    private void upgradeFromVersionOneToVersionTwo(@NonNull SQLiteDatabase db) {
-        try {
-            db.execSQL(VERSION_ONE_TO_VERSION_TWO_MIGRATION_SCRIPT);
-        } catch (SQLException ex) {
-            LLog.e("couldn't update table in downloads database to v2");
-            throw ex;
-        }
+    private void upgradeFromVersionTwoToVersionThree(@NonNull SQLiteDatabase db) {
+        createBatchesTable(db);
     }
 
     /**
@@ -213,8 +206,7 @@ final class DatabaseHelper extends SQLiteOpenHelper {
                         + DownloadContract.Batches.COLUMN_VISIBILITY + " INTEGER,"
                         + DownloadContract.Batches.COLUMN_DELETED + " BOOLEAN NOT NULL DEFAULT 0,"
                         + DownloadContract.Batches.COLUMN_EXTRA_DATA + " TEXT,"
-                        + DownloadContract.Batches.COLUMN_LAST_MODIFICATION + " TEXT,"
-                        + DownloadContract.Batches.COLUMN_HAS_STARTED + " BOOLEAN NOT NULL DEFAULT 0"
+                        + DownloadContract.Batches.COLUMN_LAST_MODIFICATION + " TEXT"
                         + ");"
         );
     }
