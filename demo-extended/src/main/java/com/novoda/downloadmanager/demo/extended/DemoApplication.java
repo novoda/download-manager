@@ -2,10 +2,13 @@ package com.novoda.downloadmanager.demo.extended;
 
 import android.app.Application;
 import android.hardware.SensorManager;
+import android.util.Log;
 
 import com.novoda.downloadmanager.Download;
-import com.novoda.downloadmanager.lib.DownloadManagerModules;
+import com.novoda.downloadmanager.lib.DestroyListener;
 import com.novoda.downloadmanager.lib.DownloadClientReadyChecker;
+import com.novoda.downloadmanager.lib.DownloadManagerModules;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 public class DemoApplication extends Application implements DownloadManagerModules.Provider {
 
@@ -25,6 +28,7 @@ public class DemoApplication extends Application implements DownloadManagerModul
                 .withQueuedNotificationCustomiser(notificationCustomiser)
                 .withDownloadingNotificationCustomiser(notificationCustomiser)
                 .withDownloadClientReadyChecker(oneRuleToBindThem)
+                .withDestroyListener(new LoggingDestroyListener())
                 .build();
     }
 
@@ -41,4 +45,11 @@ public class DemoApplication extends Application implements DownloadManagerModul
         }
     }
 
+    private static final class LoggingDestroyListener implements DestroyListener {
+
+        @Override
+        public void onDownloadManagerModulesDestroyed() {
+            Log.d("xxx", "Provided modules have been destroyed, release anything you might be holding.");
+        }
+    }
 }
