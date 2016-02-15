@@ -1,3 +1,7 @@
+0.2.39
+-----
+- Add new listener for DownloadManagerModules being released #182.
+
 0.2.38
 -----
 - Support large files (with blocking factor of 20) in the tar resume logic.
