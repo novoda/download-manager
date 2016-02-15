@@ -86,6 +86,7 @@ public class DownloadService extends Service {
     private DownloadsUriProvider downloadsUriProvider;
     private BatchInformationBroadcaster batchInformationBroadcaster;
     private NetworkChecker networkChecker;
+    private DestroyListener destroyListener;
 
     /**
      * Receives notifications when the data in the content provider changes
@@ -126,6 +127,7 @@ public class DownloadService extends Service {
         this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter, downloadsUriProvider, systemFacade);
         this.networkChecker = new NetworkChecker(this.systemFacade);
         DownloadManagerModules modules = getDownloadManagerModules();
+        this.destroyListener = modules.getDestroyListener();
         DownloadClientReadyChecker downloadClientReadyChecker = modules.getDownloadClientReadyChecker();
         PublicFacingDownloadMarshaller downloadMarshaller = new PublicFacingDownloadMarshaller();
         this.downloadReadyChecker = new DownloadReadyChecker(this.systemFacade, networkChecker, downloadClientReadyChecker, downloadMarshaller);
@@ -215,6 +217,7 @@ public class DownloadService extends Service {
     @Override
     public void onDestroy() {
         shutDown();
+        destroyListener.onDownloadManagerModulesDestroyed();
         LLog.v("Service onDestroy");
         super.onDestroy();
     }

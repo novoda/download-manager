@@ -26,6 +26,8 @@ public interface DownloadManagerModules {
 
     FailedNotificationCustomiser getFailedNotificationCustomiser();
 
+    DestroyListener getDestroyListener();
+
     class Builder {
 
         private final Context context;
@@ -37,6 +39,7 @@ public interface DownloadManagerModules {
         private FailedNotificationCustomiser failedCustomiser;
         private DownloadClientReadyChecker readyChecker;
         private NotificationImageRetriever imageRetriever;
+        private DestroyListener destroyListener;
 
         public static Builder from(@NonNull Context context) {
             return new Builder(context.getApplicationContext());
@@ -81,6 +84,11 @@ public interface DownloadManagerModules {
             return this;
         }
 
+        public Builder withDestroyListener(@NonNull DestroyListener destroyListener) {
+            this.destroyListener = destroyListener;
+            return this;
+        }
+
         public DownloadManagerModules build() {
             return new DefaultsDownloadManagerModules(
                     context,
@@ -90,7 +98,8 @@ public interface DownloadManagerModules {
                     cancelledCustomiser,
                     failedCustomiser,
                     readyChecker,
-                    imageRetriever
+                    imageRetriever,
+                    destroyListener
             );
         }
 

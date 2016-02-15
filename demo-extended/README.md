@@ -14,3 +14,4 @@ Here we show the following use cases
    - Enqueuing batched requests
    - Querying batch information
    - Pass extra data through download manager
+   - Adding a listener for when the downloadmanager is being destroyed

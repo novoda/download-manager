@@ -32,9 +32,11 @@ class DefaultsDownloadManagerModules implements DownloadManagerModules {
     private final DownloadClientReadyChecker readyChecker;
     @Nullable
     private final NotificationImageRetriever imageRetriever;
+    @Nullable
+    private final DestroyListener destroyListener;
 
     DefaultsDownloadManagerModules(Context context) {
-        this(context, null, null, null, null, null, null, null);
+        this(context, null, null, null, null, null, null, null, null);
     }
 
     public DefaultsDownloadManagerModules(Context context,
@@ -44,7 +46,8 @@ class DefaultsDownloadManagerModules implements DownloadManagerModules {
                                           @Nullable CancelledNotificationCustomiser cancelledCustomiser,
                                           @Nullable FailedNotificationCustomiser failedCustomiser,
                                           @Nullable DownloadClientReadyChecker readyChecker,
-                                          @Nullable NotificationImageRetriever imageRetriever) {
+                                          @Nullable NotificationImageRetriever imageRetriever,
+                                          @Nullable DestroyListener destroyListener) {
         this.context = context;
         this.queuedCustomiser = queuedCustomiser;
         this.downloadingCustomiser = downloadingCustomiser;
@@ -53,6 +56,7 @@ class DefaultsDownloadManagerModules implements DownloadManagerModules {
         this.failedCustomiser = failedCustomiser;
         this.readyChecker = readyChecker;
         this.imageRetriever = imageRetriever;
+        this.destroyListener = destroyListener;
     }
 
     @Override
@@ -109,6 +113,14 @@ class DefaultsDownloadManagerModules implements DownloadManagerModules {
             return new EmptyFailedNotificationCustomiser();
         }
         return failedCustomiser;
+    }
+
+    @Override
+    public DestroyListener getDestroyListener() {
+        if (destroyListener == null) {
+            return new DestroyListener.NoOp();
+        }
+        return destroyListener;
     }
 
 }
