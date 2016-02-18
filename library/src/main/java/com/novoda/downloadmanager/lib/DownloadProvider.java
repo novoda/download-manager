@@ -408,7 +408,7 @@ public final class DownloadProvider extends ContentProvider {
                 dest = DownloadsDestination.DESTINATION_CACHE_PARTITION;
             }
             if (dest == DownloadsDestination.DESTINATION_FILE_URI) {
-                if (!getFileUriDestinationPath(values).contains("/" + getContext().getPackageName() + "/")) {
+                if (!getFileUriDestinationPath(values).startsWith(Environment.getDataDirectory() + "/")) {
                     // external, not internal storage
                     getContext().enforcePermission(
                             android.Manifest.permission.WRITE_EXTERNAL_STORAGE, Binder.getCallingPid(), Binder.getCallingUid(),
