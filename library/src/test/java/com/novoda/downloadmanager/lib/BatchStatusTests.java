@@ -41,18 +41,18 @@ public class BatchStatusTests {
 
     private static final long ANY_BATCH_ID = 1;
     private static final long ANY_DOWNLOAD_ID = 2l;
-    public static final int ANY_BATCH_STATUS = DownloadStatus.RUNNING;
+    private static final int ANY_BATCH_STATUS = DownloadStatus.RUNNING;
+
     private static final Uri ACCESSIBLE_DOWNLOADS_URI = mock(Uri.class);
     private static final Uri DOWNLOADS_BY_BATCH_URI = mock(Uri.class);
     private static final Uri ALL_DOWNLOADS_URI = mock(Uri.class);
     private static final Uri BATCHES_URI = mock(Uri.class);
     private static final Uri BATCH_BY_ID_URI = mock(Uri.class);
-
     private static final Uri CONTENT_URI = mock(Uri.class);
     private static final Uri DOWNLOADS_WITHOUT_PROGRESS_URI = mock(Uri.class);
-
     private static final Uri BATCHES_WITHOUT_PROGRESS_URI = mock(Uri.class);
-    public static final long CURRENT_TIME_MILLIS = 1l;
+
+    private static final long CURRENT_TIME_MILLIS = 1l;
 
     @RunWith(PowerMockRunner.class)
     @PrepareForTest({ContentUris.class, BatchStatusService.class})
