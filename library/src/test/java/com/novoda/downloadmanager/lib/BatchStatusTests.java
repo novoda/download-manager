@@ -37,6 +37,8 @@ import static org.powermock.api.mockito.PowerMockito.whenNew;
 public class BatchStatusTests {
 
     private static final long ANY_BATCH_ID = 1;
+    private static final long ANY_DOWNLOAD_ID = 2l;
+    public static final int ANY_BATCH_STATUS = DownloadStatus.RUNNING;
     private static final Uri ACCESSIBLE_DOWNLOADS_URI = mock(Uri.class);
     private static final Uri DOWNLOADS_BY_BATCH_URI = mock(Uri.class);
     private static final Uri ALL_DOWNLOADS_URI = mock(Uri.class);
@@ -61,9 +63,9 @@ public class BatchStatusTests {
             ContentResolver mockResolver = mock(ContentResolver.class);
             BatchRepository batchRepository = givenBatchRepositoryAtCurrentTime(mockResolver);
 
-            batchRepository.updateBatchStatus(ANY_BATCH_ID, DownloadStatus.BATCH_FAILED);
+            batchRepository.updateBatchStatus(ANY_BATCH_ID, ANY_BATCH_STATUS);
 
-            verify(mockContentValues).put(Batches.COLUMN_STATUS, DownloadStatus.BATCH_FAILED);
+            verify(mockContentValues).put(Batches.COLUMN_STATUS, ANY_BATCH_STATUS);
             verify(mockContentValues).put(Batches.COLUMN_LAST_MODIFICATION, CURRENT_TIME_MILLIS);
             verify(mockResolver).update(
                     BATCHES_URI,
@@ -213,6 +215,30 @@ public class BatchStatusTests {
         private void thenStatusIsCancelled(InOrder inOrder) {
             inOrder.verify(mockContentValues).put(Batches.COLUMN_STATUS, DownloadStatus.CANCELED);
             inOrder.verify(mockResolver).update(BATCH_BY_ID_URI, mockContentValues, null, null);
+        }
+    }
+
+    @RunWith(PowerMockRunner.class)
+    @PrepareForTest({BatchRepository.class})
+    public static class SetBatchItemsFailed {
+
+        @Test
+        public void whenSettingBatchItemsToFailedThenCorrectDownloadsAreUpdated() throws Exception {
+            final ContentValues mockContentValues = mock(ContentValues.class);
+            whenNew(ContentValues.class).withAnyArguments().thenReturn(mockContentValues);
+
+            ContentResolver mockResolver = mock(ContentResolver.class);
+            BatchRepository batchRepository = givenBatchRepositoryAtCurrentTime(mockResolver);
+
+            batchRepository.setBatchItemsFailed(ANY_BATCH_ID, ANY_DOWNLOAD_ID);
+
+            verify(mockContentValues).put(Downloads.COLUMN_STATUS, DownloadStatus.BATCH_FAILED);
+            verify(mockResolver).update(
+                    ALL_DOWNLOADS_URI,
+                    mockContentValues,
+                    Downloads.COLUMN_BATCH_ID + " = ? AND " + Downloads._ID + " <> ? ",
+                    new String[]{String.valueOf(ANY_BATCH_ID), String.valueOf(ANY_DOWNLOAD_ID)}
+            );
         }
     }
 
