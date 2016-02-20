@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 
 import com.novoda.downloadmanager.lib.DownloadContract.Batches;
+import com.novoda.downloadmanager.lib.DownloadContract.Downloads;
 
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -40,11 +41,12 @@ public class BatchStatusTests {
 
 
     public static class UpdateBatchStatus {
+
         @Test
         public void whenUpdatingABatchStatusThenTheCorrectBatchIsUpdated() throws Exception {
             final ContentValues mockContentValues = mock(ContentValues.class);
             ContentResolver mockResolver = mock(ContentResolver.class);
-            BatchRepository batchRepository = givenBatchRepositoryAtSpecificTime(mockContentValues, mockResolver, CURRENT_TIME_MILLIS);
+            BatchRepository batchRepository = givenBatchRepositoryAtCurrentTime(mockContentValues, mockResolver);
 
             batchRepository.updateBatchStatus(ANY_BATCH_ID, DownloadStatus.BATCH_FAILED);
 
@@ -56,20 +58,6 @@ public class BatchStatusTests {
                     Batches._ID + " = ?",
                     new String[]{String.valueOf(ANY_BATCH_ID)}
             );
-        }
-
-        @NonNull
-        private BatchRepository givenBatchRepositoryAtSpecificTime(final ContentValues mockContentValues, final ContentResolver mockResolver, long timeMillis) {
-            DownloadsUriProvider downloadsUriProvider = givenDownloadsUriProvider();
-            SystemFacade mockSystemFacade = mock(SystemFacade.class);
-            when(mockSystemFacade.currentTimeMillis()).thenReturn(timeMillis);
-
-            return new BatchRepository(mockResolver, null, downloadsUriProvider, mockSystemFacade) {
-                @Override
-                protected ContentValues newContentValues() {
-                    return mockContentValues;
-                }
-            };
         }
     }
 
@@ -160,14 +148,48 @@ public class BatchStatusTests {
         }
     }
 
+    public static class SetBatchItemsCancelled {
+
+        @Test
+        public void whenCancellingBatchItemsThenCorrectDownloadsAreCancelled() throws Exception {
+            final ContentValues mockContentValues = mock(ContentValues.class);
+            ContentResolver mockResolver = mock(ContentResolver.class);
+            BatchRepository batchRepository = givenBatchRepositoryAtCurrentTime(mockContentValues, mockResolver);
+
+            batchRepository.setBatchItemsCancelled(ANY_BATCH_ID);
+
+            verify(mockContentValues).put(Downloads.COLUMN_STATUS, DownloadStatus.CANCELED);
+            verify(mockResolver).update(
+                    ALL_DOWNLOADS_URI,
+                    mockContentValues,
+                    Downloads.COLUMN_BATCH_ID + " = ?",
+                    new String[]{String.valueOf(ANY_BATCH_ID)}
+            );
+        }
+    }
+
     @NonNull
     private static BatchRepository givenABatchWithStatuses(Uri atUri, Integer... statuses) {
         ContentResolver mockResolver = mock(ContentResolver.class);
-        DownloadsUriProvider mockUriProvider = givenDownloadsUriProvider();
+        DownloadsUriProvider downloadsUriProvider = givenDownloadsUriProvider();
         MockCursorWithStatuses mockCursorWithStatuses = new MockCursorWithStatuses(statuses);
         when(mockResolver.query(same(atUri), any(String[].class), anyString(), any(String[].class), anyString()))
                 .thenReturn(mockCursorWithStatuses);
-        return new BatchRepository(mockResolver, null, mockUriProvider, null);
+        return new BatchRepository(mockResolver, null, downloadsUriProvider, null);
+    }
+
+    @NonNull
+    private static BatchRepository givenBatchRepositoryAtCurrentTime(final ContentValues mockContentValues, final ContentResolver mockResolver) {
+        DownloadsUriProvider downloadsUriProvider = givenDownloadsUriProvider();
+        SystemFacade mockSystemFacade = mock(SystemFacade.class);
+        when(mockSystemFacade.currentTimeMillis()).thenReturn(CURRENT_TIME_MILLIS);
+
+        return new BatchRepository(mockResolver, null, downloadsUriProvider, mockSystemFacade) {
+            @Override
+            protected ContentValues newContentValues() {
+                return mockContentValues;
+            }
+        };
     }
 
     private static DownloadsUriProvider givenDownloadsUriProvider() {

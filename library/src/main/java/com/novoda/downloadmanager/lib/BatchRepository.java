@@ -280,7 +280,7 @@ class BatchRepository {
     }
 
     public void setBatchItemsCancelled(long batchId) {
-        ContentValues values = new ContentValues(1);
+        ContentValues values = newContentValues();
         values.put(COLUMN_STATUS, DownloadStatus.CANCELED);
         resolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
     }
