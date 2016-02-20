@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 
 import com.novoda.downloadmanager.lib.DownloadContract.Batches;
 import com.novoda.downloadmanager.lib.DownloadContract.Downloads;
+import com.novoda.notils.string.StringUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,9 +22,11 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyCollection;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.inOrder;
@@ -238,6 +241,34 @@ public class BatchStatusTests {
                     mockContentValues,
                     Downloads.COLUMN_BATCH_ID + " = ? AND " + Downloads._ID + " <> ? ",
                     new String[]{String.valueOf(ANY_BATCH_ID), String.valueOf(ANY_DOWNLOAD_ID)}
+            );
+        }
+    }
+
+    @RunWith(PowerMockRunner.class)
+    @PrepareForTest({BatchRepository.class, StringUtils.class})
+    public static class UpdateBatchToPendingStatus {
+
+        @Test
+        public void whenSettingBatchItemsToFailedThenCorrectDownloadsAreUpdated() throws Exception {
+            final ContentValues mockContentValues = mock(ContentValues.class);
+            whenNew(ContentValues.class).withAnyArguments().thenReturn(mockContentValues);
+
+            mockStatic(StringUtils.class);
+            String where = Batches._ID + " = ?";
+            when(StringUtils.join(anyCollection(), anyString())).thenReturn(where);
+
+            ContentResolver mockResolver = mock(ContentResolver.class);
+            BatchRepository batchRepository = givenBatchRepositoryAtCurrentTime(mockResolver);
+
+            batchRepository.updateBatchToPendingStatus(Collections.singletonList(String.valueOf(ANY_BATCH_ID)));
+
+            verify(mockContentValues).put(Batches.COLUMN_STATUS, DownloadStatus.PENDING);
+            verify(mockResolver).update(
+                    BATCHES_URI,
+                    mockContentValues,
+                    where,
+                    new String[]{String.valueOf(ANY_BATCH_ID)}
             );
         }
     }
