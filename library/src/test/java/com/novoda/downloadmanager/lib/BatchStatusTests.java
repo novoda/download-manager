@@ -186,31 +186,33 @@ public class BatchStatusTests {
         public void whenCancellingBatchItemsThenCorrectDownloadsAreCancelled() throws Exception {
             batchRepository.setBatchItemsCancelled(ANY_BATCH_ID);
 
-            verify(mockContentValues).put(Downloads.COLUMN_STATUS, DownloadStatus.CANCELED);
-            verify(mockResolver).update(
-                    ALL_DOWNLOADS_URI,
-                    mockContentValues,
-                    Downloads.COLUMN_BATCH_ID + " = ?",
-                    new String[]{String.valueOf(ANY_BATCH_ID)}
-            );
+            InOrder order = inOrder(mockContentValues, mockResolver);
+            thenDownloadsAreCancelled(ANY_BATCH_ID, order);
         }
 
         @Test
         public void whenCancellingBatchThenCorrectBatchAndDownloadsAreCancelled() throws Exception {
             batchRepository.cancelBatch(ANY_BATCH_ID);
 
-            InOrder inorder = inOrder(mockContentValues, mockResolver);
+            InOrder order = inOrder(mockContentValues, mockResolver);
 
-            inorder.verify(mockContentValues).put(Downloads.COLUMN_STATUS, DownloadStatus.CANCELED);
-            inorder.verify(mockResolver).update(
+            thenDownloadsAreCancelled(ANY_BATCH_ID, order);
+            thenStatusIsCancelled(order);
+        }
+
+        private void thenDownloadsAreCancelled(long batchId, InOrder inOrder) {
+            inOrder.verify(mockContentValues).put(Downloads.COLUMN_STATUS, DownloadStatus.CANCELED);
+            inOrder.verify(mockResolver).update(
                     ALL_DOWNLOADS_URI,
                     mockContentValues,
                     Downloads.COLUMN_BATCH_ID + " = ?",
-                    new String[]{String.valueOf(ANY_BATCH_ID)}
+                    new String[]{String.valueOf(batchId)}
             );
+        }
 
-            inorder.verify(mockContentValues).put(Batches.COLUMN_STATUS, DownloadStatus.CANCELED);
-            inorder.verify(mockResolver).update(BATCH_BY_ID_URI, mockContentValues, null, null);
+        private void thenStatusIsCancelled(InOrder inOrder) {
+            inOrder.verify(mockContentValues).put(Batches.COLUMN_STATUS, DownloadStatus.CANCELED);
+            inOrder.verify(mockResolver).update(BATCH_BY_ID_URI, mockContentValues, null, null);
         }
     }
 
