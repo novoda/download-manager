@@ -170,12 +170,11 @@ public class BatchStatusTests {
 
     @NonNull
     private static BatchRepository givenABatchWithStatuses(Uri atUri, Integer... statuses) {
-        ContentResolver mockResolver = mock(ContentResolver.class);
-        DownloadsUriProvider downloadsUriProvider = givenDownloadsUriProvider();
         MockCursorWithStatuses mockCursorWithStatuses = new MockCursorWithStatuses(statuses);
+        ContentResolver mockResolver = mock(ContentResolver.class);
         when(mockResolver.query(same(atUri), any(String[].class), anyString(), any(String[].class), anyString()))
                 .thenReturn(mockCursorWithStatuses);
-        return new BatchRepository(mockResolver, null, downloadsUriProvider, null);
+        return givenBatchRepositoryAtCurrentTime(null, mockResolver);
     }
 
     @NonNull
