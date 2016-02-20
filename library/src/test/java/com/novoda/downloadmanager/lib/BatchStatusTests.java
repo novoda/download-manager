@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager.lib;
 
 import android.content.ContentResolver;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 
 import org.junit.Test;
@@ -15,26 +16,88 @@ import java.util.Collection;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(Enclosed.class)
 public class BatchStatusTests {
 
-    @RunWith(Parameterized.class)
-    public static class CalculateBatchStatus {
+    private static final long ANY_BATCH_ID = 1;
+    private static final Uri ACCESSIBLE_DOWNLOADS_URI = mock(Uri.class);
+    private static final Uri DOWNLOADS_BY_BATCH_URI = mock(Uri.class);
+    private static final Uri ALL_DOWNLOADS_URI = mock(Uri.class);
+    private static final Uri BATCHES_URI = mock(Uri.class);
+    private static final Uri CONTENT_URI = mock(Uri.class);
+    private static final Uri DOWNLOADS_WITHOUT_PROGRESS_URI = mock(Uri.class);
 
-        private static final long ANY_BATCH_ID = 1;
+    private static final Uri BATCHES_WITHOUT_PROGRESS_URI = mock(Uri.class);
+
+    @RunWith(Parameterized.class)
+    public static class GetBatchStatus {
 
         @Parameters
         public static Collection<Object[]> data() {
             return Arrays.asList(new Object[][]{
-                    {new Integer[]{DownloadStatus.SUCCESS, DownloadStatus.SUBMITTED},  DownloadStatus.RUNNING},
-                    {new Integer[]{DownloadStatus.SUCCESS, DownloadStatus.BATCH_FAILED},  DownloadStatus.BATCH_FAILED},
-                    {new Integer[]{DownloadStatus.SUBMITTED, DownloadStatus.SUBMITTED, DownloadStatus.SUBMITTED, DownloadStatus.SUCCESS},  DownloadStatus.RUNNING},
-                    {new Integer[]{DownloadStatus.SUCCESS, DownloadStatus.SUCCESS},  DownloadStatus.SUCCESS},
-                    {new Integer[]{DownloadStatus.PENDING, DownloadStatus.PENDING},  DownloadStatus.PENDING},
+                    {DownloadStatus.PAUSING},
+                    {DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS},
+                    {DownloadStatus.DELETING},
+                    {DownloadStatus.SUBMITTED},
+                    {DownloadStatus.PENDING},
+                    {DownloadStatus.RUNNING},
+                    {DownloadStatus.PAUSED_BY_APP},
+                    {DownloadStatus.WAITING_TO_RETRY},
+                    {DownloadStatus.WAITING_FOR_NETWORK},
+                    {DownloadStatus.QUEUED_FOR_WIFI},
+                    {DownloadStatus.INSUFFICIENT_SPACE_ERROR},
+                    {DownloadStatus.DEVICE_NOT_FOUND_ERROR},
+                    {DownloadStatus.SUCCESS},
+                    {DownloadStatus.BAD_REQUEST},
+                    {DownloadStatus.NOT_ACCEPTABLE},
+                    {DownloadStatus.LENGTH_REQUIRED},
+                    {DownloadStatus.PRECONDITION_FAILED},
+                    {DownloadStatus.MIN_ARTIFICIAL_ERROR_STATUS},
+                    {DownloadStatus.FILE_ALREADY_EXISTS_ERROR},
+                    {DownloadStatus.CANNOT_RESUME},
+                    {DownloadStatus.CANCELED},
+                    {DownloadStatus.UNKNOWN_ERROR},
+                    {DownloadStatus.FILE_ERROR},
+                    {DownloadStatus.UNHANDLED_REDIRECT},
+                    {DownloadStatus.UNHANDLED_HTTP_CODE},
+                    {DownloadStatus.HTTP_DATA_ERROR},
+                    {DownloadStatus.HTTP_EXCEPTION},
+                    {DownloadStatus.TOO_MANY_REDIRECTS},
+                    {DownloadStatus.BATCH_FAILED},
+            });
+        }
+
+        private int expectedStatus;
+
+        public GetBatchStatus(int expectedStatus) {
+            this.expectedStatus = expectedStatus;
+        }
+        @Test
+        public void givenAStatusThenThatStatusIsRetrieved() throws Exception {
+            BatchRepository repository = givenABatchWithStatuses(BATCHES_URI, expectedStatus);
+
+            int batchStatus = repository.getBatchStatus(ANY_BATCH_ID);
+
+            assertThat(batchStatus).isEqualTo(expectedStatus);
+        }
+
+    }
+
+    @RunWith(Parameterized.class)
+    public static class CalculateBatchStatus {
+
+        @Parameters
+        public static Collection<Object[]> data() {
+            return Arrays.asList(new Object[][]{
+                    {new Integer[]{DownloadStatus.SUCCESS, DownloadStatus.SUBMITTED}, DownloadStatus.RUNNING},
+                    {new Integer[]{DownloadStatus.SUCCESS, DownloadStatus.BATCH_FAILED}, DownloadStatus.BATCH_FAILED},
+                    {new Integer[]{DownloadStatus.SUBMITTED, DownloadStatus.SUBMITTED, DownloadStatus.SUBMITTED, DownloadStatus.SUCCESS}, DownloadStatus.RUNNING},
+                    {new Integer[]{DownloadStatus.SUCCESS, DownloadStatus.SUCCESS}, DownloadStatus.SUCCESS},
+                    {new Integer[]{DownloadStatus.PENDING, DownloadStatus.PENDING}, DownloadStatus.PENDING},
             });
         }
 
@@ -49,23 +112,33 @@ public class BatchStatusTests {
 
         @Test
         public void calculateCorrectStatusFromStatuses() throws Exception {
-            BatchRepository repository = givenABatchWithStatuses(statuses);
+            BatchRepository repository = givenABatchWithStatuses(ALL_DOWNLOADS_URI, statuses);
 
             int batchStatus = repository.calculateBatchStatus(ANY_BATCH_ID);
 
             assertThat(batchStatus).isEqualTo(expectedStatus);
         }
+    }
 
+    @NonNull
+    private static BatchRepository givenABatchWithStatuses(Uri atUri, Integer... statuses) {
+        ContentResolver mockResolver = mock(ContentResolver.class);
+        DownloadsUriProvider mockUriProvider = givenDownloadsUriProvider();
+        MockCursorWithStatuses mockCursorWithStatuses = new MockCursorWithStatuses(statuses);
+        when(mockResolver.query(same(atUri), any(String[].class), anyString(), any(String[].class), anyString()))
+                .thenReturn(mockCursorWithStatuses);
+        return new BatchRepository(mockResolver, null, mockUriProvider, null);
+    }
 
-        @NonNull
-        private BatchRepository givenABatchWithStatuses(Integer... statuses) {
-            ContentResolver mockResolver = mock(ContentResolver.class);
-            DownloadsUriProvider mockUriProvider = mock(DownloadsUriProvider.class);
-            MockCursorWithStatuses mockCursorWithStatuses = new MockCursorWithStatuses(statuses);
-            when(mockResolver.query(eq(mockUriProvider.getAllDownloadsUri()), any(String[].class), anyString(), any(String[].class), anyString()))
-                    .thenReturn(mockCursorWithStatuses);
-            return new BatchRepository(mockResolver, null, mockUriProvider, null);
-        }
-
+    private static DownloadsUriProvider givenDownloadsUriProvider() {
+        return new DownloadsUriProvider(
+                ACCESSIBLE_DOWNLOADS_URI,
+                DOWNLOADS_BY_BATCH_URI,
+                ALL_DOWNLOADS_URI,
+                BATCHES_URI,
+                CONTENT_URI,
+                DOWNLOADS_WITHOUT_PROGRESS_URI,
+                BATCHES_WITHOUT_PROGRESS_URI
+        );
     }
 }
