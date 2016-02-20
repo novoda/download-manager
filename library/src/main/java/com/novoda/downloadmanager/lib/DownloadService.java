@@ -381,7 +381,7 @@ public class DownloadService extends Service {
     }
 
     private void handleBatchStartingForTheFirstTime(DownloadBatch downloadBatch) {
-        batchRepository.markBatchHasStarted(downloadBatch.getBatchId());
+        batchRepository.markBatchAsStarted(downloadBatch.getBatchId());
         batchInformationBroadcaster.notifyBatchStartedFor(downloadBatch.getBatchId());
     }
 

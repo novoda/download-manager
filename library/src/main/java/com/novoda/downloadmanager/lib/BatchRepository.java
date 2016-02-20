@@ -91,6 +91,17 @@ class BatchRepository {
         return hasStarted != DownloadContract.Batches.BATCH_HAS_STARTED;
     }
 
+    public void markBatchAsStarted(long batchId) {
+        ContentValues values = new ContentValues(1);
+        values.put(DownloadContract.Batches.COLUMN_HAS_STARTED, DownloadContract.Batches.BATCH_HAS_STARTED);
+        resolver.update(
+                ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), batchId),
+                values,
+                null,
+                null
+        );
+    }
+
     public DownloadBatch retrieveBatchFor(FileDownloadInfo download) {
         Collection<FileDownloadInfo> downloads = Collections.singletonList(download);
         List<DownloadBatch> batches = retrieveBatchesFor(downloads);
@@ -187,16 +198,6 @@ class BatchRepository {
     }
 
 
-    public void markBatchHasStarted(long batchId) {
-        ContentValues values = new ContentValues(1);
-        values.put(DownloadContract.Batches.COLUMN_HAS_STARTED, DownloadContract.Batches.BATCH_HAS_STARTED);
-        resolver.update(
-                ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), batchId),
-                values,
-                null,
-                null
-        );
-    }
 
 
 }
