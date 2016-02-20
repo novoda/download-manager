@@ -69,13 +69,12 @@ class BatchRepository {
         int hasStarted = 0;
         try {
             String[] projection = {DownloadContract.Batches.COLUMN_HAS_STARTED};
-            String[] selectionArgs = {String.valueOf(batchId)};
 
             cursor = resolver.query(
-                    downloadsUriProvider.getBatchesUri(),
+                    ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), batchId),
                     projection,
-                    DownloadContract.Batches._ID + " = ?",
-                    selectionArgs,
+                    null,
+                    null,
                     null
             );
 
