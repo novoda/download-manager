@@ -76,15 +76,15 @@ class BatchRepository {
     }
 
     void updateBatchStatus(long batchId, int status) {
-        ContentValues values = newContentValues();
+        ContentValues values = newContentValues(2);
         values.put(DownloadContract.Batches.COLUMN_STATUS, status);
         values.put(DownloadContract.Batches.COLUMN_LAST_MODIFICATION, systemFacade.currentTimeMillis());
         resolver.update(downloadsUriProvider.getBatchesUri(), values, DownloadContract.Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
     }
 
     @VisibleForTesting
-    protected ContentValues newContentValues() {
-        return new ContentValues();
+    protected ContentValues newContentValues(int size) {
+        return new ContentValues(size);
     }
 
     int getBatchStatus(long batchId) {
@@ -280,13 +280,13 @@ class BatchRepository {
     }
 
     public void setBatchItemsCancelled(long batchId) {
-        ContentValues values = newContentValues();
+        ContentValues values = newContentValues(1);
         values.put(COLUMN_STATUS, DownloadStatus.CANCELED);
         resolver.update(downloadsUriProvider.getAllDownloadsUri(), values, COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
     }
 
     public void cancelBatch(long batchId) {
-        ContentValues downloadValues = new ContentValues(1);
+        ContentValues downloadValues = newContentValues(1);
         downloadValues.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.CANCELED);
         resolver.update(
                 downloadsUriProvider.getAllDownloadsUri(),
@@ -294,7 +294,7 @@ class BatchRepository {
                 DownloadContract.Downloads.COLUMN_BATCH_ID + " = ?",
                 new String[]{String.valueOf(batchId)}
         );
-        ContentValues batchValues = new ContentValues(1);
+        ContentValues batchValues = newContentValues(1);
         batchValues.put(DownloadContract.Batches.COLUMN_STATUS, DownloadStatus.CANCELED);
         resolver.update(
                 ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), batchId),

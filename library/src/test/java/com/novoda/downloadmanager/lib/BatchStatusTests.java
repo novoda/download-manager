@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager.lib;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -13,6 +14,9 @@ import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.mockito.InOrder;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,9 +25,11 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @RunWith(Enclosed.class)
 public class BatchStatusTests {
@@ -33,6 +39,8 @@ public class BatchStatusTests {
     private static final Uri DOWNLOADS_BY_BATCH_URI = mock(Uri.class);
     private static final Uri ALL_DOWNLOADS_URI = mock(Uri.class);
     private static final Uri BATCHES_URI = mock(Uri.class);
+    private static final Uri BATCH_BY_ID_URI = mock(Uri.class);
+
     private static final Uri CONTENT_URI = mock(Uri.class);
     private static final Uri DOWNLOADS_WITHOUT_PROGRESS_URI = mock(Uri.class);
 
@@ -104,6 +112,7 @@ public class BatchStatusTests {
         public GetBatchStatus(int expectedStatus) {
             this.expectedStatus = expectedStatus;
         }
+
         @Test
         public void givenAStatusThenThatStatusIsRetrieved() throws Exception {
             BatchRepository repository = givenABatchWithStatuses(BATCHES_URI, expectedStatus);
@@ -148,7 +157,9 @@ public class BatchStatusTests {
         }
     }
 
-    public static class SetBatchItemsCancelled {
+    @RunWith(PowerMockRunner.class)
+    @PrepareForTest({ContentUris.class})
+    public static class CancelBatch {
 
         @Test
         public void whenCancellingBatchItemsThenCorrectDownloadsAreCancelled() throws Exception {
@@ -166,6 +177,33 @@ public class BatchStatusTests {
                     new String[]{String.valueOf(ANY_BATCH_ID)}
             );
         }
+
+        @Test
+        public void whenCancellingBatchThenCorrectBatchAndDownloadsAreCancelled() throws Exception {
+            mockStatic(ContentUris.class);
+            when(ContentUris.withAppendedId(BATCHES_URI, ANY_BATCH_ID)).thenReturn(BATCH_BY_ID_URI);
+
+            final ContentValues mockContentValues = mock(ContentValues.class);
+            ContentResolver mockResolver = mock(ContentResolver.class);
+            BatchRepository batchRepository = givenBatchRepositoryAtCurrentTime(mockContentValues, mockResolver);
+
+            batchRepository.cancelBatch(ANY_BATCH_ID);
+
+            InOrder inorder = inOrder(mockContentValues, mockResolver);
+
+            inorder.verify(mockContentValues).put(Downloads.COLUMN_STATUS, DownloadStatus.CANCELED);
+            inorder.verify(mockResolver).update(
+                    ALL_DOWNLOADS_URI,
+                    mockContentValues,
+                    Downloads.COLUMN_BATCH_ID + " = ?",
+                    new String[]{String.valueOf(ANY_BATCH_ID)}
+            );
+
+            inorder.verify(mockContentValues).put(Batches.COLUMN_STATUS, DownloadStatus.CANCELED);
+            inorder.verify(mockResolver).update(BATCH_BY_ID_URI, mockContentValues, null, null);
+        }
+
+
     }
 
     @NonNull
@@ -185,7 +223,7 @@ public class BatchStatusTests {
 
         return new BatchRepository(mockResolver, null, downloadsUriProvider, mockSystemFacade) {
             @Override
-            protected ContentValues newContentValues() {
+            protected ContentValues newContentValues(int size) {
                 return mockContentValues;
             }
         };
