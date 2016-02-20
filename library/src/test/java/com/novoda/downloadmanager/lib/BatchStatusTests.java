@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import com.novoda.downloadmanager.lib.DownloadContract.Batches;
 import com.novoda.downloadmanager.lib.DownloadContract.Downloads;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -165,14 +166,24 @@ public class BatchStatusTests {
     @PrepareForTest({ContentUris.class, BatchRepository.class})
     public static class CancelBatch {
 
-        @Test
-        public void whenCancellingBatchItemsThenCorrectDownloadsAreCancelled() throws Exception {
-            final ContentValues mockContentValues = mock(ContentValues.class);
+        private ContentValues mockContentValues;
+        private ContentResolver mockResolver;
+        private BatchRepository batchRepository;
+
+        @Before
+        public void setUp() throws Exception {
+            mockStatic(ContentUris.class);
+            when(ContentUris.withAppendedId(BATCHES_URI, ANY_BATCH_ID)).thenReturn(BATCH_BY_ID_URI);
+
+            mockContentValues = mock(ContentValues.class);
             whenNew(ContentValues.class).withAnyArguments().thenReturn(mockContentValues);
 
-            ContentResolver mockResolver = mock(ContentResolver.class);
-            BatchRepository batchRepository = givenBatchRepositoryAtCurrentTime(mockResolver);
+            mockResolver = mock(ContentResolver.class);
+            batchRepository = givenBatchRepositoryAtCurrentTime(mockResolver);
+        }
 
+        @Test
+        public void whenCancellingBatchItemsThenCorrectDownloadsAreCancelled() throws Exception {
             batchRepository.setBatchItemsCancelled(ANY_BATCH_ID);
 
             verify(mockContentValues).put(Downloads.COLUMN_STATUS, DownloadStatus.CANCELED);
@@ -186,14 +197,6 @@ public class BatchStatusTests {
 
         @Test
         public void whenCancellingBatchThenCorrectBatchAndDownloadsAreCancelled() throws Exception {
-            mockStatic(ContentUris.class);
-            when(ContentUris.withAppendedId(BATCHES_URI, ANY_BATCH_ID)).thenReturn(BATCH_BY_ID_URI);
-
-            final ContentValues mockContentValues = mock(ContentValues.class);
-            whenNew(ContentValues.class).withAnyArguments().thenReturn(mockContentValues);
-            ContentResolver mockResolver = mock(ContentResolver.class);
-            BatchRepository batchRepository = givenBatchRepositoryAtCurrentTime(mockResolver);
-
             batchRepository.cancelBatch(ANY_BATCH_ID);
 
             InOrder inorder = inOrder(mockContentValues, mockResolver);
