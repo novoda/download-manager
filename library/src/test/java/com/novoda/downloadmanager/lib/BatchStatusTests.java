@@ -1,8 +1,11 @@
 package com.novoda.downloadmanager.lib;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+
+import com.novoda.downloadmanager.lib.DownloadContract.Batches;
 
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -18,6 +21,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(Enclosed.class)
@@ -32,6 +36,42 @@ public class BatchStatusTests {
     private static final Uri DOWNLOADS_WITHOUT_PROGRESS_URI = mock(Uri.class);
 
     private static final Uri BATCHES_WITHOUT_PROGRESS_URI = mock(Uri.class);
+    public static final long CURRENT_TIME_MILLIS = 1l;
+
+
+    public static class UpdateBatchStatus {
+        @Test
+        public void whenUpdatingABatchStatusThenTheCorrectBatchIsUpdated() throws Exception {
+            final ContentValues mockContentValues = mock(ContentValues.class);
+            ContentResolver mockResolver = mock(ContentResolver.class);
+            BatchRepository batchRepository = givenBatchRepositoryAtSpecificTime(mockContentValues, mockResolver, CURRENT_TIME_MILLIS);
+
+            batchRepository.updateBatchStatus(ANY_BATCH_ID, DownloadStatus.BATCH_FAILED);
+
+            verify(mockContentValues).put(Batches.COLUMN_STATUS, DownloadStatus.BATCH_FAILED);
+            verify(mockContentValues).put(Batches.COLUMN_LAST_MODIFICATION, CURRENT_TIME_MILLIS);
+            verify(mockResolver).update(
+                    BATCHES_URI,
+                    mockContentValues,
+                    Batches._ID + " = ?",
+                    new String[]{String.valueOf(ANY_BATCH_ID)}
+            );
+        }
+
+        @NonNull
+        private BatchRepository givenBatchRepositoryAtSpecificTime(final ContentValues mockContentValues, final ContentResolver mockResolver, long timeMillis) {
+            DownloadsUriProvider downloadsUriProvider = givenDownloadsUriProvider();
+            SystemFacade mockSystemFacade = mock(SystemFacade.class);
+            when(mockSystemFacade.currentTimeMillis()).thenReturn(timeMillis);
+
+            return new BatchRepository(mockResolver, null, downloadsUriProvider, mockSystemFacade) {
+                @Override
+                protected ContentValues newContentValues() {
+                    return mockContentValues;
+                }
+            };
+        }
+    }
 
     @RunWith(Parameterized.class)
     public static class GetBatchStatus {

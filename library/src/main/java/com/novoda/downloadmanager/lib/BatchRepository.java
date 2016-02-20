@@ -5,6 +5,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.util.SparseArrayCompat;
 
 import com.novoda.downloadmanager.notifications.NotificationVisibility;
@@ -75,10 +76,15 @@ class BatchRepository {
     }
 
     void updateBatchStatus(long batchId, int status) {
-        ContentValues values = new ContentValues();
+        ContentValues values = newContentValues();
         values.put(DownloadContract.Batches.COLUMN_STATUS, status);
         values.put(DownloadContract.Batches.COLUMN_LAST_MODIFICATION, systemFacade.currentTimeMillis());
         resolver.update(downloadsUriProvider.getBatchesUri(), values, DownloadContract.Batches._ID + " = ?", new String[]{String.valueOf(batchId)});
+    }
+
+    @VisibleForTesting
+    protected ContentValues newContentValues() {
+        return new ContentValues();
     }
 
     int getBatchStatus(long batchId) {
