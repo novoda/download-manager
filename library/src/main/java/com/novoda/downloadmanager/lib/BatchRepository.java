@@ -45,6 +45,25 @@ class BatchRepository {
         return batchStatusService.calculateBatchStatusFromDownloads(batchId);
     }
 
+    public void setBatchItemsCancelled(long batchId) {
+        batchStatusService.setBatchItemsCancelled(batchId);
+    }
+
+    public void cancelBatch(long batchId) {
+        batchStatusService.cancelBatch(batchId);
+    }
+
+    public void setBatchItemsFailed(long batchId, long downloadId) {
+        batchStatusService.setBatchItemsFailed(batchId, downloadId);
+    }
+
+    /**
+     * @return Number of rows updated
+     */
+    int updateBatchesToPendingStatus(@NonNull List<String> batchIdsToBeUnlocked) {
+        return batchStatusService.updateBatchToPendingStatus(batchIdsToBeUnlocked);
+    }
+
     boolean isBatchStartingForTheFirstTime(long batchId) {
         Cursor cursor = null;
         int hasStarted = 0;
@@ -167,17 +186,6 @@ class BatchRepository {
         return resolver.query(downloadsUriProvider.getBatchesUri(), null, query.getSelection(), query.getSelectionArguments(), query.getSortOrder());
     }
 
-    public void setBatchItemsCancelled(long batchId) {
-        batchStatusService.setBatchItemsCancelled(batchId);
-    }
-
-    public void cancelBatch(long batchId) {
-        batchStatusService.cancelBatch(batchId);
-    }
-
-    public void setBatchItemsFailed(long batchId, long downloadId) {
-        batchStatusService.setBatchItemsFailed(batchId, downloadId);
-    }
 
     public void markBatchHasStarted(long batchId) {
         ContentValues values = new ContentValues(1);
@@ -190,11 +198,5 @@ class BatchRepository {
         );
     }
 
-    /**
-     * @return Number of rows updated
-     */
-    int updateBatchesToPendingStatus(@NonNull List<String> batchIdsToBeUnlocked) {
-        return batchStatusService.updateBatchToPendingStatus(batchIdsToBeUnlocked);
-    }
 
 }
