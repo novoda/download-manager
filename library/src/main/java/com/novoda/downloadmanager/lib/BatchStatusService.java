@@ -66,6 +66,16 @@ class BatchStatusService {
     }
 
     public int getBatchStatus(long batchId) {
+        Cursor cursor = queryForStatus(batchId);
+
+        try {
+            return marshallToStatus(cursor);
+        } finally {
+            cursor.close();
+        }
+    }
+
+    private Cursor queryForStatus(long batchId) {
         String[] projection = {DownloadContract.Batches.COLUMN_STATUS};
 
         Cursor cursor = resolver.query(downloadsUriProvider.getSingleBatchUri(batchId), projection, null, null, null);
@@ -73,13 +83,12 @@ class BatchStatusService {
         if (cursor == null) {
             throw new RuntimeException("Failed to query batches for batchId = " + batchId);
         }
+        return cursor;
+    }
 
-        try {
-            cursor.moveToFirst();
-            return Cursors.getInt(cursor, DownloadContract.Batches.COLUMN_STATUS);
-        } finally {
-            cursor.close();
-        }
+    private int marshallToStatus(Cursor cursor) {
+        cursor.moveToFirst();
+        return Cursors.getInt(cursor, DownloadContract.Batches.COLUMN_STATUS);
     }
 
     public int calculateBatchStatusFromDownloads(long batchId) {
