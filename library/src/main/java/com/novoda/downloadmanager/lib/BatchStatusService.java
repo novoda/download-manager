@@ -15,47 +15,12 @@ import java.util.List;
 
 class BatchStatusService {
 
-    private static final List<Integer> PRIORITISED_STATUSES = Arrays.asList(
-            DownloadStatus.CANCELED,
-            DownloadStatus.PAUSING,
-            DownloadStatus.PAUSED_BY_APP,
-            DownloadStatus.RUNNING,
-            DownloadStatus.DELETING,
-
-            // Paused statuses
-            DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS,
-            DownloadStatus.WAITING_TO_RETRY,
-            DownloadStatus.WAITING_FOR_NETWORK,
-            DownloadStatus.QUEUED_FOR_WIFI,
-
-            DownloadStatus.SUBMITTED,
-            DownloadStatus.PENDING,
-            DownloadStatus.SUCCESS
-    );
-
-    private static final List<Integer> STATUSES_EXCEPT_SUCCESS_SUBMITTED = Arrays.asList(
-            DownloadStatus.CANCELED,
-            DownloadStatus.PAUSED_BY_APP,
-            DownloadStatus.RUNNING,
-            DownloadStatus.DELETING,
-
-            // Paused statuses
-            DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS,
-            DownloadStatus.WAITING_TO_RETRY,
-            DownloadStatus.WAITING_FOR_NETWORK,
-            DownloadStatus.QUEUED_FOR_WIFI,
-
-            DownloadStatus.PENDING
-    );
-
-    private static final int PRIORITISED_STATUSES_SIZE = PRIORITISED_STATUSES.size();
-
     private final ContentResolver resolver;
     private final DownloadsUriProvider downloadsUriProvider;
     private final SystemFacade systemFacade;
     private final Uri batchesUri;
     private final Uri downloadsUri;
-    private final StatusesCount statusesCount = new StatusesCount();
+    private final Statuses statuses = new Statuses();
 
     public BatchStatusService(ContentResolver resolver, DownloadsUriProvider downloadsUriProvider, SystemFacade systemFacade) {
         this.resolver = resolver;
@@ -92,51 +57,42 @@ class BatchStatusService {
     }
 
     public int calculateBatchStatusFromDownloads(long batchId) {
+        Cursor cursor = queryForDownloadStatusesByBatch(batchId);
+
+        statuses.clear();
+
+        marshallInStatuses(cursor);
+
+        cursor.close();
+
+        if (statuses.hasErrorStatus()) {
+            return statuses.getFirstErrorStatus();
+        }
+
+        if (statuses.hasOnlyCompleteAndSubmittedStatuses()) {
+            return DownloadStatus.RUNNING;
+        }
+
+        return statuses.getFirstStatusByPriority();
+    }
+
+    private Cursor queryForDownloadStatusesByBatch(long batchId) {
         String[] projection = {DownloadContract.Downloads.COLUMN_STATUS};
         String[] selectionArgs = {String.valueOf(batchId)};
         String selection = DownloadContract.Downloads.COLUMN_BATCH_ID + " = ?";
-        Cursor cursor = resolver.query(downloadsUri, projection, selection, selectionArgs, null);
+        Cursor cursor = resolver.query(downloadsUriProvider.getAllDownloadsUri(), projection, selection, selectionArgs, null);
 
         if (cursor == null) {
             throw new RuntimeException("Failed to query downloads for batchId = " + batchId);
         }
-
-        statusesCount.clear();
-
-        try {
-
-            while (cursor.moveToNext()) {
-                int statusCode = Cursors.getInt(cursor, DownloadContract.Downloads.COLUMN_STATUS);
-
-                if (DownloadStatus.isError(statusCode)) {
-                    return statusCode;
-                }
-
-                statusesCount.incrementCountFor(statusCode);
-            }
-        } finally {
-            cursor.close();
-        }
-
-        if (onlyCompleteAndSubmittedIn(statusesCount)) {
-            return DownloadStatus.RUNNING;
-        }
-
-        for (int status : PRIORITISED_STATUSES) {
-            if (statusesCount.hasCountFor(status)) {
-                return status;
-            }
-        }
-
-        return DownloadStatus.UNKNOWN_ERROR;
+        return cursor;
     }
 
-    private boolean onlyCompleteAndSubmittedIn(StatusesCount statusesCount) {
-        boolean hasCompleteItems = statusesCount.hasCountFor(DownloadStatus.SUCCESS);
-        boolean hasSubmittedItems = statusesCount.hasCountFor(DownloadStatus.SUBMITTED);
-        boolean hasNotOtherItems = statusesCount.hasNoItemsWithStatuses(STATUSES_EXCEPT_SUCCESS_SUBMITTED);
-
-        return hasCompleteItems && hasSubmittedItems && hasNotOtherItems;
+    private void marshallInStatuses(Cursor cursor) {
+        while (cursor.moveToNext()) {
+            int statusCode = Cursors.getInt(cursor, DownloadContract.Downloads.COLUMN_STATUS);
+            statuses.incrementCountFor(statusCode);
+        }
     }
 
     public int updateBatchToPendingStatus(@NonNull List<String> batchIds) {
@@ -185,9 +141,44 @@ class BatchStatusService {
 
     }
 
-    private static class StatusesCount {
+    private static class Statuses {
 
-        private final SparseArrayCompat<Integer> statusCounts = new SparseArrayCompat<>(PRIORITISED_STATUSES_SIZE);
+        private static final List<Integer> PRIORITISED_STATUSES = Arrays.asList(
+                DownloadStatus.CANCELED,
+                DownloadStatus.PAUSING,
+                DownloadStatus.PAUSED_BY_APP,
+                DownloadStatus.RUNNING,
+                DownloadStatus.DELETING,
+
+                // Paused statuses
+                DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS,
+                DownloadStatus.WAITING_TO_RETRY,
+                DownloadStatus.WAITING_FOR_NETWORK,
+                DownloadStatus.QUEUED_FOR_WIFI,
+
+                DownloadStatus.SUBMITTED,
+                DownloadStatus.PENDING,
+                DownloadStatus.SUCCESS
+        );
+
+        private static final List<Integer> STATUSES_EXCEPT_SUCCESS_SUBMITTED = Arrays.asList(
+                DownloadStatus.CANCELED,
+                DownloadStatus.PAUSED_BY_APP,
+                DownloadStatus.RUNNING,
+                DownloadStatus.DELETING,
+
+                // Paused statuses
+                DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS,
+                DownloadStatus.WAITING_TO_RETRY,
+                DownloadStatus.WAITING_FOR_NETWORK,
+                DownloadStatus.QUEUED_FOR_WIFI,
+
+                DownloadStatus.PENDING
+        );
+        private static final int NO_ERROR_STATUS = 0;
+
+        private final SparseArrayCompat<Integer> statusCounts = new SparseArrayCompat<>(PRIORITISED_STATUSES.size());
+        private int firstErrorStatus = NO_ERROR_STATUS;
 
         public boolean hasNoItemsWithStatuses(List<Integer> excludedStatuses) {
             for (int status : excludedStatuses) {
@@ -204,12 +195,33 @@ class BatchStatusService {
         }
 
         public void incrementCountFor(int statusCode) {
+            if (DownloadStatus.isError(statusCode) && !hasErrorStatus()) {
+                firstErrorStatus = statusCode;
+            }
+
             int currentStatusCount = statusCounts.get(statusCode, 0);
             statusCounts.put(statusCode, currentStatusCount + 1);
         }
 
         public void clear() {
             statusCounts.clear();
+            firstErrorStatus = NO_ERROR_STATUS;
+        }
+
+        private boolean hasOnlyCompleteAndSubmittedStatuses() {
+            boolean hasCompleteItems = hasCountFor(DownloadStatus.SUCCESS);
+            boolean hasSubmittedItems = hasCountFor(DownloadStatus.SUBMITTED);
+            boolean hasNotOtherItems = hasNoItemsWithStatuses(STATUSES_EXCEPT_SUCCESS_SUBMITTED);
+
+            return hasCompleteItems && hasSubmittedItems && hasNotOtherItems;
+        }
+
+        public boolean hasErrorStatus() {
+            return firstErrorStatus != NO_ERROR_STATUS;
+        }
+
+        public int getFirstErrorStatus() {
+            return firstErrorStatus;
         }
 
         @Override
@@ -222,6 +234,16 @@ class BatchStatusService {
             }
 
             return stringBuilder.append("}").toString();
+        }
+
+        private int getFirstStatusByPriority() {
+            for (int status : PRIORITISED_STATUSES) {
+                if (hasCountFor(status)) {
+                    return status;
+                }
+            }
+
+            return DownloadStatus.UNKNOWN_ERROR;
         }
     }
 }
