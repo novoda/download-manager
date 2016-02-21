@@ -13,7 +13,7 @@ import com.novoda.notils.string.StringUtils;
 import java.util.Arrays;
 import java.util.List;
 
-public class BatchStatusService {
+class BatchStatusService {
 
     private static final List<Integer> PRIORITISED_STATUSES = Arrays.asList(
             DownloadStatus.CANCELED,
@@ -51,6 +51,7 @@ public class BatchStatusService {
     private static final int PRIORITISED_STATUSES_SIZE = PRIORITISED_STATUSES.size();
 
     private final ContentResolver resolver;
+    private final DownloadsUriProvider downloadsUriProvider;
     private final SystemFacade systemFacade;
     private final Uri batchesUri;
     private final Uri downloadsUri;
@@ -58,6 +59,7 @@ public class BatchStatusService {
 
     public BatchStatusService(ContentResolver resolver, DownloadsUriProvider downloadsUriProvider, SystemFacade systemFacade) {
         this.resolver = resolver;
+        this.downloadsUriProvider = downloadsUriProvider;
         this.systemFacade = systemFacade;
         this.batchesUri = downloadsUriProvider.getBatchesUri();
         this.downloadsUri = downloadsUriProvider.getAllDownloadsUri();
@@ -65,10 +67,8 @@ public class BatchStatusService {
 
     public int getBatchStatus(long batchId) {
         String[] projection = {DownloadContract.Batches.COLUMN_STATUS};
-        String selection = DownloadContract.Batches._ID + " = ?";
-        String[] selectionArgs = {String.valueOf(batchId)};
 
-        Cursor cursor = resolver.query(batchesUri, projection, selection, selectionArgs, null);
+        Cursor cursor = resolver.query(downloadsUriProvider.getSingleBatchUri(batchId), projection, null, null, null);
 
         if (cursor == null) {
             throw new RuntimeException("Failed to query batches for batchId = " + batchId);

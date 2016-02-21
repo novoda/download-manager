@@ -1,5 +1,6 @@
 package com.novoda.downloadmanager.lib;
 
+import android.content.ContentUris;
 import android.net.Uri;
 
 public class DownloadsUriProvider { // Why is this a singleton if all fields are final?
@@ -59,14 +60,6 @@ public class DownloadsUriProvider { // Why is this a singleton if all fields are
     }
 
     /**
-     * The content URI for accessing publicly accessible downloads (i.e., it requires no
-     * permissions to access this downloaded file)
-     */
-    public Uri getPubliclyAccessibleDownloadsUri() {
-        return publiclyAccessibleDownloadsUri;
-    }
-
-    /**
      * The content:// URI to access downloads and their batch data.
      */
     public Uri getDownloadsByBatchUri() {
@@ -86,6 +79,10 @@ public class DownloadsUriProvider { // Why is this a singleton if all fields are
      */
     public Uri getBatchesUri() {
         return batchesUri;
+    }
+
+    public Uri getSingleBatchUri(long batchId) {
+        return ContentUris.withAppendedId(batchesUri, batchId);
     }
 
     /**

@@ -37,7 +37,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 @RunWith(Enclosed.class)
-public class BatchStatusTests {
+public class BatchStatusServiceTests {
 
     private static final long ANY_BATCH_ID = 1;
     private static final long ANY_DOWNLOAD_ID = 2l;
@@ -53,33 +53,6 @@ public class BatchStatusTests {
     private static final Uri BATCHES_WITHOUT_PROGRESS_URI = mock(Uri.class);
 
     private static final long CURRENT_TIME_MILLIS = 1l;
-
-    @RunWith(PowerMockRunner.class)
-    @PrepareForTest({ContentUris.class, BatchStatusService.class})
-    public static class UpdateBatchStatus {
-
-        @Test
-        public void whenUpdatingABatchStatusThenTheCorrectBatchIsUpdated() throws Exception {
-            final ContentValues mockContentValues = mock(ContentValues.class);
-            whenNew(ContentValues.class).withAnyArguments().thenReturn(mockContentValues);
-            mockStatic(ContentUris.class);
-            when(ContentUris.withAppendedId(BATCHES_URI, ANY_BATCH_ID)).thenReturn(BATCH_BY_ID_URI);
-
-            ContentResolver mockResolver = mock(ContentResolver.class);
-            BatchRepository batchRepository = givenBatchRepositoryAtCurrentTime(mockResolver);
-
-            batchRepository.updateBatchStatus(ANY_BATCH_ID, ANY_BATCH_STATUS);
-
-            verify(mockContentValues).put(Batches.COLUMN_STATUS, ANY_BATCH_STATUS);
-            verify(mockContentValues).put(Batches.COLUMN_LAST_MODIFICATION, CURRENT_TIME_MILLIS);
-            verify(mockResolver).update(
-                    BATCH_BY_ID_URI,
-                    mockContentValues,
-                    null,
-                    null
-            );
-        }
-    }
 
     @RunWith(Parameterized.class)
     public static class GetBatchStatus {
@@ -127,14 +100,58 @@ public class BatchStatusTests {
 
         @Test
         public void givenAStatusThenThatStatusIsRetrieved() throws Exception {
-            BatchRepository repository = givenABatchWithStatuses(BATCHES_URI, expectedStatus);
+            BatchStatusService service = givenABatchWithStatus(ANY_BATCH_ID, expectedStatus);
 
-            int batchStatus = repository.getBatchStatus(ANY_BATCH_ID);
+            int batchStatus = service.getBatchStatus(ANY_BATCH_ID);
 
             assertThat(batchStatus).isEqualTo(expectedStatus);
         }
 
+        private BatchStatusService givenABatchWithStatus(long batchId, int status) {
+            SystemFacade mockSystemFacade = mock(SystemFacade.class);
+            DownloadsUriProvider mockDownloadsUriProvider = mock(DownloadsUriProvider.class);
+            when(mockDownloadsUriProvider.getSingleBatchUri(batchId)).thenReturn(BATCH_BY_ID_URI);
+
+            MockCursorWithStatuses mockCursorWithStatuses = new MockCursorWithStatuses(status);
+            ContentResolver mockResolver = mock(ContentResolver.class);
+
+            String[] projection = {Batches.COLUMN_STATUS};
+
+            when(mockResolver.query(BATCH_BY_ID_URI, projection, null, null, null))
+                    .thenReturn(mockCursorWithStatuses);
+            return new BatchStatusService(mockResolver, mockDownloadsUriProvider, mockSystemFacade);
+        }
+
     }
+
+    @RunWith(PowerMockRunner.class)
+    @PrepareForTest({ContentUris.class, BatchStatusService.class})
+    public static class UpdateBatchStatus {
+
+        @Test
+        public void whenUpdatingABatchStatusThenTheCorrectBatchIsUpdated() throws Exception {
+            final ContentValues mockContentValues = mock(ContentValues.class);
+            whenNew(ContentValues.class).withAnyArguments().thenReturn(mockContentValues);
+            mockStatic(ContentUris.class);
+            when(ContentUris.withAppendedId(BATCHES_URI, ANY_BATCH_ID)).thenReturn(BATCH_BY_ID_URI);
+
+            ContentResolver mockResolver = mock(ContentResolver.class);
+            BatchRepository batchRepository = givenBatchRepositoryAtCurrentTime(mockResolver);
+
+            batchRepository.updateBatchStatus(ANY_BATCH_ID, ANY_BATCH_STATUS);
+
+            verify(mockContentValues).put(Batches.COLUMN_STATUS, ANY_BATCH_STATUS);
+            verify(mockContentValues).put(Batches.COLUMN_LAST_MODIFICATION, CURRENT_TIME_MILLIS);
+            verify(mockResolver).update(
+                    BATCH_BY_ID_URI,
+                    mockContentValues,
+                    null,
+                    null
+            );
+        }
+    }
+
+
 
     @RunWith(Parameterized.class)
     public static class CalculateBatchStatus {
