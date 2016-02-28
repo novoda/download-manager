@@ -81,6 +81,9 @@ public class DownloadsUriProvider { // Why is this a singleton if all fields are
         return batchesUri;
     }
 
+    /**
+     * The content:// URI to access one download owned by the caller's UID.
+     */
     public Uri getSingleBatchUri(long batchId) {
         return ContentUris.withAppendedId(batchesUri, batchId);
     }
