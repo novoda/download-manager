@@ -16,7 +16,16 @@ public class BatchStartingService {
     }
 
     public boolean isBatchStartingForTheFirstTime(long batchId) {
+        Cursor cursor = queryForBatch(batchId);
 
+        try {
+            return batchHasNotAlreadyStarted(cursor);
+        } finally {
+            cursor.close();
+        }
+    }
+
+    private Cursor queryForBatch(long batchId) {
         String[] projection = {DownloadContract.Batches.COLUMN_HAS_STARTED};
 
         Cursor cursor = resolver.query(
@@ -26,21 +35,22 @@ public class BatchStartingService {
                 null,
                 null
         );
+
         if (cursor == null) {
             throw new RuntimeException("Failed to query for batch with batchId = " + batchId);
         }
 
-        try {
-            int hasStarted = DownloadContract.Batches.BATCH_HAS_NOT_STARTED;
+        return cursor;
+    }
 
-            if (cursor.moveToFirst()) {
-                hasStarted = Cursors.getInt(cursor, DownloadContract.Batches.COLUMN_HAS_STARTED);
-            }
+    private boolean batchHasNotAlreadyStarted(Cursor cursor) {
+        int hasStarted = DownloadContract.Batches.BATCH_HAS_NOT_STARTED;
 
-            return hasStarted != DownloadContract.Batches.BATCH_HAS_STARTED;
-        } finally {
-            cursor.close();
+        if (cursor.moveToFirst()) {
+            hasStarted = Cursors.getInt(cursor, DownloadContract.Batches.COLUMN_HAS_STARTED);
         }
+
+        return hasStarted != DownloadContract.Batches.BATCH_HAS_STARTED;
     }
 
     public void markMatchAsStarted(long batchId) {
