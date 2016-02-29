@@ -23,7 +23,7 @@ class BatchDeletionService {
         this.downloadsUri = downloadsUriProvider.getAllDownloadsUri();
     }
 
-    public void deleteMarkedBatchesFor(Collection<FileDownloadInfo> downloads) {
+    void deleteMarkedBatchesFor(Collection<FileDownloadInfo> downloads) {
         List<Long> batchIdsToDelete = findBatchIdsToDelete();
         if (batchIdsToDelete.isEmpty()) {
             return;
