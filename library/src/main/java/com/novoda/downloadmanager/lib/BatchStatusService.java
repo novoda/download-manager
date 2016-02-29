@@ -21,7 +21,7 @@ class BatchStatusService {
     private final Uri downloadsUri;
     private final Statuses statuses = new Statuses();
 
-    public BatchStatusService(ContentResolver resolver, DownloadsUriProvider downloadsUriProvider, SystemFacade systemFacade) {
+    BatchStatusService(ContentResolver resolver, DownloadsUriProvider downloadsUriProvider, SystemFacade systemFacade) {
         this.resolver = resolver;
         this.downloadsUriProvider = downloadsUriProvider;
         this.systemFacade = systemFacade;
@@ -29,7 +29,7 @@ class BatchStatusService {
         this.downloadsUri = downloadsUriProvider.getAllDownloadsUri();
     }
 
-    public int getBatchStatus(long batchId) {
+    int getBatchStatus(long batchId) {
         Cursor cursor = queryForStatus(batchId);
 
         try {
@@ -55,7 +55,7 @@ class BatchStatusService {
         return Cursors.getInt(cursor, DownloadContract.Batches.COLUMN_STATUS);
     }
 
-    public int calculateBatchStatusFromDownloads(long batchId) {
+    int calculateBatchStatusFromDownloads(long batchId) {
         Cursor cursor = queryForDownloadStatusesByBatch(batchId);
 
         statuses.clear();
@@ -94,7 +94,7 @@ class BatchStatusService {
         }
     }
 
-    public int updateBatchToPendingStatus(@NonNull List<String> batchIds) {
+    int updateBatchToPendingStatus(@NonNull List<String> batchIds) {
         ContentValues values = new ContentValues(1);
         values.put(DownloadContract.Batches.COLUMN_STATUS, DownloadStatus.PENDING);
 
@@ -113,25 +113,25 @@ class BatchStatusService {
 
     }
 
-    public void cancelBatch(long batchId) {
+    void cancelBatch(long batchId) {
         setBatchItemsCancelled(batchId);
         updateBatchStatus(batchId, DownloadStatus.CANCELED);
     }
 
-    public void updateBatchStatus(long batchId, int status) {
+    void updateBatchStatus(long batchId, int status) {
         ContentValues values = new ContentValues();
         values.put(DownloadContract.Batches.COLUMN_STATUS, status);
         values.put(DownloadContract.Batches.COLUMN_LAST_MODIFICATION, systemFacade.currentTimeMillis());
         resolver.update(ContentUris.withAppendedId(batchesUri, batchId), values, null, null);
     }
 
-    public void setBatchItemsCancelled(long batchId) {
+    void setBatchItemsCancelled(long batchId) {
         ContentValues values = new ContentValues(1);
         values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.CANCELED);
         resolver.update(downloadsUri, values, DownloadContract.Downloads.COLUMN_BATCH_ID + " = ?", new String[]{String.valueOf(batchId)});
     }
 
-    public void setBatchItemsFailed(long batchId, long excludedDownloadId) {
+    void setBatchItemsFailed(long batchId, long excludedDownloadId) {
         ContentValues values = new ContentValues(1);
         values.put(DownloadContract.Downloads.COLUMN_STATUS, DownloadStatus.BATCH_FAILED);
         String selection = DownloadContract.Downloads.COLUMN_BATCH_ID + " = ? AND " + DownloadContract.Downloads._ID + " <> ? ";
