@@ -6,16 +6,16 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
-public class BatchStartingService {
+class BatchStartingService {
     private final ContentResolver resolver;
     private Uri batchesUri;
 
-    public BatchStartingService(ContentResolver resolver, DownloadsUriProvider downloadsUriProvider) {
+    BatchStartingService(ContentResolver resolver, DownloadsUriProvider downloadsUriProvider) {
         this.resolver = resolver;
         this.batchesUri = downloadsUriProvider.getBatchesUri();
     }
 
-    public boolean isBatchStartingForTheFirstTime(long batchId) {
+    boolean isBatchStartingForTheFirstTime(long batchId) {
         Cursor cursor = queryForBatch(batchId);
 
         try {
@@ -53,7 +53,7 @@ public class BatchStartingService {
         return hasStarted != DownloadContract.Batches.BATCH_HAS_STARTED;
     }
 
-    public void markMatchAsStarted(long batchId) {
+    void markMatchAsStarted(long batchId) {
         ContentValues values = new ContentValues(1);
         values.put(DownloadContract.Batches.COLUMN_HAS_STARTED, DownloadContract.Batches.BATCH_HAS_STARTED);
         resolver.update(ContentUris.withAppendedId(batchesUri, batchId), values, null, null);
