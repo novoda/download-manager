@@ -22,22 +22,18 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BatchRepositoryTest {
+public class BatchRetrievalServiceTest {
 
     @Mock
     private ContentResolver mockContentResolver;
-    @Mock
-    private DownloadDeleter mockDownloadDeleter;
     @Mock
     private FileDownloadInfo mockFileDownloadInfo;
     @Mock
     private DownloadsUriProvider mockDownloadsUriProvider;
     @Mock
     private Uri mockUri;
-    @Mock
-    private SystemFacade mockSystem;
 
-    private BatchRepository batchRepository;
+    private BatchRetrievalService batchRetrievalService;
 
     @Before
     public void setUp() {
@@ -46,7 +42,7 @@ public class BatchRepositoryTest {
         when(mockDownloadsUriProvider.getBatchesUri()).thenReturn(mockUri);
         when(mockDownloadsUriProvider.getAllDownloadsUri()).thenReturn(mockUri);
 
-        this.batchRepository = new BatchRepository(mockContentResolver, mockDownloadDeleter, mockDownloadsUriProvider, mockSystem);
+        batchRetrievalService = new BatchRetrievalService(mockContentResolver, mockDownloadsUriProvider);
     }
 
     @Test
@@ -56,7 +52,7 @@ public class BatchRepositoryTest {
         Cursor batchCursor = new MockCursorWithBatchIds(Collections.singletonList(expectedBatchId));
         when(mockContentResolver.query(any(Uri.class), any(String[].class), anyString(), any(String[].class), anyString())).thenReturn(batchCursor);
 
-        DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(mockFileDownloadInfo);
+        DownloadBatch downloadBatch = batchRetrievalService.retrieveBatchFor(mockFileDownloadInfo);
 
         assertThat(downloadBatch.getBatchId()).isEqualTo(expectedBatchId);
     }
@@ -68,7 +64,7 @@ public class BatchRepositoryTest {
         Cursor emptyBatchCursor = mock(Cursor.class);
         when(mockContentResolver.query(any(Uri.class), any(String[].class), anyString(), any(String[].class), anyString())).thenReturn(emptyBatchCursor);
 
-        DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(mockFileDownloadInfo);
+        DownloadBatch downloadBatch = batchRetrievalService.retrieveBatchFor(mockFileDownloadInfo);
 
         assertThat(downloadBatch).isEqualTo(DownloadBatch.DELETED);
     }
@@ -77,7 +73,7 @@ public class BatchRepositoryTest {
     public void givenABatchQueryWhenQueryingThenTheQueryIsUsed() {
         BatchQuery query = new BatchQuery.Builder().withId(12).build();
 
-        batchRepository.retrieveFor(query);
+        batchRetrievalService.retrieveFor(query);
 
         String selection = query.getSelection();
         String[] selectionArguments = query.getSelectionArguments();
