@@ -42,7 +42,7 @@ public class BatchStartingTest {
     private static final long ANY_BATCH_ID = 1l;
     public static final int SQL_TRUE = 1;
 
-    private BatchRepository repository;
+    private BatchStartingService batchStatusService;
     private Cursor mockCursor;
     private ContentResolver mockContentResolver;
 
@@ -52,11 +52,9 @@ public class BatchStartingTest {
         when(ContentUris.withAppendedId(BATCHES_URI, ANY_BATCH_ID)).thenReturn(BATCH_BY_ID_URI);
         mockContentResolver = mock(ContentResolver.class);
 
-        repository = new BatchRepository(
+        batchStatusService = new BatchStartingService(
                 mockContentResolver,
-                null,
-                givenDownloadsUriProvider(),
-                null
+                givenDownloadsUriProvider()
         );
 
         mockCursor = mock(Cursor.class);
@@ -76,7 +74,7 @@ public class BatchStartingTest {
     public void whenQueryingForStartedBatchThenResultIsFalse() throws Exception {
         when(mockCursor.getInt(0)).thenReturn(1);
 
-        boolean hasStarted = repository.isBatchStartingForTheFirstTime(ANY_BATCH_ID);
+        boolean hasStarted = batchStatusService.isBatchStartingForTheFirstTime(ANY_BATCH_ID);
 
         assertThat(hasStarted).isFalse();
     }
@@ -85,7 +83,7 @@ public class BatchStartingTest {
     public void whenQueryingForNotStartedBatchThenResultIsTrue() throws Exception {
         when(mockCursor.getInt(0)).thenReturn(0);
 
-        boolean hasStarted = repository.isBatchStartingForTheFirstTime(ANY_BATCH_ID);
+        boolean hasStarted = batchStatusService.isBatchStartingForTheFirstTime(ANY_BATCH_ID);
 
         assertThat(hasStarted).isTrue();
     }
@@ -96,7 +94,7 @@ public class BatchStartingTest {
         whenNew(ContentValues.class).withAnyArguments()
                 .thenReturn(mockContentValues);
 
-        repository.markBatchAsStarted(ANY_BATCH_ID);
+        batchStatusService.markBatchAsStarted(ANY_BATCH_ID);
 
         InOrder order = inOrder(mockContentValues, mockContentResolver);
 
