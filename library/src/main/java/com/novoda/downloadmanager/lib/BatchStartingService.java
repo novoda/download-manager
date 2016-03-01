@@ -53,7 +53,7 @@ class BatchStartingService {
         return hasStarted != DownloadContract.Batches.BATCH_HAS_STARTED;
     }
 
-    void markMatchAsStarted(long batchId) {
+    void markBatchAsStarted(long batchId) {
         ContentValues values = new ContentValues(1);
         values.put(DownloadContract.Batches.COLUMN_HAS_STARTED, DownloadContract.Batches.BATCH_HAS_STARTED);
         resolver.update(ContentUris.withAppendedId(batchesUri, batchId), values, null, null);

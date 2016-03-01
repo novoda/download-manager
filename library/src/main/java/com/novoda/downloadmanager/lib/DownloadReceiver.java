@@ -43,7 +43,7 @@ public class DownloadReceiver extends BroadcastReceiver { // TODO split this int
     }
 
     private final DownloadsUriProvider downloadsUriProvider;
-    private BatchRepository batchRepository;
+    private BatchFacade batchFacade;
 
     public DownloadReceiver() {
         downloadsUriProvider = DownloadsUriProvider.getInstance();
@@ -54,7 +54,7 @@ public class DownloadReceiver extends BroadcastReceiver { // TODO split this int
         ContentResolver contentResolver = context.getContentResolver();
         DownloadDeleter downloadDeleter = new DownloadDeleter(contentResolver);
         RealSystemFacade systemFacade = new RealSystemFacade(context, new Clock());
-        batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
+        batchFacade = BatchFacade.from(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
 
         switch (intent.getAction()) {
             case ACTION_BOOT_COMPLETED:
@@ -180,7 +180,7 @@ public class DownloadReceiver extends BroadcastReceiver { // TODO split this int
      * Mark the given batch as being cancelled by user so it will be cancelled by the running thread.
      */
     private void cancelBatchThroughDatabaseState(long batchId) {
-        batchRepository.cancelBatch(batchId);
+        batchFacade.cancelBatch(batchId);
     }
 
     private long getBatchId(Intent intent) {

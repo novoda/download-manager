@@ -7,18 +7,34 @@ import android.support.annotation.NonNull;
 import java.util.Collection;
 import java.util.List;
 
-class BatchRepository {
+class BatchFacade {
 
     private final BatchStatusService batchStatusService;
     private final BatchStartingService batchStartingService;
     private final BatchDeletionService batchDeletionService;
     private final BatchRetrievalService batchRetrievalService;
+    
+    static BatchFacade from(ContentResolver resolver,
+                            DownloadDeleter downloadDeleter,
+                            DownloadsUriProvider downloadsUriProvider,
+                            SystemFacade systemFacade) {
+        BatchStatusService batchStatusService = new BatchStatusService(resolver, downloadsUriProvider, systemFacade);
+        BatchStartingService batchStartingService = new BatchStartingService(resolver, downloadsUriProvider);
+        BatchDeletionService batchDeletionService = new BatchDeletionService(downloadDeleter, resolver, downloadsUriProvider);
+        BatchRetrievalService batchRetrievalService = new BatchRetrievalService(resolver, downloadsUriProvider);
 
-    BatchRepository(ContentResolver resolver, DownloadDeleter downloadDeleter, DownloadsUriProvider downloadsUriProvider, SystemFacade systemFacade) {
-        this.batchStatusService = new BatchStatusService(resolver, downloadsUriProvider, systemFacade);
-        this.batchStartingService = new BatchStartingService(resolver, downloadsUriProvider);
-        this.batchDeletionService = new BatchDeletionService(downloadDeleter, resolver, downloadsUriProvider);
-        this.batchRetrievalService = new BatchRetrievalService(resolver, downloadsUriProvider);
+        return new BatchFacade(batchStatusService, batchStartingService, batchDeletionService, batchRetrievalService);
+
+    }
+
+    BatchFacade(BatchStatusService batchStatusService,
+                BatchStartingService batchStartingService,
+                BatchDeletionService batchDeletionService,
+                BatchRetrievalService batchRetrievalService) {
+        this.batchStatusService = batchStatusService;
+        this.batchStartingService = batchStartingService;
+        this.batchDeletionService = batchDeletionService;
+        this.batchRetrievalService = batchRetrievalService;
     }
 
     void updateBatchStatus(long batchId, int status) {
@@ -57,7 +73,7 @@ class BatchRepository {
     }
 
     public void markBatchAsStarted(long batchId) {
-        batchStartingService.markMatchAsStarted(batchId);
+        batchStartingService.markBatchAsStarted(batchId);
     }
 
     public DownloadBatch retrieveBatchFor(FileDownloadInfo download) {
