@@ -2,9 +2,10 @@ package com.novoda.downloadmanager.lib;
 
 import android.database.Cursor;
 
-class Cursors {
-    private Cursors() {
+final class Cursors {
 
+    private Cursors() {
+        // no instances
     }
 
     public static int getInt(Cursor c, String column) {
@@ -22,4 +23,5 @@ class Cursors {
     private static int columnIndexFor(Cursor c, String column) {
         return c.getColumnIndexOrThrow(column);
     }
+
 }
