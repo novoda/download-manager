@@ -4,15 +4,14 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.net.Uri;
 
 class BatchStartingRepository {
     private final ContentResolver resolver;
-    private Uri batchesUri;
+    private final DownloadsUriProvider downloadsUriProvider;
 
     BatchStartingRepository(ContentResolver resolver, DownloadsUriProvider downloadsUriProvider) {
         this.resolver = resolver;
-        this.batchesUri = downloadsUriProvider.getBatchesUri();
+        this.downloadsUriProvider = downloadsUriProvider;
     }
 
     boolean isBatchStartingForTheFirstTime(long batchId) {
@@ -29,7 +28,7 @@ class BatchStartingRepository {
         String[] projection = {DownloadContract.Batches.COLUMN_HAS_STARTED};
 
         Cursor cursor = resolver.query(
-                ContentUris.withAppendedId(batchesUri, batchId),
+                ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), batchId),
                 projection,
                 null,
                 null,
@@ -56,6 +55,6 @@ class BatchStartingRepository {
     void markBatchAsStarted(long batchId) {
         ContentValues values = new ContentValues(1);
         values.put(DownloadContract.Batches.COLUMN_HAS_STARTED, DownloadContract.Batches.BATCH_HAS_STARTED);
-        resolver.update(ContentUris.withAppendedId(batchesUri, batchId), values, null, null);
+        resolver.update(ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), batchId), values, null, null);
     }
 }
