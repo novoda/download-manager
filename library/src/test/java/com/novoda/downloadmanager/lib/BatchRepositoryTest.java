@@ -27,31 +27,31 @@ public class BatchRepositoryTest {
     private static final BatchQuery ANY_BATCH_QUERY = new BatchQuery("any-selection", null, "any-sort-order");
 
     @Mock
-    private BatchStatusService batchStatusService;
+    private BatchStatusRepository batchStatusRepository;
     @Mock
-    private BatchStartingService batchStartingService;
+    private BatchStartingRepository batchStartingRepository;
     @Mock
-    private BatchDeletionService batchDeletionService;
+    private BatchDeletionRepository batchDeletionRepository;
     @Mock
-    private BatchRetrievalService batchRetrievalService;
+    private BatchRetrievalRepository batchRetrievalRepository;
 
     private BatchRepository batchRepository;
 
     @Before
     public void setUp() throws Exception {
-        batchRepository = new BatchRepository(batchStatusService, batchStartingService, batchDeletionService, batchRetrievalService);
+        batchRepository = new BatchRepository(batchStatusRepository, batchStartingRepository, batchDeletionRepository, batchRetrievalRepository);
     }
 
     @Test
     public void testUpdateBatchStatus() throws Exception {
         batchRepository.updateBatchStatus(ANY_BATCH_ID, ANY_STATUS);
 
-        verify(batchStatusService).updateBatchStatus(ANY_BATCH_ID, ANY_STATUS);
+        verify(batchStatusRepository).updateBatchStatus(ANY_BATCH_ID, ANY_STATUS);
     }
 
     @Test
     public void testGetBatchStatus() throws Exception {
-        when(batchStatusService.getBatchStatus(ANY_BATCH_ID)).thenReturn(ANY_STATUS);
+        when(batchStatusRepository.getBatchStatus(ANY_BATCH_ID)).thenReturn(ANY_STATUS);
 
         int status = batchRepository.getBatchStatus(ANY_BATCH_ID);
 
@@ -60,7 +60,7 @@ public class BatchRepositoryTest {
 
     @Test
     public void testCalculateBatchStatus() throws Exception {
-        when(batchStatusService.calculateBatchStatusFromDownloads(ANY_BATCH_ID)).thenReturn(ANY_STATUS);
+        when(batchStatusRepository.calculateBatchStatusFromDownloads(ANY_BATCH_ID)).thenReturn(ANY_STATUS);
 
         int status = batchRepository.calculateBatchStatus(ANY_BATCH_ID);
 
@@ -71,39 +71,39 @@ public class BatchRepositoryTest {
     public void testSetBatchItemsCancelled() throws Exception {
         batchRepository.setBatchItemsCancelled(ANY_BATCH_ID);
 
-        verify(batchStatusService).setBatchItemsCancelled(ANY_BATCH_ID);
+        verify(batchStatusRepository).setBatchItemsCancelled(ANY_BATCH_ID);
     }
 
     @Test
     public void testCancelBatch() throws Exception {
         batchRepository.cancelBatch(ANY_BATCH_ID);
 
-        verify(batchStatusService).cancelBatch(ANY_BATCH_ID);
+        verify(batchStatusRepository).cancelBatch(ANY_BATCH_ID);
     }
 
     @Test
     public void testSetBatchItemsFailed() throws Exception {
         batchRepository.setBatchItemsFailed(ANY_BATCH_ID, ANY_DOWNLOAD_ID);
 
-        verify(batchStatusService).setBatchItemsFailed(ANY_BATCH_ID, ANY_DOWNLOAD_ID);
+        verify(batchStatusRepository).setBatchItemsFailed(ANY_BATCH_ID, ANY_DOWNLOAD_ID);
     }
 
     @Test
     public void testUpdateBatchesToPendingStatus() throws Exception {
         List<String> batchIdsToBeUnlocked = Collections.singletonList(String.valueOf(ANY_BATCH_ID));
         int expectedModifiedCount = 1;
-        when(batchStatusService.updateBatchToPendingStatus(batchIdsToBeUnlocked)).thenReturn(expectedModifiedCount);
+        when(batchStatusRepository.updateBatchToPendingStatus(batchIdsToBeUnlocked)).thenReturn(expectedModifiedCount);
 
         int modified = batchRepository.updateBatchesToPendingStatus(batchIdsToBeUnlocked);
 
-        verify(batchStatusService).updateBatchToPendingStatus(batchIdsToBeUnlocked);
+        verify(batchStatusRepository).updateBatchToPendingStatus(batchIdsToBeUnlocked);
         assertThat(modified).isEqualTo(expectedModifiedCount);
     }
 
     @Test
     public void testIsBatchStartingForTheFirstTime() throws Exception {
         boolean batchIsStartingForFirstTime = true;
-        when(batchStartingService.isBatchStartingForTheFirstTime(ANY_BATCH_ID)).thenReturn(batchIsStartingForFirstTime);
+        when(batchStartingRepository.isBatchStartingForTheFirstTime(ANY_BATCH_ID)).thenReturn(batchIsStartingForFirstTime);
 
         boolean isStartingForTheFirstTime = batchRepository.isBatchStartingForTheFirstTime(ANY_BATCH_ID);
 
@@ -114,13 +114,13 @@ public class BatchRepositoryTest {
     public void testMarkBatchAsStarted() throws Exception {
         batchRepository.markBatchAsStarted(ANY_BATCH_ID);
 
-        verify(batchStartingService).markBatchAsStarted(ANY_BATCH_ID);
+        verify(batchStartingRepository).markBatchAsStarted(ANY_BATCH_ID);
     }
 
     @Test
     public void testRetrieveBatchFor() throws Exception {
         DownloadBatch expectedDownloadBatch = mock(DownloadBatch.class);
-        when(batchRetrievalService.retrieveBatchFor(ANY_FILE_DOWNLOAD_INFO)).thenReturn(expectedDownloadBatch);
+        when(batchRetrievalRepository.retrieveBatchFor(ANY_FILE_DOWNLOAD_INFO)).thenReturn(expectedDownloadBatch);
 
         DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(ANY_FILE_DOWNLOAD_INFO);
 
@@ -131,7 +131,7 @@ public class BatchRepositoryTest {
     public void testRetrieveBatchesFor() throws Exception {
         List<FileDownloadInfo> downloads = givenDownloads();
         List<DownloadBatch> expectedBatches = Collections.singletonList(mock(DownloadBatch.class));
-        when(batchRetrievalService.retrieveBatchesFor(downloads)).thenReturn(expectedBatches);
+        when(batchRetrievalRepository.retrieveBatchesFor(downloads)).thenReturn(expectedBatches);
 
         List<DownloadBatch> batches = batchRepository.retrieveBatchesFor(downloads);
 
@@ -141,7 +141,7 @@ public class BatchRepositoryTest {
     @Test
     public void testRetrieveFor() throws Exception {
         Cursor expectedCursor = mock(Cursor.class);
-        when(batchRetrievalService.retrieveFor(ANY_BATCH_QUERY)).thenReturn(expectedCursor);
+        when(batchRetrievalRepository.retrieveFor(ANY_BATCH_QUERY)).thenReturn(expectedCursor);
 
         Cursor cursor = batchRepository.retrieveFor(ANY_BATCH_QUERY);
 
@@ -153,7 +153,7 @@ public class BatchRepositoryTest {
         List<FileDownloadInfo> downloads = givenDownloads();
         batchRepository.deleteMarkedBatchesFor(downloads);
 
-        verify(batchDeletionService).deleteMarkedBatchesFor(downloads);
+        verify(batchDeletionRepository).deleteMarkedBatchesFor(downloads);
     }
 
     @NonNull

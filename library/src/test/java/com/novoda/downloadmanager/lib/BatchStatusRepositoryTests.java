@@ -37,7 +37,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 @RunWith(Enclosed.class)
-public class BatchStatusServiceTests {
+public class BatchStatusRepositoryTests {
 
     private static final long ANY_BATCH_ID = 1;
     private static final long ANY_DOWNLOAD_ID = 2l;
@@ -100,14 +100,14 @@ public class BatchStatusServiceTests {
 
         @Test
         public void givenAStatusThenThatStatusIsRetrieved() throws Exception {
-            BatchStatusService service = givenABatchWithStatus(ANY_BATCH_ID, expectedStatus);
+            BatchStatusRepository service = givenABatchWithStatus(ANY_BATCH_ID, expectedStatus);
 
             int batchStatus = service.getBatchStatus(ANY_BATCH_ID);
 
             assertThat(batchStatus).isEqualTo(expectedStatus);
         }
 
-        private BatchStatusService givenABatchWithStatus(long batchId, int status) {
+        private BatchStatusRepository givenABatchWithStatus(long batchId, int status) {
             SystemFacade mockSystemFacade = mock(SystemFacade.class);
             DownloadsUriProvider mockDownloadsUriProvider = mock(DownloadsUriProvider.class);
             when(mockDownloadsUriProvider.getSingleBatchUri(batchId)).thenReturn(BATCH_BY_ID_URI);
@@ -119,7 +119,7 @@ public class BatchStatusServiceTests {
 
             when(mockResolver.query(BATCH_BY_ID_URI, projection, null, null, null))
                     .thenReturn(mockCursorWithStatuses);
-            return new BatchStatusService(mockResolver, mockDownloadsUriProvider, mockSystemFacade);
+            return new BatchStatusRepository(mockResolver, mockDownloadsUriProvider, mockSystemFacade);
         }
 
     }
@@ -149,14 +149,14 @@ public class BatchStatusServiceTests {
 
         @Test
         public void calculateCorrectStatusFromStatuses() throws Exception {
-            BatchStatusService repository = givenABatchWithStatuses(statuses);
+            BatchStatusRepository repository = givenABatchWithStatuses(statuses);
 
             int batchStatus = repository.calculateBatchStatusFromDownloads(ANY_BATCH_ID);
 
             assertThat(batchStatus).isEqualTo(expectedStatus);
         }
 
-        private BatchStatusService givenABatchWithStatuses(Integer... statuses) throws Exception {
+        private BatchStatusRepository givenABatchWithStatuses(Integer... statuses) throws Exception {
             DownloadsUriProvider downloadsUriProvider = givenDownloadsUriProvider();
 
             MockCursorWithStatuses mockCursorWithStatuses = new MockCursorWithStatuses(statuses);
@@ -165,12 +165,12 @@ public class BatchStatusServiceTests {
             when(mockResolver.query(same(downloadsUriProvider.getAllDownloadsUri()), any(String[].class), anyString(), any(String[].class), anyString()))
                     .thenReturn(mockCursorWithStatuses);
 
-            return new BatchStatusService(mockResolver, downloadsUriProvider, mock(SystemFacade.class));
+            return new BatchStatusRepository(mockResolver, downloadsUriProvider, mock(SystemFacade.class));
         }
     }
 
     @RunWith(PowerMockRunner.class)
-    @PrepareForTest({ContentUris.class, BatchStatusService.class})
+    @PrepareForTest({ContentUris.class, BatchStatusRepository.class})
     public static class UpdateBatchStatus {
 
         @Test
@@ -181,9 +181,9 @@ public class BatchStatusServiceTests {
             when(ContentUris.withAppendedId(BATCHES_URI, ANY_BATCH_ID)).thenReturn(BATCH_BY_ID_URI);
 
             ContentResolver mockResolver = mock(ContentResolver.class);
-            BatchStatusService batchStatusService = givenBatchStatusServiceAtCurrentTime(mockResolver);
+            BatchStatusRepository batchStatusRepository = givenBatchStatusServiceAtCurrentTime(mockResolver);
 
-            batchStatusService.updateBatchStatus(ANY_BATCH_ID, ANY_BATCH_STATUS);
+            batchStatusRepository.updateBatchStatus(ANY_BATCH_ID, ANY_BATCH_STATUS);
 
             verify(mockContentValues).put(Batches.COLUMN_STATUS, ANY_BATCH_STATUS);
             verify(mockContentValues).put(Batches.COLUMN_LAST_MODIFICATION, CURRENT_TIME_MILLIS);
@@ -197,12 +197,12 @@ public class BatchStatusServiceTests {
     }
 
     @RunWith(PowerMockRunner.class)
-    @PrepareForTest({ContentUris.class, BatchStatusService.class})
+    @PrepareForTest({ContentUris.class, BatchStatusRepository.class})
     public static class CancelBatch {
 
         private ContentValues mockContentValues;
         private ContentResolver mockResolver;
-        private BatchStatusService batchStatusService;
+        private BatchStatusRepository batchStatusRepository;
 
         @Before
         public void setUp() throws Exception {
@@ -213,12 +213,12 @@ public class BatchStatusServiceTests {
             whenNew(ContentValues.class).withAnyArguments().thenReturn(mockContentValues);
 
             mockResolver = mock(ContentResolver.class);
-            batchStatusService = givenBatchStatusServiceAtCurrentTime(mockResolver);
+            batchStatusRepository = givenBatchStatusServiceAtCurrentTime(mockResolver);
         }
 
         @Test
         public void whenCancellingBatchItemsThenCorrectDownloadsAreCancelled() throws Exception {
-            batchStatusService.setBatchItemsCancelled(ANY_BATCH_ID);
+            batchStatusRepository.setBatchItemsCancelled(ANY_BATCH_ID);
 
             InOrder order = inOrder(mockContentValues, mockResolver);
             thenDownloadsAreCancelled(ANY_BATCH_ID, order);
@@ -226,7 +226,7 @@ public class BatchStatusServiceTests {
 
         @Test
         public void whenCancellingBatchThenCorrectBatchAndDownloadsAreCancelled() throws Exception {
-            batchStatusService.cancelBatch(ANY_BATCH_ID);
+            batchStatusRepository.cancelBatch(ANY_BATCH_ID);
 
             InOrder order = inOrder(mockContentValues, mockResolver);
 
@@ -251,7 +251,7 @@ public class BatchStatusServiceTests {
     }
 
     @RunWith(PowerMockRunner.class)
-    @PrepareForTest({BatchStatusService.class})
+    @PrepareForTest({BatchStatusRepository.class})
     public static class SetBatchItemsFailed {
 
         @Test
@@ -260,9 +260,9 @@ public class BatchStatusServiceTests {
             whenNew(ContentValues.class).withAnyArguments().thenReturn(mockContentValues);
 
             ContentResolver mockResolver = mock(ContentResolver.class);
-            BatchStatusService batchStatusService = givenBatchStatusServiceAtCurrentTime(mockResolver);
+            BatchStatusRepository batchStatusRepository = givenBatchStatusServiceAtCurrentTime(mockResolver);
 
-            batchStatusService.setBatchItemsFailed(ANY_BATCH_ID, ANY_DOWNLOAD_ID);
+            batchStatusRepository.setBatchItemsFailed(ANY_BATCH_ID, ANY_DOWNLOAD_ID);
 
             verify(mockContentValues).put(Downloads.COLUMN_STATUS, DownloadStatus.BATCH_FAILED);
             verify(mockResolver).update(
@@ -275,7 +275,7 @@ public class BatchStatusServiceTests {
     }
 
     @RunWith(PowerMockRunner.class)
-    @PrepareForTest({BatchStatusService.class, StringUtils.class})
+    @PrepareForTest({BatchStatusRepository.class, StringUtils.class})
     public static class UpdateBatchToPendingStatus {
 
         @Test
@@ -288,9 +288,9 @@ public class BatchStatusServiceTests {
             when(StringUtils.join(anyCollection(), anyString())).thenReturn(where);
 
             ContentResolver mockResolver = mock(ContentResolver.class);
-            BatchStatusService batchStatusService = givenBatchStatusServiceAtCurrentTime(mockResolver);
+            BatchStatusRepository batchStatusRepository = givenBatchStatusServiceAtCurrentTime(mockResolver);
 
-            batchStatusService.updateBatchToPendingStatus(Collections.singletonList(String.valueOf(ANY_BATCH_ID)));
+            batchStatusRepository.updateBatchToPendingStatus(Collections.singletonList(String.valueOf(ANY_BATCH_ID)));
 
             verify(mockContentValues).put(Batches.COLUMN_STATUS, DownloadStatus.PENDING);
             verify(mockResolver).update(
@@ -303,12 +303,12 @@ public class BatchStatusServiceTests {
     }
 
     @NonNull
-    private static BatchStatusService givenBatchStatusServiceAtCurrentTime(final ContentResolver mockResolver) throws Exception {
+    private static BatchStatusRepository givenBatchStatusServiceAtCurrentTime(final ContentResolver mockResolver) throws Exception {
         DownloadsUriProvider downloadsUriProvider = givenDownloadsUriProvider();
         SystemFacade mockSystemFacade = mock(SystemFacade.class);
         when(mockSystemFacade.currentTimeMillis()).thenReturn(CURRENT_TIME_MILLIS);
 
-        return new BatchStatusService(mockResolver, downloadsUriProvider, mockSystemFacade);
+        return new BatchStatusRepository(mockResolver, downloadsUriProvider, mockSystemFacade);
     }
 
     private static DownloadsUriProvider givenDownloadsUriProvider() {

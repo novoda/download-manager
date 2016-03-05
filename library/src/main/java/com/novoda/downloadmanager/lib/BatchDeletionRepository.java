@@ -11,13 +11,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-class BatchDeletionService {
+class BatchDeletionRepository {
 
     private final DownloadDeleter downloadDeleter;
     private ContentResolver resolver;
     private final Uri downloadsUri;
 
-    BatchDeletionService(DownloadDeleter downloadDeleter, ContentResolver resolver, DownloadsUriProvider downloadsUriProvider) {
+    BatchDeletionRepository(DownloadDeleter downloadDeleter, ContentResolver resolver, DownloadsUriProvider downloadsUriProvider) {
         this.downloadDeleter = downloadDeleter;
         this.resolver = resolver;
         this.downloadsUri = downloadsUriProvider.getAllDownloadsUri();

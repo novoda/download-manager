@@ -9,86 +9,86 @@ import java.util.List;
 
 class BatchRepository {
 
-    private final BatchStatusService batchStatusService;
-    private final BatchStartingService batchStartingService;
-    private final BatchDeletionService batchDeletionService;
-    private final BatchRetrievalService batchRetrievalService;
+    private final BatchStatusRepository batchStatusRepository;
+    private final BatchStartingRepository batchStartingRepository;
+    private final BatchDeletionRepository batchDeletionRepository;
+    private final BatchRetrievalRepository batchRetrievalRepository;
     
     static BatchRepository from(ContentResolver resolver,
                             DownloadDeleter downloadDeleter,
                             DownloadsUriProvider downloadsUriProvider,
                             SystemFacade systemFacade) {
-        BatchStatusService batchStatusService = new BatchStatusService(resolver, downloadsUriProvider, systemFacade);
-        BatchStartingService batchStartingService = new BatchStartingService(resolver, downloadsUriProvider);
-        BatchDeletionService batchDeletionService = new BatchDeletionService(downloadDeleter, resolver, downloadsUriProvider);
-        BatchRetrievalService batchRetrievalService = new BatchRetrievalService(resolver, downloadsUriProvider);
+        BatchStatusRepository batchStatusRepository = new BatchStatusRepository(resolver, downloadsUriProvider, systemFacade);
+        BatchStartingRepository batchStartingRepository = new BatchStartingRepository(resolver, downloadsUriProvider);
+        BatchDeletionRepository batchDeletionRepository = new BatchDeletionRepository(downloadDeleter, resolver, downloadsUriProvider);
+        BatchRetrievalRepository batchRetrievalRepository = new BatchRetrievalRepository(resolver, downloadsUriProvider);
 
-        return new BatchRepository(batchStatusService, batchStartingService, batchDeletionService, batchRetrievalService);
+        return new BatchRepository(batchStatusRepository, batchStartingRepository, batchDeletionRepository, batchRetrievalRepository);
 
     }
 
-    BatchRepository(BatchStatusService batchStatusService,
-                    BatchStartingService batchStartingService,
-                    BatchDeletionService batchDeletionService,
-                    BatchRetrievalService batchRetrievalService) {
-        this.batchStatusService = batchStatusService;
-        this.batchStartingService = batchStartingService;
-        this.batchDeletionService = batchDeletionService;
-        this.batchRetrievalService = batchRetrievalService;
+    BatchRepository(BatchStatusRepository batchStatusRepository,
+                    BatchStartingRepository batchStartingRepository,
+                    BatchDeletionRepository batchDeletionRepository,
+                    BatchRetrievalRepository batchRetrievalRepository) {
+        this.batchStatusRepository = batchStatusRepository;
+        this.batchStartingRepository = batchStartingRepository;
+        this.batchDeletionRepository = batchDeletionRepository;
+        this.batchRetrievalRepository = batchRetrievalRepository;
     }
 
     void updateBatchStatus(long batchId, int status) {
-        batchStatusService.updateBatchStatus(batchId, status);
+        batchStatusRepository.updateBatchStatus(batchId, status);
     }
 
     int getBatchStatus(long batchId) {
-        return batchStatusService.getBatchStatus(batchId);
+        return batchStatusRepository.getBatchStatus(batchId);
     }
 
     int calculateBatchStatus(long batchId) {
-        return batchStatusService.calculateBatchStatusFromDownloads(batchId);
+        return batchStatusRepository.calculateBatchStatusFromDownloads(batchId);
     }
 
     public void setBatchItemsCancelled(long batchId) {
-        batchStatusService.setBatchItemsCancelled(batchId);
+        batchStatusRepository.setBatchItemsCancelled(batchId);
     }
 
     public void cancelBatch(long batchId) {
-        batchStatusService.cancelBatch(batchId);
+        batchStatusRepository.cancelBatch(batchId);
     }
 
     public void setBatchItemsFailed(long batchId, long downloadId) {
-        batchStatusService.setBatchItemsFailed(batchId, downloadId);
+        batchStatusRepository.setBatchItemsFailed(batchId, downloadId);
     }
 
     /**
      * @return Number of rows updated
      */
     int updateBatchesToPendingStatus(@NonNull List<String> batchIdsToBeUnlocked) {
-        return batchStatusService.updateBatchToPendingStatus(batchIdsToBeUnlocked);
+        return batchStatusRepository.updateBatchToPendingStatus(batchIdsToBeUnlocked);
     }
 
     boolean isBatchStartingForTheFirstTime(long batchId) {
-        return batchStartingService.isBatchStartingForTheFirstTime(batchId);
+        return batchStartingRepository.isBatchStartingForTheFirstTime(batchId);
     }
 
     public void markBatchAsStarted(long batchId) {
-        batchStartingService.markBatchAsStarted(batchId);
+        batchStartingRepository.markBatchAsStarted(batchId);
     }
 
     public DownloadBatch retrieveBatchFor(FileDownloadInfo download) {
-        return batchRetrievalService.retrieveBatchFor(download);
+        return batchRetrievalRepository.retrieveBatchFor(download);
     }
 
     public List<DownloadBatch> retrieveBatchesFor(Collection<FileDownloadInfo> downloads) {
-        return batchRetrievalService.retrieveBatchesFor(downloads);
+        return batchRetrievalRepository.retrieveBatchesFor(downloads);
     }
 
     public Cursor retrieveFor(BatchQuery query) {
-        return batchRetrievalService.retrieveFor(query);
+        return batchRetrievalRepository.retrieveFor(query);
     }
 
     public void deleteMarkedBatchesFor(Collection<FileDownloadInfo> downloads) {
-        batchDeletionService.deleteMarkedBatchesFor(downloads);
+        batchDeletionRepository.deleteMarkedBatchesFor(downloads);
     }
 }

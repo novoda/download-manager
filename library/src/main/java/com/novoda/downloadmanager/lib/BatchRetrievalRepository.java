@@ -11,12 +11,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-class BatchRetrievalService {
+class BatchRetrievalRepository {
     private final ContentResolver resolver;
     private final DownloadsUriProvider downloadsUriProvider;
 
-    BatchRetrievalService(ContentResolver resolver,
-                          DownloadsUriProvider downloadsUriProvider) {
+    BatchRetrievalRepository(ContentResolver resolver,
+                             DownloadsUriProvider downloadsUriProvider) {
         this.resolver = resolver;
         this.downloadsUriProvider = downloadsUriProvider;
     }

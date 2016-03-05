@@ -12,7 +12,7 @@ import com.novoda.notils.string.StringUtils;
 import java.util.Arrays;
 import java.util.List;
 
-class BatchStatusService {
+class BatchStatusRepository {
 
     private final ContentResolver resolver;
     private final DownloadsUriProvider downloadsUriProvider;
@@ -21,7 +21,7 @@ class BatchStatusService {
     private final Uri downloadsUri;
     private final Statuses statuses = new Statuses();
 
-    BatchStatusService(ContentResolver resolver, DownloadsUriProvider downloadsUriProvider, SystemFacade systemFacade) {
+    BatchStatusRepository(ContentResolver resolver, DownloadsUriProvider downloadsUriProvider, SystemFacade systemFacade) {
         this.resolver = resolver;
         this.downloadsUriProvider = downloadsUriProvider;
         this.systemFacade = systemFacade;

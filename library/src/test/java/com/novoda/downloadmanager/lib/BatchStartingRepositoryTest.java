@@ -27,8 +27,8 @@ import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ContentUris.class, BatchStartingService.class})
-public class BatchStartingTest {
+@PrepareForTest({ContentUris.class, BatchStartingRepository.class})
+public class BatchStartingRepositoryTest {
 
     private static final Uri ACCESSIBLE_DOWNLOADS_URI = mock(Uri.class);
     private static final Uri DOWNLOADS_BY_BATCH_URI = mock(Uri.class);
@@ -42,7 +42,7 @@ public class BatchStartingTest {
     private static final long ANY_BATCH_ID = 1l;
     public static final int SQL_TRUE = 1;
 
-    private BatchStartingService batchStatusService;
+    private BatchStartingRepository batchStatusService;
     private Cursor mockCursor;
     private ContentResolver mockContentResolver;
 
@@ -52,7 +52,7 @@ public class BatchStartingTest {
         when(ContentUris.withAppendedId(BATCHES_URI, ANY_BATCH_ID)).thenReturn(BATCH_BY_ID_URI);
         mockContentResolver = mock(ContentResolver.class);
 
-        batchStatusService = new BatchStartingService(
+        batchStatusService = new BatchStartingRepository(
                 mockContentResolver,
                 givenDownloadsUriProvider()
         );

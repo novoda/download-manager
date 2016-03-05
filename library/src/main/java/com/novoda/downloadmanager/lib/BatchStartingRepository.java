@@ -6,11 +6,11 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
-class BatchStartingService {
+class BatchStartingRepository {
     private final ContentResolver resolver;
     private Uri batchesUri;
 
-    BatchStartingService(ContentResolver resolver, DownloadsUriProvider downloadsUriProvider) {
+    BatchStartingRepository(ContentResolver resolver, DownloadsUriProvider downloadsUriProvider) {
         this.resolver = resolver;
         this.batchesUri = downloadsUriProvider.getBatchesUri();
     }
