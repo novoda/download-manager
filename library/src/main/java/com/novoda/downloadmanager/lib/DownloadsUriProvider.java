@@ -5,7 +5,6 @@ import android.net.Uri;
 
 public class DownloadsUriProvider { // Why is this a singleton if all fields are final?
 
-    private final Uri publiclyAccessibleDownloadsUri;
     private final Uri downloadsByBatchUri;
     private final Uri allDownloadsUri;
     private final Uri batchesUri;
@@ -33,7 +32,6 @@ public class DownloadsUriProvider { // Why is this a singleton if all fields are
         Uri batchesByStatusUri = Uri.parse(authority + "/batches_without_progress");
 
         return new DownloadsUriProvider(
-                publiclyAccessibleDownloadsUri,
                 downloadsByBatchUri,
                 allDownloadsUri,
                 batchesUri,
@@ -44,13 +42,11 @@ public class DownloadsUriProvider { // Why is this a singleton if all fields are
     }
 
     DownloadsUriProvider(
-            Uri publiclyAccessibleDownloadsUri,
             Uri downloadsByBatchUri,
             Uri allDownloadsUri,
             Uri batchesUri,
             Uri contentUri,
             Uri downloadsWithoutProgressUri, Uri batchesWithoutProgressUri) {
-        this.publiclyAccessibleDownloadsUri = publiclyAccessibleDownloadsUri;
         this.downloadsByBatchUri = downloadsByBatchUri;
         this.allDownloadsUri = allDownloadsUri;
         this.batchesUri = batchesUri;

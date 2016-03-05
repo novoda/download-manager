@@ -43,7 +43,6 @@ public class BatchStatusRepositoryTests {
     private static final long ANY_DOWNLOAD_ID = 2l;
     private static final int ANY_BATCH_STATUS = DownloadStatus.RUNNING;
 
-    private static final Uri ACCESSIBLE_DOWNLOADS_URI = mock(Uri.class);
     private static final Uri DOWNLOADS_BY_BATCH_URI = mock(Uri.class);
     private static final Uri ALL_DOWNLOADS_URI = mock(Uri.class);
     private static final Uri BATCHES_URI = mock(Uri.class);
@@ -313,7 +312,6 @@ public class BatchStatusRepositoryTests {
 
     private static DownloadsUriProvider givenDownloadsUriProvider() {
         return new DownloadsUriProvider(
-                ACCESSIBLE_DOWNLOADS_URI,
                 DOWNLOADS_BY_BATCH_URI,
                 ALL_DOWNLOADS_URI,
                 BATCHES_URI,
