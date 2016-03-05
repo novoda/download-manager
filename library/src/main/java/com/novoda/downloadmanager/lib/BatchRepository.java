@@ -13,11 +13,11 @@ class BatchRepository {
     private final BatchStartingRepository batchStartingRepository;
     private final BatchDeletionRepository batchDeletionRepository;
     private final BatchRetrievalRepository batchRetrievalRepository;
-    
+
     static BatchRepository from(ContentResolver resolver,
-                            DownloadDeleter downloadDeleter,
-                            DownloadsUriProvider downloadsUriProvider,
-                            SystemFacade systemFacade) {
+                                DownloadDeleter downloadDeleter,
+                                DownloadsUriProvider downloadsUriProvider,
+                                SystemFacade systemFacade) {
         BatchStatusRepository batchStatusRepository = new BatchStatusRepository(resolver, downloadsUriProvider, systemFacade);
         BatchStartingRepository batchStartingRepository = new BatchStartingRepository(resolver, downloadsUriProvider);
         BatchDeletionRepository batchDeletionRepository = new BatchDeletionRepository(downloadDeleter, resolver, downloadsUriProvider);
