@@ -82,7 +82,7 @@ class DownloadTask implements Runnable {
     private final StorageManager storageManager;
     private final DownloadNotifier downloadNotifier;
     private final BatchInformationBroadcaster batchInformationBroadcaster;
-    private final BatchFacade batchFacade;
+    private final BatchRepository batchRepository;
     private final DownloadsUriProvider downloadsUriProvider;
     private final FileDownloadInfo.ControlStatus.Reader controlReader;
     private final NetworkChecker networkChecker;
@@ -97,7 +97,7 @@ class DownloadTask implements Runnable {
                         StorageManager storageManager,
                         DownloadNotifier downloadNotifier,
                         BatchInformationBroadcaster batchInformationBroadcaster,
-                        BatchFacade batchFacade,
+                        BatchRepository batchRepository,
                         DownloadsUriProvider downloadsUriProvider,
                         FileDownloadInfo.ControlStatus.Reader controlReader,
                         NetworkChecker networkChecker,
@@ -111,7 +111,7 @@ class DownloadTask implements Runnable {
         this.storageManager = storageManager;
         this.downloadNotifier = downloadNotifier;
         this.batchInformationBroadcaster = batchInformationBroadcaster;
-        this.batchFacade = batchFacade;
+        this.batchRepository = batchRepository;
         this.downloadsUriProvider = downloadsUriProvider;
         this.controlReader = controlReader;
         this.networkChecker = networkChecker;
@@ -838,14 +838,14 @@ class DownloadTask implements Runnable {
     }
 
     private void updateBatchStatus(long batchId, long downloadId) {
-        int batchStatus = batchFacade.calculateBatchStatus(batchId);
+        int batchStatus = batchRepository.calculateBatchStatus(batchId);
 
-        batchFacade.updateBatchStatus(batchId, batchStatus);
+        batchRepository.updateBatchStatus(batchId, batchStatus);
 
         if (DownloadStatus.isCancelled(batchStatus)) {
-            batchFacade.setBatchItemsCancelled(batchId);
+            batchRepository.setBatchItemsCancelled(batchId);
         } else if (DownloadStatus.isFailure(batchStatus)) {
-            batchFacade.setBatchItemsFailed(batchId, downloadId);
+            batchRepository.setBatchItemsFailed(batchId, downloadId);
             batchInformationBroadcaster.notifyBatchFailedFor(batchId);
         } else if (DownloadStatus.isSuccess(batchStatus)) {
             batchInformationBroadcaster.notifyBatchCompletedFor(batchId);

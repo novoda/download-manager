@@ -18,7 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BatchFacadeTest {
+public class BatchRepositoryTest {
 
     private static final long ANY_BATCH_ID = 1;
     private static final int ANY_STATUS = 2;
@@ -35,16 +35,16 @@ public class BatchFacadeTest {
     @Mock
     private BatchRetrievalService batchRetrievalService;
 
-    private BatchFacade batchFacade;
+    private BatchRepository batchRepository;
 
     @Before
     public void setUp() throws Exception {
-        batchFacade = new BatchFacade(batchStatusService, batchStartingService, batchDeletionService, batchRetrievalService);
+        batchRepository = new BatchRepository(batchStatusService, batchStartingService, batchDeletionService, batchRetrievalService);
     }
 
     @Test
     public void testUpdateBatchStatus() throws Exception {
-        batchFacade.updateBatchStatus(ANY_BATCH_ID, ANY_STATUS);
+        batchRepository.updateBatchStatus(ANY_BATCH_ID, ANY_STATUS);
 
         verify(batchStatusService).updateBatchStatus(ANY_BATCH_ID, ANY_STATUS);
     }
@@ -53,7 +53,7 @@ public class BatchFacadeTest {
     public void testGetBatchStatus() throws Exception {
         when(batchStatusService.getBatchStatus(ANY_BATCH_ID)).thenReturn(ANY_STATUS);
 
-        int status = batchFacade.getBatchStatus(ANY_BATCH_ID);
+        int status = batchRepository.getBatchStatus(ANY_BATCH_ID);
 
         assertThat(status).isEqualTo(ANY_STATUS);
     }
@@ -62,28 +62,28 @@ public class BatchFacadeTest {
     public void testCalculateBatchStatus() throws Exception {
         when(batchStatusService.calculateBatchStatusFromDownloads(ANY_BATCH_ID)).thenReturn(ANY_STATUS);
 
-        int status = batchFacade.calculateBatchStatus(ANY_BATCH_ID);
+        int status = batchRepository.calculateBatchStatus(ANY_BATCH_ID);
 
         assertThat(status).isEqualTo(ANY_STATUS);
     }
 
     @Test
     public void testSetBatchItemsCancelled() throws Exception {
-        batchFacade.setBatchItemsCancelled(ANY_BATCH_ID);
+        batchRepository.setBatchItemsCancelled(ANY_BATCH_ID);
 
         verify(batchStatusService).setBatchItemsCancelled(ANY_BATCH_ID);
     }
 
     @Test
     public void testCancelBatch() throws Exception {
-        batchFacade.cancelBatch(ANY_BATCH_ID);
+        batchRepository.cancelBatch(ANY_BATCH_ID);
 
         verify(batchStatusService).cancelBatch(ANY_BATCH_ID);
     }
 
     @Test
     public void testSetBatchItemsFailed() throws Exception {
-        batchFacade.setBatchItemsFailed(ANY_BATCH_ID, ANY_DOWNLOAD_ID);
+        batchRepository.setBatchItemsFailed(ANY_BATCH_ID, ANY_DOWNLOAD_ID);
 
         verify(batchStatusService).setBatchItemsFailed(ANY_BATCH_ID, ANY_DOWNLOAD_ID);
     }
@@ -94,7 +94,7 @@ public class BatchFacadeTest {
         int expectedModifiedCount = 1;
         when(batchStatusService.updateBatchToPendingStatus(batchIdsToBeUnlocked)).thenReturn(expectedModifiedCount);
 
-        int modified = batchFacade.updateBatchesToPendingStatus(batchIdsToBeUnlocked);
+        int modified = batchRepository.updateBatchesToPendingStatus(batchIdsToBeUnlocked);
 
         verify(batchStatusService).updateBatchToPendingStatus(batchIdsToBeUnlocked);
         assertThat(modified).isEqualTo(expectedModifiedCount);
@@ -105,14 +105,14 @@ public class BatchFacadeTest {
         boolean batchIsStartingForFirstTime = true;
         when(batchStartingService.isBatchStartingForTheFirstTime(ANY_BATCH_ID)).thenReturn(batchIsStartingForFirstTime);
 
-        boolean isStartingForTheFirstTime = batchFacade.isBatchStartingForTheFirstTime(ANY_BATCH_ID);
+        boolean isStartingForTheFirstTime = batchRepository.isBatchStartingForTheFirstTime(ANY_BATCH_ID);
 
         assertThat(isStartingForTheFirstTime).isEqualTo(batchIsStartingForFirstTime);
     }
 
     @Test
     public void testMarkBatchAsStarted() throws Exception {
-        batchFacade.markBatchAsStarted(ANY_BATCH_ID);
+        batchRepository.markBatchAsStarted(ANY_BATCH_ID);
 
         verify(batchStartingService).markBatchAsStarted(ANY_BATCH_ID);
     }
@@ -122,7 +122,7 @@ public class BatchFacadeTest {
         DownloadBatch expectedDownloadBatch = mock(DownloadBatch.class);
         when(batchRetrievalService.retrieveBatchFor(ANY_FILE_DOWNLOAD_INFO)).thenReturn(expectedDownloadBatch);
 
-        DownloadBatch downloadBatch = batchFacade.retrieveBatchFor(ANY_FILE_DOWNLOAD_INFO);
+        DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(ANY_FILE_DOWNLOAD_INFO);
 
         assertThat(downloadBatch).isEqualTo(expectedDownloadBatch);
     }
@@ -133,7 +133,7 @@ public class BatchFacadeTest {
         List<DownloadBatch> expectedBatches = Collections.singletonList(mock(DownloadBatch.class));
         when(batchRetrievalService.retrieveBatchesFor(downloads)).thenReturn(expectedBatches);
 
-        List<DownloadBatch> batches = batchFacade.retrieveBatchesFor(downloads);
+        List<DownloadBatch> batches = batchRepository.retrieveBatchesFor(downloads);
 
         assertThat(batches).isEqualTo(expectedBatches);
     }
@@ -143,7 +143,7 @@ public class BatchFacadeTest {
         Cursor expectedCursor = mock(Cursor.class);
         when(batchRetrievalService.retrieveFor(ANY_BATCH_QUERY)).thenReturn(expectedCursor);
 
-        Cursor cursor = batchFacade.retrieveFor(ANY_BATCH_QUERY);
+        Cursor cursor = batchRepository.retrieveFor(ANY_BATCH_QUERY);
 
         assertThat(cursor).isEqualTo(expectedCursor);
     }
@@ -151,7 +151,7 @@ public class BatchFacadeTest {
     @Test
     public void testDeleteMarkedBatchesFor() throws Exception {
         List<FileDownloadInfo> downloads = givenDownloads();
-        batchFacade.deleteMarkedBatchesFor(downloads);
+        batchRepository.deleteMarkedBatchesFor(downloads);
 
         verify(batchDeletionService).deleteMarkedBatchesFor(downloads);
     }

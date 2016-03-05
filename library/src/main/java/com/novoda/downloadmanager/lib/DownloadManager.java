@@ -425,7 +425,7 @@ public class DownloadManager {
                 new BatchPauseResumeController(
                         contentResolver,
                         DownloadsUriProvider.getInstance(),
-                        BatchFacade.from(
+                        BatchRepository.from(
                                 contentResolver,
                                 new DownloadDeleter(contentResolver),
                                 DownloadsUriProvider.getInstance(),
@@ -450,7 +450,7 @@ public class DownloadManager {
                 new BatchPauseResumeController(
                         contentResolver,
                         DownloadsUriProvider.getInstance(),
-                        BatchFacade.from(
+                        BatchRepository.from(
                                 contentResolver,
                                 new DownloadDeleter(contentResolver),
                                 DownloadsUriProvider.getInstance(),
@@ -475,7 +475,7 @@ public class DownloadManager {
                 new BatchPauseResumeController(
                         contentResolver,
                         DownloadsUriProvider.getInstance(),
-                        BatchFacade.from(
+                        BatchRepository.from(
                                 contentResolver,
                                 new DownloadDeleter(contentResolver),
                                 DownloadsUriProvider.getInstance(),
@@ -679,8 +679,8 @@ public class DownloadManager {
     public Cursor query(BatchQuery query) {
         DownloadDeleter downloadDeleter = new DownloadDeleter(contentResolver);
         RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext(), new Clock());
-        BatchFacade batchFacade = BatchFacade.from(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
-        Cursor cursor = batchFacade.retrieveFor(query);
+        BatchRepository batchRepository = BatchRepository.from(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
+        Cursor cursor = batchRepository.retrieveFor(query);
         if (cursor == null) {
             return null;
         }

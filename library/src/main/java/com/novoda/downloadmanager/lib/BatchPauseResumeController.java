@@ -4,17 +4,17 @@ import android.content.ContentResolver;
 
 public class BatchPauseResumeController {
 
-    private final BatchFacade batchFacade;
+    private final BatchRepository batchRepository;
     private final DownloadsRepository downloadsRepository;
     private final ContentResolver contentResolver;
     private final DownloadsUriProvider downloadsUriProvider;
 
     BatchPauseResumeController(ContentResolver contentResolver,
                                DownloadsUriProvider downloadsUriProvider,
-                               BatchFacade batchFacade,
+                               BatchRepository batchRepository,
                                DownloadsRepository downloadsRepository) {
         this.contentResolver = contentResolver;
-        this.batchFacade = batchFacade;
+        this.batchRepository = batchRepository;
         this.downloadsRepository = downloadsRepository;
         this.downloadsUriProvider = downloadsUriProvider;
     }
@@ -23,7 +23,7 @@ public class BatchPauseResumeController {
      * Returns true if the batch was paused, false otherwise
      */
     public boolean pauseBatch(long batchId) {
-        int batchStatus = batchFacade.getBatchStatus(batchId);
+        int batchStatus = batchRepository.getBatchStatus(batchId);
         if (DownloadStatus.isRunning(batchStatus)) {
             downloadsRepository.pauseDownloadWithBatchId(batchId);
             return true;
@@ -36,10 +36,10 @@ public class BatchPauseResumeController {
      * Returns true if the batch was resumed, false otherwise
      */
     public boolean resumeBatch(long batchId) {
-        int batchStatus = batchFacade.getBatchStatus(batchId);
+        int batchStatus = batchRepository.getBatchStatus(batchId);
         if (DownloadStatus.isPausedByApp(batchStatus)) {
             downloadsRepository.resumeDownloadWithBatchId(batchId);
-            batchFacade.updateBatchStatus(batchId, DownloadStatus.PENDING);
+            batchRepository.updateBatchStatus(batchId, DownloadStatus.PENDING);
             notifyBatchesHaveChanged();
             return true;
         } else {

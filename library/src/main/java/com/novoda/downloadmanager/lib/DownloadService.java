@@ -79,7 +79,7 @@ public class DownloadService extends Service {
     private Handler updateHandler;
 
     private volatile int lastStartId;
-    private BatchFacade batchFacade;
+    private BatchRepository batchRepository;
     private DownloadsRepository downloadsRepository;
     private DownloadDeleter downloadDeleter;
     private DownloadReadyChecker downloadReadyChecker;
@@ -124,7 +124,7 @@ public class DownloadService extends Service {
 
         this.downloadsUriProvider = DownloadsUriProvider.getInstance();
         this.downloadDeleter = new DownloadDeleter(getContentResolver());
-        this.batchFacade = BatchFacade.from(getContentResolver(), downloadDeleter, downloadsUriProvider, systemFacade);
+        this.batchRepository = BatchRepository.from(getContentResolver(), downloadDeleter, downloadsUriProvider, systemFacade);
         this.networkChecker = new NetworkChecker(this.systemFacade);
         DownloadManagerModules modules = getDownloadManagerModules();
         this.destroyListener = modules.getDestroyListener();
@@ -185,7 +185,7 @@ public class DownloadService extends Service {
         }
 
         downloadsRepository.updateRunningOrSubmittedDownloadsToPending();
-        batchFacade.updateBatchesToPendingStatus(batchesToBeUnlocked);
+        batchRepository.updateBatchesToPendingStatus(batchesToBeUnlocked);
     }
 
     /**
@@ -332,7 +332,7 @@ public class DownloadService extends Service {
         Collection<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
         updateTotalBytesFor(allDownloads);
 
-        List<DownloadBatch> downloadBatches = batchFacade.retrieveBatchesFor(allDownloads);
+        List<DownloadBatch> downloadBatches = batchRepository.retrieveBatchesFor(allDownloads);
         for (DownloadBatch downloadBatch : downloadBatches) {
             if (downloadBatch.isActive()) {
                 isActive = true;
@@ -346,7 +346,7 @@ public class DownloadService extends Service {
             }
 
             if (!isActive && downloadReadyChecker.canDownload(downloadBatch)) {
-                boolean isBatchStartingForTheFirstTime = batchFacade.isBatchStartingForTheFirstTime(downloadBatch.getBatchId());
+                boolean isBatchStartingForTheFirstTime = batchRepository.isBatchStartingForTheFirstTime(downloadBatch.getBatchId());
                 if (isBatchStartingForTheFirstTime) {
                     handleBatchStartingForTheFirstTime(downloadBatch);
                 }
@@ -360,7 +360,7 @@ public class DownloadService extends Service {
             nextRetryTimeMillis = downloadBatch.nextActionMillis(now, nextRetryTimeMillis);
         }
 
-        batchFacade.deleteMarkedBatchesFor(allDownloads);
+        batchRepository.deleteMarkedBatchesFor(allDownloads);
         updateUserVisibleNotification(downloadBatches);
 
         // Set alarm when next action is in future. It's okay if the service
@@ -381,13 +381,13 @@ public class DownloadService extends Service {
     }
 
     private void handleBatchStartingForTheFirstTime(DownloadBatch downloadBatch) {
-        batchFacade.markBatchAsStarted(downloadBatch.getBatchId());
+        batchRepository.markBatchAsStarted(downloadBatch.getBatchId());
         batchInformationBroadcaster.notifyBatchStartedFor(downloadBatch.getBatchId());
     }
 
     private void moveSubmittedTasksToBatchStatusIfNecessary() {
         List<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
-        List<DownloadBatch> downloadBatches = batchFacade.retrieveBatchesFor(allDownloads);
+        List<DownloadBatch> downloadBatches = batchRepository.retrieveBatchesFor(allDownloads);
 
         for (DownloadBatch downloadBatch : downloadBatches) {
             List<Long> ids = getSubmittedDownloadIdsFrom(downloadBatch);
@@ -418,18 +418,18 @@ public class DownloadService extends Service {
     private void download(FileDownloadInfo info) {
         Uri downloadUri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), info.getId());
         FileDownloadInfo.ControlStatus.Reader controlReader = new FileDownloadInfo.ControlStatus.Reader(getContentResolver(), downloadUri);
-        DownloadBatch downloadBatch = batchFacade.retrieveBatchFor(info);
+        DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(info);
         DownloadTask downloadTask = new DownloadTask(
                 this, systemFacade, info, downloadBatch, storageManager, downloadNotifier,
-                batchInformationBroadcaster, batchFacade, downloadsUriProvider,
+                batchInformationBroadcaster, batchRepository, downloadsUriProvider,
                 controlReader, networkChecker, downloadReadyChecker, new Clock(),
                 downloadsRepository
         );
 
         downloadsRepository.setDownloadSubmitted(info);
 
-        int batchStatus = batchFacade.calculateBatchStatus(info.getBatchId());
-        batchFacade.updateBatchStatus(info.getBatchId(), batchStatus);
+        int batchStatus = batchRepository.calculateBatchStatus(info.getBatchId());
+        batchRepository.updateBatchStatus(info.getBatchId(), batchStatus);
 
         executor.submit(downloadTask);
     }

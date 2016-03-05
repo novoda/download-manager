@@ -7,14 +7,14 @@ import android.support.annotation.NonNull;
 import java.util.Collection;
 import java.util.List;
 
-class BatchFacade {
+class BatchRepository {
 
     private final BatchStatusService batchStatusService;
     private final BatchStartingService batchStartingService;
     private final BatchDeletionService batchDeletionService;
     private final BatchRetrievalService batchRetrievalService;
     
-    static BatchFacade from(ContentResolver resolver,
+    static BatchRepository from(ContentResolver resolver,
                             DownloadDeleter downloadDeleter,
                             DownloadsUriProvider downloadsUriProvider,
                             SystemFacade systemFacade) {
@@ -23,14 +23,14 @@ class BatchFacade {
         BatchDeletionService batchDeletionService = new BatchDeletionService(downloadDeleter, resolver, downloadsUriProvider);
         BatchRetrievalService batchRetrievalService = new BatchRetrievalService(resolver, downloadsUriProvider);
 
-        return new BatchFacade(batchStatusService, batchStartingService, batchDeletionService, batchRetrievalService);
+        return new BatchRepository(batchStatusService, batchStartingService, batchDeletionService, batchRetrievalService);
 
     }
 
-    BatchFacade(BatchStatusService batchStatusService,
-                BatchStartingService batchStartingService,
-                BatchDeletionService batchDeletionService,
-                BatchRetrievalService batchRetrievalService) {
+    BatchRepository(BatchStatusService batchStatusService,
+                    BatchStartingService batchStartingService,
+                    BatchDeletionService batchDeletionService,
+                    BatchRetrievalService batchRetrievalService) {
         this.batchStatusService = batchStatusService;
         this.batchStartingService = batchStartingService;
         this.batchDeletionService = batchDeletionService;
