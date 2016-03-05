@@ -50,7 +50,7 @@ class BatchDeletionRepository {
         Cursor cursor = resolver.query(downloadsUriProvider.getBatchesUri(), projection, selection, selectionArgs, null);
 
         if (cursor == null) {
-            throw new BatchDeletionException();
+            throw BatchRetrievalException.failedQueryForBatches();
         }
 
         return cursor;

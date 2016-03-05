@@ -45,7 +45,7 @@ class BatchStatusRepository {
         Cursor cursor = resolver.query(downloadsUriProvider.getSingleBatchUri(batchId), projection, null, null, null);
 
         if (cursor == null) {
-            throw new RuntimeException("Failed to query batches for batchId = " + batchId);
+            throw BatchRetrievalException.failedQueryForBatch(batchId);
         }
         return cursor;
     }
@@ -82,7 +82,7 @@ class BatchStatusRepository {
         Cursor cursor = resolver.query(downloadsUriProvider.getAllDownloadsUri(), projection, selection, selectionArgs, null);
 
         if (cursor == null) {
-            throw new RuntimeException("Failed to query downloads for batchId = " + batchId);
+            throw BatchRetrievalException.failedQueryForBatch(batchId);
         }
         return cursor;
     }

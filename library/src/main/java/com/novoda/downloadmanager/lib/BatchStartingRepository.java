@@ -36,7 +36,7 @@ class BatchStartingRepository {
         );
 
         if (cursor == null) {
-            throw BatchQueryException.failedQueryForBatch(batchId);
+            throw BatchRetrievalException.failedQueryForBatch(batchId);
         }
 
         return cursor;
@@ -58,14 +58,4 @@ class BatchStartingRepository {
         resolver.update(ContentUris.withAppendedId(downloadsUriProvider.getBatchesUri(), batchId), values, null, null);
     }
 
-    private static class BatchQueryException extends RuntimeException {
-        public BatchQueryException(String message) {
-            super(message);
-        }
-
-        private static BatchQueryException failedQueryForBatch(long batchId) {
-            return new BatchQueryException("Failed to query for batch with batchId = " + batchId);
-        }
-
-    }
 }

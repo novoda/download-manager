@@ -110,18 +110,4 @@ class BatchRetrievalRepository {
         );
     }
 
-    private static class BatchRetrievalException extends RuntimeException {
-        private static BatchRetrievalException failedQueryForBatches() {
-            return new BatchRetrievalException("Failed to query for batches");
-        }
-
-        private static BatchRetrievalException failedQueryForBatch(long batchId) {
-            return new BatchRetrievalException("Failed to query for batch with batchId = " + batchId);
-        }
-
-        public BatchRetrievalException(String message) {
-            super(message);
-        }
-    }
-
 }
