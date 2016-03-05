@@ -36,7 +36,7 @@ class BatchRetrievalRepository {
         Cursor cursor = resolver.query(batchesUri, null, null, null, null);
 
         if (cursor == null) {
-            throw new RuntimeException("Failed to query for batches");
+            throw BatchRetrievalException.failedQueryForBatches();
         }
 
         return cursor;
@@ -71,7 +71,7 @@ class BatchRetrievalRepository {
         Cursor cursor = resolver.query(batchUri, null, null, null, null);
 
         if (cursor == null) {
-            throw new RuntimeException("Failed to query for batch with batchId = " + batchId);
+            throw BatchRetrievalException.failedQueryForBatch(batchId);
         }
 
         return cursor;
@@ -108,6 +108,20 @@ class BatchRetrievalRepository {
                 query.getSelectionArguments(),
                 query.getSortOrder()
         );
+    }
+
+    private static class BatchRetrievalException extends RuntimeException {
+        private static BatchRetrievalException failedQueryForBatches() {
+            return new BatchRetrievalException("Failed to query for batches");
+        }
+
+        private static BatchRetrievalException failedQueryForBatch(long batchId) {
+            return new BatchRetrievalException("Failed to query for batch with batchId = " + batchId);
+        }
+
+        public BatchRetrievalException(String message) {
+            super(message);
+        }
     }
 
 }
