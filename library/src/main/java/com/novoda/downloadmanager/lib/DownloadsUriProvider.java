@@ -23,7 +23,6 @@ public class DownloadsUriProvider { // Why is this a singleton if all fields are
     private static DownloadsUriProvider newInstance() {
         String authority = "content://" + DownloadProvider.AUTHORITY;
 
-        Uri publiclyAccessibleDownloadsUri = Uri.parse(authority + "/" + DownloadsDestination.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT);
         Uri downloadsByBatchUri = Uri.parse(authority + "/downloads_by_batch");
         Uri allDownloadsUri = Uri.parse(authority + "/all_downloads");
         Uri batchesUri = Uri.parse(authority + "/batches");
