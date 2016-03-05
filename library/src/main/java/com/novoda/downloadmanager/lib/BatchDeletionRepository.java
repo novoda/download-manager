@@ -13,7 +13,7 @@ import java.util.List;
 class BatchDeletionRepository {
 
     private final DownloadDeleter downloadDeleter;
-    private ContentResolver resolver;
+    private final ContentResolver resolver;
     private final DownloadsUriProvider downloadsUriProvider;
 
     BatchDeletionRepository(DownloadDeleter downloadDeleter, ContentResolver resolver, DownloadsUriProvider downloadsUriProvider) {
