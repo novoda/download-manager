@@ -9,19 +9,15 @@ final class Cursors {
     }
 
     public static int getInt(Cursor c, String column) {
-        return c.getInt(columnIndexFor(c, column));
+        return c.getInt(c.getColumnIndexOrThrow(column));
     }
 
     public static long getLong(Cursor c, String column) {
-        return c.getLong(columnIndexFor(c, column));
+        return c.getLong(c.getColumnIndexOrThrow(column));
     }
 
     public static String getString(Cursor c, String column) {
-        return c.getString(columnIndexFor(c, column));
-    }
-
-    private static int columnIndexFor(Cursor c, String column) {
-        return c.getColumnIndexOrThrow(column);
+        return c.getString(c.getColumnIndexOrThrow(column));
     }
 
 }
