@@ -105,7 +105,12 @@ class Statuses {
 
         int size = statusCounts.size();
         for (int i = 0; i < size; i++) {
-            stringBuilder.append("[status: ").append(statusCounts.keyAt(i)).append(", count: ").append(statusCounts.valueAt(i)).append("]");
+            stringBuilder
+                    .append("[status: ")
+                    .append(statusCounts.keyAt(i))
+                    .append(", count: ")
+                    .append(statusCounts.valueAt(i))
+                    .append("]");
         }
 
         return stringBuilder.append("}").toString();
