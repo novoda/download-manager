@@ -60,9 +60,12 @@ class BatchStatusRepository {
 
         statuses.clear();
 
-        marshallInStatuses(cursor);
+        try {
+            marshallInStatuses(cursor);
+        } finally {
+            cursor.close();
+        }
 
-        cursor.close();
 
         if (statuses.hasErrorStatus()) {
             return statuses.getFirstErrorStatus();
