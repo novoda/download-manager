@@ -5,6 +5,7 @@ import android.net.Uri;
 
 public class DownloadsUriProvider { // Why is this a singleton if all fields are final?
 
+    private final Uri publiclyAccessibleDownloadsUri;
     private final Uri downloadsByBatchUri;
     private final Uri allDownloadsUri;
     private final Uri batchesUri;
@@ -23,6 +24,7 @@ public class DownloadsUriProvider { // Why is this a singleton if all fields are
     private static DownloadsUriProvider newInstance() {
         String authority = "content://" + DownloadProvider.AUTHORITY;
 
+        Uri publiclyAccessibleDownloadsUri = Uri.parse(authority + "/" + DownloadsDestination.PUBLICLY_ACCESSIBLE_DOWNLOADS_URI_SEGMENT);
         Uri downloadsByBatchUri = Uri.parse(authority + "/downloads_by_batch");
         Uri allDownloadsUri = Uri.parse(authority + "/all_downloads");
         Uri batchesUri = Uri.parse(authority + "/batches");
@@ -31,6 +33,7 @@ public class DownloadsUriProvider { // Why is this a singleton if all fields are
         Uri batchesByStatusUri = Uri.parse(authority + "/batches_without_progress");
 
         return new DownloadsUriProvider(
+                publiclyAccessibleDownloadsUri,
                 downloadsByBatchUri,
                 allDownloadsUri,
                 batchesUri,
@@ -41,17 +44,27 @@ public class DownloadsUriProvider { // Why is this a singleton if all fields are
     }
 
     DownloadsUriProvider(
+            Uri publiclyAccessibleDownloadsUri,
             Uri downloadsByBatchUri,
             Uri allDownloadsUri,
             Uri batchesUri,
             Uri contentUri,
             Uri downloadsWithoutProgressUri, Uri batchesWithoutProgressUri) {
+        this.publiclyAccessibleDownloadsUri = publiclyAccessibleDownloadsUri;
         this.downloadsByBatchUri = downloadsByBatchUri;
         this.allDownloadsUri = allDownloadsUri;
         this.batchesUri = batchesUri;
         this.contentUri = contentUri;
         this.downloadsWithoutProgressUri = downloadsWithoutProgressUri;
         this.batchesWithoutProgressUri = batchesWithoutProgressUri;
+    }
+
+    /**
+     * The content URI for accessing publicly accessible downloads (i.e., it requires no
+     * permissions to access this downloaded file)
+     */
+    public Uri getPubliclyAccessibleDownloadsUri() {
+        return publiclyAccessibleDownloadsUri;
     }
 
     /**

@@ -10,6 +10,10 @@ import com.novoda.downloadmanager.lib.DownloadContract.Batches;
 import com.novoda.downloadmanager.lib.DownloadContract.Downloads;
 import com.novoda.notils.string.StringUtils;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -20,19 +24,12 @@ import org.mockito.InOrder;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollection;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
@@ -43,6 +40,7 @@ public class BatchStatusRepositoryTests {
     private static final long ANY_DOWNLOAD_ID = 2l;
     private static final int ANY_BATCH_STATUS = DownloadStatus.RUNNING;
 
+    private static final Uri PUBLICLY_ACCESSIBLE_DOWNLOADS_URI = mock(Uri.class);
     private static final Uri DOWNLOADS_BY_BATCH_URI = mock(Uri.class);
     private static final Uri ALL_DOWNLOADS_URI = mock(Uri.class);
     private static final Uri BATCHES_URI = mock(Uri.class);
@@ -312,6 +310,7 @@ public class BatchStatusRepositoryTests {
 
     private static DownloadsUriProvider givenDownloadsUriProvider() {
         return new DownloadsUriProvider(
+                PUBLICLY_ACCESSIBLE_DOWNLOADS_URI,
                 DOWNLOADS_BY_BATCH_URI,
                 ALL_DOWNLOADS_URI,
                 BATCHES_URI,

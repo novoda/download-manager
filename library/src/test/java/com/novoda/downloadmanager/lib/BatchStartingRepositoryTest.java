@@ -30,6 +30,7 @@ import static org.powermock.api.mockito.PowerMockito.whenNew;
 @PrepareForTest({ContentUris.class, BatchStartingRepository.class})
 public class BatchStartingRepositoryTest {
 
+    private static final Uri PUBLICLY_ACCESSIBLE_DOWNLOADS_URI = mock(Uri.class);
     private static final Uri DOWNLOADS_BY_BATCH_URI = mock(Uri.class);
     private static final Uri ALL_DOWNLOADS_URI = mock(Uri.class);
     private static final Uri BATCHES_URI = mock(Uri.class);
@@ -108,6 +109,7 @@ public class BatchStartingRepositoryTest {
 
     private static DownloadsUriProvider givenDownloadsUriProvider() {
         return new DownloadsUriProvider(
+                PUBLICLY_ACCESSIBLE_DOWNLOADS_URI,
                 DOWNLOADS_BY_BATCH_URI,
                 ALL_DOWNLOADS_URI,
                 BATCHES_URI,
