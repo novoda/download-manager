@@ -38,7 +38,7 @@ class BatchStartingRepository {
         );
 
         if (cursor == null) {
-            throw BatchRetrievalException.failedQueryForBatch(batchId);
+            throw new BatchRetrievalException(batchId);
         }
 
         return cursor;

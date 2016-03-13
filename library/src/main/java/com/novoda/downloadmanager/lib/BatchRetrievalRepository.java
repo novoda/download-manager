@@ -37,7 +37,7 @@ class BatchRetrievalRepository {
         Cursor cursor = resolver.query(batchesUri, null, null, null, null);
 
         if (cursor == null) {
-            throw BatchRetrievalException.failedQueryForBatches();
+            throw new BatchRetrievalException();
         }
 
         return cursor;
@@ -72,7 +72,7 @@ class BatchRetrievalRepository {
         Cursor cursor = resolver.query(batchUri, null, null, null, null);
 
         if (cursor == null) {
-            throw BatchRetrievalException.failedQueryForBatch(batchId);
+            throw new BatchRetrievalException(batchId);
         }
 
         return cursor;
