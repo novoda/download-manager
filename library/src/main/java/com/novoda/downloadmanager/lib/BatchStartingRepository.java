@@ -5,6 +5,8 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 
+import com.novoda.downloadmanager.lib.db.BetterCursor;
+
 class BatchStartingRepository {
     private final ContentResolver resolver;
     private final DownloadsUriProvider downloadsUriProvider;
@@ -15,7 +17,7 @@ class BatchStartingRepository {
     }
 
     boolean isBatchStartingForTheFirstTime(long batchId) {
-        Cursor cursor = queryForBatch(batchId);
+        BetterCursor cursor = BetterCursor.wrap(queryForBatch(batchId));
 
         try {
             return batchHasNotAlreadyStarted(cursor);
@@ -42,11 +44,11 @@ class BatchStartingRepository {
         return cursor;
     }
 
-    private boolean batchHasNotAlreadyStarted(Cursor cursor) {
+    private boolean batchHasNotAlreadyStarted(BetterCursor cursor) {
         int hasStarted = DownloadContract.Batches.BATCH_HAS_NOT_STARTED;
 
         if (cursor.moveToFirst()) {
-            hasStarted = Cursors.getInt(cursor, DownloadContract.Batches.COLUMN_HAS_STARTED);
+            hasStarted = cursor.getInt(DownloadContract.Batches.COLUMN_HAS_STARTED);
         }
 
         return hasStarted != DownloadContract.Batches.BATCH_HAS_STARTED;

@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.database.Cursor;
 import android.net.Uri;
 
+import com.novoda.downloadmanager.lib.db.BetterCursor;
 import com.novoda.downloadmanager.notifications.NotificationVisibility;
 
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ class BatchRetrievalRepository {
     }
 
     List<DownloadBatch> retrieveBatchesFor(Collection<FileDownloadInfo> downloads) {
-        Cursor cursor = queryForAllBatches();
+        BetterCursor cursor = BetterCursor.wrap(queryForAllBatches());
 
         try {
             return marshallDownloadBatches(downloads, cursor);
@@ -42,7 +43,7 @@ class BatchRetrievalRepository {
         return cursor;
     }
 
-    private List<DownloadBatch> marshallDownloadBatches(Collection<FileDownloadInfo> downloads, Cursor batchesCursor) {
+    private List<DownloadBatch> marshallDownloadBatches(Collection<FileDownloadInfo> downloads, BetterCursor batchesCursor) {
         List<DownloadBatch> batches = new ArrayList<>(batchesCursor.getCount());
         while (batchesCursor.moveToNext()) {
             batches.add(marshallDownloadBatch(downloads, batchesCursor));
@@ -52,7 +53,7 @@ class BatchRetrievalRepository {
     }
 
     DownloadBatch retrieveBatchFor(FileDownloadInfo download) {
-        Cursor cursor = queryForSingleBatch(download.getBatchId());
+        BetterCursor cursor = BetterCursor.wrap(queryForSingleBatch(download.getBatchId()));
 
         try {
             if (cursor.moveToFirst()) {
@@ -77,16 +78,16 @@ class BatchRetrievalRepository {
         return cursor;
     }
 
-    private DownloadBatch marshallDownloadBatch(Collection<FileDownloadInfo> downloads, Cursor cursor) {
-        long id = Cursors.getLong(cursor, DownloadContract.Batches._ID);
-        String title = Cursors.getString(cursor, DownloadContract.Batches.COLUMN_TITLE);
-        String description = Cursors.getString(cursor, DownloadContract.Batches.COLUMN_DESCRIPTION);
-        String bigPictureUrl = Cursors.getString(cursor, DownloadContract.Batches.COLUMN_BIG_PICTURE);
-        int status = Cursors.getInt(cursor, DownloadContract.Batches.COLUMN_STATUS);
-        @NotificationVisibility.Value int visibility = Cursors.getInt(cursor, DownloadContract.Batches.COLUMN_VISIBILITY);
-        String extraData = Cursors.getString(cursor, DownloadContract.Batches.COLUMN_EXTRA_DATA);
-        long totalSizeBytes = Cursors.getLong(cursor, DownloadContract.BatchesWithSizes.COLUMN_TOTAL_BYTES);
-        long currentSizeBytes = Cursors.getLong(cursor, DownloadContract.BatchesWithSizes.COLUMN_CURRENT_BYTES);
+    private DownloadBatch marshallDownloadBatch(Collection<FileDownloadInfo> downloads, BetterCursor cursor) {
+        long id = cursor.getLong(DownloadContract.Batches._ID);
+        String title = cursor.getString(DownloadContract.Batches.COLUMN_TITLE);
+        String description = cursor.getString(DownloadContract.Batches.COLUMN_DESCRIPTION);
+        String bigPictureUrl = cursor.getString(DownloadContract.Batches.COLUMN_BIG_PICTURE);
+        int status = cursor.getInt(DownloadContract.Batches.COLUMN_STATUS);
+        @NotificationVisibility.Value int visibility = cursor.getInt(DownloadContract.Batches.COLUMN_VISIBILITY);
+        String extraData = cursor.getString(DownloadContract.Batches.COLUMN_EXTRA_DATA);
+        long totalSizeBytes = cursor.getLong(DownloadContract.BatchesWithSizes.COLUMN_TOTAL_BYTES);
+        long currentSizeBytes = cursor.getLong(DownloadContract.BatchesWithSizes.COLUMN_CURRENT_BYTES);
         BatchInfo batchInfo = new BatchInfo(title, description, bigPictureUrl, visibility, extraData);
 
         List<FileDownloadInfo> batchDownloads = new ArrayList<>(1);
