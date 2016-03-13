@@ -10,7 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
-public class CursorWrapper implements Cursor {
+class CursorWrapper implements Cursor {
 
     private final Cursor cursor;
 
