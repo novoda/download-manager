@@ -1,7 +1,6 @@
 package com.novoda.downloadmanager.lib.db;
 
 import android.database.Cursor;
-import android.database.CursorWrapper;
 
 public class BetterCursor extends CursorWrapper {
 
