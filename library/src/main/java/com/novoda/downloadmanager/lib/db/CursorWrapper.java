@@ -1,11 +1,13 @@
 package com.novoda.downloadmanager.lib.db;
 
+import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.database.CharArrayBuffer;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 public class CursorWrapper implements Cursor {
@@ -200,6 +202,19 @@ public class CursorWrapper implements Cursor {
 
     @Override
     public Uri getNotificationUri() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            return getNotificationUriKitkatAndHigher();
+        } else {
+            throw new UnsupportedOperationException(
+                    "getNotificationUri is available only on Android version" +
+                            Build.VERSION_CODES.KITKAT +
+                            " and higher"
+            );
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private Uri getNotificationUriKitkatAndHigher() {
         return cursor.getNotificationUri();
     }
 
