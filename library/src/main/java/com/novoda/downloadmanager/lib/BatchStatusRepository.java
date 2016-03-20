@@ -7,7 +7,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
-import com.novoda.downloadmanager.lib.db.BetterCursor;
 import com.novoda.notils.string.StringUtils;
 
 import java.util.Arrays;
@@ -31,7 +30,7 @@ class BatchStatusRepository {
     }
 
     int getBatchStatus(long batchId) {
-        BetterCursor cursor = BetterCursor.wrap(queryForStatus(batchId));
+        Cursor cursor = queryForStatus(batchId);
 
         try {
             return marshallToStatus(cursor);
@@ -51,13 +50,13 @@ class BatchStatusRepository {
         return cursor;
     }
 
-    private int marshallToStatus(BetterCursor cursor) {
+    private int marshallToStatus(Cursor cursor) {
         cursor.moveToFirst();
-        return cursor.getInt(DownloadContract.Batches.COLUMN_STATUS);
+        return cursor.getInt(cursor.getColumnIndexOrThrow(DownloadContract.Batches.COLUMN_STATUS));
     }
 
     int calculateBatchStatusFromDownloads(long batchId) {
-        BetterCursor cursor = BetterCursor.wrap(queryForDownloadStatusesByBatch(batchId));
+        Cursor cursor = queryForDownloadStatusesByBatch(batchId);
 
         statuses.clear();
 
@@ -91,9 +90,9 @@ class BatchStatusRepository {
         return cursor;
     }
 
-    private void marshallInStatuses(BetterCursor cursor) {
+    private void marshallInStatuses(Cursor cursor) {
         while (cursor.moveToNext()) {
-            int statusCode = cursor.getInt(DownloadContract.Downloads.COLUMN_STATUS);
+            int statusCode = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadContract.Downloads.COLUMN_STATUS));
             statuses.incrementCountFor(statusCode);
         }
     }
