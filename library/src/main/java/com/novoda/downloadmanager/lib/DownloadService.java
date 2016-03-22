@@ -124,7 +124,7 @@ public class DownloadService extends Service {
 
         this.downloadsUriProvider = DownloadsUriProvider.getInstance();
         this.downloadDeleter = new DownloadDeleter(getContentResolver());
-        this.batchRepository = new BatchRepository(getContentResolver(), downloadDeleter, downloadsUriProvider, systemFacade);
+        this.batchRepository = BatchRepository.from(getContentResolver(), downloadDeleter, downloadsUriProvider, systemFacade);
         this.networkChecker = new NetworkChecker(this.systemFacade);
         DownloadManagerModules modules = getDownloadManagerModules();
         this.destroyListener = modules.getDestroyListener();
@@ -185,7 +185,7 @@ public class DownloadService extends Service {
         }
 
         downloadsRepository.updateRunningOrSubmittedDownloadsToPending();
-        batchRepository.updateBatchToPendingStatus(batchesToBeUnlocked);
+        batchRepository.updateBatchesToPendingStatus(batchesToBeUnlocked);
     }
 
     /**
@@ -381,7 +381,7 @@ public class DownloadService extends Service {
     }
 
     private void handleBatchStartingForTheFirstTime(DownloadBatch downloadBatch) {
-        batchRepository.markBatchHasStarted(downloadBatch.getBatchId());
+        batchRepository.markBatchAsStarted(downloadBatch.getBatchId());
         batchInformationBroadcaster.notifyBatchStartedFor(downloadBatch.getBatchId());
     }
 

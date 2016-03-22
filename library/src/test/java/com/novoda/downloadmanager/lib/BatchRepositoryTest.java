@@ -1,377 +1,163 @@
 package com.novoda.downloadmanager.lib;
 
-import android.content.ContentResolver;
-import android.database.CharArrayBuffer;
-import android.database.ContentObserver;
 import android.database.Cursor;
-import android.database.DataSetObserver;
-import android.net.Uri;
-import android.os.Bundle;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import android.support.annotation.NonNull;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import java.util.Collections;
+import java.util.List;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class BatchRepositoryTest {
 
-    private static final String[] PROJECT_BATCH_ID = {DownloadContract.Batches._ID};
-    private static final String WHERE_DELETED_VALUE_IS = DownloadContract.Batches.COLUMN_DELETED + " = ?";
-    private static final String[] MARKED_FOR_DELETION = {"1"};
-    private static final String _ID = "_id";
+    private static final long ANY_BATCH_ID = 1;
+    private static final int ANY_STATUS = 2;
+    private static final long ANY_DOWNLOAD_ID = 3;
+    public static final FileDownloadInfo ANY_FILE_DOWNLOAD_INFO = mock(FileDownloadInfo.class);
+    private static final BatchQuery ANY_BATCH_QUERY = new BatchQuery("any-selection", null, "any-sort-order");
 
     @Mock
-    private ContentResolver mockContentResolver;
+    private BatchStatusRepository batchStatusRepository;
     @Mock
-    private DownloadDeleter mockDownloadDeleter;
+    private BatchStartingRepository batchStartingRepository;
     @Mock
-    private FileDownloadInfo mockFileDownloadInfo;
+    private BatchDeletionRepository batchDeletionRepository;
     @Mock
-    private FileDownloadInfo mockFileDownloadInfoId1;
-    @Mock
-    private FileDownloadInfo mockFileDownloadInfoId2;
-    @Mock
-    private FileDownloadInfo mockFileDownloadInfoId3;
-    @Mock
-    private FileDownloadInfo mockFileDownloadInfoId4;
-    @Mock
-    private DownloadsUriProvider mockDownloadsUriProvider;
-    @Mock
-    private Uri mockUri;
-    @Mock
-    private SystemFacade mockSystem;
+    private BatchRetrievalRepository batchRetrievalRepository;
 
     private BatchRepository batchRepository;
 
     @Before
-    public void setUp() {
-        initMocks(this);
-
-        when(mockDownloadsUriProvider.getBatchesUri()).thenReturn(mockUri);
-        when(mockDownloadsUriProvider.getAllDownloadsUri()).thenReturn(mockUri);
-
-        this.batchRepository = new BatchRepository(mockContentResolver, mockDownloadDeleter, mockDownloadsUriProvider, mockSystem);
-
-        when(mockFileDownloadInfoId1.getBatchId()).thenReturn(1L);
-        when(mockFileDownloadInfoId2.getBatchId()).thenReturn(2L);
-        when(mockFileDownloadInfoId3.getBatchId()).thenReturn(3L);
-        when(mockFileDownloadInfoId4.getBatchId()).thenReturn(4L);
+    public void setUp() throws Exception {
+        batchRepository = new BatchRepository(batchStatusRepository, batchStartingRepository, batchDeletionRepository, batchRetrievalRepository);
     }
 
     @Test
-    public void givenADownloadInfoWhenRetrievingTheBatchThenTheBatchIdsMatch() {
-        long expectedBatchId = 100L;
-        when(mockFileDownloadInfo.getBatchId()).thenReturn(expectedBatchId);
-        Cursor batchCursor = new MockCursorWithBatchIds(Collections.singletonList(expectedBatchId));
-        when(mockContentResolver.query(any(Uri.class), any(String[].class), anyString(), any(String[].class), anyString())).thenReturn(batchCursor);
+    public void testUpdateBatchStatus() throws Exception {
+        batchRepository.updateBatchStatus(ANY_BATCH_ID, ANY_STATUS);
 
-        DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(mockFileDownloadInfo);
-
-        assertThat(downloadBatch.getBatchId()).isEqualTo(expectedBatchId);
+        verify(batchStatusRepository).updateBatchStatus(ANY_BATCH_ID, ANY_STATUS);
     }
 
     @Test
-    public void givenADownloadInfoAndNoLinkedBatchesWhenRetrievingTheBatchThenTheBatchIsDeleted() {
-        long batchIdToBeMissing = 100L;
-        when(mockFileDownloadInfo.getBatchId()).thenReturn(batchIdToBeMissing);
-        Cursor emptyBatchCursor = mock(Cursor.class);
-        when(mockContentResolver.query(any(Uri.class), any(String[].class), anyString(), any(String[].class), anyString())).thenReturn(emptyBatchCursor);
+    public void testGetBatchStatus() throws Exception {
+        when(batchStatusRepository.getBatchStatus(ANY_BATCH_ID)).thenReturn(ANY_STATUS);
 
-        DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(mockFileDownloadInfo);
+        int status = batchRepository.getBatchStatus(ANY_BATCH_ID);
 
-        assertThat(downloadBatch).isEqualTo(DownloadBatch.DELETED);
+        assertThat(status).isEqualTo(ANY_STATUS);
     }
 
     @Test
-    public void givenThereAreFourBatchesMarkedToBeDeletedWhenDeletingMarkedBatchesForAllDownloadsThenItRemovesAll() {
-        Cursor cursorWithDownloadsIdToBeDeleted = new MockCursorWithBatchIds(Arrays.asList(1L, 2L, 3L, 4L));
-        when(mockContentResolver.query(mockDownloadsUriProvider.getBatchesUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null)).thenReturn(cursorWithDownloadsIdToBeDeleted);
-        when(mockContentResolver.query(any(Uri.class), any(String[].class), any(String.class), any(String[].class), any(String.class))).thenReturn(cursorWithDownloadsIdToBeDeleted);
+    public void testCalculateBatchStatus() throws Exception {
+        when(batchStatusRepository.calculateBatchStatusFromDownloads(ANY_BATCH_ID)).thenReturn(ANY_STATUS);
 
-        Collection<FileDownloadInfo> downloads = Arrays.asList(mockFileDownloadInfoId1, mockFileDownloadInfoId2, mockFileDownloadInfoId3, mockFileDownloadInfoId4);
+        int status = batchRepository.calculateBatchStatus(ANY_BATCH_ID);
+
+        assertThat(status).isEqualTo(ANY_STATUS);
+    }
+
+    @Test
+    public void testSetBatchItemsCancelled() throws Exception {
+        batchRepository.setBatchItemsCancelled(ANY_BATCH_ID);
+
+        verify(batchStatusRepository).setBatchItemsCancelled(ANY_BATCH_ID);
+    }
+
+    @Test
+    public void testCancelBatch() throws Exception {
+        batchRepository.cancelBatch(ANY_BATCH_ID);
+
+        verify(batchStatusRepository).cancelBatch(ANY_BATCH_ID);
+    }
+
+    @Test
+    public void testSetBatchItemsFailed() throws Exception {
+        batchRepository.setBatchItemsFailed(ANY_BATCH_ID, ANY_DOWNLOAD_ID);
+
+        verify(batchStatusRepository).setBatchItemsFailed(ANY_BATCH_ID, ANY_DOWNLOAD_ID);
+    }
+
+    @Test
+    public void testUpdateBatchesToPendingStatus() throws Exception {
+        List<String> batchIdsToBeUnlocked = Collections.singletonList(String.valueOf(ANY_BATCH_ID));
+        int expectedModifiedCount = 1;
+        when(batchStatusRepository.updateBatchToPendingStatus(batchIdsToBeUnlocked)).thenReturn(expectedModifiedCount);
+
+        int modified = batchRepository.updateBatchesToPendingStatus(batchIdsToBeUnlocked);
+
+        verify(batchStatusRepository).updateBatchToPendingStatus(batchIdsToBeUnlocked);
+        assertThat(modified).isEqualTo(expectedModifiedCount);
+    }
+
+    @Test
+    public void testIsBatchStartingForTheFirstTime() throws Exception {
+        boolean batchIsStartingForFirstTime = true;
+        when(batchStartingRepository.isBatchStartingForTheFirstTime(ANY_BATCH_ID)).thenReturn(batchIsStartingForFirstTime);
+
+        boolean isStartingForTheFirstTime = batchRepository.isBatchStartingForTheFirstTime(ANY_BATCH_ID);
+
+        assertThat(isStartingForTheFirstTime).isEqualTo(batchIsStartingForFirstTime);
+    }
+
+    @Test
+    public void testMarkBatchAsStarted() throws Exception {
+        batchRepository.markBatchAsStarted(ANY_BATCH_ID);
+
+        verify(batchStartingRepository).markBatchAsStarted(ANY_BATCH_ID);
+    }
+
+    @Test
+    public void testRetrieveBatchFor() throws Exception {
+        DownloadBatch expectedDownloadBatch = mock(DownloadBatch.class);
+        when(batchRetrievalRepository.retrieveBatchFor(ANY_FILE_DOWNLOAD_INFO)).thenReturn(expectedDownloadBatch);
+
+        DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(ANY_FILE_DOWNLOAD_INFO);
+
+        assertThat(downloadBatch).isEqualTo(expectedDownloadBatch);
+    }
+
+    @Test
+    public void testRetrieveBatchesFor() throws Exception {
+        List<FileDownloadInfo> downloads = givenDownloads();
+        List<DownloadBatch> expectedBatches = Collections.singletonList(mock(DownloadBatch.class));
+        when(batchRetrievalRepository.retrieveBatchesFor(downloads)).thenReturn(expectedBatches);
+
+        List<DownloadBatch> batches = batchRepository.retrieveBatchesFor(downloads);
+
+        assertThat(batches).isEqualTo(expectedBatches);
+    }
+
+    @Test
+    public void testRetrieveFor() throws Exception {
+        Cursor expectedCursor = mock(Cursor.class);
+        when(batchRetrievalRepository.retrieveFor(ANY_BATCH_QUERY)).thenReturn(expectedCursor);
+
+        Cursor cursor = batchRepository.retrieveFor(ANY_BATCH_QUERY);
+
+        assertThat(cursor).isEqualTo(expectedCursor);
+    }
+
+    @Test
+    public void testDeleteMarkedBatchesFor() throws Exception {
+        List<FileDownloadInfo> downloads = givenDownloads();
         batchRepository.deleteMarkedBatchesFor(downloads);
 
-        verify(mockContentResolver).query(mockDownloadsUriProvider.getBatchesUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null);
-        verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockFileDownloadInfoId1);
-        verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockFileDownloadInfoId2);
-        verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockFileDownloadInfoId3);
-        verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockFileDownloadInfoId4);
-        verify(mockContentResolver).delete(this.mockDownloadsUriProvider.getBatchesUri(), _ID + " IN (?, ?, ?, ?)", new String[]{"1", "2", "3", "4"});
+        verify(batchDeletionRepository).deleteMarkedBatchesFor(downloads);
     }
 
-    @Test
-    public void whenThereAreTwoBatchesMarkedToBeDeletedAndFourBatchesThenRemoveAll() {
-        Cursor cursorWithDownloadsIdToBeDeleted = new MockCursorWithBatchIds(Arrays.asList(2L, 3L));
-        when(mockContentResolver.query(mockDownloadsUriProvider.getBatchesUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null)).thenReturn(cursorWithDownloadsIdToBeDeleted);
-        when(mockContentResolver.query(any(Uri.class), any(String[].class), any(String.class), any(String[].class), any(String.class))).thenReturn(cursorWithDownloadsIdToBeDeleted);
-
-        Collection<FileDownloadInfo> downloads = Arrays.asList(mockFileDownloadInfoId1, mockFileDownloadInfoId2, mockFileDownloadInfoId3, mockFileDownloadInfoId4);
-        batchRepository.deleteMarkedBatchesFor(downloads);
-
-        verify(mockContentResolver).query(mockDownloadsUriProvider.getBatchesUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null);
-        verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockFileDownloadInfoId1);
-        verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockFileDownloadInfoId2);
-        verify(mockDownloadDeleter).deleteFileAndDatabaseRow(mockFileDownloadInfoId3);
-        verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockFileDownloadInfoId4);
-        verify(mockContentResolver).delete(this.mockDownloadsUriProvider.getBatchesUri(), _ID + " IN (?, ?)", new String[]{"2", "3"});
-    }
-
-    @Test
-    public void whenThereNoBatchesMarkedToBeDeletedAndFourBatchesThenRemoveAll() {
-        Cursor cursorWithDownloadsIdToBeDeleted = new MockCursorWithBatchIds(Collections.<Long>emptyList());
-        when(mockContentResolver.query(mockDownloadsUriProvider.getBatchesUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null)).thenReturn(cursorWithDownloadsIdToBeDeleted);
-        when(mockContentResolver.query(any(Uri.class), any(String[].class), any(String.class), any(String[].class), any(String.class))).thenReturn(cursorWithDownloadsIdToBeDeleted);
-
-        Collection<FileDownloadInfo> downloads = Arrays.asList(mockFileDownloadInfoId1, mockFileDownloadInfoId2, mockFileDownloadInfoId3, mockFileDownloadInfoId4);
-        batchRepository.deleteMarkedBatchesFor(downloads);
-
-        verify(mockContentResolver).query(mockDownloadsUriProvider.getBatchesUri(), PROJECT_BATCH_ID, WHERE_DELETED_VALUE_IS, MARKED_FOR_DELETION, null);
-        verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockFileDownloadInfoId1);
-        verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockFileDownloadInfoId2);
-        verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockFileDownloadInfoId3);
-        verify(mockDownloadDeleter, never()).deleteFileAndDatabaseRow(mockFileDownloadInfoId4);
-        verify(mockContentResolver, never()).delete(any(Uri.class), any(String.class), any(String[].class));
-    }
-
-    @Test
-    public void givenABatchQueryWhenQueryingThenTheQueryIsUsed() {
-        BatchQuery query = new BatchQuery.Builder().withId(12).build();
-
-        batchRepository.retrieveFor(query);
-
-        String selection = query.getSelection();
-        String[] selectionArguments = query.getSelectionArguments();
-        String sortOrder = query.getSortOrder();
-        verify(mockContentResolver).query(any(Uri.class), any(String[].class), eq(selection), eq(selectionArguments), eq(sortOrder));
-    }
-
-    private static class MockCursorWithBatchIds implements Cursor {
-
-        private final List<Long> ids;
-        private int position = -1;
-
-        public MockCursorWithBatchIds(List<Long> ids) {
-            this.ids = ids;
-        }
-
-        @Override
-        public int getCount() {
-            return ids.size();
-        }
-
-        @Override
-        public int getPosition() {
-            return position;
-        }
-
-        @Override
-        public boolean move(int i) {
-            return position + i >= 0 && position + i < ids.size();
-        }
-
-        @Override
-        public boolean moveToPosition(int i) {
-            return i >= 0 && i < ids.size();
-        }
-
-        @Override
-        public boolean moveToFirst() {
-            position = 0;
-            return true;
-        }
-
-        @Override
-        public boolean moveToLast() {
-            position = ids.size() - 1;
-            return false;
-        }
-
-        @Override
-        public boolean moveToNext() {
-            if (position < ids.size() - 1) {
-                position++;
-                return true;
-            }
-            return false;
-        }
-
-        @Override
-        public boolean moveToPrevious() {
-            if (position > 1) {
-                position--;
-                return true;
-            }
-            return false;
-        }
-
-        @Override
-        public boolean isFirst() {
-            return position == 0;
-        }
-
-        @Override
-        public boolean isLast() {
-            return position == ids.size() - 1;
-        }
-
-        @Override
-        public boolean isBeforeFirst() {
-            return false;
-        }
-
-        @Override
-        public boolean isAfterLast() {
-            return false;
-        }
-
-        @Override
-        public int getColumnIndex(String s) {
-            return 0;
-        }
-
-        @Override
-        public int getColumnIndexOrThrow(String s) throws IllegalArgumentException {
-            return 0;
-        }
-
-        @Override
-        public String getColumnName(int i) {
-            return null;
-        }
-
-        @Override
-        public String[] getColumnNames() {
-            return new String[0];
-        }
-
-        @Override
-        public int getColumnCount() {
-            return 1;
-        }
-
-        @Override
-        public byte[] getBlob(int i) {
-            return new byte[0];
-        }
-
-        @Override
-        public String getString(int i) {
-            return null;
-        }
-
-        @Override
-        public void copyStringToBuffer(int i, CharArrayBuffer charArrayBuffer) {
-
-        }
-
-        @Override
-        public short getShort(int i) {
-            return 0;
-        }
-
-        @Override
-        public int getInt(int i) {
-            return 0;
-        }
-
-        @Override
-        public long getLong(int i) {
-            return ids.get(position);
-        }
-
-        @Override
-        public float getFloat(int i) {
-            return 0;
-        }
-
-        @Override
-        public double getDouble(int i) {
-            return 0;
-        }
-
-        @Override
-        public int getType(int i) {
-            return 0;
-        }
-
-        @Override
-        public boolean isNull(int i) {
-            return ids == null;
-        }
-
-        @Override
-        public void deactivate() {
-
-        }
-
-        @Override
-        public boolean requery() {
-            return false;
-        }
-
-        @Override
-        public void close() {
-
-        }
-
-        @Override
-        public boolean isClosed() {
-            return false;
-        }
-
-        @Override
-        public void registerContentObserver(ContentObserver contentObserver) {
-
-        }
-
-        @Override
-        public void unregisterContentObserver(ContentObserver contentObserver) {
-
-        }
-
-        @Override
-        public void registerDataSetObserver(DataSetObserver dataSetObserver) {
-
-        }
-
-        @Override
-        public void unregisterDataSetObserver(DataSetObserver dataSetObserver) {
-
-        }
-
-        @Override
-        public void setNotificationUri(ContentResolver contentResolver, Uri uri) {
-
-        }
-
-        @Override
-        public Uri getNotificationUri() {
-            return null;
-        }
-
-        @Override
-        public boolean getWantsAllOnMoveCalls() {
-            return false;
-        }
-
-        @Override
-        public Bundle getExtras() {
-            return null;
-        }
-
-        @Override
-        public Bundle respond(Bundle bundle) {
-            return null;
-        }
+    @NonNull
+    private List<FileDownloadInfo> givenDownloads() {
+        return Collections.singletonList(ANY_FILE_DOWNLOAD_INFO);
     }
 }

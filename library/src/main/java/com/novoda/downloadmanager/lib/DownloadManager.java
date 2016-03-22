@@ -425,7 +425,7 @@ public class DownloadManager {
                 new BatchPauseResumeController(
                         contentResolver,
                         DownloadsUriProvider.getInstance(),
-                        new BatchRepository(
+                        BatchRepository.from(
                                 contentResolver,
                                 new DownloadDeleter(contentResolver),
                                 DownloadsUriProvider.getInstance(),
@@ -450,7 +450,7 @@ public class DownloadManager {
                 new BatchPauseResumeController(
                         contentResolver,
                         DownloadsUriProvider.getInstance(),
-                        new BatchRepository(
+                        BatchRepository.from(
                                 contentResolver,
                                 new DownloadDeleter(contentResolver),
                                 DownloadsUriProvider.getInstance(),
@@ -475,7 +475,7 @@ public class DownloadManager {
                 new BatchPauseResumeController(
                         contentResolver,
                         DownloadsUriProvider.getInstance(),
-                        new BatchRepository(
+                        BatchRepository.from(
                                 contentResolver,
                                 new DownloadDeleter(contentResolver),
                                 DownloadsUriProvider.getInstance(),
@@ -679,7 +679,7 @@ public class DownloadManager {
     public Cursor query(BatchQuery query) {
         DownloadDeleter downloadDeleter = new DownloadDeleter(contentResolver);
         RealSystemFacade systemFacade = new RealSystemFacade(GlobalState.getContext(), new Clock());
-        BatchRepository batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
+        BatchRepository batchRepository = BatchRepository.from(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
         Cursor cursor = batchRepository.retrieveFor(query);
         if (cursor == null) {
             return null;

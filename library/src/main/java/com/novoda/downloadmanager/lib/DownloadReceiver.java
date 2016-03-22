@@ -54,7 +54,7 @@ public class DownloadReceiver extends BroadcastReceiver { // TODO split this int
         ContentResolver contentResolver = context.getContentResolver();
         DownloadDeleter downloadDeleter = new DownloadDeleter(contentResolver);
         RealSystemFacade systemFacade = new RealSystemFacade(context, new Clock());
-        batchRepository = new BatchRepository(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
+        batchRepository = BatchRepository.from(contentResolver, downloadDeleter, downloadsUriProvider, systemFacade);
 
         switch (intent.getAction()) {
             case ACTION_BOOT_COMPLETED:

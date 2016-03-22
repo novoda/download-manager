@@ -350,6 +350,7 @@ final class DownloadContract {
          * This value is used when the batch is starting for the first tme.
          */
         public static final int BATCH_HAS_STARTED = 1;
+        public static final int BATCH_HAS_NOT_STARTED = 0;
 
         private Batches() {
             // non-instantiable class
