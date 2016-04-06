@@ -509,12 +509,11 @@ class DownloadTask implements Runnable {
         } catch (StopRequestException exception) {
             if (exception.getFinalStatus() == DownloadStatus.PAUSED_BY_APP) {
                 notifyThroughDatabase(state, DownloadStatus.PAUSING, exception.getMessage(), 0);
-
-                // We still have to throw the exception, otherwise the parent
-                // thinks that the download has been completed OK, when is not
-                // We should remove exceptions as a flow control in order to avoid this
-                throw exception;
             }
+            // We still have to throw the exception, otherwise the parent
+            // thinks that the download has been completed OK, when is not
+            // We should remove exceptions as a flow control in order to avoid this
+            throw exception;
         } finally {
 //            if (drmClient != null) {
 //                drmClient.release();
