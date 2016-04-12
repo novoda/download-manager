@@ -408,10 +408,12 @@ public final class DownloadProvider extends ContentProvider {
                 dest = DownloadsDestination.DESTINATION_CACHE_PARTITION;
             }
             if (dest == DownloadsDestination.DESTINATION_FILE_URI) {
-                getContext().enforcePermission(
-                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE, Binder.getCallingPid(), Binder.getCallingUid(),
-                        "need WRITE_EXTERNAL_STORAGE permission to use DESTINATION_FILE_URI");
-                checkFileUriDestination(values);
+                if (!getFileUriDestinationPath(values).startsWith(Environment.getDataDirectory() + "/")) {
+                    // external, not internal storage
+                    getContext().enforcePermission(
+                            android.Manifest.permission.WRITE_EXTERNAL_STORAGE, Binder.getCallingPid(), Binder.getCallingUid(),
+                            "need WRITE_EXTERNAL_STORAGE permission to use DESTINATION_FILE_URI");
+                }
             } else if (dest == DownloadsDestination.DESTINATION_SYSTEMCACHE_PARTITION) {
                 getContext().enforcePermission(
                         "android.permission.ACCESS_CACHE_FILESYSTEM", Binder.getCallingPid(), Binder.getCallingUid(),
@@ -526,9 +528,9 @@ public final class DownloadProvider extends ContentProvider {
     }
 
     /**
-     * Check that the file URI provided for DESTINATION_FILE_URI is valid.
+     * Retrieve the file path for DESTINATION_FILE_URI if the URI is valid
      */
-    private void checkFileUriDestination(ContentValues values) {
+    private String getFileUriDestinationPath(ContentValues values) {
         String fileUri = values.getAsString(DownloadContract.Downloads.COLUMN_FILE_NAME_HINT);
         if (fileUri == null) {
             throw new IllegalArgumentException(
@@ -543,6 +545,7 @@ public final class DownloadProvider extends ContentProvider {
         if (path == null) {
             throw new IllegalArgumentException("Invalid file URI: " + uri);
         }
+        return path;
     }
 
     /**
