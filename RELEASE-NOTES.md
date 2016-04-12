@@ -1,3 +1,7 @@
+0.2.41 
+-----
+- Removes external storage permission enforcing when not needed #183
+
 0.2.39
 -----
 - Add new listener for DownloadManagerModules being released #182.
