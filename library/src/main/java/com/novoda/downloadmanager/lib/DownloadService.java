@@ -345,7 +345,7 @@ public class DownloadService extends Service {
                 continue;
             }
 
-            if (!isActive && downloadReadyChecker.canDownload(downloadBatch)) {
+            if (downloadReadyChecker.canDownload(downloadBatch) && !isActive) {
                 boolean isBatchStartingForTheFirstTime = batchRepository.isBatchStartingForTheFirstTime(downloadBatch.getBatchId());
                 if (isBatchStartingForTheFirstTime) {
                     handleBatchStartingForTheFirstTime(downloadBatch);
