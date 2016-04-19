@@ -1,3 +1,7 @@
+0.2.42 
+-----
+- FIXES BUG - Incorrect downlaod status mapping when connection drop
+
 0.2.41 
 -----
 - Removes external storage permission enforcing when not needed #183
