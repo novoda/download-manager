@@ -325,6 +325,7 @@ class DownloadTask implements Runnable {
             cleanupDestination(state, finalStatus);
 
             notifyDownloadCompleted(state, finalStatus, errorMsg, numFailed);
+            hackToForceClientsRefreshRulesIfConnectionDropped(finalStatus);
 
             LLog.i("Download " + originalDownloadInfo.getId() + " finished with status " + DownloadStatus.statusToString(finalStatus));
 
@@ -333,6 +334,16 @@ class DownloadTask implements Runnable {
             }
         }
         storageManager.incrementNumDownloadsSoFar();
+    }
+
+    private void hackToForceClientsRefreshRulesIfConnectionDropped(int finalStatus) {
+        if (DownloadStatus.WAITING_FOR_NETWORK == finalStatus) {
+            try {
+                checkClientRules();
+            } catch (StopRequestException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
