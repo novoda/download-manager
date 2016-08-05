@@ -83,6 +83,7 @@ public class Request {
 
     /**
      * @param uri the HTTP Uri to download.
+     * @deprecated use {@link #Request(java.net.URI)}
      */
     @Deprecated
     public Request(Uri uri) {
@@ -121,6 +122,8 @@ public class Request {
      * may be deleted by the system at any time to reclaim space.
      *
      * @return this object
+     *
+     * @deprecated use {@link #setDestinationUri(java.net.URI)}
      */
     @Deprecated
     public Request setDestinationUri(Uri uri) {
