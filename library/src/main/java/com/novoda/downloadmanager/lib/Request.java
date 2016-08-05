@@ -9,6 +9,7 @@ import android.util.Pair;
 import com.novoda.downloadmanager.notifications.NotificationVisibility;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +19,7 @@ import java.util.List;
  * <p/>
  * Note that the default download destination is a shared volume where the system might delete
  * your file if it needs to reclaim space for system use. If this is a problem, use a location
- * on external storage (see {@link #setDestinationUri(android.net.Uri)}.
+ * on external storage (see {@link #setDestinationUri(java.net.URI)}.
  */
 public class Request {
     /**
@@ -41,8 +42,8 @@ public class Request {
 
     private final List<Pair<String, String>> requestHeaders = new ArrayList<>();
 
-    private Uri uri;
-    private Uri destinationUri;
+    private URI uri;
+    private URI destinationUri;
     private CharSequence title = "";
     private CharSequence description = "";
     private String mimeType;
@@ -81,21 +82,51 @@ public class Request {
     private int notificationVisibility = NotificationVisibility.ONLY_WHEN_ACTIVE;
 
     /**
+     * @param uri the HTTP Uri to download.
+     */
+    @Deprecated
+    public Request(Uri uri) {
+        this(uri.toString());
+    }
+
+    /**
      * @param uri the HTTP URI to download.
      */
-    public Request(Uri uri) {
-        if (uri == null) {
-            throw new NullPointerException();
-        }
-        String scheme = uri.getScheme();
-        if (scheme == null || (!scheme.equals("http") && !scheme.equals("https"))) {
-            throw new IllegalArgumentException("Can only download HTTP/HTTPS URIs: " + uri);
-        }
+    @Deprecated
+    public Request(URI uri) {
+        validateUriScheme(uri.toString(), uri.getScheme());
         this.uri = uri;
     }
 
     Request(String uriString) {
-        uri = Uri.parse(uriString);
+        URI uri = URI.create(uriString);
+        validateUriScheme(uri.toString(), uri.getScheme());
+        this.uri = uri;
+    }
+
+    private void validateUriScheme(String uri, String scheme) {
+        if (scheme == null || (!scheme.equals("http") && !scheme.equals("https"))) {
+            throw new IllegalArgumentException("Can only download HTTP/HTTPS URIs: " + uri);
+        }
+    }
+
+    /**
+     * Set the local destination for the downloaded file. Must be a file Uri to a path on
+     * external storage, and the calling application must have the WRITE_EXTERNAL_STORAGE
+     * permission.
+     * <p/>
+     * The downloaded file is not scanned by MediaScanner.
+     * But it can be made scannable by calling {@link #allowScanningByMediaScanner()}.
+     * <p/>
+     * By default, downloads are saved to a generated filename in the shared download cache and
+     * may be deleted by the system at any time to reclaim space.
+     *
+     * @return this object
+     */
+    @Deprecated
+    public Request setDestinationUri(Uri uri) {
+        destinationUri = URI.create(uri.toString());
+        return this;
     }
 
     /**
@@ -111,7 +142,7 @@ public class Request {
      *
      * @return this object
      */
-    public Request setDestinationUri(Uri uri) {
+    public Request setDestinationUri(URI uri) {
         destinationUri = uri;
         return this;
     }
@@ -216,7 +247,7 @@ public class Request {
         if (subPath == null) {
             throw new NullPointerException("subPath cannot be null");
         }
-        destinationUri = Uri.withAppendedPath(Uri.fromFile(base), subPath);
+        destinationUri = new File(base, subPath).toURI();
     }
 
     /**
