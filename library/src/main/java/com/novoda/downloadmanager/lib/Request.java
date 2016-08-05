@@ -514,6 +514,6 @@ public class Request {
     }
 
     String getDestinationPath() {
-        return destinationUri.toString();
+        return destinationUri.getPath();
     }
 }
