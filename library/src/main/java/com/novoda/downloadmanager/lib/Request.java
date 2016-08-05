@@ -92,7 +92,6 @@ public class Request {
     /**
      * @param uri the HTTP URI to download.
      */
-    @Deprecated
     public Request(URI uri) {
         validateUriScheme(uri.toString(), uri.getScheme());
         this.uri = uri;
