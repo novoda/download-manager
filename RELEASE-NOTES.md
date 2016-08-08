@@ -1,6 +1,11 @@
+0.2.43 
+-----
+- FIXES BUG - `Request.getDestinationPath()` will return an actual file path, not an `URI` representation #192
+- DEPRECATES - `Request(android.net.Uri uri)` and `Request setDestinationUri(android.net.Uri uri)` in favor of `Request(java.net.URI uri)`, and `Request setDestinationUri(java.net.URI uri)` respectively #193 
+
 0.2.42 
 -----
-- FIXES BUG - Incorrect downlaod status mapping when connection drop
+- FIXES BUG - Incorrect download status mapping when connection drop
 
 0.2.41 
 -----
