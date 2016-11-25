@@ -4,6 +4,10 @@ task staticAnalysis {
     group 'Verification'
 }
 
+tasks.withType(Javadoc) {
+    options.addBooleanOption('Xdoclint:none', true)
+}
+
 check.dependsOn staticAnalysis
 
 apply from: "$project.rootDir/code-quality/checkstyle.gradle"
