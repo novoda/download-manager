@@ -93,7 +93,7 @@ class StorageManager {
     StorageManager(
             ContentResolver contentResolver, 
             File externalStorageDir,
-            File externalStorageDirs,
+            File[] externalStorageDirs,
             File internalStorageDir, 
             File systemCacheDir, 
             File downloadDataDir, 
