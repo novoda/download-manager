@@ -140,7 +140,7 @@ public class DownloadService extends Service {
         File downloadDataDir = StorageManager.getDownloadDataDirectory(this);
         File externalStorageDir = Environment.getExternalStorageDirectory();
         File[] externalStorageDirs = new File[0];
-        if (android.os.Build.VERSION.SDK_INT >= 19 ) {
+        if (android.os.Build.VERSION.SDK_INT >= 19) {
             externalStorageDirs = this.getExternalFilesDirs(null);
         }
         File internalStorageDir = Environment.getDataDirectory();
