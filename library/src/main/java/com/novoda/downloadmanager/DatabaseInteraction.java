@@ -95,7 +95,8 @@ class DatabaseInteraction {
             int totalSize = DB.File.getFileTotalSize(cursor);
             DownloadFile.FileStatus fileStatus = DownloadFile.FileStatus.valueOf(DB.File.getFileStatus(cursor));
             String localUri = DB.File.getFileLocalUri(cursor);
-            files.add(new DownloadFile(upstreamUri, currentSize, totalSize, localUri, fileStatus));
+            String fileIdentifier = DB.File.getFileIdentifier(cursor);
+            files.add(new DownloadFile(upstreamUri, currentSize, totalSize, localUri, fileStatus, fileIdentifier));
         } while (cursor.moveToNext());
 
         cursor.close();

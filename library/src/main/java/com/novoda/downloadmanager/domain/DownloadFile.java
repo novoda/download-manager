@@ -12,13 +12,15 @@ public class DownloadFile {
     private final long totalSize;
     private final String localUri;
     private final FileStatus fileStatus;
+    private final String fileIdentifier;
 
-    public DownloadFile(String uri, long currentSize, long totalSize, String localUri, FileStatus fileStatus) {
+    public DownloadFile(String uri, long currentSize, long totalSize, String localUri, FileStatus fileStatus, String fileIdentifier) {
         this.uri = uri;
         this.currentSize = currentSize;
         this.totalSize = totalSize;
         this.localUri = localUri;
         this.fileStatus = fileStatus;
+        this.fileIdentifier = fileIdentifier;
     }
 
     public String getUri() {
@@ -47,6 +49,10 @@ public class DownloadFile {
 
     public int getPercentage() {
         return Percentage.of(currentSize, totalSize);
+    }
+
+    public String getFileIdentifier() {
+        return fileIdentifier;
     }
 
     public static class NetworkRequest {

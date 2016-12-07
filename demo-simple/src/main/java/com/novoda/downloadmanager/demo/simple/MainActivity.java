@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
 
     private DownloadRequest.File createFileRequest(String uri, String filename) {
         File file = new File(getCacheDir(), filename);
-        return new DownloadRequest.File(uri, file.getAbsolutePath(), uri);
+        return new DownloadRequest.File(uri, file.getAbsolutePath(), filename);
     }
 
     private void setupQueryingExample() {

@@ -1,6 +1,5 @@
 package com.novoda.downloadmanager.demo.simple;
 
-import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -81,9 +80,8 @@ class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHolder> {
         private String getFilePercentages(List<DownloadFile> files) {
             StringBuilder stringBuilder = new StringBuilder();
             for (DownloadFile file : files) {
-                String assumedFileName = Uri.parse(file.getUri()).getLastPathSegment();
                 stringBuilder
-                        .append(assumedFileName)
+                        .append(file.getFileIdentifier())
                         .append(": ")
                         .append(file.getPercentage())
                         .append("%")
