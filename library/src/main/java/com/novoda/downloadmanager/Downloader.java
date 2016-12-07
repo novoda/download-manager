@@ -98,19 +98,12 @@ public class Downloader {
         listeners.notify(allDownloads);
     }
 
-    public void startListeningForDownloadUpdates(WatchType watchType) {
+    public void startListeningForDownloadUpdates(WatchType watchType, OnDownloadsChangedListener onDownloadsChangedListener) {
         watcher.startListeningForDownloadUpdates(watchType, onDownloadsChangedListener);
     }
 
-    private final Watcher.OnDownloadsChangedListener onDownloadsChangedListener = new Watcher.OnDownloadsChangedListener() {
-        @Override
-        public void onDownloadsChanged() {
-            requestDownloadsUpdate();
-        }
-    };
-
-    public void stopListeningForDownloadUpdates() {
-        watcher.stopListeningForDownloadUpdates();
+    public void stopListeningForDownloadUpdates(OnDownloadsChangedListener onDownloadsChangedListener) {
+        watcher.stopListeningForDownloadUpdates(onDownloadsChangedListener);
     }
 
     public void addCompletedDownload(DownloadRequest downloadRequest) {

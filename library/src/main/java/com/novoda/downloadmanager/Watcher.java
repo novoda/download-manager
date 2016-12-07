@@ -6,11 +6,13 @@ import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.Looper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 class Watcher {
 
+    private final List<DownloadChangeObserver> downloadChangeObservers = new ArrayList<>();
     private final ContentResolver contentResolver;
-
-    private OnDownloadsChangedListener onDownloadsChangedListener = OnDownloadsChangedListener.NULL_IMPL;
 
     public static Watcher newInstance(Context context) {
         return new Watcher(context.getContentResolver());
@@ -21,33 +23,38 @@ class Watcher {
     }
 
     public void startListeningForDownloadUpdates(WatchType watchType, OnDownloadsChangedListener onDownloadsChangedListener) {
-        this.onDownloadsChangedListener = onDownloadsChangedListener;
-        contentResolver.registerContentObserver(watchType.toUri(), true, contentObserver);
+        DownloadChangeObserver downloadChangeObserver = new DownloadChangeObserver(onDownloadsChangedListener);
+        downloadChangeObservers.add(downloadChangeObserver);
+        contentResolver.registerContentObserver(watchType.toUri(), true, downloadChangeObserver.getContentObserver());
     }
 
-    public void stopListeningForDownloadUpdates() {
-        contentResolver.unregisterContentObserver(contentObserver);
-        onDownloadsChangedListener = OnDownloadsChangedListener.NULL_IMPL;
-
-    }
-
-    private final ContentObserver contentObserver = new ContentObserver(new Handler(Looper.getMainLooper())) {
-        @Override
-        public void onChange(boolean selfChange) {
-            onDownloadsChangedListener.onDownloadsChanged();
-        }
-    };
-
-    interface OnDownloadsChangedListener {
-        OnDownloadsChangedListener NULL_IMPL = new OnDownloadsChangedListener() {
-            @Override
-            public void onDownloadsChanged() {
-                // do nothing
+    public void stopListeningForDownloadUpdates(OnDownloadsChangedListener onDownloadsChangedListener) {
+        for (DownloadChangeObserver downloadChangeObserver : downloadChangeObservers) {
+            if (downloadChangeObserver.onDownloadsChangedListener == onDownloadsChangedListener) {
+                contentResolver.unregisterContentObserver(downloadChangeObserver.contentObserver);
+                return;
             }
-        };
+        }
+    }
 
-        void onDownloadsChanged();
+    static class DownloadChangeObserver {
 
+        private final ContentObserver contentObserver;
+        private final OnDownloadsChangedListener onDownloadsChangedListener;
+
+        DownloadChangeObserver(final OnDownloadsChangedListener onDownloadsChangedListener) {
+            this.contentObserver = new ContentObserver(new Handler(Looper.getMainLooper())) {
+                @Override
+                public void onChange(boolean selfChange) {
+                    onDownloadsChangedListener.onDownloadsChanged();
+                }
+            };
+            this.onDownloadsChangedListener = onDownloadsChangedListener;
+        }
+
+        public ContentObserver getContentObserver() {
+            return contentObserver;
+        }
     }
 
 }
