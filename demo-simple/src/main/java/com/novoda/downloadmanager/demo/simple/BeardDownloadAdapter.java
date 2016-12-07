@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager.demo.simple;
 
+import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,10 +66,10 @@ class BeardDownloadAdapter extends RecyclerView.Adapter<BeardDownloadAdapter.Vie
             List<DownloadFile> files = download.getFiles();
 
             statusText.setText(download.getStatus().name());
-            filesText.setText(getCurrentFile(files) + " : " + getFilePercentage(files));
-            idText.setText("Id : " + download.getId().toString());
-            sizeText.setText(download.getCurrentSize() + " / " + download.getTotalSize());
-            percentText.setText("" + download.getPercentage() + "%");
+            filesText.setText(getFilePercentages(files));
+            idText.setText("Id: " + download.getId().toString());
+            sizeText.setText("bytes: " + download.getCurrentSize() + " / " + download.getTotalSize());
+            percentText.setText("Total: " + download.getPercentage() + "%");
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -77,32 +79,19 @@ class BeardDownloadAdapter extends RecyclerView.Adapter<BeardDownloadAdapter.Vie
             });
         }
 
-        private String getFilePercentage(List<DownloadFile> files) {
+        private String getFilePercentages(List<DownloadFile> files) {
+            StringBuilder stringBuilder = new StringBuilder();
             for (DownloadFile file : files) {
-                if (file.getStatus() == DownloadFile.FileStatus.INCOMPLETE) {
-                    return file.getPercentage() + "%";
-                }
+                String assumedFileName = Uri.parse(file.getUri()).getLastPathSegment();
+                stringBuilder
+                        .append(assumedFileName)
+                        .append(": ")
+                        .append(file.getPercentage())
+                        .append("%")
+                        .append("\n");
             }
-            // going to assume that all the files have completed
-            return "100%";
+            return stringBuilder.toString();
         }
-
-        private String getCurrentFile(List<DownloadFile> files) {
-            for (int i = 0; i < files.size(); i++) {
-                DownloadFile file = files.get(i);
-
-                if (file.getStatus() == DownloadFile.FileStatus.INCOMPLETE) {
-                    return formatCurrentFile(files, i + 1);
-                }
-            }
-            // going to assume that all the files have completed
-            return formatCurrentFile(files, files.size());
-        }
-
-        private String formatCurrentFile(List<DownloadFile> files, int currentFilePosition) {
-            return "Files " + currentFilePosition + " / " + files.size();
-        }
-
     }
 
     public interface OnDownloadClickedListener {

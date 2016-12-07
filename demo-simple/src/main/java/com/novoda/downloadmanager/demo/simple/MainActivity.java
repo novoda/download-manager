@@ -20,7 +20,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String BIG_FILE = "http://ipv4.download.thinkbroadband.com/10MB.zip";
+    private static final String BIG_FILE = "http://ipv4.download.thinkbroadband.com/100MB.zip";
     private static final String SMALL_FILE = "http://ipv4.download.thinkbroadband.com/5MB.zip";
     private static final String PENGUINS_IMAGE = "http://i.imgur.com/Y7pMO5Kb.jpg";
 
@@ -45,12 +45,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupDownloadingExample() {
-//        final Request request = new Request(uri)
-//                .setNotificationVisibility(NotificationVisibility.ACTIVE_OR_COMPLETE)
-//                .setTitle("Family of Penguins")
-//                .setDescription("These are not the beards you're looking for")
-//                .setBigPictureUrl(PENGUINS_IMAGE);
-
         findViewById(R.id.main_download_button).setOnClickListener(
                 new View.OnClickListener() {
                     @Override
