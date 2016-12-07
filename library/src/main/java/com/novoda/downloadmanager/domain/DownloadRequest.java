@@ -91,10 +91,6 @@ public class DownloadRequest {
             return this;
         }
 
-        public File.Builder withFile() {
-            return new File.Builder(this);
-        }
-
         public Builder withFile(File file) {
             files.add(file);
             return this;

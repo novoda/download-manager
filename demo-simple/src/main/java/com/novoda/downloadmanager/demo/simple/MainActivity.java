@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Downloader downloader;
     private View emptyView;
-    private BeardDownloadAdapter adapter;
+    private DownloadAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         emptyView = findViewById(R.id.main_no_downloads_view);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.main_downloads_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new BeardDownloadAdapter(onDownloadClickedListener);
+        adapter = new DownloadAdapter(onDownloadClickedListener);
         recyclerView.setAdapter(adapter);
 
         setupDownloadingExample();
@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private final BeardDownloadAdapter.OnDownloadClickedListener onDownloadClickedListener = new BeardDownloadAdapter.OnDownloadClickedListener() {
+    private final DownloadAdapter.OnDownloadClickedListener onDownloadClickedListener = new DownloadAdapter.OnDownloadClickedListener() {
         @Override
         public void onDownloadClicked(Download download) {
             switch (download.getStatus()) {

@@ -1,7 +1,6 @@
 package com.novoda.downloadmanager.demo.simple;
 
 import android.net.Uri;
-import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,12 +13,12 @@ import com.novoda.downloadmanager.domain.DownloadFile;
 import java.util.ArrayList;
 import java.util.List;
 
-class BeardDownloadAdapter extends RecyclerView.Adapter<BeardDownloadAdapter.ViewHolder> {
+class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHolder> {
 
     private final OnDownloadClickedListener downloadClickedListener;
     private final List<Download> downloads = new ArrayList<>();
 
-    public BeardDownloadAdapter(OnDownloadClickedListener downloadClickedListener) {
+    public DownloadAdapter(OnDownloadClickedListener downloadClickedListener) {
         this.downloadClickedListener = downloadClickedListener;
     }
 
