@@ -1,13 +1,17 @@
-0.2.43 
+0.2.44
+-----
+- FIXES BUG - Allow downloading to location returned from getExternalFilesDirs in API 19 and newer #204
+
+0.2.43
 -----
 - FIXES BUG - `Request.getDestinationPath()` will return an actual file path, not an `URI` representation #192
-- DEPRECATES - `Request(android.net.Uri uri)` and `Request setDestinationUri(android.net.Uri uri)` in favor of `Request(java.net.URI uri)`, and `Request setDestinationUri(java.net.URI uri)` respectively #193 
+- DEPRECATES - `Request(android.net.Uri uri)` and `Request setDestinationUri(android.net.Uri uri)` in favor of `Request(java.net.URI uri)`, and `Request setDestinationUri(java.net.URI uri)` respectively #193
 
-0.2.42 
+0.2.42
 -----
 - FIXES BUG - Incorrect download status mapping when connection drop
 
-0.2.41 
+0.2.41
 -----
 - Removes external storage permission enforcing when not needed #183
 
@@ -42,7 +46,7 @@
 
 0.2.32
 -----
- - FIXES UPGRADE CRASH - previous release still contained the sql syntax error in the migration 
+ - FIXES UPGRADE CRASH - previous release still contained the sql syntax error in the migration
 
 0.2.31
 -----
@@ -117,7 +121,7 @@
 
 0.2.14
 -----
-- Adds the ability to add a completed batch to the download manager #152 
+- Adds the ability to add a completed batch to the download manager #152
 - Fixes "Download Cancelled" notifications returning after being dismissed #150
 
 0.2.13

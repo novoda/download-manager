@@ -60,7 +60,7 @@ publish {
     userOrg = 'novoda'
     groupId = 'com.novoda'
     artifactId = 'download-manager'
-    publishVersion = '0.2.43'
+    publishVersion = '0.2.44'
     description = 'Download manager based on AOSP DM but allowing downloading to internal private storage.'
     website = 'https://github.com/novoda/download-manager'
 }

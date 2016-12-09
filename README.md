@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.novoda:download-manager:0.2.38'
+    compile 'com.novoda:download-manager:0.2.44'
 }
 ```
 
@@ -32,7 +32,7 @@ You will need to add this to your Android application build.gradle:
 android {
   defaultConfig {
        // other things
-       
+
        manifestPlaceholders = [downloadAuthority: "com.your.unique.authority"]
   }
 }
