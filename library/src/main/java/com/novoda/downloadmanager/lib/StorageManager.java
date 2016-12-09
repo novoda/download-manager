@@ -55,6 +55,11 @@ class StorageManager {
      */
     private final File externalStorageDir;
 
+     /**
+     * see {@link Context#getExternalFilesDirs(String)}
+     */
+    private final File[] externalStorageDirs;
+    
     /**
      * see {@link android.os.Environment#getDataDirectory()}
      */
@@ -87,13 +92,15 @@ class StorageManager {
 
     StorageManager(
             ContentResolver contentResolver, 
-            File externalStorageDir, 
+            File externalStorageDir,
+            File[] externalStorageDirs,
             File internalStorageDir, 
             File systemCacheDir, 
             File downloadDataDir, 
             DownloadsUriProvider downloadsUriProvider) {
         this.contentResolver = contentResolver;
         this.externalStorageDir = externalStorageDir;
+        this.externalStorageDirs = externalStorageDirs;
         this.internalStorageDir = internalStorageDir;
         this.systemCacheDir = systemCacheDir;
         this.downloadDataDir = downloadDataDir;
@@ -172,6 +179,12 @@ class StorageManager {
                     dir = systemCacheDir;
                 } else if (path.startsWith(internalStorageDir.getPath())) {
                     dir = internalStorageDir;
+                }
+                for (File aExternalStorageDir : externalStorageDirs) {
+                    if (path.startsWith(aExternalStorageDir.getPath())) {
+                        dir = aExternalStorageDir;
+                        break;
+                    }
                 }
                 break;
         }
