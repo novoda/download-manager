@@ -1,4 +1,4 @@
-package com.novoda.downloadmanager;
+package com.novoda.downloadmanager.service;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;

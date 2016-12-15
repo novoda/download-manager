@@ -1,7 +1,8 @@
-package com.novoda.downloadmanager;
+package com.novoda.downloadmanager.service;
 
 import android.util.Log;
 
+import com.novoda.downloadmanager.Pauser;
 import com.novoda.downloadmanager.client.ClientCheckResult;
 import com.novoda.downloadmanager.client.DownloadCheck;
 import com.novoda.downloadmanager.domain.Download;
@@ -104,6 +105,10 @@ class DownloadUpdater {
     private void download(final DownloadId downloadId) {
         downloadHandler.setDownloadSubmitted(downloadId);
         executor.submit(new DownloadTask(downloadId, downloadHandler, pauser));
+    }
+
+    public void release() {
+        executor.shutdown();
     }
 
 }
