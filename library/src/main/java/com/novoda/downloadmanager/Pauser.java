@@ -15,12 +15,7 @@ public class Pauser {
 
     private final LocalBroadcastManager localBroadcastManager;
 
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // null safe
-        }
-    };
+    private BroadcastReceiver receiver = null;
 
     public Pauser(LocalBroadcastManager localBroadcastManager) {
         this.localBroadcastManager = localBroadcastManager;
@@ -51,6 +46,9 @@ public class Pauser {
     }
 
     public void stopListeningForPause() {
+        if (receiver == null) {
+            return;
+        }
         localBroadcastManager.unregisterReceiver(receiver);
     }
 
