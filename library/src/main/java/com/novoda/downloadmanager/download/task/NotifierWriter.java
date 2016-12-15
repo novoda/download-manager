@@ -1,9 +1,9 @@
-package com.novoda.downloadmanager.task;
+package com.novoda.downloadmanager.download.task;
 
 import android.os.SystemClock;
 
-import com.novoda.downloadmanager.DownloadHandler;
 import com.novoda.downloadmanager.domain.DownloadFile;
+import com.novoda.downloadmanager.download.DownloadHandler;
 
 class NotifierWriter implements DataWriter {
 

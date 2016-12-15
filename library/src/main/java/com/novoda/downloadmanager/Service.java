@@ -2,7 +2,9 @@ package com.novoda.downloadmanager;
 
 import android.content.Intent;
 import android.database.ContentObserver;
-import android.os.*;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.Process;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
@@ -11,8 +13,9 @@ import android.util.Log;
 import com.novoda.downloadmanager.client.ClientCheckResult;
 import com.novoda.downloadmanager.client.DownloadCheck;
 import com.novoda.downloadmanager.client.GlobalClientCheck;
+import com.novoda.downloadmanager.download.DownloadHandler;
+import com.novoda.downloadmanager.download.DownloadHandlerCreator;
 import com.novoda.notils.caster.Classes;
-import com.squareup.okhttp.OkHttpClient;
 
 import java.util.concurrent.ExecutorService;
 
@@ -57,9 +60,7 @@ public class Service extends android.app.Service {
     }
 
     private DownloadUpdater createDownloadUpdater(DownloadCheck downloadCheck) {
-        ContentLengthFetcher contentLengthFetcher = new ContentLengthFetcher(new OkHttpClient());
-        DatabaseInteraction databaseInteraction = new DatabaseInteraction(getContentResolver());
-        DownloadHandler downloadHandler = new DownloadHandler(databaseInteraction, contentLengthFetcher);
+        DownloadHandler downloadHandler = DownloadHandlerCreator.create(getContentResolver());
         Pauser pauser = new Pauser(LocalBroadcastManager.getInstance(this));
         return new DownloadUpdater(downloadHandler, executor, pauser, downloadCheck);
     }

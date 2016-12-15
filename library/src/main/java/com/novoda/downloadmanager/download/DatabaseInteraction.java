@@ -1,9 +1,10 @@
-package com.novoda.downloadmanager;
+package com.novoda.downloadmanager.download;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 
+import com.novoda.downloadmanager.Provider;
 import com.novoda.downloadmanager.demo.simple.DB;
 import com.novoda.downloadmanager.domain.Download;
 import com.novoda.downloadmanager.domain.DownloadFile;

@@ -1,4 +1,4 @@
-package com.novoda.downloadmanager;
+package com.novoda.downloadmanager.download;
 
 import android.util.Pair;
 

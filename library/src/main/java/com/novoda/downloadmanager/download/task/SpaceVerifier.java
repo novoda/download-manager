@@ -1,4 +1,4 @@
-package com.novoda.downloadmanager.task;
+package com.novoda.downloadmanager.download.task;
 
 interface SpaceVerifier {
 

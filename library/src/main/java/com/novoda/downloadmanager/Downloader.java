@@ -9,7 +9,8 @@ import com.novoda.downloadmanager.client.GlobalClientCheck;
 import com.novoda.downloadmanager.domain.Download;
 import com.novoda.downloadmanager.domain.DownloadId;
 import com.novoda.downloadmanager.domain.DownloadRequest;
-import com.squareup.okhttp.OkHttpClient;
+import com.novoda.downloadmanager.download.DownloadHandler;
+import com.novoda.downloadmanager.download.DownloadHandlerCreator;
 
 import java.util.List;
 
@@ -37,10 +38,8 @@ public class Downloader {
 
         public Downloader build(Context context) {
             Context applicationContext = context.getApplicationContext();
-            ContentResolver contentResolver = applicationContext.getContentResolver();
-            DatabaseInteraction databaseInteraction = new DatabaseInteraction(contentResolver);
-            ContentLengthFetcher contentLengthFetcher = new ContentLengthFetcher(new OkHttpClient());
-            DownloadHandler downloadHandler = new DownloadHandler(databaseInteraction, contentLengthFetcher);
+            ContentResolver contentResolver = applicationContext.getContentResolver();;
+            DownloadHandler downloadHandler = DownloadHandlerCreator.create(contentResolver);
             Pauser pauser = new Pauser(LocalBroadcastManager.getInstance(context));
             Listeners listeners = Listeners.newInstance();
             Watcher watcher = Watcher.newInstance(context);

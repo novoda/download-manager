@@ -1,9 +1,9 @@
-package com.novoda.downloadmanager.task;
+package com.novoda.downloadmanager.download.task;
 
 import android.util.Log;
 
-import com.novoda.downloadmanager.DownloadHandler;
 import com.novoda.downloadmanager.domain.DownloadFile;
+import com.novoda.downloadmanager.download.DownloadHandler;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;

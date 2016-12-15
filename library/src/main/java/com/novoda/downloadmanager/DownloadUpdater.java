@@ -7,7 +7,8 @@ import com.novoda.downloadmanager.client.DownloadCheck;
 import com.novoda.downloadmanager.domain.Download;
 import com.novoda.downloadmanager.domain.DownloadFile;
 import com.novoda.downloadmanager.domain.DownloadId;
-import com.novoda.downloadmanager.task.DownloadTask;
+import com.novoda.downloadmanager.download.DownloadHandler;
+import com.novoda.downloadmanager.download.task.DownloadTask;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
