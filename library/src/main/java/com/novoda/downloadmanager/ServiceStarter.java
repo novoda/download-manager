@@ -8,6 +8,9 @@ import com.novoda.downloadmanager.client.GlobalClientCheck;
 
 class ServiceStarter {
 
+    static final String EXTRA_GLOBAL_CLIENT_CHECKER = "foo";
+    static final String EXTRA_DOWNLOAD_CHECKER = "bar";
+
     private final Context context;
 
     private final GlobalClientCheck globalClientCheck;
@@ -22,8 +25,8 @@ class ServiceStarter {
     public void start() {
         Intent service = new Intent(context, Service.class);
 
-        service.putExtra("foo", globalClientCheck);
-        service.putExtra("bar", downloadCheck);
+        service.putExtra(EXTRA_GLOBAL_CLIENT_CHECKER, globalClientCheck);
+        service.putExtra(EXTRA_DOWNLOAD_CHECKER, downloadCheck);
 
         context.startService(service);
     }

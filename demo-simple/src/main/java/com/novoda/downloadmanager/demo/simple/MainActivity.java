@@ -31,7 +31,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Downloader downloader = new Downloader.Builder().build(this);
+
         downloaderHelper = new DownloaderHelper(downloader);
 
         emptyView = findViewById(R.id.main_no_downloads_view);

@@ -24,19 +24,22 @@ public class Service extends android.app.Service {
     public void onCreate() {
         super.onCreate();
         Log.e("!!!", "service created");
-
-        HandlerThread updateThread = new HandlerThread("DownloadManager-UpdateThread");
-        updateThread.start();
-        Handler updateHandler = new Handler(updateThread.getLooper());
-
-        delegate = DelegateCreator.create(updateThread, updateHandler, this);
-
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        delegate = createDelegate();
+
         delegate.onStartCommand(intent, flags, startId);
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    private Delegate createDelegate() {
+        HandlerThread updateThread = new HandlerThread("DownloadManager-UpdateThread");
+        updateThread.start();
+        Handler updateHandler = new Handler(updateThread.getLooper());
+
+        return DelegateCreator.create(updateThread, updateHandler, this);
     }
 
     @Override
