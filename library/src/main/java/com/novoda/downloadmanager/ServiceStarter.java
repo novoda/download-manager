@@ -1,34 +1,45 @@
 package com.novoda.downloadmanager;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 
 import com.novoda.downloadmanager.client.DownloadCheck;
 import com.novoda.downloadmanager.client.GlobalClientCheck;
 
 class ServiceStarter {
 
-    static final String EXTRA_GLOBAL_CLIENT_CHECKER = "foo";
-    static final String EXTRA_DOWNLOAD_CHECKER = "bar";
-
     private final Context context;
 
-    private final GlobalClientCheck globalClientCheck;
-    private final DownloadCheck downloadCheck;
+    private final GlobalClientCheck globalClientChecker;
+    private final DownloadCheck downloadChecker;
 
-    public ServiceStarter(Context context, GlobalClientCheck globalClientCheck, DownloadCheck downloadCheck) {
+    public ServiceStarter(Context context, GlobalClientCheck globalClientChecker, DownloadCheck downloadCheck) {
         this.context = context;
-        this.globalClientCheck = globalClientCheck;
-        this.downloadCheck = downloadCheck;
+        this.globalClientChecker = globalClientChecker;
+        this.downloadChecker = downloadCheck;
     }
 
     public void start() {
         Intent service = new Intent(context, Service.class);
 
-        service.putExtra(EXTRA_GLOBAL_CLIENT_CHECKER, globalClientCheck);
-        service.putExtra(EXTRA_DOWNLOAD_CHECKER, downloadCheck);
+        ServiceConnection serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder binder) {
+                Service.ServiceBinder service = (Service.ServiceBinder) binder;
+                service.setGlobalChecker(globalClientChecker);
+                service.setDownloadChecker(downloadChecker);
+                service.start();
+            }
 
-        context.startService(service);
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                // do nothing
+            }
+        };
+        context.bindService(service, serviceConnection, Service.BIND_AUTO_CREATE);
     }
 
 }

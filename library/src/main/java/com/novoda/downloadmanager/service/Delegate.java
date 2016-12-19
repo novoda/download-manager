@@ -1,13 +1,10 @@
 package com.novoda.downloadmanager.service;
 
 import android.app.Service;
-import android.content.Intent;
 import android.util.Log;
 
 import com.novoda.downloadmanager.client.ClientCheckResult;
-import com.novoda.downloadmanager.client.DownloadCheck;
 import com.novoda.downloadmanager.client.GlobalClientCheck;
-import com.novoda.notils.caster.Classes;
 
 public class Delegate {
 
@@ -15,19 +12,20 @@ public class Delegate {
     private final DownloadUpdater downloadUpdater;
     private final Service service;
     private final UpdateScheduler updateScheduler;
+    private final GlobalClientCheck globalClientCheck;
 
     Delegate(DownloadObserver downloadObserver,
              DownloadUpdater downloadUpdater,
-             Service service, UpdateScheduler updateScheduler) {
+             Service service, UpdateScheduler updateScheduler,
+             GlobalClientCheck globalClientCheck) {
         this.downloadObserver = downloadObserver;
         this.downloadUpdater = downloadUpdater;
         this.service = service;
         this.updateScheduler = updateScheduler;
+        this.globalClientCheck = globalClientCheck;
     }
 
-    public void onStartCommand(Intent intent, int flags, int startId) {
-        GlobalClientCheck globalClientCheck = Classes.from(intent.getSerializableExtra("foo"));
-        DownloadCheck downloadCheck = Classes.from(intent.getSerializableExtra("bar"));
+    public void start() {
         ClientCheckResult clientCheckResult = globalClientCheck.onGlobalCheck();
 
         if (clientCheckResult.isAllowed()) {
