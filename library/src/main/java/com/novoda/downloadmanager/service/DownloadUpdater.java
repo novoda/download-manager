@@ -53,16 +53,16 @@ class DownloadUpdater {
 
     private boolean triggerDownload(List<Download> allDownloads) {
         for (Download download : allDownloads) {
-            Log.e("!!!", "trigger download? : " + download.getId().toString());
+            Log.e("!!!", "trigger download? : " + download.getId().asString());
 
             if (doesNotNeedToBeDownloaded(download)) {
-                Log.e("!!!", "skipping : " + download.getId().toString());
+                Log.e("!!!", "skipping : " + download.getId().asString());
                 continue;
             }
 
             ClientCheckResult clientCheckResult = downloadCheck.isAllowedToDownload(download);
             if (clientCheckResult.isAllowed()) {
-                Log.e("!!!", "downloading : " + download.getId().toString());
+                Log.e("!!!", "downloading : " + download.getId().asString());
                 download(download.getId());
                 return true;
             } else {

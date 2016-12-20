@@ -12,6 +12,7 @@ import com.novoda.downloadmanager.domain.DownloadId;
 import com.novoda.downloadmanager.domain.DownloadRequest;
 import com.novoda.downloadmanager.domain.DownloadStage;
 import com.novoda.downloadmanager.domain.DownloadStatus;
+import com.novoda.downloadmanager.domain.ExternalId;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -84,11 +85,11 @@ class DatabaseInteraction {
         DownloadStage downloadStage = DownloadStage.valueOf(DB.Download.getDownloadStage(cursor));
         DownloadStatus downloadStatus = DownloadStatus.from(downloadStage);
         List<DownloadFile> files = getFilesForId(id);
-        return new Download(id, currentSize, totalSize, downloadStage, downloadStatus, files, identifier);
+        return new Download(id, currentSize, totalSize, downloadStage, downloadStatus, files, new ExternalId(identifier));
     }
 
     private List<DownloadFile> getFilesForId(DownloadId id) {
-        Cursor cursor = contentResolver.query(Provider.FILE, null, DB.Columns.File.FileDownloadId + "=?", new String[]{id.toString()}, null);
+        Cursor cursor = contentResolver.query(Provider.FILE, null, DB.Columns.File.FileDownloadId + "=?", new String[]{id.asString()}, null);
         cursor.moveToFirst();
 
         List<DownloadFile> files = new ArrayList<>();
@@ -108,10 +109,10 @@ class DatabaseInteraction {
 
     public void submitRequest(DownloadRequest downloadRequest) {
         ContentValues values = new ContentValues();
-        long downloadId = downloadRequest.getId().toLong();
+        long downloadId = downloadRequest.getId().asLong();
         DB.Download.setDownloadId((int) downloadId, values);
         DB.Download.setDownloadStage(DownloadStage.QUEUED.name(), values);
-        DB.Download.setDownloadIdentifier(downloadRequest.getIdentifier(), values);
+        DB.Download.setDownloadIdentifier(downloadRequest.getExternalId().asString(), values);
         contentResolver.insert(Provider.DOWNLOAD, values);
 
         ContentValues[] fileValues = createFileValues(downloadRequest.getFiles(), downloadId);
@@ -143,7 +144,7 @@ class DatabaseInteraction {
     public void updateStatus(DownloadId downloadId, DownloadStage stage) {
         ContentValues values = new ContentValues(1);
         DB.Download.setDownloadStage(stage.name(), values);
-        contentResolver.update(Provider.DOWNLOAD, values, DB.Columns.Download.DownloadId + "=?", new String[]{downloadId.toString()});
+        contentResolver.update(Provider.DOWNLOAD, values, DB.Columns.Download.DownloadId + "=?", new String[]{downloadId.asString()});
     }
 
     public void updateFileProgress(DownloadFile file, long bytesWritten) {
@@ -160,7 +161,7 @@ class DatabaseInteraction {
     }
 
     public Download getDownload(DownloadId id) {
-        Cursor cursor = contentResolver.query(Provider.DOWNLOAD_WITH_SIZE, null, DB.Columns.Download.DownloadId + "=?", new String[]{id.toString()}, null);
+        Cursor cursor = contentResolver.query(Provider.DOWNLOAD_WITH_SIZE, null, DB.Columns.Download.DownloadId + "=?", new String[]{id.asString()}, null);
         try {
             cursor.moveToFirst();
             return getDownload(cursor);
@@ -173,7 +174,7 @@ class DatabaseInteraction {
 
     public void addCompletedRequest(DownloadRequest downloadRequest) {
         ContentValues values = new ContentValues();
-        long downloadId = downloadRequest.getId().toLong();
+        long downloadId = downloadRequest.getId().asLong();
         DB.Download.setDownloadId((int) downloadId, values);
         DB.Download.setDownloadStage(DownloadStage.COMPLETED.name(), values);
         contentResolver.insert(Provider.DOWNLOAD, values);
@@ -202,7 +203,7 @@ class DatabaseInteraction {
     }
 
     public void delete(Download download) {
-        long downloadId = download.getId().toLong();
+        long downloadId = download.getId().asLong();
         contentResolver.delete(Provider.DOWNLOAD, DB.Columns.Download.DownloadId + "=?", new String[]{String.valueOf(downloadId)});
         contentResolver.delete(Provider.FILE, DB.Columns.File.FileDownloadId + "=?", new String[]{String.valueOf(downloadId)});
     }

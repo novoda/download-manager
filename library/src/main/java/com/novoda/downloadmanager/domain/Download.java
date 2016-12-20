@@ -10,16 +10,16 @@ public class Download {
     private final DownloadStage downloadStage;
     private final DownloadStatus downloadStatus;
     private final List<DownloadFile> files;
-    private final String identifier;
+    private final ExternalId externalId;
 
-    public Download(DownloadId id, long currentSize, long totalSize, DownloadStage downloadStage, DownloadStatus downloadStatus, List<DownloadFile> files, String identifier) {
+    public Download(DownloadId id, long currentSize, long totalSize, DownloadStage downloadStage, DownloadStatus downloadStatus, List<DownloadFile> files, ExternalId externalId) {
         this.id = id;
         this.currentSize = currentSize;
         this.totalSize = totalSize;
         this.downloadStage = downloadStage;
         this.downloadStatus = downloadStatus;
         this.files = files;
-        this.identifier = identifier;
+        this.externalId = externalId;
     }
 
     public DownloadId getId() {
@@ -50,8 +50,8 @@ public class Download {
         return Percentage.of(currentSize, totalSize);
     }
 
-    public String identifier() {
-        return identifier;
+    public ExternalId externalId() {
+        return externalId;
     }
 
 }
