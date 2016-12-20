@@ -30,7 +30,6 @@ class FileDownloader {
     public void downloadFile(DownloadFile file) throws IOException {
         File downloadedFile = new File(file.getLocalUri());
 
-
         Log.e("!!!", "download file : " + file.getLocalUri() + " : " + (downloadedFile.exists() ? downloadedFile.length() : "0"));
 
         if (!downloadedFile.exists()) {
@@ -51,6 +50,7 @@ class FileDownloader {
         DataTransferer dataTransferer = new RegularDataTransferer(dataWriter);
 
         State state = new State();
+        state.currentBytes = downloadedFile.length();
 
         try {
             State endState = dataTransferer.transferData(state, in);
