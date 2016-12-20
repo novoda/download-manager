@@ -37,12 +37,19 @@
   <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="horizontal">
+
+    <Button
+      android:id="@+id/download_pause_resume"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_weight="100"/>
 
     <Button
       android:id="@+id/download_delete"
-      android:layout_width="wrap_content"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
+      android:layout_weight="100"
       android:text="Delete" />
 
   </LinearLayout>

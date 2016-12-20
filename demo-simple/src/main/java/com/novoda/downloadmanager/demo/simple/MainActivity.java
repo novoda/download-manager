@@ -71,24 +71,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private final DownloadAdapter.OnDownloadClickedListener onDownloadClickedListener = new DownloadAdapter.OnDownloadClickedListener() {
-        @Override
-        public void onDownloadClicked(Download download) {
-            switch (download.getStatus()) {
-                case RUNNING:
-                    toastMessage("Pausing download!");
-                    downloaderHelper.pause(download.getId());
-                    break;
-
-                case PAUSED:
-                    toastMessage("Resuming download!");
-                    downloaderHelper.resume(download.getId());
-                    break;
-            }
-        }
 
         @Override
         public void onDeleteDownload(Download download) {
             downloaderHelper.delete(download.getId());
+        }
+
+        @Override
+        public void onPauseDownload(Download download) {
+            toastMessage("Pausing download!");
+            downloaderHelper.pause(download.getId());
+        }
+
+        @Override
+        public void onResumeDownload(Download download) {
+            toastMessage("Resuming download!");
+            downloaderHelper.resume(download.getId());
         }
 
         private void toastMessage(String message) {
