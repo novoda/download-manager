@@ -26,7 +26,7 @@ public class Pauser {
     }
 
     private Intent createPauseIntent(DownloadId downloadId) {
-        return new Intent(ACTION_PAUSE).putExtra(EXTRA_DOWNLOAD_ID, downloadId.toString());
+        return new Intent(ACTION_PAUSE).putExtra(EXTRA_DOWNLOAD_ID, downloadId.asString());
     }
 
     public void listenForPause(final DownloadId downloadId, final OnPauseListener onPauseListener) {
@@ -38,7 +38,7 @@ public class Pauser {
         return new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(ACTION_PAUSE) && intent.getStringExtra(EXTRA_DOWNLOAD_ID).equals(downloadId.toString())) {
+                if (intent.getAction().equals(ACTION_PAUSE) && intent.getStringExtra(EXTRA_DOWNLOAD_ID).equals(downloadId.asString())) {
                     onPauseListener.onDownloadPaused();
                 }
             }

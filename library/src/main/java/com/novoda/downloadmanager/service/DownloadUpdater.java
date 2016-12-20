@@ -46,7 +46,6 @@ class DownloadUpdater {
         downloadHandler.deleteMarkedBatchesFor(allDownloads);
 //        updateUserVisibleNotification(downloadBatches);
 
-
         // todo update notification
 
         return isActive;
@@ -54,16 +53,16 @@ class DownloadUpdater {
 
     private boolean triggerDownload(List<Download> allDownloads) {
         for (Download download : allDownloads) {
-            Log.e("!!!", "trigger download? : " + download.getId().toString());
+            Log.e("!!!", "trigger download? : " + download.getId().asString());
 
-            if (canSkipDownload(download)) {
-                Log.e("!!!", "skipping : " + download.getId().toString());
+            if (doesNotNeedToBeDownloaded(download)) {
+                Log.e("!!!", "skipping : " + download.getId().asString());
                 continue;
             }
 
             ClientCheckResult clientCheckResult = downloadCheck.isAllowedToDownload(download);
             if (clientCheckResult.isAllowed()) {
-                Log.e("!!!", "downloading : " + download.getId().toString());
+                Log.e("!!!", "downloading : " + download.getId().asString());
                 download(download.getId());
                 return true;
             } else {
@@ -74,8 +73,8 @@ class DownloadUpdater {
         return false;
     }
 
-    private boolean canSkipDownload(Download download) {
-        return download.getStage().noActionRequired();
+    private boolean doesNotNeedToBeDownloaded(Download download) {
+        return download.getStage().doesNotNeedToBeDownloaded();
     }
 
     private boolean hasActiveDownload(List<Download> allDownloads) {
