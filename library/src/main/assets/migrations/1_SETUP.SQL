@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS 'download' (
                                 _id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                                 download_stage TEXT NOT NULL,
                                 download_id INTEGER NOT NULL,
+                                download_identifier TEXT NOT NULL,
                                 UNIQUE (download_id) ON CONFLICT REPLACE
 );
 
@@ -27,6 +28,7 @@ CREATE VIEW IF NOT EXISTS "downloads_with_size" AS
                                 SELECT
                                     download_stage,
                                     download_id,
+                                    download_identifier,
                                     SUM(file.file_current_size) AS current_size,
                                     SUM(file.file_total_size) AS total_size
                                     FROM

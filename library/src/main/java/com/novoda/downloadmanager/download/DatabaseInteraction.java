@@ -77,12 +77,14 @@ class DatabaseInteraction {
 
     private Download getDownload(Cursor cursor) {
         DownloadId id = new DownloadId(DB.Download.getDownloadId(cursor));
+
         long currentSize = Long.valueOf(cursor.getString(cursor.getColumnIndex(DB.Columns.DownloadsWithSize.CurrentSize)));
         long totalSize = Long.valueOf(cursor.getString(cursor.getColumnIndex(DB.Columns.DownloadsWithSize.TotalSize)));
+        String identifier = cursor.getString(cursor.getColumnIndex(DB.Columns.DownloadsWithSize.DownloadIdentifier));
         DownloadStage downloadStage = DownloadStage.valueOf(DB.Download.getDownloadStage(cursor));
         DownloadStatus downloadStatus = DownloadStatus.from(downloadStage);
         List<DownloadFile> files = getFilesforId(id);
-        return new Download(id, currentSize, totalSize, downloadStage, downloadStatus, files);
+        return new Download(id, currentSize, totalSize, downloadStage, downloadStatus, files, identifier);
     }
 
     private List<DownloadFile> getFilesforId(DownloadId id) {
@@ -109,6 +111,7 @@ class DatabaseInteraction {
         long downloadId = downloadRequest.getId().toLong();
         DB.Download.setDownloadId((int) downloadId, values);
         DB.Download.setDownloadStage(DownloadStage.QUEUED.name(), values);
+        DB.Download.setDownloadIdentifier(downloadRequest.getIdentifier(), values);
         contentResolver.insert(Provider.DOWNLOAD, values);
 
         ContentValues[] fileValues = createFileValues(downloadRequest.getFiles(), downloadId);

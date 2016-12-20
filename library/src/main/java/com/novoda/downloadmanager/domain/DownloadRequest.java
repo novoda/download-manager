@@ -6,10 +6,12 @@ import java.util.List;
 public class DownloadRequest {
 
     private final DownloadId id;
+    private final String identifier;
     private final List<File> files;
 
-    DownloadRequest(DownloadId id, List<File> files) {
+    DownloadRequest(DownloadId id, String identifier, List<File> files) {
         this.id = id;
+        this.identifier = identifier;
         this.files = files;
     }
 
@@ -19,6 +21,10 @@ public class DownloadRequest {
 
     public List<File> getFiles() {
         return files;
+    }
+
+    public String getIdentifier() {
+        return identifier;
     }
 
     public static class File {
@@ -85,9 +91,15 @@ public class DownloadRequest {
 
         private List<File> files = new ArrayList<>();
         private DownloadId downloadId;
+        private String identifier;
 
         public Builder with(DownloadId downloadId) {
             this.downloadId = downloadId;
+            return this;
+        }
+
+        public Builder with(String identifier) {
+            this.identifier = identifier;
             return this;
         }
 
@@ -97,7 +109,7 @@ public class DownloadRequest {
         }
 
         public DownloadRequest build() {
-            return new DownloadRequest(downloadId, files);
+            return new DownloadRequest(downloadId, identifier == null ? downloadId.toString() : identifier, files);
         }
 
     }
