@@ -43,10 +43,10 @@ class DownloadUpdater {
             isActive = triggerDownload(allDownloads);
         }
 
-//        batchRepository.deleteMarkedBatchesFor(allDownloads);
+        downloadHandler.deleteMarkedBatchesFor(allDownloads);
 //        updateUserVisibleNotification(downloadBatches);
 
-        // todo delete marked downloads
+
         // todo update notification
 
         return isActive;

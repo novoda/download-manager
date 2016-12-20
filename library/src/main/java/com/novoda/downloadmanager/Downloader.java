@@ -67,6 +67,11 @@ public class Downloader {
         startService();
     }
 
+    public void delete(DownloadId downloadId) {
+        downloadHandler.markForDeletion(downloadId);
+        startService();
+    }
+
     public void pause(DownloadId downloadId) {
         pauser.requestPause(downloadId);
     }

@@ -198,5 +198,9 @@ class DatabaseInteraction {
         return allValues;
     }
 
-
+    public void delete(Download download) {
+        long downloadId = download.getId().toLong();
+        contentResolver.delete(Provider.DOWNLOAD, DB.Columns.Download.DownloadId + "=?", new String[]{String.valueOf(downloadId)});
+        contentResolver.delete(Provider.FILE, DB.Columns.File.FileDownloadId + "=?", new String[]{String.valueOf(downloadId)});
+    }
 }

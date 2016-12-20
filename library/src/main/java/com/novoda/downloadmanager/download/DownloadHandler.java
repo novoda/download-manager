@@ -6,6 +6,7 @@ import com.novoda.downloadmanager.domain.DownloadId;
 import com.novoda.downloadmanager.domain.DownloadRequest;
 import com.novoda.downloadmanager.domain.DownloadStage;
 
+import java.io.File;
 import java.util.List;
 
 public class DownloadHandler {
@@ -76,6 +77,22 @@ public class DownloadHandler {
 
     public void resumeDownload(DownloadId downloadId) {
         databaseInteraction.updateStatus(downloadId, DownloadStage.QUEUED);
+    }
+
+    public void markForDeletion(DownloadId downloadId) {
+        databaseInteraction.updateStatus(downloadId, DownloadStage.MARKED_FOR_DELETION);
+    }
+
+    public void deleteMarkedBatchesFor(List<Download> allDownloads) {
+        for (Download download : allDownloads) {
+            if (download.getStage() == DownloadStage.MARKED_FOR_DELETION) {
+                for (DownloadFile downloadFile : download.getFiles()) {
+                    new File(downloadFile.getLocalUri()).delete();
+                }
+                databaseInteraction.delete(download);
+            }
+        }
+
     }
 
 }
