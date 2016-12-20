@@ -38,7 +38,8 @@ public class Downloader {
 
         public Downloader build(Context context) {
             Context applicationContext = context.getApplicationContext();
-            ContentResolver contentResolver = applicationContext.getContentResolver();;
+            ContentResolver contentResolver = applicationContext.getContentResolver();
+            ;
             DownloadHandler downloadHandler = DownloadHandlerCreator.create(contentResolver);
             Pauser pauser = new Pauser(LocalBroadcastManager.getInstance(context));
             Listeners listeners = Listeners.newInstance();
@@ -112,6 +113,10 @@ public class Downloader {
 
     public void addCompletedDownload(DownloadRequest downloadRequest) {
         downloadHandler.addCompletedRequest(downloadRequest);
+    }
+
+    public void forceStart() {
+        startService();
     }
 
 }
