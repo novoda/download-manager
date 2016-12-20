@@ -9,7 +9,7 @@ import novoda.lib.sqliteprovider.provider.SQLiteContentProviderImpl;
 
 public class Provider extends SQLiteContentProviderImpl {
 
-    private static final String AUTHORITY = "content://com.novoda.downloadmanager.demo.simple";
+    private static final String AUTHORITY = "content://" + BuildConfig.DOWNLOAD_AUTHORITY;
 
     public static final Uri REQUEST = buildUri(DB.Tables.Request);
     public static final Uri DOWNLOAD = buildUri(DB.Tables.Download);
