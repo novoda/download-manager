@@ -13,7 +13,7 @@
 
     <provider
       android:name=".Provider"
-      android:authorities="com.novoda.downloadmanager.demo.simple"
+      android:authorities="${downloadAuthority}"
       android:exported="false" />
 
   </application>
