@@ -50,6 +50,7 @@ class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHolder> {
         private final TextView idText;
         private final TextView sizeText;
         private final TextView percentText;
+        private final View deleteButton;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -58,6 +59,7 @@ class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHolder> {
             idText = (TextView) itemView.findViewById(R.id.download_id_text);
             sizeText = (TextView) itemView.findViewById(R.id.download_size_text);
             percentText = (TextView) itemView.findViewById(R.id.download_percent_text);
+            deleteButton = itemView.findViewById(R.id.download_delete);
         }
 
         public void bind(final Download download, final OnDownloadClickedListener downloadClickedListener) {
@@ -73,6 +75,13 @@ class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHolder> {
                 @Override
                 public void onClick(View v) {
                     downloadClickedListener.onDownloadClicked(download);
+                }
+            });
+
+            deleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    downloadClickedListener.onDeleteDownload(download);
                 }
             });
         }
@@ -93,6 +102,8 @@ class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHolder> {
 
     public interface OnDownloadClickedListener {
         void onDownloadClicked(Download download);
+
+        void onDeleteDownload(Download download);
     }
 
 }

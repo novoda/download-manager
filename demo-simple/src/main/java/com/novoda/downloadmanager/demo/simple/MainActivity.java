@@ -86,6 +86,11 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        @Override
+        public void onDeleteDownload(Download download) {
+            downloaderHelper.delete(download.getId());
+        }
+
         private void toastMessage(String message) {
             Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
         }

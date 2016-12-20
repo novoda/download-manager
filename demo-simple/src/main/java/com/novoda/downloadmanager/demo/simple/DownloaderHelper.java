@@ -52,4 +52,8 @@ class DownloaderHelper {
     public void requestDownloadsUpdate() {
         downloader.requestDownloadsUpdate();
     }
+
+    public void delete(DownloadId downloadId) {
+        downloader.delete(downloadId);
+    }
 }
