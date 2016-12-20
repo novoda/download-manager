@@ -38,11 +38,6 @@ public class DownloadTask implements Runnable {
             return;
         }
 
-        boolean isDownloadStartingForTheFirstTime = download.getCurrentSize() == 0;
-        if (isDownloadStartingForTheFirstTime) {
-//                  todo  handleBatchStartingForTheFirstTime(downloadBatch);
-        }
-
         downloadHandler.setDownloadRunning(downloadId);
 
         pauser.listenForPause(downloadId, onDownloadPaused);
