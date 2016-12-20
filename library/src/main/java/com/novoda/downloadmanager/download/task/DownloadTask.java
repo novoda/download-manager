@@ -32,7 +32,7 @@ public class DownloadTask implements Runnable {
 
         Download download = downloadHandler.getDownload(downloadId);
 
-        if (downloadStatusIsIgnored(download)) {
+        if (doesNotNeedToBeDownloaded(download)) {
             Log.e("!!!", "Download status is ignored, bailing out");
             // why did the thread start?! we're out of sync
             return;
@@ -47,8 +47,8 @@ public class DownloadTask implements Runnable {
         Log.e("!!!", "thread finished : " + download.getId());
     }
 
-    private boolean downloadStatusIsIgnored(Download download) {
-        return download.getStage().noActionRequired();
+    private boolean doesNotNeedToBeDownloaded(Download download) {
+        return download.getStage().doesNotNeedToBeDownloaded();
     }
 
     private void download(Download download) {

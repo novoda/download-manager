@@ -9,7 +9,7 @@ public enum DownloadStage {
     FAILED,
     MARKED_FOR_DELETION;
 
-    public boolean noActionRequired() {
+    public boolean doesNotNeedToBeDownloaded() {
         return this == MARKED_FOR_DELETION || this == PAUSED || this == FAILED || this == COMPLETED;
     }
 
