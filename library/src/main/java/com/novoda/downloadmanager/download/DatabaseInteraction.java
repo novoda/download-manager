@@ -83,11 +83,11 @@ class DatabaseInteraction {
         String identifier = cursor.getString(cursor.getColumnIndex(DB.Columns.DownloadsWithSize.DownloadIdentifier));
         DownloadStage downloadStage = DownloadStage.valueOf(DB.Download.getDownloadStage(cursor));
         DownloadStatus downloadStatus = DownloadStatus.from(downloadStage);
-        List<DownloadFile> files = getFilesforId(id);
+        List<DownloadFile> files = getFilesForId(id);
         return new Download(id, currentSize, totalSize, downloadStage, downloadStatus, files, identifier);
     }
 
-    private List<DownloadFile> getFilesforId(DownloadId id) {
+    private List<DownloadFile> getFilesForId(DownloadId id) {
         Cursor cursor = contentResolver.query(Provider.FILE, null, DB.Columns.File.FileDownloadId + "=?", new String[]{id.toString()}, null);
         cursor.moveToFirst();
 
