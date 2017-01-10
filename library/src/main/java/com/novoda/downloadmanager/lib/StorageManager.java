@@ -181,7 +181,7 @@ class StorageManager {
                     dir = internalStorageDir;
                 } else {
                     for (File anExternalStorageDir : externalStorageDirs) {
-                        if (anExternalStorageDir != null && path.startsWith(anExternalStorageDir.getPath()) {
+                        if (anExternalStorageDir != null && path.startsWith(anExternalStorageDir.getPath())) {
                             dir = anExternalStorageDir;
                             break;
                         }
