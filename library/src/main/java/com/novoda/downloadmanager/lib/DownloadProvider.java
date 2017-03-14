@@ -38,7 +38,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import com.novoda.downloadmanager.lib.jobscheduler.DownloadJob;
 import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.io.File;
@@ -516,7 +515,7 @@ public final class DownloadProvider extends ContentProvider {
         notifyContentChanged(uri, match);
         notifyDownloadStatusChanged();
         Uri uri1 = ContentUris.withAppendedId(downloadsUriProvider.getContentUri(), rowID);
-        DownloadJob.scheduleJob();
+        //DownloadJob.scheduleJob();
         return uri1;
     }
 
@@ -818,7 +817,7 @@ public final class DownloadProvider extends ContentProvider {
         notifyContentChanged(uri, match);
 
         if (startService) {
-            DownloadJob.scheduleJob();
+            //DownloadJob.scheduleJob();
         }
         return count;
     }

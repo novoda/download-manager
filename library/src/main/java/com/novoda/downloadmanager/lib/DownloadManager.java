@@ -506,7 +506,7 @@ public class DownloadManager {
         this.systemFacade = systemFacade;
         this.batchPauseResumeController = batchPauseResumeController;
         GlobalState.setContext(context);
-        GlobalState.setVerboseLogging(verboseLogging);
+        GlobalState.setVerboseLogging(true);
         JobManager.create(context).addJobCreator(new DownloadManagerJobCreator());
     }
 
@@ -546,7 +546,9 @@ public class DownloadManager {
         RequestBatch batch = request.asBatch();
         long batchId = insert(batch);
         request.setBatchId(batchId);
-        return insert(request);
+        long insert = insert(request);
+        DownloadJob.scheduleJob();
+        return insert;
     }
 
     private long insert(Request request) {
@@ -559,14 +561,18 @@ public class DownloadManager {
      * {@link BatchPauseResumeController#pauseBatch(long)}
      */
     public boolean pauseBatch(long batchId) {
-        return batchPauseResumeController.pauseBatch(batchId);
+        boolean pauseBatch = batchPauseResumeController.pauseBatch(batchId);
+        DownloadJob.scheduleJob();
+        return pauseBatch;
     }
 
     /**
      * {@link BatchPauseResumeController#resumeBatch(long)}}
      */
     public boolean resumeBatch(long batchId) {
-        return batchPauseResumeController.resumeBatch(batchId);
+        boolean resumeBatch = batchPauseResumeController.resumeBatch(batchId);
+        DownloadJob.scheduleJob();
+        return resumeBatch;
     }
 
     public void removeDownload(URI uri) {
@@ -628,7 +634,9 @@ public class DownloadManager {
         }
 
         setDeletingStatusFor(batchIds);
-        return markBatchesToBeDeleted(batchIds);
+        int batchesToBeDeleted = markBatchesToBeDeleted(batchIds);
+        DownloadJob.scheduleJob();
+        return batchesToBeDeleted;
     }
 
     private void setDeletingStatusFor(long[] batchesIds) {
@@ -1012,6 +1020,7 @@ public class DownloadManager {
             insert(request);
         }
         notifyBatchesHaveChanged();
+        DownloadJob.scheduleJob();
 
         return batchId;
     }

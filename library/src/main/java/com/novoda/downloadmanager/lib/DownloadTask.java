@@ -21,12 +21,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.drm.DrmManagerClient;
 import android.net.NetworkInfo;
-import android.net.TrafficStats;
-import android.os.PowerManager;
 import android.os.Process;
 import android.text.TextUtils;
 import android.util.Pair;
 
+import com.novoda.downloadmanager.lib.jobscheduler.DownloadJob;
 import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.downloadmanager.notifications.DownloadNotifier;
 
@@ -238,7 +237,6 @@ class DownloadTask implements Runnable {
             return;
         }
 
-        PowerManager.WakeLock wakeLock = null;
         int finalStatus = DownloadStatus.UNKNOWN_ERROR;
         int numFailed = originalDownloadInfo.getNumFailed();
         String errorMsg = null;
@@ -253,12 +251,7 @@ class DownloadTask implements Runnable {
                 updateBatchStatus(originalDownloadInfo.getBatchId(), originalDownloadInfo.getId());
             }
 
-            PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-
-            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-            wakeLock.acquire();
-
-            LLog.i("Download " + originalDownloadInfo.getId() + " starting");
+            LLog.i("Ferran, Download " + originalDownloadInfo.getId() + " starting");
 
             // Remember which network this download started on; used to
             // determine if errors were due to network changes.
@@ -266,11 +259,6 @@ class DownloadTask implements Runnable {
             if (networkInfo != null) {
                 state.networkType = networkInfo.getType();
             }
-
-            // Network traffic on this thread should be counted against the
-            // requesting UID, and is tagged with well-known value.
-            TrafficStats.setThreadStatsTag(0xFFFFFF01); // TrafficStats.TAG_SYSTEM_DOWNLOAD
-            // TrafficStats.setThreadStatsUid(downloadInfo.uid); Won't need this as we will be an Android library (doing own work)
 
             try {
                 // TODO: migrate URL sanity checking into client side of API
@@ -324,17 +312,16 @@ class DownloadTask implements Runnable {
             finalStatus = DownloadStatus.UNKNOWN_ERROR;
             // falls through to the code that reports an error
         } finally {
-            TrafficStats.clearThreadStatsTag();
-
             cleanupDestination(state, finalStatus);
 
             notifyDownloadCompleted(state, finalStatus, errorMsg, numFailed);
             hackToForceClientsRefreshRulesIfConnectionDropped(finalStatus);
 
-            LLog.i("Download " + originalDownloadInfo.getId() + " finished with status " + DownloadStatus.statusToString(finalStatus));
+            LLog.i("Ferran, Download " + originalDownloadInfo.getId() + " finished with status " + DownloadStatus.statusToString(finalStatus));
 
-            if (wakeLock != null) {
-                wakeLock.release();
+            if (finalStatus != DownloadStatus.SUCCESS) {
+                LLog.v("Ferran, download on finally, scheduling immediatelly");
+                DownloadJob.scheduleJob();
             }
         }
         storageManager.incrementNumDownloadsSoFar();

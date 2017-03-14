@@ -20,10 +20,8 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Environment;
-import android.os.Handler;
 
 import com.novoda.downloadmanager.lib.jobscheduler.DownloadJob;
 import com.novoda.downloadmanager.lib.logger.LLog;
@@ -36,7 +34,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Performs background downloads as requested by applications that use
@@ -55,7 +52,7 @@ public class DownloadServiceJob {
 
     private SystemFacade systemFacade;
     private StorageManager storageManager;
-    private DownloadManagerContentObserver downloadManagerContentObserver;
+    //private DownloadManagerContentObserver downloadManagerContentObserver;
     private DownloadNotifier downloadNotifier;
     private DownloadScanner downloadScanner;
 
@@ -72,20 +69,6 @@ public class DownloadServiceJob {
 
     public DownloadServiceJob() {
         executor = Executors.newSingleThreadExecutor();
-    }
-
-    /**
-     * Receives notifications when the data in the content provider changes
-     */
-    private class DownloadManagerContentObserver extends ContentObserver {
-        DownloadManagerContentObserver() {
-            super(new Handler());
-        }
-
-        @Override
-        public void onChange(final boolean selfChange) {
-            startDownloading();
-        }
     }
 
     public void onCreate() {
@@ -128,19 +111,16 @@ public class DownloadServiceJob {
         downloadNotifier = downloadNotifierFactory.getDownloadNotifier(context, modules, downloadMarshaller, statusTranslator);
         downloadNotifier.cancelAll();
 
-        downloadManagerContentObserver = new DownloadManagerContentObserver();
-        context.getContentResolver().registerContentObserver(
-                downloadsUriProvider.getAllDownloadsUri(),
-                true, downloadManagerContentObserver
-        );
-
         this.downloadsRepository = new DownloadsRepository(
-                systemFacade, context.getContentResolver(), new DownloadsRepository.DownloadInfoCreator() {
-            @Override
-            public FileDownloadInfo create(FileDownloadInfo.Reader reader) {
-                return createNewDownloadInfo(reader);
-            }
-        }, downloadsUriProvider
+                systemFacade,
+                context.getContentResolver(),
+                new DownloadsRepository.DownloadInfoCreator() {
+                    @Override
+                    public FileDownloadInfo create(FileDownloadInfo.Reader reader) {
+                        return createNewDownloadInfo(reader);
+                    }
+                },
+                downloadsUriProvider
         );
 
         unlockStaleDownloads();
@@ -167,23 +147,18 @@ public class DownloadServiceJob {
     }
 
     private DownloadManagerModules getDownloadManagerModules() {
-        Context context = GlobalState.getContext();
-        if (context.getApplicationContext() instanceof DownloadManagerModules.Provider) {
-            return ((DownloadManagerModules.Provider) context.getApplicationContext()).provideDownloadManagerModules();
+        Context applicationContext = GlobalState.getContext().getApplicationContext();
+
+        if (applicationContext instanceof DownloadManagerModules.Provider) {
+            return ((DownloadManagerModules.Provider) applicationContext).provideDownloadManagerModules();
+        } else {
+            return new DefaultsDownloadManagerModules(applicationContext);
         }
-        return new DefaultsDownloadManagerModules(context.getApplicationContext());
     }
 
     public void onStartCommand() {
-        LLog.v("Service onStart");
+        LLog.v("Ferran, Service onStartCommand");
         startDownloading();
-    }
-
-    private void shutDown() {
-        LLog.d("Shutting down service");
-        destroyListener.onDownloadManagerModulesDestroyed();
-        GlobalState.getContext().getContentResolver().unregisterContentObserver(downloadManagerContentObserver);
-        downloadScanner.shutdown();
     }
 
     /**
@@ -193,6 +168,7 @@ public class DownloadServiceJob {
         executor.execute(new Runnable() {
             @Override
             public void run() {
+                LLog.v("Ferran, startDownloading in a thread");
                 boolean isActive = updateLocked();
 
                 if (isActive) {
@@ -201,7 +177,8 @@ public class DownloadServiceJob {
 
                     // Enqueue delayed update pass to catch finished operations that
                     // didn't trigger an update pass; these are bugs.
-                    DownloadJob.scheduleJob(TimeUnit.MINUTES.toMillis(5));
+                    LLog.v("Ferran, active, we schedule another job immediatelly");
+                    DownloadJob.scheduleJob();
                 } else {
                     // No active tasks, and any pending update messages can be
                     // ignored, since any updates important enough to initiate tasks
@@ -209,8 +186,15 @@ public class DownloadServiceJob {
 
                     shutDown();
                 }
+                LLog.v("Ferran, endDownloading in a thread");
             }
         });
+    }
+
+    private void shutDown() {
+        LLog.d("Ferran, Shutting down service");
+        destroyListener.onDownloadManagerModulesDestroyed();
+        downloadScanner.shutdown();
     }
 
     /**
@@ -268,8 +252,8 @@ public class DownloadServiceJob {
         // Set alarm when next action is in future. It's okay if the service
         // continues to run in meantime, since it will kick off an update pass.
         if (nextRetryTimeMillis > 0 && nextRetryTimeMillis < Long.MAX_VALUE) {
-            LLog.v("scheduling start in " + nextRetryTimeMillis + "ms");
-            DownloadJob.scheduleJob();
+            LLog.v("Ferran, download next retry scheduling start in " + nextRetryTimeMillis + "ms");
+            DownloadJob.scheduleJob(nextRetryTimeMillis);
         }
 
         if (!isActive) {
@@ -315,6 +299,7 @@ public class DownloadServiceJob {
     }
 
     private void download(FileDownloadInfo info) {
+        LLog.v("Ferran, Download " + info.getId());
         Context context = GlobalState.getContext();
         Uri downloadUri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), info.getId());
         FileDownloadInfo.ControlStatus.Reader controlReader = new FileDownloadInfo.ControlStatus.Reader(context.getContentResolver(), downloadUri);

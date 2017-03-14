@@ -7,14 +7,15 @@ import android.support.annotation.NonNull;
 import com.evernote.android.job.Job;
 import com.evernote.android.job.JobRequest;
 import com.novoda.downloadmanager.lib.DownloadServiceJob;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.util.concurrent.TimeUnit;
 
 public class DownloadJob extends Job {
 
     private static final long BACKOFF_MILLIS = TimeUnit.SECONDS.toMillis(2);
-    private static final long EXECUTION_START_MILLIS = 1L;
-    private static final long EXECUTION_END_MILLIS = 2L;
+    private static final long EXECUTION_START_MILLIS = 500L;
+    private static final long EXECUTION_END_MILLIS = 500L;
 
     static String TAG = "download_job_tag";
 
@@ -28,6 +29,7 @@ public class DownloadJob extends Job {
     }
 
     public static void scheduleJob() {
+        LLog.v("Ferran, scheduling a job to start immediatelly in 500ms");
         scheduleJob(EXECUTION_START_MILLIS);
     }
 
