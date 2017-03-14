@@ -7,20 +7,18 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 
+import com.novoda.downloadmanager.lib.jobscheduler.DownloadJob;
 import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.downloadmanager.notifications.NotificationDisplayer;
 import com.novoda.downloadmanager.notifications.NotificationVisibility;
 
 import static android.content.Intent.ACTION_BOOT_COMPLETED;
 import static android.content.Intent.ACTION_MEDIA_MOUNTED;
-import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static com.novoda.downloadmanager.lib.Constants.ACTION_CANCEL;
 import static com.novoda.downloadmanager.lib.Constants.ACTION_RETRY;
 import static com.novoda.downloadmanager.notifications.NotificationVisibility.ACTIVE_OR_COMPLETE;
@@ -60,10 +58,7 @@ public class DownloadReceiver extends BroadcastReceiver { // TODO split this int
             case ACTION_BOOT_COMPLETED:
             case ACTION_MEDIA_MOUNTED:
             case ACTION_RETRY:
-                startService(context);
-                break;
-            case CONNECTIVITY_ACTION:
-                checkConnectivityToStartService(context);
+                startService();
                 break;
             case NotificationDisplayer.ACTION_DOWNLOAD_CANCELLED_CLICK:
             case NotificationDisplayer.ACTION_DOWNLOAD_FAILED_CLICK:
@@ -78,14 +73,6 @@ public class DownloadReceiver extends BroadcastReceiver { // TODO split this int
             default:
                 // no need to handle any other cases
                 break;
-        }
-    }
-
-    private void checkConnectivityToStartService(Context context) {
-        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo info = connManager.getActiveNetworkInfo();
-        if (info != null && info.isConnected()) {
-            startService(context);
         }
     }
 
@@ -191,7 +178,7 @@ public class DownloadReceiver extends BroadcastReceiver { // TODO split this int
         return cursor.getInt(cursor.getColumnIndexOrThrow(col));
     }
 
-    private void startService(Context context) {
-        context.startService(new Intent(context, DownloadService.class));
+    private void startService() {
+        DownloadJob.scheduleJob();
     }
 }

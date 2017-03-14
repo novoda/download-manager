@@ -207,6 +207,10 @@ class DownloadTask implements Runnable {
     @Override
     public void run() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        syncRun();
+    }
+
+    public void syncRun() {
         try {
             runInternal();
         } finally {

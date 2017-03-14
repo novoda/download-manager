@@ -30,6 +30,9 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 
+import com.evernote.android.job.JobManager;
+import com.novoda.downloadmanager.lib.jobscheduler.DownloadJob;
+import com.novoda.downloadmanager.lib.jobscheduler.DownloadManagerJobCreator;
 import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.downloadmanager.notifications.NotificationVisibility;
 
@@ -504,6 +507,7 @@ public class DownloadManager {
         this.batchPauseResumeController = batchPauseResumeController;
         GlobalState.setContext(context);
         GlobalState.setVerboseLogging(verboseLogging);
+        JobManager.create(context).addJobCreator(new DownloadManagerJobCreator());
     }
 
     /**
@@ -1044,7 +1048,6 @@ public class DownloadManager {
      * one instance is running, ignoring further calls if is currently active
      */
     public void forceStart() {
-        Context context = GlobalState.getContext();
-        context.startService(new Intent(context, DownloadService.class));
+        DownloadJob.scheduleJob();
     }
 }

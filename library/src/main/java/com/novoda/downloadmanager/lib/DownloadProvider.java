@@ -20,7 +20,6 @@ import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.content.UriMatcher;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -39,6 +38,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.novoda.downloadmanager.lib.jobscheduler.DownloadJob;
 import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.io.File;
@@ -299,7 +299,6 @@ public final class DownloadProvider extends ContentProvider {
         }
         // start the DownloadService class. don't wait for the 1st download to be issued.
         // saves us by getting some initialization code in DownloadService out of the way.
-        context.startService(new Intent(context, DownloadService.class));
 //        downloadsDataDir = StorageManager.getDownloadDataDirectory(getContext());
         downloadsDataDir = context.getCacheDir();
 //        try {
@@ -307,6 +306,8 @@ public final class DownloadProvider extends ContentProvider {
 //        } catch (IOException e) {
 //            LLog.wtf("Could not get canonical path for download directory", e);
 //        }
+        //JobManager.create(getContext().getApplicationContext()).addJobCreator(new DownloadManagerJobCreator());
+        //DownloadJob.scheduleJob();
         return true;
     }
 
@@ -512,11 +513,11 @@ public final class DownloadProvider extends ContentProvider {
          * DownloadManager.addCompletedDownload(String, String, String,
          * boolean, String, String, long) need special treatment
          */
-        Context context = getContext();
-        context.startService(new Intent(context, DownloadService.class));
         notifyContentChanged(uri, match);
         notifyDownloadStatusChanged();
-        return ContentUris.withAppendedId(downloadsUriProvider.getContentUri(), rowID);
+        Uri uri1 = ContentUris.withAppendedId(downloadsUriProvider.getContentUri(), rowID);
+        DownloadJob.scheduleJob();
+        return uri1;
     }
 
     private void notifyDownloadStatusChanged() {
@@ -817,8 +818,7 @@ public final class DownloadProvider extends ContentProvider {
         notifyContentChanged(uri, match);
 
         if (startService) {
-            Context context = getContext();
-            context.startService(new Intent(context, DownloadService.class));
+            DownloadJob.scheduleJob();
         }
         return count;
     }
