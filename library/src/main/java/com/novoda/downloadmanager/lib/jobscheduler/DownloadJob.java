@@ -20,13 +20,43 @@ public class DownloadJob extends Job {
     static String TAG = "download_job_tag";
 
     private static DownloadServiceJob downloadServiceJob;
+    private final Object lock = new Object();
 
     @NonNull
     @Override
     protected Result onRunJob(Params params) {
         LLog.v("Ferran, job starts right now");
+
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                downloadServiceJob = DownloadServiceJob.getInstance();
+                downloadServiceJobInstanceIsReady();
+            }
+        });
+
+        waitForDownloadServiceJobInstanceToBeReady();
+
         downloadServiceJob.onStartCommand();
         return Result.SUCCESS;
+    }
+
+    private void downloadServiceJobInstanceIsReady() {
+        synchronized (lock) {
+            LLog.v("Ferran, Download service job instance is ready now");
+            lock.notifyAll();
+        }
+    }
+
+    private void waitForDownloadServiceJobInstanceToBeReady() {
+        synchronized (lock) {
+            try {
+                LLog.v("Ferran, Waiting for download service job instance to be ready");
+                lock.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public static void scheduleJob() {
@@ -38,8 +68,6 @@ public class DownloadJob extends Job {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                downloadServiceJob = DownloadServiceJob.getInstance();
-
                 new JobRequest.Builder(TAG)
                         .setExecutionWindow(startMillis, EXECUTION_END_MILLIS)
                         .setBackoffCriteria(BACKOFF_MILLIS, JobRequest.BackoffPolicy.LINEAR)
