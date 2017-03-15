@@ -32,8 +32,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 /**
  * Performs background downloads as requested by applications that use
@@ -52,10 +50,8 @@ public class DownloadServiceJob {
 
     private SystemFacade systemFacade;
     private StorageManager storageManager;
-    //private DownloadManagerContentObserver downloadManagerContentObserver;
     private DownloadNotifier downloadNotifier;
     private DownloadScanner downloadScanner;
-
     private BatchRepository batchRepository;
     private DownloadsRepository downloadsRepository;
     private DownloadDeleter downloadDeleter;
@@ -64,8 +60,6 @@ public class DownloadServiceJob {
     private BatchInformationBroadcaster batchInformationBroadcaster;
     private NetworkChecker networkChecker;
     private DestroyListener destroyListener;
-
-    private Executor executor;
 
     public static DownloadServiceJob getInstance() {
         return LazySingleton.INSTANCE;
@@ -76,7 +70,6 @@ public class DownloadServiceJob {
     }
 
     private DownloadServiceJob() {
-        executor = Executors.newSingleThreadExecutor();
         onCreate();
     }
 
