@@ -13,31 +13,32 @@ import java.util.concurrent.TimeUnit;
 
 public class DownloadJob extends Job {
 
-    private static final long BACKOFF_MILLIS = TimeUnit.SECONDS.toMillis(5);
-    private static final long EXECUTION_START_MILLIS = TimeUnit.SECONDS.toMillis(1);
-    private static final long EXECUTION_END_MILLIS = TimeUnit.HOURS.toMillis(1);
-
     static String TAG = "download_job_tag";
 
-    private static DownloadServiceJob downloadServiceJob;
+    private static final long BACKOFF_MILLIS = TimeUnit.SECONDS.toMillis(5);
+    private static final long EXECUTION_START_MILLIS = TimeUnit.SECONDS.toMillis(1);
+    private static final long EXECUTION_END_MILLIS = TimeUnit.SECONDS.toMillis(2);
+
     private final Object lock = new Object();
 
     @NonNull
     @Override
     protected Result onRunJob(Params params) {
+        final DownloadServiceJob[] downloadServiceJob = new DownloadServiceJob[1];
+
         LLog.v("Ferran, job starts right now");
 
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                downloadServiceJob = DownloadServiceJob.getInstance();
+                downloadServiceJob[0] = DownloadServiceJob.getInstance();
                 downloadServiceJobInstanceIsReady();
             }
         });
 
         waitForDownloadServiceJobInstanceToBeReady();
 
-        downloadServiceJob.onStartCommand();
+        downloadServiceJob[0].onStartCommand();
         return Result.SUCCESS;
     }
 
@@ -64,7 +65,7 @@ public class DownloadJob extends Job {
         scheduleJob(EXECUTION_START_MILLIS);
     }
 
-    public static void scheduleJob(final long startMillis) {
+    private static void scheduleJob(final long startMillis) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
