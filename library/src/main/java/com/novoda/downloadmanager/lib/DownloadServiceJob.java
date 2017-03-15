@@ -204,10 +204,7 @@ public class DownloadServiceJob {
      * snapshot taken in this update.
      */
     private boolean updateLocked() {
-
         boolean isActive = false;
-        long nextRetryTimeMillis = Long.MAX_VALUE;
-        long now = systemFacade.currentTimeMillis();
 
         Collection<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
         updateTotalBytesFor(allDownloads);
@@ -236,19 +233,10 @@ public class DownloadServiceJob {
             } else if (downloadBatch.scanCompletedMediaIfReady(downloadScanner)) {
                 isActive = true;
             }
-
-            nextRetryTimeMillis = downloadBatch.nextActionMillis(now, nextRetryTimeMillis);
         }
 
         batchRepository.deleteMarkedBatchesFor(allDownloads);
         updateUserVisibleNotification(downloadBatches);
-
-        // Set alarm when next action is in future. It's okay if the service
-        // continues to run in meantime, since it will kick off an update pass.
-        if (nextRetryTimeMillis > 0 && nextRetryTimeMillis < Long.MAX_VALUE) {
-            LLog.v("Ferran, download next retry scheduling start in " + nextRetryTimeMillis + "ms");
-            DownloadJob.scheduleJob(nextRetryTimeMillis);
-        }
 
         if (!isActive) {
             moveSubmittedTasksToBatchStatusIfNecessary();
@@ -300,7 +288,7 @@ public class DownloadServiceJob {
         DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(info);
         DownloadTask downloadTask = new DownloadTask(
                 context, systemFacade, info, downloadBatch, storageManager, downloadNotifier,
-                batchInformationBroadcaster, batchRepository, downloadsUriProvider,
+                batchInformationBroadcaster, batchRepository,
                 controlReader, networkChecker, downloadReadyChecker, new Clock(),
                 downloadsRepository
         );

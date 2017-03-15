@@ -21,11 +21,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.drm.DrmManagerClient;
 import android.net.NetworkInfo;
-import android.os.Process;
 import android.text.TextUtils;
 import android.util.Pair;
 
-import com.novoda.downloadmanager.lib.jobscheduler.DownloadJob;
 import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.downloadmanager.notifications.DownloadNotifier;
 
@@ -56,15 +54,13 @@ import static java.net.HttpURLConnection.*;
  * Task which executes a given {@link FileDownloadInfo}: making network requests,
  * persisting data to disk, and updating {@link DownloadProvider}.
  */
-class DownloadTask implements Runnable {
+class DownloadTask {
 
     /**
      * For intents used to notify the user that a download exceeds a size threshold, if this extra
      * is true, WiFi is required for this download size; otherwise, it is only recommended.
      */
-    public static final String EXTRA_IS_WIFI_REQUIRED = "isWifiRequired";
-
-    private static final String TAG = "DownloadManager-DownloadTask";
+    static final String EXTRA_IS_WIFI_REQUIRED = "isWifiRequired";
 
     // TODO: bind each download to a specific network interface to avoid state
     // checking races once we have ConnectivityManager API
@@ -82,7 +78,6 @@ class DownloadTask implements Runnable {
     private final DownloadNotifier downloadNotifier;
     private final BatchInformationBroadcaster batchInformationBroadcaster;
     private final BatchRepository batchRepository;
-    private final DownloadsUriProvider downloadsUriProvider;
     private final FileDownloadInfo.ControlStatus.Reader controlReader;
     private final NetworkChecker networkChecker;
     private final DownloadReadyChecker downloadReadyChecker;
@@ -97,7 +92,6 @@ class DownloadTask implements Runnable {
                         DownloadNotifier downloadNotifier,
                         BatchInformationBroadcaster batchInformationBroadcaster,
                         BatchRepository batchRepository,
-                        DownloadsUriProvider downloadsUriProvider,
                         FileDownloadInfo.ControlStatus.Reader controlReader,
                         NetworkChecker networkChecker,
                         DownloadReadyChecker downloadReadyChecker,
@@ -111,7 +105,6 @@ class DownloadTask implements Runnable {
         this.downloadNotifier = downloadNotifier;
         this.batchInformationBroadcaster = batchInformationBroadcaster;
         this.batchRepository = batchRepository;
-        this.downloadsUriProvider = downloadsUriProvider;
         this.controlReader = controlReader;
         this.networkChecker = networkChecker;
         this.downloadReadyChecker = downloadReadyChecker;
@@ -203,12 +196,6 @@ class DownloadTask implements Runnable {
         return type;
     }
 
-    @Override
-    public void run() {
-        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        syncRun();
-    }
-
     public void syncRun() {
         try {
             runInternal();
@@ -243,7 +230,6 @@ class DownloadTask implements Runnable {
         State state = new State(originalDownloadInfo);
 
         try {
-
             checkDownloadCanProceed();
 
             if (downloadStatus != DownloadStatus.RUNNING) {
@@ -303,7 +289,6 @@ class DownloadTask implements Runnable {
                     }
                 }
             }
-
             // fall through to finally block
         } catch (Throwable ex) {
             errorMsg = ex.getMessage();
@@ -318,11 +303,6 @@ class DownloadTask implements Runnable {
             hackToForceClientsRefreshRulesIfConnectionDropped(finalStatus);
 
             LLog.i("Ferran, Download " + originalDownloadInfo.getId() + " finished with status " + DownloadStatus.statusToString(finalStatus));
-
-            if (finalStatus != DownloadStatus.SUCCESS) {
-                LLog.v("Ferran, download on finally, scheduling immediatelly");
-                DownloadJob.scheduleJob();
-            }
         }
         storageManager.incrementNumDownloadsSoFar();
     }
