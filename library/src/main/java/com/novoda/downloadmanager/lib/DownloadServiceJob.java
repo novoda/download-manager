@@ -22,6 +22,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.PowerManager;
 
 import com.novoda.downloadmanager.lib.jobscheduler.DownloadJob;
 import com.novoda.downloadmanager.lib.logger.LLog;
@@ -165,7 +166,13 @@ public class DownloadServiceJob {
 
     private void startDownloading() {
         LLog.v("Ferran, startDownloading in a thread");
+
+        PowerManager.WakeLock wakeLock = getWakeLock();
+        wakeLock.acquire();
+
         boolean isActive = updateLocked();
+
+        wakeLock.release();
 
         if (isActive) {
             // Still doing useful work, keep service alive. These active
@@ -173,7 +180,7 @@ public class DownloadServiceJob {
 
             // Enqueue delayed update pass to catch finished operations that
             // didn't trigger an update pass; these are bugs.
-            LLog.v("Ferran, active, we schedule another job immediatelly");
+            LLog.v("Ferran, active, we schedule another job immediately");
             DownloadJob.scheduleJob();
         } else {
             // No active tasks, and any pending update messages can be
@@ -183,6 +190,11 @@ public class DownloadServiceJob {
             shutDown();
         }
         LLog.v("Ferran, endDownloading in a thread");
+    }
+
+    private PowerManager.WakeLock getWakeLock() {
+        PowerManager pm = (PowerManager) GlobalState.getContext().getSystemService(Context.POWER_SERVICE);
+        return pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Long running task");
     }
 
     private void shutDown() {
