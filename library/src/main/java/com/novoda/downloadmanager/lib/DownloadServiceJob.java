@@ -67,11 +67,20 @@ public class DownloadServiceJob {
 
     private Executor executor;
 
-    public DownloadServiceJob() {
-        executor = Executors.newSingleThreadExecutor();
+    public static DownloadServiceJob getInstance() {
+        return LazySingleton.INSTANCE;
     }
 
-    public void onCreate() {
+    private static class LazySingleton {
+        private static final DownloadServiceJob INSTANCE = new DownloadServiceJob();
+    }
+
+    private DownloadServiceJob() {
+        executor = Executors.newSingleThreadExecutor();
+        onCreate();
+    }
+
+    private void onCreate() {
         LLog.v("Ferran, Service onCreate");
 
         Context context = GlobalState.getContext();
@@ -161,34 +170,26 @@ public class DownloadServiceJob {
         startDownloading();
     }
 
-    /**
-     * Enqueue an {#updateLocked()} pass to occur in future.
-     */
     private void startDownloading() {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                LLog.v("Ferran, startDownloading in a thread");
-                boolean isActive = updateLocked();
+        LLog.v("Ferran, startDownloading in a thread");
+        boolean isActive = updateLocked();
 
-                if (isActive) {
-                    // Still doing useful work, keep service alive. These active
-                    // tasks will trigger another update pass when they're finished.
+        if (isActive) {
+            // Still doing useful work, keep service alive. These active
+            // tasks will trigger another update pass when they're finished.
 
-                    // Enqueue delayed update pass to catch finished operations that
-                    // didn't trigger an update pass; these are bugs.
-                    LLog.v("Ferran, active, we schedule another job immediatelly");
-                    DownloadJob.scheduleJob();
-                } else {
-                    // No active tasks, and any pending update messages can be
-                    // ignored, since any updates important enough to initiate tasks
-                    // will always be delivered with a new startId.
+            // Enqueue delayed update pass to catch finished operations that
+            // didn't trigger an update pass; these are bugs.
+            LLog.v("Ferran, active, we schedule another job immediatelly");
+            DownloadJob.scheduleJob();
+        } else {
+            // No active tasks, and any pending update messages can be
+            // ignored, since any updates important enough to initiate tasks
+            // will always be delivered with a new startId.
 
-                    shutDown();
-                }
-                LLog.v("Ferran, endDownloading in a thread");
-            }
-        });
+            shutDown();
+        }
+        LLog.v("Ferran, endDownloading in a thread");
     }
 
     private void shutDown() {

@@ -19,11 +19,12 @@ public class DownloadJob extends Job {
 
     static String TAG = "download_job_tag";
 
-    private static DownloadServiceJob downloadServiceJob = new DownloadServiceJob();
+    private static DownloadServiceJob downloadServiceJob;
 
     @NonNull
     @Override
     protected Result onRunJob(Params params) {
+        LLog.v("Ferran, job starts right now");
         downloadServiceJob.onStartCommand();
         return Result.SUCCESS;
     }
@@ -37,7 +38,7 @@ public class DownloadJob extends Job {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                downloadServiceJob.onCreate();
+                downloadServiceJob = DownloadServiceJob.getInstance();
 
                 new JobRequest.Builder(TAG)
                         .setExecutionWindow(startMillis, startMillis + EXECUTION_END_MILLIS)
