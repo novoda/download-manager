@@ -13,9 +13,9 @@ import java.util.concurrent.TimeUnit;
 
 public class DownloadJob extends Job {
 
-    private static final long BACKOFF_MILLIS = TimeUnit.SECONDS.toMillis(2);
-    private static final long EXECUTION_START_MILLIS = 500L;
-    private static final long EXECUTION_END_MILLIS = 500L;
+    private static final long BACKOFF_MILLIS = TimeUnit.SECONDS.toMillis(5);
+    private static final long EXECUTION_START_MILLIS = TimeUnit.SECONDS.toMillis(1);
+    private static final long EXECUTION_END_MILLIS = TimeUnit.HOURS.toMillis(1);
 
     static String TAG = "download_job_tag";
 
@@ -30,7 +30,7 @@ public class DownloadJob extends Job {
     }
 
     public static void scheduleJob() {
-        LLog.v("Ferran, scheduling a job to start immediatelly in 500ms");
+        LLog.v("Ferran, scheduling a job to start immediately in 1s");
         scheduleJob(EXECUTION_START_MILLIS);
     }
 
@@ -41,8 +41,8 @@ public class DownloadJob extends Job {
                 downloadServiceJob = DownloadServiceJob.getInstance();
 
                 new JobRequest.Builder(TAG)
-                        .setExecutionWindow(startMillis, startMillis + EXECUTION_END_MILLIS)
-                        .setBackoffCriteria(BACKOFF_MILLIS, JobRequest.BackoffPolicy.EXPONENTIAL)
+                        .setExecutionWindow(startMillis, EXECUTION_END_MILLIS)
+                        .setBackoffCriteria(BACKOFF_MILLIS, JobRequest.BackoffPolicy.LINEAR)
                         .setRequiresDeviceIdle(false)
                         .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
                         .setRequirementsEnforced(true)
