@@ -162,15 +162,15 @@ public class DownloadServiceJob {
     }
 
     @WorkerThread
-    public int onStartCommand() {
+    public int onStartCommand(boolean enforceExecution) {
         LLog.v("Ferran, Service onStartCommand");
-        return startDownloading();
+        return startDownloading(enforceExecution);
     }
 
-    private int startDownloading() {
+    private int startDownloading(boolean enforceExecution) {
         LLog.v("Ferran, startDownloading");
 
-        if (alreadyDownloading()) {
+        if (!enforceExecution && alreadyDownloading()) {
             LLog.v("Ferran, batch already running, we won't continue");
             return DownloadStatus.SUCCESS;
         }
@@ -194,6 +194,11 @@ public class DownloadServiceJob {
     public int getDownloadStatus() {
         Collection<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
         List<DownloadBatch> downloadBatches = batchRepository.retrieveBatchesFor(allDownloads);
+
+        if (downloadBatches.isEmpty()) {
+            return DownloadStatus.SUCCESS;
+        }
+
         int statusInPriority = 0;
 
         for (DownloadBatch downloadBatch : downloadBatches) {

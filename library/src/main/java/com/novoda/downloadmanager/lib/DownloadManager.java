@@ -635,7 +635,7 @@ public class DownloadManager {
 
         setDeletingStatusFor(batchIds);
         int batchesToBeDeleted = markBatchesToBeDeleted(batchIds);
-        DownloadJob.scheduleJob();
+        DownloadJob.scheduleEnforcedJob();
         return batchesToBeDeleted;
     }
 

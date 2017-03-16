@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 
 import com.evernote.android.job.Job;
 import com.evernote.android.job.JobRequest;
+import com.evernote.android.job.util.support.PersistableBundleCompat;
 import com.novoda.downloadmanager.lib.DownloadServiceJob;
 import com.novoda.downloadmanager.lib.DownloadStatus;
 import com.novoda.downloadmanager.lib.logger.LLog;
@@ -13,6 +14,10 @@ import com.novoda.downloadmanager.lib.logger.LLog;
 import java.util.concurrent.TimeUnit;
 
 public class DownloadJob extends Job {
+
+    private static final String ENFORCE_EXECUTION = "enforceExecution";
+    private static final boolean STANDARD_EXECUTION = false;
+    private static final boolean ENFORCED_EXECUTION = true;
 
     static String TAG = "download_job_tag";
 
@@ -32,7 +37,10 @@ public class DownloadJob extends Job {
         ensureDownloadServiceJobInstanceExists(downloadServiceJob);
         waitForDownloadServiceJobInstanceToBeReady();
 
-        int status = downloadServiceJob[0].onStartCommand();
+        PersistableBundleCompat extras = params.getExtras();
+        boolean enforceExecution = extras.getBoolean(ENFORCE_EXECUTION, STANDARD_EXECUTION);
+
+        int status = downloadServiceJob[0].onStartCommand(enforceExecution);
 
         if (DownloadStatus.isCompleted(status)) {
             LLog.v("Ferran, job is completed");
@@ -76,13 +84,21 @@ public class DownloadJob extends Job {
 
     public static void scheduleJob() {
         LLog.v("Ferran, scheduling a job to start immediately in 1s");
-        scheduleJob(EXECUTION_START_MILLIS);
+        scheduleJob(EXECUTION_START_MILLIS, STANDARD_EXECUTION);
     }
 
-    private static void scheduleJob(final long startMillis) {
+    public static void scheduleEnforcedJob() {
+        LLog.v("Ferran, scheduling a job to start immediately in 1s");
+        scheduleJob(EXECUTION_START_MILLIS, ENFORCED_EXECUTION);
+    }
+
+    private static void scheduleJob(final long startMillis, final boolean enforceJob) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
+                PersistableBundleCompat extras = new PersistableBundleCompat();
+                extras.putBoolean(ENFORCE_EXECUTION, enforceJob);
+
                 new JobRequest.Builder(TAG)
                         .setExecutionWindow(startMillis, EXECUTION_END_MILLIS)
                         .setBackoffCriteria(BACKOFF_MILLIS, JobRequest.BackoffPolicy.LINEAR)
@@ -90,6 +106,7 @@ public class DownloadJob extends Job {
                         .setRequirementsEnforced(true)
                         .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
                         .setPersisted(true)
+                        .setExtras(extras)
                         .build()
                         .schedule();
             }

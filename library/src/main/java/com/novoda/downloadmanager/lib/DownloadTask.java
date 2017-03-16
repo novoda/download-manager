@@ -414,11 +414,6 @@ class DownloadTask {
      */
     private void checkDownloadCanProceed() throws StopRequestException {
         LLog.v("Ferran, checkDownloadCanProceed");
-//        if (clock.intervalLessThan(Clock.Interval.ONE_SECOND)) {
-//            return;
-//        }
-//
-//        clock.startInterval();
 
         checkIsPausedOrCanceled();
 
@@ -548,7 +543,7 @@ class DownloadTask {
     private final NotifierWriter.WriteChunkListener checkOnWrite = new NotifierWriter.WriteChunkListener() {
         @Override
         public void chunkWritten(FileDownloadInfo downloadInfo) throws StopRequestException {
-            if (clock.intervalLessThan(Clock.Interval.TWO_SECONDS)) {
+            if (clock.intervalLessThan(Clock.Interval.ONE_SECOND)) {
                 return;
             }
 
