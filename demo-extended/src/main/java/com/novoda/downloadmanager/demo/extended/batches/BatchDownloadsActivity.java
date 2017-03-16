@@ -1,8 +1,14 @@
 package com.novoda.downloadmanager.demo.extended.batches;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -18,11 +24,11 @@ import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.demo.extended.BeardDownload;
 import com.novoda.downloadmanager.demo.extended.QueryForDownloadsAsyncTask;
 import com.novoda.downloadmanager.lib.DownloadManager;
-import com.novoda.downloadmanager.notifications.NotificationVisibility;
 import com.novoda.downloadmanager.lib.Query;
 import com.novoda.downloadmanager.lib.Request;
 import com.novoda.downloadmanager.lib.RequestBatch;
 import com.novoda.downloadmanager.lib.logger.LLog;
+import com.novoda.downloadmanager.notifications.NotificationVisibility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +73,18 @@ public class BatchDownloadsActivity extends AppCompatActivity implements QueryFo
                 });
 
         setupQueryingExample();
+
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            NetworkRequest networkRequest = new NetworkRequest.Builder().addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build();
+            connectivityManager.registerNetworkCallback(networkRequest, new ConnectivityManager.NetworkCallback() {
+                @Override
+                public void onAvailable(Network network) {
+                    LLog.v("Ferran, network is active now");
+                    downloadManager.forceStart();
+                }
+            });
+        }
     }
 
     private void setupQueryingExample() {

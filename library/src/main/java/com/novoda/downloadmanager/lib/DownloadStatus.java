@@ -240,6 +240,14 @@ public final class DownloadStatus {
         return status == PAUSED_BY_APP;
     }
 
+    public static boolean isPendingForNetwork(int status) {
+        return status == WAITING_FOR_NETWORK || status == WAITING_TO_RETRY || status == QUEUED_FOR_WIFI;
+    }
+
+    public static boolean isPausedByAppRestrictions(int status) {
+        return status == QUEUED_DUE_CLIENT_RESTRICTIONS;
+    }
+
     /**
      * Returns whether the download did not start due to insufficient space
      */

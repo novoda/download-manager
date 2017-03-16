@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import com.evernote.android.job.Job;
 import com.evernote.android.job.JobRequest;
 import com.novoda.downloadmanager.lib.DownloadServiceJob;
+import com.novoda.downloadmanager.lib.DownloadStatus;
 import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.util.concurrent.TimeUnit;
@@ -24,10 +25,28 @@ public class DownloadJob extends Job {
     @NonNull
     @Override
     protected Result onRunJob(Params params) {
-        final DownloadServiceJob[] downloadServiceJob = new DownloadServiceJob[1];
-
         LLog.v("Ferran, job starts right now");
 
+        final DownloadServiceJob[] downloadServiceJob = new DownloadServiceJob[1];
+
+        ensureDownloadServiceJobInstanceExists(downloadServiceJob);
+        waitForDownloadServiceJobInstanceToBeReady();
+
+        int status = downloadServiceJob[0].onStartCommand();
+
+        if (DownloadStatus.isCompleted(status)) {
+            LLog.v("Ferran, job is completed");
+            return Result.SUCCESS;
+        } else if (DownloadStatus.isPendingForNetwork(status) || DownloadStatus.isPausedByAppRestrictions(status)) {
+            LLog.v("Ferran, job is going to be rescheduled");
+            return Result.RESCHEDULE;
+        } else {
+            LLog.v("Ferran, job failure");
+            return Result.FAILURE;
+        }
+    }
+
+    private void ensureDownloadServiceJobInstanceExists(final DownloadServiceJob[] downloadServiceJob) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
@@ -35,18 +54,6 @@ public class DownloadJob extends Job {
                 downloadServiceJobInstanceIsReady();
             }
         });
-
-        waitForDownloadServiceJobInstanceToBeReady();
-
-        downloadServiceJob[0].onStartCommand();
-        return Result.SUCCESS;
-    }
-
-    private void downloadServiceJobInstanceIsReady() {
-        synchronized (lock) {
-            LLog.v("Ferran, Download service job instance is ready now");
-            lock.notifyAll();
-        }
     }
 
     private void waitForDownloadServiceJobInstanceToBeReady() {
@@ -57,6 +64,13 @@ public class DownloadJob extends Job {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private void downloadServiceJobInstanceIsReady() {
+        synchronized (lock) {
+            LLog.v("Ferran, Download service job instance is ready now");
+            lock.notifyAll();
         }
     }
 
@@ -73,8 +87,8 @@ public class DownloadJob extends Job {
                         .setExecutionWindow(startMillis, EXECUTION_END_MILLIS)
                         .setBackoffCriteria(BACKOFF_MILLIS, JobRequest.BackoffPolicy.LINEAR)
                         .setRequiresDeviceIdle(false)
-                        .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
                         .setRequirementsEnforced(true)
+                        .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
                         .setPersisted(true)
                         .build()
                         .schedule();

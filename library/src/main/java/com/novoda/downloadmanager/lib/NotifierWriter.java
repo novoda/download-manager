@@ -75,7 +75,8 @@ class NotifierWriter implements DataWriter {
         values.put(COLUMN_CURRENT_BYTES, state.currentBytes);
     }
 
-    public interface WriteChunkListener {
+    interface WriteChunkListener {
+
         void chunkWritten(FileDownloadInfo downloadInfo) throws StopRequestException;
     }
 

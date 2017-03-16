@@ -7,7 +7,8 @@ import java.util.concurrent.TimeUnit;
 class Clock {
 
     public enum Interval {
-        ONE_SECOND(TimeUnit.SECONDS.toMillis(1));
+        ONE_SECOND(TimeUnit.SECONDS.toMillis(1)),
+        TWO_SECONDS(TimeUnit.SECONDS.toMillis(2));
 
         private final long interval;
 

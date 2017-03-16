@@ -23,8 +23,9 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.PowerManager;
+import android.support.annotation.MainThread;
+import android.support.annotation.WorkerThread;
 
-import com.novoda.downloadmanager.lib.jobscheduler.DownloadJob;
 import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.downloadmanager.notifications.DownloadNotifier;
 import com.novoda.downloadmanager.notifications.DownloadNotifierFactory;
@@ -62,6 +63,7 @@ public class DownloadServiceJob {
     private NetworkChecker networkChecker;
     private DestroyListener destroyListener;
 
+    @MainThread
     public static DownloadServiceJob getInstance() {
         return LazySingleton.INSTANCE;
     }
@@ -159,37 +161,64 @@ public class DownloadServiceJob {
         }
     }
 
-    public void onStartCommand() {
+    @WorkerThread
+    public int onStartCommand() {
         LLog.v("Ferran, Service onStartCommand");
-        startDownloading();
+        return startDownloading();
     }
 
-    private void startDownloading() {
-        LLog.v("Ferran, startDownloading in a thread");
+    private int startDownloading() {
+        LLog.v("Ferran, startDownloading");
+
+        if (alreadyDownloading()) {
+            LLog.v("Ferran, batch already running, we won't continue");
+            return DownloadStatus.SUCCESS;
+        }
 
         PowerManager.WakeLock wakeLock = getWakeLock();
         wakeLock.acquire();
 
         boolean isActive = updateLocked();
 
+        while (isActive) {
+            isActive = updateLocked();
+        }
+
         wakeLock.release();
 
-        if (isActive) {
-            // Still doing useful work, keep service alive. These active
-            // tasks will trigger another update pass when they're finished.
+        shutDown();
 
-            // Enqueue delayed update pass to catch finished operations that
-            // didn't trigger an update pass; these are bugs.
-            LLog.v("Ferran, active, we schedule another job immediately");
-            DownloadJob.scheduleJob();
-        } else {
-            // No active tasks, and any pending update messages can be
-            // ignored, since any updates important enough to initiate tasks
-            // will always be delivered with a new startId.
+        return getDownloadStatus();
+    }
 
-            shutDown();
+    public int getDownloadStatus() {
+        Collection<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
+        List<DownloadBatch> downloadBatches = batchRepository.retrieveBatchesFor(allDownloads);
+        int statusInPriority = 0;
+
+        for (DownloadBatch downloadBatch : downloadBatches) {
+            int status = downloadBatch.getStatus();
+            if (DownloadStatus.isPendingForNetwork(status)) {
+                return DownloadStatus.WAITING_FOR_NETWORK;
+            } else {
+                statusInPriority = status;
+            }
         }
-        LLog.v("Ferran, endDownloading in a thread");
+
+        return statusInPriority;
+    }
+
+    private boolean alreadyDownloading() {
+        Collection<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
+        List<DownloadBatch> downloadBatches = batchRepository.retrieveBatchesFor(allDownloads);
+
+        for (DownloadBatch downloadBatch : downloadBatches) {
+            if (downloadBatch.isRunning()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private PowerManager.WakeLock getWakeLock() {
@@ -216,6 +245,7 @@ public class DownloadServiceJob {
      * snapshot taken in this update.
      */
     private boolean updateLocked() {
+        LLog.v("Ferran, start updateLocked");
         boolean isActive = false;
 
         Collection<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
@@ -253,6 +283,8 @@ public class DownloadServiceJob {
         if (!isActive) {
             moveSubmittedTasksToBatchStatusIfNecessary();
         }
+
+        LLog.v("Ferran, end updateLocked");
 
         return isActive;
     }

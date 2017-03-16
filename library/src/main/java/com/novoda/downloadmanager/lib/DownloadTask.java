@@ -19,7 +19,6 @@ package com.novoda.downloadmanager.lib;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.drm.DrmManagerClient;
 import android.net.NetworkInfo;
 import android.text.TextUtils;
 import android.util.Pair;
@@ -230,14 +229,14 @@ class DownloadTask {
         State state = new State(originalDownloadInfo);
 
         try {
+            LLog.i("Ferran, Download " + originalDownloadInfo.getId() + " starting");
+
             checkDownloadCanProceed();
 
             if (downloadStatus != DownloadStatus.RUNNING) {
                 downloadsRepository.setDownloadRunning(originalDownloadInfo);
                 updateBatchStatus(originalDownloadInfo.getBatchId(), originalDownloadInfo.getId());
             }
-
-            LLog.i("Ferran, Download " + originalDownloadInfo.getId() + " starting");
 
             // Remember which network this download started on; used to
             // determine if errors were due to network changes.
@@ -414,11 +413,12 @@ class DownloadTask {
      * has been.
      */
     private void checkDownloadCanProceed() throws StopRequestException {
-        if (clock.intervalLessThan(Clock.Interval.ONE_SECOND)) {
-            return;
-        }
-
-        clock.startInterval();
+        LLog.v("Ferran, checkDownloadCanProceed");
+//        if (clock.intervalLessThan(Clock.Interval.ONE_SECOND)) {
+//            return;
+//        }
+//
+//        clock.startInterval();
 
         checkIsPausedOrCanceled();
 
@@ -450,7 +450,6 @@ class DownloadTask {
      * Transfer data from the given connection to the destination file.
      */
     private void transferData(State state, HttpURLConnection conn) throws StopRequestException {
-        DrmManagerClient drmClient = null;
         InputStream in = null;
         OutputStream out = null;
         FileDescriptor outFd = null;
@@ -463,10 +462,6 @@ class DownloadTask {
 
             try {
                 if (DownloadDrmHelper.isDrmConvertNeeded(state.mimeType)) {
-//                    drmClient = new DrmManagerClient(context);
-//                    final RandomAccessFile file = new RandomAccessFile(new File(state.filename), "rw");
-//                    out = new DrmOutputStream(drmClient, file, state.mimeType);
-//                    outFd = file.getFD();
                     throw new IllegalStateException("DRM not supported atm");
                 } else {
                     out = new FileOutputStream(state.filename, true);
@@ -480,14 +475,6 @@ class DownloadTask {
             // commands and checking disk space as needed.
             transferData(state, in, out);
 
-//            try {
-//                if (out instanceof DrmOutputStream) {
-//                    ((DrmOutputStream) out).finish();
-//                }
-//            } catch (IOException e) {
-//                throw new StopRequestException(STATUS_FILE_ERROR, e);
-//            }
-
         } catch (StopRequestException exception) {
             if (exception.getFinalStatus() == DownloadStatus.PAUSED_BY_APP) {
                 notifyThroughDatabase(state, DownloadStatus.PAUSING, exception.getMessage(), 0);
@@ -497,10 +484,6 @@ class DownloadTask {
             // We should remove exceptions as a flow control in order to avoid this
             throw exception;
         } finally {
-//            if (drmClient != null) {
-//                drmClient.release();
-//            }
-
             closeQuietly(in);
 
             closeAfterWrite(out, outFd);
@@ -541,6 +524,7 @@ class DownloadTask {
      * destination file.
      */
     private void transferData(State state, InputStream in, OutputStream out) throws StopRequestException {
+        LLog.v("Ferran, start transfer data");
         StorageSpaceVerifier spaceVerifier = new StorageSpaceVerifier(storageManager, originalDownloadInfo.getDestination(), state.filename);
         DataWriter checkedWriter = new CheckedWriter(spaceVerifier, out);
         DataWriter dataWriter = new NotifierWriter(getContentResolver(),
@@ -558,11 +542,17 @@ class DownloadTask {
 
         State newState = dataTransferer.transferData(state, in);
         handleEndOfStream(newState);
+        LLog.v("Ferran, end transfer data");
     }
 
     private final NotifierWriter.WriteChunkListener checkOnWrite = new NotifierWriter.WriteChunkListener() {
         @Override
         public void chunkWritten(FileDownloadInfo downloadInfo) throws StopRequestException {
+            if (clock.intervalLessThan(Clock.Interval.TWO_SECONDS)) {
+                return;
+            }
+
+            clock.startInterval();
             checkDownloadCanProceed();
         }
     };
