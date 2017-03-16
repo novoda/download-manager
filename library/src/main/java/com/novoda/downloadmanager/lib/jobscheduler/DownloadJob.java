@@ -25,7 +25,7 @@ public class DownloadJob extends Job {
     private static final long EXECUTION_START_MILLIS = TimeUnit.SECONDS.toMillis(1);
     private static final long EXECUTION_END_MILLIS = TimeUnit.SECONDS.toMillis(2);
 
-    private final Object lock = new Object();
+    private final static Object lock = new Object();
 
     @NonNull
     @Override
@@ -42,10 +42,11 @@ public class DownloadJob extends Job {
 
         int status = downloadServiceJob[0].onStartCommand(enforceExecution);
 
-        if (DownloadStatus.isCompleted(status)) {
+        if (DownloadStatus.isCompleted(status) || DownloadStatus.isPausedByApp(status)) {
             LLog.v("Ferran, job is completed");
             return Result.SUCCESS;
-        } else if (DownloadStatus.isPendingForNetwork(status) || DownloadStatus.isPausedByAppRestrictions(status)) {
+        } else if (DownloadStatus.isPendingForNetwork(status)
+                || DownloadStatus.isPausedByAppRestrictions(status)) {
             LLog.v("Ferran, job is going to be rescheduled");
             return Result.RESCHEDULE;
         } else {
