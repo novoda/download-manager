@@ -181,6 +181,7 @@ public class DownloadServiceJob {
         boolean isActive = updateLocked();
 
         while (isActive) {
+            waitForOneSecond();
             isActive = updateLocked();
         }
 
@@ -189,6 +190,14 @@ public class DownloadServiceJob {
         shutDown();
 
         return getDownloadStatus();
+    }
+
+    private void waitForOneSecond() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public int getDownloadStatus() {
@@ -289,7 +298,7 @@ public class DownloadServiceJob {
             moveSubmittedTasksToBatchStatusIfNecessary();
         }
 
-        LLog.v("Ferran, end updateLocked");
+        LLog.v("Ferran, end updateLocked isActive: " + isActive);
 
         return isActive;
     }
