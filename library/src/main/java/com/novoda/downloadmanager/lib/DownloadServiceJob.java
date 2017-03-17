@@ -167,7 +167,7 @@ public class DownloadServiceJob {
     public int onStartCommand(boolean enforceExecution) {
         LLog.v("Ferran, Service onStartCommand");
 
-        if (!enforceExecution && alreadyDownloading()) {
+        if (downloadsAlreadyInProgress(enforceExecution)) {
             LLog.v("Ferran, batch already running, we won't continue");
             return DownloadStatus.SUCCESS;
         }
@@ -181,6 +181,10 @@ public class DownloadServiceJob {
         shutDown();
 
         return getDownloadStatus();
+    }
+
+    private boolean downloadsAlreadyInProgress(boolean enforceExecution) {
+        return !enforceExecution && alreadyDownloading();
     }
 
     private void downloadUntilAllBatchesAreInactive() {
@@ -273,7 +277,7 @@ public class DownloadServiceJob {
 
         if (alreadyRunning(downloadBatches)) {
             LLog.v("Ferran, fast return");
-            return true;
+            return false;
         }
 
         updateTotalBytesFor(allDownloads);

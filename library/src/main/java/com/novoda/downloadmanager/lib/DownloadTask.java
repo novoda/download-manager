@@ -422,6 +422,11 @@ class DownloadTask {
     private void checkIsPausedOrCanceled() throws StopRequestException {
         FileDownloadInfo.ControlStatus controlStatus = controlReader.newControlStatus();
 
+        if (controlStatus.isDeleted()) {
+            LLog.v("Ferran, this is marked for deletion so we immediately stop downloading");
+            throw new StopRequestException(DownloadStatus.CANCELED, "download deleted");
+        }
+
         if (controlStatus.isPaused()) {
             throw new StopRequestException(DownloadStatus.PAUSED_BY_APP, "download paused by owner");
         }
