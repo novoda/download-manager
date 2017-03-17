@@ -34,6 +34,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Performs background downloads as requested by applications that use
@@ -201,8 +205,7 @@ public class DownloadServiceJob {
     }
 
     public int getDownloadStatus() {
-        Collection<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
-        List<DownloadBatch> downloadBatches = batchRepository.retrieveBatchesFor(allDownloads);
+        List<DownloadBatch> downloadBatches = getDownloadBatches();
 
         if (downloadBatches.isEmpty()) {
             return DownloadStatus.SUCCESS;
@@ -223,8 +226,7 @@ public class DownloadServiceJob {
     }
 
     private boolean alreadyDownloading() {
-        Collection<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
-        List<DownloadBatch> downloadBatches = batchRepository.retrieveBatchesFor(allDownloads);
+        List<DownloadBatch> downloadBatches = getDownloadBatches();
 
         for (DownloadBatch downloadBatch : downloadBatches) {
             if (downloadBatch.isRunning()) {
@@ -233,6 +235,11 @@ public class DownloadServiceJob {
         }
 
         return false;
+    }
+
+    private List<DownloadBatch> getDownloadBatches() {
+        Collection<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
+        return batchRepository.retrieveBatchesFor(allDownloads);
     }
 
     private PowerManager.WakeLock getWakeLock() {
@@ -309,8 +316,7 @@ public class DownloadServiceJob {
     }
 
     private void moveSubmittedTasksToBatchStatusIfNecessary() {
-        List<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
-        List<DownloadBatch> downloadBatches = batchRepository.retrieveBatchesFor(allDownloads);
+        List<DownloadBatch> downloadBatches = getDownloadBatches();
 
         for (DownloadBatch downloadBatch : downloadBatches) {
             List<Long> ids = getSubmittedDownloadIdsFrom(downloadBatch);
@@ -356,7 +362,32 @@ public class DownloadServiceJob {
         int batchStatus = batchRepository.calculateBatchStatus(info.getBatchId());
         batchRepository.updateBatchStatus(info.getBatchId(), batchStatus);
 
+        ScheduledFuture notificationUpdates = startNotificationUpdates();
+
         downloadTask.syncRun();
+
+        stopNotificationUpdates(notificationUpdates);
+    }
+
+    private static final ScheduledExecutorService notificationExecutor = Executors.newSingleThreadScheduledExecutor();
+
+    private ScheduledFuture startNotificationUpdates() {
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                LLog.v("Ferran, update user visible notification");
+                List<DownloadBatch> downloadBatches = getDownloadBatches();
+                updateUserVisibleNotification(downloadBatches);
+            }
+        };
+
+        long initialDelay = 2;
+        long repeatEvery = 2;
+        return notificationExecutor.scheduleAtFixedRate(task, initialDelay, repeatEvery, TimeUnit.SECONDS);
+    }
+
+    private void stopNotificationUpdates(ScheduledFuture notificationUpdates) {
+        notificationUpdates.cancel(false);
     }
 
     private void updateTotalBytesFor(Collection<FileDownloadInfo> downloadInfos) {
