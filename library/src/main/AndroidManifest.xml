@@ -11,8 +11,6 @@
 
     <activity android:name="com.novoda.downloadmanager.lib.SizeLimitActivity" />
 
-    <service android:name="com.novoda.downloadmanager.lib.DownloadService" />
-
     <provider
       android:name="com.novoda.downloadmanager.lib.DownloadProvider"
       android:authorities="${downloadAuthority}"
@@ -23,6 +21,7 @@
       android:exported="false">
       <intent-filter>
         <action android:name="android.intent.action.BOOT_COMPLETED" />
+        <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
       </intent-filter>
       <intent-filter>
         <action android:name="android.intent.action.MEDIA_MOUNTED" />

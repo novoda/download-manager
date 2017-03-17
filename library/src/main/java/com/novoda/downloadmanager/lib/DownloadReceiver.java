@@ -19,6 +19,7 @@ import com.novoda.downloadmanager.notifications.NotificationVisibility;
 
 import static android.content.Intent.ACTION_BOOT_COMPLETED;
 import static android.content.Intent.ACTION_MEDIA_MOUNTED;
+import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static com.novoda.downloadmanager.lib.Constants.ACTION_CANCEL;
 import static com.novoda.downloadmanager.lib.Constants.ACTION_RETRY;
 import static com.novoda.downloadmanager.notifications.NotificationVisibility.ACTIVE_OR_COMPLETE;
@@ -58,7 +59,8 @@ public class DownloadReceiver extends BroadcastReceiver { // TODO split this int
             case ACTION_BOOT_COMPLETED:
             case ACTION_MEDIA_MOUNTED:
             case ACTION_RETRY:
-                startService();
+            case CONNECTIVITY_ACTION:
+                startDownloadJob();
                 break;
             case NotificationDisplayer.ACTION_DOWNLOAD_CANCELLED_CLICK:
             case NotificationDisplayer.ACTION_DOWNLOAD_FAILED_CLICK:
@@ -178,7 +180,7 @@ public class DownloadReceiver extends BroadcastReceiver { // TODO split this int
         return cursor.getInt(cursor.getColumnIndexOrThrow(col));
     }
 
-    private void startService() {
+    private void startDownloadJob() {
         DownloadJob.scheduleJob();
     }
 }
