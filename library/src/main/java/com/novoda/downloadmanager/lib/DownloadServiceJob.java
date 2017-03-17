@@ -34,10 +34,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Performs background downloads as requested by applications that use
@@ -56,7 +52,6 @@ public class DownloadServiceJob {
 
     private SystemFacade systemFacade;
     private StorageManager storageManager;
-    private DownloadNotifier downloadNotifier;
     private DownloadScanner downloadScanner;
     private BatchRepository batchRepository;
     private DownloadsRepository downloadsRepository;
@@ -66,6 +61,7 @@ public class DownloadServiceJob {
     private BatchInformationBroadcaster batchInformationBroadcaster;
     private NetworkChecker networkChecker;
     private DestroyListener destroyListener;
+    private NotificationsUpdator notificationsUpdator;
 
     @MainThread
     public static DownloadServiceJob getInstance() {
@@ -117,8 +113,6 @@ public class DownloadServiceJob {
 
         DownloadNotifierFactory downloadNotifierFactory = new DownloadNotifierFactory();
         PublicFacingStatusTranslator statusTranslator = new PublicFacingStatusTranslator();
-        downloadNotifier = downloadNotifierFactory.getDownloadNotifier(context, modules, downloadMarshaller, statusTranslator);
-        downloadNotifier.cancelAll();
 
         this.downloadsRepository = new DownloadsRepository(
                 systemFacade,
@@ -131,6 +125,10 @@ public class DownloadServiceJob {
                 },
                 downloadsUriProvider
         );
+
+        DownloadNotifier downloadNotifier = downloadNotifierFactory.getDownloadNotifier(context, modules, downloadMarshaller, statusTranslator);
+        downloadNotifier.cancelAll();
+        this.notificationsUpdator = new NotificationsUpdator(downloadNotifier, downloadsRepository, batchRepository);
 
         unlockStaleDownloads();
     }
@@ -180,20 +178,23 @@ public class DownloadServiceJob {
         }
 
         PowerManager.WakeLock wakeLock = getWakeLock();
+
         wakeLock.acquire();
-
-        boolean isActive = updateLocked();
-
-        while (isActive) {
-            waitForOneSecond();
-            isActive = updateLocked();
-        }
-
+        downloadUntilAllBatchesAreInactive();
         wakeLock.release();
 
         shutDown();
 
         return getDownloadStatus();
+    }
+
+    private void downloadUntilAllBatchesAreInactive() {
+        boolean isActive = download();
+
+        while (isActive) {
+            waitForOneSecond();
+            isActive = download();
+        }
     }
 
     private void waitForOneSecond() {
@@ -265,7 +266,7 @@ public class DownloadServiceJob {
      * if (info.isDeleted) {
      * snapshot taken in this update.
      */
-    private boolean updateLocked() {
+    private boolean download() {
         LLog.v("Ferran, start updateLocked");
         boolean isActive = false;
 
@@ -299,7 +300,7 @@ public class DownloadServiceJob {
         }
 
         batchRepository.deleteMarkedBatchesFor(allDownloads);
-        updateUserVisibleNotification(downloadBatches);
+        notificationsUpdator.updateImmediately(downloadBatches);
 
         if (!isActive) {
             moveSubmittedTasksToBatchStatusIfNecessary();
@@ -351,7 +352,7 @@ public class DownloadServiceJob {
         FileDownloadInfo.ControlStatus.Reader controlReader = new FileDownloadInfo.ControlStatus.Reader(context.getContentResolver(), downloadUri);
         DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(info);
         DownloadTask downloadTask = new DownloadTask(
-                context, systemFacade, info, downloadBatch, storageManager, downloadNotifier,
+                context, systemFacade, info, downloadBatch, storageManager, notificationsUpdator,
                 batchInformationBroadcaster, batchRepository,
                 controlReader, networkChecker, downloadReadyChecker, new Clock(),
                 downloadsRepository
@@ -362,32 +363,9 @@ public class DownloadServiceJob {
         int batchStatus = batchRepository.calculateBatchStatus(info.getBatchId());
         batchRepository.updateBatchStatus(info.getBatchId(), batchStatus);
 
-        ScheduledFuture notificationUpdates = startNotificationUpdates();
-
-        downloadTask.syncRun();
-
-        stopNotificationUpdates(notificationUpdates);
-    }
-
-    private static final ScheduledExecutorService notificationExecutor = Executors.newSingleThreadScheduledExecutor();
-
-    private ScheduledFuture startNotificationUpdates() {
-        Runnable task = new Runnable() {
-            @Override
-            public void run() {
-                LLog.v("Ferran, update user visible notification");
-                List<DownloadBatch> downloadBatches = getDownloadBatches();
-                updateUserVisibleNotification(downloadBatches);
-            }
-        };
-
-        long initialDelay = 2;
-        long repeatEvery = 2;
-        return notificationExecutor.scheduleAtFixedRate(task, initialDelay, repeatEvery, TimeUnit.SECONDS);
-    }
-
-    private void stopNotificationUpdates(ScheduledFuture notificationUpdates) {
-        notificationUpdates.cancel(false);
+        notificationsUpdator.startUpdating();
+        downloadTask.run();
+        notificationsUpdator.stopUpdating();
     }
 
     private void updateTotalBytesFor(Collection<FileDownloadInfo> downloadInfos) {
@@ -400,9 +378,5 @@ public class DownloadServiceJob {
                 context.getContentResolver().update(downloadInfo.getAllDownloadsUri(), values, null, null);
             }
         }
-    }
-
-    private void updateUserVisibleNotification(Collection<DownloadBatch> batches) {
-        downloadNotifier.updateWith(batches);
     }
 }

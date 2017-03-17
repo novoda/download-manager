@@ -24,7 +24,6 @@ import android.text.TextUtils;
 import android.util.Pair;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
-import com.novoda.downloadmanager.notifications.DownloadNotifier;
 
 import java.io.Closeable;
 import java.io.File;
@@ -74,7 +73,7 @@ class DownloadTask {
     private final DownloadBatch originalDownloadBatch;
     private final SystemFacade systemFacade;
     private final StorageManager storageManager;
-    private final DownloadNotifier downloadNotifier;
+    private final NotificationsUpdator notificationsUpdator;
     private final BatchInformationBroadcaster batchInformationBroadcaster;
     private final BatchRepository batchRepository;
     private final FileDownloadInfo.ControlStatus.Reader controlReader;
@@ -88,7 +87,7 @@ class DownloadTask {
                         FileDownloadInfo originalDownloadInfo,
                         DownloadBatch originalDownloadBatch,
                         StorageManager storageManager,
-                        DownloadNotifier downloadNotifier,
+                        NotificationsUpdator notificationsUpdator,
                         BatchInformationBroadcaster batchInformationBroadcaster,
                         BatchRepository batchRepository,
                         FileDownloadInfo.ControlStatus.Reader controlReader,
@@ -101,7 +100,7 @@ class DownloadTask {
         this.originalDownloadInfo = originalDownloadInfo;
         this.originalDownloadBatch = originalDownloadBatch;
         this.storageManager = storageManager;
-        this.downloadNotifier = downloadNotifier;
+        this.notificationsUpdator = notificationsUpdator;
         this.batchInformationBroadcaster = batchInformationBroadcaster;
         this.batchRepository = batchRepository;
         this.controlReader = controlReader;
@@ -195,11 +194,11 @@ class DownloadTask {
         return type;
     }
 
-    public void syncRun() {
+    public void run() {
         try {
             runInternal();
         } finally {
-            downloadNotifier.notifyDownloadSpeed(originalDownloadInfo.getId(), 0);
+            notificationsUpdator.updateDownloadSpeed(originalDownloadInfo.getId(), 0);
         }
     }
 
@@ -522,11 +521,13 @@ class DownloadTask {
         LLog.v("Ferran, start transfer data");
         StorageSpaceVerifier spaceVerifier = new StorageSpaceVerifier(storageManager, originalDownloadInfo.getDestination(), state.filename);
         DataWriter checkedWriter = new CheckedWriter(spaceVerifier, out);
-        DataWriter dataWriter = new NotifierWriter(getContentResolver(),
+        DataWriter dataWriter = new NotifierWriter(
+                getContentResolver(),
                 checkedWriter,
-                downloadNotifier,
+                notificationsUpdator,
                 originalDownloadInfo,
-                checkOnWrite);
+                checkOnWrite
+        );
 
         DataTransferer dataTransferer;
         if (originalDownloadInfo.shouldAllowTarUpdate(state.mimeType)) {

@@ -4,15 +4,13 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.os.SystemClock;
 
-import com.novoda.downloadmanager.notifications.DownloadNotifier;
-
 import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.COLUMN_CURRENT_BYTES;
 
 class NotifierWriter implements DataWriter {
 
     private final ContentResolver contentResolver;
     private final DataWriter dataWriter;
-    private final DownloadNotifier downloadNotifier;
+    private final NotificationsUpdator notificationsUpdator;
     private final FileDownloadInfo downloadInfo;
     private final WriteChunkListener writeChunkListener;
 
@@ -20,12 +18,12 @@ class NotifierWriter implements DataWriter {
 
     public NotifierWriter(ContentResolver contentResolver,
                           DataWriter dataWriter,
-                          DownloadNotifier downloadNotifier,
+                          NotificationsUpdator notificationsUpdator,
                           FileDownloadInfo downloadInfo,
                           WriteChunkListener writeChunkListener) {
         this.contentResolver = contentResolver;
         this.dataWriter = dataWriter;
-        this.downloadNotifier = downloadNotifier;
+        this.notificationsUpdator = notificationsUpdator;
         this.downloadInfo = downloadInfo;
         this.writeChunkListener = writeChunkListener;
     }
@@ -54,7 +52,7 @@ class NotifierWriter implements DataWriter {
 
             // Only notify once we have a full sample window
             if (state.speedSampleStart != 0) {
-                downloadNotifier.notifyDownloadSpeed(downloadInfo.getId(), state.speed);
+                notificationsUpdator.updateDownloadSpeed(downloadInfo.getId(), state.speed);
             }
 
             state.speedSampleStart = now;
