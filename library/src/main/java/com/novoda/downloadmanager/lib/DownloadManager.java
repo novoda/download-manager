@@ -444,31 +444,6 @@ public class DownloadManager {
         );
     }
 
-    DownloadManager(Context context, ContentResolver contentResolver, DownloadsUriProvider downloadsUriProvider) {
-        this(
-                context,
-                contentResolver,
-                downloadsUriProvider,
-                new RealSystemFacade(context, new Clock()),
-                new BatchPauseResumeController(
-                        contentResolver,
-                        DownloadsUriProvider.getInstance(),
-                        BatchRepository.from(
-                                contentResolver,
-                                new DownloadDeleter(contentResolver),
-                                DownloadsUriProvider.getInstance(),
-                                new RealSystemFacade(GlobalState.getContext(), new Clock())
-                        ),
-                        new DownloadsRepository(
-                                new RealSystemFacade(GlobalState.getContext(), new Clock()), contentResolver,
-                                DownloadsRepository.DownloadInfoCreator.NON_FUNCTIONAL,
-                                DownloadsUriProvider.getInstance()
-                        )
-                ),
-                false
-        );
-    }
-
     DownloadManager(Context context,
                     ContentResolver contentResolver,
                     DownloadsUriProvider downloadsUriProvider,
