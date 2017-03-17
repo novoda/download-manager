@@ -49,7 +49,7 @@ public class DownloadManagerBuilder {
             connectivityManager.registerNetworkCallback(networkRequest, new ConnectivityManager.NetworkCallback() {
                 @Override
                 public void onAvailable(Network network) {
-                    Log.v("Ferran, network is active now from inside the download manager");
+                    Log.v("network is active now from inside the download manager");
                     downloadManager.forceStart();
                 }
             });

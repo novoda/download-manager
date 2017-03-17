@@ -77,7 +77,7 @@ public class DownloadServiceJob {
     }
 
     private void onCreate() {
-        LLog.v("Ferran, Service onCreate");
+        LLog.v("Service onCreate");
 
         Context context = GlobalState.getContext();
 
@@ -165,10 +165,10 @@ public class DownloadServiceJob {
 
     @WorkerThread
     public int onStartCommand(boolean enforceExecution) {
-        LLog.v("Ferran, Service onStartCommand");
+        LLog.v("Service onStartCommand");
 
         if (downloadsAlreadyInProgress(enforceExecution)) {
-            LLog.v("Ferran, batch already running, we won't continue");
+            LLog.v("batch already running, we won't continue");
             return DownloadStatus.SUCCESS;
         }
 
@@ -251,7 +251,7 @@ public class DownloadServiceJob {
     }
 
     private void shutDown() {
-        LLog.d("Ferran, Shutting down service");
+        LLog.d("Shutting down service");
         destroyListener.onDownloadManagerModulesDestroyed();
         downloadScanner.shutdown();
     }
@@ -269,14 +269,14 @@ public class DownloadServiceJob {
      * snapshot taken in this update.
      */
     private boolean download() {
-        LLog.v("Ferran, start updateLocked");
+        LLog.v("start updateLocked");
         boolean isActive = false;
 
         Collection<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
         List<DownloadBatch> downloadBatches = batchRepository.retrieveBatchesFor(allDownloads);
 
         if (alreadyRunning(downloadBatches)) {
-            LLog.v("Ferran, fast return");
+            LLog.v("fast return");
             return false;
         }
 
@@ -314,7 +314,7 @@ public class DownloadServiceJob {
             moveSubmittedTasksToBatchStatusIfNecessary();
         }
 
-        LLog.v("Ferran, end updateLocked isActive: " + isActive);
+        LLog.v("end updateLocked isActive: " + isActive);
 
         return isActive;
     }
@@ -354,7 +354,7 @@ public class DownloadServiceJob {
     }
 
     private void download(FileDownloadInfo info) {
-        LLog.v("Ferran, Download " + info.getId());
+        LLog.v("Download " + info.getId());
         Context context = GlobalState.getContext();
         Uri downloadUri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), info.getId());
         FileDownloadInfo.ControlStatus.Reader controlReader = new FileDownloadInfo.ControlStatus.Reader(context.getContentResolver(), downloadUri);

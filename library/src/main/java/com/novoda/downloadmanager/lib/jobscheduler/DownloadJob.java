@@ -30,7 +30,7 @@ public class DownloadJob extends Job {
     @NonNull
     @Override
     protected Result onRunJob(Params params) {
-        LLog.v("Ferran, job starts right now");
+        LLog.v("job starts right now");
 
         final DownloadServiceJob[] downloadServiceJob = new DownloadServiceJob[1];
 
@@ -43,14 +43,14 @@ public class DownloadJob extends Job {
         int status = downloadServiceJob[0].onStartCommand(enforceExecution);
 
         if (DownloadStatus.isCompleted(status) || DownloadStatus.isPausedByApp(status)) {
-            LLog.v("Ferran, job is completed");
+            LLog.v("job is completed");
             return Result.SUCCESS;
         } else if (DownloadStatus.isPendingForNetwork(status)
                 || DownloadStatus.isPausedByAppRestrictions(status)) {
-            LLog.v("Ferran, job is going to be rescheduled");
+            LLog.v("job is going to be rescheduled");
             return Result.RESCHEDULE;
         } else {
-            LLog.v("Ferran, job failure");
+            LLog.v("job failure");
             return Result.FAILURE;
         }
     }
@@ -68,7 +68,7 @@ public class DownloadJob extends Job {
     private void waitForDownloadServiceJobInstanceToBeReady() {
         synchronized (lock) {
             try {
-                LLog.v("Ferran, Waiting for download service job instance to be ready");
+                LLog.v("Waiting for download service job instance to be ready");
                 lock.wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -78,18 +78,18 @@ public class DownloadJob extends Job {
 
     private void downloadServiceJobInstanceIsReady() {
         synchronized (lock) {
-            LLog.v("Ferran, Download service job instance is ready now");
+            LLog.v("Download service job instance is ready now");
             lock.notifyAll();
         }
     }
 
     public static void scheduleJob() {
-        LLog.v("Ferran, scheduling a job to start immediately in 1s");
+        LLog.v("scheduling a job to start immediately in 1s");
         scheduleJob(EXECUTION_START_MILLIS, STANDARD_EXECUTION);
     }
 
     public static void scheduleEnforcedJob() {
-        LLog.v("Ferran, scheduling a job to start immediately in 1s");
+        LLog.v("scheduling a job to start immediately in 1s");
         scheduleJob(EXECUTION_START_MILLIS, ENFORCED_EXECUTION);
     }
 

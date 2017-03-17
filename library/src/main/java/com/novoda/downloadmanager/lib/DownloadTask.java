@@ -228,7 +228,7 @@ class DownloadTask {
         State state = new State(originalDownloadInfo);
 
         try {
-            LLog.i("Ferran, Download " + originalDownloadInfo.getId() + " starting");
+            LLog.i("Download " + originalDownloadInfo.getId() + " starting");
 
             checkDownloadCanProceed();
 
@@ -300,7 +300,7 @@ class DownloadTask {
             notifyDownloadCompleted(state, finalStatus, errorMsg, numFailed);
             hackToForceClientsRefreshRulesIfConnectionDropped(finalStatus);
 
-            LLog.i("Ferran, Download " + originalDownloadInfo.getId() + " finished with status " + DownloadStatus.statusToString(finalStatus));
+            LLog.i("Download " + originalDownloadInfo.getId() + " finished with status " + DownloadStatus.statusToString(finalStatus));
         }
         storageManager.incrementNumDownloadsSoFar();
     }
@@ -412,7 +412,7 @@ class DownloadTask {
      * has been.
      */
     private void checkDownloadCanProceed() throws StopRequestException {
-        LLog.v("Ferran, checkDownloadCanProceed");
+        LLog.v("checkDownloadCanProceed");
 
         checkIsPausedOrCanceled();
 
@@ -423,7 +423,7 @@ class DownloadTask {
         FileDownloadInfo.ControlStatus controlStatus = controlReader.newControlStatus();
 
         if (controlStatus.isDeleted()) {
-            LLog.v("Ferran, this is marked for deletion so we immediately stop downloading");
+            LLog.v("this is marked for deletion so we immediately stop downloading");
             throw new StopRequestException(DownloadStatus.CANCELED, "download deleted");
         }
 
@@ -523,7 +523,7 @@ class DownloadTask {
      * destination file.
      */
     private void transferData(State state, InputStream in, OutputStream out) throws StopRequestException {
-        LLog.v("Ferran, start transfer data");
+        LLog.v("start transfer data");
         StorageSpaceVerifier spaceVerifier = new StorageSpaceVerifier(storageManager, originalDownloadInfo.getDestination(), state.filename);
         DataWriter checkedWriter = new CheckedWriter(spaceVerifier, out);
         DataWriter dataWriter = new NotifierWriter(
@@ -543,7 +543,7 @@ class DownloadTask {
 
         State newState = dataTransferer.transferData(state, in);
         handleEndOfStream(newState);
-        LLog.v("Ferran, end transfer data");
+        LLog.v("end transfer data");
     }
 
     private final NotifierWriter.WriteChunkListener checkOnWrite = new NotifierWriter.WriteChunkListener() {

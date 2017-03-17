@@ -481,7 +481,7 @@ public class DownloadManager {
         this.systemFacade = systemFacade;
         this.batchPauseResumeController = batchPauseResumeController;
         GlobalState.setContext(context);
-        GlobalState.setVerboseLogging(true);
+        GlobalState.setVerboseLogging(verboseLogging);
         JobManager.create(context).addJobCreator(new DownloadManagerJobCreator());
     }
 
@@ -604,7 +604,7 @@ public class DownloadManager {
      * @return the number of batches actually removed
      */
     public int removeBatches(long... batchIds) {
-        LLog.v("Ferran, delete");
+        LLog.v("delete");
         if (batchIds == null || batchIds.length == 0) {
             throw new IllegalArgumentException("called with nothing to remove. input param 'batchIds' can't be null");
         }

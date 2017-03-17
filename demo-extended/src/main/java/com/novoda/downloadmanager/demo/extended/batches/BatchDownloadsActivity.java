@@ -80,7 +80,7 @@ public class BatchDownloadsActivity extends AppCompatActivity implements QueryFo
             connectivityManager.registerNetworkCallback(networkRequest, new ConnectivityManager.NetworkCallback() {
                 @Override
                 public void onAvailable(Network network) {
-                    LLog.v("Ferran, network is active now");
+                    LLog.v("network is active now");
                     downloadManager.forceStart();
                 }
             });
