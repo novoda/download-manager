@@ -2,8 +2,14 @@ package com.novoda.downloadmanager;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
+import android.os.Build;
 
 import com.novoda.downloadmanager.lib.DownloadManager;
+import com.novoda.notils.logger.simple.Log;
 
 /**
  * A client can specify whether the downloads are allowed to proceed by implementing
@@ -31,7 +37,26 @@ public class DownloadManagerBuilder {
 
     public DownloadManager build() {
         ContentResolver contentResolver = context.getContentResolver();
-        return new DownloadManager(context, contentResolver, verboseLogging);
+        DownloadManager downloadManager = new DownloadManager(context, contentResolver, verboseLogging);
+        updateOnNetworkChanges(downloadManager);
+        return downloadManager;
     }
 
+    private void updateOnNetworkChanges(final DownloadManager downloadManager) {
+        if (deviceDoesNotSupportConnectivityChangesBroadcast()) {
+            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkRequest networkRequest = new NetworkRequest.Builder().addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build();
+            connectivityManager.registerNetworkCallback(networkRequest, new ConnectivityManager.NetworkCallback() {
+                @Override
+                public void onAvailable(Network network) {
+                    Log.v("Ferran, network is active now from inside the download manager");
+                    downloadManager.forceStart();
+                }
+            });
+        }
+    }
+
+    private boolean deviceDoesNotSupportConnectivityChangesBroadcast() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
+    }
 }

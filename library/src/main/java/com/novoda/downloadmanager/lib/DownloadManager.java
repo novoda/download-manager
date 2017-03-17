@@ -419,31 +419,6 @@ public class DownloadManager {
 
     private Uri baseUri;
 
-    public DownloadManager(Context context, ContentResolver contentResolver) {
-        this(
-                context,
-                contentResolver,
-                DownloadsUriProvider.getInstance(),
-                new RealSystemFacade(context, new Clock()),
-                new BatchPauseResumeController(
-                        contentResolver,
-                        DownloadsUriProvider.getInstance(),
-                        BatchRepository.from(
-                                contentResolver,
-                                new DownloadDeleter(contentResolver),
-                                DownloadsUriProvider.getInstance(),
-                                new RealSystemFacade(GlobalState.getContext(), new Clock())
-                        ),
-                        new DownloadsRepository(
-                                new RealSystemFacade(GlobalState.getContext(), new Clock()), contentResolver,
-                                DownloadsRepository.DownloadInfoCreator.NON_FUNCTIONAL,
-                                DownloadsUriProvider.getInstance()
-                        )
-                ),
-                false
-        );
-    }
-
     public DownloadManager(Context context, ContentResolver contentResolver, boolean verboseLogging) {
         this(
                 context,
@@ -629,6 +604,7 @@ public class DownloadManager {
      * @return the number of batches actually removed
      */
     public int removeBatches(long... batchIds) {
+        LLog.v("Ferran, delete");
         if (batchIds == null || batchIds.length == 0) {
             throw new IllegalArgumentException("called with nothing to remove. input param 'batchIds' can't be null");
         }
