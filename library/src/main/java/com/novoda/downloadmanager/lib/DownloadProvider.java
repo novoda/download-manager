@@ -750,7 +750,7 @@ public final class DownloadProvider extends ContentProvider {
         SQLiteDatabase db = openHelper.getWritableDatabase();
 
         int count;
-        boolean startService = false;
+        boolean scheduleDownloadJob = false;
 
         ContentValues filteredValues;
         if (Binder.getCallingPid() != Process.myPid()) {
@@ -759,7 +759,7 @@ public final class DownloadProvider extends ContentProvider {
             Integer i = values.getAsInteger(DownloadContract.Downloads.COLUMN_CONTROL);
             if (i != null) {
                 filteredValues.put(DownloadContract.Downloads.COLUMN_CONTROL, i);
-                startService = true;
+                scheduleDownloadJob = true;
             }
 
             copyInteger(DownloadContract.Downloads.COLUMN_CONTROL, values, filteredValues);
@@ -773,7 +773,7 @@ public final class DownloadProvider extends ContentProvider {
             boolean isUserBypassingSizeLimit =
                     values.containsKey(DownloadContract.Downloads.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
             if (isRestart || isUserBypassingSizeLimit) {
-                startService = true;
+                scheduleDownloadJob = true;
             }
         }
 
@@ -806,7 +806,7 @@ public final class DownloadProvider extends ContentProvider {
 
         notifyContentChanged(uri, match);
 
-        if (startService) {
+        if (scheduleDownloadJob) {
             LLog.v("downloadProvider.update, we schedule a job");
             DownloadJob.scheduleJob();
         }
