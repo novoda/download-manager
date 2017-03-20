@@ -23,8 +23,7 @@ public class DownloadJob extends Job {
     private static final long BACKOFF_MILLIS = TimeUnit.SECONDS.toMillis(5);
     private static final long EXECUTION_START_MILLIS = TimeUnit.SECONDS.toMillis(1);
     private static final long EXECUTION_END_MILLIS = TimeUnit.SECONDS.toMillis(2);
-
-    private final static Object lock = new Object();
+    private static final Object LOCK = new Object();
 
     @NonNull
     @Override
@@ -72,10 +71,10 @@ public class DownloadJob extends Job {
     }
 
     private void waitForDownloadServiceJobInstanceToBeReady() {
-        synchronized (lock) {
+        synchronized (LOCK) {
             try {
                 LLog.v("Waiting for download service job instance to be ready");
-                lock.wait();
+                LOCK.wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -83,9 +82,9 @@ public class DownloadJob extends Job {
     }
 
     private void downloadServiceJobInstanceIsReady() {
-        synchronized (lock) {
+        synchronized (LOCK) {
             LLog.v("Download service job instance is ready now");
-            lock.notifyAll();
+            LOCK.notifyAll();
         }
     }
 
