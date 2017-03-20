@@ -46,6 +46,7 @@ import java.util.List;
  * delivered through {Context#startService(Intent)}.
  */
 public class DownloadServiceJob {
+    private static final int ONE_SECOND = 1000;
     // TODO: migrate WakeLock from individual DownloadThreads out into
     // DownloadReceiver to protect our entire workflow.
 
@@ -203,7 +204,7 @@ public class DownloadServiceJob {
 
     private void waitForOneSecond() {
         try {
-            Thread.sleep(1000);
+            Thread.sleep(ONE_SECOND);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
