@@ -105,7 +105,15 @@ public final class DownloadServiceJob {
         }
         File internalStorageDir = Environment.getDataDirectory();
         File systemCacheDir = Environment.getDownloadCacheDirectory();
-        storageManager = new StorageManager(contentResolver, externalStorageDir, externalStorageDirs, internalStorageDir, systemCacheDir, downloadDataDir, downloadsUriProvider);
+        storageManager = new StorageManager(
+                contentResolver,
+                externalStorageDir,
+                externalStorageDirs,
+                internalStorageDir,
+                systemCacheDir,
+                downloadDataDir,
+                downloadsUriProvider
+        );
 
         downloadScanner = new DownloadScanner(context.getContentResolver(), context, downloadsUriProvider);
 
