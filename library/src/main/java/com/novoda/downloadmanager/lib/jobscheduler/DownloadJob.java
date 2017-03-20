@@ -42,11 +42,10 @@ public class DownloadJob extends Job {
 
         int status = downloadServiceJob[0].onStartCommand(enforceExecution);
 
-        if (DownloadStatus.isCompleted(status) || DownloadStatus.isPausedByApp(status)) {
+        if (jobHasSucceeded(status)) {
             LLog.v("job is completed");
             return Result.SUCCESS;
-        } else if (DownloadStatus.isPendingForNetwork(status)
-                || DownloadStatus.isPausedByAppRestrictions(status)) {
+        } else if (jobNeedsRescheduling(status)) {
             LLog.v("job is going to be rescheduled");
             return Result.RESCHEDULE;
         } else {
@@ -63,6 +62,14 @@ public class DownloadJob extends Job {
                 downloadServiceJobInstanceIsReady();
             }
         });
+    }
+
+    private boolean jobHasSucceeded(int status) {
+        return DownloadStatus.isCompleted(status) || DownloadStatus.isPausedByApp(status);
+    }
+
+    private boolean jobNeedsRescheduling(int status) {
+        return DownloadStatus.isPendingForNetwork(status) || DownloadStatus.isPausedByAppRestrictions(status);
     }
 
     private void waitForDownloadServiceJobInstanceToBeReady() {
