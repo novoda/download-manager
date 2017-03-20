@@ -73,7 +73,7 @@ class DownloadTask {
     private final DownloadBatch originalDownloadBatch;
     private final SystemFacade systemFacade;
     private final StorageManager storageManager;
-    private final NotificationsUpdator notificationsUpdator;
+    private final NotificationsUpdater notificationsUpdater;
     private final BatchInformationBroadcaster batchInformationBroadcaster;
     private final BatchRepository batchRepository;
     private final FileDownloadInfo.ControlStatus.Reader controlReader;
@@ -82,12 +82,13 @@ class DownloadTask {
     private final Clock clock;
     private final DownloadsRepository downloadsRepository;
 
+    @SuppressWarnings("checkstyle:parameternumber")
     public DownloadTask(Context context,
                         SystemFacade systemFacade,
                         FileDownloadInfo originalDownloadInfo,
                         DownloadBatch originalDownloadBatch,
                         StorageManager storageManager,
-                        NotificationsUpdator notificationsUpdator,
+                        NotificationsUpdater notificationsUpdater,
                         BatchInformationBroadcaster batchInformationBroadcaster,
                         BatchRepository batchRepository,
                         FileDownloadInfo.ControlStatus.Reader controlReader,
@@ -100,7 +101,7 @@ class DownloadTask {
         this.originalDownloadInfo = originalDownloadInfo;
         this.originalDownloadBatch = originalDownloadBatch;
         this.storageManager = storageManager;
-        this.notificationsUpdator = notificationsUpdator;
+        this.notificationsUpdater = notificationsUpdater;
         this.batchInformationBroadcaster = batchInformationBroadcaster;
         this.batchRepository = batchRepository;
         this.controlReader = controlReader;
@@ -198,7 +199,7 @@ class DownloadTask {
         try {
             runInternal();
         } finally {
-            notificationsUpdator.updateDownloadSpeed(originalDownloadInfo.getId(), 0);
+            notificationsUpdater.updateDownloadSpeed(originalDownloadInfo.getId(), 0);
         }
     }
 
@@ -529,7 +530,7 @@ class DownloadTask {
         DataWriter dataWriter = new NotifierWriter(
                 getContentResolver(),
                 checkedWriter,
-                notificationsUpdator,
+                notificationsUpdater,
                 originalDownloadInfo,
                 checkOnWrite
         );

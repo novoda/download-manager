@@ -10,7 +10,7 @@ class NotifierWriter implements DataWriter {
 
     private final ContentResolver contentResolver;
     private final DataWriter dataWriter;
-    private final NotificationsUpdator notificationsUpdator;
+    private final NotificationsUpdater notificationsUpdater;
     private final FileDownloadInfo downloadInfo;
     private final WriteChunkListener writeChunkListener;
 
@@ -18,12 +18,12 @@ class NotifierWriter implements DataWriter {
 
     public NotifierWriter(ContentResolver contentResolver,
                           DataWriter dataWriter,
-                          NotificationsUpdator notificationsUpdator,
+                          NotificationsUpdater notificationsUpdater,
                           FileDownloadInfo downloadInfo,
                           WriteChunkListener writeChunkListener) {
         this.contentResolver = contentResolver;
         this.dataWriter = dataWriter;
-        this.notificationsUpdator = notificationsUpdator;
+        this.notificationsUpdater = notificationsUpdater;
         this.downloadInfo = downloadInfo;
         this.writeChunkListener = writeChunkListener;
     }
@@ -52,7 +52,7 @@ class NotifierWriter implements DataWriter {
 
             // Only notify once we have a full sample window
             if (state.speedSampleStart != 0) {
-                notificationsUpdator.updateDownloadSpeed(downloadInfo.getId(), state.speed);
+                notificationsUpdater.updateDownloadSpeed(downloadInfo.getId(), state.speed);
             }
 
             state.speedSampleStart = now;

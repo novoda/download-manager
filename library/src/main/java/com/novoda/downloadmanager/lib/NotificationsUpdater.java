@@ -9,9 +9,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-class NotificationsUpdator {
+class NotificationsUpdater {
 
-    private static final ScheduledExecutorService notificationExecutor = Executors.newSingleThreadScheduledExecutor();
+    private static final ScheduledExecutorService NOTIFICATION_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
     private static final boolean DO_NOT_INTERRUPT_IF_RUNNING = false;
     private static final int INITIAL_DELAY_IN_SECONDS = 2;
     private static final int REPEAT_EVERY_IN_SECONDS = 2;
@@ -23,7 +23,7 @@ class NotificationsUpdator {
 
     private ScheduledFuture notification;
 
-    public NotificationsUpdator(DownloadNotifier downloadNotifier, DownloadsRepository downloadsRepository, BatchRepository batchRepository) {
+    public NotificationsUpdater(DownloadNotifier downloadNotifier, DownloadsRepository downloadsRepository, BatchRepository batchRepository) {
         this.downloadNotifier = downloadNotifier;
         this.downloadsRepository = downloadsRepository;
         this.batchRepository = batchRepository;
@@ -39,7 +39,7 @@ class NotificationsUpdator {
         };
 
         stopUpdating();
-        notification = notificationExecutor.scheduleAtFixedRate(task, INITIAL_DELAY_IN_SECONDS, REPEAT_EVERY_IN_SECONDS, TIME_UNIT_SECONDS);
+        notification = NOTIFICATION_EXECUTOR.scheduleAtFixedRate(task, INITIAL_DELAY_IN_SECONDS, REPEAT_EVERY_IN_SECONDS, TIME_UNIT_SECONDS);
     }
 
     private List<DownloadBatch> getDownloadBatches() {

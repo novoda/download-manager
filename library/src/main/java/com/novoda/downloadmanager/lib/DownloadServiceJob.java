@@ -63,7 +63,7 @@ public final class DownloadServiceJob {
     private BatchInformationBroadcaster batchInformationBroadcaster;
     private NetworkChecker networkChecker;
     private DestroyListener destroyListener;
-    private NotificationsUpdator notificationsUpdator;
+    private NotificationsUpdater notificationsUpdater;
 
     @MainThread
     public static DownloadServiceJob getInstance() {
@@ -134,7 +134,7 @@ public final class DownloadServiceJob {
 
         DownloadNotifier downloadNotifier = downloadNotifierFactory.getDownloadNotifier(context, modules, downloadMarshaller, statusTranslator);
         downloadNotifier.cancelAll();
-        this.notificationsUpdator = new NotificationsUpdator(downloadNotifier, downloadsRepository, batchRepository);
+        this.notificationsUpdater = new NotificationsUpdater(downloadNotifier, downloadsRepository, batchRepository);
 
         unlockStaleDownloads();
     }
@@ -318,7 +318,7 @@ public final class DownloadServiceJob {
         }
 
         batchRepository.deleteMarkedBatchesFor(allDownloads);
-        notificationsUpdator.updateImmediately(downloadBatches);
+        notificationsUpdater.updateImmediately(downloadBatches);
 
         if (!isActive) {
             moveSubmittedTasksToBatchStatusIfNecessary();
@@ -370,7 +370,7 @@ public final class DownloadServiceJob {
         FileDownloadInfo.ControlStatus.Reader controlReader = new FileDownloadInfo.ControlStatus.Reader(context.getContentResolver(), downloadUri);
         DownloadBatch downloadBatch = batchRepository.retrieveBatchFor(info);
         DownloadTask downloadTask = new DownloadTask(
-                context, systemFacade, info, downloadBatch, storageManager, notificationsUpdator,
+                context, systemFacade, info, downloadBatch, storageManager, notificationsUpdater,
                 batchInformationBroadcaster, batchRepository,
                 controlReader, networkChecker, downloadReadyChecker, new Clock(),
                 downloadsRepository
@@ -381,9 +381,9 @@ public final class DownloadServiceJob {
         int batchStatus = batchRepository.calculateBatchStatus(info.getBatchId());
         batchRepository.updateBatchStatus(info.getBatchId(), batchStatus);
 
-        notificationsUpdator.startUpdating();
+        notificationsUpdater.startUpdating();
         downloadTask.run();
-        notificationsUpdator.stopUpdating();
+        notificationsUpdater.stopUpdating();
     }
 
     private void updateTotalBytesFor(Collection<FileDownloadInfo> downloadInfos) {
