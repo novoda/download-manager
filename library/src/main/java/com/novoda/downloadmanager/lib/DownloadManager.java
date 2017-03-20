@@ -440,6 +440,7 @@ public class DownloadManager {
                                 DownloadsUriProvider.getInstance()
                         )
                 ),
+                new DownloadManagerJobCreator(),
                 verboseLogging
         );
     }
@@ -449,6 +450,7 @@ public class DownloadManager {
                     DownloadsUriProvider downloadsUriProvider,
                     SystemFacade systemFacade,
                     BatchPauseResumeController batchPauseResumeController,
+                    DownloadManagerJobCreator jobCreator,
                     boolean verboseLogging) {
         this.contentResolver = contentResolver;
         this.downloadsUriProvider = downloadsUriProvider;
@@ -457,7 +459,7 @@ public class DownloadManager {
         this.batchPauseResumeController = batchPauseResumeController;
         GlobalState.setContext(context);
         GlobalState.setVerboseLogging(verboseLogging);
-        JobManager.create(context).addJobCreator(new DownloadManagerJobCreator());
+        JobManager.create(context).addJobCreator(jobCreator);
     }
 
     /**
