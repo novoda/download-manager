@@ -465,6 +465,10 @@ class FileDownloadInfo {
             return status == DownloadStatus.CANCELED;
         }
 
+        public boolean isDeleted() {
+            return status == DownloadStatus.DELETING;
+        }
+
         static final class Reader {
 
             private static final String[] PROJECTION = new String[]{

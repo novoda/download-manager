@@ -30,6 +30,9 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 
+import com.evernote.android.job.JobManager;
+import com.novoda.downloadmanager.lib.jobscheduler.DownloadJob;
+import com.novoda.downloadmanager.lib.jobscheduler.DownloadManagerJobCreator;
 import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.downloadmanager.notifications.NotificationVisibility;
 
@@ -376,7 +379,7 @@ public class DownloadManager {
     /**
      * columns to request from DownloadProvider.
      */
-    public static final String[] UNDERLYING_COLUMNS = new String[]{
+    static final String[] UNDERLYING_COLUMNS = new String[]{
             DownloadContract.Downloads._ID,
             DownloadContract.Downloads.COLUMN_DATA + " AS " + COLUMN_LOCAL_FILENAME,
             DownloadContract.Downloads.COLUMN_MEDIAPROVIDER_URI,
@@ -416,31 +419,6 @@ public class DownloadManager {
 
     private Uri baseUri;
 
-    public DownloadManager(Context context, ContentResolver contentResolver) {
-        this(
-                context,
-                contentResolver,
-                DownloadsUriProvider.getInstance(),
-                new RealSystemFacade(context, new Clock()),
-                new BatchPauseResumeController(
-                        contentResolver,
-                        DownloadsUriProvider.getInstance(),
-                        BatchRepository.from(
-                                contentResolver,
-                                new DownloadDeleter(contentResolver),
-                                DownloadsUriProvider.getInstance(),
-                                new RealSystemFacade(GlobalState.getContext(), new Clock())
-                        ),
-                        new DownloadsRepository(
-                                new RealSystemFacade(GlobalState.getContext(), new Clock()), contentResolver,
-                                DownloadsRepository.DownloadInfoCreator.NON_FUNCTIONAL,
-                                DownloadsUriProvider.getInstance()
-                        )
-                ),
-                false
-        );
-    }
-
     public DownloadManager(Context context, ContentResolver contentResolver, boolean verboseLogging) {
         this(
                 context,
@@ -462,32 +440,8 @@ public class DownloadManager {
                                 DownloadsUriProvider.getInstance()
                         )
                 ),
+                new DownloadManagerJobCreator(),
                 verboseLogging
-        );
-    }
-
-    DownloadManager(Context context, ContentResolver contentResolver, DownloadsUriProvider downloadsUriProvider) {
-        this(
-                context,
-                contentResolver,
-                downloadsUriProvider,
-                new RealSystemFacade(context, new Clock()),
-                new BatchPauseResumeController(
-                        contentResolver,
-                        DownloadsUriProvider.getInstance(),
-                        BatchRepository.from(
-                                contentResolver,
-                                new DownloadDeleter(contentResolver),
-                                DownloadsUriProvider.getInstance(),
-                                new RealSystemFacade(GlobalState.getContext(), new Clock())
-                        ),
-                        new DownloadsRepository(
-                                new RealSystemFacade(GlobalState.getContext(), new Clock()), contentResolver,
-                                DownloadsRepository.DownloadInfoCreator.NON_FUNCTIONAL,
-                                DownloadsUriProvider.getInstance()
-                        )
-                ),
-                false
         );
     }
 
@@ -496,6 +450,7 @@ public class DownloadManager {
                     DownloadsUriProvider downloadsUriProvider,
                     SystemFacade systemFacade,
                     BatchPauseResumeController batchPauseResumeController,
+                    DownloadManagerJobCreator jobCreator,
                     boolean verboseLogging) {
         this.contentResolver = contentResolver;
         this.downloadsUriProvider = downloadsUriProvider;
@@ -504,6 +459,7 @@ public class DownloadManager {
         this.batchPauseResumeController = batchPauseResumeController;
         GlobalState.setContext(context);
         GlobalState.setVerboseLogging(verboseLogging);
+        JobManager.create(context).addJobCreator(jobCreator);
     }
 
     /**
@@ -542,7 +498,9 @@ public class DownloadManager {
         RequestBatch batch = request.asBatch();
         long batchId = insert(batch);
         request.setBatchId(batchId);
-        return insert(request);
+        long insert = insert(request);
+        DownloadJob.scheduleJob();
+        return insert;
     }
 
     private long insert(Request request) {
@@ -619,12 +577,14 @@ public class DownloadManager {
      * @return the number of batches actually removed
      */
     public int removeBatches(long... batchIds) {
+        LLog.v("delete");
         if (batchIds == null || batchIds.length == 0) {
             throw new IllegalArgumentException("called with nothing to remove. input param 'batchIds' can't be null");
         }
 
         setDeletingStatusFor(batchIds);
-        return markBatchesToBeDeleted(batchIds);
+        int batchesToBeDeleted = markBatchesToBeDeleted(batchIds);
+        return batchesToBeDeleted;
     }
 
     private void setDeletingStatusFor(long[] batchesIds) {
@@ -1008,6 +968,7 @@ public class DownloadManager {
             insert(request);
         }
         notifyBatchesHaveChanged();
+        DownloadJob.scheduleJob();
 
         return batchId;
     }
@@ -1044,7 +1005,6 @@ public class DownloadManager {
      * one instance is running, ignoring further calls if is currently active
      */
     public void forceStart() {
-        Context context = GlobalState.getContext();
-        context.startService(new Intent(context, DownloadService.class));
+        DownloadJob.scheduleJob();
     }
 }

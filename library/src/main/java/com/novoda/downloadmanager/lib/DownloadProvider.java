@@ -20,7 +20,6 @@ import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.content.UriMatcher;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -39,6 +38,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.novoda.downloadmanager.lib.jobscheduler.DownloadJob;
 import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.io.File;
@@ -299,7 +299,6 @@ public final class DownloadProvider extends ContentProvider {
         }
         // start the DownloadService class. don't wait for the 1st download to be issued.
         // saves us by getting some initialization code in DownloadService out of the way.
-        context.startService(new Intent(context, DownloadService.class));
 //        downloadsDataDir = StorageManager.getDownloadDataDirectory(getContext());
         downloadsDataDir = context.getCacheDir();
 //        try {
@@ -512,8 +511,6 @@ public final class DownloadProvider extends ContentProvider {
          * DownloadManager.addCompletedDownload(String, String, String,
          * boolean, String, String, long) need special treatment
          */
-        Context context = getContext();
-        context.startService(new Intent(context, DownloadService.class));
         notifyContentChanged(uri, match);
         notifyDownloadStatusChanged();
         return ContentUris.withAppendedId(downloadsUriProvider.getContentUri(), rowID);
@@ -753,14 +750,7 @@ public final class DownloadProvider extends ContentProvider {
         SQLiteDatabase db = openHelper.getWritableDatabase();
 
         int count;
-        boolean startService = false;
-
-        if (values.containsKey(DownloadContract.Downloads.COLUMN_DELETED)) {
-            if (values.getAsInteger(DownloadContract.Downloads.COLUMN_DELETED) == 1) {
-                // some rows are to be 'deleted'. need to start DownloadService.
-                startService = true;
-            }
-        }
+        boolean scheduleDownloadJob = false;
 
         ContentValues filteredValues;
         if (Binder.getCallingPid() != Process.myPid()) {
@@ -769,7 +759,7 @@ public final class DownloadProvider extends ContentProvider {
             Integer i = values.getAsInteger(DownloadContract.Downloads.COLUMN_CONTROL);
             if (i != null) {
                 filteredValues.put(DownloadContract.Downloads.COLUMN_CONTROL, i);
-                startService = true;
+                scheduleDownloadJob = true;
             }
 
             copyInteger(DownloadContract.Downloads.COLUMN_CONTROL, values, filteredValues);
@@ -783,7 +773,7 @@ public final class DownloadProvider extends ContentProvider {
             boolean isUserBypassingSizeLimit =
                     values.containsKey(DownloadContract.Downloads.COLUMN_BYPASS_RECOMMENDED_SIZE_LIMIT);
             if (isRestart || isUserBypassingSizeLimit) {
-                startService = true;
+                scheduleDownloadJob = true;
             }
         }
 
@@ -816,9 +806,9 @@ public final class DownloadProvider extends ContentProvider {
 
         notifyContentChanged(uri, match);
 
-        if (startService) {
-            Context context = getContext();
-            context.startService(new Intent(context, DownloadService.class));
+        if (scheduleDownloadJob) {
+            LLog.v("downloadProvider.update, we schedule a job");
+            DownloadJob.scheduleJob();
         }
         return count;
     }

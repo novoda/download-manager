@@ -258,7 +258,6 @@ public class NotificationDisplayer {
 
         } else if (type == SynchronisedDownloadNotifier.TYPE_WAITING) {
             setSecondaryNotificationText(builder, style, context.getString(R.string.dl__download_size_requires_wifi));
-
         } else if (type == SynchronisedDownloadNotifier.TYPE_SUCCESS) {
             setSecondaryNotificationText(builder, style, context.getString(R.string.dl__download_complete));
         } else if (type == SynchronisedDownloadNotifier.TYPE_FAILED) {

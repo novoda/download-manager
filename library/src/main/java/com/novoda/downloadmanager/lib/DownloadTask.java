@@ -19,16 +19,11 @@ package com.novoda.downloadmanager.lib;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.drm.DrmManagerClient;
 import android.net.NetworkInfo;
-import android.net.TrafficStats;
-import android.os.PowerManager;
-import android.os.Process;
 import android.text.TextUtils;
 import android.util.Pair;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
-import com.novoda.downloadmanager.notifications.DownloadNotifier;
 
 import java.io.Closeable;
 import java.io.File;
@@ -57,15 +52,13 @@ import static java.net.HttpURLConnection.*;
  * Task which executes a given {@link FileDownloadInfo}: making network requests,
  * persisting data to disk, and updating {@link DownloadProvider}.
  */
-class DownloadTask implements Runnable {
+class DownloadTask {
 
     /**
      * For intents used to notify the user that a download exceeds a size threshold, if this extra
      * is true, WiFi is required for this download size; otherwise, it is only recommended.
      */
-    public static final String EXTRA_IS_WIFI_REQUIRED = "isWifiRequired";
-
-    private static final String TAG = "DownloadManager-DownloadTask";
+    static final String EXTRA_IS_WIFI_REQUIRED = "isWifiRequired";
 
     // TODO: bind each download to a specific network interface to avoid state
     // checking races once we have ConnectivityManager API
@@ -80,25 +73,24 @@ class DownloadTask implements Runnable {
     private final DownloadBatch originalDownloadBatch;
     private final SystemFacade systemFacade;
     private final StorageManager storageManager;
-    private final DownloadNotifier downloadNotifier;
+    private final NotificationsUpdater notificationsUpdater;
     private final BatchInformationBroadcaster batchInformationBroadcaster;
     private final BatchRepository batchRepository;
-    private final DownloadsUriProvider downloadsUriProvider;
     private final FileDownloadInfo.ControlStatus.Reader controlReader;
     private final NetworkChecker networkChecker;
     private final DownloadReadyChecker downloadReadyChecker;
     private final Clock clock;
     private final DownloadsRepository downloadsRepository;
 
+    @SuppressWarnings("checkstyle:parameternumber")
     public DownloadTask(Context context,
                         SystemFacade systemFacade,
                         FileDownloadInfo originalDownloadInfo,
                         DownloadBatch originalDownloadBatch,
                         StorageManager storageManager,
-                        DownloadNotifier downloadNotifier,
+                        NotificationsUpdater notificationsUpdater,
                         BatchInformationBroadcaster batchInformationBroadcaster,
                         BatchRepository batchRepository,
-                        DownloadsUriProvider downloadsUriProvider,
                         FileDownloadInfo.ControlStatus.Reader controlReader,
                         NetworkChecker networkChecker,
                         DownloadReadyChecker downloadReadyChecker,
@@ -109,10 +101,9 @@ class DownloadTask implements Runnable {
         this.originalDownloadInfo = originalDownloadInfo;
         this.originalDownloadBatch = originalDownloadBatch;
         this.storageManager = storageManager;
-        this.downloadNotifier = downloadNotifier;
+        this.notificationsUpdater = notificationsUpdater;
         this.batchInformationBroadcaster = batchInformationBroadcaster;
         this.batchRepository = batchRepository;
-        this.downloadsUriProvider = downloadsUriProvider;
         this.controlReader = controlReader;
         this.networkChecker = networkChecker;
         this.downloadReadyChecker = downloadReadyChecker;
@@ -204,13 +195,11 @@ class DownloadTask implements Runnable {
         return type;
     }
 
-    @Override
     public void run() {
-        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         try {
             runInternal();
         } finally {
-            downloadNotifier.notifyDownloadSpeed(originalDownloadInfo.getId(), 0);
+            notificationsUpdater.updateDownloadSpeed(originalDownloadInfo.getId(), 0);
         }
     }
 
@@ -234,13 +223,13 @@ class DownloadTask implements Runnable {
             return;
         }
 
-        PowerManager.WakeLock wakeLock = null;
         int finalStatus = DownloadStatus.UNKNOWN_ERROR;
         int numFailed = originalDownloadInfo.getNumFailed();
         String errorMsg = null;
         State state = new State(originalDownloadInfo);
 
         try {
+            LLog.i("Download " + originalDownloadInfo.getId() + " starting");
 
             checkDownloadCanProceed();
 
@@ -249,24 +238,12 @@ class DownloadTask implements Runnable {
                 updateBatchStatus(originalDownloadInfo.getBatchId(), originalDownloadInfo.getId());
             }
 
-            PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-
-            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-            wakeLock.acquire();
-
-            LLog.i("Download " + originalDownloadInfo.getId() + " starting");
-
             // Remember which network this download started on; used to
             // determine if errors were due to network changes.
             final NetworkInfo networkInfo = systemFacade.getActiveNetworkInfo(); // Param downloadInfo.uid removed TODO
             if (networkInfo != null) {
                 state.networkType = networkInfo.getType();
             }
-
-            // Network traffic on this thread should be counted against the
-            // requesting UID, and is tagged with well-known value.
-            TrafficStats.setThreadStatsTag(0xFFFFFF01); // TrafficStats.TAG_SYSTEM_DOWNLOAD
-            // TrafficStats.setThreadStatsUid(downloadInfo.uid); Won't need this as we will be an Android library (doing own work)
 
             try {
                 // TODO: migrate URL sanity checking into client side of API
@@ -311,7 +288,6 @@ class DownloadTask implements Runnable {
                     }
                 }
             }
-
             // fall through to finally block
         } catch (Throwable ex) {
             errorMsg = ex.getMessage();
@@ -320,18 +296,12 @@ class DownloadTask implements Runnable {
             finalStatus = DownloadStatus.UNKNOWN_ERROR;
             // falls through to the code that reports an error
         } finally {
-            TrafficStats.clearThreadStatsTag();
-
             cleanupDestination(state, finalStatus);
 
             notifyDownloadCompleted(state, finalStatus, errorMsg, numFailed);
             hackToForceClientsRefreshRulesIfConnectionDropped(finalStatus);
 
             LLog.i("Download " + originalDownloadInfo.getId() + " finished with status " + DownloadStatus.statusToString(finalStatus));
-
-            if (wakeLock != null) {
-                wakeLock.release();
-            }
         }
         storageManager.incrementNumDownloadsSoFar();
     }
@@ -443,11 +413,7 @@ class DownloadTask implements Runnable {
      * has been.
      */
     private void checkDownloadCanProceed() throws StopRequestException {
-        if (clock.intervalLessThan(Clock.Interval.ONE_SECOND)) {
-            return;
-        }
-
-        clock.startInterval();
+        LLog.v("checkDownloadCanProceed");
 
         checkIsPausedOrCanceled();
 
@@ -456,6 +422,11 @@ class DownloadTask implements Runnable {
 
     private void checkIsPausedOrCanceled() throws StopRequestException {
         FileDownloadInfo.ControlStatus controlStatus = controlReader.newControlStatus();
+
+        if (controlStatus.isDeleted()) {
+            LLog.v("this is marked for deletion so we immediately stop downloading");
+            throw new StopRequestException(DownloadStatus.CANCELED, "download deleted");
+        }
 
         if (controlStatus.isPaused()) {
             throw new StopRequestException(DownloadStatus.PAUSED_BY_APP, "download paused by owner");
@@ -479,7 +450,6 @@ class DownloadTask implements Runnable {
      * Transfer data from the given connection to the destination file.
      */
     private void transferData(State state, HttpURLConnection conn) throws StopRequestException {
-        DrmManagerClient drmClient = null;
         InputStream in = null;
         OutputStream out = null;
         FileDescriptor outFd = null;
@@ -492,10 +462,6 @@ class DownloadTask implements Runnable {
 
             try {
                 if (DownloadDrmHelper.isDrmConvertNeeded(state.mimeType)) {
-//                    drmClient = new DrmManagerClient(context);
-//                    final RandomAccessFile file = new RandomAccessFile(new File(state.filename), "rw");
-//                    out = new DrmOutputStream(drmClient, file, state.mimeType);
-//                    outFd = file.getFD();
                     throw new IllegalStateException("DRM not supported atm");
                 } else {
                     out = new FileOutputStream(state.filename, true);
@@ -509,14 +475,6 @@ class DownloadTask implements Runnable {
             // commands and checking disk space as needed.
             transferData(state, in, out);
 
-//            try {
-//                if (out instanceof DrmOutputStream) {
-//                    ((DrmOutputStream) out).finish();
-//                }
-//            } catch (IOException e) {
-//                throw new StopRequestException(STATUS_FILE_ERROR, e);
-//            }
-
         } catch (StopRequestException exception) {
             if (exception.getFinalStatus() == DownloadStatus.PAUSED_BY_APP) {
                 notifyThroughDatabase(state, DownloadStatus.PAUSING, exception.getMessage(), 0);
@@ -526,10 +484,6 @@ class DownloadTask implements Runnable {
             // We should remove exceptions as a flow control in order to avoid this
             throw exception;
         } finally {
-//            if (drmClient != null) {
-//                drmClient.release();
-//            }
-
             closeQuietly(in);
 
             closeAfterWrite(out, outFd);
@@ -570,13 +524,16 @@ class DownloadTask implements Runnable {
      * destination file.
      */
     private void transferData(State state, InputStream in, OutputStream out) throws StopRequestException {
+        LLog.v("start transfer data");
         StorageSpaceVerifier spaceVerifier = new StorageSpaceVerifier(storageManager, originalDownloadInfo.getDestination(), state.filename);
         DataWriter checkedWriter = new CheckedWriter(spaceVerifier, out);
-        DataWriter dataWriter = new NotifierWriter(getContentResolver(),
+        DataWriter dataWriter = new NotifierWriter(
+                getContentResolver(),
                 checkedWriter,
-                downloadNotifier,
+                notificationsUpdater,
                 originalDownloadInfo,
-                checkOnWrite);
+                checkOnWrite
+        );
 
         DataTransferer dataTransferer;
         if (originalDownloadInfo.shouldAllowTarUpdate(state.mimeType)) {
@@ -587,11 +544,17 @@ class DownloadTask implements Runnable {
 
         State newState = dataTransferer.transferData(state, in);
         handleEndOfStream(newState);
+        LLog.v("end transfer data");
     }
 
     private final NotifierWriter.WriteChunkListener checkOnWrite = new NotifierWriter.WriteChunkListener() {
         @Override
         public void chunkWritten(FileDownloadInfo downloadInfo) throws StopRequestException {
+            if (clock.intervalLessThan(Clock.Interval.ONE_SECOND)) {
+                return;
+            }
+
+            clock.startInterval();
             checkDownloadCanProceed();
         }
     };

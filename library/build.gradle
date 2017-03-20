@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.2.3'
+        classpath 'com.android.tools.build:gradle:2.3.0'
         classpath 'com.novoda:bintray-release:0.3.4'
     }
 }
@@ -15,12 +15,12 @@ repositories {
 }
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion "22.0.1"
+    compileSdkVersion 25
+    buildToolsVersion '25.0.2'
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 22
+        targetSdkVersion 25
 
         def projects = rootProject.getProject().getChildProjects()
         projects.each {
@@ -44,9 +44,10 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:22.2.1'
+    compile 'com.android.support:support-v4:25.3.0'
     compile 'com.novoda:notils:2.2.13'
     compile 'com.squareup.okhttp:okhttp:2.3.0'
+    compile 'com.evernote:android-job:1.1.7'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:1.10.19'
@@ -60,7 +61,7 @@ publish {
     userOrg = 'novoda'
     groupId = 'com.novoda'
     artifactId = 'download-manager'
-    publishVersion = '0.2.44'
+    publishVersion = '0.2.45'
     description = 'Download manager based on AOSP DM but allowing downloading to internal private storage.'
     website = 'https://github.com/novoda/download-manager'
 }

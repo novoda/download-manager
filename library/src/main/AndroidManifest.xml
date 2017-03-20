@@ -11,8 +11,6 @@
 
     <activity android:name="com.novoda.downloadmanager.lib.SizeLimitActivity" />
 
-    <service android:name="com.novoda.downloadmanager.lib.DownloadService" />
-
     <provider
       android:name="com.novoda.downloadmanager.lib.DownloadProvider"
       android:authorities="${downloadAuthority}"
