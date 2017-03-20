@@ -13,6 +13,9 @@ class NotificationsUpdator {
 
     private static final ScheduledExecutorService notificationExecutor = Executors.newSingleThreadScheduledExecutor();
     private static final boolean DO_NOT_INTERRUPT_IF_RUNNING = false;
+    private static final int INITIAL_DELAY_IN_SECONDS = 2;
+    private static final int REPEAT_EVERY_IN_SECONDS = 2;
+    private static final TimeUnit TIME_UNIT_SECONDS = TimeUnit.SECONDS;
 
     private final DownloadNotifier downloadNotifier;
     private final DownloadsRepository downloadsRepository;
@@ -35,11 +38,8 @@ class NotificationsUpdator {
             }
         };
 
-        long initialDelay = 2;
-        long repeatEvery = 2;
-
         stopUpdating();
-        notification = notificationExecutor.scheduleAtFixedRate(task, initialDelay, repeatEvery, TimeUnit.SECONDS);
+        notification = notificationExecutor.scheduleAtFixedRate(task, INITIAL_DELAY_IN_SECONDS, REPEAT_EVERY_IN_SECONDS, TIME_UNIT_SECONDS);
     }
 
     private List<DownloadBatch> getDownloadBatches() {
