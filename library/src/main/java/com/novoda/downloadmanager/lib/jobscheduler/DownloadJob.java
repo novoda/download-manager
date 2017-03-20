@@ -15,12 +15,11 @@ import java.util.concurrent.TimeUnit;
 
 public class DownloadJob extends Job {
 
+    public static final String TAG = "download_job_tag";
+
     private static final String ENFORCE_EXECUTION = "enforceExecution";
     private static final boolean STANDARD_EXECUTION = false;
     private static final boolean ENFORCED_EXECUTION = true;
-
-    static String TAG = "download_job_tag";
-
     private static final long BACKOFF_MILLIS = TimeUnit.SECONDS.toMillis(5);
     private static final long EXECUTION_START_MILLIS = TimeUnit.SECONDS.toMillis(1);
     private static final long EXECUTION_END_MILLIS = TimeUnit.SECONDS.toMillis(2);
