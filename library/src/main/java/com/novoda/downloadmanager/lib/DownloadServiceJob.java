@@ -45,7 +45,7 @@ import java.util.List;
  * Any database updates important enough to initiate tasks should always be
  * delivered through {Context#startService(Intent)}.
  */
-public class DownloadServiceJob {
+public final class DownloadServiceJob {
     private static final int ONE_SECOND = 1000;
     // TODO: migrate WakeLock from individual DownloadThreads out into
     // DownloadReceiver to protect our entire workflow.
@@ -75,11 +75,7 @@ public class DownloadServiceJob {
     }
 
     private DownloadServiceJob() {
-        onCreate();
-    }
-
-    private void onCreate() {
-        LLog.v("Service onCreate");
+        LLog.v("Service constructor");
 
         Context context = GlobalState.getContext();
 
