@@ -21,6 +21,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.PowerManager;
 import android.support.annotation.MainThread;
@@ -102,7 +103,7 @@ public class DownloadServiceJob {
         File downloadDataDir = StorageManager.getDownloadDataDirectory(context);
         File externalStorageDir = Environment.getExternalStorageDirectory();
         File[] externalStorageDirs = new File[0];
-        if (android.os.Build.VERSION.SDK_INT >= 19) {
+        if (deviceIsKitKat()) {
             externalStorageDirs = context.getExternalFilesDirs(null);
         }
         File internalStorageDir = Environment.getDataDirectory();
@@ -131,6 +132,10 @@ public class DownloadServiceJob {
         this.notificationsUpdator = new NotificationsUpdator(downloadNotifier, downloadsRepository, batchRepository);
 
         unlockStaleDownloads();
+    }
+
+    private boolean deviceIsKitKat() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
     }
 
     private void unlockStaleDownloads() {
