@@ -174,10 +174,10 @@ public final class DownloadServiceJob {
     }
 
     @WorkerThread
-    public int onStartCommand(boolean enforceExecution) {
+    public int onStartCommand() {
         LLog.v("Service onStartCommand");
 
-        if (downloadsAlreadyInProgress(enforceExecution)) {
+        if (alreadyDownloading()) {
             LLog.v("batch already running, we won't continue");
             return DownloadStatus.SUCCESS;
         }
@@ -191,10 +191,6 @@ public final class DownloadServiceJob {
         shutDown();
 
         return getDownloadStatus();
-    }
-
-    private boolean downloadsAlreadyInProgress(boolean enforceExecution) {
-        return !enforceExecution && alreadyDownloading();
     }
 
     private void downloadUntilAllBatchesAreInactive() {
