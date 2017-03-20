@@ -513,17 +513,14 @@ public class DownloadManager {
      * {@link BatchPauseResumeController#pauseBatch(long)}
      */
     public boolean pauseBatch(long batchId) {
-        boolean pauseBatch = batchPauseResumeController.pauseBatch(batchId);
-        return pauseBatch;
+        return batchPauseResumeController.pauseBatch(batchId);
     }
 
     /**
      * {@link BatchPauseResumeController#resumeBatch(long)}}
      */
     public boolean resumeBatch(long batchId) {
-        boolean resumeBatch = batchPauseResumeController.resumeBatch(batchId);
-        DownloadJob.scheduleJob();
-        return resumeBatch;
+        return batchPauseResumeController.resumeBatch(batchId);
     }
 
     public void removeDownload(URI uri) {
