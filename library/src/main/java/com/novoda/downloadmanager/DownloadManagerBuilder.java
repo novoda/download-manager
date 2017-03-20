@@ -57,6 +57,6 @@ public class DownloadManagerBuilder {
     }
 
     private boolean deviceDoesNotSupportConnectivityChangesBroadcast() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N;
     }
 }
