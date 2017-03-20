@@ -514,7 +514,6 @@ public class DownloadManager {
      */
     public boolean pauseBatch(long batchId) {
         boolean pauseBatch = batchPauseResumeController.pauseBatch(batchId);
-        DownloadJob.scheduleJob();
         return pauseBatch;
     }
 
@@ -588,7 +587,6 @@ public class DownloadManager {
 
         setDeletingStatusFor(batchIds);
         int batchesToBeDeleted = markBatchesToBeDeleted(batchIds);
-        DownloadJob.scheduleEnforcedJob();
         return batchesToBeDeleted;
     }
 
