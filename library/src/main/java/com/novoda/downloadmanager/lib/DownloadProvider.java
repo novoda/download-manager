@@ -38,6 +38,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.novoda.downloadmanager.lib.jobscheduler.DownloadJob;
 import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.io.File;
@@ -751,13 +752,6 @@ public final class DownloadProvider extends ContentProvider {
         int count;
         boolean startService = false;
 
-        if (values.containsKey(DownloadContract.Downloads.COLUMN_DELETED)) {
-            if (values.getAsInteger(DownloadContract.Downloads.COLUMN_DELETED) == 1) {
-                // some rows are to be 'deleted'. need to start DownloadService.
-                startService = true;
-            }
-        }
-
         ContentValues filteredValues;
         if (Binder.getCallingPid() != Process.myPid()) {
             filteredValues = new ContentValues();
@@ -813,7 +807,8 @@ public final class DownloadProvider extends ContentProvider {
         notifyContentChanged(uri, match);
 
         if (startService) {
-            //DownloadJob.scheduleJob();
+            LLog.v("downloadProvider.update, we schedule a job");
+            DownloadJob.scheduleJob();
         }
         return count;
     }
