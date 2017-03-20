@@ -37,7 +37,6 @@ class NotifierWriter implements DataWriter {
         return localState;
     }
 
-    @SuppressWarnings("checkstyle:MagicNumberCheck")
     private DownloadTask.State reportProgress(DownloadTask.State state) {
         final long now = SystemClock.elapsedRealtime();
 

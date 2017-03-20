@@ -379,7 +379,7 @@ public class DownloadManager {
     /**
      * columns to request from DownloadProvider.
      */
-    public static final String[] UNDERLYING_COLUMNS = new String[]{
+    static final String[] UNDERLYING_COLUMNS = new String[]{
             DownloadContract.Downloads._ID,
             DownloadContract.Downloads.COLUMN_DATA + " AS " + COLUMN_LOCAL_FILENAME,
             DownloadContract.Downloads.COLUMN_MEDIAPROVIDER_URI,
