@@ -305,8 +305,6 @@ public final class DownloadProvider extends ContentProvider {
 //        } catch (IOException e) {
 //            LLog.wtf("Could not get canonical path for download directory", e);
 //        }
-        //JobManager.create(getContext().getApplicationContext()).addJobCreator(new DownloadManagerJobCreator());
-        //DownloadJob.scheduleJob();
         return true;
     }
 
@@ -514,9 +512,7 @@ public final class DownloadProvider extends ContentProvider {
          */
         notifyContentChanged(uri, match);
         notifyDownloadStatusChanged();
-        Uri uri1 = ContentUris.withAppendedId(downloadsUriProvider.getContentUri(), rowID);
-        //DownloadJob.scheduleJob();
-        return uri1;
+        return ContentUris.withAppendedId(downloadsUriProvider.getContentUri(), rowID);
     }
 
     private void notifyDownloadStatusChanged() {
