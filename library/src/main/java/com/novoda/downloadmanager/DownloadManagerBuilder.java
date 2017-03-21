@@ -1,5 +1,6 @@
 package com.novoda.downloadmanager;
 
+import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -17,6 +18,8 @@ import com.novoda.notils.logger.simple.Log;
  *
  */
 public class DownloadManagerBuilder {
+
+    private static final int ANDROID_N = 24;
 
     private final Context context;
 
@@ -42,6 +45,7 @@ public class DownloadManagerBuilder {
         return downloadManager;
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void updateOnNetworkChanges(final DownloadManager downloadManager) {
         if (deviceDoesNotSupportConnectivityChangesBroadcast()) {
             ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -57,6 +61,6 @@ public class DownloadManagerBuilder {
     }
 
     private boolean deviceDoesNotSupportConnectivityChangesBroadcast() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N;
+        return Build.VERSION.SDK_INT >= ANDROID_N;
     }
 }
