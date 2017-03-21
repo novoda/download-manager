@@ -47,20 +47,22 @@ public class DownloadManagerBuilder {
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void updateOnNetworkChanges(final DownloadManager downloadManager) {
-        if (deviceDoesNotSupportConnectivityChangesBroadcast()) {
-            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkRequest networkRequest = new NetworkRequest.Builder().addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build();
-            connectivityManager.registerNetworkCallback(networkRequest, new ConnectivityManager.NetworkCallback() {
-                @Override
-                public void onAvailable(Network network) {
-                    Log.v("network is active now from inside the download manager");
-                    downloadManager.forceStart();
-                }
-            });
+        if (deviceSupportsConnectivityChangesBroadcast()) {
+            return;
         }
+
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkRequest networkRequest = new NetworkRequest.Builder().addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build();
+        connectivityManager.registerNetworkCallback(networkRequest, new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onAvailable(Network network) {
+                Log.v("network is active now from inside the download manager");
+                downloadManager.forceStart();
+            }
+        });
     }
 
-    private boolean deviceDoesNotSupportConnectivityChangesBroadcast() {
-        return Build.VERSION.SDK_INT >= ANDROID_N;
+    private boolean deviceSupportsConnectivityChangesBroadcast() {
+        return Build.VERSION.SDK_INT < ANDROID_N;
     }
 }
