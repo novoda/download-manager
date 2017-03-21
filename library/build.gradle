@@ -43,7 +43,7 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:25.3.0'
+    compile 'com.android.support:support-v4:25.3.0'
     compile 'com.novoda:notils:2.2.13'
     compile 'com.squareup.okhttp:okhttp:2.3.0'
     compile 'com.evernote:android-job:1.1.7'
