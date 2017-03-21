@@ -27,6 +27,7 @@ import android.os.Process;
 import android.text.TextUtils;
 import android.util.Pair;
 
+import com.novoda.downloadmanager.lib.jobscheduler.DownloadJob;
 import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.downloadmanager.notifications.DownloadNotifier;
 
@@ -329,11 +330,21 @@ class DownloadTask implements Runnable {
 
             LLog.i("Download " + originalDownloadInfo.getId() + " finished with status " + DownloadStatus.statusToString(finalStatus));
 
+            scheduleDownloadJob(finalStatus);
+
             if (wakeLock != null) {
                 wakeLock.release();
             }
         }
         storageManager.incrementNumDownloadsSoFar();
+    }
+
+    private void scheduleDownloadJob(int finalStatus) {
+        if (finalStatus == DownloadStatus.WAITING_TO_RETRY
+                || finalStatus == DownloadStatus.WAITING_FOR_NETWORK
+                || finalStatus == DownloadStatus.QUEUED_FOR_WIFI) {
+            DownloadJob.scheduleJob();
+        }
     }
 
     private void hackToForceClientsRefreshRulesIfConnectionDropped(int finalStatus) {
