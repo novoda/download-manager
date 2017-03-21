@@ -10,7 +10,7 @@ import android.net.NetworkRequest;
 import android.os.Build;
 
 import com.novoda.downloadmanager.lib.DownloadManager;
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.lib.logger.LLog;
 
 /**
  * A client can specify whether the downloads are allowed to proceed by implementing
@@ -56,7 +56,7 @@ public class DownloadManagerBuilder {
         connectivityManager.registerNetworkCallback(networkRequest, new ConnectivityManager.NetworkCallback() {
             @Override
             public void onAvailable(Network network) {
-                Log.v("network is active now from inside the download manager");
+                LLog.v("network is active now from inside the download manager");
                 downloadManager.forceStart();
             }
         });
