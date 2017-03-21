@@ -27,7 +27,6 @@ import android.os.Process;
 import android.text.TextUtils;
 import android.util.Pair;
 
-import com.novoda.downloadmanager.lib.jobscheduler.DownloadJob;
 import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.downloadmanager.notifications.DownloadNotifier;
 

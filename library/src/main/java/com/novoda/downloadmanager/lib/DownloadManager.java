@@ -31,7 +31,6 @@ import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 
 import com.evernote.android.job.JobManager;
-import com.novoda.downloadmanager.lib.jobscheduler.DownloadManagerJobCreator;
 import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.downloadmanager.notifications.NotificationVisibility;
 

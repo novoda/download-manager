@@ -1,4 +1,4 @@
-package com.novoda.downloadmanager.lib.jobscheduler;
+package com.novoda.downloadmanager.lib;
 
 import android.content.Context;
 import android.content.Intent;
@@ -6,13 +6,11 @@ import android.support.annotation.NonNull;
 
 import com.evernote.android.job.Job;
 import com.evernote.android.job.JobRequest;
-import com.novoda.downloadmanager.lib.DownloadService;
-import com.novoda.downloadmanager.lib.GlobalState;
 import com.novoda.downloadmanager.lib.logger.LLog;
 
 import java.util.concurrent.TimeUnit;
 
-public class DownloadJob extends Job {
+class DownloadJob extends Job {
 
     public static final String TAG = "download_job_tag";
 

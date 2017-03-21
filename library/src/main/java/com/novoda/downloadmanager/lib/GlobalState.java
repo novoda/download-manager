@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
 
-public class GlobalState {
+class GlobalState {
 
     private static Context context;
     private static boolean verboseLogging;
