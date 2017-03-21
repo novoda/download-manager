@@ -220,11 +220,6 @@ class MockCursorWithBatchIds implements Cursor {
     }
 
     @Override
-    public void setExtras(Bundle extras) {
-
-    }
-
-    @Override
     public Bundle getExtras() {
         return null;
     }
