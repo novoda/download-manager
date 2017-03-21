@@ -329,11 +329,21 @@ class DownloadTask implements Runnable {
 
             LLog.i("Download " + originalDownloadInfo.getId() + " finished with status " + DownloadStatus.statusToString(finalStatus));
 
+            scheduleDownloadJob(finalStatus);
+
             if (wakeLock != null) {
                 wakeLock.release();
             }
         }
         storageManager.incrementNumDownloadsSoFar();
+    }
+
+    private void scheduleDownloadJob(int finalStatus) {
+        if (finalStatus == DownloadStatus.WAITING_TO_RETRY
+                || finalStatus == DownloadStatus.WAITING_FOR_NETWORK
+                || finalStatus == DownloadStatus.QUEUED_FOR_WIFI) {
+            DownloadJob.scheduleJob();
+        }
     }
 
     private void hackToForceClientsRefreshRulesIfConnectionDropped(int finalStatus) {

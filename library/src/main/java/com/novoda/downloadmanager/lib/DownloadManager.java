@@ -30,6 +30,7 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 
+import com.evernote.android.job.JobManager;
 import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.downloadmanager.notifications.NotificationVisibility;
 
@@ -437,6 +438,7 @@ public class DownloadManager {
                                 DownloadsUriProvider.getInstance()
                         )
                 ),
+                new DownloadManagerJobCreator(),
                 false
         );
     }
@@ -462,6 +464,7 @@ public class DownloadManager {
                                 DownloadsUriProvider.getInstance()
                         )
                 ),
+                new DownloadManagerJobCreator(),
                 verboseLogging
         );
     }
@@ -487,6 +490,7 @@ public class DownloadManager {
                                 DownloadsUriProvider.getInstance()
                         )
                 ),
+                new DownloadManagerJobCreator(),
                 false
         );
     }
@@ -496,12 +500,14 @@ public class DownloadManager {
                     DownloadsUriProvider downloadsUriProvider,
                     SystemFacade systemFacade,
                     BatchPauseResumeController batchPauseResumeController,
+                    DownloadManagerJobCreator jobCreator,
                     boolean verboseLogging) {
         this.contentResolver = contentResolver;
         this.downloadsUriProvider = downloadsUriProvider;
         this.baseUri = downloadsUriProvider.getContentUri();
         this.systemFacade = systemFacade;
         this.batchPauseResumeController = batchPauseResumeController;
+        JobManager.create(context).addJobCreator(jobCreator);
         GlobalState.setContext(context);
         GlobalState.setVerboseLogging(verboseLogging);
     }
