@@ -71,7 +71,7 @@ class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHolder> {
 
             statusText.setText(download.getStatus().name());
             filesText.setText(getFilePercentages(files));
-            idText.setText("Id: " + download.getId().asString());
+            idText.setText("Download ID: " + download.getId().asString());
 
             String downloadedSize = Formatter.formatShortFileSize(itemView.getContext(), download.getCurrentSize());
             progressText.setText(downloadedSize + " (" + download.getPercentage() + "%)");
