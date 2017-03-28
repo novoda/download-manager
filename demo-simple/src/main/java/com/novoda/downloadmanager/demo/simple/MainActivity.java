@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String PENGUINS_IMAGE_URL = "http://i.imgur.com/Y7pMO5Kb.jpg";
 
     private final DeleteAllDownloadsAction deleteAllDownloadsAction = new DeleteAllDownloadsAction();
+    private final StartDownloadsAction startDownloadAction = new StartDownloadsAction();
 
     private View emptyView;
     private DownloadAdapter adapter;
@@ -48,7 +49,12 @@ public class MainActivity extends AppCompatActivity {
         adapter = new DownloadAdapter(onDownloadClickedListener);
         recyclerView.setAdapter(adapter);
 
-        findViewById(R.id.main_download_button).setOnClickListener(downloadClickListener);
+        findViewById(R.id.main_download_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startDownloadAction.run();
+            }
+        });
     }
 
     @Override
@@ -64,31 +70,6 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private final View.OnClickListener downloadClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            DownloadRequest downloadRequest = createDownloadRequest();
-            downloaderHelper.submit(downloadRequest);
-        }
-    };
-
-    private DownloadRequest createDownloadRequest() {
-        DownloadRequest.File bigFile = createFileRequest(BIG_FILE_URL, "super_big.file");
-        DownloadRequest.File bigFile2 = createFileRequest(PENGUINS_IMAGE_URL, "penguins.important");
-        DownloadRequest.File bigFile3 = createFileRequest(SMALL_FILE_URL, "very.small");
-        return new DownloadRequest.Builder()
-                .with(downloaderHelper.createDownloadId())
-                .withFile(bigFile)
-                .withFile(bigFile2)
-                .withFile(bigFile3)
-                .build();
-    }
-
-    private DownloadRequest.File createFileRequest(String uri, String filename) {
-        File file = new File(getCacheDir(), filename);
-        return new DownloadRequest.File(uri, file.getAbsolutePath(), filename);
     }
 
     private final DownloadAdapter.OnDownloadClickedListener onDownloadClickedListener = new DownloadAdapter.OnDownloadClickedListener() {
@@ -137,6 +118,33 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private class StartDownloadsAction implements Runnable {
+
+        @Override
+        public void run() {
+            DownloadRequest downloadRequest = createDownloadRequest();
+            downloaderHelper.submit(downloadRequest);
+        }
+
+        private DownloadRequest createDownloadRequest() {
+            DownloadRequest.File bigFile = createFileRequest(BIG_FILE_URL, "super_big.file");
+            DownloadRequest.File bigFile2 = createFileRequest(PENGUINS_IMAGE_URL, "penguins.important");
+            DownloadRequest.File bigFile3 = createFileRequest(SMALL_FILE_URL, "very.small");
+            return new DownloadRequest.Builder()
+                    .with(downloaderHelper.createDownloadId())
+                    .withFile(bigFile)
+                    .withFile(bigFile2)
+                    .withFile(bigFile3)
+                    .build();
+        }
+
+        private DownloadRequest.File createFileRequest(String uri, String filename) {
+            File file = new File(getCacheDir(), filename);
+            return new DownloadRequest.File(uri, file.getAbsolutePath(), filename);
+        }
+
+    }
+
     private class DeleteAllDownloadsAction implements Runnable {
 
         private final List<DownloadId> downloadIds = new ArrayList<>();
@@ -154,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
                 downloaderHelper.delete(downloadId);
             }
         }
+
     }
 
 }
