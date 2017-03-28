@@ -1,60 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  android:orientation="vertical">
-
-  <TextView
-    android:id="@+id/download_status_text"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:textAppearance="?android:attr/textAppearanceLarge" />
-
-  <TextView
-    android:id="@+id/download_files_text"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:textAppearance="?android:attr/textAppearanceLarge" />
-
-  <TextView
-    android:id="@+id/download_id_text"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:textAppearance="?android:attr/textAppearanceLarge" />
-
-  <TextView
-    android:id="@+id/download_size_text"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:textAppearance="?android:attr/textAppearanceLarge" />
-
-  <TextView
-    android:id="@+id/download_percent_text"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:textAppearance="?android:attr/textAppearanceLarge" />
+  android:layout_height="wrap_content">
 
   <LinearLayout
+    android:id="@+id/info_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:layout_toLeftOf="@+id/actions_container"
+    android:orientation="vertical">
+
+    <TextView
+      android:id="@+id/download_id_text"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:textAppearance="?android:attr/textAppearanceLarge"
+      tools:text="download id" />
+
+    <TextView
+      android:id="@+id/download_percent_text"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:textAppearance="?android:attr/textAppearanceLarge"
+      tools:text="total percent downloaded" />
+
+    <TextView
+      android:id="@+id/download_size_text"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:textAppearance="?android:attr/textAppearanceLarge"
+      tools:text="total download size" />
+
+    <TextView
+      android:id="@+id/download_files_text"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      tools:text="download files text" />
+
+  </LinearLayout>
+
+  <LinearLayout
+    android:id="@id/actions_container"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentRight="true"
+    android:orientation="vertical">
+
+    <TextView
+      android:id="@+id/download_status_text"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      tools:text="Paused" />
 
     <ImageButton
       android:id="@+id/download_pause_resume"
-      android:layout_width="match_parent"
+      android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_weight="100"
+      android:layout_gravity="right"
       android:contentDescription="@string/button_running_content_description"
       android:src="@drawable/ic_pause_black_24dp" />
 
     <ImageButton
       android:id="@+id/download_delete"
-      android:layout_width="match_parent"
+      android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_weight="100"
+      android:layout_gravity="right"
       android:contentDescription="@string/button_delete_content_description"
       android:src="@drawable/ic_close_black_24dp" />
 
   </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>
