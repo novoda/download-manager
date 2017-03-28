@@ -1,9 +1,9 @@
 package com.novoda.downloadmanager.demo.simple;
 
 import android.support.v7.widget.RecyclerView;
+import android.text.format.Formatter;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -52,8 +52,7 @@ class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHolder> {
         private final TextView statusText;
         private final TextView filesText;
         private final TextView idText;
-        private final TextView sizeText;
-        private final TextView percentText;
+        private final TextView progressText;
         private final View deleteButton;
         private final ImageView pauseResumeButton;
 
@@ -62,8 +61,7 @@ class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHolder> {
             statusText = (TextView) itemView.findViewById(R.id.download_status_text);
             filesText = (TextView) itemView.findViewById(R.id.download_files_text);
             idText = (TextView) itemView.findViewById(R.id.download_id_text);
-            sizeText = (TextView) itemView.findViewById(R.id.download_size_text);
-            percentText = (TextView) itemView.findViewById(R.id.download_percent_text);
+            progressText = (TextView) itemView.findViewById(R.id.download_progress_text);
             deleteButton = itemView.findViewById(R.id.download_delete);
             pauseResumeButton = (ImageView) itemView.findViewById(R.id.download_pause_resume);
         }
@@ -74,8 +72,9 @@ class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHolder> {
             statusText.setText(download.getStatus().name());
             filesText.setText(getFilePercentages(files));
             idText.setText("Id: " + download.getId().asString());
-            sizeText.setText("bytes: " + download.getCurrentSize() + " / " + download.getTotalSize());
-            percentText.setText("Total: " + download.getPercentage() + "%");
+
+            String downloadedSize = Formatter.formatShortFileSize(itemView.getContext(), download.getCurrentSize());
+            progressText.setText(downloadedSize + " (" + download.getPercentage() + "%)");
 
             if (download.getStage() == DownloadStage.COMPLETED) {
                 pauseResumeButton.setVisibility(View.GONE);
