@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -11,9 +13,11 @@ import com.novoda.downloadmanager.Downloader;
 import com.novoda.downloadmanager.OnDownloadsUpdateListener;
 import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.domain.Download;
+import com.novoda.downloadmanager.domain.DownloadId;
 import com.novoda.downloadmanager.domain.DownloadRequest;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -21,6 +25,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String BIG_FILE_URL = "http://ipv4.download.thinkbroadband.com/100MB.zip";
     private static final String SMALL_FILE_URL = "http://ipv4.download.thinkbroadband.com/5MB.zip";
     private static final String PENGUINS_IMAGE_URL = "http://i.imgur.com/Y7pMO5Kb.jpg";
+
+    private final DeleteAllDownloadsAction deleteAllDownloadsAction = new DeleteAllDownloadsAction();
 
     private View emptyView;
     private DownloadAdapter adapter;
@@ -43,6 +49,21 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         findViewById(R.id.main_download_button).setOnClickListener(downloadClickListener);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.demo, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_delete_all) {
+            deleteAllDownloadsAction.run();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private final View.OnClickListener downloadClickListener = new View.OnClickListener() {
@@ -110,9 +131,29 @@ public class MainActivity extends AppCompatActivity {
     private final OnDownloadsUpdateListener onDownloadsUpdate = new OnDownloadsUpdateListener() {
         @Override
         public void onDownloadsUpdate(List<Download> downloads) {
+            deleteAllDownloadsAction.update(downloads);
             adapter.update(downloads);
             emptyView.setVisibility(downloads.isEmpty() ? View.VISIBLE : View.GONE);
         }
     };
+
+    private class DeleteAllDownloadsAction implements Runnable {
+
+        private final List<DownloadId> downloadIds = new ArrayList<>();
+
+        public void update(List<Download> downloads) {
+            this.downloadIds.clear();
+            for (Download download : downloads) {
+                downloadIds.add(download.getId());
+            }
+        }
+
+        @Override
+        public void run() {
+            for (DownloadId downloadId : downloadIds) {
+                downloaderHelper.delete(downloadId);
+            }
+        }
+    }
 
 }
