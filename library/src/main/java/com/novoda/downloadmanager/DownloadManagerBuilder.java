@@ -19,8 +19,6 @@ import com.novoda.downloadmanager.lib.logger.LLog;
  */
 public class DownloadManagerBuilder {
 
-    private static final int ANDROID_N = 24;
-
     private final Context context;
 
     private boolean verboseLogging;
@@ -63,6 +61,6 @@ public class DownloadManagerBuilder {
     }
 
     private boolean deviceSupportsConnectivityChangesBroadcast() {
-        return Build.VERSION.SDK_INT < ANDROID_N;
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.N;
     }
 }
