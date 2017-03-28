@@ -16,20 +16,20 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:textAppearance="?android:attr/textAppearanceLarge"
-      tools:text="download id" />
+      tools:text="Download ID: 3" />
 
     <TextView
       android:id="@+id/download_progress_text"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:textAppearance="?android:attr/textAppearanceLarge"
-      tools:text="total download size" />
+      tools:text="5.9 MB (5%)" />
 
     <TextView
       android:id="@+id/download_files_text"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      tools:text="download files text" />
+      tools:text="super_big.file: 5%\npenguins.important: 0%\nvery.small: 0%" />
 
   </LinearLayout>
 
