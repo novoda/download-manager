@@ -48,13 +48,6 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new DownloadAdapter(onDownloadClickedListener);
         recyclerView.setAdapter(adapter);
-
-        findViewById(R.id.main_download_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startDownloadAction.run();
-            }
-        });
     }
 
     @Override
@@ -65,11 +58,16 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menu_delete_all) {
-            deleteAllDownloadsAction.run();
-            return true;
+        switch (item.getItemId()) {
+            case R.id.menu_start_downloads:
+                startDownloadAction.run();
+                return true;
+            case R.id.menu_delete_all:
+                deleteAllDownloadsAction.run();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     private final DownloadAdapter.OnDownloadClickedListener onDownloadClickedListener = new DownloadAdapter.OnDownloadClickedListener() {
