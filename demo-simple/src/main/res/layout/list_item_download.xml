@@ -39,18 +39,21 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
-    <Button
+    <ImageButton
       android:id="@+id/download_pause_resume"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_weight="100"/>
+      android:layout_weight="100"
+      android:contentDescription="@string/button_running_content_description"
+      android:src="@drawable/ic_pause_black_24dp" />
 
-    <Button
+    <ImageButton
       android:id="@+id/download_delete"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_weight="100"
-      android:text="Delete" />
+      android:contentDescription="@string/button_delete_content_description"
+      android:src="@drawable/ic_close_black_24dp" />
 
   </LinearLayout>
 

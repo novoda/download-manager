@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.novoda.downloadmanager.demo.R;
@@ -54,7 +55,7 @@ class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHolder> {
         private final TextView sizeText;
         private final TextView percentText;
         private final View deleteButton;
-        private final Button pauseResumeButton;
+        private final ImageView pauseResumeButton;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -64,7 +65,7 @@ class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHolder> {
             sizeText = (TextView) itemView.findViewById(R.id.download_size_text);
             percentText = (TextView) itemView.findViewById(R.id.download_percent_text);
             deleteButton = itemView.findViewById(R.id.download_delete);
-            pauseResumeButton = (Button) itemView.findViewById(R.id.download_pause_resume);
+            pauseResumeButton = (ImageView) itemView.findViewById(R.id.download_pause_resume);
         }
 
         public void bind(final Download download, final OnDownloadClickedListener downloadClickedListener) {
@@ -82,11 +83,13 @@ class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHolder> {
                 pauseResumeButton.setVisibility(View.VISIBLE);
 
                 if (download.getStage() == DownloadStage.RUNNING) {
-                    pauseResumeButton.setText("Pause");
+                    pauseResumeButton.setImageResource(R.drawable.ic_pause_black_24dp);
+                    pauseResumeButton.setContentDescription(pauseResumeButton.getResources().getString(R.string.button_running_content_description));
                 }
 
                 if (download.getStage() == DownloadStage.PAUSED) {
-                    pauseResumeButton.setText("Resume");
+                    pauseResumeButton.setImageResource(R.drawable.ic_play_arrow_black_24dp);
+                    pauseResumeButton.setContentDescription(pauseResumeButton.getResources().getString(R.string.button_paused_content_description));
                 }
 
                 pauseResumeButton.setOnClickListener(new View.OnClickListener() {
