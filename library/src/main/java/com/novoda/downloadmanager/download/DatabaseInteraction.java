@@ -138,7 +138,7 @@ class DatabaseInteraction {
     public void updateFileSize(DownloadFile file, long totalBytes) {
         ContentValues values = new ContentValues(1);
         DB.File.setFileTotalSize((int) totalBytes, values);
-        contentResolver.update(Provider.FILE, values, DB.Columns.File.FileUri + "=?", new String[]{file.getUri()});
+        contentResolver.update(Provider.FILE, values, DB.Columns.File.FileIdentifier + "=?", new String[]{file.getFileIdentifier()});
     }
 
     public void updateStatus(DownloadId downloadId, DownloadStage stage) {
@@ -150,14 +150,14 @@ class DatabaseInteraction {
     public void updateFileProgress(DownloadFile file, long bytesWritten) {
         ContentValues values = new ContentValues(1);
         DB.File.setFileCurrentSize((int) bytesWritten, values);
-        contentResolver.update(Provider.FILE, values, DB.Columns.File.FileUri + "=?", new String[]{file.getUri()});
+        contentResolver.update(Provider.FILE, values, DB.Columns.File.FileIdentifier + "=?", new String[]{file.getFileIdentifier()});
     }
 
     public void updateFile(DownloadFile file, DownloadFile.FileStatus status, long currentSize) {
         ContentValues values = new ContentValues(2);
         DB.File.setFileCurrentSize((int) currentSize, values);
         DB.File.setFileStatus(status.name(), values);
-        contentResolver.update(Provider.FILE, values, DB.Columns.File.FileUri + "=?", new String[]{file.getUri()});
+        contentResolver.update(Provider.FILE, values, DB.Columns.File.FileIdentifier + "=?", new String[]{file.getFileIdentifier()});
     }
 
     public Download getDownload(DownloadId id) {
