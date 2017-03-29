@@ -19,6 +19,7 @@ import com.novoda.downloadmanager.domain.DownloadRequest;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -125,20 +126,17 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private DownloadRequest createDownloadRequest() {
-            DownloadRequest.File bigFile = createFileRequest(BIG_FILE_URL, "super_big.file");
-            DownloadRequest.File bigFile2 = createFileRequest(PENGUINS_IMAGE_URL, "penguins.important");
-            DownloadRequest.File bigFile3 = createFileRequest(SMALL_FILE_URL, "very.small");
             return new DownloadRequest.Builder()
                     .with(downloaderHelper.createDownloadId())
-                    .withFile(bigFile)
-                    .withFile(bigFile2)
-                    .withFile(bigFile3)
+                    .withFile(createFileRequest(PENGUINS_IMAGE_URL, "penguins.important"))
+                    .withFile(createFileRequest(SMALL_FILE_URL, "very.small"))
+                    .withFile(createFileRequest(BIG_FILE_URL, "super_big.file"))
                     .build();
         }
 
         private DownloadRequest.File createFileRequest(String uri, String filename) {
             File file = new File(getCacheDir(), filename);
-            return new DownloadRequest.File(uri, file.getAbsolutePath(), filename);
+            return new DownloadRequest.File(uri, file.getAbsolutePath(), UUID.randomUUID().toString());
         }
 
     }
