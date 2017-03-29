@@ -53,7 +53,7 @@ class DownloadUpdater {
 
     private boolean triggerDownload(List<Download> allDownloads) {
         for (Download download : allDownloads) {
-            Log.e("!!!", "trigger download? : " + download.getId().asString());
+            Log.e("!!!", "trigger download? : " + download.getId().asString() + ", stage: " + download.getStage());
 
             if (doesNotNeedToBeDownloaded(download)) {
                 Log.e("!!!", "skipping : " + download.getId().asString());

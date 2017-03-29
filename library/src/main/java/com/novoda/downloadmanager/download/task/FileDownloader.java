@@ -57,6 +57,7 @@ class FileDownloader {
         } finally {
             syncDatabase(file, downloadedFile.length());
         }
+        Log.e("!!!", "finished downloading file : " + file.getLocalUri() + " : " + (downloadedFile.exists() ? downloadedFile.length() : "0"));
     }
 
     private Request.Builder createRequest(DownloadFile file, long fileSize) {

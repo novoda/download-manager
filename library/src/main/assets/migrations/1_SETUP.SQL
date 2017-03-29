@@ -31,7 +31,7 @@ CREATE VIEW IF NOT EXISTS "downloads_with_size" AS
                                     download_identifier,
                                     SUM(file.file_current_size) AS current_size,
                                     SUM(file.file_total_size) AS total_size
-                                    FROM
-                                        download
-                                        LEFT OUTER JOIN file ON file.file_download_id = download.download_id
-                                    GROUP BY download_id;
+                                FROM
+                                    download
+                                    LEFT OUTER JOIN file ON file.file_download_id = download.download_id
+                                GROUP BY download_id;

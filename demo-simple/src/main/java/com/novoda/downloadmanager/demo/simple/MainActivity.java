@@ -1,9 +1,11 @@
 package com.novoda.downloadmanager.demo.simple;
 
+import android.content.ContextWrapper;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -128,15 +130,17 @@ public class MainActivity extends AppCompatActivity {
         private DownloadRequest createDownloadRequest() {
             return new DownloadRequest.Builder()
                     .with(downloaderHelper.createDownloadId())
-                    .withFile(createFileRequest(PENGUINS_IMAGE_URL, "penguins.important"))
+//                    .withFile(createFileRequest(PENGUINS_IMAGE_URL, "penguins.important"))
                     .withFile(createFileRequest(SMALL_FILE_URL, "very.small"))
-                    .withFile(createFileRequest(BIG_FILE_URL, "super_big.file"))
+//                    .withFile(createFileRequest(BIG_FILE_URL, "super_big.file"))
                     .build();
         }
 
         private DownloadRequest.File createFileRequest(String uri, String filename) {
-            File file = new File(getCacheDir(), filename);
-            return new DownloadRequest.File(uri, file.getAbsolutePath(), UUID.randomUUID().toString());
+            String identifier = UUID.randomUUID().toString();
+            File file = new File(getDataDir(), filename + "_" + identifier.substring(0, 5));
+            Log.e("!!!", "createRequest file : " + identifier);
+            return new DownloadRequest.File(uri, file.getAbsolutePath(), identifier);
         }
 
     }

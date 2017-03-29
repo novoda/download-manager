@@ -3,6 +3,8 @@ package com.novoda.downloadmanager.download;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
+import android.util.Log;
 
 import com.novoda.downloadmanager.Provider;
 import com.novoda.downloadmanager.demo.simple.DB;
@@ -60,6 +62,8 @@ class DatabaseInteraction {
     public List<Download> getAllDownloads() {
         List<Download> downloads = new ArrayList<>();
         Cursor cursor = contentResolver.query(Provider.DOWNLOAD_WITH_SIZE, null, null, null, null);
+        Log.e("!!!", "getAllDownloads: DOWNLOAD_WITH_SIZE");
+//        DatabaseUtils.dumpCursor(cursor);
         try {
             if (cursor.moveToFirst()) {
                 do {
@@ -79,13 +83,21 @@ class DatabaseInteraction {
     private Download getDownload(Cursor cursor) {
         DownloadId id = new DownloadId(DB.Download.getDownloadId(cursor));
 
-        long currentSize = Long.valueOf(cursor.getString(cursor.getColumnIndex(DB.Columns.DownloadsWithSize.CurrentSize)));
-        long totalSize = Long.valueOf(cursor.getString(cursor.getColumnIndex(DB.Columns.DownloadsWithSize.TotalSize)));
+//        _dumpFileTable();
+
+        long currentSize = cursor.getLong(cursor.getColumnIndex(DB.Columns.DownloadsWithSize.CurrentSize));
+        long totalSize = cursor.getLong(cursor.getColumnIndex(DB.Columns.DownloadsWithSize.TotalSize));
         String identifier = cursor.getString(cursor.getColumnIndex(DB.Columns.DownloadsWithSize.DownloadIdentifier));
         DownloadStage downloadStage = DownloadStage.valueOf(DB.Download.getDownloadStage(cursor));
         DownloadStatus downloadStatus = DownloadStatus.from(downloadStage);
         List<DownloadFile> files = getFilesForId(id);
         return new Download(id, currentSize, totalSize, downloadStage, downloadStatus, files, new ExternalId(identifier));
+    }
+
+    private void _dumpFileTable() {
+        Cursor filesCursor = contentResolver.query(Provider.FILE, null, null, null, null);
+        Log.e("!!!", "getDownload: FILE");
+        DatabaseUtils.dumpCursor(filesCursor);
     }
 
     private List<DownloadFile> getFilesForId(DownloadId id) {
@@ -148,12 +160,18 @@ class DatabaseInteraction {
     }
 
     public void updateFileProgress(DownloadFile file, long bytesWritten) {
+        if (file.totalSize() < bytesWritten) {
+            throw new IllegalStateException();
+        }
         ContentValues values = new ContentValues(1);
         DB.File.setFileCurrentSize((int) bytesWritten, values);
         contentResolver.update(Provider.FILE, values, DB.Columns.File.FileIdentifier + "=?", new String[]{file.getFileIdentifier()});
     }
 
     public void updateFile(DownloadFile file, DownloadFile.FileStatus status, long currentSize) {
+        if (file.totalSize() < currentSize) {
+            throw new IllegalStateException();
+        }
         ContentValues values = new ContentValues(2);
         DB.File.setFileCurrentSize((int) currentSize, values);
         DB.File.setFileStatus(status.name(), values);

@@ -32,11 +32,11 @@ public class DownloadTask implements Runnable {
 
         Download download = downloadHandler.getDownload(downloadId);
 
-        if (doesNotNeedToBeDownloaded(download)) {
-            Log.e("!!!", "Download status is ignored, bailing out");
-            // why did the thread start?! we're out of sync
-            return;
-        }
+//        if (doesNotNeedToBeDownloaded(download)) {
+//            Log.e("!!!", "Download status is ignored, bailing out");
+//             why did the thread start?! we're out of sync
+//            return;
+//        }
 
         downloadHandler.setDownloadRunning(downloadId);
 
