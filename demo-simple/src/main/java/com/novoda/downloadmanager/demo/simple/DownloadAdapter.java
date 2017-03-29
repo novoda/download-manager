@@ -117,7 +117,7 @@ class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHolder> {
             StringBuilder stringBuilder = new StringBuilder();
             for (DownloadFile file : files) {
                 stringBuilder
-                        .append(file.getFileIdentifier())
+                        .append(file.getFileIdentifier().substring(0, 7))
                         .append(": ")
                         .append(file.getPercentage())
                         .append("%")
