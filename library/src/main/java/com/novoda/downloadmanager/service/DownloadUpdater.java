@@ -33,7 +33,7 @@ class DownloadUpdater {
         Log.e("!!!", "update triggered");
 
         List<Download> allDownloads = downloadHandler.getAllDownloads();
-        updateTotalBytesFor(allDownloads);
+        updateFileSizeForFilesWithUnknownSize(allDownloads);
 
         boolean downloadInProgress = hasActiveDownload(allDownloads); // if any startDownload is in the SUBMITTED (not RUNNING, but due to) or RUNNING state
         Log.e("!!!", "At least one startDownload in SUBMITTED/RUNNING state: " + downloadInProgress);
@@ -79,7 +79,7 @@ class DownloadUpdater {
         return false;
     }
 
-    private void updateTotalBytesFor(List<Download> allDownloads) {
+    private void updateFileSizeForFilesWithUnknownSize(List<Download> allDownloads) {
         for (Download download : allDownloads) {
             List<DownloadFile> files = download.getFiles();
             for (DownloadFile file : files) {
