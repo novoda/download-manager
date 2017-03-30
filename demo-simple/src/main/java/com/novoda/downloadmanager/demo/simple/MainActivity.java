@@ -130,17 +130,17 @@ public class MainActivity extends AppCompatActivity {
         private DownloadRequest createDownloadRequest() {
             return new DownloadRequest.Builder()
                     .with(downloaderHelper.createDownloadId())
-//                    .withFile(createFileRequest(PENGUINS_IMAGE_URL, "penguins.important"))
-                    .withFile(createFileRequest(SMALL_FILE_URL, "very.small"))
-//                    .withFile(createFileRequest(BIG_FILE_URL, "super_big.file"))
+                    .withFile(createFileRequest(SMALL_FILE_URL, "very.small_" + UUID.randomUUID().toString()))
                     .build();
         }
 
         private DownloadRequest.File createFileRequest(String uri, String filename) {
-            String identifier = UUID.randomUUID().toString();
-            File file = new File(getDataDir(), filename + "_" + identifier.substring(0, 5));
-            Log.e("!!!", "createRequest file : " + identifier);
-            return new DownloadRequest.File(uri, file.getAbsolutePath(), identifier);
+            File file = new File(getCacheDir(), filename);
+            Log.e("!!!", "createRequest file : " + filename);
+            return new DownloadRequest.File.Builder()
+                    .with(uri)
+                    .withLocalUri(file.getAbsolutePath())
+                    .build();
         }
 
     }

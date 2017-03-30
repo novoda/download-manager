@@ -111,8 +111,7 @@ class DatabaseInteraction {
             int totalSize = DB.File.getFileTotalSize(cursor);
             DownloadFile.FileStatus fileStatus = DownloadFile.FileStatus.valueOf(DB.File.getFileStatus(cursor));
             String localUri = DB.File.getFileLocalUri(cursor);
-            String fileIdentifier = DB.File.getFileIdentifier(cursor);
-            files.add(new DownloadFile(upstreamUri, currentSize, totalSize, localUri, fileStatus, fileIdentifier));
+            files.add(new DownloadFile(upstreamUri, currentSize, totalSize, localUri, fileStatus));
         } while (cursor.moveToNext());
 
         cursor.close();
@@ -127,8 +126,20 @@ class DatabaseInteraction {
         DB.Download.setDownloadIdentifier(downloadRequest.getExternalId().asString(), values);
         contentResolver.insert(Provider.DOWNLOAD, values);
 
+        ensureLocalFileUriIsUniqueForAllFilesIn(downloadRequest);
+
         ContentValues[] fileValues = createFileValues(downloadRequest.getFiles(), downloadId);
         contentResolver.bulkInsert(Provider.FILE, fileValues);
+    }
+
+    private void ensureLocalFileUriIsUniqueForAllFilesIn(DownloadRequest downloadRequest) {
+        for (DownloadRequest.File file : downloadRequest.getFiles()) {
+            String localUri = file.getLocalUri();
+            Cursor query = contentResolver.query(Provider.FILE, null, DB.Columns.File.FileLocalUri + "=?", new String[]{localUri}, null);
+            if (query.getCount() > 0) {
+                throw new IllegalArgumentException("downloadRequest includes already downloaded file(s): " + localUri);
+            }
+        }
     }
 
     private ContentValues[] createFileValues(List<DownloadRequest.File> files, long downloadId) {
@@ -137,7 +148,6 @@ class DatabaseInteraction {
             DownloadRequest.File file = files.get(index);
             ContentValues fileValues = new ContentValues();
             DB.File.setFileDownloadId((int) downloadId, fileValues);
-            DB.File.setFileIdentifier(file.getIdentifier(), fileValues);
             DB.File.setFileUri(file.getUri(), fileValues);
             DB.File.setFileLocalUri(file.getLocalUri(), fileValues);
             DB.File.setFileStatus(DownloadFile.FileStatus.INCOMPLETE.name(), fileValues);
@@ -150,7 +160,7 @@ class DatabaseInteraction {
     public void updateFileSize(DownloadFile file, long totalBytes) {
         ContentValues values = new ContentValues(1);
         DB.File.setFileTotalSize((int) totalBytes, values);
-        contentResolver.update(Provider.FILE, values, DB.Columns.File.FileIdentifier + "=?", new String[]{file.getFileIdentifier()});
+        contentResolver.update(Provider.FILE, values, DB.Columns.File.FileLocalUri + "=?", new String[]{file.getLocalUri()});
     }
 
     public void updateStatus(DownloadId downloadId, DownloadStage stage) {
@@ -165,7 +175,7 @@ class DatabaseInteraction {
         }
         ContentValues values = new ContentValues(1);
         DB.File.setFileCurrentSize((int) bytesWritten, values);
-        contentResolver.update(Provider.FILE, values, DB.Columns.File.FileIdentifier + "=?", new String[]{file.getFileIdentifier()});
+        contentResolver.update(Provider.FILE, values, DB.Columns.File.FileLocalUri + "=?", new String[]{file.getLocalUri()});
     }
 
     public void updateFile(DownloadFile file, DownloadFile.FileStatus status, long currentSize) {
@@ -175,7 +185,7 @@ class DatabaseInteraction {
         ContentValues values = new ContentValues(2);
         DB.File.setFileCurrentSize((int) currentSize, values);
         DB.File.setFileStatus(status.name(), values);
-        contentResolver.update(Provider.FILE, values, DB.Columns.File.FileIdentifier + "=?", new String[]{file.getFileIdentifier()});
+        contentResolver.update(Provider.FILE, values, DB.Columns.File.FileLocalUri + "=?", new String[]{file.getLocalUri()});
     }
 
     public Download getDownload(DownloadId id) {
@@ -208,7 +218,6 @@ class DatabaseInteraction {
             File file = new File(requestFile.getUri());
             ContentValues fileValues = new ContentValues();
             DB.File.setFileDownloadId((int) downloadId, fileValues);
-            DB.File.setFileIdentifier(requestFile.getIdentifier(), fileValues);
             DB.File.setFileUri(requestFile.getUri(), fileValues);
             DB.File.setFileLocalUri(requestFile.getLocalUri(), fileValues);
             DB.File.setFileStatus(DownloadFile.FileStatus.COMPLETE.name(), fileValues);

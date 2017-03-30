@@ -20,8 +20,7 @@ CREATE TABLE IF NOT EXISTS 'file' (
                                 file_download_id INTEGER NOT NULL,
                                 file_uri TEXT NOT_NULL,
                                 file_local_uri TEXT NOT_NULL,
-                                file_identifier TEXT NOT NULL,
-                                UNIQUE (file_uri, file_identifier) ON CONFLICT REPLACE
+                                UNIQUE (file_local_uri) ON CONFLICT ABORT
 );
 
 CREATE VIEW IF NOT EXISTS "downloads_with_size" AS
