@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         emptyView = findViewById(R.id.main_no_downloads_view);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.main_downloads_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new DownloadAdapter(onDownloadClickedListener);
+        adapter = new DownloadAdapter(onDownloadItemActionsListener);
         recyclerView.setAdapter(adapter);
     }
 
@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private final DownloadAdapter.OnDownloadClickedListener onDownloadClickedListener = new DownloadAdapter.OnDownloadClickedListener() {
+    private final DownloadAdapter.OnDownloadClickedListener onDownloadItemActionsListener = new DownloadAdapter.OnDownloadClickedListener() {
 
         @Override
         public void onDeleteDownload(Download download) {
