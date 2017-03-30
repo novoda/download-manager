@@ -115,9 +115,10 @@ class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHolder> {
 
         private String getFilePercentages(List<DownloadFile> files) {
             StringBuilder stringBuilder = new StringBuilder();
-            for (DownloadFile file : files) {
+            for (int i = 0; i < files.size(); i++) {
+                DownloadFile file = files.get(i);
                 stringBuilder
-                        .append(file.getFileIdentifier().substring(0, 7))
+                        .append("File #" + (i + 1) + " ..." + file.getLocalUri().substring(file.getLocalUri().length() - 10, file.getLocalUri().length() - 1))
                         .append(": ")
                         .append(file.getPercentage())
                         .append("%")
