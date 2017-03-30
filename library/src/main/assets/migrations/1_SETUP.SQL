@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS 'request' (
                                 _id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                                 request_timestamp TEXT NOT NULL,
-                                UNIQUE (request_timestamp) ON CONFLICT REPLACE
+                                UNIQUE (request_timestamp) ON CONFLICT REPLACE --TODO: should abort this - else risk two downloads with same ID in DatabaseInteractions
 );
 
 CREATE TABLE IF NOT EXISTS 'download' (
