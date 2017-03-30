@@ -33,14 +33,13 @@ class DownloadUpdater {
         Log.e("!!!", "update triggered");
 
         List<Download> allDownloads = downloadHandler.getAllDownloads();
-
         updateTotalBytesFor(allDownloads);
 
-        boolean isActive = hasActiveDownload(allDownloads); // if any startDownload is in the SUBMITTED (not RUNNING, but due to) or RUNNING state
-        Log.e("!!!", "At least one startDownload in SUBMITTED/RUNNING state: " + isActive);
+        boolean downloadInProgress = hasActiveDownload(allDownloads); // if any startDownload is in the SUBMITTED (not RUNNING, but due to) or RUNNING state
+        Log.e("!!!", "At least one startDownload in SUBMITTED/RUNNING state: " + downloadInProgress);
 
-        if (!isActive) {
-            isActive = startNextQueuedDownload(allDownloads);
+        if (!downloadInProgress) {
+            downloadInProgress = startNextQueuedDownload(allDownloads);
         }
 
         downloadHandler.deleteMarkedBatchesFor(allDownloads);
@@ -48,7 +47,16 @@ class DownloadUpdater {
 
         // todo update notification
 
-        return isActive;
+        return downloadInProgress;
+    }
+
+    private boolean hasActiveDownload(List<Download> allDownloads) {
+        for (Download download : allDownloads) {
+            if (download.getStage().isActive()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean startNextQueuedDownload(List<Download> allDownloads) {
@@ -67,15 +75,6 @@ class DownloadUpdater {
                 return true;
             }
             // TODO: send broadcast or fire callback to alert that a startDownload was denied
-        }
-        return false;
-    }
-
-    private boolean hasActiveDownload(List<Download> allDownloads) {
-        for (Download download : allDownloads) {
-            if (download.getStage().isActive()) {
-                return true;
-            }
         }
         return false;
     }
