@@ -88,13 +88,17 @@ public class DownloadHandler {
     public void deleteMarkedBatchesFor(List<Download> allDownloads) {
         for (Download download : allDownloads) {
             if (download.getStage() == DownloadStage.MARKED_FOR_DELETION) {
-                for (DownloadFile downloadFile : download.getFiles()) {
-                    new File(downloadFile.getLocalUri()).delete();
-                }
-                databaseInteraction.delete(download);
+                deleteFilesFor(download);
             }
         }
 
+    }
+
+    private void deleteFilesFor(Download download) {
+        for (DownloadFile downloadFile : download.getFiles()) {
+            new File(downloadFile.getLocalUri()).delete();
+        }
+        databaseInteraction.delete(download);
     }
 
 }
