@@ -40,10 +40,6 @@ public class DownloadTask implements Runnable {
         Log.e("!!!", "thread finished : " + download.getId());
     }
 
-    private boolean doesNotNeedToBeDownloaded(Download download) {
-        return download.getStage().doesNotNeedToBeDownloaded();
-    }
-
     private void download(Download download) {
         try {
             FileDownloader fileDownloader = new FileDownloader(httpClient, downloadHandler, pausedProvider);

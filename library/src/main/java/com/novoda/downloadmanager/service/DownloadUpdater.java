@@ -8,6 +8,7 @@ import com.novoda.downloadmanager.client.DownloadCheck;
 import com.novoda.downloadmanager.domain.Download;
 import com.novoda.downloadmanager.domain.DownloadFile;
 import com.novoda.downloadmanager.domain.DownloadId;
+import com.novoda.downloadmanager.domain.DownloadStage;
 import com.novoda.downloadmanager.download.DownloadHandler;
 import com.novoda.downloadmanager.download.task.DownloadTask;
 
@@ -35,12 +36,11 @@ class DownloadUpdater {
 
         updateTotalBytesFor(allDownloads);
 
-        boolean isActive = hasActiveDownload(allDownloads);
-
-        Log.e("!!!", "are we active? " + isActive);
+        boolean isActive = hasActiveDownload(allDownloads); // if any startDownload is in the SUBMITTED (not RUNNING, but due to) or RUNNING state
+        Log.e("!!!", "At least one startDownload in SUBMITTED/RUNNING state: " + isActive);
 
         if (!isActive) {
-            isActive = triggerDownload(allDownloads);
+            isActive = startNextQueuedDownload(allDownloads);
         }
 
         downloadHandler.deleteMarkedBatchesFor(allDownloads);
@@ -51,30 +51,24 @@ class DownloadUpdater {
         return isActive;
     }
 
-    private boolean triggerDownload(List<Download> allDownloads) {
+    private boolean startNextQueuedDownload(List<Download> allDownloads) {
         for (Download download : allDownloads) {
-            Log.e("!!!", "trigger download? : " + download.getId().asString() + ", stage: " + download.getStage());
+            Log.v("!!!", "trigger startDownload? : " + download.getId().asString() + ", stage: " + download.getStage());
 
-            if (doesNotNeedToBeDownloaded(download)) {
-                Log.e("!!!", "skipping : " + download.getId().asString());
+            if (download.getStage() != DownloadStage.QUEUED) {
+                Log.v("!!!", "skipping : " + download.getId().asString());
                 continue;
             }
 
             ClientCheckResult clientCheckResult = downloadCheck.isAllowedToDownload(download);
             if (clientCheckResult.isAllowed()) {
-                Log.e("!!!", "downloading : " + download.getId().asString());
-                download(download.getId());
+                Log.v("!!!", "downloading : " + download.getId().asString());
+                startDownload(download.getId());
                 return true;
-            } else {
-                // todo broadcast/callback download denied
-                return false;
             }
+            // TODO: send broadcast or fire callback to alert that a startDownload was denied
         }
         return false;
-    }
-
-    private boolean doesNotNeedToBeDownloaded(Download download) {
-        return download.getStage().doesNotNeedToBeDownloaded();
     }
 
     private boolean hasActiveDownload(List<Download> allDownloads) {
@@ -101,7 +95,7 @@ class DownloadUpdater {
         return file.totalSize() == -1;
     }
 
-    private void download(final DownloadId downloadId) {
+    private void startDownload(final DownloadId downloadId) {
         downloadHandler.setDownloadSubmitted(downloadId);
         executor.submit(new DownloadTask(downloadId, downloadHandler, pauser));
     }
