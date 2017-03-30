@@ -35,6 +35,8 @@ public class DownloadHandler {
         return databaseInteraction.getAllDownloads();
     }
 
+    // TODO: maybe we can pass the download's total size (this method only called from outside, we already pass values like currentSize in other methods),
+    // then we don't need contentLengthFetcher in here
     public void updateFileSize(DownloadFile file) {
         long totalBytes = contentLengthFetcher.fetchContentLengthFor(file);
         databaseInteraction.updateFileSize(file, totalBytes);
