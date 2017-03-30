@@ -39,8 +39,8 @@ public class Downloader {
         public Downloader build(Context context) {
             Context applicationContext = context.getApplicationContext();
             ContentResolver contentResolver = applicationContext.getContentResolver();
-            ;
             DownloadHandler downloadHandler = DownloadHandlerCreator.create(contentResolver);
+
             Pauser pauser = new Pauser(LocalBroadcastManager.getInstance(context));
             Listeners listeners = Listeners.newInstance();
             Watcher watcher = Watcher.newInstance(context);
