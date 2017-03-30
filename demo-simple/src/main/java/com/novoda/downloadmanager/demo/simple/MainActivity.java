@@ -1,6 +1,5 @@
 package com.novoda.downloadmanager.demo.simple;
 
-import android.content.ContextWrapper;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
