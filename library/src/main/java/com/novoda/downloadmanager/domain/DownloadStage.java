@@ -7,9 +7,6 @@ public enum DownloadStage {
     PAUSED,
     COMPLETED,
     FAILED,
-    MARKED_FOR_DELETION;
+    MARKED_FOR_DELETION
 
-    public boolean isActive() {
-        return this == DownloadStage.SUBMITTED || this == DownloadStage.RUNNING;
-    }
 }

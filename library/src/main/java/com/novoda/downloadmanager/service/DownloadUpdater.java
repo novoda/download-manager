@@ -65,11 +65,15 @@ class DownloadUpdater {
 
     private boolean hasActiveDownload(List<Download> allDownloads) {
         for (Download download : allDownloads) {
-            if (download.getStage().isActive()) {
+            if (isActive(download)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private boolean isActive(Download download) {
+        return download.getStage() == DownloadStage.SUBMITTED || download.getStage() == DownloadStage.RUNNING;
     }
 
     private boolean startNextQueuedDownload(List<Download> allDownloads) {
