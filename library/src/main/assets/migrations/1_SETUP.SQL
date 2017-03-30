@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS 'download' (
                                 download_stage TEXT NOT NULL,
                                 download_id INTEGER NOT NULL,
                                 download_identifier TEXT NOT NULL,
-                                UNIQUE (download_id) ON CONFLICT REPLACE
+                                UNIQUE (download_id) ON CONFLICT REPLACE --TODO: should abort this, not replace. The DatabaseInteractions class should not let such an operation occur
 );
 
 CREATE TABLE IF NOT EXISTS 'file' (
