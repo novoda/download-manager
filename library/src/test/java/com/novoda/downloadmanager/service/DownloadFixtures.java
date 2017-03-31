@@ -15,7 +15,7 @@ class DownloadFixtures {
     private DownloadId downloadId = new DownloadId(123456);
     private int currentSize = 100;
     private int totalSize = 200;
-    private DownloadStage downloadStage = DownloadStage.SUBMITTED;
+    private DownloadStage downloadStage = DownloadStage.RUNNING;
     private DownloadStatus downloadStatus = DownloadStatus.TRANSITIONING;
     private List<DownloadFile> downloadFiles = Collections.emptyList();
     private ExternalId externalId = new ExternalId("external_id");

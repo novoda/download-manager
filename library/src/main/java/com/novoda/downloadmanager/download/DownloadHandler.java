@@ -42,10 +42,6 @@ public class DownloadHandler {
         databaseInteraction.updateFileSize(file, totalBytes);
     }
 
-    public void setDownloadSubmitted(DownloadId downloadId) {
-        databaseInteraction.updateStatus(downloadId, DownloadStage.SUBMITTED);
-    }
-
     public void updateFileProgress(DownloadFile file, long bytesWritten) {
         databaseInteraction.updateFileProgress(file, bytesWritten);
     }

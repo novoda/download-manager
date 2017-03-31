@@ -12,12 +12,16 @@ import com.novoda.downloadmanager.client.DownloadCheck;
 import com.novoda.downloadmanager.client.GlobalClientCheck;
 import com.novoda.downloadmanager.service.Delegate;
 import com.novoda.downloadmanager.service.DelegateCreator;
+import com.novoda.downloadmanager.service.DownloadUpdater;
+import com.novoda.downloadmanager.service.SubmittedDownloadsTracker;
 
 public class Service extends android.app.Service {
 
     private final Binder binder = new ServiceBinder();
+    private final SubmittedDownloadsTracker tracker = new SubmittedDownloadsTracker();
 
     private Delegate delegate;
+    private DownloadUpdater downloadUpdater;
 
     private DownloadCheck downloadChecker;
     private GlobalClientCheck globalChecker;
@@ -39,7 +43,6 @@ public class Service extends android.app.Service {
         delegate = createDelegate(globalChecker, downloadChecker);
 
         delegate.start();
-
     }
 
     private Delegate createDelegate(GlobalClientCheck globalChecker, DownloadCheck downloadChecker) {
@@ -52,25 +55,25 @@ public class Service extends android.app.Service {
                 updateHandler,
                 this,
                 globalChecker,
-                downloadChecker
+                downloadChecker,
+                tracker
         );
     }
 
     @Override
     public void onDestroy() {
         delegate.shutDown();
+        Log.e(getClass().getSimpleName(), "Service Destroyed: " + hashCode());
         super.onDestroy();
     }
 
     class ServiceBinder extends Binder {
 
         void setDownloadChecker(DownloadCheck downloadChecker) {
-            Log.e("!!!", "setDownloadChecker");
             Service.this.downloadChecker = downloadChecker;
         }
 
         void setGlobalChecker(GlobalClientCheck globalChecker) {
-            Log.e("!!!", "setGlobalChecker");
             Service.this.globalChecker = globalChecker;
         }
 

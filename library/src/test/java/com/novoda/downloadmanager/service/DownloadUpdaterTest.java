@@ -65,7 +65,7 @@ public class DownloadUpdaterTest {
 
     @Before
     public void setUp() {
-        downloadUpdater = new DownloadUpdater(downloadHandler, executorService, pauser, downloadCheck);
+        downloadUpdater = new DownloadUpdater(downloadHandler, executorService, pauser, downloadCheck, tracker);
         Log.setShowLogs(true);
     }
 
@@ -95,16 +95,6 @@ public class DownloadUpdaterTest {
         InOrder inOrder = inOrder(downloadHandler);
         inOrder.verify(downloadHandler).updateFileSize(UNKNOWN_SIZE_DOWNLOAD_FILE);
         inOrder.verify(downloadHandler).updateFileSize(ANOTHER_UNKNOWN_SIZE_DOWNLOAD_FILE);
-    }
-
-    @Test
-    public void givenDownloads_withSubmittedDownload_whenUpdating_thenReturnsTrue() {
-        List<Download> downloads = givenDownloadsWith(DownloadStage.SUBMITTED);
-        given(downloadHandler.getAllDownloads()).willReturn(downloads);
-
-        boolean isActivelyDownloading = downloadUpdater.update();
-
-        assertThat(isActivelyDownloading).isTrue();
     }
 
     @Test

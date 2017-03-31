@@ -4,7 +4,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-class DownloadExecutorFactory {
+public class DownloadExecutorFactory {
 
     private static final int KEEP_ALIVE_TIME = 10;
 

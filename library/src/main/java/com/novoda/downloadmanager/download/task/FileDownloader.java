@@ -88,6 +88,7 @@ class FileDownloader {
         @Override
         public void chunkWritten(DownloadFile file) {
             if (pausedProvider.isPaused()) {
+                Log.e(FileDownloader.class.getSimpleName(), "pausedException");
                 throw new PausedFlowException();
             }
         }
