@@ -73,6 +73,10 @@ public class DownloadHandler {
         databaseInteraction.updateStatus(downloadId, DownloadStage.PAUSED);
     }
 
+    public void setDownloadSubmitted(DownloadId downloadId) {
+        databaseInteraction.updateStatus(downloadId, DownloadStage.SUBMITTED);
+    }
+
     public void resumeDownload(DownloadId downloadId) {
         databaseInteraction.updateStatus(downloadId, DownloadStage.QUEUED);
     }
@@ -96,5 +100,4 @@ public class DownloadHandler {
         }
         databaseInteraction.delete(download);
     }
-
 }

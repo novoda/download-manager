@@ -20,36 +20,30 @@ public class DownloadUpdater {
     private final ExecutorService executor;
     private final Pauser pauser;
     private final DownloadCheck downloadCheck;
-    private final SubmittedDownloadsTracker tracker;
 
     public DownloadUpdater(DownloadHandler downloadHandler,
                            ExecutorService executor,
                            Pauser pauser,
-                           DownloadCheck downloadCheck,
-                           SubmittedDownloadsTracker tracker) {
+                           DownloadCheck downloadCheck) {
         this.downloadHandler = downloadHandler;
         this.executor = executor;
         this.pauser = pauser;
         this.downloadCheck = downloadCheck;
-        this.tracker = tracker;
     }
 
     public boolean update() {
         List<Download> allDownloads = downloadHandler.getAllDownloads();
-        updateFileSizeForFilesWithUnknownSize(allDownloads);
-
-        boolean downloadInProgress = hasActiveDownload(allDownloads); // if any startDownload is in the SUBMITTED (not RUNNING, but due to) or RUNNING state
-
-        if (!downloadInProgress) {
-            downloadInProgress = startNextQueuedDownload(allDownloads);
-        }
 
         downloadHandler.deleteMarkedBatchesFor(allDownloads);
-//        updateUserVisibleNotification(downloadBatches);
+        updateFileSizeForFilesWithUnknownSize(allDownloads);
 
-        // todo update notification
+        boolean isCurrentlyDownloading = isCurrentlyDownloading(allDownloads);
 
-        return downloadInProgress;
+        if (!isCurrentlyDownloading) {
+            isCurrentlyDownloading = startNextQueuedDownload(allDownloads);
+        }
+
+        return isCurrentlyDownloading;
     }
 
     private void updateFileSizeForFilesWithUnknownSize(List<Download> allDownloads) {
@@ -67,7 +61,7 @@ public class DownloadUpdater {
         return file.totalSize() == -1;
     }
 
-    private boolean hasActiveDownload(List<Download> allDownloads) {
+    private boolean isCurrentlyDownloading(List<Download> allDownloads) {
         for (Download download : allDownloads) {
             if (isActive(download)) {
                 return true;
@@ -77,7 +71,7 @@ public class DownloadUpdater {
     }
 
     private boolean isActive(Download download) {
-        return tracker.contains(download.getId()) || download.getStage() == DownloadStage.RUNNING;
+        return download.getStage() == DownloadStage.SUBMITTED || download.getStage() == DownloadStage.RUNNING;
     }
 
     private boolean startNextQueuedDownload(List<Download> allDownloads) {
@@ -98,11 +92,7 @@ public class DownloadUpdater {
     }
 
     private void start(final Download download) {
-        if (tracker.contains(download.getId())) {
-            return;
-        }
-
-        tracker.addDownloadId(download.getId());
+        downloadHandler.setDownloadSubmitted(download.getId());
 
         executor.submit(new DownloadTask(download.getId(), downloadHandler, pauser));
         Log.e(getClass().getSimpleName(), "Submitting to executor: " + download.getId() + " stage: " + download.getStage() + " hash: " + hashCode());

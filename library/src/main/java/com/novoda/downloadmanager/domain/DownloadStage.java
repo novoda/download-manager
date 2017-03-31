@@ -6,6 +6,7 @@ public enum DownloadStage {
     PAUSED,
     COMPLETED,
     FAILED,
-    MARKED_FOR_DELETION
+    MARKED_FOR_DELETION,
+    SUBMITTED
 
 }

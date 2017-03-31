@@ -12,16 +12,12 @@ import com.novoda.downloadmanager.client.DownloadCheck;
 import com.novoda.downloadmanager.client.GlobalClientCheck;
 import com.novoda.downloadmanager.service.Delegate;
 import com.novoda.downloadmanager.service.DelegateCreator;
-import com.novoda.downloadmanager.service.DownloadUpdater;
-import com.novoda.downloadmanager.service.SubmittedDownloadsTracker;
 
 public class Service extends android.app.Service {
 
     private final Binder binder = new ServiceBinder();
-    private final SubmittedDownloadsTracker tracker = new SubmittedDownloadsTracker();
 
     private Delegate delegate;
-    private DownloadUpdater downloadUpdater;
 
     private DownloadCheck downloadChecker;
     private GlobalClientCheck globalChecker;
@@ -55,8 +51,7 @@ public class Service extends android.app.Service {
                 updateHandler,
                 this,
                 globalChecker,
-                downloadChecker,
-                tracker
+                downloadChecker
         );
     }
 

@@ -19,15 +19,14 @@ public class DelegateCreator {
                                   Handler updateHandler,
                                   Service service,
                                   GlobalClientCheck globalClientCheck,
-                                  DownloadCheck downloadCheck,
-                                  SubmittedDownloadsTracker tracker) {
+                                  DownloadCheck downloadCheck) {
         UpdateScheduler updateScheduler = new UpdateScheduler(updateThread, updateHandler);
 
         DownloadHandler downloadHandler = DownloadHandlerCreator.create(service.getContentResolver());
         Pauser pauser = new Pauser(LocalBroadcastManager.getInstance(service));
         DownloadExecutorFactory factory = new DownloadExecutorFactory();
         ExecutorService executor = factory.createExecutor();
-        DownloadUpdater downloadUpdater = new DownloadUpdater(downloadHandler, executor, pauser, downloadCheck, tracker);
+        DownloadUpdater downloadUpdater = new DownloadUpdater(downloadHandler, executor, pauser, downloadCheck);
 
         DownloadObserver downloadObserver = new DownloadObserver(updateHandler, service.getContentResolver());
         return new Delegate(downloadObserver, downloadUpdater, service, updateScheduler, globalClientCheck);

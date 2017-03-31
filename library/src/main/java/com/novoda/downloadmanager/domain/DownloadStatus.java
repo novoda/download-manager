@@ -11,6 +11,7 @@ public enum DownloadStatus {
     public static DownloadStatus from(DownloadStage stage) {
         switch (stage) {
             case QUEUED:
+            case SUBMITTED:
                 return QUEUED;
 
             case RUNNING:
