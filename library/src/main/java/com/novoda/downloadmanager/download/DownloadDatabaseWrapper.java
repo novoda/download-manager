@@ -80,13 +80,12 @@ public class DownloadDatabaseWrapper {
         databaseInteraction.updateStatus(downloadId, DownloadStage.MARKED_FOR_DELETION);
     }
 
-    public void deleteMarkedBatchesFor(List<Download> allDownloads) {
-        for (Download download : allDownloads) {
+    public void deleteAllDownloadsMarkedForDeletion() {
+        for (Download download : getAllDownloads()) {
             if (download.getStage() == DownloadStage.MARKED_FOR_DELETION) {
                 deleteFilesFor(download);
             }
         }
-
     }
 
     private void deleteFilesFor(Download download) {
@@ -94,5 +93,9 @@ public class DownloadDatabaseWrapper {
             new File(downloadFile.getLocalUri()).delete();
         }
         databaseInteraction.delete(download);
+    }
+
+    public void revertSubmittedDownloadsToQueuedDownloads() {
+        databaseInteraction.revertSubmittedDownloadsToQueuedDownloads();
     }
 }

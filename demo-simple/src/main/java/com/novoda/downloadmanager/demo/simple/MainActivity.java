@@ -130,8 +130,8 @@ public class MainActivity extends AppCompatActivity {
             return new DownloadRequest.Builder()
                     .with(downloaderHelper.createDownloadId())
                     .withFile(createFileRequest(SMALL_FILE_URL, "very.small_" + UUID.randomUUID().toString()))
-                    .withFile(createFileRequest(BIG_FILE_URL, "very.big_" + UUID.randomUUID().toString()))
-                    .withFile(createFileRequest(PENGUINS_IMAGE_URL, "very.penguin_" + UUID.randomUUID().toString()))
+//                    .withFile(createFileRequest(BIG_FILE_URL, "very.big_" + UUID.randomUUID().toString()))
+//                    .withFile(createFileRequest(PENGUINS_IMAGE_URL, "very.penguin_" + UUID.randomUUID().toString()))
                     .build();
         }
 

@@ -37,8 +37,8 @@ public class Service extends android.app.Service {
     private void start() {
         Log.e("!!!", "service on start");
         delegate = createDelegate(globalChecker, downloadChecker);
-
-        delegate.start();
+        delegate.revertSubmittedDownloadsToQueuedDownloads();
+        delegate.onServiceStart();
     }
 
     private Delegate createDelegate(GlobalClientCheck globalChecker, DownloadCheck downloadChecker) {

@@ -38,7 +38,7 @@ public class DownloadUpdater {
     public boolean update() {
         List<Download> allDownloads = downloadDatabaseWrapper.getAllDownloads();
 
-        downloadDatabaseWrapper.deleteMarkedBatchesFor(allDownloads);
+        downloadDatabaseWrapper.deleteAllDownloadsMarkedForDeletion();
         updateFileSizeForFilesWithUnknownSize(allDownloads);
 
         boolean isCurrentlyDownloading = isCurrentlyDownloading(allDownloads);

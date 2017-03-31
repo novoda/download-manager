@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.novoda.downloadmanager.client.ClientCheckResult;
 import com.novoda.downloadmanager.client.GlobalClientCheck;
+import com.novoda.downloadmanager.download.DownloadDatabaseWrapper;
 
 public class Delegate {
 
@@ -14,20 +15,23 @@ public class Delegate {
     private final Service service;
     private final UpdateScheduler updateScheduler;
     private final GlobalClientCheck globalClientCheck;
+    private final DownloadDatabaseWrapper downloadDatabaseWrapper;
 
     Delegate(DownloadObserver downloadObserver,
              DownloadUpdater downloadUpdater,
              Service service,
              UpdateScheduler updateScheduler,
-             GlobalClientCheck globalClientCheck) {
+             GlobalClientCheck globalClientCheck,
+             DownloadDatabaseWrapper downloadDatabaseWrapper) {
         this.downloadObserver = downloadObserver;
         this.downloadUpdater = downloadUpdater;
         this.service = service;
         this.updateScheduler = updateScheduler;
         this.globalClientCheck = globalClientCheck;
+        this.downloadDatabaseWrapper = downloadDatabaseWrapper;
     }
 
-    public void start() {
+    public void onServiceStart() {
         ClientCheckResult clientCheckResult = globalClientCheck.onGlobalCheck();
 
         if (clientCheckResult.isAllowed()) {
@@ -64,6 +68,10 @@ public class Delegate {
 
     private boolean update() {
         return downloadUpdater.update();
+    }
+
+    public void revertSubmittedDownloadsToQueuedDownloads() {
+        downloadDatabaseWrapper.revertSubmittedDownloadsToQueuedDownloads();
     }
 
     public void shutDown() {

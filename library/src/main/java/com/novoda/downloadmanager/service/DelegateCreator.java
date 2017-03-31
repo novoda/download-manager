@@ -32,7 +32,7 @@ public class DelegateCreator {
         DownloadUpdater downloadUpdater = new DownloadUpdater(downloadDatabaseWrapper, executor, pauser, downloadCheck, contentLengthFetcher);
 
         DownloadObserver downloadObserver = new DownloadObserver(updateHandler, service.getContentResolver());
-        return new Delegate(downloadObserver, downloadUpdater, service, updateScheduler, globalClientCheck);
+        return new Delegate(downloadObserver, downloadUpdater, service, updateScheduler, globalClientCheck, downloadDatabaseWrapper);
     }
 
 }

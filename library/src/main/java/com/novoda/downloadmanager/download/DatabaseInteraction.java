@@ -222,4 +222,10 @@ class DatabaseInteraction {
         contentResolver.delete(Provider.DOWNLOAD, DB.Columns.Download.DownloadId + "=?", new String[]{String.valueOf(downloadId)});
         contentResolver.delete(Provider.FILE, DB.Columns.File.FileDownloadId + "=?", new String[]{String.valueOf(downloadId)});
     }
+
+    public void revertSubmittedDownloadsToQueuedDownloads() {
+        ContentValues values = new ContentValues(1);
+        DB.Download.setDownloadStage(DownloadStage.QUEUED.name(), values);
+        contentResolver.update(Provider.DOWNLOAD, values, DB.Columns.Download.DownloadStage + "=?", new String[]{DownloadStage.SUBMITTED.name()});
+    }
 }
