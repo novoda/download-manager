@@ -10,7 +10,7 @@ import com.squareup.okhttp.Response;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-class ContentLengthFetcher {
+public class ContentLengthFetcher {
 
     private static final String HEADER_CONTENT_LENGTH = "Content-Length";
     private static final int UNKNOWN_CONTENT_LENGTH = -1;

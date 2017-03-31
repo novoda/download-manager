@@ -8,6 +8,7 @@ import com.novoda.downloadmanager.client.DownloadCheck;
 import com.novoda.downloadmanager.domain.Download;
 import com.novoda.downloadmanager.domain.DownloadFile;
 import com.novoda.downloadmanager.domain.DownloadStage;
+import com.novoda.downloadmanager.download.ContentLengthFetcher;
 import com.novoda.downloadmanager.download.DownloadHandler;
 import com.novoda.downloadmanager.download.task.DownloadTask;
 
@@ -20,15 +21,18 @@ public class DownloadUpdater {
     private final ExecutorService executor;
     private final Pauser pauser;
     private final DownloadCheck downloadCheck;
+    private final ContentLengthFetcher contentLengthFetcher;
 
     public DownloadUpdater(DownloadHandler downloadHandler,
                            ExecutorService executor,
                            Pauser pauser,
-                           DownloadCheck downloadCheck) {
+                           DownloadCheck downloadCheck,
+                           ContentLengthFetcher contentLengthFetcher) {
         this.downloadHandler = downloadHandler;
         this.executor = executor;
         this.pauser = pauser;
         this.downloadCheck = downloadCheck;
+        this.contentLengthFetcher = contentLengthFetcher;
     }
 
     public boolean update() {
@@ -51,7 +55,8 @@ public class DownloadUpdater {
             List<DownloadFile> files = download.getFiles();
             for (DownloadFile file : files) {
                 if (hasUnknownTotalBytes(file)) {
-                    downloadHandler.updateFileSize(file);
+                    long totalBytes = contentLengthFetcher.fetchContentLengthFor(file);
+                    downloadHandler.updateFileSize(file, totalBytes);
                 }
             }
         }

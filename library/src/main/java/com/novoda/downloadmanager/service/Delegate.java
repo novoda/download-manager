@@ -17,7 +17,8 @@ public class Delegate {
 
     Delegate(DownloadObserver downloadObserver,
              DownloadUpdater downloadUpdater,
-             Service service, UpdateScheduler updateScheduler,
+             Service service,
+             UpdateScheduler updateScheduler,
              GlobalClientCheck globalClientCheck) {
         this.downloadObserver = downloadObserver;
         this.downloadUpdater = downloadUpdater;
