@@ -1,7 +1,5 @@
 package com.novoda.downloadmanager.download.task;
 
-import android.util.Log;
-
 import com.novoda.downloadmanager.Pauser;
 import com.novoda.downloadmanager.domain.Download;
 import com.novoda.downloadmanager.domain.DownloadFile;
@@ -28,27 +26,13 @@ public class DownloadTask implements Runnable {
 
     @Override
     public void run() {
-        Log.e("!!!", "Download thread started");
-
         Download download = downloadHandler.getDownload(downloadId);
-
-        if (doesNotNeedToBeDownloaded(download)) {
-            Log.e("!!!", "Download status is ignored, bailing out");
-            // why did the thread start?! we're out of sync
-            return;
-        }
 
         downloadHandler.setDownloadRunning(downloadId);
 
         pauser.listenForPause(downloadId, onDownloadPaused);
         download(download);
         pauser.stopListeningForPause();
-
-        Log.e("!!!", "thread finished : " + download.getId());
-    }
-
-    private boolean doesNotNeedToBeDownloaded(Download download) {
-        return download.getStage().doesNotNeedToBeDownloaded();
     }
 
     private void download(Download download) {

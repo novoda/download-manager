@@ -15,4 +15,31 @@ public class DownloadId {
     public long asLong() {
         return id;
     }
+
+    @Override
+    public String toString() {
+        return "DownloadId{" +
+                "id=" + id +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        DownloadId that = (DownloadId) o;
+
+        return id == that.id;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (id ^ (id >>> 32));
+    }
 }

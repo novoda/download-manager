@@ -22,7 +22,8 @@ public class Pauser {
     }
 
     public void requestPause(DownloadId downloadId) {
-        localBroadcastManager.sendBroadcast(createPauseIntent(downloadId));
+        Intent pauseIntent = createPauseIntent(downloadId);
+        localBroadcastManager.sendBroadcast(pauseIntent);
     }
 
     private Intent createPauseIntent(DownloadId downloadId) {

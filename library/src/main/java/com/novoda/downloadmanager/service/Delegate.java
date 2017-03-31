@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager.service;
 
 import android.app.Service;
+import android.content.Intent;
 import android.util.Log;
 
 import com.novoda.downloadmanager.client.ClientCheckResult;
@@ -61,7 +62,6 @@ public class Delegate {
     }
 
     private boolean update() {
-        Log.e("!!!", "update!");
         return downloadUpdater.update();
     }
 
@@ -70,7 +70,7 @@ public class Delegate {
         downloadObserver.release();
         updateScheduler.release();
         downloadUpdater.release();
-        service.stopSelf();
+        service.stopService(new Intent(service.getApplicationContext(), Service.class));
     }
 
 }

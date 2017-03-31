@@ -8,7 +8,7 @@ class DownloadExecutorFactory {
 
     private static final int KEEP_ALIVE_TIME = 10;
 
-    public ThreadPoolExecutor createExecutor() {
+    ThreadPoolExecutor createExecutor() {
         int maxConcurrentDownloads = 1;
         ThreadPoolExecutor executor = new ThreadPoolExecutor(
                 maxConcurrentDownloads,

@@ -35,13 +35,11 @@ public class DownloadHandler {
         return databaseInteraction.getAllDownloads();
     }
 
+    // TODO: maybe we can pass the download's total size (this method only called from outside, we already pass values like currentSize in other methods),
+    // then we don't need contentLengthFetcher in here
     public void updateFileSize(DownloadFile file) {
         long totalBytes = contentLengthFetcher.fetchContentLengthFor(file);
         databaseInteraction.updateFileSize(file, totalBytes);
-    }
-
-    public void setDownloadSubmitted(DownloadId downloadId) {
-        databaseInteraction.updateStatus(downloadId, DownloadStage.SUBMITTED);
     }
 
     public void updateFileProgress(DownloadFile file, long bytesWritten) {
@@ -86,13 +84,17 @@ public class DownloadHandler {
     public void deleteMarkedBatchesFor(List<Download> allDownloads) {
         for (Download download : allDownloads) {
             if (download.getStage() == DownloadStage.MARKED_FOR_DELETION) {
-                for (DownloadFile downloadFile : download.getFiles()) {
-                    new File(downloadFile.getLocalUri()).delete();
-                }
-                databaseInteraction.delete(download);
+                deleteFilesFor(download);
             }
         }
 
+    }
+
+    private void deleteFilesFor(Download download) {
+        for (DownloadFile downloadFile : download.getFiles()) {
+            new File(downloadFile.getLocalUri()).delete();
+        }
+        databaseInteraction.delete(download);
     }
 
 }
