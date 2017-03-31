@@ -4,11 +4,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class DownloadExecutorFactory {
+class DownloadExecutorFactory {
 
     private static final int KEEP_ALIVE_TIME = 10;
 
-    public ThreadPoolExecutor createExecutor() {
+    ThreadPoolExecutor createExecutor() {
         int maxConcurrentDownloads = 1;
         ThreadPoolExecutor executor = new ThreadPoolExecutor(
                 maxConcurrentDownloads,
