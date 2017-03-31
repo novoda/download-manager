@@ -3,7 +3,7 @@ package com.novoda.downloadmanager.download.task;
 import android.util.Log;
 
 import com.novoda.downloadmanager.domain.DownloadFile;
-import com.novoda.downloadmanager.download.DownloadHandler;
+import com.novoda.downloadmanager.download.DownloadDatabaseWrapper;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -18,12 +18,12 @@ import java.io.OutputStream;
 class FileDownloader {
 
     private final OkHttpClient httpClient;
-    private final DownloadHandler downloadHandler;
+    private final DownloadDatabaseWrapper downloadDatabaseWrapper;
     private final PausedProvider pausedProvider;
 
-    public FileDownloader(OkHttpClient httpClient, DownloadHandler downloadHandler, PausedProvider pausedProvider) {
+    public FileDownloader(OkHttpClient httpClient, DownloadDatabaseWrapper downloadDatabaseWrapper, PausedProvider pausedProvider) {
         this.httpClient = httpClient;
-        this.downloadHandler = downloadHandler;
+        this.downloadDatabaseWrapper = downloadDatabaseWrapper;
         this.pausedProvider = pausedProvider;
     }
 
@@ -46,7 +46,7 @@ class FileDownloader {
 
         DataWriter checkedWriter = new CheckedWriter(getSpaceVerifier(), out);
 
-        DataWriter dataWriter = new NotifierWriter(checkedWriter, file, check, downloadHandler);
+        DataWriter dataWriter = new NotifierWriter(checkedWriter, file, check, downloadDatabaseWrapper);
         DataTransferer dataTransferer = new RegularDataTransferer(dataWriter);
 
         State state = new State();
@@ -96,9 +96,9 @@ class FileDownloader {
 
     private void syncDatabase(DownloadFile file, long fileSize) {
         if (file.totalSize() == fileSize) {
-            downloadHandler.updateFile(file, DownloadFile.FileStatus.COMPLETE, fileSize);
+            downloadDatabaseWrapper.updateFile(file, DownloadFile.FileStatus.COMPLETE, fileSize);
         } else {
-            downloadHandler.updateFile(file, DownloadFile.FileStatus.INCOMPLETE, fileSize);
+            downloadDatabaseWrapper.updateFile(file, DownloadFile.FileStatus.INCOMPLETE, fileSize);
         }
     }
 

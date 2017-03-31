@@ -9,14 +9,14 @@ import com.novoda.downloadmanager.client.GlobalClientCheck;
 import com.novoda.downloadmanager.domain.Download;
 import com.novoda.downloadmanager.domain.DownloadId;
 import com.novoda.downloadmanager.domain.DownloadRequest;
-import com.novoda.downloadmanager.download.DownloadHandler;
+import com.novoda.downloadmanager.download.DownloadDatabaseWrapper;
 import com.novoda.downloadmanager.download.DownloadHandlerCreator;
 
 import java.util.List;
 
 public class Downloader {
 
-    private final DownloadHandler downloadHandler;
+    private final DownloadDatabaseWrapper downloadDatabaseWrapper;
     private final Pauser pauser;
     private final Listeners listeners;
     private final Watcher watcher;
@@ -39,20 +39,20 @@ public class Downloader {
         public Downloader build(Context context) {
             Context applicationContext = context.getApplicationContext();
             ContentResolver contentResolver = applicationContext.getContentResolver();
-            DownloadHandler downloadHandler = DownloadHandlerCreator.create(contentResolver);
+            DownloadDatabaseWrapper downloadDatabaseWrapper = DownloadHandlerCreator.create(contentResolver);
 
             Pauser pauser = new Pauser(LocalBroadcastManager.getInstance(context));
             Listeners listeners = Listeners.newInstance();
             Watcher watcher = Watcher.newInstance(context);
             ServiceStarter serviceStarter = serviceBuilder.build(applicationContext);
 
-            return new Downloader(downloadHandler, pauser, listeners, watcher, serviceStarter);
+            return new Downloader(downloadDatabaseWrapper, pauser, listeners, watcher, serviceStarter);
         }
 
     }
 
-    Downloader(DownloadHandler downloadHandler, Pauser pauser, Listeners listeners, Watcher watcher, ServiceStarter serviceStarter) {
-        this.downloadHandler = downloadHandler;
+    Downloader(DownloadDatabaseWrapper downloadDatabaseWrapper, Pauser pauser, Listeners listeners, Watcher watcher, ServiceStarter serviceStarter) {
+        this.downloadDatabaseWrapper = downloadDatabaseWrapper;
         this.pauser = pauser;
         this.listeners = listeners;
         this.watcher = watcher;
@@ -60,16 +60,16 @@ public class Downloader {
     }
 
     public DownloadId createDownloadId() {
-        return downloadHandler.createDownloadId();
+        return downloadDatabaseWrapper.createDownloadId();
     }
 
     public void submit(DownloadRequest downloadRequest) {
-        downloadHandler.submitRequest(downloadRequest);
+        downloadDatabaseWrapper.submitRequest(downloadRequest);
         startService();
     }
 
     public void delete(DownloadId downloadId) {
-        downloadHandler.markForDeletion(downloadId);
+        downloadDatabaseWrapper.markForDeletion(downloadId);
         startService();
     }
 
@@ -78,7 +78,7 @@ public class Downloader {
     }
 
     public void resume(DownloadId downloadId) {
-        downloadHandler.resumeDownload(downloadId);
+        downloadDatabaseWrapper.resumeDownload(downloadId);
         startService();
     }
 
@@ -87,7 +87,7 @@ public class Downloader {
     }
 
     public List<Download> getAllDownloads() {
-        return downloadHandler.getAllDownloads();
+        return downloadDatabaseWrapper.getAllDownloads();
     }
 
     public void addOnDownloadsUpdateListener(OnDownloadsUpdateListener listener) {
@@ -112,7 +112,7 @@ public class Downloader {
     }
 
     public void addCompletedDownload(DownloadRequest downloadRequest) {
-        downloadHandler.addCompletedRequest(downloadRequest);
+        downloadDatabaseWrapper.addCompletedRequest(downloadRequest);
     }
 
     public void forceStart() {

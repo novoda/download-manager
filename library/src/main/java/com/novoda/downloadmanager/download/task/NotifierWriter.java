@@ -3,7 +3,7 @@ package com.novoda.downloadmanager.download.task;
 import android.os.SystemClock;
 
 import com.novoda.downloadmanager.domain.DownloadFile;
-import com.novoda.downloadmanager.download.DownloadHandler;
+import com.novoda.downloadmanager.download.DownloadDatabaseWrapper;
 
 class NotifierWriter implements DataWriter {
 
@@ -20,16 +20,16 @@ class NotifierWriter implements DataWriter {
     private final DataWriter dataWriter;
     private final DownloadFile file;
     private final WriteChunkListener writeChunkListener;
-    private final DownloadHandler downloadHandler;
+    private final DownloadDatabaseWrapper downloadDatabaseWrapper;
 
     public NotifierWriter(DataWriter dataWriter,
                           DownloadFile file,
                           WriteChunkListener writeChunkListener,
-                          DownloadHandler downloadHandler) {
+                          DownloadDatabaseWrapper downloadDatabaseWrapper) {
         this.dataWriter = dataWriter;
         this.file = file;
         this.writeChunkListener = writeChunkListener;
-        this.downloadHandler = downloadHandler;
+        this.downloadDatabaseWrapper = downloadDatabaseWrapper;
     }
 
     @Override
@@ -65,7 +65,7 @@ class NotifierWriter implements DataWriter {
         }
 
         if (state.currentBytes - state.bytesNotified > MIN_PROGRESS_STEP && now - state.timeLastNotification > MIN_PROGRESS_TIME) {
-            downloadHandler.updateFileProgress(file, state.currentBytes);
+            downloadDatabaseWrapper.updateFileProgress(file, state.currentBytes);
             state.bytesNotified = state.currentBytes;
             state.timeLastNotification = now;
         }

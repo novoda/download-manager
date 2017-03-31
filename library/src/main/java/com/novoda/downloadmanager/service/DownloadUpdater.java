@@ -9,7 +9,7 @@ import com.novoda.downloadmanager.domain.Download;
 import com.novoda.downloadmanager.domain.DownloadFile;
 import com.novoda.downloadmanager.domain.DownloadStage;
 import com.novoda.downloadmanager.download.ContentLengthFetcher;
-import com.novoda.downloadmanager.download.DownloadHandler;
+import com.novoda.downloadmanager.download.DownloadDatabaseWrapper;
 import com.novoda.downloadmanager.download.task.DownloadTask;
 
 import java.util.List;
@@ -17,18 +17,18 @@ import java.util.concurrent.ExecutorService;
 
 public class DownloadUpdater {
 
-    private final DownloadHandler downloadHandler;
+    private final DownloadDatabaseWrapper downloadDatabaseWrapper;
     private final ExecutorService executor;
     private final Pauser pauser;
     private final DownloadCheck downloadCheck;
     private final ContentLengthFetcher contentLengthFetcher;
 
-    public DownloadUpdater(DownloadHandler downloadHandler,
+    public DownloadUpdater(DownloadDatabaseWrapper downloadDatabaseWrapper,
                            ExecutorService executor,
                            Pauser pauser,
                            DownloadCheck downloadCheck,
                            ContentLengthFetcher contentLengthFetcher) {
-        this.downloadHandler = downloadHandler;
+        this.downloadDatabaseWrapper = downloadDatabaseWrapper;
         this.executor = executor;
         this.pauser = pauser;
         this.downloadCheck = downloadCheck;
@@ -36,9 +36,9 @@ public class DownloadUpdater {
     }
 
     public boolean update() {
-        List<Download> allDownloads = downloadHandler.getAllDownloads();
+        List<Download> allDownloads = downloadDatabaseWrapper.getAllDownloads();
 
-        downloadHandler.deleteMarkedBatchesFor(allDownloads);
+        downloadDatabaseWrapper.deleteMarkedBatchesFor(allDownloads);
         updateFileSizeForFilesWithUnknownSize(allDownloads);
 
         boolean isCurrentlyDownloading = isCurrentlyDownloading(allDownloads);
@@ -56,7 +56,7 @@ public class DownloadUpdater {
             for (DownloadFile file : files) {
                 if (hasUnknownTotalBytes(file)) {
                     long totalBytes = contentLengthFetcher.fetchContentLengthFor(file);
-                    downloadHandler.updateFileSize(file, totalBytes);
+                    downloadDatabaseWrapper.updateFileSize(file, totalBytes);
                 }
             }
         }
@@ -97,9 +97,9 @@ public class DownloadUpdater {
     }
 
     private void start(final Download download) {
-        downloadHandler.setDownloadSubmitted(download.getId());
+        downloadDatabaseWrapper.setDownloadSubmitted(download.getId());
 
-        executor.submit(new DownloadTask(download.getId(), downloadHandler, pauser));
+        executor.submit(new DownloadTask(download.getId(), downloadDatabaseWrapper, pauser));
         Log.e(getClass().getSimpleName(), "Submitting to executor: " + download.getId() + " stage: " + download.getStage() + " hash: " + hashCode());
     }
 

@@ -4,9 +4,9 @@ import android.content.ContentResolver;
 
 public class DownloadHandlerCreator {
 
-    public static DownloadHandler create(ContentResolver contentResolver) {
+    public static DownloadDatabaseWrapper create(ContentResolver contentResolver) {
         DatabaseInteraction databaseInteraction = new DatabaseInteraction(contentResolver);
-        return new DownloadHandler(databaseInteraction);
+        return new DownloadDatabaseWrapper(databaseInteraction);
     }
 
 }

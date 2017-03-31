@@ -9,7 +9,7 @@ import com.novoda.downloadmanager.Pauser;
 import com.novoda.downloadmanager.client.DownloadCheck;
 import com.novoda.downloadmanager.client.GlobalClientCheck;
 import com.novoda.downloadmanager.download.ContentLengthFetcher;
-import com.novoda.downloadmanager.download.DownloadHandler;
+import com.novoda.downloadmanager.download.DownloadDatabaseWrapper;
 import com.novoda.downloadmanager.download.DownloadHandlerCreator;
 import com.squareup.okhttp.OkHttpClient;
 
@@ -24,12 +24,12 @@ public class DelegateCreator {
                                   DownloadCheck downloadCheck) {
         UpdateScheduler updateScheduler = new UpdateScheduler(updateThread, updateHandler);
 
-        DownloadHandler downloadHandler = DownloadHandlerCreator.create(service.getContentResolver());
+        DownloadDatabaseWrapper downloadDatabaseWrapper = DownloadHandlerCreator.create(service.getContentResolver());
         Pauser pauser = new Pauser(LocalBroadcastManager.getInstance(service));
         DownloadExecutorFactory factory = new DownloadExecutorFactory();
         ExecutorService executor = factory.createExecutor();
         ContentLengthFetcher contentLengthFetcher = new ContentLengthFetcher(new OkHttpClient());
-        DownloadUpdater downloadUpdater = new DownloadUpdater(downloadHandler, executor, pauser, downloadCheck, contentLengthFetcher);
+        DownloadUpdater downloadUpdater = new DownloadUpdater(downloadDatabaseWrapper, executor, pauser, downloadCheck, contentLengthFetcher);
 
         DownloadObserver downloadObserver = new DownloadObserver(updateHandler, service.getContentResolver());
         return new Delegate(downloadObserver, downloadUpdater, service, updateScheduler, globalClientCheck);

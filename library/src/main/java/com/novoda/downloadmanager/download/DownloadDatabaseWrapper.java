@@ -9,11 +9,11 @@ import com.novoda.downloadmanager.domain.DownloadStage;
 import java.io.File;
 import java.util.List;
 
-public class DownloadHandler {
+public class DownloadDatabaseWrapper {
 
     private final DatabaseInteraction databaseInteraction;
 
-    public DownloadHandler(DatabaseInteraction databaseInteraction) {
+    public DownloadDatabaseWrapper(DatabaseInteraction databaseInteraction) {
         this.databaseInteraction = databaseInteraction;
     }
 

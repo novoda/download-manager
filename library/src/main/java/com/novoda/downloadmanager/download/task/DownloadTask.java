@@ -4,7 +4,7 @@ import com.novoda.downloadmanager.Pauser;
 import com.novoda.downloadmanager.domain.Download;
 import com.novoda.downloadmanager.domain.DownloadFile;
 import com.novoda.downloadmanager.domain.DownloadId;
-import com.novoda.downloadmanager.download.DownloadHandler;
+import com.novoda.downloadmanager.download.DownloadDatabaseWrapper;
 import com.squareup.okhttp.OkHttpClient;
 
 import java.io.IOException;
@@ -12,23 +12,23 @@ import java.io.IOException;
 public class DownloadTask implements Runnable {
 
     private final DownloadId downloadId;
-    private final DownloadHandler downloadHandler;
+    private final DownloadDatabaseWrapper downloadDatabaseWrapper;
     private final Pauser pauser;
     private final OkHttpClient httpClient = new OkHttpClient();
 
     private boolean downloadPaused;
 
-    public DownloadTask(DownloadId download, DownloadHandler downloadHandler, Pauser pauser) {
+    public DownloadTask(DownloadId download, DownloadDatabaseWrapper downloadDatabaseWrapper, Pauser pauser) {
         this.downloadId = download;
-        this.downloadHandler = downloadHandler;
+        this.downloadDatabaseWrapper = downloadDatabaseWrapper;
         this.pauser = pauser;
     }
 
     @Override
     public void run() {
-        Download download = downloadHandler.getDownload(downloadId);
+        Download download = downloadDatabaseWrapper.getDownload(downloadId);
 
-        downloadHandler.setDownloadRunning(downloadId);
+        downloadDatabaseWrapper.setDownloadRunning(downloadId);
 
         pauser.listenForPause(downloadId, onDownloadPaused);
         download(download);
@@ -37,14 +37,14 @@ public class DownloadTask implements Runnable {
 
     private void download(Download download) {
         try {
-            FileDownloader fileDownloader = new FileDownloader(httpClient, downloadHandler, pausedProvider);
+            FileDownloader fileDownloader = new FileDownloader(httpClient, downloadDatabaseWrapper, pausedProvider);
             startDownload(download, fileDownloader);
-            downloadHandler.syncDownloadStatus(downloadId);
+            downloadDatabaseWrapper.syncDownloadStatus(downloadId);
         } catch (IOException e) {
-            downloadHandler.setDownloadFailed(downloadId);
+            downloadDatabaseWrapper.setDownloadFailed(downloadId);
             e.printStackTrace();
         } catch (FileDownloader.PausedFlowException e) {
-            downloadHandler.setDownloadPaused(downloadId);
+            downloadDatabaseWrapper.setDownloadPaused(downloadId);
         }
     }
 
