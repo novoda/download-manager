@@ -28,13 +28,10 @@ class DownloadUpdater {
     }
 
     public boolean update() {
-//        Log.e("!!!", "update triggered");
-
         List<Download> allDownloads = downloadHandler.getAllDownloads();
         updateFileSizeForFilesWithUnknownSize(allDownloads);
 
         boolean downloadInProgress = hasActiveDownload(allDownloads); // if any startDownload is in the SUBMITTED (not RUNNING, but due to) or RUNNING state
-//        Log.e("!!!", "At least one startDownload in SUBMITTED/RUNNING state: " + downloadInProgress);
 
         if (!downloadInProgress) {
             downloadInProgress = startNextQueuedDownload(allDownloads);
@@ -78,16 +75,13 @@ class DownloadUpdater {
 
     private boolean startNextQueuedDownload(List<Download> allDownloads) {
         for (Download download : allDownloads) {
-//            Log.v("!!!", "trigger startDownload? : " + download.getId().asString() + ", stage: " + download.getStage());
 
             if (download.getStage() != DownloadStage.QUEUED) {
-//                Log.v("!!!", "skipping : " + download.getId().asString());
                 continue;
             }
 
             ClientCheckResult clientCheckResult = downloadCheck.isAllowedToDownload(download);
             if (clientCheckResult.isAllowed()) {
-//                Log.v("!!!", "downloading : " + download.getId().asString());
                 startDownload(download.getId());
                 return true;
             }
