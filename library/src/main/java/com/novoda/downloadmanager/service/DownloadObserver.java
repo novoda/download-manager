@@ -18,11 +18,11 @@ class DownloadObserver {
         this.contentResolver = contentResolver;
     }
 
-    void startMonitoringDownloadChanges(final OnUpdate onUpdate) {
+    void startMonitoringDownloadChanges(final Callback callback) {
         contentObserver = new ContentObserver(updateHandler) {
             @Override
             public void onChange(boolean selfChange) {
-                onUpdate.onUpdate();
+                callback.onDownloadsTableUpdated();
             }
         };
         contentResolver.registerContentObserver(Provider.DOWNLOAD_SERVICE_UPDATE, true, contentObserver);
@@ -32,8 +32,8 @@ class DownloadObserver {
         contentResolver.unregisterContentObserver(contentObserver);
     }
 
-    interface OnUpdate {
-        void onUpdate();
+    interface Callback {
+        void onDownloadsTableUpdated();
     }
 
 }

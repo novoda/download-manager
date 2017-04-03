@@ -35,7 +35,7 @@ public class Delegate {
         ClientCheckResult clientCheckResult = globalClientCheck.onGlobalCheck();
 
         if (clientCheckResult.isAllowed()) {
-            downloadObserver.startMonitoringDownloadChanges(onDatabaseUpdate);
+            downloadObserver.startMonitoringDownloadChanges(onDownloadsTableUpdated);
 
             updateScheduler.scheduleNow(updateCallback);
         } else {
@@ -43,9 +43,9 @@ public class Delegate {
         }
     }
 
-    private final DownloadObserver.OnUpdate onDatabaseUpdate = new DownloadObserver.OnUpdate() {
+    private final DownloadObserver.Callback onDownloadsTableUpdated = new DownloadObserver.Callback() {
         @Override
-        public void onUpdate() {
+        public void onDownloadsTableUpdated() {
             continueOrShutdown();
         }
     };
