@@ -1,11 +1,13 @@
 package com.novoda.downloadmanager;
 
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.novoda.downloadmanager.client.DownloadCheck;
@@ -50,15 +52,17 @@ public class Service extends android.app.Service {
         Handler updateHandler = new Handler(updateThread.getLooper());
 
         Timer timer = new Timer(updateThread, updateHandler);
-        DownloadObserver downloadObserver = new DownloadObserver(updateHandler, getContentResolver());
+        ContentResolver contentResolver = getContentResolver();
+        DownloadObserver downloadObserver = new DownloadObserver(updateHandler, contentResolver);
 
         return DelegateCreator.create(
-                this,
                 globalChecker,
                 downloadChecker,
                 serviceConnection,
                 downloadObserver,
-                timer
+                timer,
+                LocalBroadcastManager.getInstance(this),
+                contentResolver
         );
     }
 

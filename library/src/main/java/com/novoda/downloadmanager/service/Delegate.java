@@ -1,7 +1,6 @@
 package com.novoda.downloadmanager.service;
 
 import com.novoda.downloadmanager.DownloadServiceConnection;
-import com.novoda.downloadmanager.Service;
 import com.novoda.downloadmanager.client.ClientCheckResult;
 import com.novoda.downloadmanager.client.GlobalClientCheck;
 import com.novoda.downloadmanager.download.DownloadDatabaseWrapper;
@@ -10,7 +9,6 @@ public class Delegate {
 
     private final DownloadObserver downloadObserver;
     private final DownloadTaskSubmitter downloadTaskSubmitter;
-    private final Service service;
     private final Timer timer;
     private final GlobalClientCheck globalClientCheck;
     private final DownloadDatabaseWrapper downloadDatabaseWrapper;
@@ -19,7 +17,6 @@ public class Delegate {
 
     Delegate(DownloadObserver downloadObserver,
              DownloadTaskSubmitter downloadTaskSubmitter,
-             Service service,
              Timer timer,
              GlobalClientCheck globalClientCheck,
              DownloadDatabaseWrapper downloadDatabaseWrapper,
@@ -27,7 +24,6 @@ public class Delegate {
              TotalFileSizeUpdater totalFileSizeUpdater) {
         this.downloadObserver = downloadObserver;
         this.downloadTaskSubmitter = downloadTaskSubmitter;
-        this.service = service;
         this.timer = timer;
         this.globalClientCheck = globalClientCheck;
         this.downloadDatabaseWrapper = downloadDatabaseWrapper;
@@ -40,10 +36,9 @@ public class Delegate {
 
         if (clientCheckResult.isAllowed()) {
             downloadObserver.startMonitoringDownloadChanges(onDownloadsTableUpdated);
-
             timer.scheduleNow(updateCallback);
         } else {
-            service.stopSelf();
+            stopService();
         }
     }
 
