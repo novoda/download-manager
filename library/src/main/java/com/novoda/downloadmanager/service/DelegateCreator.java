@@ -31,7 +31,8 @@ public class DelegateCreator {
         DownloadExecutorFactory factory = new DownloadExecutorFactory();
         ExecutorService executor = factory.createExecutor();
         ContentLengthFetcher contentLengthFetcher = new ContentLengthFetcher(new OkHttpClient());
-        DownloadUpdater downloadUpdater = new DownloadUpdater(downloadDatabaseWrapper, executor, pauser, downloadCheck, contentLengthFetcher);
+        TotalFileSizeUpdater totalFileSizeUpdater = new TotalFileSizeUpdater(downloadDatabaseWrapper, contentLengthFetcher);
+        DownloadUpdater downloadUpdater = new DownloadUpdater(downloadDatabaseWrapper, executor, pauser, downloadCheck, totalFileSizeUpdater);
 
         DownloadObserver downloadObserver = new DownloadObserver(updateHandler, service.getContentResolver());
         return new Delegate(downloadObserver, downloadUpdater, service, updateScheduler, globalClientCheck, downloadDatabaseWrapper, downloadServiceConnection);

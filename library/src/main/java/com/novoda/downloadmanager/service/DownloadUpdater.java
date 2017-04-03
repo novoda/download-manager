@@ -21,25 +21,25 @@ public class DownloadUpdater {
     private final ExecutorService executor;
     private final Pauser pauser;
     private final DownloadCheck downloadCheck;
-    private final ContentLengthFetcher contentLengthFetcher;
+    private final TotalFileSizeUpdater totalFileSizeUpdater;
 
     public DownloadUpdater(DownloadDatabaseWrapper downloadDatabaseWrapper,
                            ExecutorService executor,
                            Pauser pauser,
                            DownloadCheck downloadCheck,
-                           ContentLengthFetcher contentLengthFetcher) {
+                           TotalFileSizeUpdater totalFileSizeUpdater) {
         this.downloadDatabaseWrapper = downloadDatabaseWrapper;
         this.executor = executor;
         this.pauser = pauser;
         this.downloadCheck = downloadCheck;
-        this.contentLengthFetcher = contentLengthFetcher;
+        this.totalFileSizeUpdater = totalFileSizeUpdater;
     }
 
     public boolean update() {
         List<Download> allDownloads = downloadDatabaseWrapper.getAllDownloads();
 
         downloadDatabaseWrapper.deleteAllDownloadsMarkedForDeletion();
-        updateFileSizeForFilesWithUnknownSize();
+        totalFileSizeUpdater.updateMissingTotalFileSizes();
 
         boolean isCurrentlyDownloading = isCurrentlyDownloading(allDownloads);
 
@@ -48,14 +48,6 @@ public class DownloadUpdater {
         }
 
         return isCurrentlyDownloading;
-    }
-
-    private void updateFileSizeForFilesWithUnknownSize() {
-        List<DownloadFile> files = downloadDatabaseWrapper.getFilesWithUnknownTotalSize();
-        for (DownloadFile file : files) {
-            long totalBytes = contentLengthFetcher.fetchContentLengthFor(file);
-            downloadDatabaseWrapper.updateFileSize(file, totalBytes);
-        }
     }
 
     private boolean isCurrentlyDownloading(List<Download> allDownloads) {
