@@ -59,21 +59,25 @@ class DatabaseInteraction {
     }
 
     public List<Download> getAllDownloads() {
-        List<Download> downloads = new ArrayList<>();
         Cursor cursor = contentResolver.query(Provider.DOWNLOAD_WITH_SIZE, null, null, null, null);
         try {
-            if (cursor.moveToFirst()) {
-                do {
-                    Download download = getDownload(cursor);
-                    downloads.add(download);
-                } while (cursor.moveToNext());
-            }
+            return marshalDownloads(cursor);
         } finally {
             if (cursor != null) {
                 cursor.close();
             }
         }
+    }
 
+    private List<Download> marshalDownloads(Cursor cursor) {
+        if (cursor == null || !cursor.moveToNext()) {
+            return Collections.emptyList();
+        }
+        List<Download> downloads = new ArrayList<>();
+        do {
+            Download download = getDownload(cursor);
+            downloads.add(download);
+        } while (cursor.moveToNext());
         return downloads;
     }
 
