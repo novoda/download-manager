@@ -13,24 +13,27 @@ import com.novoda.downloadmanager.download.task.DownloadTask;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
-public class DownloadUpdater {
+public class DownloadTaskSubmitter {
 
     private final DownloadDatabaseWrapper downloadDatabaseWrapper;
     private final ExecutorService executor;
     private final Pauser pauser;
     private final DownloadCheck downloadCheck;
 
-    public DownloadUpdater(DownloadDatabaseWrapper downloadDatabaseWrapper,
-                           ExecutorService executor,
-                           Pauser pauser,
-                           DownloadCheck downloadCheck) {
+    public DownloadTaskSubmitter(DownloadDatabaseWrapper downloadDatabaseWrapper,
+                                 ExecutorService executor,
+                                 Pauser pauser,
+                                 DownloadCheck downloadCheck) {
         this.downloadDatabaseWrapper = downloadDatabaseWrapper;
         this.executor = executor;
         this.pauser = pauser;
         this.downloadCheck = downloadCheck;
     }
 
-    public boolean update() {
+    /**
+     * @return true if a download is in progress
+     */
+    public boolean submitNextAvailableDownloadIfNotCurrentlyDownloading() {
         List<Download> allDownloads = downloadDatabaseWrapper.getAllDownloads();
         boolean isCurrentlyDownloading = isCurrentlyDownloading(allDownloads);
 
@@ -78,7 +81,7 @@ public class DownloadUpdater {
         Log.e(getClass().getSimpleName(), "Submitting to executor: " + download.getId() + " stage: " + download.getStage() + " hash: " + hashCode());
     }
 
-    public void release() {
+    public void stopSubmittingDownloadTasks() {
         executor.shutdown();
     }
 

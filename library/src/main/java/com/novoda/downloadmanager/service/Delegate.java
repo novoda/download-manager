@@ -9,7 +9,7 @@ import com.novoda.downloadmanager.download.DownloadDatabaseWrapper;
 public class Delegate {
 
     private final DownloadObserver downloadObserver;
-    private final DownloadUpdater downloadUpdater;
+    private final DownloadTaskSubmitter downloadTaskSubmitter;
     private final Service service;
     private final UpdateScheduler updateScheduler;
     private final GlobalClientCheck globalClientCheck;
@@ -18,7 +18,7 @@ public class Delegate {
     private final TotalFileSizeUpdater totalFileSizeUpdater;
 
     Delegate(DownloadObserver downloadObserver,
-             DownloadUpdater downloadUpdater,
+             DownloadTaskSubmitter downloadTaskSubmitter,
              Service service,
              UpdateScheduler updateScheduler,
              GlobalClientCheck globalClientCheck,
@@ -26,7 +26,7 @@ public class Delegate {
              DownloadServiceConnection downloadServiceConnection,
              TotalFileSizeUpdater totalFileSizeUpdater) {
         this.downloadObserver = downloadObserver;
-        this.downloadUpdater = downloadUpdater;
+        this.downloadTaskSubmitter = downloadTaskSubmitter;
         this.service = service;
         this.updateScheduler = updateScheduler;
         this.globalClientCheck = globalClientCheck;
@@ -73,7 +73,7 @@ public class Delegate {
     private boolean update() {
         downloadDatabaseWrapper.deleteAllDownloadsMarkedForDeletion();
         totalFileSizeUpdater.updateMissingTotalFileSizes();
-        return downloadUpdater.update();
+        return downloadTaskSubmitter.submitNextAvailableDownloadIfNotCurrentlyDownloading();
     }
 
     public void revertSubmittedDownloadsToQueuedDownloads() {
@@ -92,7 +92,7 @@ public class Delegate {
     private void release() {
         downloadObserver.release();
         updateScheduler.release();
-        downloadUpdater.release();
+        downloadTaskSubmitter.stopSubmittingDownloadTasks();
     }
 
 }
