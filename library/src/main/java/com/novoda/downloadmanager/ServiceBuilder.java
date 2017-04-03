@@ -20,8 +20,8 @@ class ServiceBuilder {
         return this;
     }
 
-    public ServiceStarter build(Context context) {
-        return new ServiceStarter(context, globalClientCheck, downloadCheck);
+    public DownloadServiceConnection build(Context context) {
+        return new DownloadServiceConnection(context, globalClientCheck, downloadCheck);
     }
 
 }

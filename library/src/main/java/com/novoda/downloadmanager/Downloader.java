@@ -20,7 +20,7 @@ public class Downloader {
     private final Pauser pauser;
     private final Listeners listeners;
     private final Watcher watcher;
-    private final ServiceStarter serviceStarter;
+    private final DownloadServiceConnection downloadServiceConnection;
 
     public static class Builder {
 
@@ -44,19 +44,19 @@ public class Downloader {
             Pauser pauser = new Pauser(LocalBroadcastManager.getInstance(context));
             Listeners listeners = Listeners.newInstance();
             Watcher watcher = Watcher.newInstance(context);
-            ServiceStarter serviceStarter = serviceBuilder.build(applicationContext);
+            DownloadServiceConnection downloadServiceConnection = serviceBuilder.build(applicationContext);
 
-            return new Downloader(downloadDatabaseWrapper, pauser, listeners, watcher, serviceStarter);
+            return new Downloader(downloadDatabaseWrapper, pauser, listeners, watcher, downloadServiceConnection);
         }
 
     }
 
-    Downloader(DownloadDatabaseWrapper downloadDatabaseWrapper, Pauser pauser, Listeners listeners, Watcher watcher, ServiceStarter serviceStarter) {
+    Downloader(DownloadDatabaseWrapper downloadDatabaseWrapper, Pauser pauser, Listeners listeners, Watcher watcher, DownloadServiceConnection downloadServiceConnection) {
         this.downloadDatabaseWrapper = downloadDatabaseWrapper;
         this.pauser = pauser;
         this.listeners = listeners;
         this.watcher = watcher;
-        this.serviceStarter = serviceStarter;
+        this.downloadServiceConnection = downloadServiceConnection;
     }
 
     public DownloadId createDownloadId() {
@@ -83,7 +83,7 @@ public class Downloader {
     }
 
     private void startService() {
-        serviceStarter.start();
+        downloadServiceConnection.startService();
     }
 
     public List<Download> getAllDownloads() {

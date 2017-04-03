@@ -1,9 +1,10 @@
 package com.novoda.downloadmanager.service;
 
-import android.app.Service;
 import android.content.Intent;
 import android.util.Log;
 
+import com.novoda.downloadmanager.DownloadServiceConnection;
+import com.novoda.downloadmanager.Service;
 import com.novoda.downloadmanager.client.ClientCheckResult;
 import com.novoda.downloadmanager.client.GlobalClientCheck;
 import com.novoda.downloadmanager.download.DownloadDatabaseWrapper;
@@ -16,19 +17,22 @@ public class Delegate {
     private final UpdateScheduler updateScheduler;
     private final GlobalClientCheck globalClientCheck;
     private final DownloadDatabaseWrapper downloadDatabaseWrapper;
+    private final DownloadServiceConnection downloadServiceConnection;
 
     Delegate(DownloadObserver downloadObserver,
              DownloadUpdater downloadUpdater,
              Service service,
              UpdateScheduler updateScheduler,
              GlobalClientCheck globalClientCheck,
-             DownloadDatabaseWrapper downloadDatabaseWrapper) {
+             DownloadDatabaseWrapper downloadDatabaseWrapper,
+             DownloadServiceConnection downloadServiceConnection) {
         this.downloadObserver = downloadObserver;
         this.downloadUpdater = downloadUpdater;
         this.service = service;
         this.updateScheduler = updateScheduler;
         this.globalClientCheck = globalClientCheck;
         this.downloadDatabaseWrapper = downloadDatabaseWrapper;
+        this.downloadServiceConnection = downloadServiceConnection;
     }
 
     public void onServiceStart() {
@@ -79,7 +83,7 @@ public class Delegate {
         downloadObserver.release();
         updateScheduler.release();
         downloadUpdater.release();
-        service.stopService(new Intent(service.getApplicationContext(), Service.class));
+        downloadServiceConnection.stopService();
     }
 
 }

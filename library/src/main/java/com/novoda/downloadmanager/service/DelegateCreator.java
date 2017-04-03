@@ -1,11 +1,12 @@
 package com.novoda.downloadmanager.service;
 
-import android.app.Service;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.novoda.downloadmanager.DownloadServiceConnection;
 import com.novoda.downloadmanager.Pauser;
+import com.novoda.downloadmanager.Service;
 import com.novoda.downloadmanager.client.DownloadCheck;
 import com.novoda.downloadmanager.client.GlobalClientCheck;
 import com.novoda.downloadmanager.download.ContentLengthFetcher;
@@ -21,7 +22,8 @@ public class DelegateCreator {
                                   Handler updateHandler,
                                   Service service,
                                   GlobalClientCheck globalClientCheck,
-                                  DownloadCheck downloadCheck) {
+                                  DownloadCheck downloadCheck,
+                                  DownloadServiceConnection downloadServiceConnection) {
         UpdateScheduler updateScheduler = new UpdateScheduler(updateThread, updateHandler);
 
         DownloadDatabaseWrapper downloadDatabaseWrapper = DownloadHandlerCreator.create(service.getContentResolver());
@@ -32,7 +34,7 @@ public class DelegateCreator {
         DownloadUpdater downloadUpdater = new DownloadUpdater(downloadDatabaseWrapper, executor, pauser, downloadCheck, contentLengthFetcher);
 
         DownloadObserver downloadObserver = new DownloadObserver(updateHandler, service.getContentResolver());
-        return new Delegate(downloadObserver, downloadUpdater, service, updateScheduler, globalClientCheck, downloadDatabaseWrapper);
+        return new Delegate(downloadObserver, downloadUpdater, service, updateScheduler, globalClientCheck, downloadDatabaseWrapper, downloadServiceConnection);
     }
 
 }

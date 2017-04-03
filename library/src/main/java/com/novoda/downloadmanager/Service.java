@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager;
 
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -15,12 +16,13 @@ import com.novoda.downloadmanager.service.DelegateCreator;
 
 public class Service extends android.app.Service {
 
-    private final Binder binder = new ServiceBinder();
+    private final Binder binder = new DownloadServiceBinder();
 
     private Delegate delegate;
 
     private DownloadCheck downloadChecker;
     private GlobalClientCheck globalChecker;
+    private DownloadServiceConnection serviceConnection;
 
     @Nullable
     @Override
@@ -34,8 +36,8 @@ public class Service extends android.app.Service {
         Log.e("!!!", "service created");
     }
 
-    private void start() {
-        Log.e("!!!", "service on start");
+    private void fooStart() {
+        Log.e("!!!", "service on startService");
         delegate = createDelegate(globalChecker, downloadChecker);
         delegate.revertSubmittedDownloadsToQueuedDownloads();
         delegate.onServiceStart();
@@ -51,7 +53,8 @@ public class Service extends android.app.Service {
                 updateHandler,
                 this,
                 globalChecker,
-                downloadChecker
+                downloadChecker,
+                serviceConnection
         );
     }
 
@@ -62,7 +65,7 @@ public class Service extends android.app.Service {
         super.onDestroy();
     }
 
-    class ServiceBinder extends Binder {
+    class DownloadServiceBinder extends Binder {
 
         void setDownloadChecker(DownloadCheck downloadChecker) {
             Service.this.downloadChecker = downloadChecker;
@@ -72,8 +75,13 @@ public class Service extends android.app.Service {
             Service.this.globalChecker = globalChecker;
         }
 
-        void start() {
-            Service.this.start();
+        void fooStart() {
+            Service.this.fooStart();
+        }
+
+        void setServiceConnection(DownloadServiceConnection serviceConnection) {
+            Log.d("!!!", "setServiceConnection():");
+            Service.this.serviceConnection = serviceConnection;
         }
     }
 
