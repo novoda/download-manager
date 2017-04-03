@@ -9,15 +9,11 @@ import android.os.IBinder;
 import com.novoda.downloadmanager.client.DownloadCheck;
 import com.novoda.downloadmanager.client.GlobalClientCheck;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public class DownloadServiceConnection {
 
     private final Context context;
     private final GlobalClientCheck globalClientChecker;
     private final DownloadCheck downloadChecker;
-
-    private boolean bound;
 
     public DownloadServiceConnection(Context context, GlobalClientCheck globalClientChecker, DownloadCheck downloadCheck) {
         this.context = context;
@@ -27,14 +23,12 @@ public class DownloadServiceConnection {
 
     public void startService() {
         Intent serviceIntent = new Intent(context, Service.class);
-        bound = context.bindService(serviceIntent, serviceConnection, Service.BIND_AUTO_CREATE);
+        context.bindService(serviceIntent, serviceConnection, Service.BIND_AUTO_CREATE);
     }
 
     public void stopService() {
-        if (bound) {
-            context.unbindService(serviceConnection);
-            bound = false;
-        }
+        context.unbindService(serviceConnection);
+        context.stopService(new Intent(context, Service.class));
     }
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {

@@ -1,7 +1,6 @@
 package com.novoda.downloadmanager;
 
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -60,7 +59,7 @@ public class Service extends android.app.Service {
 
     @Override
     public void onDestroy() {
-        delegate.shutDown();
+        delegate.onDestroy();
         Log.e(getClass().getSimpleName(), "Service Destroyed: " + hashCode());
         super.onDestroy();
     }

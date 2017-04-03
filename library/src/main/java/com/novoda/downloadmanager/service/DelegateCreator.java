@@ -32,10 +32,10 @@ public class DelegateCreator {
         ExecutorService executor = factory.createExecutor();
         ContentLengthFetcher contentLengthFetcher = new ContentLengthFetcher(new OkHttpClient());
         TotalFileSizeUpdater totalFileSizeUpdater = new TotalFileSizeUpdater(downloadDatabaseWrapper, contentLengthFetcher);
-        DownloadUpdater downloadUpdater = new DownloadUpdater(downloadDatabaseWrapper, executor, pauser, downloadCheck, totalFileSizeUpdater);
+        DownloadUpdater downloadUpdater = new DownloadUpdater(downloadDatabaseWrapper, executor, pauser, downloadCheck);
 
         DownloadObserver downloadObserver = new DownloadObserver(updateHandler, service.getContentResolver());
-        return new Delegate(downloadObserver, downloadUpdater, service, updateScheduler, globalClientCheck, downloadDatabaseWrapper, downloadServiceConnection);
+        return new Delegate(downloadObserver, downloadUpdater, service, updateScheduler, globalClientCheck, downloadDatabaseWrapper, downloadServiceConnection, totalFileSizeUpdater);
     }
 
 }

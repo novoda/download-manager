@@ -6,9 +6,7 @@ import com.novoda.downloadmanager.Pauser;
 import com.novoda.downloadmanager.client.ClientCheckResult;
 import com.novoda.downloadmanager.client.DownloadCheck;
 import com.novoda.downloadmanager.domain.Download;
-import com.novoda.downloadmanager.domain.DownloadFile;
 import com.novoda.downloadmanager.domain.DownloadStage;
-import com.novoda.downloadmanager.download.ContentLengthFetcher;
 import com.novoda.downloadmanager.download.DownloadDatabaseWrapper;
 import com.novoda.downloadmanager.download.task.DownloadTask;
 
@@ -21,26 +19,19 @@ public class DownloadUpdater {
     private final ExecutorService executor;
     private final Pauser pauser;
     private final DownloadCheck downloadCheck;
-    private final TotalFileSizeUpdater totalFileSizeUpdater;
 
     public DownloadUpdater(DownloadDatabaseWrapper downloadDatabaseWrapper,
                            ExecutorService executor,
                            Pauser pauser,
-                           DownloadCheck downloadCheck,
-                           TotalFileSizeUpdater totalFileSizeUpdater) {
+                           DownloadCheck downloadCheck) {
         this.downloadDatabaseWrapper = downloadDatabaseWrapper;
         this.executor = executor;
         this.pauser = pauser;
         this.downloadCheck = downloadCheck;
-        this.totalFileSizeUpdater = totalFileSizeUpdater;
     }
 
     public boolean update() {
         List<Download> allDownloads = downloadDatabaseWrapper.getAllDownloads();
-
-        downloadDatabaseWrapper.deleteAllDownloadsMarkedForDeletion();
-        totalFileSizeUpdater.updateMissingTotalFileSizes();
-
         boolean isCurrentlyDownloading = isCurrentlyDownloading(allDownloads);
 
         if (!isCurrentlyDownloading) {

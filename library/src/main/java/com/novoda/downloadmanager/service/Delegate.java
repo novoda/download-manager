@@ -1,8 +1,5 @@
 package com.novoda.downloadmanager.service;
 
-import android.content.Intent;
-import android.util.Log;
-
 import com.novoda.downloadmanager.DownloadServiceConnection;
 import com.novoda.downloadmanager.Service;
 import com.novoda.downloadmanager.client.ClientCheckResult;
@@ -18,6 +15,7 @@ public class Delegate {
     private final GlobalClientCheck globalClientCheck;
     private final DownloadDatabaseWrapper downloadDatabaseWrapper;
     private final DownloadServiceConnection downloadServiceConnection;
+    private final TotalFileSizeUpdater totalFileSizeUpdater;
 
     Delegate(DownloadObserver downloadObserver,
              DownloadUpdater downloadUpdater,
@@ -25,7 +23,8 @@ public class Delegate {
              UpdateScheduler updateScheduler,
              GlobalClientCheck globalClientCheck,
              DownloadDatabaseWrapper downloadDatabaseWrapper,
-             DownloadServiceConnection downloadServiceConnection) {
+             DownloadServiceConnection downloadServiceConnection,
+             TotalFileSizeUpdater totalFileSizeUpdater) {
         this.downloadObserver = downloadObserver;
         this.downloadUpdater = downloadUpdater;
         this.service = service;
@@ -33,6 +32,7 @@ public class Delegate {
         this.globalClientCheck = globalClientCheck;
         this.downloadDatabaseWrapper = downloadDatabaseWrapper;
         this.downloadServiceConnection = downloadServiceConnection;
+        this.totalFileSizeUpdater = totalFileSizeUpdater;
     }
 
     public void onServiceStart() {
@@ -66,11 +66,13 @@ public class Delegate {
         if (isActive) {
             updateScheduler.scheduleLater(updateCallback);
         } else {
-            shutDown();
+            stopService();
         }
     }
 
     private boolean update() {
+        downloadDatabaseWrapper.deleteAllDownloadsMarkedForDeletion();
+        totalFileSizeUpdater.updateMissingTotalFileSizes();
         return downloadUpdater.update();
     }
 
@@ -78,12 +80,19 @@ public class Delegate {
         downloadDatabaseWrapper.revertSubmittedDownloadsToQueuedDownloads();
     }
 
-    public void shutDown() {
-        Log.e("!!!", "shutting down service");
+    public void stopService() {
+        release();
+        downloadServiceConnection.stopService();
+    }
+
+    public void onDestroy() {
+        release();
+    }
+
+    private void release() {
         downloadObserver.release();
         updateScheduler.release();
         downloadUpdater.release();
-        downloadServiceConnection.stopService();
     }
 
 }
