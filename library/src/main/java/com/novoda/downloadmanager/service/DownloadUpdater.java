@@ -39,7 +39,7 @@ public class DownloadUpdater {
         List<Download> allDownloads = downloadDatabaseWrapper.getAllDownloads();
 
         downloadDatabaseWrapper.deleteAllDownloadsMarkedForDeletion();
-        updateFileSizeForFilesWithUnknownSize(allDownloads);
+        updateFileSizeForFilesWithUnknownSize();
 
         boolean isCurrentlyDownloading = isCurrentlyDownloading(allDownloads);
 
@@ -50,20 +50,12 @@ public class DownloadUpdater {
         return isCurrentlyDownloading;
     }
 
-    private void updateFileSizeForFilesWithUnknownSize(List<Download> allDownloads) {
-        for (Download download : allDownloads) {
-            List<DownloadFile> files = download.getFiles();
-            for (DownloadFile file : files) {
-                if (hasUnknownTotalBytes(file)) {
-                    long totalBytes = contentLengthFetcher.fetchContentLengthFor(file);
-                    downloadDatabaseWrapper.updateFileSize(file, totalBytes);
-                }
-            }
+    private void updateFileSizeForFilesWithUnknownSize() {
+        List<DownloadFile> files = downloadDatabaseWrapper.getFilesWithUnknownTotalSize();
+        for (DownloadFile file : files) {
+            long totalBytes = contentLengthFetcher.fetchContentLengthFor(file);
+            downloadDatabaseWrapper.updateFileSize(file, totalBytes);
         }
-    }
-
-    private boolean hasUnknownTotalBytes(DownloadFile file) {
-        return file.totalSize() == -1;
     }
 
     private boolean isCurrentlyDownloading(List<Download> allDownloads) {

@@ -16,6 +16,7 @@ import com.novoda.downloadmanager.domain.ExternalId;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 class DatabaseInteraction {
@@ -90,8 +91,19 @@ class DatabaseInteraction {
 
     private List<DownloadFile> getFilesForId(DownloadId id) {
         Cursor cursor = contentResolver.query(Provider.FILE, null, DB.Columns.File.FileDownloadId + "=?", new String[]{id.asString()}, null);
-        cursor.moveToFirst();
+        try {
+            return marshalDownloadFiles(cursor);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
 
+    private List<DownloadFile> marshalDownloadFiles(Cursor cursor) {
+        if (cursor == null || !cursor.moveToNext()) {
+            return Collections.emptyList();
+        }
         List<DownloadFile> files = new ArrayList<>();
         do {
             String upstreamUri = DB.File.getFileUri(cursor);
@@ -102,7 +114,6 @@ class DatabaseInteraction {
             files.add(new DownloadFile(upstreamUri, currentSize, totalSize, localUri, fileStatus));
         } while (cursor.moveToNext());
 
-        cursor.close();
         return files;
     }
 
@@ -228,4 +239,16 @@ class DatabaseInteraction {
         DB.Download.setDownloadStage(DownloadStage.QUEUED.name(), values);
         contentResolver.update(Provider.DOWNLOAD, values, DB.Columns.Download.DownloadStage + "=?", new String[]{DownloadStage.SUBMITTED.name()});
     }
+
+    public List<DownloadFile> getFilesWithUnknownTotalSize() {
+        Cursor cursor = contentResolver.query(Provider.FILE, null, DB.Columns.File.FileTotalSize + "=?", new String[]{"-1"}, null);
+        try {
+            return marshalDownloadFiles(cursor);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
 }

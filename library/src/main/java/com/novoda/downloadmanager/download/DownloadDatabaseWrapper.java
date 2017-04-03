@@ -98,4 +98,8 @@ public class DownloadDatabaseWrapper {
     public void revertSubmittedDownloadsToQueuedDownloads() {
         databaseInteraction.revertSubmittedDownloadsToQueuedDownloads();
     }
+
+    public List<DownloadFile> getFilesWithUnknownTotalSize() {
+        return databaseInteraction.getFilesWithUnknownTotalSize();
+    }
 }
