@@ -11,7 +11,7 @@ public class Delegate {
     private final DownloadObserver downloadObserver;
     private final DownloadTaskSubmitter downloadTaskSubmitter;
     private final Service service;
-    private final UpdateScheduler updateScheduler;
+    private final Timer timer;
     private final GlobalClientCheck globalClientCheck;
     private final DownloadDatabaseWrapper downloadDatabaseWrapper;
     private final DownloadServiceConnection downloadServiceConnection;
@@ -20,7 +20,7 @@ public class Delegate {
     Delegate(DownloadObserver downloadObserver,
              DownloadTaskSubmitter downloadTaskSubmitter,
              Service service,
-             UpdateScheduler updateScheduler,
+             Timer timer,
              GlobalClientCheck globalClientCheck,
              DownloadDatabaseWrapper downloadDatabaseWrapper,
              DownloadServiceConnection downloadServiceConnection,
@@ -28,7 +28,7 @@ public class Delegate {
         this.downloadObserver = downloadObserver;
         this.downloadTaskSubmitter = downloadTaskSubmitter;
         this.service = service;
-        this.updateScheduler = updateScheduler;
+        this.timer = timer;
         this.globalClientCheck = globalClientCheck;
         this.downloadDatabaseWrapper = downloadDatabaseWrapper;
         this.downloadServiceConnection = downloadServiceConnection;
@@ -41,7 +41,7 @@ public class Delegate {
         if (clientCheckResult.isAllowed()) {
             downloadObserver.startMonitoringDownloadChanges(onDownloadsTableUpdated);
 
-            updateScheduler.scheduleNow(updateCallback);
+            timer.scheduleNow(updateCallback);
         } else {
             service.stopSelf();
         }
@@ -54,7 +54,7 @@ public class Delegate {
         }
     };
 
-    private final UpdateScheduler.OnUpdate updateCallback = new UpdateScheduler.OnUpdate() {
+    private final Timer.Callback updateCallback = new Timer.Callback() {
         @Override
         public void onUpdate() {
             continueOrShutdown();
@@ -62,18 +62,15 @@ public class Delegate {
     };
 
     private void continueOrShutdown() {
-        boolean isActive = update();
-        if (isActive) {
-            updateScheduler.scheduleLater(updateCallback);
+        downloadDatabaseWrapper.deleteAllDownloadsMarkedForDeletion();
+        totalFileSizeUpdater.updateMissingTotalFileSizes();
+        boolean downloadInProgress = downloadTaskSubmitter.submitNextAvailableDownloadIfNotCurrentlyDownloading();
+
+        if (downloadInProgress) {
+            timer.scheduleLater(updateCallback);
         } else {
             stopService();
         }
-    }
-
-    private boolean update() {
-        downloadDatabaseWrapper.deleteAllDownloadsMarkedForDeletion();
-        totalFileSizeUpdater.updateMissingTotalFileSizes();
-        return downloadTaskSubmitter.submitNextAvailableDownloadIfNotCurrentlyDownloading();
     }
 
     public void revertSubmittedDownloadsToQueuedDownloads() {
@@ -91,7 +88,7 @@ public class Delegate {
 
     private void release() {
         downloadObserver.release();
-        updateScheduler.release();
+        timer.release();
         downloadTaskSubmitter.stopSubmittingDownloadTasks();
     }
 

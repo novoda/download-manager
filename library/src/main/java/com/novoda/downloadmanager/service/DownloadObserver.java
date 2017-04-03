@@ -6,14 +6,14 @@ import android.os.Handler;
 
 import com.novoda.downloadmanager.Provider;
 
-class DownloadObserver {
+public class DownloadObserver {
 
     private final Handler updateHandler;
     private final ContentResolver contentResolver;
 
     private ContentObserver contentObserver;
 
-    DownloadObserver(Handler updateHandler, ContentResolver contentResolver) {
+    public DownloadObserver(Handler updateHandler, ContentResolver contentResolver) {
         this.updateHandler = updateHandler;
         this.contentResolver = contentResolver;
     }

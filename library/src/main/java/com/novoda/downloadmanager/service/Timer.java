@@ -6,26 +6,28 @@ import android.os.Process;
 
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
-class UpdateScheduler {
+public class Timer {
 
     private final HandlerThread updateThread;
     private final Handler updateHandler;
 
-    private OnUpdate onUpdate;
+    private Callback callback;
 
-    UpdateScheduler(HandlerThread updateThread, Handler updateHandler) {
+    public Timer(HandlerThread updateThread, Handler updateHandler) {
         this.updateThread = updateThread;
         this.updateHandler = updateHandler;
     }
 
-    public void scheduleNow(OnUpdate onUpdate) {
-        this.onUpdate = onUpdate;
+    public void scheduleNow(Callback callback) {
+        this.callback = callback;
+
         updateHandler.removeCallbacks(updateCallback);
         updateHandler.post(updateCallback);
     }
 
-    public void scheduleLater(OnUpdate onUpdate) {
-        this.onUpdate = onUpdate;
+    public void scheduleLater(Callback callback) {
+        this.callback = callback;
+
         updateHandler.removeCallbacks(updateCallback);
         updateHandler.postDelayed(updateCallback, 5 * MINUTE_IN_MILLIS);
     }
@@ -34,7 +36,7 @@ class UpdateScheduler {
         @Override
         public void run() {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            onUpdate.onUpdate();
+            callback.onUpdate();
         }
     };
 
@@ -43,7 +45,7 @@ class UpdateScheduler {
         updateThread.quit();
     }
 
-    interface OnUpdate {
+    interface Callback {
         void onUpdate();
     }
 

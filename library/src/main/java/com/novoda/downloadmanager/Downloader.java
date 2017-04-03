@@ -10,7 +10,7 @@ import com.novoda.downloadmanager.domain.Download;
 import com.novoda.downloadmanager.domain.DownloadId;
 import com.novoda.downloadmanager.domain.DownloadRequest;
 import com.novoda.downloadmanager.download.DownloadDatabaseWrapper;
-import com.novoda.downloadmanager.download.DownloadHandlerCreator;
+import com.novoda.downloadmanager.download.DownloadDatabaseWrapperCreator;
 
 import java.util.List;
 
@@ -39,7 +39,7 @@ public class Downloader {
         public Downloader build(Context context) {
             Context applicationContext = context.getApplicationContext();
             ContentResolver contentResolver = applicationContext.getContentResolver();
-            DownloadDatabaseWrapper downloadDatabaseWrapper = DownloadHandlerCreator.create(contentResolver);
+            DownloadDatabaseWrapper downloadDatabaseWrapper = DownloadDatabaseWrapperCreator.create(contentResolver);
 
             Pauser pauser = new Pauser(LocalBroadcastManager.getInstance(context));
             Listeners listeners = Listeners.newInstance();

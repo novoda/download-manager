@@ -12,6 +12,8 @@ import com.novoda.downloadmanager.client.DownloadCheck;
 import com.novoda.downloadmanager.client.GlobalClientCheck;
 import com.novoda.downloadmanager.service.Delegate;
 import com.novoda.downloadmanager.service.DelegateCreator;
+import com.novoda.downloadmanager.service.DownloadObserver;
+import com.novoda.downloadmanager.service.Timer;
 
 public class Service extends android.app.Service {
 
@@ -47,13 +49,16 @@ public class Service extends android.app.Service {
         updateThread.start();
         Handler updateHandler = new Handler(updateThread.getLooper());
 
+        Timer timer = new Timer(updateThread, updateHandler);
+        DownloadObserver downloadObserver = new DownloadObserver(updateHandler, getContentResolver());
+
         return DelegateCreator.create(
-                updateThread,
-                updateHandler,
                 this,
                 globalChecker,
                 downloadChecker,
-                serviceConnection
+                serviceConnection,
+                downloadObserver,
+                timer
         );
     }
 

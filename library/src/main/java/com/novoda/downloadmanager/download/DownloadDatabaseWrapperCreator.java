@@ -2,7 +2,7 @@ package com.novoda.downloadmanager.download;
 
 import android.content.ContentResolver;
 
-public class DownloadHandlerCreator {
+public class DownloadDatabaseWrapperCreator {
 
     public static DownloadDatabaseWrapper create(ContentResolver contentResolver) {
         DatabaseInteraction databaseInteraction = new DatabaseInteraction(contentResolver);
