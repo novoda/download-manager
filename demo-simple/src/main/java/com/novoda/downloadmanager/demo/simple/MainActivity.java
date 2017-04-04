@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,6 +15,7 @@ import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.Download;
 import com.novoda.downloadmanager.DownloadId;
 import com.novoda.downloadmanager.DownloadRequest;
+import com.novoda.notils.logger.simple.Log;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.setShowLogs(true);
 
         Downloader downloader = new Downloader.Builder().build(this);
 
