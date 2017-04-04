@@ -7,7 +7,7 @@ import com.novoda.downloadmanager.demo.simple.DB;
 
 import novoda.lib.sqliteprovider.provider.SQLiteContentProviderImpl;
 
-class Provider extends SQLiteContentProviderImpl {
+public class Provider extends SQLiteContentProviderImpl {
 
     private static final String AUTHORITY = "content://" + Reflector.reflectAuthority();
 

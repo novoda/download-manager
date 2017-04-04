@@ -12,7 +12,7 @@ import com.squareup.okhttp.OkHttpClient;
 
 import java.util.concurrent.ExecutorService;
 
-class DownloadService extends Service {
+public class DownloadService extends Service {
 
     private final android.os.Binder binder = new Binder();
 
