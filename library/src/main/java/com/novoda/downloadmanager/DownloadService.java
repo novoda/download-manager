@@ -10,12 +10,15 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.squareup.okhttp.OkHttpClient;
+
+import java.util.concurrent.ExecutorService;
+
 class DownloadService extends Service {
 
     private final android.os.Binder binder = new Binder();
 
     private Delegate delegate;
-
     private DownloadCheck downloadChecker;
     private GlobalClientCheck globalChecker;
     private DownloadServiceConnection serviceConnection;
@@ -29,17 +32,6 @@ class DownloadService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.e("!!!", "service created");
-    }
-
-    private void fooStart() {
-        Log.e("!!!", "service on startService");
-        delegate = createDelegate(globalChecker, downloadChecker);
-        delegate.revertSubmittedDownloadsToQueuedDownloads();
-        delegate.onServiceStart();
-    }
-
-    private Delegate createDelegate(GlobalClientCheck globalChecker, DownloadCheck downloadChecker) {
         HandlerThread updateThread = new HandlerThread("DownloadManager-UpdateThread");
         updateThread.start();
         Handler updateHandler = new Handler(updateThread.getLooper());
@@ -48,15 +40,42 @@ class DownloadService extends Service {
         ContentResolver contentResolver = getContentResolver();
         DownloadObserver downloadObserver = new DownloadObserver(updateHandler, contentResolver);
 
-        return DelegateCreator.create(
-                globalChecker,
-                downloadChecker,
-                serviceConnection,
-                downloadObserver,
-                timer,
-                LocalBroadcastManager.getInstance(this),
-                contentResolver
-        );
+        DownloadDatabaseWrapper downloadDatabaseWrapper = DownloadDatabaseWrapperCreator.create(contentResolver);
+        Pauser pauser = new Pauser(LocalBroadcastManager.getInstance(this));
+        DownloadExecutorFactory factory = new DownloadExecutorFactory();
+        ExecutorService executor = factory.createExecutor();
+        ContentLengthFetcher contentLengthFetcher = new ContentLengthFetcher(new OkHttpClient());
+        TotalFileSizeUpdater totalFileSizeUpdater = new TotalFileSizeUpdater(downloadDatabaseWrapper, contentLengthFetcher);
+        DownloadTaskSubmitter downloadTaskSubmitter = new DownloadTaskSubmitter(downloadDatabaseWrapper, executor, pauser, lazyDownloadCheck);
+
+        delegate = new Delegate(downloadObserver, downloadTaskSubmitter, timer, lazyGlobalClientCheck, downloadDatabaseWrapper, lazyServiceConnectionStopper, totalFileSizeUpdater);
+    }
+
+    private final GlobalClientCheck lazyGlobalClientCheck = new GlobalClientCheck() {
+        @Override
+        public ClientCheckResult onGlobalCheck() {
+            return globalChecker.onGlobalCheck();
+        }
+    };
+
+    private final DownloadCheck lazyDownloadCheck = new DownloadCheck() {
+        @Override
+        public ClientCheckResult isAllowedToDownload(Download download) {
+            return downloadChecker.isAllowedToDownload(download);
+        }
+    };
+
+    private final ServiceStopper lazyServiceConnectionStopper = new ServiceStopper() {
+        @Override
+        public void stopService() {
+            serviceConnection.stopService();
+        }
+    };
+
+    private void fooStart() {
+        Log.e("!!!", "service on startService");
+        delegate.revertSubmittedDownloadsToQueuedDownloads();
+        delegate.onServiceStart();
     }
 
     @Override
@@ -84,6 +103,12 @@ class DownloadService extends Service {
             Log.d("!!!", "setServiceConnection():");
             DownloadService.this.serviceConnection = serviceConnection;
         }
+    }
+
+    interface ServiceStopper {
+
+        void stopService();
+
     }
 
 }

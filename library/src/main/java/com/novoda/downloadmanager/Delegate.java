@@ -7,7 +7,7 @@ class Delegate {
     private final Timer timer;
     private final GlobalClientCheck globalClientCheck;
     private final DownloadDatabaseWrapper downloadDatabaseWrapper;
-    private final DownloadServiceConnection downloadServiceConnection;
+    private final DownloadService.ServiceStopper serviceStopper;
     private final TotalFileSizeUpdater totalFileSizeUpdater;
 
     Delegate(DownloadObserver downloadObserver,
@@ -15,14 +15,14 @@ class Delegate {
              Timer timer,
              GlobalClientCheck globalClientCheck,
              DownloadDatabaseWrapper downloadDatabaseWrapper,
-             DownloadServiceConnection downloadServiceConnection,
+             DownloadService.ServiceStopper serviceStopper,
              TotalFileSizeUpdater totalFileSizeUpdater) {
         this.downloadObserver = downloadObserver;
         this.downloadTaskSubmitter = downloadTaskSubmitter;
         this.timer = timer;
         this.globalClientCheck = globalClientCheck;
         this.downloadDatabaseWrapper = downloadDatabaseWrapper;
-        this.downloadServiceConnection = downloadServiceConnection;
+        this.serviceStopper = serviceStopper;
         this.totalFileSizeUpdater = totalFileSizeUpdater;
     }
 
@@ -69,7 +69,7 @@ class Delegate {
 
     public void stopService() {
         release();
-        downloadServiceConnection.stopService();
+        serviceStopper.stopService();
     }
 
     public void onDestroy() {
