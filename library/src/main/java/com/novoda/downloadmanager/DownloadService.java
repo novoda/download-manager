@@ -3,7 +3,6 @@ package com.novoda.downloadmanager;
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -20,7 +19,7 @@ import com.novoda.downloadmanager.service.Timer;
 
 public class DownloadService extends Service {
 
-    private final Binder binder = new DownloadServiceBinder();
+    private final android.os.Binder binder = new Binder();
 
     private Delegate delegate;
 
@@ -74,7 +73,7 @@ public class DownloadService extends Service {
         super.onDestroy();
     }
 
-    class DownloadServiceBinder extends Binder {
+    class Binder extends android.os.Binder {
 
         void setDownloadChecker(DownloadCheck downloadChecker) {
             DownloadService.this.downloadChecker = downloadChecker;
