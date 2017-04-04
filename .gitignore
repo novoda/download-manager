@@ -31,7 +31,6 @@ proguard/
 *.ipr
 *.iws
 .idea/
-.gradle/
 
 # OSX
 *.DS_Store
