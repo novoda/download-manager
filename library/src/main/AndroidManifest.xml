@@ -9,7 +9,7 @@
 
   <application>
 
-    <service android:name=".Service" />
+    <service android:name=".DownloadService" />
 
     <provider
       android:name=".Provider"

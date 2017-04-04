@@ -1,5 +1,6 @@
 package com.novoda.downloadmanager;
 
+import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.Binder;
@@ -17,7 +18,7 @@ import com.novoda.downloadmanager.service.DelegateCreator;
 import com.novoda.downloadmanager.service.DownloadObserver;
 import com.novoda.downloadmanager.service.Timer;
 
-public class Service extends android.app.Service {
+public class DownloadService extends Service {
 
     private final Binder binder = new DownloadServiceBinder();
 
@@ -76,20 +77,20 @@ public class Service extends android.app.Service {
     class DownloadServiceBinder extends Binder {
 
         void setDownloadChecker(DownloadCheck downloadChecker) {
-            Service.this.downloadChecker = downloadChecker;
+            DownloadService.this.downloadChecker = downloadChecker;
         }
 
         void setGlobalChecker(GlobalClientCheck globalChecker) {
-            Service.this.globalChecker = globalChecker;
+            DownloadService.this.globalChecker = globalChecker;
         }
 
         void fooStart() {
-            Service.this.fooStart();
+            DownloadService.this.fooStart();
         }
 
         void setServiceConnection(DownloadServiceConnection serviceConnection) {
             Log.d("!!!", "setServiceConnection():");
-            Service.this.serviceConnection = serviceConnection;
+            DownloadService.this.serviceConnection = serviceConnection;
         }
     }
 

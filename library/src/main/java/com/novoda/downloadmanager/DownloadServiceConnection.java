@@ -1,5 +1,6 @@
 package com.novoda.downloadmanager;
 
+import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -22,20 +23,20 @@ public class DownloadServiceConnection {
     }
 
     public void startService() {
-        Intent serviceIntent = new Intent(context, Service.class);
+        Intent serviceIntent = new Intent(context, DownloadService.class);
         context.bindService(serviceIntent, serviceConnection, Service.BIND_AUTO_CREATE);
     }
 
     public void stopService() {
         context.unbindService(serviceConnection);
-        context.stopService(new Intent(context, Service.class));
+        context.stopService(new Intent(context, DownloadService.class));
     }
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
-            Service.DownloadServiceBinder downloadServiceBinder = (Service.DownloadServiceBinder) binder;
+            DownloadService.Binder downloadServiceBinder = (DownloadService.Binder) binder;
             downloadServiceBinder.setGlobalChecker(globalClientChecker);
             downloadServiceBinder.setDownloadChecker(downloadChecker);
             downloadServiceBinder.setServiceConnection(DownloadServiceConnection.this);
