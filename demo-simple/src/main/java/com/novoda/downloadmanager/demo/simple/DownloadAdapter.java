@@ -1,15 +1,16 @@
 package com.novoda.downloadmanager.demo.simple;
 
 import android.support.v7.widget.RecyclerView;
+import android.text.format.Formatter;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.novoda.downloadmanager.demo.R;
-import com.novoda.downloadmanager.domain.Download;
-import com.novoda.downloadmanager.domain.DownloadFile;
-import com.novoda.downloadmanager.domain.DownloadStage;
+import com.novoda.downloadmanager.Download;
+import com.novoda.downloadmanager.DownloadFile;
+import com.novoda.downloadmanager.DownloadStage;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.ArrayList;
@@ -51,20 +52,18 @@ class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHolder> {
         private final TextView statusText;
         private final TextView filesText;
         private final TextView idText;
-        private final TextView sizeText;
-        private final TextView percentText;
+        private final TextView progressText;
         private final View deleteButton;
-        private final Button pauseResumeButton;
+        private final ImageView pauseResumeButton;
 
         public ViewHolder(View itemView) {
             super(itemView);
             statusText = (TextView) itemView.findViewById(R.id.download_status_text);
             filesText = (TextView) itemView.findViewById(R.id.download_files_text);
             idText = (TextView) itemView.findViewById(R.id.download_id_text);
-            sizeText = (TextView) itemView.findViewById(R.id.download_size_text);
-            percentText = (TextView) itemView.findViewById(R.id.download_percent_text);
+            progressText = (TextView) itemView.findViewById(R.id.download_progress_text);
             deleteButton = itemView.findViewById(R.id.download_delete);
-            pauseResumeButton = (Button) itemView.findViewById(R.id.download_pause_resume);
+            pauseResumeButton = (ImageView) itemView.findViewById(R.id.download_pause_resume);
         }
 
         public void bind(final Download download, final OnDownloadClickedListener downloadClickedListener) {
@@ -72,9 +71,10 @@ class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHolder> {
 
             statusText.setText(download.getStatus().name());
             filesText.setText(getFilePercentages(files));
-            idText.setText("Id: " + download.getId().asString());
-            sizeText.setText("bytes: " + download.getCurrentSize() + " / " + download.getTotalSize());
-            percentText.setText("Total: " + download.getPercentage() + "%");
+            idText.setText("Download ID: " + download.getId().asString());
+
+            String downloadedSize = Formatter.formatShortFileSize(itemView.getContext(), download.getCurrentSize());
+            progressText.setText(downloadedSize + " (" + download.getPercentage() + "%)");
 
             if (download.getStage() == DownloadStage.COMPLETED) {
                 pauseResumeButton.setVisibility(View.GONE);
@@ -82,11 +82,13 @@ class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHolder> {
                 pauseResumeButton.setVisibility(View.VISIBLE);
 
                 if (download.getStage() == DownloadStage.RUNNING) {
-                    pauseResumeButton.setText("Pause");
+                    pauseResumeButton.setImageResource(R.drawable.ic_pause_black_24dp);
+                    pauseResumeButton.setContentDescription(pauseResumeButton.getResources().getString(R.string.button_running_content_description));
                 }
 
                 if (download.getStage() == DownloadStage.PAUSED) {
-                    pauseResumeButton.setText("Resume");
+                    pauseResumeButton.setImageResource(R.drawable.ic_play_arrow_black_24dp);
+                    pauseResumeButton.setContentDescription(pauseResumeButton.getResources().getString(R.string.button_paused_content_description));
                 }
 
                 pauseResumeButton.setOnClickListener(new View.OnClickListener() {
@@ -113,9 +115,10 @@ class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.ViewHolder> {
 
         private String getFilePercentages(List<DownloadFile> files) {
             StringBuilder stringBuilder = new StringBuilder();
-            for (DownloadFile file : files) {
+            for (int i = 0; i < files.size(); i++) {
+                DownloadFile file = files.get(i);
                 stringBuilder
-                        .append(file.getFileIdentifier())
+                        .append("File #" + (i + 1) + " ..." + file.getLocalUri().substring(file.getLocalUri().length() - 10, file.getLocalUri().length()))
                         .append(": ")
                         .append(file.getPercentage())
                         .append("%")

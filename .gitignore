@@ -25,12 +25,12 @@ proguard/
 # Log Files
 *.log
 
-# IDEA Ignores
+# IDE Ignores
 *.iml
 *.ipr
 *.iws
 .idea/
-.gradle/
+captures/
 
 # OSX
 *.DS_Store

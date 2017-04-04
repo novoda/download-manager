@@ -1,7 +1,5 @@
 package com.novoda.downloadmanager;
 
-import com.novoda.downloadmanager.domain.Download;
-
 import java.util.ArrayList;
 import java.util.List;
 

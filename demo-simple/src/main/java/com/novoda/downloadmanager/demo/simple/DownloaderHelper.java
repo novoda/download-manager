@@ -4,8 +4,8 @@ import com.novoda.downloadmanager.Downloader;
 import com.novoda.downloadmanager.OnDownloadsChangedListener;
 import com.novoda.downloadmanager.OnDownloadsUpdateListener;
 import com.novoda.downloadmanager.WatchType;
-import com.novoda.downloadmanager.domain.DownloadId;
-import com.novoda.downloadmanager.domain.DownloadRequest;
+import com.novoda.downloadmanager.DownloadId;
+import com.novoda.downloadmanager.DownloadRequest;
 
 class DownloaderHelper {
 

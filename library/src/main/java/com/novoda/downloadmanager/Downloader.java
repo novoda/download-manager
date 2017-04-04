@@ -4,72 +4,64 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.novoda.downloadmanager.client.DownloadCheck;
-import com.novoda.downloadmanager.client.GlobalClientCheck;
-import com.novoda.downloadmanager.domain.Download;
-import com.novoda.downloadmanager.domain.DownloadId;
-import com.novoda.downloadmanager.domain.DownloadRequest;
-import com.novoda.downloadmanager.download.DownloadHandler;
-import com.novoda.downloadmanager.download.DownloadHandlerCreator;
-
 import java.util.List;
 
 public class Downloader {
 
-    private final DownloadHandler downloadHandler;
+    private final DownloadDatabaseWrapper downloadDatabaseWrapper;
     private final Pauser pauser;
     private final Listeners listeners;
     private final Watcher watcher;
-    private final ServiceStarter serviceStarter;
+    private final DownloadServiceConnection downloadServiceConnection;
 
     public static class Builder {
 
-        private final ServiceBuilder serviceBuilder = new ServiceBuilder();
+        private final DownloadServiceConnectionBuilder downloadServiceConnectionBuilder = new DownloadServiceConnectionBuilder();
 
         public Builder with(GlobalClientCheck globalClientCheck) {
-            serviceBuilder.with(globalClientCheck);
+            downloadServiceConnectionBuilder.with(globalClientCheck);
             return this;
         }
 
         public Builder with(DownloadCheck downloadCheck) {
-            serviceBuilder.with(downloadCheck);
+            downloadServiceConnectionBuilder.with(downloadCheck);
             return this;
         }
 
         public Downloader build(Context context) {
             Context applicationContext = context.getApplicationContext();
             ContentResolver contentResolver = applicationContext.getContentResolver();
-            ;
-            DownloadHandler downloadHandler = DownloadHandlerCreator.create(contentResolver);
+            DownloadDatabaseWrapper downloadDatabaseWrapper = DownloadDatabaseWrapperCreator.create(contentResolver);
+
             Pauser pauser = new Pauser(LocalBroadcastManager.getInstance(context));
             Listeners listeners = Listeners.newInstance();
             Watcher watcher = Watcher.newInstance(context);
-            ServiceStarter serviceStarter = serviceBuilder.build(applicationContext);
+            DownloadServiceConnection downloadServiceConnection = downloadServiceConnectionBuilder.build(applicationContext);
 
-            return new Downloader(downloadHandler, pauser, listeners, watcher, serviceStarter);
+            return new Downloader(downloadDatabaseWrapper, pauser, listeners, watcher, downloadServiceConnection);
         }
 
     }
 
-    Downloader(DownloadHandler downloadHandler, Pauser pauser, Listeners listeners, Watcher watcher, ServiceStarter serviceStarter) {
-        this.downloadHandler = downloadHandler;
+    Downloader(DownloadDatabaseWrapper downloadDatabaseWrapper, Pauser pauser, Listeners listeners, Watcher watcher, DownloadServiceConnection downloadServiceConnection) {
+        this.downloadDatabaseWrapper = downloadDatabaseWrapper;
         this.pauser = pauser;
         this.listeners = listeners;
         this.watcher = watcher;
-        this.serviceStarter = serviceStarter;
+        this.downloadServiceConnection = downloadServiceConnection;
     }
 
     public DownloadId createDownloadId() {
-        return downloadHandler.createDownloadId();
+        return downloadDatabaseWrapper.createDownloadId();
     }
 
     public void submit(DownloadRequest downloadRequest) {
-        downloadHandler.submitRequest(downloadRequest);
+        downloadDatabaseWrapper.submitRequest(downloadRequest);
         startService();
     }
 
     public void delete(DownloadId downloadId) {
-        downloadHandler.markForDeletion(downloadId);
+        downloadDatabaseWrapper.markForDeletion(downloadId);
         startService();
     }
 
@@ -78,16 +70,16 @@ public class Downloader {
     }
 
     public void resume(DownloadId downloadId) {
-        downloadHandler.resumeDownload(downloadId);
+        downloadDatabaseWrapper.resumeDownload(downloadId);
         startService();
     }
 
     private void startService() {
-        serviceStarter.start();
+        downloadServiceConnection.startService();
     }
 
     public List<Download> getAllDownloads() {
-        return downloadHandler.getAllDownloads();
+        return downloadDatabaseWrapper.getAllDownloads();
     }
 
     public void addOnDownloadsUpdateListener(OnDownloadsUpdateListener listener) {
@@ -112,7 +104,7 @@ public class Downloader {
     }
 
     public void addCompletedDownload(DownloadRequest downloadRequest) {
-        downloadHandler.addCompletedRequest(downloadRequest);
+        downloadDatabaseWrapper.addCompletedRequest(downloadRequest);
     }
 
     public void forceStart() {

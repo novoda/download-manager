@@ -6,9 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.novoda.downloadmanager.domain.DownloadId;
-
-public class Pauser {
+class Pauser {
 
     private static final String ACTION_PAUSE = "PAUSE";
     private static final String EXTRA_DOWNLOAD_ID = "DOWNLOAD_ID";
@@ -22,7 +20,8 @@ public class Pauser {
     }
 
     public void requestPause(DownloadId downloadId) {
-        localBroadcastManager.sendBroadcast(createPauseIntent(downloadId));
+        Intent pauseIntent = createPauseIntent(downloadId);
+        localBroadcastManager.sendBroadcast(pauseIntent);
     }
 
     private Intent createPauseIntent(DownloadId downloadId) {
@@ -52,7 +51,7 @@ public class Pauser {
         localBroadcastManager.unregisterReceiver(receiver);
     }
 
-    public interface OnPauseListener {
+    interface OnPauseListener {
         void onDownloadPaused();
     }
 

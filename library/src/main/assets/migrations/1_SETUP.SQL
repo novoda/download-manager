@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS 'request' (
                                 _id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                                 request_timestamp TEXT NOT NULL,
-                                UNIQUE (request_timestamp) ON CONFLICT REPLACE
+                                UNIQUE (request_timestamp) ON CONFLICT REPLACE --TODO: should abort this - else risk two downloads with same ID in DatabaseInteractions
 );
 
 CREATE TABLE IF NOT EXISTS 'download' (
@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS 'download' (
                                 download_stage TEXT NOT NULL,
                                 download_id INTEGER NOT NULL,
                                 download_identifier TEXT NOT NULL,
-                                UNIQUE (download_id) ON CONFLICT REPLACE
+                                UNIQUE (download_id) ON CONFLICT REPLACE --TODO: should abort this, not replace. The DatabaseInteractions class should not let such an operation occur
 );
 
 CREATE TABLE IF NOT EXISTS 'file' (
@@ -20,8 +20,7 @@ CREATE TABLE IF NOT EXISTS 'file' (
                                 file_download_id INTEGER NOT NULL,
                                 file_uri TEXT NOT_NULL,
                                 file_local_uri TEXT NOT_NULL,
-                                file_identifier TEXT NOT NULL,
-                                UNIQUE (file_uri, file_identifier) ON CONFLICT REPLACE
+                                UNIQUE (file_local_uri) ON CONFLICT ABORT
 );
 
 CREATE VIEW IF NOT EXISTS "downloads_with_size" AS
@@ -31,7 +30,7 @@ CREATE VIEW IF NOT EXISTS "downloads_with_size" AS
                                     download_identifier,
                                     SUM(file.file_current_size) AS current_size,
                                     SUM(file.file_total_size) AS total_size
-                                    FROM
-                                        download
-                                        LEFT OUTER JOIN file ON file.file_download_id = download.download_id
-                                    GROUP BY download_id;
+                                FROM
+                                    download
+                                    LEFT OUTER JOIN file ON file.file_download_id = download.download_id
+                                GROUP BY download_id;
