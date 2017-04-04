@@ -1,9 +1,5 @@
 package com.novoda.downloadmanager;
 
-import com.novoda.downloadmanager.DownloadFile;
-import com.novoda.downloadmanager.ContentLengthFetcher;
-import com.novoda.downloadmanager.DownloadDatabaseWrapper;
-
 import java.util.List;
 
 class TotalFileSizeUpdater {
