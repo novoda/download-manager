@@ -1,35 +1,31 @@
 package com.novoda.downloadmanager;
 
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Process;
 
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
 class Timer {
 
-    private final HandlerThread updateThread;
-    private final Handler updateHandler;
+    private final DownloadsHandler downloadsHandler;
 
     private Callback callback;
 
-    public Timer(HandlerThread updateThread, Handler updateHandler) {
-        this.updateThread = updateThread;
-        this.updateHandler = updateHandler;
+    public Timer(DownloadsHandler downloadsHandler) {
+        this.downloadsHandler = downloadsHandler;
     }
 
     public void scheduleNow(Callback callback) {
         this.callback = callback;
 
-        updateHandler.removeCallbacks(updateCallback);
-        updateHandler.post(updateCallback);
+        downloadsHandler.removeCallbacks(updateCallback);
+        downloadsHandler.post(updateCallback);
     }
 
     public void scheduleLater(Callback callback) {
         this.callback = callback;
 
-        updateHandler.removeCallbacks(updateCallback);
-        updateHandler.postDelayed(updateCallback, 5 * MINUTE_IN_MILLIS);
+        downloadsHandler.removeCallbacks(updateCallback);
+        downloadsHandler.postDelayed(updateCallback, 5 * MINUTE_IN_MILLIS);
     }
 
     private final Runnable updateCallback = new Runnable() {
@@ -41,8 +37,8 @@ class Timer {
     };
 
     public void release() {
-        updateHandler.removeCallbacks(updateCallback);
-        updateThread.quit();
+        downloadsHandler.removeCallbacks(updateCallback);
+        downloadsHandler.stop();
     }
 
     interface Callback {

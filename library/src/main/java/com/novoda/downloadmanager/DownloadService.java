@@ -3,8 +3,6 @@ package com.novoda.downloadmanager;
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
@@ -32,13 +30,11 @@ class DownloadService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        HandlerThread updateThread = new HandlerThread("DownloadManager-UpdateThread");
-        updateThread.start();
-        Handler updateHandler = new Handler(updateThread.getLooper());
+        DownloadsHandler downloadsHandler = DownloadsHandler.start();
 
-        Timer timer = new Timer(updateThread, updateHandler);
+        Timer timer = new Timer(downloadsHandler);
         ContentResolver contentResolver = getContentResolver();
-        DownloadObserver downloadObserver = new DownloadObserver(updateHandler, contentResolver);
+        DownloadObserver downloadObserver = new DownloadObserver(downloadsHandler, contentResolver);
 
         DownloadDatabaseWrapper downloadDatabaseWrapper = DownloadDatabaseWrapperCreator.create(contentResolver);
         Pauser pauser = new Pauser(LocalBroadcastManager.getInstance(this));

@@ -2,24 +2,21 @@ package com.novoda.downloadmanager;
 
 import android.content.ContentResolver;
 import android.database.ContentObserver;
-import android.os.Handler;
-
-import com.novoda.downloadmanager.Provider;
 
 class DownloadObserver {
 
-    private final Handler updateHandler;
+    private final DownloadsHandler downloadsHandler;
     private final ContentResolver contentResolver;
 
     private ContentObserver contentObserver;
 
-    public DownloadObserver(Handler updateHandler, ContentResolver contentResolver) {
-        this.updateHandler = updateHandler;
+    public DownloadObserver(DownloadsHandler downloadsHandler, ContentResolver contentResolver) {
+        this.downloadsHandler = downloadsHandler;
         this.contentResolver = contentResolver;
     }
 
     void startMonitoringDownloadChanges(final Callback callback) {
-        contentObserver = new ContentObserver(updateHandler) {
+        contentObserver = new ContentObserver(downloadsHandler.getHandler()) {
             @Override
             public void onChange(boolean selfChange) {
                 callback.onDownloadsTableUpdated();
