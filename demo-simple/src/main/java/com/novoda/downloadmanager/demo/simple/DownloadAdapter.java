@@ -8,9 +8,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.novoda.downloadmanager.demo.R;
-import com.novoda.downloadmanager.domain.Download;
-import com.novoda.downloadmanager.domain.DownloadFile;
-import com.novoda.downloadmanager.domain.DownloadStage;
+import com.novoda.downloadmanager.Download;
+import com.novoda.downloadmanager.DownloadFile;
+import com.novoda.downloadmanager.DownloadStage;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.ArrayList;

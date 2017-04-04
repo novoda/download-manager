@@ -2,9 +2,6 @@ package com.novoda.downloadmanager;
 
 import android.content.Context;
 
-import com.novoda.downloadmanager.client.DownloadCheck;
-import com.novoda.downloadmanager.client.GlobalClientCheck;
-
 class DownloadServiceConnectionBuilder {
 
     private GlobalClientCheck globalClientCheck = GlobalClientCheck.IGNORED;

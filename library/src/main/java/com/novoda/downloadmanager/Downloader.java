@@ -4,14 +4,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.novoda.downloadmanager.client.DownloadCheck;
-import com.novoda.downloadmanager.client.GlobalClientCheck;
-import com.novoda.downloadmanager.domain.Download;
-import com.novoda.downloadmanager.domain.DownloadId;
-import com.novoda.downloadmanager.domain.DownloadRequest;
-import com.novoda.downloadmanager.download.DownloadDatabaseWrapper;
-import com.novoda.downloadmanager.download.DownloadDatabaseWrapperCreator;
-
 import java.util.List;
 
 public class Downloader {

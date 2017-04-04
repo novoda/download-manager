@@ -13,9 +13,9 @@ import android.widget.Toast;
 import com.novoda.downloadmanager.Downloader;
 import com.novoda.downloadmanager.OnDownloadsUpdateListener;
 import com.novoda.downloadmanager.demo.R;
-import com.novoda.downloadmanager.domain.Download;
-import com.novoda.downloadmanager.domain.DownloadId;
-import com.novoda.downloadmanager.domain.DownloadRequest;
+import com.novoda.downloadmanager.Download;
+import com.novoda.downloadmanager.DownloadId;
+import com.novoda.downloadmanager.DownloadRequest;
 
 import java.io.File;
 import java.util.ArrayList;

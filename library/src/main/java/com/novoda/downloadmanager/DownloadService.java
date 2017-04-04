@@ -10,14 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.novoda.downloadmanager.client.DownloadCheck;
-import com.novoda.downloadmanager.client.GlobalClientCheck;
-import com.novoda.downloadmanager.service.Delegate;
-import com.novoda.downloadmanager.service.DelegateCreator;
-import com.novoda.downloadmanager.service.DownloadObserver;
-import com.novoda.downloadmanager.service.Timer;
-
-public class DownloadService extends Service {
+class DownloadService extends Service {
 
     private final android.os.Binder binder = new Binder();
 

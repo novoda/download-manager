@@ -7,10 +7,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
-import com.novoda.downloadmanager.client.DownloadCheck;
-import com.novoda.downloadmanager.client.GlobalClientCheck;
-
-public class DownloadServiceConnection {
+class DownloadServiceConnection {
 
     private final Context context;
     private final GlobalClientCheck globalClientChecker;
