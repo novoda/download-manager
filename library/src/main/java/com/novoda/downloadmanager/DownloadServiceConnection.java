@@ -37,7 +37,7 @@ class DownloadServiceConnection {
             downloadServiceBinder.setGlobalChecker(globalClientChecker);
             downloadServiceBinder.setDownloadChecker(downloadChecker);
             downloadServiceBinder.setServiceConnection(DownloadServiceConnection.this);
-            downloadServiceBinder.fooStart();
+            downloadServiceBinder.onBindComplete();
         }
 
         @Override

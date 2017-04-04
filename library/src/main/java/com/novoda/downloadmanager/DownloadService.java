@@ -30,12 +30,12 @@ class DownloadService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        DownloadsHandler downloadsHandler = DownloadsHandler.start();
+        Log.e(getClass().getSimpleName(), "onCreate() " + hashCode());
 
+        DownloadsHandler downloadsHandler = DownloadsHandler.start();
         Timer timer = new Timer(downloadsHandler);
         ContentResolver contentResolver = getContentResolver();
         DownloadObserver downloadObserver = new DownloadObserver(downloadsHandler, contentResolver);
-
         DownloadDatabaseWrapper downloadDatabaseWrapper = DownloadDatabaseWrapperCreator.create(contentResolver);
         Pauser pauser = new Pauser(LocalBroadcastManager.getInstance(this));
         DownloadExecutorFactory factory = new DownloadExecutorFactory();
@@ -68,16 +68,10 @@ class DownloadService extends Service {
         }
     };
 
-    private void fooStart() {
-        Log.e("!!!", "service on startService");
-        delegate.revertSubmittedDownloadsToQueuedDownloads();
-        delegate.onServiceStart();
-    }
-
     @Override
     public void onDestroy() {
+        Log.e(getClass().getSimpleName(), "onDestroy() " + hashCode());
         delegate.onDestroy();
-        Log.e(getClass().getSimpleName(), "Service Destroyed: " + hashCode());
         super.onDestroy();
     }
 
@@ -91,13 +85,15 @@ class DownloadService extends Service {
             DownloadService.this.globalChecker = globalChecker;
         }
 
-        void fooStart() {
-            DownloadService.this.fooStart();
+        void setServiceConnection(DownloadServiceConnection serviceConnection) {
+            DownloadService.this.serviceConnection = serviceConnection;
         }
 
-        void setServiceConnection(DownloadServiceConnection serviceConnection) {
-            Log.d("!!!", "setServiceConnection():");
-            DownloadService.this.serviceConnection = serviceConnection;
+        void onBindComplete() {
+            Log.e(getClass().getSimpleName(), "onBindComplete() " + hashCode());
+
+            delegate.revertSubmittedDownloadsToQueuedDownloads();
+            delegate.onServiceStart();
         }
     }
 
