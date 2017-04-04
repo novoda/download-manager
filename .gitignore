@@ -15,7 +15,6 @@ gen/
 # Gradle files
 .gradle/
 build/
-captures/
 
 # Local configuration file (sdk path, etc)
 local.properties
@@ -26,11 +25,12 @@ proguard/
 # Log Files
 *.log
 
-# IDEA Ignores
+# IDE Ignores
 *.iml
 *.ipr
 *.iws
 .idea/
+captures/
 
 # OSX
 *.DS_Store
