@@ -24,15 +24,15 @@ public class Downloader {
 
     public static class Builder {
 
-        private final ServiceBuilder serviceBuilder = new ServiceBuilder();
+        private final DownloadServiceConnectionBuilder downloadServiceConnectionBuilder = new DownloadServiceConnectionBuilder();
 
         public Builder with(GlobalClientCheck globalClientCheck) {
-            serviceBuilder.with(globalClientCheck);
+            downloadServiceConnectionBuilder.with(globalClientCheck);
             return this;
         }
 
         public Builder with(DownloadCheck downloadCheck) {
-            serviceBuilder.with(downloadCheck);
+            downloadServiceConnectionBuilder.with(downloadCheck);
             return this;
         }
 
@@ -44,7 +44,7 @@ public class Downloader {
             Pauser pauser = new Pauser(LocalBroadcastManager.getInstance(context));
             Listeners listeners = Listeners.newInstance();
             Watcher watcher = Watcher.newInstance(context);
-            DownloadServiceConnection downloadServiceConnection = serviceBuilder.build(applicationContext);
+            DownloadServiceConnection downloadServiceConnection = downloadServiceConnectionBuilder.build(applicationContext);
 
             return new Downloader(downloadDatabaseWrapper, pauser, listeners, watcher, downloadServiceConnection);
         }
