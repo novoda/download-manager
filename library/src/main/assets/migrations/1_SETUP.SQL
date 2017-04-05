@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS 'request' (
                                 _id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                                 request_timestamp TEXT NOT NULL,
-                                UNIQUE (request_timestamp) ON CONFLICT REPLACE --TODO: should abort this - else risk two downloads with same ID in DatabaseInteractions
+                                UNIQUE (request_timestamp) ON CONFLICT REPLACE
 );
 
 CREATE TABLE IF NOT EXISTS 'download' (
@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS 'download' (
                                 download_stage TEXT NOT NULL,
                                 download_id INTEGER NOT NULL,
                                 download_identifier TEXT NOT NULL,
-                                UNIQUE (download_id) ON CONFLICT REPLACE --TODO: should abort this, not replace. The DatabaseInteractions class should not let such an operation occur
+                                UNIQUE (download_id) ON CONFLICT REPLACE
 );
 
 CREATE TABLE IF NOT EXISTS 'file' (
