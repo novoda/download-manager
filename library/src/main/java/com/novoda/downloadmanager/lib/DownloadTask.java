@@ -281,9 +281,7 @@ class DownloadTask implements Runnable {
             finalizeDestinationFile(state);
             finalStatus = DownloadStatus.SUCCESS;
 
-            // check if a file is paused by app and set PAUSED_BY_APP to finalStatus
-
-            if (batchHasPausedFiles(originalDownloadBatch.getBatchId())) {
+            if (batchHasPausedFiles(originalDownloadBatch.getBatchId())) { // check if a file is paused by app and set PAUSED_BY_APP to finalStatus
                 finalStatus = DownloadStatus.PAUSED_BY_APP;
             }
         } catch (StopRequestException error) {
@@ -346,10 +344,9 @@ class DownloadTask implements Runnable {
     }
 
     private boolean batchHasPausedFiles(long batchId) {
-        List<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
-
+        List<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloadsFor(batchId);
         for (FileDownloadInfo file : allDownloads) {
-            if (file.getBatchId() == batchId && file.isPaused()) {
+            if (file.isPaused()) {
                 return true;
             }
         }
