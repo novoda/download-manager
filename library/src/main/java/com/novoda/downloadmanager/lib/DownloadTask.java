@@ -281,7 +281,7 @@ class DownloadTask implements Runnable {
             finalizeDestinationFile(state);
             finalStatus = DownloadStatus.SUCCESS;
 
-            if (batchHasPausedFiles(originalDownloadBatch.getBatchId())) { // check if a file is paused by app and set PAUSED_BY_APP to finalStatus
+            if (batchHasPausedFiles(originalDownloadBatch.getBatchId())) {
                 finalStatus = DownloadStatus.PAUSED_BY_APP;
             }
         } catch (StopRequestException error) {
