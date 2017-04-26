@@ -43,6 +43,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.Locale;
 
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
@@ -279,6 +280,12 @@ class DownloadTask implements Runnable {
 
             finalizeDestinationFile(state);
             finalStatus = DownloadStatus.SUCCESS;
+
+            // check if a file is paused by app and set PAUSED_BY_APP to finalStatus
+
+            if (batchHasPausedFiles(originalDownloadBatch.getBatchId())) {
+                finalStatus = DownloadStatus.PAUSED_BY_APP;
+            }
         } catch (StopRequestException error) {
             // remove the cause before printing, in case it contains PII
             errorMsg = error.getMessage();
@@ -336,6 +343,17 @@ class DownloadTask implements Runnable {
             }
         }
         storageManager.incrementNumDownloadsSoFar();
+    }
+
+    private boolean batchHasPausedFiles(long batchId) {
+        List<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloads();
+
+        for (FileDownloadInfo file : allDownloads) {
+            if (file.getBatchId() == batchId && file.isPaused()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void scheduleDownloadJob(int finalStatus) {
@@ -887,6 +905,7 @@ class DownloadTask implements Runnable {
     private static boolean isStatusRetryable(int status) {
         switch (status) {
             case HTTP_DATA_ERROR:
+            case HTTP_NOT_FOUND:
             case HTTP_UNAVAILABLE:
             case HTTP_INTERNAL_ERROR:
             case QUEUED_DUE_CLIENT_RESTRICTIONS:

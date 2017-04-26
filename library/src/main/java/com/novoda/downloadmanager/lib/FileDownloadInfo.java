@@ -184,6 +184,10 @@ class FileDownloadInfo {
         return deleted;
     }
 
+    public boolean isPaused() {
+        return control == DownloadsControl.CONTROL_PAUSED;
+    }
+
     public String getMediaProviderUri() {
         return mediaProviderUri;
     }
