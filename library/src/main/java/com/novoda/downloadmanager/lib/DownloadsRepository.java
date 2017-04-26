@@ -40,7 +40,7 @@ class DownloadsRepository {
         Cursor downloadsCursor = contentResolver.query(
                 downloadsUriProvider.getAllDownloadsUri(),
                 null,
-                batchId == NO_BATCH_ID ? null : DownloadContract.Batches._ID + " = ?",
+                batchId == NO_BATCH_ID ? null : DownloadContract.Downloads.COLUMN_BATCH_ID + " = ?",
                 batchId == NO_BATCH_ID ? null : new String[] { String.valueOf(batchId) },
                 DownloadContract.Batches._ID + " ASC"
         );
