@@ -279,10 +279,11 @@ class DownloadTask implements Runnable {
             executeDownload(state);
 
             finalizeDestinationFile(state);
-            finalStatus = DownloadStatus.SUCCESS;
 
             if (batchHasPausedFiles(originalDownloadBatch.getBatchId())) {
                 finalStatus = DownloadStatus.PAUSED_BY_APP;
+            } else {
+                finalStatus = DownloadStatus.SUCCESS;
             }
         } catch (StopRequestException error) {
             // remove the cause before printing, in case it contains PII
@@ -597,11 +598,13 @@ class DownloadTask implements Runnable {
     private void transferData(State state, InputStream in, OutputStream out) throws StopRequestException {
         StorageSpaceVerifier spaceVerifier = new StorageSpaceVerifier(storageManager, originalDownloadInfo.getDestination(), state.filename);
         DataWriter checkedWriter = new CheckedWriter(spaceVerifier, out);
-        DataWriter dataWriter = new NotifierWriter(getContentResolver(),
+        DataWriter dataWriter = new NotifierWriter(
+                getContentResolver(),
                 checkedWriter,
                 downloadNotifier,
                 originalDownloadInfo,
-                checkOnWrite);
+                checkOnWrite
+        );
 
         DataTransferer dataTransferer;
         if (originalDownloadInfo.shouldAllowTarUpdate(state.mimeType)) {
@@ -696,7 +699,8 @@ class DownloadTask implements Runnable {
                 state.mimeType,
                 originalDownloadInfo.getDestination(),
                 state.contentLength,
-                storageManager);
+                storageManager
+        );
 
         updateDownloadInfoFieldsFrom(state);
         downloadsRepository.updateDatabaseFromHeaders(originalDownloadInfo, state.filename, state.headerETag, state.mimeType, state.totalBytes);
@@ -863,7 +867,8 @@ class DownloadTask implements Runnable {
 
     private void notifyThroughDatabase(State state, int finalStatus, String errorMsg, int numFailed) {
         downloadsRepository.updateDownload(originalDownloadInfo, state.filename,
-                state.mimeType, state.retryAfter, state.requestUri, finalStatus, errorMsg, numFailed);
+                                           state.mimeType, state.retryAfter, state.requestUri, finalStatus, errorMsg, numFailed
+        );
 
         updateBatchStatus(originalDownloadInfo.getBatchId(), originalDownloadInfo.getId());
     }
