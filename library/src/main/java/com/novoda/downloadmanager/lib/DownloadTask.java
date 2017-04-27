@@ -43,6 +43,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.Locale;
 
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
@@ -278,7 +279,12 @@ class DownloadTask implements Runnable {
             executeDownload(state);
 
             finalizeDestinationFile(state);
-            finalStatus = DownloadStatus.SUCCESS;
+
+            if (batchHasPausedFiles(originalDownloadBatch.getBatchId())) {
+                finalStatus = DownloadStatus.PAUSED_BY_APP;
+            } else {
+                finalStatus = DownloadStatus.SUCCESS;
+            }
         } catch (StopRequestException error) {
             // remove the cause before printing, in case it contains PII
             errorMsg = error.getMessage();
@@ -336,6 +342,16 @@ class DownloadTask implements Runnable {
             }
         }
         storageManager.incrementNumDownloadsSoFar();
+    }
+
+    private boolean batchHasPausedFiles(long batchId) {
+        List<FileDownloadInfo> allDownloads = downloadsRepository.getAllDownloadsFor(batchId);
+        for (FileDownloadInfo file : allDownloads) {
+            if (file.isPaused()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void scheduleDownloadJob(int finalStatus) {
@@ -582,11 +598,13 @@ class DownloadTask implements Runnable {
     private void transferData(State state, InputStream in, OutputStream out) throws StopRequestException {
         StorageSpaceVerifier spaceVerifier = new StorageSpaceVerifier(storageManager, originalDownloadInfo.getDestination(), state.filename);
         DataWriter checkedWriter = new CheckedWriter(spaceVerifier, out);
-        DataWriter dataWriter = new NotifierWriter(getContentResolver(),
+        DataWriter dataWriter = new NotifierWriter(
+                getContentResolver(),
                 checkedWriter,
                 downloadNotifier,
                 originalDownloadInfo,
-                checkOnWrite);
+                checkOnWrite
+        );
 
         DataTransferer dataTransferer;
         if (originalDownloadInfo.shouldAllowTarUpdate(state.mimeType)) {
@@ -681,7 +699,8 @@ class DownloadTask implements Runnable {
                 state.mimeType,
                 originalDownloadInfo.getDestination(),
                 state.contentLength,
-                storageManager);
+                storageManager
+        );
 
         updateDownloadInfoFieldsFrom(state);
         downloadsRepository.updateDatabaseFromHeaders(originalDownloadInfo, state.filename, state.headerETag, state.mimeType, state.totalBytes);
@@ -848,7 +867,8 @@ class DownloadTask implements Runnable {
 
     private void notifyThroughDatabase(State state, int finalStatus, String errorMsg, int numFailed) {
         downloadsRepository.updateDownload(originalDownloadInfo, state.filename,
-                state.mimeType, state.retryAfter, state.requestUri, finalStatus, errorMsg, numFailed);
+                                           state.mimeType, state.retryAfter, state.requestUri, finalStatus, errorMsg, numFailed
+        );
 
         updateBatchStatus(originalDownloadInfo.getBatchId(), originalDownloadInfo.getId());
     }
@@ -887,6 +907,7 @@ class DownloadTask implements Runnable {
     private static boolean isStatusRetryable(int status) {
         switch (status) {
             case HTTP_DATA_ERROR:
+            case HTTP_NOT_FOUND:
             case HTTP_UNAVAILABLE:
             case HTTP_INTERNAL_ERROR:
             case QUEUED_DUE_CLIENT_RESTRICTIONS:

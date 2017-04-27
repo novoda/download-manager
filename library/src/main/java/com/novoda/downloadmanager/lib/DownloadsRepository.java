@@ -21,6 +21,7 @@ import static com.novoda.downloadmanager.lib.DownloadContract.Downloads.*;
 class DownloadsRepository {
 
     private static final int TRUE_THIS_IS_CLEARER_NOW = 1;
+    private static final long NO_BATCH_ID = -1;
 
     private final SystemFacade systemFacade;
     private final ContentResolver contentResolver;
@@ -35,12 +36,12 @@ class DownloadsRepository {
         this.downloadsUriProvider = downloadsUriProvider;
     }
 
-    public List<FileDownloadInfo> getAllDownloads() {
+    public List<FileDownloadInfo> getAllDownloadsFor(long batchId) {
         Cursor downloadsCursor = contentResolver.query(
                 downloadsUriProvider.getAllDownloadsUri(),
                 null,
-                null,
-                null,
+                batchId == NO_BATCH_ID ? null : DownloadContract.Downloads.COLUMN_BATCH_ID + " = ?",
+                batchId == NO_BATCH_ID ? null : new String[] { String.valueOf(batchId) },
                 DownloadContract.Batches._ID + " ASC"
         );
 
@@ -56,6 +57,10 @@ class DownloadsRepository {
         } finally {
             downloadsCursor.close();
         }
+    }
+
+    public List<FileDownloadInfo> getAllDownloads() {
+        return getAllDownloadsFor(NO_BATCH_ID);
     }
 
     public FileDownloadInfo getDownloadFor(long id) {
