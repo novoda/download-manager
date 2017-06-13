@@ -55,7 +55,9 @@ class DownloadsRepository {
 
             return downloads;
         } finally {
-            if (downloadsCursor != null) downloadsCursor.close();
+            if (downloadsCursor != null) {
+                downloadsCursor.close();
+            }
         }
     }
 
