@@ -2,7 +2,6 @@ package com.novoda.downloadmanager;
 
 import android.util.Pair;
 
-import com.novoda.downloadmanager.DownloadFile;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;

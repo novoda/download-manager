@@ -3,8 +3,6 @@ package com.novoda.downloadmanager;
 import android.content.ContentValues;
 import android.net.Uri;
 
-import com.novoda.downloadmanager.demo.simple.DB;
-
 import novoda.lib.sqliteprovider.provider.SQLiteContentProviderImpl;
 
 public class Provider extends SQLiteContentProviderImpl {

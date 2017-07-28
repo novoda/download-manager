@@ -43,10 +43,8 @@ android {
 
 sqliteAccess {
     migrationsDir 'src/main/assets/migrations'
-    // todo fix this package name
-    packageName 'com.novoda.downloadmanager.demo.simple'
+    packageName 'com.novoda.downloadmanager'
 }
-
 
 dependencies {
     compile 'com.android.support:support-v4:25.3.1'

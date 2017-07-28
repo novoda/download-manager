@@ -4,16 +4,6 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 
-import com.novoda.downloadmanager.Provider;
-import com.novoda.downloadmanager.demo.simple.DB;
-import com.novoda.downloadmanager.Download;
-import com.novoda.downloadmanager.DownloadFile;
-import com.novoda.downloadmanager.DownloadId;
-import com.novoda.downloadmanager.DownloadRequest;
-import com.novoda.downloadmanager.DownloadStage;
-import com.novoda.downloadmanager.DownloadStatus;
-import com.novoda.downloadmanager.ExternalId;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;

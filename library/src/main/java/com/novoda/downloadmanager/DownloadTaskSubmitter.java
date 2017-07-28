@@ -2,14 +2,6 @@ package com.novoda.downloadmanager;
 
 import android.util.Log;
 
-import com.novoda.downloadmanager.Pauser;
-import com.novoda.downloadmanager.ClientCheckResult;
-import com.novoda.downloadmanager.DownloadCheck;
-import com.novoda.downloadmanager.Download;
-import com.novoda.downloadmanager.DownloadStage;
-import com.novoda.downloadmanager.DownloadDatabaseWrapper;
-import com.novoda.downloadmanager.DownloadTask;
-
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
