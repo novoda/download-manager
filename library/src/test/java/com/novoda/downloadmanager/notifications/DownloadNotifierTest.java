@@ -21,29 +21,41 @@ public class DownloadNotifierTest {
     private NotificationDisplayer mockNotificationDisplayer;
     @Mock
     private Context mockContext;
+    private DownloadNotifier downloadNotifier;
 
     @Before
     public void setUp() {
         initMocks(this);
+        downloadNotifier = new SynchronisedDownloadNotifier(mockContext, mockNotificationDisplayer);
     }
 
     @Test
     public void whenRemovingStaleNotificationsThenItDoesNotCrash() {
-        Collection<DownloadBatch> batches = new ArrayList<>();
-
-        DownloadBatch batchQueuedForWifi = getQueuedForWifiDownloadBatch();
-        DownloadBatch batchRunning = getRunningDownloadBatch();
-
-        batches.add(batchQueuedForWifi);
-        batches.add(batchRunning);
+        Collection<DownloadBatch> batches = createDownloadBatches();
 
         Collection<DownloadBatch> updatedBatches = new ArrayList<>();
         DownloadBatch batchQueuedForWifiUpdated = getQueuedForWifiDownloadBatch();
         updatedBatches.add(batchQueuedForWifiUpdated);
 
-        DownloadNotifier downloadNotifier = new SynchronisedDownloadNotifier(mockContext, mockNotificationDisplayer);
         downloadNotifier.updateWith(batches);
         downloadNotifier.updateWith(updatedBatches);
+    }
+
+    private Collection<DownloadBatch> createDownloadBatches() {
+        Collection<DownloadBatch> batches = new ArrayList<>();
+
+        DownloadBatch batchRunning = getRunningDownloadBatch();
+
+        batches.add(getQueuedForWifiDownloadBatch());
+        batches.add(getQueuedForWifiDownloadBatch());
+        batches.add(getQueuedForWifiDownloadBatch());
+        batches.add(getQueuedForWifiDownloadBatch());
+        batches.add(getQueuedForWifiDownloadBatch());
+        batches.add(getQueuedForWifiDownloadBatch());
+
+        batches.add(batchRunning);
+
+        return batches;
     }
 
     private DownloadBatch getQueuedForWifiDownloadBatch() {

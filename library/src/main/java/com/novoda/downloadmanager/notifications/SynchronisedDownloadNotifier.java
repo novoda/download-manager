@@ -104,15 +104,15 @@ class SynchronisedDownloadNotifier implements DownloadNotifier {
     }
 
     private SimpleArrayMap<String, Collection<DownloadBatch>> getClustersByNotificationTag(Collection<DownloadBatch> batches) {
-        SimpleArrayMap<String, Collection<DownloadBatch>> clustered = new SimpleArrayMap<>();
+        SimpleArrayMap<String, Collection<DownloadBatch>> taggedBatches = new SimpleArrayMap<>();
 
         for (DownloadBatch batch : batches) {
             String tag = buildNotificationTag(batch);
 
-            addBatchToCluster(tag, clustered, batch);
+            associateBatchesWithTag(tag, batch, taggedBatches);
         }
 
-        return clustered;
+        return taggedBatches;
     }
 
     /**
@@ -140,21 +140,21 @@ class SynchronisedDownloadNotifier implements DownloadNotifier {
         }
     }
 
-    private void addBatchToCluster(String tag, SimpleArrayMap<String, Collection<DownloadBatch>> cluster, DownloadBatch batch) {
+    private void associateBatchesWithTag(String tag, DownloadBatch batch, SimpleArrayMap<String, Collection<DownloadBatch>> taggedBatches) {
         if (tag == null) {
             return;
         }
 
-        Collection<DownloadBatch> batches;
+        Collection<DownloadBatch> batchesForTag;
 
-        if (cluster.containsKey(tag)) {
-            batches = cluster.get(tag);
+        if (taggedBatches.containsKey(tag)) {
+            batchesForTag = taggedBatches.get(tag);
         } else {
-            batches = new ArrayList<>();
-            cluster.put(tag, batches);
+            batchesForTag = new ArrayList<>();
+            taggedBatches.put(tag, batchesForTag);
         }
 
-        batches.add(batch);
+        batchesForTag.add(batch);
     }
 
     private List<Integer> getStaleTagsThatWereNotRenewed(SimpleArrayMap<String, Collection<DownloadBatch>> clustered) {
