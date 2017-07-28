@@ -107,7 +107,7 @@ class SynchronisedDownloadNotifier implements DownloadNotifier {
         SimpleArrayMap<String, Collection<DownloadBatch>> taggedBatches = new SimpleArrayMap<>();
 
         for (DownloadBatch batch : batches) {
-            String tag = buildNotificationTag(batch);
+            String tag = buildNotificationTag(batch).tag();
 
             associateBatchesWithTag(tag, batch, taggedBatches);
         }
@@ -119,25 +119,8 @@ class SynchronisedDownloadNotifier implements DownloadNotifier {
      * Build tag used for collapsing several {@link DownloadBatch} into a single
      * {@link Notification}.
      */
-    private String buildNotificationTag(DownloadBatch batch) {
-        // TODO this method and NotificationDisplayer.#getNotificationTagType have an inherent contract
-        // If we pulled out a `NotificationTag` value object this would fix it
-        if (batch.isQueuedForWifi()) {
-            return TYPE_WAITING + ":" + context.getPackageName();
-        } else if (batch.isRunning() && batch.shouldShowActiveItem()) {
-            return TYPE_ACTIVE + ":" + context.getPackageName();
-        } else if (batch.isError() && !batch.isCancelled() && batch.shouldShowCompletedItem()) {
-            // Failed downloads always have unique notifications
-            return TYPE_FAILED + ":" + batch.getBatchId();
-        } else if (batch.isCancelled() && batch.shouldShowCompletedItem()) {
-            // Cancelled downloads always have unique notifications
-            return TYPE_CANCELLED + ":" + batch.getBatchId();
-        } else if (batch.isSuccess() && batch.shouldShowCompletedItem()) {
-            // Complete downloads always have unique notifications
-            return TYPE_SUCCESS + ":" + batch.getBatchId();
-        } else {
-            return null;
-        }
+    private NotificationTag buildNotificationTag(DownloadBatch batch) {
+        return NotificationTag.create(batch, context.getPackageName());
     }
 
     private void associateBatchesWithTag(String tag, DownloadBatch batch, SimpleArrayMap<String, Collection<DownloadBatch>> taggedBatches) {
