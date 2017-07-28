@@ -2,12 +2,8 @@ package com.novoda.downloadmanager.demo.simple;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Toast;
 
 import com.novoda.downloadmanager.Download;
 import com.novoda.downloadmanager.DownloadId;
@@ -33,10 +29,8 @@ public class MainActivity extends AppCompatActivity {
     private final DeleteAllDownloadsAction deleteAllDownloadsAction = new DeleteAllDownloadsAction();
     private final StartDownloadsAction startDownloadAction = new StartDownloadsAction();
 
-    private View emptyView;
-    private DownloadAdapter adapter;
-
     private Downloader downloader;
+    private DemoView demoView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,11 +40,23 @@ public class MainActivity extends AppCompatActivity {
 
         downloader = new Downloader.Builder().build(this);
 
-        emptyView = findViewById(R.id.main_no_downloads_view);
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.main_downloads_list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new DownloadAdapter(onDownloadItemActionsListener);
-        recyclerView.setAdapter(adapter);
+        demoView = (DemoView) findViewById(R.id.demo_view);
+        demoView.update(new DemoView.OnDownloadClickedListener() {
+            @Override
+            public void onDeleteDownload(Download download) {
+                downloader.delete(download.getId());
+            }
+
+            @Override
+            public void onPauseDownload(Download download) {
+                downloader.pause(download.getId());
+            }
+
+            @Override
+            public void onResumeDownload(Download download) {
+                downloader.resume(download.getId());
+            }
+        });
     }
 
     @Override
@@ -73,30 +79,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private final DownloadAdapter.OnDownloadClickedListener onDownloadItemActionsListener = new DownloadAdapter.OnDownloadClickedListener() {
-
-        @Override
-        public void onDeleteDownload(Download download) {
-            downloader.delete(download.getId());
-        }
-
-        @Override
-        public void onPauseDownload(Download download) {
-            toastMessage("Pausing download!");
-            downloader.pause(download.getId());
-        }
-
-        @Override
-        public void onResumeDownload(Download download) {
-            toastMessage("Resuming download!");
-            downloader.resume(download.getId());
-        }
-
-        private void toastMessage(String message) {
-            Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
-        }
-    };
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -116,8 +98,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onDownloadsUpdate(List<Download> downloads) {
             deleteAllDownloadsAction.update(downloads);
-            adapter.update(downloads);
-            emptyView.setVisibility(downloads.isEmpty() ? View.VISIBLE : View.GONE);
+            demoView.display(downloads);
         }
     };
 
