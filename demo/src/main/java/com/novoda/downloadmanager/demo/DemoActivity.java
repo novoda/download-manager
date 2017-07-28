@@ -112,17 +112,13 @@ public class DemoActivity extends AppCompatActivity {
 
         @Override
         public void run() {
-            DownloadRequest downloadRequest = createDownloadRequest();
-            downloader.submit(downloadRequest);
-        }
-
-        private DownloadRequest createDownloadRequest() {
-            return new DownloadRequest.Builder()
+            DownloadRequest downloadRequest = new DownloadRequest.Builder()
                     .with(downloader.createDownloadId())
                     .withFile(createFileRequest(BIG_FILE_URL, "big_" + UUID.randomUUID().toString()))
                     .withFile(createFileRequest(SMALL_FILE_URL, "small_" + UUID.randomUUID().toString()))
                     .withFile(createFileRequest(TINY_FILE_URL, "tiny_" + UUID.randomUUID().toString()))
                     .build();
+            downloader.submit(downloadRequest);
         }
 
         private DownloadRequest.File createFileRequest(String uri, String filename) {
