@@ -37,8 +37,8 @@ public class DownloadNotifierTest {
         DownloadBatch batchQueuedForWifiUpdated = getQueuedForWifiDownloadBatch();
         updatedBatches.add(batchQueuedForWifiUpdated);
 
-        downloadNotifier.updateWith(batches);
-        downloadNotifier.updateWith(updatedBatches);
+        downloadNotifier.updateWith(batches, notificationNotifier);
+        downloadNotifier.updateWith(updatedBatches, notificationNotifier);
     }
 
     private Collection<DownloadBatch> createDownloadBatches() {

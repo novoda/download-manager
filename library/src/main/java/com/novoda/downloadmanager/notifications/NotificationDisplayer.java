@@ -67,7 +67,11 @@ public class NotificationDisplayer {
         this.downloadMarshaller = downloadMarshaller;
     }
 
-    public void buildAndShowNotification(NotificationTag tag, Collection<DownloadBatch> batchesForTag, long firstShown) {
+    public interface NotificationNotifier {
+        void onNotificationCreated(int notificationId, Notification notification);
+    }
+
+    public void buildAndShowNotification(NotificationTag tag, Collection<DownloadBatch> batchesForTag, long firstShown, NotificationNotifier notificationNotifier) {
         int type = tag.status();
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
@@ -77,6 +81,7 @@ public class NotificationDisplayer {
 
         Notification notification = buildTitlesAndDescription(type, batchesForTag, builder);
         notificationManager.notify(tag.hashCode(), notification);
+        notificationNotifier.onNotificationCreated(tag.hashCode(), notification);
     }
 
     private void buildIcon(int type, NotificationCompat.Builder builder) {
