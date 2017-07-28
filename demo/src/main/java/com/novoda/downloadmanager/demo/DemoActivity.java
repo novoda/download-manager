@@ -101,6 +101,13 @@ public class DemoActivity extends AppCompatActivity {
         }
     };
 
+    private final OnDownloadsChangedListener onDownloadsChangedListener = new OnDownloadsChangedListener() {
+        @Override
+        public void onDownloadsChanged() {
+            downloader.requestDownloadsUpdate();
+        }
+    };
+
     private class AddNewBatchDownloadAction implements Runnable {
 
         @Override
@@ -117,7 +124,6 @@ public class DemoActivity extends AppCompatActivity {
                     .withFile(createFileRequest(PENGUINS_IMAGE_URL, "very.penguin_" + UUID.randomUUID().toString()))
                     .build();
         }
-
         private DownloadRequest.File createFileRequest(String uri, String filename) {
             File file = new File(getCacheDir(), filename);
             Log.e("!!!", "createRequest file : " + filename);
@@ -126,6 +132,7 @@ public class DemoActivity extends AppCompatActivity {
                     .withLocalUri(file.getAbsolutePath())
                     .build();
         }
+
     }
 
     private class DeleteAllDownloadsAction implements Runnable {
@@ -138,19 +145,12 @@ public class DemoActivity extends AppCompatActivity {
                 downloadIds.add(download.getId());
             }
         }
-
         @Override
         public void run() {
             for (DownloadId downloadId : downloadIds) {
                 downloader.delete(downloadId);
             }
         }
-    }
 
-    private final OnDownloadsChangedListener onDownloadsChangedListener = new OnDownloadsChangedListener() {
-        @Override
-        public void onDownloadsChanged() {
-            downloader.requestDownloadsUpdate();
-        }
-    };
+    }
 }
