@@ -9,12 +9,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.novoda.downloadmanager.Downloader;
-import com.novoda.downloadmanager.OnDownloadsUpdateListener;
-import com.novoda.downloadmanager.demo.R;
 import com.novoda.downloadmanager.Download;
 import com.novoda.downloadmanager.DownloadId;
 import com.novoda.downloadmanager.DownloadRequest;
+import com.novoda.downloadmanager.Downloader;
+import com.novoda.downloadmanager.OnDownloadsChangedListener;
+import com.novoda.downloadmanager.OnDownloadsUpdateListener;
+import com.novoda.downloadmanager.WatchType;
+import com.novoda.downloadmanager.demo.R;
 import com.novoda.notils.logger.simple.Log;
 
 import java.io.File;
@@ -34,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private View emptyView;
     private DownloadAdapter adapter;
 
-    private DownloaderHelper downloaderHelper;
+    private Downloader downloader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,9 +44,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Log.setShowLogs(true);
 
-        Downloader downloader = new Downloader.Builder().build(this);
-
-        downloaderHelper = new DownloaderHelper(downloader);
+        downloader = new Downloader.Builder().build(this);
 
         emptyView = findViewById(R.id.main_no_downloads_view);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.main_downloads_list);
@@ -77,19 +77,19 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onDeleteDownload(Download download) {
-            downloaderHelper.delete(download.getId());
+            downloader.delete(download.getId());
         }
 
         @Override
         public void onPauseDownload(Download download) {
             toastMessage("Pausing download!");
-            downloaderHelper.pause(download.getId());
+            downloader.pause(download.getId());
         }
 
         @Override
         public void onResumeDownload(Download download) {
             toastMessage("Resuming download!");
-            downloaderHelper.resume(download.getId());
+            downloader.resume(download.getId());
         }
 
         private void toastMessage(String message) {
@@ -100,13 +100,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        downloaderHelper.startWatching(onDownloadsUpdate);
-        downloaderHelper.requestDownloadsUpdate();
+        downloader.addOnDownloadsUpdateListener(onDownloadsUpdate);
+        downloader.startListeningForDownloadUpdates(WatchType.PROGRESS, onDownloadsChangedListener);
+        downloader.requestDownloadsUpdate();
     }
 
     @Override
     protected void onPause() {
-        downloaderHelper.stopWatching(onDownloadsUpdate);
+        downloader.removeOnDownloadsUpdateListener(onDownloadsUpdate);
+        downloader.stopListeningForDownloadUpdates(onDownloadsChangedListener);
         super.onPause();
     }
 
@@ -124,12 +126,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             DownloadRequest downloadRequest = createDownloadRequest();
-            downloaderHelper.submit(downloadRequest);
+            downloader.submit(downloadRequest);
         }
 
         private DownloadRequest createDownloadRequest() {
             return new DownloadRequest.Builder()
-                    .with(downloaderHelper.createDownloadId())
+                    .with(downloader.createDownloadId())
                     .withFile(createFileRequest(SMALL_FILE_URL, "very.small_" + UUID.randomUUID().toString()))
                     .withFile(createFileRequest(BIG_FILE_URL, "very.big_" + UUID.randomUUID().toString()))
                     .withFile(createFileRequest(PENGUINS_IMAGE_URL, "very.penguin_" + UUID.randomUUID().toString()))
@@ -144,7 +146,6 @@ public class MainActivity extends AppCompatActivity {
                     .withLocalUri(file.getAbsolutePath())
                     .build();
         }
-
     }
 
     private class DeleteAllDownloadsAction implements Runnable {
@@ -161,10 +162,15 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             for (DownloadId downloadId : downloadIds) {
-                downloaderHelper.delete(downloadId);
+                downloader.delete(downloadId);
             }
         }
-
     }
 
+    private final OnDownloadsChangedListener onDownloadsChangedListener = new OnDownloadsChangedListener() {
+        @Override
+        public void onDownloadsChanged() {
+            downloader.requestDownloadsUpdate();
+        }
+    };
 }
