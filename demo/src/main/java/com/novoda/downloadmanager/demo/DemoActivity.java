@@ -26,7 +26,7 @@ public class DemoActivity extends AppCompatActivity {
     private static final String PENGUINS_IMAGE_URL = "http://i.imgur.com/Y7pMO5Kb.jpg";
 
     private final DeleteAllDownloadsAction deleteAllDownloadsAction = new DeleteAllDownloadsAction();
-    private final StartDownloadsAction startDownloadAction = new StartDownloadsAction();
+    private final AddNewBatchDownloadAction addNewBatchDownloadAction = new AddNewBatchDownloadAction();
 
     private Downloader downloader;
     private DemoView demoView;
@@ -68,7 +68,7 @@ public class DemoActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_start_downloads:
-                startDownloadAction.run();
+                addNewBatchDownloadAction.run();
                 return true;
             case R.id.menu_delete_all:
                 deleteAllDownloadsAction.run();
@@ -101,7 +101,7 @@ public class DemoActivity extends AppCompatActivity {
         }
     };
 
-    private class StartDownloadsAction implements Runnable {
+    private class AddNewBatchDownloadAction implements Runnable {
 
         @Override
         public void run() {
