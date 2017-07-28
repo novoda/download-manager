@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class MainActivity extends AppCompatActivity {
+public class DemoActivity extends AppCompatActivity {
 
     private static final String BIG_FILE_URL = "http://ipv4.download.thinkbroadband.com/100MB.zip";
     private static final String SMALL_FILE_URL = "http://ipv4.download.thinkbroadband.com/5MB.zip";
@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_demo);
         Log.setShowLogs(true);
 
         downloader = new Downloader.Builder().build(this);
