@@ -1,9 +1,9 @@
 <resources>
   <string name="app_name">DLM Demo</string>
 
-  <string name="menu_start_downloads">Start downloads</string>
-  <string name="menu_delete_all">Delete all</string>
-  <string name="no_downloads">No downloads yet.\nTap download and then refresh to query the download manager!</string>
+  <string name="menu_start_downloads">Download</string>
+  <string name="menu_delete_all">Delete all downloads</string>
+  <string name="no_downloads">No downloads yet.\nTap on the Download action to get started!</string>
   <string name="button_refresh_text">Refresh</string>
 
   <string name="button_running_content_description">Pause</string>
