@@ -112,14 +112,14 @@ class DatabaseInteraction {
     }
 
     public void submitRequest(DownloadRequest downloadRequest) {
+        ensureLocalFileUriIsUniqueForAllFilesIn(downloadRequest);
+
         ContentValues values = new ContentValues();
         long downloadId = downloadRequest.getId().asLong();
         DB.Download.setDownloadId((int) downloadId, values);
         DB.Download.setDownloadStage(DownloadStage.QUEUED.name(), values);
         DB.Download.setDownloadIdentifier(downloadRequest.getExternalId().asString(), values);
         contentResolver.insert(Provider.DOWNLOAD, values);
-
-        ensureLocalFileUriIsUniqueForAllFilesIn(downloadRequest);
 
         ContentValues[] fileValues = createFileValues(downloadRequest.getFiles(), downloadId);
         contentResolver.bulkInsert(Provider.FILE, fileValues);
