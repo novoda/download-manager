@@ -48,20 +48,20 @@ public class DemoView extends FrameLayout {
     public void update(final OnDownloadClickedListener downloadClickedListener) {
         adapter.update(new OnDownloadClickedListener() {
             @Override
-            public void onDeleteDownload(Download download) {
-                downloadClickedListener.onDeleteDownload(download);
+            public void onDelete(Download download) {
+                downloadClickedListener.onDelete(download);
             }
 
             @Override
-            public void onPauseDownload(Download download) {
+            public void onPause(Download download) {
                 toast("Pausing download");
-                downloadClickedListener.onPauseDownload(download);
+                downloadClickedListener.onPause(download);
             }
 
             @Override
-            public void onResumeDownload(Download download) {
+            public void onResume(Download download) {
                 toast("Resuming download");
-                downloadClickedListener.onResumeDownload(download);
+                downloadClickedListener.onResume(download);
             }
         });
     }
@@ -159,9 +159,9 @@ public class DemoView extends FrameLayout {
                         @Override
                         public void onClick(View v) {
                             if (download.getStage() == DownloadStage.RUNNING) {
-                                downloadClickedListener.onPauseDownload(download);
+                                downloadClickedListener.onPause(download);
                             } else if (download.getStage() == DownloadStage.PAUSED) {
-                                downloadClickedListener.onResumeDownload(download);
+                                downloadClickedListener.onResume(download);
                             } else {
                                 Log.e("Unhandled stage: " + download.getStage());
                             }
@@ -172,7 +172,7 @@ public class DemoView extends FrameLayout {
                 deleteButton.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        downloadClickedListener.onDeleteDownload(download);
+                        downloadClickedListener.onDelete(download);
                     }
                 });
             }
@@ -197,22 +197,22 @@ public class DemoView extends FrameLayout {
 
         OnDownloadClickedListener NO_OP = new OnDownloadClickedListener() {
             @Override
-            public void onDeleteDownload(Download download) {
+            public void onDelete(Download download) {
             }
 
             @Override
-            public void onPauseDownload(Download download) {
+            public void onPause(Download download) {
             }
 
             @Override
-            public void onResumeDownload(Download download) {
+            public void onResume(Download download) {
             }
         };
 
-        void onDeleteDownload(Download download);
+        void onDelete(Download download);
 
-        void onPauseDownload(Download download);
+        void onPause(Download download);
 
-        void onResumeDownload(Download download);
+        void onResume(Download download);
     }
 }

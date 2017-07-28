@@ -43,17 +43,17 @@ public class MainActivity extends AppCompatActivity {
         demoView = (DemoView) findViewById(R.id.demo_view);
         demoView.update(new DemoView.OnDownloadClickedListener() {
             @Override
-            public void onDeleteDownload(Download download) {
+            public void onDelete(Download download) {
                 downloader.delete(download.getId());
             }
 
             @Override
-            public void onPauseDownload(Download download) {
+            public void onPause(Download download) {
                 downloader.pause(download.getId());
             }
 
             @Override
-            public void onResumeDownload(Download download) {
+            public void onResume(Download download) {
                 downloader.resume(download.getId());
             }
         });
@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
 
         private final List<DownloadId> downloadIds = new ArrayList<>();
 
-        public void update(List<Download> downloads) {
+        void update(List<Download> downloads) {
             this.downloadIds.clear();
             for (Download download : downloads) {
                 downloadIds.add(download.getId());
