@@ -23,7 +23,7 @@ public class DemoActivity extends AppCompatActivity {
 
     private static final String BIG_FILE_URL = "http://ipv4.download.thinkbroadband.com/100MB.zip";
     private static final String SMALL_FILE_URL = "http://ipv4.download.thinkbroadband.com/5MB.zip";
-    private static final String PENGUINS_IMAGE_URL = "http://i.imgur.com/Y7pMO5Kb.jpg";
+    private static final String TINY_FILE_URL = "http://i.imgur.com/Y7pMO5Kb.jpg";
 
     private final DeleteAllDownloadsAction deleteAllDownloadsAction = new DeleteAllDownloadsAction();
     private final AddNewBatchDownloadAction addNewBatchDownloadAction = new AddNewBatchDownloadAction();
@@ -119,20 +119,18 @@ public class DemoActivity extends AppCompatActivity {
         private DownloadRequest createDownloadRequest() {
             return new DownloadRequest.Builder()
                     .with(downloader.createDownloadId())
-                    .withFile(createFileRequest(SMALL_FILE_URL, "very.small_" + UUID.randomUUID().toString()))
-                    .withFile(createFileRequest(BIG_FILE_URL, "very.big_" + UUID.randomUUID().toString()))
-                    .withFile(createFileRequest(PENGUINS_IMAGE_URL, "very.penguin_" + UUID.randomUUID().toString()))
+                    .withFile(createFileRequest(BIG_FILE_URL, "big_" + UUID.randomUUID().toString()))
+                    .withFile(createFileRequest(SMALL_FILE_URL, "small_" + UUID.randomUUID().toString()))
+                    .withFile(createFileRequest(TINY_FILE_URL, "tiny_" + UUID.randomUUID().toString()))
                     .build();
         }
         private DownloadRequest.File createFileRequest(String uri, String filename) {
             File file = new File(getCacheDir(), filename);
-            Log.e("!!!", "createRequest file : " + filename);
             return new DownloadRequest.File.Builder()
                     .with(uri)
                     .withLocalUri(file.getAbsolutePath())
                     .build();
         }
-
     }
 
     private class DeleteAllDownloadsAction implements Runnable {
@@ -151,6 +149,5 @@ public class DemoActivity extends AppCompatActivity {
                 downloader.delete(downloadId);
             }
         }
-
     }
 }
