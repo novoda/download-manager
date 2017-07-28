@@ -1,7 +1,13 @@
 package com.novoda.downloadmanager.notifications;
 
+import android.app.Notification;
+
 import com.novoda.downloadmanager.lib.DownloadBatch;
 
+/**
+ * Build tag used for collapsing several {@link DownloadBatch} into a single
+ * {@link Notification}.
+ */
 public class NotificationTag {
 
     private final int status;
@@ -33,5 +39,34 @@ public class NotificationTag {
 
     public String tag() {
         return status + ":" + identifier;
+    }
+
+    public int status() {
+        return status;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        NotificationTag that = (NotificationTag) o;
+
+        if (status != that.status) {
+            return false;
+        }
+        return identifier != null ? identifier.equals(that.identifier) : that.identifier == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = status;
+        result = 31 * result + (identifier != null ? identifier.hashCode() : 0);
+        return result;
     }
 }

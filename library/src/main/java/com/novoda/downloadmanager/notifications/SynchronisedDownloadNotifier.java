@@ -16,7 +16,6 @@
 
 package com.novoda.downloadmanager.notifications;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -47,9 +46,9 @@ class SynchronisedDownloadNotifier implements DownloadNotifier {
      * Currently active notifications, mapped from clustering tag to timestamp
      * when first shown.
      *
-     * @see #buildNotificationTag(DownloadBatch)
+     * @see NotificationTag#create(DownloadBatch, String)
      */
-    private final SimpleArrayMap<String, Long> activeNotifications = new SimpleArrayMap<>();
+    private final SimpleArrayMap<NotificationTag, Long> activeNotifications = new SimpleArrayMap<>();
 
     private final NotificationDisplayer notificationDisplayer;
 
@@ -79,73 +78,62 @@ class SynchronisedDownloadNotifier implements DownloadNotifier {
     @Override
     public void updateWith(Collection<DownloadBatch> batches) {
         synchronized (activeNotifications) {
-            SimpleArrayMap<String, Collection<DownloadBatch>> clusters = getClustersByNotificationTag(batches);
+            SimpleArrayMap<NotificationTag, Collection<DownloadBatch>> clusteredBatches = clusterBatchesByNotificationTag(batches);
 
-            for (int i = 0, size = clusters.size(); i < size; i++) {
-                String notificationId = clusters.keyAt(i);
+            for (int i = 0, size = clusteredBatches.size(); i < size; i++) {
+                NotificationTag notificationId = clusteredBatches.keyAt(i);
+                Collection<DownloadBatch> batchesForTag = clusteredBatches.get(notificationId);
                 long firstShown = getFirstShownTime(notificationId);
-                notificationDisplayer.buildAndShowNotification(clusters, notificationId, firstShown);
+                notificationDisplayer.buildAndShowNotification(notificationId, batchesForTag, firstShown);
             }
 
-            List<Integer> staleTagsToBeRemoved = getStaleTagsThatWereNotRenewed(clusters);
+            List<Integer> staleTagsToBeRemoved = getStaleTagsThatWereNotRenewed(clusteredBatches);
             notificationDisplayer.cancelStaleTags(staleTagsToBeRemoved);
         }
     }
 
-    private long getFirstShownTime(String notificationId) {
+    private long getFirstShownTime(NotificationTag tag) {
         final long firstShown;
-        if (activeNotifications.containsKey(notificationId)) {
-            firstShown = activeNotifications.get(notificationId);
+        if (activeNotifications.containsKey(tag)) {
+            firstShown = activeNotifications.get(tag);
         } else {
             firstShown = System.currentTimeMillis();
-            activeNotifications.put(notificationId, firstShown);
+            activeNotifications.put(tag, firstShown);
         }
         return firstShown;
     }
 
-    private SimpleArrayMap<String, Collection<DownloadBatch>> getClustersByNotificationTag(Collection<DownloadBatch> batches) {
-        SimpleArrayMap<String, Collection<DownloadBatch>> taggedBatches = new SimpleArrayMap<>();
+    private SimpleArrayMap<NotificationTag, Collection<DownloadBatch>> clusterBatchesByNotificationTag(Collection<DownloadBatch> batches) {
+        SimpleArrayMap<NotificationTag, Collection<DownloadBatch>> taggedBatches = new SimpleArrayMap<>();
 
         for (DownloadBatch batch : batches) {
-            String tag = buildNotificationTag(batch).tag();
-
-            associateBatchesWithTag(tag, batch, taggedBatches);
+            NotificationTag tag = NotificationTag.create(batch, context.getPackageName());
+            associateBatchWithTag(tag, batch, taggedBatches);
         }
 
         return taggedBatches;
     }
 
-    /**
-     * Build tag used for collapsing several {@link DownloadBatch} into a single
-     * {@link Notification}.
-     */
-    private NotificationTag buildNotificationTag(DownloadBatch batch) {
-        return NotificationTag.create(batch, context.getPackageName());
-    }
-
-    private void associateBatchesWithTag(String tag, DownloadBatch batch, SimpleArrayMap<String, Collection<DownloadBatch>> taggedBatches) {
+    private void associateBatchWithTag(NotificationTag tag, DownloadBatch batch, SimpleArrayMap<NotificationTag, Collection<DownloadBatch>> taggedBatches) {
         if (tag == null) {
             return;
         }
 
-        Collection<DownloadBatch> batchesForTag;
-
         if (taggedBatches.containsKey(tag)) {
-            batchesForTag = taggedBatches.get(tag);
+            taggedBatches.get(tag).add(batch);
         } else {
-            batchesForTag = new ArrayList<>();
+            Collection<DownloadBatch> batchesForTag = new ArrayList<>();
+            batchesForTag.add(batch);
             taggedBatches.put(tag, batchesForTag);
         }
-
-        batchesForTag.add(batch);
     }
 
-    private List<Integer> getStaleTagsThatWereNotRenewed(SimpleArrayMap<String, Collection<DownloadBatch>> clustered) {
+    private List<Integer> getStaleTagsThatWereNotRenewed(SimpleArrayMap<NotificationTag, Collection<DownloadBatch>> clusteredBatches) {
         List<Integer> staleTags = new ArrayList<>();
 
         for (int i = activeNotifications.size() - 1; i >= 0; i--) {
-            String tag = activeNotifications.keyAt(i);
-            if (!clustered.containsKey(tag)) {
+            NotificationTag tag = activeNotifications.keyAt(i);
+            if (!clusteredBatches.containsKey(tag)) {
                 staleTags.add(tag.hashCode());
                 activeNotifications.removeAt(i);
             }
