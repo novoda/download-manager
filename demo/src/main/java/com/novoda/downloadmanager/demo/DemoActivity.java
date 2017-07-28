@@ -1,4 +1,4 @@
-package com.novoda.downloadmanager.demo.simple;
+package com.novoda.downloadmanager.demo;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -12,7 +12,6 @@ import com.novoda.downloadmanager.Downloader;
 import com.novoda.downloadmanager.OnDownloadsChangedListener;
 import com.novoda.downloadmanager.OnDownloadsUpdateListener;
 import com.novoda.downloadmanager.WatchType;
-import com.novoda.downloadmanager.demo.R;
 import com.novoda.notils.logger.simple.Log;
 
 import java.io.File;

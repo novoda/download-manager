@@ -1,4 +1,4 @@
-<com.novoda.downloadmanager.demo.simple.DemoView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.novoda.downloadmanager.demo.DemoView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/demo_view"
     android:layout_width="match_parent"

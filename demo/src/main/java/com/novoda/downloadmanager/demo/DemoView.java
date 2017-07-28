@@ -1,4 +1,4 @@
-package com.novoda.downloadmanager.demo.simple;
+package com.novoda.downloadmanager.demo;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
