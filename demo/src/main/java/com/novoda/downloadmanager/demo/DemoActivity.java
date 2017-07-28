@@ -124,6 +124,7 @@ public class DemoActivity extends AppCompatActivity {
                     .withFile(createFileRequest(TINY_FILE_URL, "tiny_" + UUID.randomUUID().toString()))
                     .build();
         }
+
         private DownloadRequest.File createFileRequest(String uri, String filename) {
             File file = new File(getCacheDir(), filename);
             return new DownloadRequest.File.Builder()
@@ -143,6 +144,7 @@ public class DemoActivity extends AppCompatActivity {
                 downloadIds.add(download.getId());
             }
         }
+
         @Override
         public void run() {
             for (DownloadId downloadId : downloadIds) {
