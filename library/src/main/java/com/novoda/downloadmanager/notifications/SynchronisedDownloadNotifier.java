@@ -84,7 +84,7 @@ class SynchronisedDownloadNotifier implements DownloadNotifier {
                 NotificationTag notificationTag = clusteredBatches.keyAt(i);
                 Collection<DownloadBatch> batchesForTag = clusteredBatches.get(notificationTag);
                 long firstShown = getFirstShownTime(notificationTag);
-                notificationDisplayer.buildAndShowNotification(notificationTag, batchesForTag, firstShown, notificationCreatedCallback);
+                notificationDisplayer.buildAndShowNotification(notificationTag, batchesForTag, firstShown);
             }
 
             List<Integer> staleTagsToBeRemoved = getStaleTagsThatWereNotRenewed(clusteredBatches);

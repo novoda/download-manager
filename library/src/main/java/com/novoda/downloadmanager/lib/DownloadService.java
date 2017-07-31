@@ -39,6 +39,7 @@ import android.support.annotation.NonNull;
 import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.downloadmanager.notifications.DownloadNotifier;
 import com.novoda.downloadmanager.notifications.DownloadNotifierFactory;
+import com.novoda.downloadmanager.notifications.NotificationTag;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -461,8 +462,10 @@ public class DownloadService extends Service {
 
     final DownloadNotifier.NotificationCreatedCallback notificationCreatedCallback = new DownloadNotifier.NotificationCreatedCallback() {
         @Override
-        public void onNotificationCreated(int notificationId, Notification notification) {
-            DownloadService.this.startForeground(notificationId, notification);
+        public void onNotificationCreated(NotificationTag tag, Notification notification) {
+            if (DownloadStatus.isRunning(tag.status())) {
+                DownloadService.this.startForeground(tag.hashCode(), notification);
+            }
         }
     };
 }

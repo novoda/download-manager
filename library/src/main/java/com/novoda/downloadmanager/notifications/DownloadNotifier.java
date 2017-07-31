@@ -14,6 +14,6 @@ public interface DownloadNotifier {
     void updateWith(Collection<DownloadBatch> batches, NotificationCreatedCallback notificationCreatedCallback);
 
     interface NotificationCreatedCallback {
-        void onNotificationCreated(int notificationId, Notification notification);
+        void onNotificationCreated(NotificationTag tag, Notification notification);
     }
 }

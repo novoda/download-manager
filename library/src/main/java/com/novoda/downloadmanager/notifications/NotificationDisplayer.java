@@ -21,7 +21,6 @@ import com.novoda.downloadmanager.lib.DownloadReceiver;
 import com.novoda.downloadmanager.lib.DownloadStatus;
 import com.novoda.downloadmanager.lib.PublicFacingDownloadMarshaller;
 import com.novoda.downloadmanager.lib.PublicFacingStatusTranslator;
-import com.novoda.downloadmanager.notifications.DownloadNotifier.NotificationCreatedCallback;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -68,7 +67,7 @@ public class NotificationDisplayer {
         this.downloadMarshaller = downloadMarshaller;
     }
 
-    public void buildAndShowNotification(NotificationTag tag, Collection<DownloadBatch> batchesForTag, long firstShown, NotificationCreatedCallback callback) {
+    public Notification buildAndShowNotification(NotificationTag tag, Collection<DownloadBatch> batchesForTag, long firstShown) {
         int type = tag.status();
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
@@ -78,7 +77,7 @@ public class NotificationDisplayer {
 
         Notification notification = buildTitlesAndDescription(type, batchesForTag, builder);
         notificationManager.notify(tag.hashCode(), notification);
-        callback.onNotificationCreated(tag.hashCode(), notification);
+        return notification;
     }
 
     private void buildIcon(int type, NotificationCompat.Builder builder) {
