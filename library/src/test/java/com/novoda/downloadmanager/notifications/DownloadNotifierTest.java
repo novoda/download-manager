@@ -1,6 +1,8 @@
 package com.novoda.downloadmanager.notifications;
 
+import android.app.Notification;
 import android.content.Context;
+import android.support.v4.util.SimpleArrayMap;
 
 import com.novoda.downloadmanager.lib.DownloadBatch;
 
@@ -17,45 +19,39 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 public class DownloadNotifierTest {
 
+    private final DownloadNotifier.NotificationsCreatedCallback notificationsCreatedCallback = new DownloadNotifier.NotificationsCreatedCallback() {
+        @Override
+        public void onNotificationCreated(SimpleArrayMap<NotificationTag, Notification> taggedNotifications) {
+
+        }
+    };
     @Mock
     private NotificationDisplayer mockNotificationDisplayer;
     @Mock
     private Context mockContext;
-    private DownloadNotifier downloadNotifier;
 
     @Before
     public void setUp() {
         initMocks(this);
-        downloadNotifier = new SynchronisedDownloadNotifier(mockContext, mockNotificationDisplayer);
     }
 
     @Test
     public void whenRemovingStaleNotificationsThenItDoesNotCrash() {
-        Collection<DownloadBatch> batches = createDownloadBatches();
+        Collection<DownloadBatch> batches = new ArrayList<>();
+
+        DownloadBatch batchQueuedForWifi = getQueuedForWifiDownloadBatch();
+        DownloadBatch batchRunning = getRunningDownloadBatch();
+
+        batches.add(batchQueuedForWifi);
+        batches.add(batchRunning);
 
         Collection<DownloadBatch> updatedBatches = new ArrayList<>();
         DownloadBatch batchQueuedForWifiUpdated = getQueuedForWifiDownloadBatch();
         updatedBatches.add(batchQueuedForWifiUpdated);
 
-        downloadNotifier.updateWith(batches, notificationNotifier);
-        downloadNotifier.updateWith(updatedBatches, notificationNotifier);
-    }
-
-    private Collection<DownloadBatch> createDownloadBatches() {
-        Collection<DownloadBatch> batches = new ArrayList<>();
-
-        DownloadBatch batchRunning = getRunningDownloadBatch();
-
-        batches.add(getQueuedForWifiDownloadBatch());
-        batches.add(getQueuedForWifiDownloadBatch());
-        batches.add(getQueuedForWifiDownloadBatch());
-        batches.add(getQueuedForWifiDownloadBatch());
-        batches.add(getQueuedForWifiDownloadBatch());
-        batches.add(getQueuedForWifiDownloadBatch());
-
-        batches.add(batchRunning);
-
-        return batches;
+        DownloadNotifier downloadNotifier = new SynchronisedDownloadNotifier(mockContext, mockNotificationDisplayer);
+        downloadNotifier.updateWith(batches, notificationsCreatedCallback);
+        downloadNotifier.updateWith(updatedBatches, notificationsCreatedCallback);
     }
 
     private DownloadBatch getQueuedForWifiDownloadBatch() {
