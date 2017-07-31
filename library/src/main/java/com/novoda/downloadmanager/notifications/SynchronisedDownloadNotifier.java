@@ -81,10 +81,10 @@ class SynchronisedDownloadNotifier implements DownloadNotifier {
             SimpleArrayMap<NotificationTag, Collection<DownloadBatch>> clusteredBatches = clusterBatchesByNotificationTag(batches);
 
             for (int i = 0, size = clusteredBatches.size(); i < size; i++) {
-                NotificationTag notificationId = clusteredBatches.keyAt(i);
-                Collection<DownloadBatch> batchesForTag = clusteredBatches.get(notificationId);
-                long firstShown = getFirstShownTime(notificationId);
-                notificationDisplayer.buildAndShowNotification(notificationId, batchesForTag, firstShown, notificationCreatedCallback);
+                NotificationTag notificationTag = clusteredBatches.keyAt(i);
+                Collection<DownloadBatch> batchesForTag = clusteredBatches.get(notificationTag);
+                long firstShown = getFirstShownTime(notificationTag);
+                notificationDisplayer.buildAndShowNotification(notificationTag, batchesForTag, firstShown, notificationCreatedCallback);
             }
 
             List<Integer> staleTagsToBeRemoved = getStaleTagsThatWereNotRenewed(clusteredBatches);
