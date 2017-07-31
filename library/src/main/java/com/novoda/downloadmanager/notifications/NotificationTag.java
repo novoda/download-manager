@@ -8,7 +8,7 @@ import com.novoda.downloadmanager.lib.DownloadBatch;
  * Build tag used for collapsing several {@link DownloadBatch} into a single
  * {@link Notification}.
  */
-public class NotificationTag {
+public final class NotificationTag {
 
     private final int status;
     private final String identifier;
