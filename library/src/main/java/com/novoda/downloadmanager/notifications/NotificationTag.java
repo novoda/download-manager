@@ -8,7 +8,7 @@ import com.novoda.downloadmanager.lib.DownloadBatch;
  * Build tag used for collapsing several {@link DownloadBatch} into a single
  * {@link Notification}.
  */
-public final class NotificationTag {
+public class NotificationTag {
 
     private final int status;
     private final String identifier;
@@ -32,13 +32,9 @@ public final class NotificationTag {
         }
     }
 
-    private NotificationTag(int status, String identifier) {
+    NotificationTag(int status, String identifier) {
         this.status = status;
         this.identifier = identifier;
-    }
-
-    public String tag() {
-        return status + ":" + identifier;
     }
 
     public int status() {
