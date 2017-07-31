@@ -35,6 +35,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
 import android.support.annotation.NonNull;
+import android.support.v4.util.SimpleArrayMap;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.downloadmanager.notifications.DownloadNotifier;
@@ -452,7 +453,7 @@ public class DownloadService extends Service {
     }
 
     private void updateUserVisibleNotification(Collection<DownloadBatch> batches) {
-        downloadNotifier.updateWith(batches, notificationCreatedCallback);
+        downloadNotifier.updateWith(batches, notificationsCreatedCallback);
     }
 
     @Override
@@ -460,11 +461,21 @@ public class DownloadService extends Service {
         LLog.e("I want to dump but nothing to dump into");
     }
 
-    final DownloadNotifier.NotificationCreatedCallback notificationCreatedCallback = new DownloadNotifier.NotificationCreatedCallback() {
+    final DownloadNotifier.NotificationsCreatedCallback notificationsCreatedCallback = new DownloadNotifier.NotificationsCreatedCallback() {
         @Override
-        public void onNotificationCreated(NotificationTag tag, Notification notification) {
-            if (DownloadStatus.isRunning(tag.status())) {
-                DownloadService.this.startForeground(tag.hashCode(), notification);
+        public void onNotificationCreated(SimpleArrayMap<NotificationTag, Notification> taggedNotifications) {
+            boolean noActiveDownloads = true;
+
+            for (int i = 0; i < taggedNotifications.size(); i++) {
+                NotificationTag currentTag = taggedNotifications.keyAt(i);
+                if (currentTag.status() == DownloadNotifier.TYPE_ACTIVE) {
+                    DownloadService.this.startForeground(currentTag.hashCode(), taggedNotifications.get(currentTag));
+                    noActiveDownloads = false;
+                    break;
+                }
+            }
+            if (noActiveDownloads) {
+                DownloadService.this.stopForeground(false);
             }
         }
     };

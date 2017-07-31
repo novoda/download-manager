@@ -16,6 +16,7 @@
 
 package com.novoda.downloadmanager.notifications;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -33,12 +34,6 @@ import java.util.List;
  * {@link PendingIntent} that launch towards {DownloadReceiver}.
  */
 class SynchronisedDownloadNotifier implements DownloadNotifier {
-
-    static final int TYPE_ACTIVE = 1;
-    static final int TYPE_WAITING = 2;
-    static final int TYPE_SUCCESS = 3;
-    static final int TYPE_FAILED = 4;
-    static final int TYPE_CANCELLED = 5;
 
     private final Context context;
 
@@ -76,19 +71,23 @@ class SynchronisedDownloadNotifier implements DownloadNotifier {
      * {@link DownloadBatch}, adding, collapsing, and removing as needed.
      */
     @Override
-    public void updateWith(Collection<DownloadBatch> batches, NotificationCreatedCallback notificationCreatedCallback) {
+    public void updateWith(Collection<DownloadBatch> batches, NotificationsCreatedCallback notificationsCreatedCallback) {
         synchronized (activeNotifications) {
             SimpleArrayMap<NotificationTag, Collection<DownloadBatch>> clusteredBatches = clusterBatchesByNotificationTag(batches);
+            SimpleArrayMap<NotificationTag, Notification> taggedNotifications = new SimpleArrayMap<>(activeNotifications.size());
 
             for (int i = 0, size = clusteredBatches.size(); i < size; i++) {
                 NotificationTag notificationTag = clusteredBatches.keyAt(i);
                 Collection<DownloadBatch> batchesForTag = clusteredBatches.get(notificationTag);
                 long firstShown = getFirstShownTime(notificationTag);
-                notificationDisplayer.buildAndShowNotification(notificationTag, batchesForTag, firstShown);
+                Notification notification = notificationDisplayer.buildAndShowNotification(notificationTag, batchesForTag, firstShown);
+                taggedNotifications.put(notificationTag, notification);
             }
 
             List<Integer> staleTagsToBeRemoved = getStaleTagsThatWereNotRenewed(clusteredBatches);
             notificationDisplayer.cancelStaleTags(staleTagsToBeRemoved);
+
+            notificationsCreatedCallback.onNotificationCreated(taggedNotifications);
         }
     }
 
