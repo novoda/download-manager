@@ -1,10 +1,9 @@
 package com.novoda.downloadmanager.notifications;
 
-import android.app.Notification;
 import android.content.Context;
-import android.support.v4.util.SimpleArrayMap;
 
 import com.novoda.downloadmanager.lib.DownloadBatch;
+import com.novoda.downloadmanager.lib.NotificationCreatedListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,16 +18,12 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 public class DownloadNotifierTest {
 
-    private final DownloadNotifier.NotificationsCreatedCallback noOpCallback = new DownloadNotifier.NotificationsCreatedCallback() {
-        @Override
-        public void onNotificationCreated(SimpleArrayMap<NotificationTag, Notification> taggedNotifications) {
-            // no-op
-        }
-    };
     @Mock
     private NotificationDisplayer mockNotificationDisplayer;
     @Mock
     private Context mockContext;
+    @Mock
+    private NotificationCreatedListener mockListener;
 
     @Before
     public void setUp() {
@@ -50,8 +45,8 @@ public class DownloadNotifierTest {
         updatedBatches.add(batchQueuedForWifiUpdated);
 
         DownloadNotifier downloadNotifier = new SynchronisedDownloadNotifier(mockContext, mockNotificationDisplayer);
-        downloadNotifier.updateWith(batches, noOpCallback);
-        downloadNotifier.updateWith(updatedBatches, noOpCallback);
+        downloadNotifier.updateWith(batches, mockListener);
+        downloadNotifier.updateWith(updatedBatches, mockListener);
     }
 
     private DownloadBatch getQueuedForWifiDownloadBatch() {

@@ -23,6 +23,7 @@ import android.content.Context;
 import android.support.v4.util.SimpleArrayMap;
 
 import com.novoda.downloadmanager.lib.DownloadBatch;
+import com.novoda.downloadmanager.lib.NotificationCreatedListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,7 +48,7 @@ class SynchronisedDownloadNotifier implements DownloadNotifier {
 
     private final NotificationDisplayer notificationDisplayer;
 
-    public SynchronisedDownloadNotifier(Context context, NotificationDisplayer notificationDisplayer) {
+    SynchronisedDownloadNotifier(Context context, NotificationDisplayer notificationDisplayer) {
         this.context = context;
         this.notificationDisplayer = notificationDisplayer;
     }
@@ -71,7 +72,7 @@ class SynchronisedDownloadNotifier implements DownloadNotifier {
      * {@link DownloadBatch}, adding, collapsing, and removing as needed.
      */
     @Override
-    public void updateWith(Collection<DownloadBatch> batches, NotificationsCreatedCallback notificationsCreatedCallback) {
+    public void updateWith(Collection<DownloadBatch> batches, NotificationCreatedListener notificationsCreatedCallback) {
         synchronized (activeNotifications) {
             SimpleArrayMap<NotificationTag, Collection<DownloadBatch>> clusteredBatches = clusterBatchesByNotificationTag(batches);
             SimpleArrayMap<NotificationTag, Notification> taggedNotifications = new SimpleArrayMap<>(activeNotifications.size());
