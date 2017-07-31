@@ -53,6 +53,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
+import static com.novoda.downloadmanager.notifications.DownloadNotifier.NotificationsCreatedCallback;
+import static com.novoda.downloadmanager.notifications.DownloadNotifier.TYPE_ACTIVE;
 
 /**
  * Performs background downloads as requested by applications that use
@@ -90,6 +92,25 @@ public class DownloadService extends Service {
     private BatchInformationBroadcaster batchInformationBroadcaster;
     private NetworkChecker networkChecker;
     private DestroyListener destroyListener;
+
+    private final NotificationsCreatedCallback notificationsCreatedCallback = new NotificationsCreatedCallback() {
+        @Override
+        public void onNotificationCreated(SimpleArrayMap<NotificationTag, Notification> taggedNotifications) {
+            boolean noActiveDownloads = true;
+
+            for (int i = 0; i < taggedNotifications.size(); i++) {
+                NotificationTag currentTag = taggedNotifications.keyAt(i);
+                if (currentTag.status() == TYPE_ACTIVE) {
+                    DownloadService.this.startForeground(currentTag.hashCode(), taggedNotifications.get(currentTag));
+                    noActiveDownloads = false;
+                    break;
+                }
+            }
+            if (noActiveDownloads) {
+                DownloadService.this.stopForeground(false);
+            }
+        }
+    };
 
     /**
      * Receives notifications when the data in the content provider changes
@@ -461,22 +482,4 @@ public class DownloadService extends Service {
         LLog.e("I want to dump but nothing to dump into");
     }
 
-    final DownloadNotifier.NotificationsCreatedCallback notificationsCreatedCallback = new DownloadNotifier.NotificationsCreatedCallback() {
-        @Override
-        public void onNotificationCreated(SimpleArrayMap<NotificationTag, Notification> taggedNotifications) {
-            boolean noActiveDownloads = true;
-
-            for (int i = 0; i < taggedNotifications.size(); i++) {
-                NotificationTag currentTag = taggedNotifications.keyAt(i);
-                if (currentTag.status() == DownloadNotifier.TYPE_ACTIVE) {
-                    DownloadService.this.startForeground(currentTag.hashCode(), taggedNotifications.get(currentTag));
-                    noActiveDownloads = false;
-                    break;
-                }
-            }
-            if (noActiveDownloads) {
-                DownloadService.this.stopForeground(false);
-            }
-        }
-    };
 }
