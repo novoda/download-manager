@@ -39,7 +39,6 @@ import android.support.annotation.NonNull;
 import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.downloadmanager.notifications.DownloadNotifier;
 import com.novoda.downloadmanager.notifications.DownloadNotifierFactory;
-import com.novoda.downloadmanager.notifications.NotificationDisplayer;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -452,7 +451,7 @@ public class DownloadService extends Service {
     }
 
     private void updateUserVisibleNotification(Collection<DownloadBatch> batches) {
-        downloadNotifier.updateWith(batches, notificationNotifier);
+        downloadNotifier.updateWith(batches, notificationCreatedCallback);
     }
 
     @Override
@@ -460,7 +459,7 @@ public class DownloadService extends Service {
         LLog.e("I want to dump but nothing to dump into");
     }
 
-    final NotificationDisplayer.NotificationNotifier notificationNotifier = new NotificationDisplayer.NotificationNotifier() {
+    final DownloadNotifier.NotificationCreatedCallback notificationCreatedCallback = new DownloadNotifier.NotificationCreatedCallback() {
         @Override
         public void onNotificationCreated(int notificationId, Notification notification) {
             DownloadService.this.startForeground(notificationId, notification);

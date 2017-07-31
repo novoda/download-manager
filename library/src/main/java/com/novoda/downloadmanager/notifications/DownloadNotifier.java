@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager.notifications;
 
+import android.app.Notification;
+
 import com.novoda.downloadmanager.lib.DownloadBatch;
 
 import java.util.Collection;
@@ -9,5 +11,9 @@ public interface DownloadNotifier {
 
     void notifyDownloadSpeed(long id, long bytesPerSecond);
 
-    void updateWith(Collection<DownloadBatch> batches, NotificationDisplayer.NotificationNotifier notificationNotifier);
+    void updateWith(Collection<DownloadBatch> batches, NotificationCreatedCallback notificationCreatedCallback);
+
+    interface NotificationCreatedCallback {
+        void onNotificationCreated(int notificationId, Notification notification);
+    }
 }
