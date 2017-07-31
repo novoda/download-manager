@@ -19,10 +19,10 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 public class DownloadNotifierTest {
 
-    private final DownloadNotifier.NotificationsCreatedCallback notificationsCreatedCallback = new DownloadNotifier.NotificationsCreatedCallback() {
+    private final DownloadNotifier.NotificationsCreatedCallback noOpCallback = new DownloadNotifier.NotificationsCreatedCallback() {
         @Override
         public void onNotificationCreated(SimpleArrayMap<NotificationTag, Notification> taggedNotifications) {
-
+            // no-op
         }
     };
     @Mock
@@ -50,8 +50,8 @@ public class DownloadNotifierTest {
         updatedBatches.add(batchQueuedForWifiUpdated);
 
         DownloadNotifier downloadNotifier = new SynchronisedDownloadNotifier(mockContext, mockNotificationDisplayer);
-        downloadNotifier.updateWith(batches, notificationsCreatedCallback);
-        downloadNotifier.updateWith(updatedBatches, notificationsCreatedCallback);
+        downloadNotifier.updateWith(batches, noOpCallback);
+        downloadNotifier.updateWith(updatedBatches, noOpCallback);
     }
 
     private DownloadBatch getQueuedForWifiDownloadBatch() {
