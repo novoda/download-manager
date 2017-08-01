@@ -16,6 +16,6 @@ public interface DownloadNotifier {
 
     void notifyDownloadSpeed(long id, long bytesPerSecond);
 
-    void updateWith(Collection<DownloadBatch> batches, NotificationsCreatedListener notificationsCreatedCallback);
+    void updateWith(Collection<DownloadBatch> batches, NotificationsCreatedListener notificationsCreatedListener);
 
 }

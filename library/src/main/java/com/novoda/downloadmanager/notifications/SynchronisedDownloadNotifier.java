@@ -72,7 +72,7 @@ class SynchronisedDownloadNotifier implements DownloadNotifier {
      * {@link DownloadBatch}, adding, collapsing, and removing as needed.
      */
     @Override
-    public void updateWith(Collection<DownloadBatch> batches, NotificationsCreatedListener notificationsCreatedCallback) {
+    public void updateWith(Collection<DownloadBatch> batches, NotificationsCreatedListener notificationsCreatedListener) {
         synchronized (activeNotifications) {
             SimpleArrayMap<NotificationTag, Collection<DownloadBatch>> clusteredBatches = clusterBatchesByNotificationTag(batches);
             SimpleArrayMap<NotificationTag, Notification> taggedNotifications = new SimpleArrayMap<>(activeNotifications.size());
@@ -88,7 +88,7 @@ class SynchronisedDownloadNotifier implements DownloadNotifier {
             List<Integer> staleTagsToBeRemoved = getStaleTagsThatWereNotRenewed(clusteredBatches);
             notificationDisplayer.cancelStaleTags(staleTagsToBeRemoved);
 
-            notificationsCreatedCallback.onNotificationCreated(taggedNotifications);
+            notificationsCreatedListener.onNotificationCreated(taggedNotifications);
         }
     }
 
