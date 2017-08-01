@@ -47,7 +47,7 @@ public class NotificationsCreatedListenerTest {
     public void givenActiveDownload_whenNotificationCreated_thenBringsServiceToForeground() {
         SimpleArrayMap<NotificationTag, Notification> taggedNotifications = givenActiveDownload();
 
-        listener.onNotificationCreated(taggedNotifications);
+        listener.onNotificationsCreated(taggedNotifications);
 
         verify(service).startForeground(ACTIVE_DOWNLOAD_TAG.hashCode(), activeDownloadNotification);
     }
@@ -56,7 +56,7 @@ public class NotificationsCreatedListenerTest {
     public void givenNoActiveDownload_whenNotificationCreated_thenPutsServiceInBackground() {
         SimpleArrayMap<NotificationTag, Notification> taggedNotifications = givenNoActiveDownload();
 
-        listener.onNotificationCreated(taggedNotifications);
+        listener.onNotificationsCreated(taggedNotifications);
 
         verify(service).stopForeground(KEEP_NOTIFICATION);
     }

@@ -93,7 +93,7 @@ class SynchronisedDownloadNotifier implements DownloadNotifier {
             List<Integer> staleTagsToBeRemoved = getStaleTagsThatWereNotRenewed(clusteredBatches);
             notificationDisplayer.cancelStaleTags(staleTagsToBeRemoved);
 
-            notificationsCreatedListener.onNotificationCreated(taggedNotifications);
+            notificationsCreatedListener.onNotificationsCreated(taggedNotifications);
         }
     }
 

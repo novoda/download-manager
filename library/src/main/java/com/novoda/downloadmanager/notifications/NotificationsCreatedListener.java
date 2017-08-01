@@ -6,14 +6,20 @@ import android.support.v4.util.SimpleArrayMap;
 
 import static com.novoda.downloadmanager.notifications.SynchronisedDownloadNotifier.TYPE_ACTIVE;
 
+/**
+ * Listens for creation of {@link android.app.Notification} objects
+ * and puts its given {@link android.app.Service} instance in the foreground or background,
+ * depending on the presence of active downloads.
+ * This class is only temporarily public and is not intended for client use.
+ */
 public class NotificationsCreatedListener {
-    private Service service;
+    private final Service service;
 
     public NotificationsCreatedListener(Service service) {
         this.service = service;
     }
 
-    void onNotificationCreated(SimpleArrayMap<NotificationTag, Notification> taggedNotifications) {
+    void onNotificationsCreated(SimpleArrayMap<NotificationTag, Notification> taggedNotifications) {
         boolean noActiveDownloads = true;
 
         for (int i = 0; i < taggedNotifications.size(); i++) {
