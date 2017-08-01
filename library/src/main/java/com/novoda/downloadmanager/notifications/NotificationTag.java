@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager.notifications;
 
 import android.app.Notification;
+import android.support.annotation.Nullable;
 
 import com.novoda.downloadmanager.lib.DownloadBatch;
 
@@ -13,6 +14,7 @@ public class NotificationTag {
     private final int status;
     private final String identifier;
 
+    @Nullable
     public static NotificationTag create(DownloadBatch batch, String packageName) {
         if (batch.isQueuedForWifi()) {
             return new NotificationTag(DownloadNotifier.TYPE_WAITING, packageName);
