@@ -15,7 +15,7 @@ import static com.novoda.downloadmanager.notifications.NotificationTagFixtures.a
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-public class NotificationCreatedListenerTest {
+public class NotificationsCreatedListenerTest {
 
     private static final boolean KEEP_NOTIFICATION = false;
     private static final NotificationTag ACTIVE_DOWNLOAD_TAG = aTag().withStatus(TYPE_ACTIVE).build();
@@ -38,12 +38,12 @@ public class NotificationCreatedListenerTest {
     @Mock
     private Notification waitingDownloadNotification;
 
-    private NotificationCreatedListener listener;
+    private NotificationsCreatedListener listener;
 
     @Before
     public void setUp() {
         initMocks(this);
-        listener = new NotificationCreatedListener(service);
+        listener = new NotificationsCreatedListener(service);
     }
 
     @Test

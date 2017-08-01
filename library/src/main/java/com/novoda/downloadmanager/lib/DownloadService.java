@@ -87,8 +87,7 @@ public class DownloadService extends Service {
     private BatchInformationBroadcaster batchInformationBroadcaster;
     private NetworkChecker networkChecker;
     private DestroyListener destroyListener;
-
-    private final NotificationCreatedListener notificationsCreatedCallback = new NotificationCreatedListener(this);
+    private NotificationsCreatedListener notificationsCreatedListener;
 
     /**
      * Receives notifications when the data in the content provider changes
@@ -178,6 +177,8 @@ public class DownloadService extends Service {
         );
 
         unlockStaleDownloads();
+
+        notificationsCreatedListener = new NotificationsCreatedListener(this);
 
         updateThread = new HandlerThread("DownloadManager-UpdateThread");
         updateThread.start();
@@ -452,7 +453,7 @@ public class DownloadService extends Service {
     }
 
     private void updateUserVisibleNotification(Collection<DownloadBatch> batches) {
-        downloadNotifier.updateWith(batches, notificationsCreatedCallback);
+        downloadNotifier.updateWith(batches, notificationsCreatedListener);
     }
 
     @Override

@@ -8,10 +8,10 @@ import com.novoda.downloadmanager.notifications.NotificationTag;
 
 import static com.novoda.downloadmanager.notifications.DownloadNotifier.TYPE_ACTIVE;
 
-public class NotificationCreatedListener {
+public class NotificationsCreatedListener {
     private Service service;
 
-    NotificationCreatedListener(Service service) {
+    NotificationsCreatedListener(Service service) {
         this.service = service;
     }
 

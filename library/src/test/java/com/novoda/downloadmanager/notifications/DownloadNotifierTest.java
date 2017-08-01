@@ -3,7 +3,7 @@ package com.novoda.downloadmanager.notifications;
 import android.content.Context;
 
 import com.novoda.downloadmanager.lib.DownloadBatch;
-import com.novoda.downloadmanager.lib.NotificationCreatedListener;
+import com.novoda.downloadmanager.lib.NotificationsCreatedListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,7 +23,7 @@ public class DownloadNotifierTest {
     @Mock
     private Context mockContext;
     @Mock
-    private NotificationCreatedListener mockListener;
+    private NotificationsCreatedListener mockListener;
 
     @Before
     public void setUp() {

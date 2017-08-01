@@ -1,7 +1,7 @@
 package com.novoda.downloadmanager.notifications;
 
 import com.novoda.downloadmanager.lib.DownloadBatch;
-import com.novoda.downloadmanager.lib.NotificationCreatedListener;
+import com.novoda.downloadmanager.lib.NotificationsCreatedListener;
 
 import java.util.Collection;
 
@@ -16,6 +16,6 @@ public interface DownloadNotifier {
 
     void notifyDownloadSpeed(long id, long bytesPerSecond);
 
-    void updateWith(Collection<DownloadBatch> batches, NotificationCreatedListener notificationsCreatedCallback);
+    void updateWith(Collection<DownloadBatch> batches, NotificationsCreatedListener notificationsCreatedCallback);
 
 }
