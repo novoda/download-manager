@@ -23,7 +23,6 @@ import android.content.Context;
 import android.support.v4.util.SimpleArrayMap;
 
 import com.novoda.downloadmanager.lib.DownloadBatch;
-import com.novoda.downloadmanager.lib.NotificationsCreatedListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,6 +34,12 @@ import java.util.List;
  * {@link PendingIntent} that launch towards {DownloadReceiver}.
  */
 class SynchronisedDownloadNotifier implements DownloadNotifier {
+
+    static final int TYPE_ACTIVE = 1;
+    static final int TYPE_WAITING = 2;
+    static final int TYPE_SUCCESS = 3;
+    static final int TYPE_FAILED = 4;
+    static final int TYPE_CANCELLED = 5;
 
     private final Context context;
 

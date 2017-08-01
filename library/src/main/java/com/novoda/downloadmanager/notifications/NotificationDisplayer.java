@@ -82,14 +82,14 @@ public class NotificationDisplayer {
 
     private void buildIcon(int type, NotificationCompat.Builder builder) {
         switch (type) {
-            case DownloadNotifier.TYPE_ACTIVE:
+            case SynchronisedDownloadNotifier.TYPE_ACTIVE:
                 builder.setSmallIcon(android.R.drawable.stat_sys_download);
                 break;
-            case DownloadNotifier.TYPE_WAITING:
-            case DownloadNotifier.TYPE_FAILED:
+            case SynchronisedDownloadNotifier.TYPE_WAITING:
+            case SynchronisedDownloadNotifier.TYPE_FAILED:
                 builder.setSmallIcon(android.R.drawable.stat_sys_warning);
                 break;
-            case DownloadNotifier.TYPE_SUCCESS:
+            case SynchronisedDownloadNotifier.TYPE_SUCCESS:
                 builder.setSmallIcon(android.R.drawable.stat_sys_download_done);
                 break;
             default:
@@ -103,11 +103,11 @@ public class NotificationDisplayer {
         long batchId = batch.getBatchId();
         int batchStatus = batch.getStatus();
 
-        if (type == DownloadNotifier.TYPE_ACTIVE || type == DownloadNotifier.TYPE_WAITING) {
+        if (type == SynchronisedDownloadNotifier.TYPE_ACTIVE || type == SynchronisedDownloadNotifier.TYPE_WAITING) {
             builder.setOngoing(true);
-        } else if (type == DownloadNotifier.TYPE_SUCCESS
-                || type == DownloadNotifier.TYPE_CANCELLED
-                || type == DownloadNotifier.TYPE_FAILED) {
+        } else if (type == SynchronisedDownloadNotifier.TYPE_SUCCESS
+                || type == SynchronisedDownloadNotifier.TYPE_CANCELLED
+                || type == SynchronisedDownloadNotifier.TYPE_FAILED) {
             Intent dismissedIntent = createNotificationDismissedIntent(batchId);
             builder.setDeleteIntent(PendingIntent.getBroadcast(context, 0, dismissedIntent, 0));
             builder.setAutoCancel(true);
@@ -161,19 +161,19 @@ public class NotificationDisplayer {
     private void customiseNotification(int type, NotificationCompat.Builder builder, DownloadBatch batch) {
         Download download = downloadMarshaller.marshall(batch);
         switch (type) {
-            case DownloadNotifier.TYPE_WAITING:
+            case SynchronisedDownloadNotifier.TYPE_WAITING:
                 notificationCustomiser.customiseQueued(download, builder);
                 break;
-            case DownloadNotifier.TYPE_ACTIVE:
+            case SynchronisedDownloadNotifier.TYPE_ACTIVE:
                 notificationCustomiser.customiseDownloading(download, builder);
                 break;
-            case DownloadNotifier.TYPE_SUCCESS:
+            case SynchronisedDownloadNotifier.TYPE_SUCCESS:
                 notificationCustomiser.customiseComplete(download, builder);
                 break;
-            case DownloadNotifier.TYPE_CANCELLED:
+            case SynchronisedDownloadNotifier.TYPE_CANCELLED:
                 notificationCustomiser.customiseCancelled(download, builder);
                 break;
-            case DownloadNotifier.TYPE_FAILED:
+            case SynchronisedDownloadNotifier.TYPE_FAILED:
                 notificationCustomiser.customiseFailed(download, builder);
                 break;
             default:
@@ -184,7 +184,7 @@ public class NotificationDisplayer {
     private Notification buildTitlesAndDescription(int type, Collection<DownloadBatch> cluster, NotificationCompat.Builder builder) {
         String remainingText = null;
         String percentText = null;
-        if (type == DownloadNotifier.TYPE_ACTIVE) {
+        if (type == SynchronisedDownloadNotifier.TYPE_ACTIVE) {
             int totalPercent = 0;
             long remainingMillis = 0;
             synchronized (downloadSpeed) {
@@ -238,7 +238,7 @@ public class NotificationDisplayer {
         builder.setContentTitle(title);
         style.setBigContentTitle(title);
 
-        if (type == DownloadNotifier.TYPE_ACTIVE) {
+        if (type == SynchronisedDownloadNotifier.TYPE_ACTIVE) {
             String description = batch.getDescription();
             if (TextUtils.isEmpty(description)) {
                 setSecondaryNotificationText(builder, style, context.getString(R.string.dl__downloading));
@@ -247,14 +247,14 @@ public class NotificationDisplayer {
             }
             builder.setContentInfo(percentText);
 
-        } else if (type == DownloadNotifier.TYPE_WAITING) {
+        } else if (type == SynchronisedDownloadNotifier.TYPE_WAITING) {
             setSecondaryNotificationText(builder, style, context.getString(R.string.dl__download_size_requires_wifi));
 
-        } else if (type == DownloadNotifier.TYPE_SUCCESS) {
+        } else if (type == SynchronisedDownloadNotifier.TYPE_SUCCESS) {
             setSecondaryNotificationText(builder, style, context.getString(R.string.dl__download_complete));
-        } else if (type == DownloadNotifier.TYPE_FAILED) {
+        } else if (type == SynchronisedDownloadNotifier.TYPE_FAILED) {
             setSecondaryNotificationText(builder, style, context.getString(R.string.dl__download_unsuccessful));
-        } else if (type == DownloadNotifier.TYPE_CANCELLED) {
+        } else if (type == SynchronisedDownloadNotifier.TYPE_CANCELLED) {
             setSecondaryNotificationText(builder, style, context.getString(R.string.dl__download_cancelled));
         }
 
@@ -291,18 +291,18 @@ public class NotificationDisplayer {
             inboxStyle.addLine(getDownloadTitle(batch));
         }
 
-        if (type == DownloadNotifier.TYPE_ACTIVE) {
+        if (type == SynchronisedDownloadNotifier.TYPE_ACTIVE) {
             builder.setContentTitle(resources.getQuantityString(R.plurals.dl__notif_summary_active, currentBatches.size(), currentBatches.size()));
             builder.setContentInfo(percentText);
             setSecondaryNotificationText(builder, inboxStyle, remainingText);
-        } else if (type == DownloadNotifier.TYPE_WAITING) {
+        } else if (type == SynchronisedDownloadNotifier.TYPE_WAITING) {
             builder.setContentTitle(resources.getQuantityString(R.plurals.dl__notif_summary_waiting, currentBatches.size(), currentBatches.size()));
             setSecondaryNotificationText(builder, inboxStyle, context.getString(R.string.dl__download_size_requires_wifi));
-        } else if (type == DownloadNotifier.TYPE_SUCCESS) {
+        } else if (type == SynchronisedDownloadNotifier.TYPE_SUCCESS) {
             setSecondaryNotificationText(builder, inboxStyle, context.getString(R.string.dl__download_complete));
-        } else if (type == DownloadNotifier.TYPE_FAILED) {
+        } else if (type == SynchronisedDownloadNotifier.TYPE_FAILED) {
             setSecondaryNotificationText(builder, inboxStyle, context.getString(R.string.dl__download_unsuccessful));
-        } else if (type == DownloadNotifier.TYPE_CANCELLED) {
+        } else if (type == SynchronisedDownloadNotifier.TYPE_CANCELLED) {
             setSecondaryNotificationText(builder, inboxStyle, context.getString(R.string.dl__download_cancelled));
         }
 

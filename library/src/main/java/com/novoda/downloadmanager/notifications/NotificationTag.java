@@ -9,26 +9,26 @@ import com.novoda.downloadmanager.lib.DownloadBatch;
  * Build tag used for collapsing several {@link DownloadBatch} into a single
  * {@link Notification}.
  */
-public class NotificationTag {
+class NotificationTag {
 
     private final int status;
     private final String identifier;
 
     @Nullable
-    public static NotificationTag create(DownloadBatch batch, String packageName) {
+    static NotificationTag create(DownloadBatch batch, String packageName) {
         if (batch.isQueuedForWifi()) {
-            return new NotificationTag(DownloadNotifier.TYPE_WAITING, packageName);
+            return new NotificationTag(SynchronisedDownloadNotifier.TYPE_WAITING, packageName);
         } else if (batch.isRunning() && batch.shouldShowActiveItem()) {
-            return new NotificationTag(DownloadNotifier.TYPE_ACTIVE, packageName);
+            return new NotificationTag(SynchronisedDownloadNotifier.TYPE_ACTIVE, packageName);
         } else if (batch.isError() && !batch.isCancelled() && batch.shouldShowCompletedItem()) {
             // Failed downloads always have unique notifications
-            return new NotificationTag(DownloadNotifier.TYPE_FAILED, String.valueOf(batch.getBatchId()));
+            return new NotificationTag(SynchronisedDownloadNotifier.TYPE_FAILED, String.valueOf(batch.getBatchId()));
         } else if (batch.isCancelled() && batch.shouldShowCompletedItem()) {
             // Cancelled downloads always have unique notifications
-            return new NotificationTag(DownloadNotifier.TYPE_CANCELLED, String.valueOf(batch.getBatchId()));
+            return new NotificationTag(SynchronisedDownloadNotifier.TYPE_CANCELLED, String.valueOf(batch.getBatchId()));
         } else if (batch.isSuccess() && batch.shouldShowCompletedItem()) {
             // Complete downloads always have unique notifications
-            return new NotificationTag(DownloadNotifier.TYPE_SUCCESS, String.valueOf(batch.getBatchId()));
+            return new NotificationTag(SynchronisedDownloadNotifier.TYPE_SUCCESS, String.valueOf(batch.getBatchId()));
         } else {
             return null;
         }

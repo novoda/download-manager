@@ -38,6 +38,7 @@ import android.support.annotation.NonNull;
 import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.downloadmanager.notifications.DownloadNotifier;
 import com.novoda.downloadmanager.notifications.DownloadNotifierFactory;
+import com.novoda.downloadmanager.notifications.NotificationsCreatedListener;
 
 import java.io.File;
 import java.io.FileDescriptor;

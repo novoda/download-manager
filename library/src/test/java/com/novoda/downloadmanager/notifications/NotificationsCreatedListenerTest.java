@@ -1,16 +1,13 @@
-package com.novoda.downloadmanager.lib;
+package com.novoda.downloadmanager.notifications;
 
 import android.app.Notification;
 import android.app.Service;
 import android.support.v4.util.SimpleArrayMap;
 
-import com.novoda.downloadmanager.notifications.NotificationTag;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import static com.novoda.downloadmanager.notifications.DownloadNotifier.*;
 import static com.novoda.downloadmanager.notifications.NotificationTagFixtures.aTag;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -18,11 +15,11 @@ import static org.mockito.MockitoAnnotations.initMocks;
 public class NotificationsCreatedListenerTest {
 
     private static final boolean KEEP_NOTIFICATION = false;
-    private static final NotificationTag ACTIVE_DOWNLOAD_TAG = aTag().withStatus(TYPE_ACTIVE).build();
-    private static final NotificationTag FAILED_DOWNLOAD_TAG = aTag().withStatus(TYPE_FAILED).build();
-    private static final NotificationTag SUCCESSFUL_DOWNLOAD_TAG = aTag().withStatus(TYPE_SUCCESS).build();
-    private static final NotificationTag CANCELLED_DOWNLOAD_TAG = aTag().withStatus(TYPE_CANCELLED).build();
-    private static final NotificationTag WAITING_DOWNLOAD_TAG = aTag().withStatus(TYPE_WAITING).build();
+    private static final NotificationTag ACTIVE_DOWNLOAD_TAG = aTag().withStatus(SynchronisedDownloadNotifier.TYPE_ACTIVE).build();
+    private static final NotificationTag FAILED_DOWNLOAD_TAG = aTag().withStatus(SynchronisedDownloadNotifier.TYPE_FAILED).build();
+    private static final NotificationTag SUCCESSFUL_DOWNLOAD_TAG = aTag().withStatus(SynchronisedDownloadNotifier.TYPE_SUCCESS).build();
+    private static final NotificationTag CANCELLED_DOWNLOAD_TAG = aTag().withStatus(SynchronisedDownloadNotifier.TYPE_CANCELLED).build();
+    private static final NotificationTag WAITING_DOWNLOAD_TAG = aTag().withStatus(SynchronisedDownloadNotifier.TYPE_WAITING).build();
 
     @Mock
     private Service service;

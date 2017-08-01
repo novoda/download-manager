@@ -3,7 +3,6 @@ package com.novoda.downloadmanager.notifications;
 import android.content.Context;
 
 import com.novoda.downloadmanager.lib.DownloadBatch;
-import com.novoda.downloadmanager.lib.NotificationsCreatedListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
