@@ -38,6 +38,7 @@ import android.support.annotation.NonNull;
 import com.novoda.downloadmanager.lib.logger.LLog;
 import com.novoda.downloadmanager.notifications.DownloadNotifier;
 import com.novoda.downloadmanager.notifications.DownloadNotifierFactory;
+import com.novoda.downloadmanager.notifications.NotificationsCreatedListener;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -87,6 +88,7 @@ public class DownloadService extends Service {
     private BatchInformationBroadcaster batchInformationBroadcaster;
     private NetworkChecker networkChecker;
     private DestroyListener destroyListener;
+    private NotificationsCreatedListener notificationsCreatedListener;
 
     /**
      * Receives notifications when the data in the content provider changes
@@ -176,6 +178,8 @@ public class DownloadService extends Service {
         );
 
         unlockStaleDownloads();
+
+        notificationsCreatedListener = new NotificationsCreatedListener(this);
 
         updateThread = new HandlerThread("DownloadManager-UpdateThread");
         updateThread.start();
@@ -450,7 +454,7 @@ public class DownloadService extends Service {
     }
 
     private void updateUserVisibleNotification(Collection<DownloadBatch> batches) {
-        downloadNotifier.updateWith(batches);
+        downloadNotifier.updateWith(batches, notificationsCreatedListener);
     }
 
     @Override

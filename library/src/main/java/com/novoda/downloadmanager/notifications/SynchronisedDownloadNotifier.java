@@ -47,13 +47,13 @@ class SynchronisedDownloadNotifier implements DownloadNotifier {
      * Currently active notifications, mapped from clustering tag to timestamp
      * when first shown.
      *
-     * @see #buildNotificationTag(DownloadBatch)
+     * @see NotificationTag#create(DownloadBatch, String)
      */
-    private final SimpleArrayMap<String, Long> activeNotifications = new SimpleArrayMap<>();
+    private final SimpleArrayMap<NotificationTag, Long> activeNotifications = new SimpleArrayMap<>();
 
     private final NotificationDisplayer notificationDisplayer;
 
-    public SynchronisedDownloadNotifier(Context context, NotificationDisplayer notificationDisplayer) {
+    SynchronisedDownloadNotifier(Context context, NotificationDisplayer notificationDisplayer) {
         this.context = context;
         this.notificationDisplayer = notificationDisplayer;
     }
@@ -77,92 +77,68 @@ class SynchronisedDownloadNotifier implements DownloadNotifier {
      * {@link DownloadBatch}, adding, collapsing, and removing as needed.
      */
     @Override
-    public void updateWith(Collection<DownloadBatch> batches) {
+    public void updateWith(Collection<DownloadBatch> batches, NotificationsCreatedListener notificationsCreatedListener) {
         synchronized (activeNotifications) {
-            SimpleArrayMap<String, Collection<DownloadBatch>> clusters = getClustersByNotificationTag(batches);
+            SimpleArrayMap<NotificationTag, Collection<DownloadBatch>> clusteredBatches = clusterBatchesByNotificationTag(batches);
+            SimpleArrayMap<NotificationTag, Notification> taggedNotifications = new SimpleArrayMap<>(activeNotifications.size());
 
-            for (int i = 0, size = clusters.size(); i < size; i++) {
-                String notificationId = clusters.keyAt(i);
-                long firstShown = getFirstShownTime(notificationId);
-                notificationDisplayer.buildAndShowNotification(clusters, notificationId, firstShown);
+            for (int i = 0, size = clusteredBatches.size(); i < size; i++) {
+                NotificationTag notificationTag = clusteredBatches.keyAt(i);
+                Collection<DownloadBatch> batchesForTag = clusteredBatches.get(notificationTag);
+                long firstShown = getFirstShownTime(notificationTag);
+                Notification notification = notificationDisplayer.buildAndShowNotification(notificationTag, batchesForTag, firstShown);
+                taggedNotifications.put(notificationTag, notification);
             }
 
-            List<Integer> staleTagsToBeRemoved = getStaleTagsThatWereNotRenewed(clusters);
+            List<Integer> staleTagsToBeRemoved = getStaleTagsThatWereNotRenewed(clusteredBatches);
             notificationDisplayer.cancelStaleTags(staleTagsToBeRemoved);
+
+            notificationsCreatedListener.onNotificationsCreated(taggedNotifications);
         }
     }
 
-    private long getFirstShownTime(String notificationId) {
+    private long getFirstShownTime(NotificationTag tag) {
         final long firstShown;
-        if (activeNotifications.containsKey(notificationId)) {
-            firstShown = activeNotifications.get(notificationId);
+        if (activeNotifications.containsKey(tag)) {
+            firstShown = activeNotifications.get(tag);
         } else {
             firstShown = System.currentTimeMillis();
-            activeNotifications.put(notificationId, firstShown);
+            activeNotifications.put(tag, firstShown);
         }
         return firstShown;
     }
 
-    private SimpleArrayMap<String, Collection<DownloadBatch>> getClustersByNotificationTag(Collection<DownloadBatch> batches) {
-        SimpleArrayMap<String, Collection<DownloadBatch>> clustered = new SimpleArrayMap<>();
+    private SimpleArrayMap<NotificationTag, Collection<DownloadBatch>> clusterBatchesByNotificationTag(Collection<DownloadBatch> batches) {
+        SimpleArrayMap<NotificationTag, Collection<DownloadBatch>> taggedBatches = new SimpleArrayMap<>();
 
         for (DownloadBatch batch : batches) {
-            String tag = buildNotificationTag(batch);
-
-            addBatchToCluster(tag, clustered, batch);
+            NotificationTag tag = NotificationTag.create(batch, context.getPackageName());
+            associateBatchWithTag(tag, batch, taggedBatches);
         }
 
-        return clustered;
+        return taggedBatches;
     }
 
-    /**
-     * Build tag used for collapsing several {@link DownloadBatch} into a single
-     * {@link Notification}.
-     */
-    private String buildNotificationTag(DownloadBatch batch) {
-        // TODO this method and NotificationDisplayer.#getNotificationTagType have an inherent contract
-        // If we pulled out a `NotificationTag` value object this would fix it
-        if (batch.isQueuedForWifi()) {
-            return TYPE_WAITING + ":" + context.getPackageName();
-        } else if (batch.isRunning() && batch.shouldShowActiveItem()) {
-            return TYPE_ACTIVE + ":" + context.getPackageName();
-        } else if (batch.isError() && !batch.isCancelled() && batch.shouldShowCompletedItem()) {
-            // Failed downloads always have unique notifications
-            return TYPE_FAILED + ":" + batch.getBatchId();
-        } else if (batch.isCancelled() && batch.shouldShowCompletedItem()) {
-            // Cancelled downloads always have unique notifications
-            return TYPE_CANCELLED + ":" + batch.getBatchId();
-        } else if (batch.isSuccess() && batch.shouldShowCompletedItem()) {
-            // Complete downloads always have unique notifications
-            return TYPE_SUCCESS + ":" + batch.getBatchId();
-        } else {
-            return null;
-        }
-    }
-
-    private void addBatchToCluster(String tag, SimpleArrayMap<String, Collection<DownloadBatch>> cluster, DownloadBatch batch) {
+    private void associateBatchWithTag(NotificationTag tag, DownloadBatch batch, SimpleArrayMap<NotificationTag, Collection<DownloadBatch>> taggedBatches) {
         if (tag == null) {
             return;
         }
 
-        Collection<DownloadBatch> batches;
-
-        if (cluster.containsKey(tag)) {
-            batches = cluster.get(tag);
+        if (taggedBatches.containsKey(tag)) {
+            taggedBatches.get(tag).add(batch);
         } else {
-            batches = new ArrayList<>();
-            cluster.put(tag, batches);
+            Collection<DownloadBatch> batchesForTag = new ArrayList<>();
+            batchesForTag.add(batch);
+            taggedBatches.put(tag, batchesForTag);
         }
-
-        batches.add(batch);
     }
 
-    private List<Integer> getStaleTagsThatWereNotRenewed(SimpleArrayMap<String, Collection<DownloadBatch>> clustered) {
+    private List<Integer> getStaleTagsThatWereNotRenewed(SimpleArrayMap<NotificationTag, Collection<DownloadBatch>> clusteredBatches) {
         List<Integer> staleTags = new ArrayList<>();
 
         for (int i = activeNotifications.size() - 1; i >= 0; i--) {
-            String tag = activeNotifications.keyAt(i);
-            if (!clustered.containsKey(tag)) {
+            NotificationTag tag = activeNotifications.keyAt(i);
+            if (!clusteredBatches.containsKey(tag)) {
                 staleTags.add(tag.hashCode());
                 activeNotifications.removeAt(i);
             }

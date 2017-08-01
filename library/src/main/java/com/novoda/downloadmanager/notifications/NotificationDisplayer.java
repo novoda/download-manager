@@ -10,7 +10,6 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.util.LongSparseArray;
-import android.support.v4.util.SimpleArrayMap;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 
@@ -68,25 +67,17 @@ public class NotificationDisplayer {
         this.downloadMarshaller = downloadMarshaller;
     }
 
-    public void buildAndShowNotification(SimpleArrayMap<String, Collection<DownloadBatch>> clusters, String notificationId, long firstShown) {
-        int type = getNotificationTagType(notificationId);
-        Collection<DownloadBatch> cluster = clusters.get(notificationId);
+    public Notification buildAndShowNotification(NotificationTag tag, Collection<DownloadBatch> batchesForTag, long firstShown) {
+        int type = tag.status();
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
         builder.setWhen(firstShown);
         buildIcon(type, builder);
-        buildActionIntents(type, cluster, builder);
+        buildActionIntents(type, batchesForTag, builder);
 
-        Notification notification = buildTitlesAndDescription(type, cluster, builder);
-        notificationManager.notify(notificationId.hashCode(), notification);
-    }
-
-    /**
-     * Return the cluster type of the given as created by
-     * {@link SynchronisedDownloadNotifier#buildNotificationTag(DownloadBatch)}.
-     */
-    private int getNotificationTagType(String tag) {
-        return Integer.parseInt(tag.substring(0, tag.indexOf(':')));
+        Notification notification = buildTitlesAndDescription(type, batchesForTag, builder);
+        notificationManager.notify(tag.hashCode(), notification);
+        return notification;
     }
 
     private void buildIcon(int type, NotificationCompat.Builder builder) {

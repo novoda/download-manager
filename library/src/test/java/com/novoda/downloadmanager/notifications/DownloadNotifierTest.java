@@ -21,6 +21,8 @@ public class DownloadNotifierTest {
     private NotificationDisplayer mockNotificationDisplayer;
     @Mock
     private Context mockContext;
+    @Mock
+    private NotificationsCreatedListener mockListener;
 
     @Before
     public void setUp() {
@@ -42,8 +44,8 @@ public class DownloadNotifierTest {
         updatedBatches.add(batchQueuedForWifiUpdated);
 
         DownloadNotifier downloadNotifier = new SynchronisedDownloadNotifier(mockContext, mockNotificationDisplayer);
-        downloadNotifier.updateWith(batches);
-        downloadNotifier.updateWith(updatedBatches);
+        downloadNotifier.updateWith(batches, mockListener);
+        downloadNotifier.updateWith(updatedBatches, mockListener);
     }
 
     private DownloadBatch getQueuedForWifiDownloadBatch() {
