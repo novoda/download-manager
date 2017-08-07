@@ -33,12 +33,10 @@ class DefaultsDownloadManagerModules implements DownloadManagerModules {
     @Nullable
     private final NotificationImageRetriever imageRetriever;
     @Nullable
-    private final NotificationChannelCustomiser channelCustomiser;
-    @Nullable
     private final DestroyListener destroyListener;
 
     DefaultsDownloadManagerModules(Context context) {
-        this(context, null, null, null, null, null, null, null, null, null);
+        this(context, null, null, null, null, null, null, null, null);
     }
 
     public DefaultsDownloadManagerModules(Context context,
@@ -49,7 +47,6 @@ class DefaultsDownloadManagerModules implements DownloadManagerModules {
                                           @Nullable FailedNotificationCustomiser failedCustomiser,
                                           @Nullable DownloadClientReadyChecker readyChecker,
                                           @Nullable NotificationImageRetriever imageRetriever,
-                                          @Nullable NotificationChannelCustomiser channelCustomiser,
                                           @Nullable DestroyListener destroyListener) {
         this.context = context;
         this.queuedCustomiser = queuedCustomiser;
@@ -59,7 +56,6 @@ class DefaultsDownloadManagerModules implements DownloadManagerModules {
         this.failedCustomiser = failedCustomiser;
         this.readyChecker = readyChecker;
         this.imageRetriever = imageRetriever;
-        this.channelCustomiser = channelCustomiser;
         this.destroyListener = destroyListener;
     }
 
@@ -117,11 +113,6 @@ class DefaultsDownloadManagerModules implements DownloadManagerModules {
             return new EmptyFailedNotificationCustomiser();
         }
         return failedCustomiser;
-    }
-
-    @Override
-    public NotificationChannelCustomiser getNotificationChannelCustomiser() {
-        return channelCustomiser;
     }
 
     @Override
