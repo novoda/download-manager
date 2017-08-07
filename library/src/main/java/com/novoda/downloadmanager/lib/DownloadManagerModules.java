@@ -41,6 +41,7 @@ public interface DownloadManagerModules {
         private FailedNotificationCustomiser failedCustomiser;
         private DownloadClientReadyChecker readyChecker;
         private NotificationImageRetriever imageRetriever;
+        private NotificationChannelCustomiser channelCustomiser;
         private DestroyListener destroyListener;
 
         public static Builder from(@NonNull Context context) {
@@ -83,6 +84,11 @@ public interface DownloadManagerModules {
 
         public Builder withNotificationImageRetrieverFactory(@NonNull NotificationImageRetriever imageRetriever) {
             this.imageRetriever = imageRetriever;
+            return this;
+        }
+
+        public Builder withNotificationChannelCustomiser(@NonNull NotificationChannelCustomiser channelCustomiser) {
+            this.channelCustomiser = channelCustomiser;
             return this;
         }
 
