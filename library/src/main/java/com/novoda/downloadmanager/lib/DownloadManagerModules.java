@@ -26,6 +26,8 @@ public interface DownloadManagerModules {
 
     FailedNotificationCustomiser getFailedNotificationCustomiser();
 
+    NotificationChannelCustomiser getNotificationChannelCustomiser();
+
     DestroyListener getDestroyListener();
 
     class Builder {
@@ -99,6 +101,7 @@ public interface DownloadManagerModules {
                     failedCustomiser,
                     readyChecker,
                     imageRetriever,
+                    channelCustomiser,
                     destroyListener
             );
         }
