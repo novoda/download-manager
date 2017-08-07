@@ -153,7 +153,7 @@ public class DownloadService extends Service {
 
         DownloadNotifierFactory downloadNotifierFactory = new DownloadNotifierFactory();
         PublicFacingStatusTranslator statusTranslator = new PublicFacingStatusTranslator();
-        downloadNotifier = downloadNotifierFactory.getDownloadNotifier(this, modules, downloadMarshaller, statusTranslator);
+        downloadNotifier = downloadNotifierFactory.getDownloadNotifier(this, modules, downloadMarshaller, statusTranslator, modules.getNotificationManagerCustomiser());
         downloadNotifier.cancelAll();
 
         downloadManagerContentObserver = new DownloadManagerContentObserver();
