@@ -88,10 +88,10 @@ public class NotificationDisplayer {
     private NotificationCompat.Builder initNotificationBuilder() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel notificationChannel = notificationChannelProvider.getNotificationChannel();
-            String channelId = notificationChannel.getId();
             if (!notificationManager.getNotificationChannels().contains(notificationChannel)) {
                 notificationManager.createNotificationChannel(notificationChannel);
             }
+            String channelId = notificationChannel.getId();
             return new NotificationCompat.Builder(context, channelId);
         } else {
             return new NotificationCompat.Builder(context);

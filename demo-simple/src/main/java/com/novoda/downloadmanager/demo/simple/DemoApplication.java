@@ -27,7 +27,9 @@ public class DemoApplication extends Application implements DownloadManagerModul
         @RequiresApi(api = Build.VERSION_CODES.O)
         @Override
         public NotificationChannel getNotificationChannel() {
-            return new NotificationChannel("app id", "Beard Downloader", NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationChannel channel = new NotificationChannel("app id", "Beard Downloader", NotificationManager.IMPORTANCE_DEFAULT);
+            channel.enableVibration(false);
+            return channel;
         }
     }
 }
