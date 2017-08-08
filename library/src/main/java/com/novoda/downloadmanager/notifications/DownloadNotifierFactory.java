@@ -13,9 +13,8 @@ public class DownloadNotifierFactory {
     public DownloadNotifier getDownloadNotifier(Context context,
                                                 DownloadManagerModules modules,
                                                 PublicFacingDownloadMarshaller downloadMarshaller,
-                                                PublicFacingStatusTranslator statusTranslator,
-                                                NotificationManagerCustomiser customiser) {
-        NotificationManager notificationManager = initNotificationManager(context, customiser);
+                                                PublicFacingStatusTranslator statusTranslator) {
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         Resources resources = context.getResources();
         NotificationDisplayer notificationDisplayer = new NotificationDisplayer(
                 context,
@@ -24,15 +23,11 @@ public class DownloadNotifierFactory {
                 resources,
                 createNotificationCustomiser(modules),
                 statusTranslator,
-                downloadMarshaller
+                downloadMarshaller,
+                modules.getNotificationChannelProvider()
         );
 
         return new SynchronisedDownloadNotifier(context, notificationDisplayer);
-    }
-
-    private NotificationManager initNotificationManager(Context context, NotificationManagerCustomiser customiser) {
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        return customiser.customise(notificationManager);
     }
 
     private NotificationCustomiser createNotificationCustomiser(DownloadManagerModules downloadManagerModules) {

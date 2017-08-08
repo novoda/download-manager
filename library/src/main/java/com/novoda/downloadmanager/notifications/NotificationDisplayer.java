@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager.notifications;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -8,6 +9,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.util.LongSparseArray;
 import android.text.TextUtils;
@@ -49,6 +51,7 @@ public class NotificationDisplayer {
     private final NotificationCustomiser notificationCustomiser;
     private final PublicFacingStatusTranslator statusTranslator;
     private final PublicFacingDownloadMarshaller downloadMarshaller;
+    private final NotificationChannelProvider notificationChannelProvider;
 
     public NotificationDisplayer(
             Context context,
@@ -57,7 +60,8 @@ public class NotificationDisplayer {
             Resources resources,
             NotificationCustomiser notificationCustomiser,
             PublicFacingStatusTranslator statusTranslator,
-            PublicFacingDownloadMarshaller downloadMarshaller) {
+            PublicFacingDownloadMarshaller downloadMarshaller,
+            NotificationChannelProvider notificationChannelProvider) {
         this.context = context;
         this.notificationManager = notificationManager;
         this.imageRetriever = imageRetriever;
@@ -65,12 +69,13 @@ public class NotificationDisplayer {
         this.notificationCustomiser = notificationCustomiser;
         this.statusTranslator = statusTranslator;
         this.downloadMarshaller = downloadMarshaller;
+        this.notificationChannelProvider = notificationChannelProvider;
     }
 
     public Notification buildAndShowNotification(NotificationTag tag, Collection<DownloadBatch> batchesForTag, long firstShown) {
         int type = tag.status();
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+        NotificationCompat.Builder builder = initNotificationBuilder();
         builder.setWhen(firstShown);
         buildIcon(type, builder);
         buildActionIntents(type, batchesForTag, builder);
@@ -78,6 +83,19 @@ public class NotificationDisplayer {
         Notification notification = buildTitlesAndDescription(type, batchesForTag, builder);
         notificationManager.notify(tag.hashCode(), notification);
         return notification;
+    }
+
+    private NotificationCompat.Builder initNotificationBuilder() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel notificationChannel = notificationChannelProvider.getNotificationChannel();
+            String channelId = notificationChannel.getId();
+            if (!notificationManager.getNotificationChannels().contains(notificationChannel)) {
+                notificationManager.createNotificationChannel(notificationChannel);
+            }
+            return new NotificationCompat.Builder(context, channelId);
+        } else {
+            return new NotificationCompat.Builder(context);
+        }
     }
 
     private void buildIcon(int type, NotificationCompat.Builder builder) {
