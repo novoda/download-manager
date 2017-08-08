@@ -15,7 +15,6 @@ import com.novoda.downloadmanager.lib.logger.LLog;
 /**
  * A client can specify whether the downloads are allowed to proceed by implementing
  * {@link com.novoda.downloadmanager.lib.DownloadClientReadyChecker} on your Application class
- *
  */
 public class DownloadManagerBuilder {
 
