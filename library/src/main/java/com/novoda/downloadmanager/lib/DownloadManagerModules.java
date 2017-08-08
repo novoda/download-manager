@@ -7,8 +7,8 @@ import com.novoda.downloadmanager.notifications.CancelledNotificationCustomiser;
 import com.novoda.downloadmanager.notifications.CompleteNotificationCustomiser;
 import com.novoda.downloadmanager.notifications.DownloadingNotificationCustomiser;
 import com.novoda.downloadmanager.notifications.FailedNotificationCustomiser;
-import com.novoda.downloadmanager.notifications.NotificationImageRetriever;
 import com.novoda.downloadmanager.notifications.NotificationChannelProvider;
+import com.novoda.downloadmanager.notifications.NotificationImageRetriever;
 import com.novoda.downloadmanager.notifications.QueuedNotificationCustomiser;
 
 public interface DownloadManagerModules {
@@ -88,7 +88,7 @@ public interface DownloadManagerModules {
             return this;
         }
 
-        public Builder withNotificationManagerCustomiser(@NonNull NotificationChannelProvider notificationChannelProvider) {
+        public Builder withNotificationChannelProvider(@NonNull NotificationChannelProvider notificationChannelProvider) {
             this.notificationChannelProvider = notificationChannelProvider;
             return this;
         }
