@@ -11,6 +11,6 @@ class DefaultChannelProvider implements NotificationChannelProvider {
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public NotificationChannel getNotificationChannel() {
-        return new NotificationChannel("App channel id", "App name", NotificationManager.IMPORTANCE_DEFAULT);
+        return new NotificationChannel("App channel id", "App name", NotificationManager.IMPORTANCE_LOW);
     }
 }
