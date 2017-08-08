@@ -7,6 +7,7 @@ import com.novoda.downloadmanager.notifications.CancelledNotificationCustomiser;
 import com.novoda.downloadmanager.notifications.CompleteNotificationCustomiser;
 import com.novoda.downloadmanager.notifications.DownloadingNotificationCustomiser;
 import com.novoda.downloadmanager.notifications.FailedNotificationCustomiser;
+import com.novoda.downloadmanager.notifications.NotificationChannelProvider;
 import com.novoda.downloadmanager.notifications.NotificationImageRetriever;
 import com.novoda.downloadmanager.notifications.QueuedNotificationCustomiser;
 
@@ -26,6 +27,8 @@ public interface DownloadManagerModules {
 
     FailedNotificationCustomiser getFailedNotificationCustomiser();
 
+    NotificationChannelProvider getNotificationChannelProvider();
+
     DestroyListener getDestroyListener();
 
     class Builder {
@@ -39,6 +42,7 @@ public interface DownloadManagerModules {
         private FailedNotificationCustomiser failedCustomiser;
         private DownloadClientReadyChecker readyChecker;
         private NotificationImageRetriever imageRetriever;
+        private NotificationChannelProvider notificationChannelProvider;
         private DestroyListener destroyListener;
 
         public static Builder from(@NonNull Context context) {
@@ -84,6 +88,11 @@ public interface DownloadManagerModules {
             return this;
         }
 
+        public Builder withNotificationChannelProvider(@NonNull NotificationChannelProvider notificationChannelProvider) {
+            this.notificationChannelProvider = notificationChannelProvider;
+            return this;
+        }
+
         public Builder withDestroyListener(@NonNull DestroyListener destroyListener) {
             this.destroyListener = destroyListener;
             return this;
@@ -99,6 +108,7 @@ public interface DownloadManagerModules {
                     failedCustomiser,
                     readyChecker,
                     imageRetriever,
+                    notificationChannelProvider,
                     destroyListener
             );
         }
