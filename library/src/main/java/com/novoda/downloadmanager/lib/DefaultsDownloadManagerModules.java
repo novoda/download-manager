@@ -122,7 +122,7 @@ class DefaultsDownloadManagerModules implements DownloadManagerModules {
 
     public NotificationChannelProvider getNotificationChannelProvider() {
         if (notificationChannelProvider == null) {
-            return new NullChannelProvider();
+            return new DefaultChannelProvider();
         }
         return notificationChannelProvider;
     }
