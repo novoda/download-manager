@@ -66,7 +66,8 @@ class DownloadsRepository {
         return getAllDownloadsFor(NO_BATCH_ID);
     }
 
-    public @Nullable FileDownloadInfo getDownloadFor(long id) {
+    @Nullable
+    public FileDownloadInfo getDownloadFor(long id) {
         Uri uri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id);
         Cursor downloadsCursor = contentResolver.query(uri, null, null, null, null);
         if (downloadsCursor != null) {
