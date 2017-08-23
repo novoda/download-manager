@@ -5,6 +5,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.novoda.downloadmanager.lib.logger.LLog;
@@ -49,7 +50,7 @@ class DownloadsRepository {
             List<FileDownloadInfo> downloads = new ArrayList<>();
             FileDownloadInfo.Reader reader = new FileDownloadInfo.Reader(contentResolver, downloadsCursor);
 
-            while (downloadsCursor.moveToNext()) {
+            while (downloadsCursor != null && downloadsCursor.moveToNext()) {
                 downloads.add(downloadInfoCreator.create(reader));
             }
 
@@ -65,15 +66,20 @@ class DownloadsRepository {
         return getAllDownloadsFor(NO_BATCH_ID);
     }
 
+    @Nullable
     public FileDownloadInfo getDownloadFor(long id) {
         Uri uri = ContentUris.withAppendedId(downloadsUriProvider.getAllDownloadsUri(), id);
         Cursor downloadsCursor = contentResolver.query(uri, null, null, null, null);
-        try {
-            downloadsCursor.moveToFirst();
-            FileDownloadInfo.Reader reader = new FileDownloadInfo.Reader(contentResolver, downloadsCursor);
-            return downloadInfoCreator.create(reader);
-        } finally {
-            downloadsCursor.close();
+        if (downloadsCursor != null) {
+            try {
+                downloadsCursor.moveToFirst();
+                FileDownloadInfo.Reader reader = new FileDownloadInfo.Reader(contentResolver, downloadsCursor);
+                return downloadInfoCreator.create(reader);
+            } finally {
+                downloadsCursor.close();
+            }
+        } else {
+            return null;
         }
     }
 
@@ -86,7 +92,7 @@ class DownloadsRepository {
                 new String[]{DownloadContract.Downloads.COLUMN_STATUS}, null, null, null
         );
         try {
-            if (cursor.moveToFirst()) {
+            if (cursor != null && cursor.moveToFirst()) {
                 return cursor.getInt(0);
             } else {
                 // TODO: increase strictness of value returned for unknown
@@ -94,7 +100,9 @@ class DownloadsRepository {
                 return DownloadStatus.PENDING;
             }
         } finally {
-            cursor.close();
+            if (cursor != null) {
+                cursor.close();
+            }
         }
     }
 
@@ -288,3 +296,4 @@ class DownloadsRepository {
     }
 
 }
+
