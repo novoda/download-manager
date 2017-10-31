@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
-import com.novoda.notils.logger.simple.Log;
 import com.novoda.downloadmanager.AllBatchStatusesCallback;
 import com.novoda.downloadmanager.Batch;
 import com.novoda.downloadmanager.DownloadBatchCallback;
@@ -14,6 +13,7 @@ import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
+import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
 
@@ -36,8 +36,8 @@ public class MainActivity extends AppCompatActivity {
 
         Log.setShowLogs(true);
 
-        textViewBatch1 = (TextView) findViewById(R.id.batch_1);
-        textViewBatch2 = (TextView) findViewById(R.id.batch_2);
+        textViewBatch1 = findViewById(R.id.batch_1);
+        textViewBatch2 = findViewById(R.id.batch_2);
 
         View buttonDownload = findViewById(R.id.button_start_downloading);
         buttonDownload.setOnClickListener(new View.OnClickListener() {
