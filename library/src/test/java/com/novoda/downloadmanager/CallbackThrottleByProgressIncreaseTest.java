@@ -26,21 +26,21 @@ public class CallbackThrottleByProgressIncreaseTest {
     }
 
     @Test
-    public void throwsException_whenStoppingUpdates_withoutSettingCallback() {
+    public void mustHaveCallback_whenStoppingUpdates() {
         thrown.expect(NullPointerException.class);
 
         callbackThrottleByProgressIncrease.stopUpdates();
     }
 
     @Test
-    public void doesNothing_whenUpdating_withoutSettingCallback() {
+    public void mustHaveCallback_whenUpdating() {
         callbackThrottleByProgressIncrease.update(downloadBatchStatus);
 
         verifyZeroInteractions(downloadBatchCallback, downloadBatchStatus);
     }
 
     @Test
-    public void doesNothing_whenDownloadPercentageIsTheSame() {
+    public void doesNotEmit_whenPercentageIsUnchanged() {
         givenStatusUpdate(downloadBatchStatus);
 
         callbackThrottleByProgressIncrease.update(downloadBatchStatus);
@@ -49,7 +49,7 @@ public class CallbackThrottleByProgressIncreaseTest {
     }
 
     @Test
-    public void notifiesCallbackWithPreviousStatus_whenStoppingUpdates() {
+    public void emitsLastStatus_whenStoppingUpdates() {
         givenStatusUpdate(downloadBatchStatus);
 
         callbackThrottleByProgressIncrease.stopUpdates();
