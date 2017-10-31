@@ -26,14 +26,14 @@ public class CallbackThrottleByProgressIncreaseTest {
     }
 
     @Test
-    public void mustHaveCallback_whenStoppingUpdates() {
+    public void throwsException_whenStoppingUpdatesWithoutCallback() {
         thrown.expect(NullPointerException.class);
 
         callbackThrottleByProgressIncrease.stopUpdates();
     }
 
     @Test
-    public void mustHaveCallback_whenUpdating() {
+    public void doesNothing_whenUpdatingWithoutCallback() {
         callbackThrottleByProgressIncrease.update(downloadBatchStatus);
 
         verifyZeroInteractions(downloadBatchCallback, downloadBatchStatus);
