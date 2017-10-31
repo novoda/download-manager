@@ -1,0 +1,29 @@
+package com.novoda.downloadmanager;
+
+import android.support.annotation.NonNull;
+
+import com.evernote.android.job.Job;
+import com.novoda.notils.logger.simple.Log;
+
+class LiteJobDownload extends Job {
+
+    private final DownloadManager downloadManager;
+
+    LiteJobDownload(DownloadManager downloadManager) {
+        this.downloadManager = downloadManager;
+    }
+
+    @NonNull
+    @Override
+    protected Result onRunJob(Params params) {
+        downloadManager.submitAllStoredDownloads(new AllStoredDownloadsSubmittedCallback() {
+            @Override
+            public void onAllDownloadsSubmitted() {
+                // done
+                Log.v("LiteJobDownload all jobs submitted");
+            }
+        });
+        Log.v("LiteJobDownload run network recovery job");
+        return Result.SUCCESS;
+    }
+}
