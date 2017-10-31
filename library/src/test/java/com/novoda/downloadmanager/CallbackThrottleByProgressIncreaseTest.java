@@ -63,5 +63,4 @@ public class CallbackThrottleByProgressIncreaseTest {
         callbackThrottleByProgressIncrease.update(downloadBatchStatus);
         reset(downloadBatchCallback);
     }
-
 }
