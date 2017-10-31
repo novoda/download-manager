@@ -13,7 +13,7 @@ apply plugin: 'bintray-release'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "25.0.3"
+    buildToolsVersion "26.0.2"
 
     defaultConfig {
         minSdkVersion 14
@@ -22,8 +22,13 @@ android {
         versionName "0.1"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
     }
+
+    lintOptions {
+        abortOnError false
+        lintConfig file("$rootProject.projectDir/team-props/lint-rules/config.xml")
+    }
+
     buildTypes {
         release {
             minifyEnabled false

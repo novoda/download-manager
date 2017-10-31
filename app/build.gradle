@@ -2,7 +2,8 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "25.0.3"
+    buildToolsVersion "26.0.2"
+
     defaultConfig {
         applicationId "com.litedownloadmanager.demo"
         minSdkVersion 14
@@ -11,6 +12,12 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
+    lintOptions {
+        abortOnError false
+        lintConfig file("$rootProject.projectDir/team-props/lint-rules/config.xml")
+    }
+
     buildTypes {
         release {
             minifyEnabled false
