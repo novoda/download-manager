@@ -33,13 +33,6 @@ public class CallbackThrottleByProgressIncreaseTest {
     }
 
     @Test
-    public void doesNothing_whenUpdatingWithoutCallback() {
-        callbackThrottleByProgressIncrease.update(downloadBatchStatus);
-
-        verifyZeroInteractions(downloadBatchCallback, downloadBatchStatus);
-    }
-
-    @Test
     public void doesNotEmit_whenPercentageIsUnchanged() {
         givenStatusUpdate(downloadBatchStatus);
 
