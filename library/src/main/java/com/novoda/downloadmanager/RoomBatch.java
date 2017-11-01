@@ -4,10 +4,12 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
 
 @Entity(indices={@Index("batch_id")})
 class RoomBatch {
 
+    @NonNull
     @PrimaryKey
     @ColumnInfo(name = "batch_id")
     public String id;
