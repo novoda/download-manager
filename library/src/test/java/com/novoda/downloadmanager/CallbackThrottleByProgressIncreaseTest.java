@@ -1,9 +1,7 @@
 package com.novoda.downloadmanager;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -11,9 +9,6 @@ import static org.mockito.Mockito.*;
 public class CallbackThrottleByProgressIncreaseTest {
 
     private static final int DOWNLOAD_PERCENTAGE = 75;
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     private final DownloadBatchCallback downloadBatchCallback = mock(DownloadBatchCallback.class);
     private final DownloadBatchStatus downloadBatchStatus = mock(DownloadBatchStatus.class);
@@ -25,10 +20,8 @@ public class CallbackThrottleByProgressIncreaseTest {
         callbackThrottleByProgressIncrease = new CallbackThrottleByProgressIncrease();
     }
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void throwsException_whenStoppingUpdatesWithoutCallback() {
-        thrown.expect(NullPointerException.class);
-
         callbackThrottleByProgressIncrease.stopUpdates();
     }
 
