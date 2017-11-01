@@ -34,7 +34,8 @@ public class CallbackThrottleByProgressIncreaseTest {
 
     @Test
     public void doesNotEmit_whenPercentageIsUnchanged() {
-        givenStatusUpdate(downloadBatchStatus);
+        callbackThrottleByProgressIncrease.setCallback(downloadBatchCallback);
+        givenPreviousUpdate(downloadBatchStatus);
 
         callbackThrottleByProgressIncrease.update(downloadBatchStatus);
 
@@ -43,16 +44,16 @@ public class CallbackThrottleByProgressIncreaseTest {
 
     @Test
     public void emitsLastStatus_whenStoppingUpdates() {
-        givenStatusUpdate(downloadBatchStatus);
+        callbackThrottleByProgressIncrease.setCallback(downloadBatchCallback);
+        givenPreviousUpdate(downloadBatchStatus);
 
         callbackThrottleByProgressIncrease.stopUpdates();
 
         verify(downloadBatchCallback).onUpdate(downloadBatchStatus);
     }
 
-    private void givenStatusUpdate(DownloadBatchStatus downloadBatchStatus) {
+    private void givenPreviousUpdate(DownloadBatchStatus downloadBatchStatus) {
         given(downloadBatchStatus.percentageDownloaded()).willReturn(DOWNLOAD_PERCENTAGE);
-        callbackThrottleByProgressIncrease.setCallback(downloadBatchCallback);
         callbackThrottleByProgressIncrease.update(downloadBatchStatus);
         reset(downloadBatchCallback);
     }
