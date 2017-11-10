@@ -67,6 +67,10 @@ public class LiteDownloadService extends Service implements DownloadService {
     public void makeNotificationDismissible(NotificationInformation notificationInformation) {
         stopForeground(true);
 
+        showFinalDownloadedNotification(notificationInformation);
+    }
+
+    private void showFinalDownloadedNotification(NotificationInformation notificationInformation) {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager != null) {
             Notification notification = notificationInformation.getNotification();
