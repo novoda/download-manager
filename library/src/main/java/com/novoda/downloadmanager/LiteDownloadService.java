@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationManagerCompat;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -17,15 +18,18 @@ import java.util.concurrent.Executors;
 public class LiteDownloadService extends Service implements DownloadService {
 
     private static final String WAKELOCK_TAG = "WakelockTag";
+    private static final String NOTIFICATION_TAG = "download-manager";
 
     private ExecutorService executor;
     private IBinder binder;
     private PowerManager.WakeLock wakeLock;
+    private NotificationManagerCompat notificationManagerCompat;
 
     @Override
     public void onCreate() {
         executor = Executors.newSingleThreadExecutor();
         binder = new DownloadServiceBinder();
+        notificationManagerCompat = NotificationManagerCompat.from(this);
 
         super.onCreate();
     }
@@ -66,21 +70,12 @@ public class LiteDownloadService extends Service implements DownloadService {
     @Override
     public void makeNotificationDismissible(NotificationInformation notificationInformation) {
         stopForeground(true);
-
         showFinalDownloadedNotification(notificationInformation);
     }
 
     private void showFinalDownloadedNotification(NotificationInformation notificationInformation) {
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        if (notificationManager != null) {
-            Notification notification = notificationInformation.getNotification();
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                notificationManager.notify(notification.getChannelId(), notificationInformation.getId(), notification);
-            } else {
-                notificationManager.notify(notificationInformation.getId(), notification);
-            }
-        }
+        Notification notification = notificationInformation.getNotification();
+        notificationManagerCompat.notify(NOTIFICATION_TAG, notificationInformation.getId(), notification);
     }
 
     private void acquireCpuWakeLock() {
