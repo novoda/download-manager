@@ -85,8 +85,10 @@ public class LiteDownloadService extends Service implements DownloadService {
 
     private void acquireCpuWakeLock() {
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
-        wakeLock.acquire();
+        if (powerManager != null) {
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
+            wakeLock.acquire();
+        }
     }
 
     private void releaseCpuWakeLock() {
