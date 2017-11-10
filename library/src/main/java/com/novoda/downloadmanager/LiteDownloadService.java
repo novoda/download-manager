@@ -1,10 +1,12 @@
 package com.novoda.downloadmanager;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
@@ -67,7 +69,13 @@ public class LiteDownloadService extends Service implements DownloadService {
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager != null) {
-            notificationManager.notify("download", notificationInformation.getId(), notificationInformation.getNotification());
+            Notification notification = notificationInformation.getNotification();
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                notificationManager.notify(notification.getChannelId(), notificationInformation.getId(), notification);
+            } else {
+                notificationManager.notify(notificationInformation.getId(), notification);
+            }
         }
     }
 
