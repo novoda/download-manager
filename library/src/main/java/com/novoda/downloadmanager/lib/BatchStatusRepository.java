@@ -75,6 +75,10 @@ class BatchStatusRepository {
             return DownloadStatus.RUNNING;
         }
 
+        if (statuses.hasOnlyCompleteAndSubmittedOrPendingStatuses()) {
+            return DownloadStatus.BATCH_RUNNING;
+        }
+
         return statuses.getFirstStatusByPriority();
     }
 

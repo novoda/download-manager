@@ -40,6 +40,19 @@ class Statuses {
             DownloadStatus.PENDING
     );
 
+    private static final List<Integer> STATUSES_EXCEPT_SUCCESS_SUBMITTED_AND_PENDING = Arrays.asList(
+            DownloadStatus.CANCELED,
+            DownloadStatus.PAUSED_BY_APP,
+            DownloadStatus.RUNNING,
+            DownloadStatus.DELETING,
+
+            // Paused statuses
+            DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS,
+            DownloadStatus.WAITING_TO_RETRY,
+            DownloadStatus.WAITING_FOR_NETWORK,
+            DownloadStatus.QUEUED_FOR_WIFI
+    );
+
     private static final int NO_ERROR_STATUS = 0;
 
     private final SparseArrayCompat<Integer> statusCounts = new SparseArrayCompat<>(PRIORITISED_STATUSES.size());
@@ -79,6 +92,15 @@ class Statuses {
         boolean hasNotOtherItems = hasNoItemsWithStatuses(STATUSES_EXCEPT_SUCCESS_SUBMITTED);
 
         return hasCompleteItems && hasSubmittedItems && hasNotOtherItems;
+    }
+
+    boolean hasOnlyCompleteAndSubmittedOrPendingStatuses() {
+        boolean hasCompleteItems = hasCountFor(DownloadStatus.SUCCESS);
+        boolean hasSubmittedOrPendingItems = hasCountFor(DownloadStatus.SUBMITTED) ||
+                hasCountFor(DownloadStatus.PENDING);
+        boolean hasNotOtherItems = hasNoItemsWithStatuses(STATUSES_EXCEPT_SUCCESS_SUBMITTED_AND_PENDING);
+
+        return hasCompleteItems && hasSubmittedOrPendingItems && hasNotOtherItems;
     }
 
     boolean hasErrorStatus() {

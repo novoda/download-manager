@@ -44,6 +44,7 @@ public class BatchQuery {
 
         private static final String ORDER_BY_LIVENESS = "CASE " + DownloadContract.Batches.COLUMN_STATUS + " "
                 + "WHEN " + DownloadStatus.RUNNING + " THEN 1 "
+                + "WHEN " + DownloadStatus.BATCH_RUNNING + " THEN 2 "
                 + "WHEN " + DownloadStatus.PENDING + " THEN 2 "
                 + "WHEN " + DownloadStatus.PAUSED_BY_APP + " THEN 3 "
                 + "WHEN " + DownloadStatus.BATCH_FAILED + " THEN 4 "
@@ -159,6 +160,9 @@ public class BatchQuery {
                         .or()
                         .withSelection(DownloadContract.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
                         .withArgument(String.valueOf(DownloadStatus.SUBMITTED))
+                        .or()
+                        .withSelection(DownloadContract.Batches.COLUMN_STATUS, Criteria.Wildcard.EQUALS)
+                        .withArgument(String.valueOf(DownloadStatus.BATCH_RUNNING))
                         .build();
                 criteriaList.add(pendingCriteria);
             }
