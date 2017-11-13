@@ -54,8 +54,7 @@ class DownloadsFilePersistence {
             DownloadFileStatus downloadFileStatus = new DownloadFileStatus(
                     downloadFileId,
                     getFileStatusFrom(batchStatus),
-                    fileSize,
-                    new DownloadError()
+                    fileSize
             );
 
             FileSizeRequester fileSizeRequester = fileOperations.fileSizeRequester();

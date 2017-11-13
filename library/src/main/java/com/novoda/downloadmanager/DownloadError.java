@@ -8,16 +8,12 @@ class DownloadError {
         FILE_CANNOT_BE_WRITTEN,
         STORAGE_UNAVAILABLE,
         NETWORK_ERROR_CANNOT_DOWNLOAD_FILE,
-        UNKNOWN
+        UNKNOWN;
     }
 
-    private Error error;
+    private final Error error;
 
-    DownloadError() {
-        this.error = Error.UNKNOWN;
-    }
-
-    void setError(Error error) {
+    DownloadError(Error error) {
         this.error = error;
     }
 

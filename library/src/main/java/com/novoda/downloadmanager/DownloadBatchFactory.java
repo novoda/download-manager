@@ -23,12 +23,10 @@ final class DownloadBatchFactory {
         for (String fileUrl : fileUrls) {
             InternalFileSize fileSize = InternalFileSizeCreator.UNKNOWN;
             DownloadFileId downloadFileId = DownloadFileId.from(batch);
-            DownloadError downloadError = new DownloadError();
             DownloadFileStatus downloadFileStatus = new DownloadFileStatus(
                     downloadFileId,
                     DownloadFileStatus.Status.QUEUED,
-                    fileSize,
-                    downloadError
+                    fileSize
             );
             FileName fileName = LiteFileName.from(batch, fileUrl);
 
