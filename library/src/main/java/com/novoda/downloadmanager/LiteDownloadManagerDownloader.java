@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.*;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
 
 class LiteDownloadManagerDownloader {
 
@@ -132,10 +133,6 @@ class LiteDownloadManagerDownloader {
         );
 
         downloadService.updateNotification(notificationInformation);
-
-        if (liteDownloadBatchStatus.status() != DOWNLOADING) {
-            downloadService.updateNotification(notificationInformation);
-        }
 
         if (liteDownloadBatchStatus.status() == DOWNLOADED) {
             downloadService.makeNotificationDismissible(notificationInformation);
