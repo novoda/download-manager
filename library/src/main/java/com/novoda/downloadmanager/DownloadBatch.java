@@ -75,10 +75,6 @@ class DownloadBatch {
                     downloadBatchStatus.markAsError(downloadFileStatus.getError());
                 }
 
-                if (downloadBatchStatus.status() == DOWNLOADED) {
-                    downloadBatchStatus.markAsDownloaded(downloadsBatchPersistence);
-                }
-
                 callbackThrottle.update(downloadBatchStatus);
             }
         };
@@ -92,6 +88,10 @@ class DownloadBatch {
 
         if (networkError()) {
             DownloadsNetworkRecoveryCreator.getInstance().scheduleRecovery();
+        }
+
+        if (downloadBatchStatus.status() == DOWNLOADED) {
+            downloadBatchStatus.markAsDownloaded(downloadsBatchPersistence);
         }
 
         callbackThrottle.stopUpdates();
