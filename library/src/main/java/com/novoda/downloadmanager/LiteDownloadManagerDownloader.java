@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADING;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.*;
 
 class LiteDownloadManagerDownloader {
 
@@ -95,15 +94,18 @@ class LiteDownloadManagerDownloader {
     }
 
     private void executeDownload(final DownloadBatch downloadBatch) {
-        updateStatusToQueuedIfNeeded(downloadBatch);
+        InternalDownloadBatchStatus downloadBatchStatus = downloadBatch.status();
+        if (downloadBatchStatus.status() == DOWNLOADED) {
+            return;
+        }
+
+        updateStatusToQueuedIfNeeded(downloadBatchStatus);
         downloadService.download(downloadBatch, downloadBatchCallback());
     }
 
-    private void updateStatusToQueuedIfNeeded(DownloadBatch downloadBatch) {
-        InternalDownloadBatchStatus liteDownloadBatchStatus = downloadBatch.status();
-
-        if (liteDownloadBatchStatus.status() != PAUSED) {
-            liteDownloadBatchStatus.markAsQueued(downloadsBatchPersistence);
+    private void updateStatusToQueuedIfNeeded(InternalDownloadBatchStatus downloadBatchStatus) {
+        if (downloadBatchStatus.status() != PAUSED) {
+            downloadBatchStatus.markAsQueued(downloadsBatchPersistence);
         }
     }
 
