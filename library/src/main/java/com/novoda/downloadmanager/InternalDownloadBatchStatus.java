@@ -13,4 +13,6 @@ interface InternalDownloadBatchStatus extends DownloadBatchStatus {
     void markForDeletion();
 
     void markAsError(DownloadError downloadError);
+
+    void markAsDownloaded(DownloadsBatchStatusPersistence persistence);
 }
