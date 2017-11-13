@@ -132,7 +132,7 @@ class LiteDownloadManagerDownloader {
         );
 
         if (liteDownloadBatchStatus.status() == DELETION) {
-            downloadService.dismissNotifications();
+            downloadService.dismissNotification();
             return;
         }
 

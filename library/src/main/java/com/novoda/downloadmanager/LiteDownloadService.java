@@ -70,15 +70,14 @@ public class LiteDownloadService extends Service implements DownloadService {
         showFinalDownloadedNotification(notificationInformation);
     }
 
-    @Override
-    public void dismissNotifications() {
-        stopForeground(true);
-        notificationManagerCompat.cancelAll();
-    }
-
     private void showFinalDownloadedNotification(NotificationInformation notificationInformation) {
         Notification notification = notificationInformation.getNotification();
         notificationManagerCompat.notify(NOTIFICATION_TAG, notificationInformation.getId(), notification);
+    }
+
+    @Override
+    public void dismissNotification() {
+        stopForeground(true);
     }
 
     private void acquireCpuWakeLock() {
