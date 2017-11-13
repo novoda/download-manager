@@ -8,7 +8,7 @@ class DownloadError {
         FILE_CANNOT_BE_WRITTEN,
         STORAGE_UNAVAILABLE,
         NETWORK_ERROR_CANNOT_DOWNLOAD_FILE,
-        UNKNOWN;
+        UNKNOWN
     }
 
     private final Error error;
