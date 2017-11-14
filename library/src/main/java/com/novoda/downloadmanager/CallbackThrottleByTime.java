@@ -5,7 +5,7 @@ import java.util.TimerTask;
 
 class CallbackThrottleByTime implements CallbackThrottle {
 
-    private final long period;
+    private final long periodInMillis;
 
     private static final long DELAY = 0;
 
@@ -14,8 +14,8 @@ class CallbackThrottleByTime implements CallbackThrottle {
     private TimerTask timerTask;
     private DownloadBatchCallback callback;
 
-    CallbackThrottleByTime(long period) {
-        this.period = period;
+    CallbackThrottleByTime(long periodInMillis) {
+        this.periodInMillis = periodInMillis;
     }
 
     @Override
@@ -42,7 +42,7 @@ class CallbackThrottleByTime implements CallbackThrottle {
     private void startUpdateIfNecessary() {
         if (timer == null) {
             timer = new Timer();
-            timer.scheduleAtFixedRate(timerTask, DELAY, period);
+            timer.scheduleAtFixedRate(timerTask, DELAY, periodInMillis);
         }
     }
 
