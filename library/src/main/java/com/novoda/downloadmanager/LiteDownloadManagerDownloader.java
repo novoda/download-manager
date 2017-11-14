@@ -95,12 +95,10 @@ class LiteDownloadManagerDownloader {
 
     private void executeDownload(final DownloadBatch downloadBatch) {
         InternalDownloadBatchStatus downloadBatchStatus = downloadBatch.status();
-        if (downloadBatchStatus.status() == DOWNLOADED) {
-            return;
+        if (downloadBatchStatus.status() != DOWNLOADED) {
+            updateStatusToQueuedIfNeeded(downloadBatchStatus);
+            downloadService.download(downloadBatch, downloadBatchCallback());
         }
-
-        updateStatusToQueuedIfNeeded(downloadBatchStatus);
-        downloadService.download(downloadBatch, downloadBatchCallback());
     }
 
     private void updateStatusToQueuedIfNeeded(InternalDownloadBatchStatus downloadBatchStatus) {
