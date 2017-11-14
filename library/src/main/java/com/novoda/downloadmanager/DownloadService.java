@@ -6,5 +6,7 @@ interface DownloadService {
 
     void updateNotification(NotificationInformation notification);
 
-    void makeNotificationDismissible(NotificationInformation notificationInformation);
+    void stackNotification(NotificationInformation notificationInformation);
+
+    void dismissNotification();
 }
