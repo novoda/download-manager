@@ -112,6 +112,7 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
         persistence.updateStatusAsync(downloadBatchId, status);
     }
 
+    @Nullable
     @Override
     public DownloadError.Error getDownloadErrorType() {
         if (downloadError != null) {
