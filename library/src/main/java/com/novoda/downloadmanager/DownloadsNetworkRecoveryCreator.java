@@ -6,8 +6,8 @@ class DownloadsNetworkRecoveryCreator {
 
     private static DownloadsNetworkRecovery INSTANCE;
 
-    static DownloadsNetworkRecovery createDisabled() {
-        return DownloadsNetworkRecovery.DISABLED;
+    static void createDisabled() {
+        DownloadsNetworkRecoveryCreator.INSTANCE = DownloadsNetworkRecovery.DISABLED;
     }
 
     static void createEnabled(Context context, DownloadManager downloadManager, ConnectionType connectionType) {
