@@ -97,6 +97,12 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
         this.downloadError = downloadError;
     }
 
+    @Override
+    public void markAsDownloaded(DownloadsBatchStatusPersistence persistence) {
+        this.status = Status.DOWNLOADED;
+        updateStatus(status, persistence);
+    }
+
     private void updateStatus(Status status, DownloadsBatchStatusPersistence persistence) {
         persistence.updateStatusAsync(downloadBatchId, status);
     }

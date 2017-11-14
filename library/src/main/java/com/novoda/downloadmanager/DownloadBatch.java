@@ -70,6 +70,7 @@ class DownloadBatch {
                 fileBytesDownloadedMap.put(downloadFileStatus.getDownloadFileId(), downloadFileStatus.bytesDownloaded());
                 long currentBytesDownloaded = getBytesDownloadedFrom(fileBytesDownloadedMap);
                 downloadBatchStatus.update(currentBytesDownloaded, totalBatchSizeBytes);
+
                 if (downloadFileStatus.isMarkedAsError()) {
                     downloadBatchStatus.markAsError(downloadFileStatus.getError());
                 }
@@ -87,6 +88,10 @@ class DownloadBatch {
 
         if (networkError()) {
             DownloadsNetworkRecoveryCreator.getInstance().scheduleRecovery();
+        }
+
+        if (downloadBatchStatus.status() == DOWNLOADED) {
+            downloadBatchStatus.markAsDownloaded(downloadsBatchPersistence);
         }
 
         callbackThrottle.stopUpdates();
