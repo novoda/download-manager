@@ -11,13 +11,9 @@ class DownloadError {
         UNKNOWN
     }
 
-    private Error error;
+    private final Error error;
 
-    DownloadError() {
-        this.error = Error.UNKNOWN;
-    }
-
-    void setError(Error error) {
+    DownloadError(Error error) {
         this.error = error;
     }
 

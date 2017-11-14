@@ -56,9 +56,8 @@ class DownloadBatch {
         totalBatchSizeBytes = getTotalSize(downloadFiles);
 
         if (totalBatchSizeBytes <= ZERO_BYTES) {
-            DownloadError downloadError = new DownloadError();
-            downloadError.setError(DownloadError.Error.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE);
-            downloadBatchStatus.markAsError(downloadError);
+            DownloadError downloadError = new DownloadError(DownloadError.Error.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE);
+            downloadBatchStatus.markAsError(downloadError, downloadsBatchPersistence);
             notifyCallback(downloadBatchStatus);
             return;
         }
@@ -72,7 +71,7 @@ class DownloadBatch {
                 downloadBatchStatus.update(currentBytesDownloaded, totalBatchSizeBytes);
 
                 if (downloadFileStatus.isMarkedAsError()) {
-                    downloadBatchStatus.markAsError(downloadFileStatus.getError());
+                    downloadBatchStatus.markAsError(downloadFileStatus.getError(), downloadsBatchPersistence);
                 }
 
                 callbackThrottle.update(downloadBatchStatus);

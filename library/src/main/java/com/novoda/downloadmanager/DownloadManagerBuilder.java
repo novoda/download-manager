@@ -102,17 +102,6 @@ public final class DownloadManagerBuilder {
         this.callbackThrottleCreatorType = callbackThrottleCreatorType;
     }
 
-    public DownloadManagerBuilder withNetworkDownloader() {
-        OkHttpClient httpClient = new OkHttpClient();
-        httpClient.setConnectTimeout(5, TimeUnit.SECONDS);
-        httpClient.setWriteTimeout(5, TimeUnit.SECONDS);
-        httpClient.setReadTimeout(5, TimeUnit.SECONDS);
-
-        fileSizeRequester = new NetworkFileSizeRequester(httpClient);
-        fileDownloader = new NetworkFileDownloader(httpClient);
-        return this;
-    }
-
     public DownloadManagerBuilder withFilePersistenceInternal() {
         filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(context);
         return this;
@@ -149,8 +138,8 @@ public final class DownloadManagerBuilder {
         return this;
     }
 
-    public DownloadManagerBuilder withNetworkRecovery(boolean enabled) {
-        allowNetworkRecovery = enabled;
+    public DownloadManagerBuilder withoutNetworkRecovery() {
+        allowNetworkRecovery = false;
         return this;
     }
 

@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager;
 
+import android.support.annotation.Nullable;
+
 class DownloadFileStatus {
 
     enum Status {
@@ -13,15 +15,14 @@ class DownloadFileStatus {
 
     private final DownloadFileId downloadFileId;
 
-    private DownloadError downloadError;
     private FileSize fileSize;
     private Status status;
+    private DownloadError downloadError;
 
-    DownloadFileStatus(DownloadFileId downloadFileId, DownloadFileStatus.Status status, FileSize fileSize, DownloadError downloadError) {
+    DownloadFileStatus(DownloadFileId downloadFileId, Status status, FileSize fileSize) {
         this.downloadFileId = downloadFileId;
         this.status = status;
         this.fileSize = fileSize;
-        this.downloadError = downloadError;
     }
 
     void update(FileSize fileSize) {
@@ -57,7 +58,7 @@ class DownloadFileStatus {
     }
 
     boolean isMarkedAsError() {
-        return status == Status.ERROR;
+        return status == Status.ERROR && downloadError != null;
     }
 
     void markAsQueued() {
@@ -70,9 +71,10 @@ class DownloadFileStatus {
 
     void markAsError(DownloadError.Error error) {
         status = Status.ERROR;
-        downloadError.setError(error);
+        downloadError = new DownloadError(error);
     }
 
+    @Nullable
     DownloadError getError() {
         return downloadError;
     }

@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager;
 
+import android.support.annotation.Nullable;
+
 class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
 
     private static final long ZERO_BYTES = 0;
@@ -10,8 +12,10 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     private long bytesDownloaded;
     private long totalBatchSizeBytes;
     private int percentageDownloaded;
-    private DownloadError downloadError;
     private Status status;
+
+    @Nullable
+    private DownloadError downloadError;
 
     LiteDownloadBatchStatus(DownloadBatchId downloadBatchId, DownloadBatchTitle downloadBatchTitle, Status status) {
         this.downloadBatchTitle = downloadBatchTitle;
@@ -92,9 +96,10 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     }
 
     @Override
-    public void markAsError(DownloadError downloadError) {
+    public void markAsError(DownloadError downloadError, DownloadsBatchStatusPersistence persistence) {
         this.status = Status.ERROR;
         this.downloadError = downloadError;
+        updateStatus(status, persistence);
     }
 
     @Override
@@ -107,8 +112,13 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
         persistence.updateStatusAsync(downloadBatchId, status);
     }
 
+    @Nullable
     @Override
     public DownloadError.Error getDownloadErrorType() {
-        return downloadError.error();
+        if (downloadError != null) {
+            return downloadError.error();
+        } else {
+            return null;
+        }
     }
 }
