@@ -1,49 +1,40 @@
 package com.novoda.downloadmanager;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 class CallbackThrottleByTime implements CallbackThrottle {
 
-    private static final long DELAY_IN_MILLIS = 0;
+    private final Scheduler scheduler;
 
     private DownloadBatchStatus downloadBatchStatus;
-    private Timer timer;
-    private TimerTask timerTask;
-    private final long periodInMillis;
     private DownloadBatchCallback callback;
 
-    CallbackThrottleByTime(long periodInMillis) {
-        this.periodInMillis = periodInMillis;
+    CallbackThrottleByTime(Scheduler scheduler) {
+        this.scheduler = scheduler;
     }
 
     @Override
     public void setCallback(final DownloadBatchCallback callback) {
         this.callback = callback;
-        timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                callback.onUpdate(downloadBatchStatus);
-            }
-        };
     }
 
     @Override
     public void update(DownloadBatchStatus downloadBatchStatus) {
-        if (timerTask == null) {
+        if (callback == null) {
             return;
         }
 
         this.downloadBatchStatus = downloadBatchStatus;
-        startUpdateIfNecessary();
-    }
 
-    private void startUpdateIfNecessary() {
-        if (timer == null) {
-            timer = new Timer();
-            timer.scheduleAtFixedRate(timerTask, DELAY_IN_MILLIS, periodInMillis);
+        if (!scheduler.isScheduled(action)) {
+            scheduler.schedule(action);
         }
     }
+
+    private final Scheduler.Action action = new Scheduler.Action() {
+        @Override
+        public void perform() {
+            callback.onUpdate(downloadBatchStatus);
+        }
+    };
 
     @Override
     public void stopUpdates() {
@@ -51,9 +42,6 @@ class CallbackThrottleByTime implements CallbackThrottle {
             callback.onUpdate(downloadBatchStatus);
         }
 
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-        }
+        scheduler.cancelAll();
     }
 }
