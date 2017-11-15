@@ -2,7 +2,7 @@ package com.novoda.downloadmanager;
 
 class DownloadFileStatusFixtures {
 
-    private DownloadFileId downloadFileId = DownloadFileId.from("id");
+    private DownloadFileId downloadFileId = DownloadFileId.from("01");
     private DownloadFileStatus.Status status = DownloadFileStatus.Status.QUEUED;
     private FileSize fileSize = InternalFileSizeFixtures.aFileSize().build();
 
