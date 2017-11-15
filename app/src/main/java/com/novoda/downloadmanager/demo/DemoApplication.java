@@ -8,6 +8,8 @@ import com.facebook.stetho.Stetho;
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 
+import java.util.concurrent.TimeUnit;
+
 public class DemoApplication extends Application {
 
     private volatile LiteDownloadManagerCommands liteDownloadManagerCommands;
@@ -24,6 +26,7 @@ public class DemoApplication extends Application {
 
         liteDownloadManagerCommands = DownloadManagerBuilder
                 .newInstance(this, handler, R.mipmap.ic_launcher_round)
+                .withCallbackThrottleByTime(TimeUnit.MILLISECONDS, 1)
                 .build();
     }
 

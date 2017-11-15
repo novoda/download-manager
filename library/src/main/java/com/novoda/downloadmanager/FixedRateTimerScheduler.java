@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -10,43 +10,48 @@ class FixedRateTimerScheduler implements Scheduler {
 
     private final Timer timer;
     private final long frequencyInMillis;
-    private final List<Action> actions;
+    private final Map<Action, TimerTask> actionTimerTasks;
 
-    FixedRateTimerScheduler(Timer timer, long frequencyInMillis, List<Action> actions) {
+    FixedRateTimerScheduler(Timer timer, long frequencyInMillis, Map<Action, TimerTask> actionTimerTasks) {
         this.timer = timer;
         this.frequencyInMillis = frequencyInMillis;
-        this.actions = actions;
+        this.actionTimerTasks = actionTimerTasks;
     }
 
     @Override
     public void schedule(final Action action) {
-        if (actions.contains(action)) {
+        if (actionTimerTasks.containsKey(action)) {
             return;
         }
 
-        timer.scheduleAtFixedRate(new TimerTask() {
+        TimerTask taskToExecute = new TimerTask() {
             @Override
             public void run() {
                 action.perform();
             }
-        }, DELAY_IN_MILLIS, frequencyInMillis);
-        actions.add(action);
+        };
+        timer.scheduleAtFixedRate(taskToExecute, DELAY_IN_MILLIS, frequencyInMillis);
+        actionTimerTasks.put(action, taskToExecute);
     }
 
     @Override
     public void cancel(Action action) {
-        throw new UnsupportedOperationException("Timer cannot cancel per action. Call `cancelAll()` instead.");
+        if (actionTimerTasks.containsKey(action)) {
+            TimerTask timerTask = actionTimerTasks.get(action);
+            timerTask.cancel();
+            actionTimerTasks.remove(action);
+        }
     }
 
     @Override
     public void cancelAll() {
         timer.cancel();
-        actions.clear();
+        actionTimerTasks.clear();
     }
 
     @Override
     public boolean isScheduled(Action action) {
-        return actions.contains(action);
+        return actionTimerTasks.containsKey(action);
     }
 
 }

@@ -1,7 +1,8 @@
 package com.novoda.downloadmanager;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Timer;
+import java.util.TimerTask;
 
 final class SchedulerFactory {
 
@@ -10,7 +11,7 @@ final class SchedulerFactory {
     }
 
     static Scheduler createFixedRateTimerScheduler(long frequencyInMillis) {
-        return new FixedRateTimerScheduler(new Timer(), frequencyInMillis, new ArrayList<Scheduler.Action>());
+        return new FixedRateTimerScheduler(new Timer(), frequencyInMillis, new HashMap<Scheduler.Action, TimerTask>());
     }
 
 }

@@ -1,12 +1,15 @@
 package com.novoda.downloadmanager;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.*;
@@ -16,19 +19,40 @@ public class FixedRateTimerSchedulerTest {
     private static final long FREQUENCY = 100;
 
     private final Timer timer = mock(Timer.class);
-    private final List<Scheduler.Action> actions = new ArrayList<>();
+    private final Map<Scheduler.Action, TimerTask> actionTimerTasks = new HashMap<>();
     private final Scheduler.Action anyAction = mock(Scheduler.Action.class);
-    private final FixedRateTimerScheduler scheduler = new FixedRateTimerScheduler(timer, FREQUENCY, actions);
+    private TimerTask timerTask;
+
+    private FixedRateTimerScheduler scheduler;
+
+    @Before
+    public void setUp() {
+        scheduler = new FixedRateTimerScheduler(timer, FREQUENCY, actionTimerTasks);
+
+        final ArgumentCaptor<TimerTask> argumentCaptor = ArgumentCaptor.forClass(TimerTask.class);
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                timerTask = argumentCaptor.getValue();
+                return null;
+            }
+        }).when(timer).scheduleAtFixedRate(argumentCaptor.capture(), eq(0L), eq(FREQUENCY));
+    }
 
     @Test
     public void executesAction_whenSchedulingAction() {
         scheduler.schedule(anyAction);
 
-        ArgumentCaptor<TimerTask> argumentCaptor = ArgumentCaptor.forClass(TimerTask.class);
-        verify(timer).scheduleAtFixedRate(argumentCaptor.capture(), eq(0L), eq(FREQUENCY));
-        argumentCaptor.getValue().run();
+        timerTask.run();
 
         verify(anyAction).perform();
+    }
+
+    @Test
+    public void recordsAction_whenSchedulingAction() {
+        scheduler.schedule(anyAction);
+
+        assertThat(actionTimerTasks).containsEntry(anyAction, timerTask);
     }
 
     @Test
@@ -40,13 +64,30 @@ public class FixedRateTimerSchedulerTest {
         verifyZeroInteractions(timer);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void throwsException_whenCancellingSpecificAction() {
-        givenScheduledAction();
+    @Test
+    public void cancelTimerTask_whenCancellingSpecificAction() {
+        TimerTask timerTask = mock(TimerTask.class);
+        actionTimerTasks.put(anyAction, timerTask);
 
         scheduler.cancel(anyAction);
 
-        verify(timer).cancel();
+        verify(timerTask).cancel();
+    }
+
+    @Test
+    public void removeTimerTask_whenCancellingSpecificAction() {
+        TimerTask timerTask = mock(TimerTask.class);
+        actionTimerTasks.put(anyAction, timerTask);
+
+        Scheduler.Action additionalAction = mock(Scheduler.Action.class);
+        TimerTask additionalTimerTask = mock(TimerTask.class);
+        actionTimerTasks.put(anyAction, timerTask);
+        actionTimerTasks.put(additionalAction, additionalTimerTask);
+
+        scheduler.cancel(anyAction);
+
+        assertThat(actionTimerTasks).doesNotContainEntry(anyAction, timerTask);
+        assertThat(actionTimerTasks).containsEntry(additionalAction, additionalTimerTask);
     }
 
     @Test
@@ -64,7 +105,7 @@ public class FixedRateTimerSchedulerTest {
 
         scheduler.cancelAll();
 
-        assertThat(actions).isEmpty();
+        assertThat(actionTimerTasks).isEmpty();
     }
 
     @Test
@@ -87,4 +128,5 @@ public class FixedRateTimerSchedulerTest {
         scheduler.schedule(anyAction);
         reset(timer);
     }
+
 }
