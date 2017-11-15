@@ -41,7 +41,7 @@ class CallbackThrottleCreator {
     CallbackThrottle create() {
         switch (type) {
             case THROTTLE_BY_TIME:
-                return new CallbackThrottleByTime(FixedRateTimerScheduler.withFrequency(timeUnit.toMillis(frequency)));
+                return new CallbackThrottleByTime(SchedulerFactory.createFixedRateTimerScheduler(timeUnit.toMillis(frequency)));
             case THROTTLE_BY_PROGRESS_INCREASE:
                 return new CallbackThrottleByProgressIncrease();
             case CUSTOM:

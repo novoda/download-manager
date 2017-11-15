@@ -1,25 +1,20 @@
 package com.novoda.downloadmanager;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 class FixedRateTimerScheduler implements Scheduler {
 
-    private static final int DELAY_IN_MILLIS = 0;
+    private static final long DELAY_IN_MILLIS = 0;
 
     private final Timer timer;
-    private final long frequency;
+    private final long frequencyInMillis;
     private final List<Action> actions;
 
-    static FixedRateTimerScheduler withFrequency(long frequency) {
-        return new FixedRateTimerScheduler(new Timer(), frequency, new ArrayList<Action>());
-    }
-
-    private FixedRateTimerScheduler(Timer timer, long frequency, List<Action> actions) {
+    FixedRateTimerScheduler(Timer timer, long frequencyInMillis, List<Action> actions) {
         this.timer = timer;
-        this.frequency = frequency;
+        this.frequencyInMillis = frequencyInMillis;
         this.actions = actions;
     }
 
@@ -34,13 +29,13 @@ class FixedRateTimerScheduler implements Scheduler {
             public void run() {
                 action.perform();
             }
-        }, DELAY_IN_MILLIS, frequency);
+        }, DELAY_IN_MILLIS, frequencyInMillis);
         actions.add(action);
     }
 
     @Override
     public void cancel(Action action) {
-        // Timer can't cancel per action.
+        throw new UnsupportedOperationException("Timer cannot cancel per action. Call `cancelAll()` instead.");
     }
 
     @Override
