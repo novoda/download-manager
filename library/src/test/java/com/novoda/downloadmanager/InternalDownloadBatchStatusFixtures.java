@@ -97,32 +97,38 @@ class InternalDownloadBatchStatusFixtures {
 
             @Override
             public void markAsDownloading(DownloadsBatchStatusPersistence persistence) {
-                // do nothing.
+                status = Status.DOWNLOADING;
+                persistence.updateStatusAsync(downloadBatchId, status);
             }
 
             @Override
             public void markAsPaused(DownloadsBatchStatusPersistence persistence) {
-                // do nothing.
+                status = Status.PAUSED;
+                persistence.updateStatusAsync(downloadBatchId, status);
             }
 
             @Override
             public void markAsQueued(DownloadsBatchStatusPersistence persistence) {
-                // do nothing.
+                status = Status.QUEUED;
+                persistence.updateStatusAsync(downloadBatchId, status);
             }
 
             @Override
             public void markForDeletion() {
-                // do nothing.
+                status = Status.DELETION;
             }
 
             @Override
             public void markAsError(DownloadError downloadError, DownloadsBatchStatusPersistence persistence) {
-                // do nothing.
+                status = Status.ERROR;
+                downloadErrorType = downloadError.error();
+                persistence.updateStatusAsync(downloadBatchId, status);
             }
 
             @Override
             public void markAsDownloaded(DownloadsBatchStatusPersistence persistence) {
-                // do nothing.
+                status = Status.DOWNLOADED;
+                persistence.updateStatusAsync(downloadBatchId, status);
             }
         };
     }
