@@ -4,7 +4,7 @@ class DownloadFileStatusFixtures {
 
     private DownloadFileId downloadFileId = DownloadFileId.from("id");
     private DownloadFileStatus.Status status = DownloadFileStatus.Status.QUEUED;
-    private FileSize fileSize = FileSizeFixtures.aFileSize().build();
+    private FileSize fileSize = InternalFileSizeFixtures.aFileSize().build();
 
     static DownloadFileStatusFixtures aDownloadFileStatus() {
         return new DownloadFileStatusFixtures();
