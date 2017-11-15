@@ -8,18 +8,19 @@ import java.util.TimerTask;
 class FixedRateTimerScheduler implements Scheduler {
 
     private static final int DELAY_IN_MILLIS = 0;
+
     private final Timer timer;
     private final long frequency;
-
-    private List<Action> actions = new ArrayList<>();
+    private final List<Action> actions;
 
     static FixedRateTimerScheduler withFrequency(long frequency) {
-        return new FixedRateTimerScheduler(new Timer(), frequency);
+        return new FixedRateTimerScheduler(new Timer(), frequency, new ArrayList<Action>());
     }
 
-    private FixedRateTimerScheduler(Timer timer, long frequency) {
+    private FixedRateTimerScheduler(Timer timer, long frequency, List<Action> actions) {
         this.timer = timer;
         this.frequency = frequency;
+        this.actions = actions;
     }
 
     @Override
