@@ -4,6 +4,7 @@ import static com.novoda.downloadmanager.DownloadBatchIdFixtures.aDownloadBatchI
 import static com.novoda.downloadmanager.DownloadFileStatusFixtures.aDownloadFileStatus;
 import static com.novoda.downloadmanager.FileNameFixtures.aFileName;
 import static com.novoda.downloadmanager.FilePathFixtures.aFilePath;
+import static com.novoda.downloadmanager.FilePersistenceFixtures.aFilePersistence;
 import static com.novoda.downloadmanager.InternalFileSizeFixtures.aFileSize;
 import static org.mockito.Mockito.mock;
 
@@ -17,7 +18,7 @@ class DownloadFileFixtures {
     private InternalFileSize fileSize = aFileSize().build();
     private FileDownloader fileDownloader = mock(FileDownloader.class);
     private FileSizeRequester fileSizeRequester = new InMemoryFileSizeRequester();
-    private FilePersistence filePersistence = mock(FilePersistence.class);
+    private FilePersistence filePersistence = aFilePersistence().build();
     private DownloadsFilePersistence downloadsFilePersistence = mock(DownloadsFilePersistence.class);
 
     static DownloadFileFixtures aDownloadFile() {
