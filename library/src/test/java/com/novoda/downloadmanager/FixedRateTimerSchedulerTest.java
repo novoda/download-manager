@@ -12,6 +12,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.Mockito.*;
 
 public class FixedRateTimerSchedulerTest {
@@ -30,13 +31,13 @@ public class FixedRateTimerSchedulerTest {
         scheduler = new FixedRateTimerScheduler(timer, FREQUENCY, actionTimerTasks);
 
         final ArgumentCaptor<TimerTask> argumentCaptor = ArgumentCaptor.forClass(TimerTask.class);
-        doAnswer(new Answer<Void>() {
+        willAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
                 timerTask = argumentCaptor.getValue();
                 return null;
             }
-        }).when(timer).scheduleAtFixedRate(argumentCaptor.capture(), eq(0L), eq(FREQUENCY));
+        }).given(timer).scheduleAtFixedRate(argumentCaptor.capture(), eq(0L), eq(FREQUENCY));
     }
 
     @Test
