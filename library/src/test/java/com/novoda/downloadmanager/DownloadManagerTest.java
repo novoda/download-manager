@@ -18,9 +18,12 @@ import org.mockito.stubbing.Answer;
 import static com.google.common.truth.Truth.assertThat;
 import static com.novoda.downloadmanager.DownloadBatchIdFixtures.aDownloadBatchId;
 import static com.novoda.downloadmanager.InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willAnswer;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 public class DownloadManagerTest {
 
@@ -222,7 +225,11 @@ public class DownloadManagerTest {
 
         downloadManager.getAllDownloadBatchStatuses(allBatchStatusesCallback);
 
-        verify(allBatchStatusesCallback).onReceived(Arrays.<DownloadBatchStatus>asList(status, additionalStatus));
+        ArgumentCaptor<List> argumentCaptor = ArgumentCaptor.forClass(List.class);
+        
+        verify(allBatchStatusesCallback).onReceived(argumentCaptor.capture());
+        List<DownloadBatchStatus> actualStatuses = argumentCaptor.getValue();
+        assertThat(actualStatuses).containsAllOf(status, additionalStatus);
     }
 
 }
