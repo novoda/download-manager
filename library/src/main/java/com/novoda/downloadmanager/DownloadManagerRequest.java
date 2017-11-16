@@ -1,6 +1,5 @@
 package com.novoda.downloadmanager;
 
-import java.util.HashMap;
 import java.util.Map;
 
 class DownloadManagerRequest {
@@ -8,7 +7,7 @@ class DownloadManagerRequest {
     private final Map<String, String> headers;
     private final String url;
 
-    private DownloadManagerRequest(Map<String, String> headers, String url) {
+    DownloadManagerRequest(Map<String, String> headers, String url) {
         this.headers = headers;
         this.url = url;
     }
@@ -21,26 +20,27 @@ class DownloadManagerRequest {
         return url;
     }
 
-    class Builder {
-        private static final String DOWNLOADED_BYTES_VALUE_FORMAT = "bytes=%s-%s";
-
-        private String url;
-        private HashMap<String, String> headers = new HashMap<>();
-
-        Builder withUrl(String url) {
-            this.url = url;
-            return this;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
         }
 
-        Builder withDownloadedBytesHeader(long currentSize, long totalSize) {
-            String headerValue = String.format(DOWNLOADED_BYTES_VALUE_FORMAT, currentSize, totalSize);
-            headers.put("Range", headerValue);
-            return this;
-        }
+        DownloadManagerRequest that = (DownloadManagerRequest) o;
 
-        DownloadManagerRequest build() {
-            return new DownloadManagerRequest(headers, url);
+        if (!headers.equals(that.headers)) {
+            return false;
         }
+        return url.equals(that.url);
     }
 
+    @Override
+    public int hashCode() {
+        int result = headers.hashCode();
+        result = 31 * result + url.hashCode();
+        return result;
+    }
 }
