@@ -7,11 +7,11 @@ import com.squareup.okhttp.Request;
 import java.io.IOException;
 import java.util.Map;
 
-public class WrappedOkHttpClient implements HttpClient {
+class WrappedOkHttpClient implements HttpClient {
 
     private final OkHttpClient httpClient;
 
-    public WrappedOkHttpClient(OkHttpClient httpClient) {
+    WrappedOkHttpClient(OkHttpClient httpClient) {
         this.httpClient = httpClient;
     }
 
@@ -19,6 +19,10 @@ public class WrappedOkHttpClient implements HttpClient {
     public DownloadManagerResponse execute(DownloadManagerRequest request) throws IOException {
         Request.Builder requestBuilder = new Request.Builder()
                 .url(request.url());
+
+        if (request.method() == DownloadManagerRequest.Method.HEAD) {
+            requestBuilder = requestBuilder.head();
+        }
 
         for (Map.Entry<String, String> entry : request.headers().entrySet()) {
             requestBuilder.addHeader(entry.getKey(), entry.getValue());

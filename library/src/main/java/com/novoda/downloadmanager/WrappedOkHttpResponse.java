@@ -5,12 +5,27 @@ import com.squareup.okhttp.Response;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class WrappedOkHttpResponse implements HttpClient.DownloadManagerResponse {
+class WrappedOkHttpResponse implements HttpClient.DownloadManagerResponse {
 
     private final Response response;
 
     WrappedOkHttpResponse(Response response) {
         this.response = response;
+    }
+
+    @Override
+    public int code() {
+        return response.code();
+    }
+
+    @Override
+    public boolean isSuccessful() {
+        return response.isSuccessful();
+    }
+
+    @Override
+    public String header(String name, String defaultValue) {
+        return response.header(name, defaultValue);
     }
 
     @Override

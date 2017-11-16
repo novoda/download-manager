@@ -51,13 +51,15 @@ public final class DownloadManagerBuilder {
         DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
 
         // Network downloader
-        OkHttpClient httpClient = new OkHttpClient();
-        httpClient.setConnectTimeout(5, TimeUnit.SECONDS);
-        httpClient.setWriteTimeout(5, TimeUnit.SECONDS);
-        httpClient.setReadTimeout(5, TimeUnit.SECONDS);
+        OkHttpClient okHttpClient = new OkHttpClient();
+        okHttpClient.setConnectTimeout(5, TimeUnit.SECONDS);
+        okHttpClient.setWriteTimeout(5, TimeUnit.SECONDS);
+        okHttpClient.setReadTimeout(5, TimeUnit.SECONDS);
+        HttpClient httpClient = new WrappedOkHttpClient(okHttpClient);
 
-        FileSizeRequester fileSizeRequester = new NetworkFileSizeRequester(httpClient);
-        FileDownloader fileDownloader = new NetworkFileDownloader(httpClient);
+        DownloadManagerRequestCreator requestCreator = new DownloadManagerRequestCreator();
+        FileSizeRequester fileSizeRequester = new NetworkFileSizeRequester(httpClient, requestCreator);
+        FileDownloader fileDownloader = new NetworkFileDownloader(httpClient, requestCreator);
 
         DownloadBatchNotification downloadBatchNotification = new DownloadBatchNotification(context, notificationIcon);
 

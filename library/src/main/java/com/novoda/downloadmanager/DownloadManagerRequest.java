@@ -6,10 +6,12 @@ class DownloadManagerRequest {
 
     private final Map<String, String> headers;
     private final String url;
+    private final Method method;
 
-    DownloadManagerRequest(Map<String, String> headers, String url) {
+    DownloadManagerRequest(Map<String, String> headers, String url, Method method) {
         this.headers = headers;
         this.url = url;
+        this.method = method;
     }
 
     Map<String, String> headers() {
@@ -18,6 +20,10 @@ class DownloadManagerRequest {
 
     String url() {
         return url;
+    }
+
+    Method method() {
+        return method;
     }
 
     @Override
@@ -34,13 +40,33 @@ class DownloadManagerRequest {
         if (!headers.equals(that.headers)) {
             return false;
         }
-        return url.equals(that.url);
+        if (!url.equals(that.url)) {
+            return false;
+        }
+        return method == that.method;
     }
 
     @Override
     public int hashCode() {
         int result = headers.hashCode();
         result = 31 * result + url.hashCode();
+        result = 31 * result + method.hashCode();
         return result;
     }
+
+    enum Method {
+        GET("get"),
+        HEAD("head");
+
+        private final String rawMethod;
+
+        Method(String rawMethod) {
+            this.rawMethod = rawMethod;
+        }
+
+        public String rawMethod() {
+            return rawMethod;
+        }
+    }
+
 }

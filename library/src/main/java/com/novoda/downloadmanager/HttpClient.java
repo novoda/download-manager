@@ -9,6 +9,12 @@ interface HttpClient {
 
     interface DownloadManagerResponse {
 
+        int code();
+
+        boolean isSuccessful();
+
+        String header(String name, String defaultValue);
+
         InputStream openByteStream() throws IOException;
 
         void closeByteStream() throws IOException;
