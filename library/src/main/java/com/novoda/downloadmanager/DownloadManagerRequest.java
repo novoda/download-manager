@@ -64,7 +64,7 @@ class DownloadManagerRequest {
             this.rawMethod = rawMethod;
         }
 
-        public String rawMethod() {
+        String rawMethod() {
             return rawMethod;
         }
     }
