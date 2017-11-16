@@ -15,20 +15,20 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.Mockito.*;
 
-public class FixedRateTimerSchedulerTest {
+public class FixedRateTimerActionSchedulerTest {
 
     private static final long FREQUENCY = 100;
 
     private final Timer timer = mock(Timer.class);
-    private final Map<Scheduler.Action, TimerTask> actionTimerTasks = new HashMap<>();
-    private final Scheduler.Action anyAction = mock(Scheduler.Action.class);
+    private final Map<ActionScheduler.Action, TimerTask> actionTimerTasks = new HashMap<>();
+    private final ActionScheduler.Action anyAction = mock(ActionScheduler.Action.class);
     private TimerTask timerTask;
 
-    private FixedRateTimerScheduler scheduler;
+    private FixedRateTimerActionScheduler scheduler;
 
     @Before
     public void setUp() {
-        scheduler = new FixedRateTimerScheduler(timer, FREQUENCY, actionTimerTasks);
+        scheduler = new FixedRateTimerActionScheduler(timer, FREQUENCY, actionTimerTasks);
 
         final ArgumentCaptor<TimerTask> argumentCaptor = ArgumentCaptor.forClass(TimerTask.class);
         willAnswer(new Answer<Void>() {
@@ -80,7 +80,7 @@ public class FixedRateTimerSchedulerTest {
         TimerTask timerTask = mock(TimerTask.class);
         actionTimerTasks.put(anyAction, timerTask);
 
-        Scheduler.Action additionalAction = mock(Scheduler.Action.class);
+        ActionScheduler.Action additionalAction = mock(ActionScheduler.Action.class);
         TimerTask additionalTimerTask = mock(TimerTask.class);
         actionTimerTasks.put(anyAction, timerTask);
         actionTimerTasks.put(additionalAction, additionalTimerTask);

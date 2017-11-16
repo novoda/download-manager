@@ -10,8 +10,8 @@ final class SchedulerFactory {
         // Uses static methods.
     }
 
-    static Scheduler createFixedRateTimerScheduler(long frequencyInMillis) {
-        return new FixedRateTimerScheduler(new Timer(), frequencyInMillis, new HashMap<Scheduler.Action, TimerTask>());
+    static ActionScheduler createFixedRateTimerScheduler(long frequencyInMillis) {
+        return new FixedRateTimerActionScheduler(new Timer(), frequencyInMillis, new HashMap<ActionScheduler.Action, TimerTask>());
     }
 
 }

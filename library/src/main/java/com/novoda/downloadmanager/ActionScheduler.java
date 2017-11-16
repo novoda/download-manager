@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-interface Scheduler {
+interface ActionScheduler {
 
     void schedule(Action action);
 

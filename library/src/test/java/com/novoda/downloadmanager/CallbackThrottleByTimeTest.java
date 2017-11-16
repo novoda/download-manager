@@ -12,7 +12,7 @@ import static org.mockito.Mockito.*;
 
 public class CallbackThrottleByTimeTest {
 
-    private final Scheduler scheduler = mock(Scheduler.class);
+    private final ActionScheduler actionScheduler = mock(ActionScheduler.class);
     private final DownloadBatchCallback callback = mock(DownloadBatchCallback.class);
     private final DownloadBatchStatus downloadBatchStatus = mock(DownloadBatchStatus.class);
 
@@ -20,33 +20,33 @@ public class CallbackThrottleByTimeTest {
 
     @Before
     public void setUp() {
-        callbackThrottleByTime = new CallbackThrottleByTime(scheduler);
+        callbackThrottleByTime = new CallbackThrottleByTime(actionScheduler);
 
-        final ArgumentCaptor<Scheduler.Action> argumentCaptor = ArgumentCaptor.forClass(Scheduler.Action.class);
+        final ArgumentCaptor<ActionScheduler.Action> argumentCaptor = ArgumentCaptor.forClass(ActionScheduler.Action.class);
         willAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
                 argumentCaptor.getValue().perform();
                 return null;
             }
-        }).given(scheduler).schedule(argumentCaptor.capture());
+        }).given(actionScheduler).schedule(argumentCaptor.capture());
     }
 
     @Test
     public void doesNothing_whenCallbackIsAbsent() {
         callbackThrottleByTime.update(downloadBatchStatus);
 
-        verifyZeroInteractions(scheduler, callback, downloadBatchStatus);
+        verifyZeroInteractions(actionScheduler, callback, downloadBatchStatus);
     }
 
     @Test
     public void doesNotSchedule_whenActionAlreadyScheduled() {
-        given(scheduler.isScheduled(any(Scheduler.Action.class))).willReturn(true);
+        given(actionScheduler.isScheduled(any(ActionScheduler.Action.class))).willReturn(true);
         callbackThrottleByTime.setCallback(callback);
 
         callbackThrottleByTime.update(downloadBatchStatus);
 
-        verify(scheduler, never()).schedule(any(Scheduler.Action.class));
+        verify(actionScheduler, never()).schedule(any(ActionScheduler.Action.class));
     }
 
     @Test
@@ -62,7 +62,7 @@ public class CallbackThrottleByTimeTest {
     public void cancelsAllScheduledActions_whenStoppingUpdates() {
         callbackThrottleByTime.stopUpdates();
 
-        verify(scheduler).cancelAll();
+        verify(actionScheduler).cancelAll();
     }
 
     @Test
@@ -71,7 +71,7 @@ public class CallbackThrottleByTimeTest {
 
         callbackThrottleByTime.stopUpdates();
 
-        verify(scheduler).cancelAll();
+        verify(actionScheduler).cancelAll();
     }
 
     @Test

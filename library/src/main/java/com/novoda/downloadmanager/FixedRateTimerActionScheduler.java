@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-class FixedRateTimerScheduler implements Scheduler {
+class FixedRateTimerActionScheduler implements ActionScheduler {
 
     private static final long DELAY_IN_MILLIS = 0;
 
@@ -12,7 +12,7 @@ class FixedRateTimerScheduler implements Scheduler {
     private final long frequencyInMillis;
     private final Map<Action, TimerTask> actionTimerTasks;
 
-    FixedRateTimerScheduler(Timer timer, long frequencyInMillis, Map<Action, TimerTask> actionTimerTasks) {
+    FixedRateTimerActionScheduler(Timer timer, long frequencyInMillis, Map<Action, TimerTask> actionTimerTasks) {
         this.timer = timer;
         this.frequencyInMillis = frequencyInMillis;
         this.actionTimerTasks = actionTimerTasks;
