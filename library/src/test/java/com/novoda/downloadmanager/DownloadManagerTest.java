@@ -18,15 +18,14 @@ import org.mockito.stubbing.Answer;
 import static com.google.common.truth.Truth.assertThat;
 import static com.novoda.downloadmanager.DownloadBatchIdFixtures.aDownloadBatchId;
 import static com.novoda.downloadmanager.InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus;
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willAnswer;
+import static org.mockito.Mockito.*;
 
 public class DownloadManagerTest {
 
+    private static final InternalDownloadBatchStatus BATCH_STATUS = anInternalDownloadsBatchStatus().build();
+    private static final InternalDownloadBatchStatus ADDITIONAL_BATCH_STATUS = anInternalDownloadsBatchStatus().build();
     private static final DownloadBatchId DOWNLOAD_BATCH_ID = aDownloadBatchId().withRawDownloadBatchId("id01").build();
     private static final DownloadBatchId ADDITIONAL_DOWNLOAD_BATCH_ID = aDownloadBatchId().withRawDownloadBatchId("id02").build();
     private static final Batch BATCH = new Batch.Builder(DOWNLOAD_BATCH_ID, "title").build();
@@ -42,10 +41,11 @@ public class DownloadManagerTest {
     private final FileOperations fileOperations = mock(FileOperations.class);
     private final DownloadsBatchPersistence downloadsBatchPersistence = mock(DownloadsBatchPersistence.class);
     private final LiteDownloadManagerDownloader downloadManagerDownloader = mock(LiteDownloadManagerDownloader.class);
-    private List<DownloadBatchCallback> downloadBatchCallbacks = new ArrayList<>();
 
     private DownloadManager downloadManager;
-    private Map<DownloadBatchId, DownloadBatch> downloadBatches;
+    private Map<DownloadBatchId, DownloadBatch> downloadBatches = new HashMap<>();
+    private List<DownloadBatchStatus> downloadBatchStatuses = new ArrayList<>();
+    private List<DownloadBatchCallback> downloadBatchCallbacks = new ArrayList<>();
 
     @Before
     public void setUp() {
@@ -73,6 +73,18 @@ public class DownloadManagerTest {
                 return null;
             }
         }).given(downloadsBatchPersistence).loadAsync(any(FileOperations.class), loadBatchesCallbackCaptor.capture());
+
+        final ArgumentCaptor<List> argumentCaptor = ArgumentCaptor.forClass(List.class);
+        willAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                downloadBatchStatuses = argumentCaptor.getValue();
+                return null;
+            }
+        }).given(allBatchStatusesCallback).onReceived(argumentCaptor.capture());
+
+        given(downloadBatch.status()).willReturn(BATCH_STATUS);
+        given(additionalDownloadBatch.status()).willReturn(ADDITIONAL_BATCH_STATUS);
     }
 
     @Test
@@ -217,19 +229,11 @@ public class DownloadManagerTest {
 
     @Test
     public void getsAllBatchStatuses_whenServiceAlreadyExists() {
-        InternalDownloadBatchStatus status = anInternalDownloadsBatchStatus().build();
-        given(downloadBatch.status()).willReturn(status);
-        InternalDownloadBatchStatus additionalStatus = anInternalDownloadsBatchStatus().build();
-        given(additionalDownloadBatch.status()).willReturn(additionalStatus);
         downloadManager.initialise(mock(DownloadService.class));
 
         downloadManager.getAllDownloadBatchStatuses(allBatchStatusesCallback);
 
-        ArgumentCaptor<List> argumentCaptor = ArgumentCaptor.forClass(List.class);
-        
-        verify(allBatchStatusesCallback).onReceived(argumentCaptor.capture());
-        List<DownloadBatchStatus> actualStatuses = argumentCaptor.getValue();
-        assertThat(actualStatuses).containsAllOf(status, additionalStatus);
+        assertThat(downloadBatchStatuses).containsAllOf(BATCH_STATUS, ADDITIONAL_BATCH_STATUS);
     }
 
 }
