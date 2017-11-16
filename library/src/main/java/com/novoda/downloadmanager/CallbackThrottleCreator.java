@@ -48,7 +48,7 @@ class CallbackThrottleCreator {
             case CUSTOM:
                 return createCallbackThrottle();
             default:
-                throw new IllegalStateException("type " + type + " not supported");
+                throw new IllegalStateException("type " + type + " not supported.");
         }
     }
 
