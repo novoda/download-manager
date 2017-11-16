@@ -6,7 +6,7 @@ import java.io.InputStream;
 
 class NetworkResponseFixtures {
 
-    private int code = 201;
+    private int code = 200;
     private boolean isSuccessful = true;
     private String header = "header";
     private InputStream inputStream = new ByteArrayInputStream("input".getBytes());
