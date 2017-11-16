@@ -11,11 +11,11 @@ class NetworkFileDownloader implements FileDownloader {
     private static final int BUFFER_SIZE = 8 * 512;
 
     private final HttpClient httpClient;
-    private final DownloadManagerRequestCreator requestCreator;
+    private final NetworkRequestCreator requestCreator;
 
     private boolean canDownload;
 
-    NetworkFileDownloader(HttpClient httpClient, DownloadManagerRequestCreator requestCreator) {
+    NetworkFileDownloader(HttpClient httpClient, NetworkRequestCreator requestCreator) {
         this.httpClient = httpClient;
         this.requestCreator = requestCreator;
     }
@@ -24,8 +24,8 @@ class NetworkFileDownloader implements FileDownloader {
     public void startDownloading(String url, FileSize fileSize, Callback callback) {
         canDownload = true;
 
-        DownloadManagerRequest request = createRequestFrom(url, fileSize);
-        HttpClient.DownloadManagerResponse response = null;
+        NetworkRequest request = createRequestFrom(url, fileSize);
+        HttpClient.NetworkResponse response = null;
         try {
             response = httpClient.execute(request);
             int responseCode = response.code();
@@ -60,7 +60,7 @@ class NetworkFileDownloader implements FileDownloader {
         callback.onDownloadFinished();
     }
 
-    private DownloadManagerRequest createRequestFrom(String url, FileSize fileSize) {
+    private NetworkRequest createRequestFrom(String url, FileSize fileSize) {
         if (fileSize.areBytesDownloadedKnown()) {
             return requestCreator.createDownloadRequestWithDownloadedBytesHeader(url, fileSize.currentSize(), fileSize.totalSize());
         } else {

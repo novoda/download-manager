@@ -5,7 +5,7 @@ import com.squareup.okhttp.Response;
 import java.io.IOException;
 import java.io.InputStream;
 
-class WrappedOkHttpResponse implements HttpClient.DownloadManagerResponse {
+class WrappedOkHttpResponse implements HttpClient.NetworkResponse {
 
     private final Response response;
 

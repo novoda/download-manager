@@ -5,9 +5,9 @@ import java.io.InputStream;
 
 interface HttpClient {
 
-    DownloadManagerResponse execute(DownloadManagerRequest downloadManagerRequest) throws IOException;
+    NetworkResponse execute(NetworkRequest networkRequest) throws IOException;
 
-    interface DownloadManagerResponse {
+    interface NetworkResponse {
 
         int code();
 

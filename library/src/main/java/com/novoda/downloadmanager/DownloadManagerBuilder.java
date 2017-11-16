@@ -57,7 +57,7 @@ public final class DownloadManagerBuilder {
         okHttpClient.setReadTimeout(5, TimeUnit.SECONDS);
         HttpClient httpClient = new WrappedOkHttpClient(okHttpClient);
 
-        DownloadManagerRequestCreator requestCreator = new DownloadManagerRequestCreator();
+        NetworkRequestCreator requestCreator = new NetworkRequestCreator();
         FileSizeRequester fileSizeRequester = new NetworkFileSizeRequester(httpClient, requestCreator);
         FileDownloader fileDownloader = new NetworkFileDownloader(httpClient, requestCreator);
 

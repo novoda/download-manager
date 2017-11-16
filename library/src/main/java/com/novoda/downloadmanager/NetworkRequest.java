@@ -2,13 +2,13 @@ package com.novoda.downloadmanager;
 
 import java.util.Map;
 
-class DownloadManagerRequest {
+class NetworkRequest {
 
     private final Map<String, String> headers;
     private final String url;
     private final Method method;
 
-    DownloadManagerRequest(Map<String, String> headers, String url, Method method) {
+    NetworkRequest(Map<String, String> headers, String url, Method method) {
         this.headers = headers;
         this.url = url;
         this.method = method;
@@ -35,7 +35,7 @@ class DownloadManagerRequest {
             return false;
         }
 
-        DownloadManagerRequest that = (DownloadManagerRequest) o;
+        NetworkRequest that = (NetworkRequest) o;
 
         if (!headers.equals(that.headers)) {
             return false;

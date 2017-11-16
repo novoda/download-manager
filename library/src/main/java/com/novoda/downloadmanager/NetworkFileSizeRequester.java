@@ -10,19 +10,19 @@ class NetworkFileSizeRequester implements FileSizeRequester {
     private static final int UNKNOWN_CONTENT_LENGTH = -1;
 
     private final HttpClient httpClient;
-    private final DownloadManagerRequestCreator requestCreator;
+    private final NetworkRequestCreator requestCreator;
 
-    NetworkFileSizeRequester(HttpClient httpClient, DownloadManagerRequestCreator requestCreator) {
+    NetworkFileSizeRequester(HttpClient httpClient, NetworkRequestCreator requestCreator) {
         this.httpClient = httpClient;
         this.requestCreator = requestCreator;
     }
 
     @Override
     public FileSize requestFileSize(String url) {
-        DownloadManagerRequest fileSizeRequest = requestCreator.createFileSizeRequest(url);
+        NetworkRequest fileSizeRequest = requestCreator.createFileSizeRequest(url);
 
         try {
-            HttpClient.DownloadManagerResponse response = httpClient.execute(fileSizeRequest);
+            HttpClient.NetworkResponse response = httpClient.execute(fileSizeRequest);
             if (response.isSuccessful()) {
                 long totalFileSize = Long.parseLong(response.header(HEADER_CONTENT_LENGTH, String.valueOf(UNKNOWN_CONTENT_LENGTH)));
                 return FileSizeCreator.createFromTotalSize(totalFileSize);

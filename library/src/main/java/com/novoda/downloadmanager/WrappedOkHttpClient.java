@@ -16,11 +16,11 @@ class WrappedOkHttpClient implements HttpClient {
     }
 
     @Override
-    public DownloadManagerResponse execute(DownloadManagerRequest request) throws IOException {
+    public NetworkResponse execute(NetworkRequest request) throws IOException {
         Request.Builder requestBuilder = new Request.Builder()
                 .url(request.url());
 
-        if (request.method() == DownloadManagerRequest.Method.HEAD) {
+        if (request.method() == NetworkRequest.Method.HEAD) {
             requestBuilder = requestBuilder.head();
         }
 
