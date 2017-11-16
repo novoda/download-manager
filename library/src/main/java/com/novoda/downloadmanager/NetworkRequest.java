@@ -68,5 +68,4 @@ class NetworkRequest {
             return rawMethod;
         }
     }
-
 }

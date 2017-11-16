@@ -22,5 +22,4 @@ class NetworkRequestCreator {
 
         return new NetworkRequest(headers, url, NetworkRequest.Method.GET);
     }
-
 }

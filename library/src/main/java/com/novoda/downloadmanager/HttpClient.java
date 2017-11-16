@@ -19,5 +19,4 @@ interface HttpClient {
 
         void closeByteStream() throws IOException;
     }
-
 }
