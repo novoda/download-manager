@@ -8,5 +8,5 @@ interface InternalFileSize extends FileSize {
 
     void setCurrentSize(long currentSize);
 
-    LiteFileSize copy();
+    InternalFileSize copy();
 }

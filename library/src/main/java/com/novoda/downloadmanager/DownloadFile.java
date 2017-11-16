@@ -1,7 +1,7 @@
 package com.novoda.downloadmanager;
 
-import com.novoda.notils.logger.simple.Log;
 import com.novoda.downloadmanager.DownloadError.Error;
+import com.novoda.notils.logger.simple.Log;
 
 class DownloadFile {
 
@@ -130,8 +130,8 @@ class DownloadFile {
         return DownloadError.Error.UNKNOWN;
     }
 
-    private LiteFileSize requestTotalFileSizeIfNecessary(InternalFileSize fileSize) {
-        LiteFileSize updatedFileSize = fileSize.copy();
+    private InternalFileSize requestTotalFileSizeIfNecessary(InternalFileSize fileSize) {
+        InternalFileSize updatedFileSize = fileSize.copy();
 
         if (fileSize.isTotalSizeUnknown()) {
             FileSize requestFileSize = fileSizeRequester.requestFileSize(url);
