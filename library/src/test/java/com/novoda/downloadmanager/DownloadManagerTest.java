@@ -76,7 +76,7 @@ public class DownloadManagerTest {
         willAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
-                DownloadsBatchPersistence.LoadBatchesCallback loadBatchesCallback = (DownloadsBatchPersistence.LoadBatchesCallback) invocation.getArgument(1);
+                DownloadsBatchPersistence.LoadBatchesCallback loadBatchesCallback = invocation.getArgument(1);
                 loadBatchesCallback.onLoaded(Arrays.asList(downloadBatch, additionalDownloadBatch));
                 return null;
             }
