@@ -56,5 +56,4 @@ public class NetworkFileSizeRequesterTest {
 
         assertThat(fileSize).isEqualTo(FileSizeCreator.createFromTotalSize(FILE_BYTES));
     }
-
 }
