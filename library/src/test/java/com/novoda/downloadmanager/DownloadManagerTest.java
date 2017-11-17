@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -29,6 +31,7 @@ public class DownloadManagerTest {
     private static final DownloadBatchId DOWNLOAD_BATCH_ID = aDownloadBatchId().withRawDownloadBatchId("id01").build();
     private static final DownloadBatchId ADDITIONAL_DOWNLOAD_BATCH_ID = aDownloadBatchId().withRawDownloadBatchId("id02").build();
     private static final Batch BATCH = new Batch.Builder(DOWNLOAD_BATCH_ID, "title").build();
+    private final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
 
     private final AllStoredDownloadsSubmittedCallback allStoredDownloadsSubmittedCallback = mock(AllStoredDownloadsSubmittedCallback.class);
     private final AllBatchStatusesCallback allBatchStatusesCallback = mock(AllBatchStatusesCallback.class);
@@ -36,7 +39,6 @@ public class DownloadManagerTest {
     private final Object lock = spy(new Object());
     private final DownloadBatch downloadBatch = mock(DownloadBatch.class);
     private final DownloadBatch additionalDownloadBatch = mock(DownloadBatch.class);
-    private final ExecutorService executorService = mock(ExecutorService.class);
     private final DownloadBatchCallback downloadBatchCallback = mock(DownloadBatchCallback.class);
     private final FileOperations fileOperations = mock(FileOperations.class);
     private final DownloadsBatchPersistence downloadsBatchPersistence = mock(DownloadsBatchPersistence.class);
@@ -57,7 +59,7 @@ public class DownloadManagerTest {
 
         downloadManager = new DownloadManager(
                 lock,
-                executorService,
+                EXECUTOR,
                 downloadBatches,
                 downloadBatchCallbacks,
                 fileOperations,
@@ -103,11 +105,21 @@ public class DownloadManagerTest {
 
     @Test
     public void notifyAll_whenInitialising() throws InterruptedException {
-        downloadManager.initialise(downloadService);
+        final AtomicBoolean triggeredNotify = new AtomicBoolean(false);
 
         synchronized (lock) {
-            verify(lock).notifyAll();
+            EXECUTOR.submit(new Runnable() {
+                @Override
+                public void run() {
+                    downloadManager.initialise(downloadService);
+                    triggeredNotify.set(true);
+                }
+            });
+
+            lock.wait();
         }
+
+        assertThat(triggeredNotify.get()).isTrue();
     }
 
     @Test
@@ -229,10 +241,20 @@ public class DownloadManagerTest {
         assertThat(downloadBatchCallbacks).doesNotContain(downloadBatchCallback);
     }
 
-    @Ignore // How to test the synchronized block here?
+    @Ignore
     @Test
-    public void waitsForServiceToExist_whenGettingAllBatchStatuses() {
-        downloadManager.getAllDownloadBatchStatuses(allBatchStatusesCallback);
+    public void waitsForServiceToExist_whenGettingAllBatchStatuses() throws InterruptedException {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                downloadManager.getAllDownloadBatchStatuses(allBatchStatusesCallback);
+            }
+        }).run();
+
+        synchronized (lock) {
+            lock.notifyAll();
+            verify(lock).wait();
+        }
     }
 
     @Test
