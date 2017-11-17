@@ -64,4 +64,28 @@ class LiteFileSize implements InternalFileSize {
                 ", totalSize=" + totalSize +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        LiteFileSize that = (LiteFileSize) o;
+
+        if (currentSize != that.currentSize) {
+            return false;
+        }
+        return totalSize == that.totalSize;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (currentSize ^ (currentSize >>> 32));
+        result = 31 * result + (int) (totalSize ^ (totalSize >>> 32));
+        return result;
+    }
 }
