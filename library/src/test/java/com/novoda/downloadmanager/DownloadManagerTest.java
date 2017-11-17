@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -103,23 +102,18 @@ public class DownloadManagerTest {
         verify(downloadManagerDownloader).setDownloadService(downloadService);
     }
 
-    @Test
+    @Test(timeout = 500)
     public void notifyAll_whenInitialising() throws InterruptedException {
-        final AtomicBoolean triggeredNotify = new AtomicBoolean(false);
-
         synchronized (lock) {
             EXECUTOR.submit(new Runnable() {
                 @Override
                 public void run() {
                     downloadManager.initialise(downloadService);
-                    triggeredNotify.set(true);
                 }
             });
 
             lock.wait();
         }
-
-        assertThat(triggeredNotify.get()).isTrue();
     }
 
     @Test
