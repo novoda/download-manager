@@ -9,7 +9,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
@@ -30,12 +29,12 @@ public class DownloadManagerTest {
     private static final DownloadBatchId DOWNLOAD_BATCH_ID = aDownloadBatchId().withRawDownloadBatchId("id01").build();
     private static final DownloadBatchId ADDITIONAL_DOWNLOAD_BATCH_ID = aDownloadBatchId().withRawDownloadBatchId("id02").build();
     private static final Batch BATCH = new Batch.Builder(DOWNLOAD_BATCH_ID, "title").build();
-    private final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
 
     private final AllStoredDownloadsSubmittedCallback allStoredDownloadsSubmittedCallback = mock(AllStoredDownloadsSubmittedCallback.class);
     private final AllBatchStatusesCallback allBatchStatusesCallback = mock(AllBatchStatusesCallback.class);
     private final DownloadService downloadService = mock(DownloadService.class);
     private final Object lock = spy(new Object());
+    private final ExecutorService executorService = mock(ExecutorService.class);
     private final DownloadBatch downloadBatch = mock(DownloadBatch.class);
     private final DownloadBatch additionalDownloadBatch = mock(DownloadBatch.class);
     private final DownloadBatchCallback downloadBatchCallback = mock(DownloadBatchCallback.class);
@@ -58,7 +57,7 @@ public class DownloadManagerTest {
 
         downloadManager = new DownloadManager(
                 lock,
-                EXECUTOR,
+                executorService,
                 downloadBatches,
                 downloadBatchCallbacks,
                 fileOperations,
@@ -105,7 +104,7 @@ public class DownloadManagerTest {
     @Test(timeout = 500)
     public void notifyAll_whenInitialising() throws InterruptedException {
         synchronized (lock) {
-            EXECUTOR.submit(new Runnable() {
+            Executors.newSingleThreadExecutor().submit(new Runnable() {
                 @Override
                 public void run() {
                     downloadManager.initialise(downloadService);
@@ -235,20 +234,21 @@ public class DownloadManagerTest {
         assertThat(downloadBatchCallbacks).doesNotContain(downloadBatchCallback);
     }
 
-    @Ignore
-    @Test
+    @Test(timeout = 500)
     public void waitsForServiceToExist_whenGettingAllBatchStatuses() throws InterruptedException {
-        new Thread(new Runnable() {
+        final ArgumentCaptor<Runnable> argumentCaptor = ArgumentCaptor.forClass(Runnable.class);
+        willAnswer(new Answer<Void>() {
             @Override
-            public void run() {
-                downloadManager.getAllDownloadBatchStatuses(allBatchStatusesCallback);
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                argumentCaptor.getValue().run();
+                return null;
             }
-        }).run();
+        }).given(executorService).submit(argumentCaptor.capture());
 
-        synchronized (lock) {
-            lock.notifyAll();
-            verify(lock).wait();
-        }
+        notifyLockOnAnotherThread();
+
+        downloadManager.getAllDownloadBatchStatuses(allBatchStatusesCallback);
+
     }
 
     @Test
@@ -258,6 +258,24 @@ public class DownloadManagerTest {
         downloadManager.getAllDownloadBatchStatuses(allBatchStatusesCallback);
 
         assertThat(downloadBatchStatuses).containsExactly(BATCH_STATUS, ADDITIONAL_BATCH_STATUS);
+    }
+
+    private void notifyLockOnAnotherThread() {
+        Executors.newSingleThreadExecutor()
+                .submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        synchronized (lock) {
+                            lock.notifyAll();
+                        }
+                    }
+                });
     }
 
 }
