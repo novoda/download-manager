@@ -240,7 +240,7 @@ public class DownloadManagerTest {
 
         downloadManager.getAllDownloadBatchStatuses(allBatchStatusesCallback);
 
-        assertThat(downloadBatchStatuses).containsAllOf(BATCH_STATUS, ADDITIONAL_BATCH_STATUS);
+        assertThat(downloadBatchStatuses).containsExactly(BATCH_STATUS, ADDITIONAL_BATCH_STATUS);
     }
 
 }
