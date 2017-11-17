@@ -51,7 +51,7 @@ public class NetworkFileDownloaderTest {
     }
 
     @Test
-    public void closesByteStream_whenDownloading() throws IOException {
+    public void closesByteStream_whenDownloaded() throws IOException {
         HttpClient.NetworkResponse networkResponse = spy(aNetworkResponse().build());
         given(httpClient.execute(requestCreator.createDownloadRequest(ANY_RAW_URL))).willReturn(networkResponse);
 
