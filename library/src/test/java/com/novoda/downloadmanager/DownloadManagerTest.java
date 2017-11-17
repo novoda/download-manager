@@ -65,6 +65,14 @@ public class DownloadManagerTest {
                 downloadManagerDownloader
         );
 
+        setupDownloadBatchesResponse();
+        setupDownloadBatchStatusesResponse();
+
+        given(downloadBatch.status()).willReturn(BATCH_STATUS);
+        given(additionalDownloadBatch.status()).willReturn(ADDITIONAL_BATCH_STATUS);
+    }
+
+    private void setupDownloadBatchesResponse() {
         final ArgumentCaptor<DownloadsBatchPersistence.LoadBatchesCallback> loadBatchesCallbackCaptor = ArgumentCaptor.forClass(DownloadsBatchPersistence.LoadBatchesCallback.class);
         willAnswer(new Answer<Void>() {
             @Override
@@ -73,7 +81,9 @@ public class DownloadManagerTest {
                 return null;
             }
         }).given(downloadsBatchPersistence).loadAsync(any(FileOperations.class), loadBatchesCallbackCaptor.capture());
+    }
 
+    private void setupDownloadBatchStatusesResponse() {
         final ArgumentCaptor<List> argumentCaptor = ArgumentCaptor.forClass(List.class);
         willAnswer(new Answer<Void>() {
             @Override
@@ -82,9 +92,6 @@ public class DownloadManagerTest {
                 return null;
             }
         }).given(allBatchStatusesCallback).onReceived(argumentCaptor.capture());
-
-        given(downloadBatch.status()).willReturn(BATCH_STATUS);
-        given(additionalDownloadBatch.status()).willReturn(ADDITIONAL_BATCH_STATUS);
     }
 
     @Test
