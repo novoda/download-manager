@@ -33,7 +33,7 @@ public class DownloadManagerTest {
     private final AllStoredDownloadsSubmittedCallback allStoredDownloadsSubmittedCallback = mock(AllStoredDownloadsSubmittedCallback.class);
     private final AllBatchStatusesCallback allBatchStatusesCallback = mock(AllBatchStatusesCallback.class);
     private final DownloadService downloadService = mock(DownloadService.class);
-    private final Object lock = mock(Object.class);
+    private final Object lock = spy(new Object());
     private final DownloadBatch downloadBatch = mock(DownloadBatch.class);
     private final DownloadBatch additionalDownloadBatch = mock(DownloadBatch.class);
     private final ExecutorService executorService = mock(ExecutorService.class);
@@ -101,12 +101,13 @@ public class DownloadManagerTest {
         verify(downloadManagerDownloader).setDownloadService(downloadService);
     }
 
-    @Ignore // How do we unit test the synchronized block?
     @Test
-    public void notifyAll_whenInitialising() {
+    public void notifyAll_whenInitialising() throws InterruptedException {
         downloadManager.initialise(downloadService);
 
-        verify(lock).notifyAll();
+        synchronized (lock) {
+            verify(lock).notifyAll();
+        }
     }
 
     @Test
