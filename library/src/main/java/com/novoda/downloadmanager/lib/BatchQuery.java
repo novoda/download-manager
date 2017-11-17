@@ -45,11 +45,11 @@ public class BatchQuery {
         private static final String ORDER_BY_LIVENESS = "CASE " + DownloadContract.Batches.COLUMN_STATUS + " "
                 + "WHEN " + DownloadStatus.RUNNING + " THEN 1 "
                 + "WHEN " + DownloadStatus.BATCH_RUNNING + " THEN 2 "
-                + "WHEN " + DownloadStatus.PENDING + " THEN 2 "
-                + "WHEN " + DownloadStatus.PAUSED_BY_APP + " THEN 3 "
-                + "WHEN " + DownloadStatus.BATCH_FAILED + " THEN 4 "
-                + "WHEN " + DownloadStatus.SUCCESS + " THEN 5 "
-                + "ELSE 6 "
+                + "WHEN " + DownloadStatus.PENDING + " THEN 3 "
+                + "WHEN " + DownloadStatus.PAUSED_BY_APP + " THEN 4 "
+                + "WHEN " + DownloadStatus.BATCH_FAILED + " THEN 5 "
+                + "WHEN " + DownloadStatus.SUCCESS + " THEN 6 "
+                + "ELSE 7 "
                 + "END, " + DownloadContract.Batches._ID + " ASC";
 
         private Criteria.Builder criteriaIdBuilder;

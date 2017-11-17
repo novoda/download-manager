@@ -40,8 +40,9 @@ public class BatchQueryTest {
 
         assertThat(query.getSelection()).isEqualTo(
                 "(" + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
-                        +DownloadContract.Batches.COLUMN_STATUS + "=?)");
-        assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), new Integer[]{DownloadStatus.PENDING, DownloadStatus.SUBMITTED});
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=?)");
+        assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), new Integer[]{DownloadStatus.PENDING, DownloadStatus.SUBMITTED, DownloadStatus.BATCH_RUNNING});
     }
 
     @Test
@@ -135,10 +136,12 @@ public class BatchQueryTest {
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=?)");
         Integer[] expectedArguments = {
                 DownloadStatus.PENDING,
                 DownloadStatus.SUBMITTED,
+                DownloadStatus.BATCH_RUNNING,
                 DownloadStatus.RUNNING,
                 DownloadStatus.PAUSED_BY_APP,
                 DownloadStatus.WAITING_TO_RETRY,
@@ -147,7 +150,6 @@ public class BatchQueryTest {
                 DownloadStatus.QUEUED_DUE_CLIENT_RESTRICTIONS
         };
         assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), expectedArguments);
-
     }
 
     @Test
@@ -169,11 +171,13 @@ public class BatchQueryTest {
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=?)");
 
         Integer[] expectedArguments = {
                 DownloadStatus.PENDING,
                 DownloadStatus.SUBMITTED,
+                DownloadStatus.BATCH_RUNNING,
                 DownloadStatus.RUNNING,
                 DownloadStatus.PAUSED_BY_APP,
                 DownloadStatus.WAITING_TO_RETRY,
@@ -208,12 +212,14 @@ public class BatchQueryTest {
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + "(" + DownloadContract.Batches.COLUMN_STATUS + ">=? AND "
                         + DownloadContract.Batches.COLUMN_STATUS + "<?))");
 
         Integer[] expectedArguments = {
                 DownloadStatus.PENDING,
                 DownloadStatus.SUBMITTED,
+                DownloadStatus.BATCH_RUNNING,
                 DownloadStatus.RUNNING,
                 DownloadStatus.PAUSED_BY_APP,
                 DownloadStatus.WAITING_TO_RETRY,
@@ -254,6 +260,7 @@ public class BatchQueryTest {
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + "(" + DownloadContract.Batches.COLUMN_STATUS + ">=? AND "
                         + DownloadContract.Batches.COLUMN_STATUS + "<?))");
 
@@ -261,6 +268,7 @@ public class BatchQueryTest {
                 id,
                 DownloadStatus.PENDING,
                 DownloadStatus.SUBMITTED,
+                DownloadStatus.BATCH_RUNNING,
                 DownloadStatus.RUNNING,
                 DownloadStatus.PAUSED_BY_APP,
                 DownloadStatus.WAITING_TO_RETRY,
@@ -327,11 +335,13 @@ public class BatchQueryTest {
                 "(" + DownloadContract.Batches._ID + "=?) AND "
                         + "(" + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                        + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                         + DownloadContract.Batches.COLUMN_STATUS + "=?)");
         Integer[] expectedArguments = {
                 thirdId,
                 DownloadStatus.PENDING,
                 DownloadStatus.SUBMITTED,
+                DownloadStatus.BATCH_RUNNING,
                 DownloadStatus.RUNNING};
         assertThatSelectionArgumentAreEqualTo(query.getSelectionArguments(), expectedArguments);
 
@@ -346,6 +356,7 @@ public class BatchQueryTest {
                 .build();
 
         assertThat(query.getSelection()).isEqualTo("(" + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                                                           + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                                                            + DownloadContract.Batches.COLUMN_STATUS + "=?)");
         assertThat(query.getSortOrder()).isEqualTo(sortColumn + " ASC ");
     }
@@ -359,6 +370,7 @@ public class BatchQueryTest {
                 .build();
 
         assertThat(query.getSelection()).isEqualTo("(" + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
+                                                           + DownloadContract.Batches.COLUMN_STATUS + "=? OR "
                                                            + DownloadContract.Batches.COLUMN_STATUS + "=?)");
         assertThat(query.getSortOrder()).isEqualTo(sortColumn + " DESC ");
     }
@@ -369,11 +381,12 @@ public class BatchQueryTest {
 
         assertThat(query.getSortOrder()).isEqualTo("CASE batch_status " +
                 "WHEN 192 THEN 1 " +
-                "WHEN 190 THEN 2 " +
-                "WHEN 193 THEN 3 " +
-                "WHEN 498 THEN 4 " +
-                "WHEN 200 THEN 5 " +
-                "ELSE 6 END, _id ASC");
+                "WHEN 191 THEN 2 " +
+                "WHEN 190 THEN 3 " +
+                "WHEN 193 THEN 4 " +
+                "WHEN 498 THEN 5 " +
+                "WHEN 200 THEN 6 " +
+                "ELSE 7 END, _id ASC");
     }
 
     private void assertThatSelectionArgumentAreEqualTo(Object[] firstArray, Object[] secondArray) {
