@@ -6,6 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static com.novoda.downloadmanager.InternalFileSizeFixtures.aFileSize;
@@ -105,5 +106,15 @@ public class NetworkFileDownloaderTest {
         networkFileDownloader.startDownloading(ANY_RAW_URL, UNKNOWN_FILE_SIZE, callback);
 
         verify(callback).onDownloadFinished();
+    }
+
+    @Ignore // How can we test the `canDownload` flag?
+    @Test
+    public void stopsEmittingBytes_whenStoppingDownload() throws IOException {
+        networkFileDownloader.startDownloading(ANY_RAW_URL, UNKNOWN_FILE_SIZE, callback);
+
+        networkFileDownloader.stopDownloading();
+
+        verify(callback, never()).onBytesRead(new byte[10], 0);
     }
 }
