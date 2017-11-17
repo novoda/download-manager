@@ -34,10 +34,6 @@ class DownloadManager implements LiteDownloadManagerCommands {
     }
 
     void initialise(DownloadService downloadService) {
-        setDownloadService(downloadService);
-    }
-
-    private void setDownloadService(DownloadService downloadService) {
         this.downloadService = downloadService;
         downloader.setDownloadService(downloadService);
         synchronized (waitForDownloadService) {
@@ -69,7 +65,6 @@ class DownloadManager implements LiteDownloadManagerCommands {
         // and the type of the connection is allowed
         // then start immediately
         // else, schedule a job with window 1ms-1day
-
 
         // if the job fails because of network issues, then schedule a job with window 1ms-1day
 
