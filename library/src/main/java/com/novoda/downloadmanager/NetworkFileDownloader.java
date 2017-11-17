@@ -1,10 +1,6 @@
 package com.novoda.downloadmanager;
 
 import com.novoda.notils.logger.simple.Log;
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,30 +10,27 @@ class NetworkFileDownloader implements FileDownloader {
 
     private static final int BUFFER_SIZE = 8 * 512;
 
-    private final OkHttpClient httpClient;
+    private final HttpClient httpClient;
+    private final NetworkRequestCreator requestCreator;
 
     private boolean canDownload;
 
-    NetworkFileDownloader(OkHttpClient httpClient) {
+    NetworkFileDownloader(HttpClient httpClient, NetworkRequestCreator requestCreator) {
         this.httpClient = httpClient;
+        this.requestCreator = requestCreator;
     }
 
     @Override
     public void startDownloading(String url, FileSize fileSize, Callback callback) {
         canDownload = true;
 
-        Request.Builder requestBuilder = new Request.Builder().url(url);
-        if (fileSize.areBytesDownloadedKnown()) {
-            requestBuilder.addHeader("Range", "bytes=" + fileSize.currentSize() + "-" + fileSize.totalSize());
-        }
-
-        Call call = httpClient.newCall(requestBuilder.build());
-        Response response = null;
+        NetworkRequest request = createRequestFrom(url, fileSize);
+        HttpClient.NetworkResponse response = null;
         try {
-            response = call.execute();
+            response = httpClient.execute(request);
             int responseCode = response.code();
             if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_PARTIAL) {
-                InputStream in = response.body().byteStream();
+                InputStream in = response.openByteStream();
                 byte[] buffer = new byte[BUFFER_SIZE];
                 int readLast = 0;
                 while (canDownload && readLast != -1) {
@@ -57,7 +50,7 @@ class NetworkFileDownloader implements FileDownloader {
         } finally {
             try {
                 if (response != null) {
-                    response.body().close();
+                    response.closeByteStream();
                 }
             } catch (IOException e) {
                 Log.e(e, "Exception while closing the body response");
@@ -65,6 +58,14 @@ class NetworkFileDownloader implements FileDownloader {
         }
 
         callback.onDownloadFinished();
+    }
+
+    private NetworkRequest createRequestFrom(String url, FileSize fileSize) {
+        if (fileSize.areBytesDownloadedKnown()) {
+            return requestCreator.createDownloadRequestWithDownloadedBytesHeader(url, fileSize.currentSize(), fileSize.totalSize());
+        } else {
+            return requestCreator.createDownloadRequest(url);
+        }
     }
 
     @Override

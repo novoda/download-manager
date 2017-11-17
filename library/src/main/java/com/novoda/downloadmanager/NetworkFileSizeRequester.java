@@ -1,9 +1,6 @@
 package com.novoda.downloadmanager;
 
 import com.novoda.notils.logger.simple.Log;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 
@@ -12,20 +9,20 @@ class NetworkFileSizeRequester implements FileSizeRequester {
     private static final String HEADER_CONTENT_LENGTH = "Content-Length";
     private static final int UNKNOWN_CONTENT_LENGTH = -1;
 
-    private final OkHttpClient httpClient;
+    private final HttpClient httpClient;
+    private final NetworkRequestCreator requestCreator;
 
-    NetworkFileSizeRequester(OkHttpClient httpClient) {
+    NetworkFileSizeRequester(HttpClient httpClient, NetworkRequestCreator requestCreator) {
         this.httpClient = httpClient;
+        this.requestCreator = requestCreator;
     }
 
     @Override
     public FileSize requestFileSize(String url) {
-        Request.Builder requestBuilder = new Request.Builder()
-                .head()
-                .url(url);
+        NetworkRequest fileSizeRequest = requestCreator.createFileSizeRequest(url);
 
         try {
-            Response response = httpClient.newCall(requestBuilder.build()).execute();
+            HttpClient.NetworkResponse response = httpClient.execute(fileSizeRequest);
             if (response.isSuccessful()) {
                 long totalFileSize = Long.parseLong(response.header(HEADER_CONTENT_LENGTH, String.valueOf(UNKNOWN_CONTENT_LENGTH)));
                 return FileSizeCreator.createFromTotalSize(totalFileSize);
