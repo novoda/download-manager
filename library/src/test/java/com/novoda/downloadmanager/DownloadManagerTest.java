@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -73,25 +73,24 @@ public class DownloadManagerTest {
     }
 
     private void setupDownloadBatchesResponse() {
-        final ArgumentCaptor<DownloadsBatchPersistence.LoadBatchesCallback> loadBatchesCallbackCaptor = ArgumentCaptor.forClass(DownloadsBatchPersistence.LoadBatchesCallback.class);
         willAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
-                loadBatchesCallbackCaptor.getValue().onLoaded(Arrays.asList(downloadBatch, additionalDownloadBatch));
+                DownloadsBatchPersistence.LoadBatchesCallback loadBatchesCallback = (DownloadsBatchPersistence.LoadBatchesCallback) invocation.getArgument(1);
+                loadBatchesCallback.onLoaded(Arrays.asList(downloadBatch, additionalDownloadBatch));
                 return null;
             }
-        }).given(downloadsBatchPersistence).loadAsync(any(FileOperations.class), loadBatchesCallbackCaptor.capture());
+        }).given(downloadsBatchPersistence).loadAsync(any(FileOperations.class), any(DownloadsBatchPersistence.LoadBatchesCallback.class));
     }
 
     private void setupDownloadBatchStatusesResponse() {
-        final ArgumentCaptor<List> argumentCaptor = ArgumentCaptor.forClass(List.class);
         willAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
-                downloadBatchStatuses = argumentCaptor.getValue();
+                downloadBatchStatuses = invocation.getArgument(0);
                 return null;
             }
-        }).given(allBatchStatusesCallback).onReceived(argumentCaptor.capture());
+        }).given(allBatchStatusesCallback).onReceived(ArgumentMatchers.<DownloadBatchStatus>anyList());
     }
 
     @Test
@@ -236,14 +235,13 @@ public class DownloadManagerTest {
 
     @Test(timeout = 500)
     public void waitsForServiceToExist_whenGettingAllBatchStatuses() throws InterruptedException {
-        final ArgumentCaptor<Runnable> argumentCaptor = ArgumentCaptor.forClass(Runnable.class);
         willAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
-                argumentCaptor.getValue().run();
+                ((Runnable) invocation.getArgument(0)).run();
                 return null;
             }
-        }).given(executorService).submit(argumentCaptor.capture());
+        }).given(executorService).submit(any(Runnable.class));
 
         notifyLockOnAnotherThread();
 
