@@ -1,38 +1,37 @@
 package com.novoda.downloadmanager.demo.simple;
 
-import com.novoda.downloadmanager.lib.DownloadManager;
+import com.novoda.downloadmanager.DownloadBatchStatus;
+import com.novoda.downloadmanager.DownloadBatchTitle;
 
 class BeardDownload {
-    private final String title;
-    private final String fileName;
-    private final int downloadStatus;
+    private final DownloadBatchTitle title;
+    private final DownloadBatchStatus.Status downloadStatus;
 
-    public BeardDownload(String title, String fileName, int downloadStatus) {
+    public BeardDownload(DownloadBatchTitle title, DownloadBatchStatus.Status downloadStatus) {
         this.title = title;
-        this.fileName = fileName;
         this.downloadStatus = downloadStatus;
     }
 
     public String getTitle() {
-        return title;
+        return title.asString();
     }
 
     public String getFileName() {
-        return fileName;
+        return " ... Not sure about the file name yet";
     }
 
     public String getDownloadStatusText() {
-        if (downloadStatus == DownloadManager.STATUS_RUNNING) {
+        if (downloadStatus == DownloadBatchStatus.Status.DOWNLOADING) {
             return "Downloading";
-        } else if (downloadStatus == DownloadManager.STATUS_SUCCESSFUL) {
+        } else if (downloadStatus == DownloadBatchStatus.Status.DOWNLOADED) {
             return "Complete";
-        } else if (downloadStatus == DownloadManager.STATUS_FAILED) {
+        } else if (downloadStatus == DownloadBatchStatus.Status.ERROR) {
             return "Failed";
-        } else if (downloadStatus == DownloadManager.STATUS_PENDING) {
+        } else if (downloadStatus == DownloadBatchStatus.Status.QUEUED) {
             return "Queued";
-        } else if (downloadStatus == DownloadManager.STATUS_PAUSED) {
+        } else if (downloadStatus == DownloadBatchStatus.Status.PAUSED) {
             return "Paused";
-        } else if (downloadStatus == DownloadManager.STATUS_DELETING) {
+        } else if (downloadStatus == DownloadBatchStatus.Status.DELETION) {
             return "Deleting";
         } else {
             return "WTH";

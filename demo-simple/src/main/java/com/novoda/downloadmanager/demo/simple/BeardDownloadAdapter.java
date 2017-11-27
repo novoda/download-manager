@@ -12,7 +12,7 @@ import java.util.List;
 class BeardDownloadAdapter extends RecyclerView.Adapter<BeardDownloadAdapter.ViewHolder> {
     private final List<BeardDownload> beardDownloads;
 
-    public BeardDownloadAdapter(List<BeardDownload> beardDownloads) {
+    BeardDownloadAdapter(List<BeardDownload> beardDownloads) {
         this.beardDownloads = beardDownloads;
     }
 
@@ -25,7 +25,7 @@ class BeardDownloadAdapter extends RecyclerView.Adapter<BeardDownloadAdapter.Vie
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
         final BeardDownload beardDownload = beardDownloads.get(position);
         viewHolder.titleTextView.setText(beardDownload.getTitle());
-        viewHolder.locationTextView.setText(beardDownload.getDownloadStatusText() + ": " + beardDownload.getFileName());
+        viewHolder.locationTextView.setText(String.format("%s: %s", beardDownload.getDownloadStatusText(), beardDownload.getFileName()));
     }
 
     @Override
@@ -38,10 +38,10 @@ class BeardDownloadAdapter extends RecyclerView.Adapter<BeardDownloadAdapter.Vie
         private final TextView titleTextView;
         private final TextView locationTextView;
 
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
-            titleTextView = (TextView) itemView.findViewById(R.id.download_title_text);
-            locationTextView = (TextView) itemView.findViewById(R.id.download_location_text);
+            titleTextView = itemView.findViewById(R.id.download_title_text);
+            locationTextView = itemView.findViewById(R.id.download_location_text);
         }
     }
 }
