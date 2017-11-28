@@ -9,6 +9,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
+import com.facebook.stetho.Stetho;
 import com.novoda.downloadmanager.AllBatchStatusesCallback;
 import com.novoda.downloadmanager.Batch;
 import com.novoda.downloadmanager.DownloadBatchId;
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Stetho.initializeWithDefaults(this);
         setContentView(R.layout.activity_main);
         emptyView = findViewById(R.id.main_no_downloads_view);
         recyclerView = findViewById(R.id.main_downloads_list);
