@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager.demo.simple;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -7,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 
 import com.facebook.stetho.Stetho;
@@ -19,6 +22,7 @@ import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.demo.R;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +53,28 @@ public class MainActivity extends AppCompatActivity {
         setupQueryingExample();
     }
 
+    private void logV1Database() {
+        if (checkV1DatabaseExists()) {
+            File dbFile = this.getDatabasePath("downloads.db");
+            SQLiteDatabase database = SQLiteDatabase.openDatabase(dbFile.getAbsolutePath(), null, 0);
+
+            Cursor cursor = database.rawQuery("SELECT * FROM Downloads", null);
+            cursor.moveToFirst();
+
+            Log.d("MainActivity", cursor.getString(cursor.getColumnIndex("total_bytes")));
+
+            cursor.close();
+            database.close();
+        } else {
+            Log.d("MainActivity", "downloads.db doesn't exist!");
+        }
+    }
+
+    private boolean checkV1DatabaseExists() {
+        File dbFile = this.getDatabasePath("downloads.db");
+        return dbFile.exists();
+    }
+
     private void setupDownloadingExample() {
         findViewById(R.id.main_download_button).setOnClickListener(
                 new View.OnClickListener() {
@@ -69,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(@NonNull View v) {
                         queryForDownloads();
+                        logV1Database();
                     }
                 }
         );
