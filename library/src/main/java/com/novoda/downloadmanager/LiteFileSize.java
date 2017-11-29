@@ -1,13 +1,13 @@
 package com.novoda.downloadmanager;
 
-class LiteFileSize implements InternalFileSize {
+public class LiteFileSize implements InternalFileSize {
 
     private static final int ZERO_BYTES = 0;
 
     private long currentSize;
     private long totalSize;
 
-    LiteFileSize(long currentSize, long totalSize) {
+    public LiteFileSize(long currentSize, long totalSize) {
         this.currentSize = currentSize;
         this.totalSize = totalSize;
     }

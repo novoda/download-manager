@@ -10,7 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-class InternalFilePersistence implements FilePersistence {
+public class InternalFilePersistence implements FilePersistence {
 
     private Context context;
 

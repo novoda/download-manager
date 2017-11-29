@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-final class LiteFileName implements FileName {
+public final class LiteFileName implements FileName {
 
     private final String name;
 

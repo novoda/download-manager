@@ -1,6 +1,5 @@
 package com.novoda.downloadmanager.demo.simple;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -20,11 +19,16 @@ import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.DownloadManagerBuilder;
+import com.novoda.downloadmanager.InternalFilePersistence;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
+import com.novoda.downloadmanager.LiteFileName;
+import com.novoda.downloadmanager.LiteFileSize;
 import com.novoda.downloadmanager.demo.R;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,12 +68,33 @@ public class MainActivity extends AppCompatActivity {
             Cursor cursor = database.rawQuery("SELECT * FROM Downloads", null);
             cursor.moveToFirst();
 
-            Log.d("MainActivity", cursor.getString(cursor.getColumnIndex("_data")));
+            //Log.d("MainActivity", cursor.getString(cursor.getColumnIndex("_data")));
+
+            String fileName = cursor.getString(cursor.getColumnIndex("_data"));
+            long fileSize = cursor.getLong(cursor.getColumnIndex("total_bytes"));
 
             cursor.close();
             database.close();
 
-            FileOutputStream file = openFileOutput(filePath.path(), Context.MODE_APPEND);
+            LiteFileName liteFileName = LiteFileName.from(fileName);
+            LiteFileSize liteFileSize = new LiteFileSize(fileSize, fileSize);
+
+            InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
+
+            //internalFilePersistence.initialiseWith(this);
+            //internalFilePersistence.create(liteFileName, liteFileSize);
+
+            try {
+                File file = new File(fileName);
+                FileInputStream inputStream = new FileInputStream(file);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                Log.d("MainActivity", reader.readLine());
+                inputStream.close();
+            } catch (java.io.IOException e) {
+                e.printStackTrace();
+            }
+
+            //FileOutputStream file = openFileOutput(filePath.path(), Context.MODE_APPEND);
             
         } else {
             Log.d("MainActivity", "downloads.db doesn't exist!");
