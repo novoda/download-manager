@@ -72,13 +72,14 @@ public class MainActivity extends AppCompatActivity {
             Cursor cursor = database.rawQuery("SELECT * FROM Downloads", null);
             Cursor anotherCursor = database.rawQuery("SELECT * FROM DownloadsByBatch", null);
             cursor.moveToFirst();
+            anotherCursor.moveToFirst();
 
             //Log.d("MainActivity", cursor.getString(cursor.getColumnIndex("_data")));
 
             String fileName = cursor.getString(cursor.getColumnIndex("_data"));
             long fileSize = cursor.getLong(cursor.getColumnIndex("total_bytes"));
             String fileUri = cursor.getString(cursor.getColumnIndex("uri"));
-            String title = anotherCursor.getString(cursor.getColumnIndex("batch_title"));
+            String title = anotherCursor.getString(anotherCursor.getColumnIndex("batch_title"));
 
             cursor.close();
             anotherCursor.close();
