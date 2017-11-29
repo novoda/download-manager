@@ -19,18 +19,22 @@ import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.DownloadManagerBuilder;
+import com.novoda.downloadmanager.FileName;
+import com.novoda.downloadmanager.FileSize;
 import com.novoda.downloadmanager.InternalFilePersistence;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.LiteFileName;
 import com.novoda.downloadmanager.LiteFileSize;
 import com.novoda.downloadmanager.demo.R;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -66,36 +70,63 @@ public class MainActivity extends AppCompatActivity {
             SQLiteDatabase database = SQLiteDatabase.openDatabase(dbFile.getAbsolutePath(), null, 0);
 
             Cursor cursor = database.rawQuery("SELECT * FROM Downloads", null);
+            Cursor anotherCursor = database.rawQuery("SELECT * FROM DownloadsByBatch", null);
             cursor.moveToFirst();
 
             //Log.d("MainActivity", cursor.getString(cursor.getColumnIndex("_data")));
 
             String fileName = cursor.getString(cursor.getColumnIndex("_data"));
             long fileSize = cursor.getLong(cursor.getColumnIndex("total_bytes"));
+            String fileUri = cursor.getString(cursor.getColumnIndex("uri"));
+            String title = anotherCursor.getString(cursor.getColumnIndex("batch_title"));
 
             cursor.close();
+            anotherCursor.close();
             database.close();
 
-            LiteFileName liteFileName = LiteFileName.from(fileName);
-            LiteFileSize liteFileSize = new LiteFileSize(fileSize, fileSize);
+            Batch batch = new Batch.Builder(BEARD_ID, title)
+                    .addFile(fileUri)
+                    .build();
 
-            InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
-
-            //internalFilePersistence.initialiseWith(this);
-            //internalFilePersistence.create(liteFileName, liteFileSize);
-
-            try {
-                File file = new File(fileName);
-                FileInputStream inputStream = new FileInputStream(file);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                Log.d("MainActivity", reader.readLine());
-                inputStream.close();
-            } catch (java.io.IOException e) {
-                e.printStackTrace();
+            Map<FileName, FileSize> map = new HashMap<>();
+            for (String uri : batch.getFileUrls()) {
+                FileName newFileName = LiteFileName.from(batch, uri);
+                FileSize newFileSize = new LiteFileSize(fileSize, fileSize);
+                map.put(newFileName, newFileSize);
             }
 
+            InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
+            internalFilePersistence.initialiseWith(this);
+
+            for (Map.Entry<FileName, FileSize> nameAndSize : map.entrySet()) {
+                FileName actualFileName = nameAndSize.getKey();
+                FileSize actualFileSize = nameAndSize.getValue();
+                internalFilePersistence.create(actualFileName, actualFileSize);
+
+                try {
+                    // open the v1 file
+                    File file = new File(fileName);
+                    FileInputStream inputStream = new FileInputStream(file);
+                    BufferedInputStream reader = new BufferedInputStream(inputStream);
+                    byte[] bytes = new byte[(int) file.length()];
+                    reader.read(bytes);
+                    reader.close();
+
+                    Log.d("MainActivity", "read some bytes: " + Arrays.toString(bytes));
+
+                    // write the v1 file to the v2 file persistence
+                    internalFilePersistence.write(bytes, 0, bytes.length);
+
+                    inputStream.close();
+                } catch (java.io.IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            //internalFilePersistence.create(liteFileName, liteFileSize);
+
             //FileOutputStream file = openFileOutput(filePath.path(), Context.MODE_APPEND);
-            
+
         } else {
             Log.d("MainActivity", "downloads.db doesn't exist!");
         }

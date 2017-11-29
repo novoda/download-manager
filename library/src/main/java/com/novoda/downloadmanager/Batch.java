@@ -23,7 +23,7 @@ public final class Batch {
         return title;
     }
 
-    List<String> getFileUrls() {
+    public List<String> getFileUrls() {
         return new ArrayList<>(fileUrls);
     }
 
