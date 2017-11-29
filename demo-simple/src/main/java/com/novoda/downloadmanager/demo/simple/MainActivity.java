@@ -1,5 +1,6 @@
 package com.novoda.downloadmanager.demo.simple;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.demo.R;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,15 +58,19 @@ public class MainActivity extends AppCompatActivity {
     private void logV1Database() {
         if (checkV1DatabaseExists()) {
             File dbFile = this.getDatabasePath("downloads.db");
+
             SQLiteDatabase database = SQLiteDatabase.openDatabase(dbFile.getAbsolutePath(), null, 0);
 
             Cursor cursor = database.rawQuery("SELECT * FROM Downloads", null);
             cursor.moveToFirst();
 
-            Log.d("MainActivity", cursor.getString(cursor.getColumnIndex("total_bytes")));
+            Log.d("MainActivity", cursor.getString(cursor.getColumnIndex("_data")));
 
             cursor.close();
             database.close();
+
+            FileOutputStream file = openFileOutput(filePath.path(), Context.MODE_APPEND);
+            
         } else {
             Log.d("MainActivity", "downloads.db doesn't exist!");
         }
