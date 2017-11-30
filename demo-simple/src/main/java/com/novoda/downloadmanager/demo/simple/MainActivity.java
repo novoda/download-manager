@@ -18,13 +18,19 @@ import com.novoda.downloadmanager.Batch;
 import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
+import com.novoda.downloadmanager.DownloadBatchTitle;
+import com.novoda.downloadmanager.DownloadFileId;
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.DownloadsBatchPersisted;
 import com.novoda.downloadmanager.DownloadsFilePersisted;
 import com.novoda.downloadmanager.DownloadsPersistence;
 import com.novoda.downloadmanager.FileName;
+import com.novoda.downloadmanager.FilePath;
+import com.novoda.downloadmanager.FilePathCreator;
+import com.novoda.downloadmanager.FilePersistenceType;
 import com.novoda.downloadmanager.FileSize;
 import com.novoda.downloadmanager.InternalFilePersistence;
+import com.novoda.downloadmanager.LiteDownloadBatchTitle;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.LiteDownloadsBatchPersisted;
 import com.novoda.downloadmanager.LiteDownloadsFilePersisted;
@@ -47,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String BIG_FILE = "http://ipv4.download.thinkbroadband.com/200MB.zip";
     //    private static final String PENGUINS_IMAGE = "http://i.imgur.com/Y7pMO5Kb.jpg";
     private static final DownloadBatchId BEARD_ID = DownloadBatchIdCreator.createFrom("beard_id");
-    private static final int BUFFER_SIZE = 8;
+    private static final int BUFFER_SIZE = 8 * 512;
 
     private LiteDownloadManagerCommands downloadManagerCommands;
     private RecyclerView recyclerView;
@@ -90,8 +96,8 @@ public class MainActivity extends AppCompatActivity {
             cursor.moveToFirst();
             anotherCursor.moveToFirst();
 
-            String fileName = cursor.getString(cursor.getColumnIndex("_data"));
-            long fileSize = cursor.getLong(cursor.getColumnIndex("total_bytes"));
+            String originalV1FileName = cursor.getString(cursor.getColumnIndex("_data"));
+            long originalV1FileSize = cursor.getLong(cursor.getColumnIndex("total_bytes"));
             String fileUri = cursor.getString(cursor.getColumnIndex("uri"));
             String title = anotherCursor.getString(anotherCursor.getColumnIndex("batch_title"));
 
@@ -103,21 +109,27 @@ public class MainActivity extends AppCompatActivity {
                     .addFile(fileUri)
                     .build();
 
-            migrateV1FilesToV2Location(fileName, fileSize, batch);
-            migrateV1DataToV2Database(batch);
+            migrateV1FilesToV2Location(originalV1FileName, buildV2FileNamesWithSizes(originalV1FileSize, batch));
+            migrateV1DataToV2Database(originalV1FileSize, batch);
 
         } else {
             Log.d("MainActivity", "downloads.db doesn't exist!");
         }
     }
 
-    private void migrateV1FilesToV2Location(String fileName, long fileSize, Batch batch) {
+    // TODO: pass a list of the original file sizes, iterate through both uri list and size list at the same time
+    private Map<FileName, FileSize> buildV2FileNamesWithSizes(long fileSize, Batch batch) {
         Map<FileName, FileSize> map = new HashMap<>();
         for (String uri : batch.getFileUrls()) {
             FileName newFileName = LiteFileName.from(batch, uri);
             FileSize newFileSize = new LiteFileSize(fileSize, fileSize);
             map.put(newFileName, newFileSize);
         }
+        return map;
+    }
+
+    // TODO: pass a list of the original file names, iterate through original file names and map at the same time
+    private void migrateV1FilesToV2Location(String originalV1FileName, Map<FileName, FileSize> map) {
 
         InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
         internalFilePersistence.initialiseWith(this);
@@ -131,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
             FileInputStream inputStream = null;
             try {
                 // open the v1 file
-                inputStream = new FileInputStream(new File(fileName));
+                inputStream = new FileInputStream(new File(originalV1FileName));
                 byte[] bytes = new byte[BUFFER_SIZE];
 
                 // read the v1 file
@@ -160,13 +172,27 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void migrateV1DataToV2Database(Batch batch) {
+    private void migrateV1DataToV2Database(long fileSize, Batch batch) {
         DownloadsPersistence database = RoomDownloadsPersistence.newInstance(this);
         database.startTransaction();
-        DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted();
+
+        DownloadBatchTitle downloadBatchTitle = new LiteDownloadBatchTitle(batch.getTitle());
+        DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted(downloadBatchTitle, batch.getDownloadBatchId(), DownloadBatchStatus.Status.DOWNLOADED);
         database.persistBatch(persistedBatch);
+
         for (String url : batch.getFileUrls()) {
-            DownloadsFilePersisted persistedFile = new LiteDownloadsFilePersisted();
+            FileName fileName = LiteFileName.from(batch, url);
+            FilePath filePath = FilePathCreator.create(fileName.name());
+            DownloadFileId downloadFileId = DownloadFileId.from(batch);
+            DownloadsFilePersisted persistedFile = new LiteDownloadsFilePersisted(
+                    batch.getDownloadBatchId(),
+                    downloadFileId,
+                    fileName,
+                    filePath,
+                    fileSize,
+                    url,
+                    FilePersistenceType.INTERNAL
+            );
             database.persistFile(persistedFile);
         }
         database.transactionSuccess();

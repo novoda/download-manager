@@ -19,7 +19,7 @@ public final class Batch {
         return downloadBatchId;
     }
 
-    String getTitle() {
+    public String getTitle() {
         return title;
     }
 

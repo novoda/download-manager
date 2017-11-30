@@ -1,10 +1,10 @@
 package com.novoda.downloadmanager;
 
-class LiteDownloadBatchTitle implements DownloadBatchTitle {
+public class LiteDownloadBatchTitle implements DownloadBatchTitle {
 
     private final String title;
 
-    LiteDownloadBatchTitle(String title) {
+    public LiteDownloadBatchTitle(String title) {
         this.title = title;
     }
 
