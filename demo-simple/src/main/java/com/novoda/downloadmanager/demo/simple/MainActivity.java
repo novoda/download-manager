@@ -19,18 +19,25 @@ import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.DownloadManagerBuilder;
+import com.novoda.downloadmanager.DownloadsBatchPersisted;
+import com.novoda.downloadmanager.DownloadsFilePersisted;
+import com.novoda.downloadmanager.DownloadsPersistence;
 import com.novoda.downloadmanager.FileName;
 import com.novoda.downloadmanager.FileSize;
 import com.novoda.downloadmanager.InternalFilePersistence;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
+import com.novoda.downloadmanager.LiteDownloadsBatchPersisted;
+import com.novoda.downloadmanager.LiteDownloadsFilePersisted;
 import com.novoda.downloadmanager.LiteFileName;
 import com.novoda.downloadmanager.LiteFileSize;
+import com.novoda.downloadmanager.RoomDownloadsPersistence;
 import com.novoda.downloadmanager.demo.R;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String BIG_FILE = "http://ipv4.download.thinkbroadband.com/200MB.zip";
     //    private static final String PENGUINS_IMAGE = "http://i.imgur.com/Y7pMO5Kb.jpg";
     private static final DownloadBatchId BEARD_ID = DownloadBatchIdCreator.createFrom("beard_id");
-    private static final int BUFFER_SIZE = 8 * 512;
+    private static final int BUFFER_SIZE = 8;
 
     private LiteDownloadManagerCommands downloadManagerCommands;
     private RecyclerView recyclerView;
@@ -67,12 +74,12 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                moveV1FilesToV2Location();
+                moveV1DownloadsToV2();
             }
         }).start();
     }
 
-    private void moveV1FilesToV2Location() {
+    private void moveV1DownloadsToV2() {
         if (checkV1DatabaseExists()) {
             File dbFile = this.getDatabasePath("downloads.db");
 
@@ -82,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
             Cursor anotherCursor = database.rawQuery("SELECT * FROM DownloadsByBatch", null);
             cursor.moveToFirst();
             anotherCursor.moveToFirst();
-            
+
             String fileName = cursor.getString(cursor.getColumnIndex("_data"));
             long fileSize = cursor.getLong(cursor.getColumnIndex("total_bytes"));
             String fileUri = cursor.getString(cursor.getColumnIndex("uri"));
@@ -96,59 +103,74 @@ public class MainActivity extends AppCompatActivity {
                     .addFile(fileUri)
                     .build();
 
-            Map<FileName, FileSize> map = new HashMap<>();
-            for (String uri : batch.getFileUrls()) {
-                FileName newFileName = LiteFileName.from(batch, uri);
-                FileSize newFileSize = new LiteFileSize(fileSize, fileSize);
-                map.put(newFileName, newFileSize);
-            }
+            migrateV1FilesToV2Location(fileName, fileSize, batch);
+            migrateV1DataToV2Database(batch);
 
-            InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
-            internalFilePersistence.initialiseWith(this);
-
-            for (Map.Entry<FileName, FileSize> nameAndSize : map.entrySet()) {
-                FileName actualFileName = nameAndSize.getKey();
-                FileSize actualFileSize = nameAndSize.getValue();
-                internalFilePersistence.create(actualFileName, actualFileSize);
-
-                FileInputStream inputStream = null;
-                try {
-                    // open the v1 file
-                    File file = new File(fileName);
-
-                    for (File file1 : getFilesDir().listFiles()) {
-                        Log.d("MainActivity", "File Name: " + file1.getName() + ", File size: " + file1.length());
-                    }
-
-                    inputStream = new FileInputStream(file);
-
-                    byte[] bytes = new byte[BUFFER_SIZE];
-
-                    int readLast = 0;
-                    while (readLast != -1) {
-                        readLast = inputStream.read(bytes);
-                        if (readLast != 0 && readLast != -1) {
-                            internalFilePersistence.write(bytes, 0, readLast);
-                            //Log.d("MainActivity", Arrays.toString(bytes));
-                        }
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        internalFilePersistence.close();
-                        if (inputStream != null) {
-                            inputStream.close();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
         } else {
             Log.d("MainActivity", "downloads.db doesn't exist!");
         }
+    }
+
+    private void migrateV1FilesToV2Location(String fileName, long fileSize, Batch batch) {
+        Map<FileName, FileSize> map = new HashMap<>();
+        for (String uri : batch.getFileUrls()) {
+            FileName newFileName = LiteFileName.from(batch, uri);
+            FileSize newFileSize = new LiteFileSize(fileSize, fileSize);
+            map.put(newFileName, newFileSize);
+        }
+
+        InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
+        internalFilePersistence.initialiseWith(this);
+
+        for (Map.Entry<FileName, FileSize> nameAndSize : map.entrySet()) {
+            // initialise the InternalFilePersistence
+            FileName actualFileName = nameAndSize.getKey();
+            FileSize actualFileSize = nameAndSize.getValue();
+            internalFilePersistence.create(actualFileName, actualFileSize);
+
+            FileInputStream inputStream = null;
+            try {
+                // open the v1 file
+                inputStream = new FileInputStream(new File(fileName));
+                byte[] bytes = new byte[BUFFER_SIZE];
+
+                // read the v1 file
+                int readLast = 0;
+                while (readLast != -1) {
+                    readLast = inputStream.read(bytes);
+                    if (readLast != 0 && readLast != -1) {
+                        // write the v1 file to the v2 location
+                        internalFilePersistence.write(bytes, 0, readLast);
+                        Log.d("MainActivity", Arrays.toString(bytes));
+                        bytes = new byte[BUFFER_SIZE];
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    internalFilePersistence.close();
+                    if (inputStream != null) {
+                        inputStream.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void migrateV1DataToV2Database(Batch batch) {
+        DownloadsPersistence database = RoomDownloadsPersistence.newInstance(this);
+        database.startTransaction();
+        DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted();
+        database.persistBatch(persistedBatch);
+        for (String url : batch.getFileUrls()) {
+            DownloadsFilePersisted persistedFile = new LiteDownloadsFilePersisted();
+            database.persistFile(persistedFile);
+        }
+        database.transactionSuccess();
+        database.endTransaction();
     }
 
     private boolean checkV1DatabaseExists() {

@@ -6,11 +6,11 @@ import android.content.Context;
 import java.util.ArrayList;
 import java.util.List;
 
-class RoomDownloadsPersistence implements DownloadsPersistence {
+public class RoomDownloadsPersistence implements DownloadsPersistence {
 
     private final RoomAppDatabase database;
 
-    static RoomDownloadsPersistence newInstance(Context context) {
+    public static RoomDownloadsPersistence newInstance(Context context) {
         RoomAppDatabase database = Room.databaseBuilder(
                 context.getApplicationContext(),
                 RoomAppDatabase.class,

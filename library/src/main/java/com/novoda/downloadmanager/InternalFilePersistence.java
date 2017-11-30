@@ -3,9 +3,10 @@ package com.novoda.downloadmanager;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
-import com.novoda.notils.logger.simple.Log;
 import com.novoda.downloadmanager.FilePersistenceResult.Status;
+import com.novoda.notils.logger.simple.Log;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -22,6 +23,9 @@ public class InternalFilePersistence implements FilePersistence {
     @Override
     public void initialiseWith(Context context) {
         this.context = context.getApplicationContext();
+        for (File file : context.getFilesDir().listFiles()) {
+            Log.d(file.length());
+        }
     }
 
     @Override

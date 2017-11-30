@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-class LiteDownloadsFilePersisted implements DownloadsFilePersisted {
+public class LiteDownloadsFilePersisted implements DownloadsFilePersisted {
 
     private final DownloadBatchId downloadBatchId;
     private final DownloadFileId downloadFileId;
@@ -10,13 +10,13 @@ class LiteDownloadsFilePersisted implements DownloadsFilePersisted {
     private final String url;
     private final FilePersistenceType filePersistenceType;
 
-    LiteDownloadsFilePersisted(DownloadBatchId downloadBatchId,
-                               DownloadFileId downloadFileId,
-                               FileName fileName,
-                               FilePath filePath,
-                               long totalFileSize,
-                               String url,
-                               FilePersistenceType filePersistenceType) {
+    public LiteDownloadsFilePersisted(DownloadBatchId downloadBatchId,
+                                      DownloadFileId downloadFileId,
+                                      FileName fileName,
+                                      FilePath filePath,
+                                      long totalFileSize,
+                                      String url,
+                                      FilePersistenceType filePersistenceType) {
         this.downloadBatchId = downloadBatchId;
         this.downloadFileId = downloadFileId;
         this.fileName = fileName;
