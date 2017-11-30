@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
                         readLast = inputStream.read(bytes);
                         if (readLast != 0 && readLast != -1) {
                             internalFilePersistence.write(bytes, 0, readLast);
+                            Log.d("MainActivity", Arrays.toString(bytes));
                         }
                     }
                 } catch (IOException e) {
