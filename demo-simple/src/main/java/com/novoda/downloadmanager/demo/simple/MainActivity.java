@@ -27,7 +27,6 @@ import com.novoda.downloadmanager.LiteFileName;
 import com.novoda.downloadmanager.LiteFileSize;
 import com.novoda.downloadmanager.demo.R;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
@@ -41,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String BIG_FILE = "http://ipv4.download.thinkbroadband.com/200MB.zip";
     //    private static final String PENGUINS_IMAGE = "http://i.imgur.com/Y7pMO5Kb.jpg";
     private static final DownloadBatchId BEARD_ID = DownloadBatchIdCreator.createFrom("beard_id");
+    private static final int BUFFER_SIZE = 8 * 512;
 
     private LiteDownloadManagerCommands downloadManagerCommands;
     private RecyclerView recyclerView;
@@ -106,18 +106,18 @@ public class MainActivity extends AppCompatActivity {
 
                 try {
                     // open the v1 file
-                    File file = new File(fileName);
-                    FileInputStream inputStream = new FileInputStream(file);
-                    BufferedInputStream reader = new BufferedInputStream(inputStream);
-                    byte[] bytes = new byte[(int) file.length()];
-                    reader.read(bytes);
-                    reader.close();
+                    FileInputStream inputStream = new FileInputStream(new File(fileName));
+                    byte[] bytes = new byte[BUFFER_SIZE];
 
-                    Log.d("MainActivity", "read some bytes: " + Arrays.toString(bytes));
-
-                    // write the v1 file to the v2 file persistence
-                    internalFilePersistence.write(bytes, 0, bytes.length);
-
+                    int readLast = 0;
+                    while (readLast != -1) {
+                        readLast = inputStream.read(bytes);
+                        if (readLast != 0 && readLast != -1) {
+                            // write the v1 file to the v2 file persistence
+                            internalFilePersistence.write(bytes, 0, readLast);
+                        }
+                        Log.d("MainActivity", "read some bytes: " + Arrays.toString(bytes));
+                    }
                     inputStream.close();
                 } catch (java.io.IOException e) {
                     e.printStackTrace();
