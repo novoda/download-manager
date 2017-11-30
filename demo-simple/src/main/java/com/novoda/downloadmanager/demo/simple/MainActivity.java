@@ -31,7 +31,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,9 +82,7 @@ public class MainActivity extends AppCompatActivity {
             Cursor anotherCursor = database.rawQuery("SELECT * FROM DownloadsByBatch", null);
             cursor.moveToFirst();
             anotherCursor.moveToFirst();
-
-            //Log.d("MainActivity", cursor.getString(cursor.getColumnIndex("_data")));
-
+            
             String fileName = cursor.getString(cursor.getColumnIndex("_data"));
             long fileSize = cursor.getLong(cursor.getColumnIndex("total_bytes"));
             String fileUri = cursor.getString(cursor.getColumnIndex("uri"));
@@ -117,7 +114,14 @@ public class MainActivity extends AppCompatActivity {
                 FileInputStream inputStream = null;
                 try {
                     // open the v1 file
-                    inputStream = new FileInputStream(new File(fileName));
+                    File file = new File(fileName);
+
+                    for (File file1 : getFilesDir().listFiles()) {
+                        Log.d("MainActivity", "File Name: " + file1.getName() + ", File size: " + file1.length());
+                    }
+
+                    inputStream = new FileInputStream(file);
+
                     byte[] bytes = new byte[BUFFER_SIZE];
 
                     int readLast = 0;
@@ -125,10 +129,10 @@ public class MainActivity extends AppCompatActivity {
                         readLast = inputStream.read(bytes);
                         if (readLast != 0 && readLast != -1) {
                             internalFilePersistence.write(bytes, 0, readLast);
-                            Log.d("MainActivity", Arrays.toString(bytes));
-                            bytes = new byte[BUFFER_SIZE];
+                            //Log.d("MainActivity", Arrays.toString(bytes));
                         }
                     }
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
@@ -142,7 +146,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
-
         } else {
             Log.d("MainActivity", "downloads.db doesn't exist!");
         }
