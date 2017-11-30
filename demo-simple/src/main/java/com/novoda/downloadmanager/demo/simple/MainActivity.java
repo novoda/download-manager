@@ -64,7 +64,16 @@ public class MainActivity extends AppCompatActivity {
         setupQueryingExample();
     }
 
-    private void logV1Database() {
+    private void migrateV1DownloadsUsingNewThread() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                moveV1FilesToV2Location();
+            }
+        }).start();
+    }
+
+    private void moveV1FilesToV2Location() {
         if (checkV1DatabaseExists()) {
             File dbFile = this.getDatabasePath("downloads.db");
 
@@ -117,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
                         if (readLast != 0 && readLast != -1) {
                             internalFilePersistence.write(bytes, 0, readLast);
                             Log.d("MainActivity", Arrays.toString(bytes));
+                            bytes = new byte[BUFFER_SIZE];
                         }
                     }
                 } catch (IOException e) {
@@ -163,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(@NonNull View v) {
                         queryForDownloads();
-                        logV1Database();
+                        migrateV1DownloadsUsingNewThread();
                     }
                 }
         );
