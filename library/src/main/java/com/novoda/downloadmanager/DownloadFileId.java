@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-final class DownloadFileId {
+public final class DownloadFileId {
 
     private final int id;
 
