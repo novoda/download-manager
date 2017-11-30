@@ -29,8 +29,8 @@ import com.novoda.downloadmanager.demo.R;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,29 +104,32 @@ public class MainActivity extends AppCompatActivity {
                 FileSize actualFileSize = nameAndSize.getValue();
                 internalFilePersistence.create(actualFileName, actualFileSize);
 
+                FileInputStream inputStream = null;
                 try {
                     // open the v1 file
-                    FileInputStream inputStream = new FileInputStream(new File(fileName));
+                    inputStream = new FileInputStream(new File(fileName));
                     byte[] bytes = new byte[BUFFER_SIZE];
 
                     int readLast = 0;
                     while (readLast != -1) {
                         readLast = inputStream.read(bytes);
                         if (readLast != 0 && readLast != -1) {
-                            // write the v1 file to the v2 file persistence
                             internalFilePersistence.write(bytes, 0, readLast);
                         }
-                        Log.d("MainActivity", "read some bytes: " + Arrays.toString(bytes));
                     }
-                    inputStream.close();
-                } catch (java.io.IOException e) {
+                } catch (IOException e) {
                     e.printStackTrace();
+                } finally {
+                    try {
+                        internalFilePersistence.close();
+                        if (inputStream != null) {
+                            inputStream.close();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-
-            //internalFilePersistence.create(liteFileName, liteFileSize);
-
-            //FileOutputStream file = openFileOutput(filePath.path(), Context.MODE_APPEND);
 
         } else {
             Log.d("MainActivity", "downloads.db doesn't exist!");
