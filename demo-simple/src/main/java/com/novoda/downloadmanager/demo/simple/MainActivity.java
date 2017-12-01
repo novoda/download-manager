@@ -43,7 +43,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -153,7 +152,6 @@ public class MainActivity extends AppCompatActivity {
                     if (readLast != 0 && readLast != -1) {
                         // write the v1 file to the v2 location
                         internalFilePersistence.write(bytes, 0, readLast);
-                        Log.d("MainActivity", Arrays.toString(bytes));
                         bytes = new byte[BUFFER_SIZE];
                     }
                 }
