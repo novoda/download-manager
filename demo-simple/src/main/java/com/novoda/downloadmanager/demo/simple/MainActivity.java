@@ -43,9 +43,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -98,23 +96,23 @@ public class MainActivity extends AppCompatActivity {
                 Cursor uriCursor = database.rawQuery(query, new String[]{batchesCursor.getString(0)});
                 Batch.Builder newBatch = new Batch.Builder(DownloadBatchIdCreator.createFrom(batchesCursor.getString(0) + batchesCursor.getString(1)), batchesCursor.getString(1));
 
-                Map<FileName, FileSize> map = new HashMap<>();
+                MigrationHolder migrationHolder = new MigrationHolder();
 
                 while (uriCursor.moveToNext()) {
                     Log.d("MainActivity", batchesCursor.getString(0) + " : " + batchesCursor.getString(1) + " : " + uriCursor.getString(0));
                     newBatch.addFile(uriCursor.getString(0));
 
-                    FileName fileName = LiteFileName.from(uriCursor.getString(1));
+                    String originalFileName = uriCursor.getString(1);
                     long rawFileSize = uriCursor.getLong(2);
                     FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
-
-                    map.put(fileName, fileSize);
+                    migrationHolder.add(originalFileName, fileSize);
                 }
 
                 Batch batch = newBatch.build();
+                migrationHolder.setBatch(batch);
 
-                migrateV1FilesToV2Location(map, batch);
-                migrateV1DataToV2Database(map, batch);
+                migrateV1FilesToV2Location(migrationHolder);
+                migrateV1DataToV2Database(migrationHolder, batch);
 
                 uriCursor.close();
             }
@@ -126,20 +124,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // TODO: create a map of the v1 filenames and v1 filesizes
-    private void migrateV1FilesToV2Location(Map<FileName, FileSize> v2FileNamesWithFileSizes, Batch batch) {
+    private void migrateV1FilesToV2Location(MigrationHolder migrationHolder) {
         InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
         internalFilePersistence.initialiseWith(this);
 
-        for (Map.Entry<FileName, FileSize> nameAndSize : v2FileNamesWithFileSizes.entrySet()) {
+        for (int i = 0; i < migrationHolder.originalFileLocations().size(); i++) {
             // initialise the InternalFilePersistence
-            FileName actualFileName = nameAndSize.getKey();
-            FileSize actualFileSize = nameAndSize.getValue();
-            internalFilePersistence.create(actualFileName, actualFileSize);
+            String actualFileName = migrationHolder.originalFileLocations().get(i);
+            FileSize actualFileSize = migrationHolder.fileSizes().get(i);
+            internalFilePersistence.create(LiteFileName.from(actualFileName), actualFileSize);
 
             FileInputStream inputStream = null;
             try {
                 // open the v1 file
-                inputStream = new FileInputStream(new File(nameAndSize.getKey().name()));
+                inputStream = new FileInputStream(new File(actualFileName));
                 byte[] bytes = new byte[BUFFER_SIZE];
 
                 // read the v1 file
@@ -167,14 +165,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void migrateV1DataToV2Database(Map<FileName, FileSize> map, Batch batch) {
+    private void migrateV1DataToV2Database(MigrationHolder migrationHolder, Batch batch) {
         DownloadsPersistence database = RoomDownloadsPersistence.newInstance(this);
         database.startTransaction();
 
         DownloadBatchTitle downloadBatchTitle = new LiteDownloadBatchTitle(batch.getTitle());
         DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted(downloadBatchTitle, batch.getDownloadBatchId(), DownloadBatchStatus.Status.DOWNLOADED);
         database.persistBatch(persistedBatch);
-        for (int i = 0; i < map.entrySet().size(); i++) {
+
+        for (int i = 0; i < migrationHolder.originalFileLocations().size(); i++) {
             String url = batch.getFileUrls().get(i);
             FileName fileName = LiteFileName.from(batch, url);
             FilePath filePath = FilePathCreator.create(fileName.name());
@@ -184,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
                     downloadFileId,
                     fileName,
                     filePath,
-                    map, // FileSize
+                    migrationHolder.fileSizes().get(i).totalSize(),
                     url,
                     FilePersistenceType.INTERNAL
             );
