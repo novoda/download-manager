@@ -90,41 +90,43 @@ public class MainActivity extends AppCompatActivity {
 
             SQLiteDatabase database = SQLiteDatabase.openDatabase(dbFile.getAbsolutePath(), null, 0);
 
-            Cursor batchesCursor = database.rawQuery("SELECT * FROM DownloadsByBatch", null);
-            batchesCursor.moveToFirst();
-            Cursor filesCursor = database.rawQuery("SELECT * FROM Downloads", null);
-            filesCursor.moveToFirst();
+            Cursor batchesCursor = database.rawQuery("SELECT _id, batch_title FROM batches", null);
 
-            String originalV1FileName = filesCursor.getString(filesCursor.getColumnIndex("_data"));
-            long originalV1FileSize = filesCursor.getLong(filesCursor.getColumnIndex("total_bytes"));
-            String url = filesCursor.getString(filesCursor.getColumnIndex("uri"));
-            String title = batchesCursor.getString(batchesCursor.getColumnIndex("batch_title"));
+            while (batchesCursor.moveToNext()) {
 
-            filesCursor.close();
+                String query = "SELECT uri, _data, total_bytes FROM Downloads WHERE batch_id = ?";
+                Cursor uriCursor = database.rawQuery(query, new String[]{batchesCursor.getString(0)});
+                Batch.Builder newBatch = new Batch.Builder(DownloadBatchIdCreator.createFrom(batchesCursor.getString(0) + batchesCursor.getString(1)), batchesCursor.getString(1));
+
+                Map<FileName, FileSize> map = new HashMap<>();
+
+                while (uriCursor.moveToNext()) {
+                    Log.d("MainActivity", batchesCursor.getString(0) + " : " + batchesCursor.getString(1) + " : " + uriCursor.getString(0));
+                    newBatch.addFile(uriCursor.getString(0));
+
+                    FileName fileName = LiteFileName.from(uriCursor.getString(1));
+                    long rawFileSize = uriCursor.getLong(2);
+                    FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
+
+                    map.put(fileName, fileSize);
+                }
+
+                Batch batch = newBatch.build();
+
+                migrateV1FilesToV2Location(map, batch);
+                migrateV1DataToV2Database(map, batch);
+
+                uriCursor.close();
+            }
             batchesCursor.close();
             database.close();
-
-            Batch batch = new Batch.Builder(BEARD_ID, title)
-                    .addFile(url)
-                    .build();
-
-            migrateV1FilesToV2Location(originalV1FileName, originalV1FileSize, batch);
-            migrateV1DataToV2Database(originalV1FileSize, batch);
-
         } else {
             Log.d("MainActivity", "downloads.db doesn't exist!");
         }
     }
 
-    // TODO: create a map of the v1 filenames nd v1 filesizes
-    private void migrateV1FilesToV2Location(String originalV1FileName, long originalV1FileSize, Batch batch) {
-        Map<FileName, FileSize> v2FileNamesWithFileSizes = new HashMap<>();
-        for (String uri : batch.getFileUrls()) {
-            FileName newFileName = LiteFileName.from(batch, uri);
-            FileSize newFileSize = new LiteFileSize(originalV1FileSize, originalV1FileSize);
-            v2FileNamesWithFileSizes.put(newFileName, newFileSize);
-        }
-
+    // TODO: create a map of the v1 filenames and v1 filesizes
+    private void migrateV1FilesToV2Location(Map<FileName, FileSize> v2FileNamesWithFileSizes, Batch batch) {
         InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
         internalFilePersistence.initialiseWith(this);
 
@@ -137,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
             FileInputStream inputStream = null;
             try {
                 // open the v1 file
-                inputStream = new FileInputStream(new File(originalV1FileName));
+                inputStream = new FileInputStream(new File(nameAndSize.getKey().name()));
                 byte[] bytes = new byte[BUFFER_SIZE];
 
                 // read the v1 file
@@ -165,15 +167,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void migrateV1DataToV2Database(long fileSize, Batch batch) {
+    private void migrateV1DataToV2Database(Map<FileName, FileSize> map, Batch batch) {
         DownloadsPersistence database = RoomDownloadsPersistence.newInstance(this);
         database.startTransaction();
 
         DownloadBatchTitle downloadBatchTitle = new LiteDownloadBatchTitle(batch.getTitle());
         DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted(downloadBatchTitle, batch.getDownloadBatchId(), DownloadBatchStatus.Status.DOWNLOADED);
         database.persistBatch(persistedBatch);
-
-        for (String url : batch.getFileUrls()) {
+        for (int i = 0; i < map.entrySet().size(); i++) {
+            String url = batch.getFileUrls().get(i);
             FileName fileName = LiteFileName.from(batch, url);
             FilePath filePath = FilePathCreator.create(fileName.name());
             DownloadFileId downloadFileId = DownloadFileId.from(batch);
@@ -182,12 +184,13 @@ public class MainActivity extends AppCompatActivity {
                     downloadFileId,
                     fileName,
                     filePath,
-                    fileSize,
+                    map, // FileSize
                     url,
                     FilePersistenceType.INTERNAL
             );
             database.persistFile(persistedFile);
         }
+
         database.transactionSuccess();
         database.endTransaction();
     }
