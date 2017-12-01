@@ -90,22 +90,22 @@ public class MainActivity extends AppCompatActivity {
 
             SQLiteDatabase database = SQLiteDatabase.openDatabase(dbFile.getAbsolutePath(), null, 0);
 
-            Cursor cursor = database.rawQuery("SELECT * FROM Downloads", null);
-            Cursor anotherCursor = database.rawQuery("SELECT * FROM DownloadsByBatch", null);
-            cursor.moveToFirst();
-            anotherCursor.moveToFirst();
+            Cursor batchesCursor = database.rawQuery("SELECT * FROM DownloadsByBatch", null);
+            batchesCursor.moveToFirst();
+            Cursor filesCursor = database.rawQuery("SELECT * FROM Downloads", null);
+            filesCursor.moveToFirst();
 
-            String originalV1FileName = cursor.getString(cursor.getColumnIndex("_data"));
-            long originalV1FileSize = cursor.getLong(cursor.getColumnIndex("total_bytes"));
-            String fileUri = cursor.getString(cursor.getColumnIndex("uri"));
-            String title = anotherCursor.getString(anotherCursor.getColumnIndex("batch_title"));
+            String originalV1FileName = filesCursor.getString(filesCursor.getColumnIndex("_data"));
+            long originalV1FileSize = filesCursor.getLong(filesCursor.getColumnIndex("total_bytes"));
+            String url = filesCursor.getString(filesCursor.getColumnIndex("uri"));
+            String title = batchesCursor.getString(batchesCursor.getColumnIndex("batch_title"));
 
-            cursor.close();
-            anotherCursor.close();
+            filesCursor.close();
+            batchesCursor.close();
             database.close();
 
             Batch batch = new Batch.Builder(BEARD_ID, title)
-                    .addFile(fileUri)
+                    .addFile(url)
                     .build();
 
             migrateV1FilesToV2Location(originalV1FileName, buildV2FileNamesWithSizes(originalV1FileSize, batch));
