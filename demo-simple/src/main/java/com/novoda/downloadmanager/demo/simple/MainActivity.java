@@ -94,13 +94,13 @@ public class MainActivity extends AppCompatActivity {
 
                 String query = "SELECT uri, _data, total_bytes FROM Downloads WHERE batch_id = ?";
                 Cursor uriCursor = database.rawQuery(query, new String[]{batchesCursor.getString(0)});
-                Batch.Builder newBatch = new Batch.Builder(DownloadBatchIdCreator.createFrom(batchesCursor.getString(0) + batchesCursor.getString(1)), batchesCursor.getString(1));
+                Batch.Builder newBatchBuilder = new Batch.Builder(DownloadBatchIdCreator.createFrom(batchesCursor.getString(0) + batchesCursor.getString(1)), batchesCursor.getString(1));
 
                 MigrationHolder migrationHolder = new MigrationHolder();
 
                 while (uriCursor.moveToNext()) {
                     Log.d("MainActivity", batchesCursor.getString(0) + " : " + batchesCursor.getString(1) + " : " + uriCursor.getString(0));
-                    newBatch.addFile(uriCursor.getString(0));
+                    newBatchBuilder.addFile(uriCursor.getString(0));
 
                     String originalFileName = uriCursor.getString(1);
                     long rawFileSize = uriCursor.getLong(2);
@@ -108,14 +108,19 @@ public class MainActivity extends AppCompatActivity {
                     migrationHolder.add(originalFileName, fileSize);
                 }
 
-                Batch batch = newBatch.build();
+                uriCursor.close();
+
+                Batch batch = newBatchBuilder.build();
                 migrationHolder.setBatch(batch);
 
                 migrateV1FilesToV2Location(migrationHolder, batch);
                 migrateV1DataToV2Database(migrationHolder, batch);
 
-                uriCursor.close();
+                String sql = "DELETE FROM batches WHERE _id = ?";
+                String[] bindArgs = {batchesCursor.getString(0)};
+                database.execSQL(sql, bindArgs);
             }
+            deleteDatabase("downloads.db");
             batchesCursor.close();
             database.close();
         } else {
@@ -214,7 +219,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupQueryingExample() {
-        queryForDownloads();
         findViewById(R.id.main_refresh_button).setOnClickListener(
                 new View.OnClickListener() {
                     @Override
