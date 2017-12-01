@@ -90,25 +90,25 @@ public class MainActivity extends AppCompatActivity {
 
             SQLiteDatabase database = SQLiteDatabase.openDatabase(dbFile.getAbsolutePath(), null, 0);
 
-            Cursor cursor = database.rawQuery("SELECT * FROM Downloads", null);
-            Cursor anotherCursor = database.rawQuery("SELECT * FROM DownloadsByBatch", null);
-            cursor.moveToFirst();
-            anotherCursor.moveToFirst();
+            Cursor batchesCursor = database.rawQuery("SELECT * FROM DownloadsByBatch", null);
+            batchesCursor.moveToFirst();
+            Cursor filesCursor = database.rawQuery("SELECT * FROM Downloads", null);
+            filesCursor.moveToFirst();
 
-            String originalV1FileName = cursor.getString(cursor.getColumnIndex("_data"));
-            long originalV1FileSize = cursor.getLong(cursor.getColumnIndex("total_bytes"));
-            String fileUri = cursor.getString(cursor.getColumnIndex("uri"));
-            String title = anotherCursor.getString(anotherCursor.getColumnIndex("batch_title"));
+            String originalV1FileName = filesCursor.getString(filesCursor.getColumnIndex("_data"));
+            long originalV1FileSize = filesCursor.getLong(filesCursor.getColumnIndex("total_bytes"));
+            String url = filesCursor.getString(filesCursor.getColumnIndex("uri"));
+            String title = batchesCursor.getString(batchesCursor.getColumnIndex("batch_title"));
 
-            cursor.close();
-            anotherCursor.close();
+            filesCursor.close();
+            batchesCursor.close();
             database.close();
 
             Batch batch = new Batch.Builder(BEARD_ID, title)
-                    .addFile(fileUri)
+                    .addFile(url)
                     .build();
 
-            migrateV1FilesToV2Location(originalV1FileName, buildV2FileNamesWithSizes(originalV1FileSize, batch));
+            migrateV1FilesToV2Location(originalV1FileName, originalV1FileSize, batch);
             migrateV1DataToV2Database(originalV1FileSize, batch);
 
         } else {
@@ -116,24 +116,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // TODO: pass a list of the original file sizes, iterate through both uri list and size list at the same time
-    private Map<FileName, FileSize> buildV2FileNamesWithSizes(long fileSize, Batch batch) {
-        Map<FileName, FileSize> map = new HashMap<>();
+    // TODO: create a map of the v1 filenames nd v1 filesizes
+    private void migrateV1FilesToV2Location(String originalV1FileName, long originalV1FileSize, Batch batch) {
+        Map<FileName, FileSize> v2FileNamesWithFileSizes = new HashMap<>();
         for (String uri : batch.getFileUrls()) {
             FileName newFileName = LiteFileName.from(batch, uri);
-            FileSize newFileSize = new LiteFileSize(fileSize, fileSize);
-            map.put(newFileName, newFileSize);
+            FileSize newFileSize = new LiteFileSize(originalV1FileSize, originalV1FileSize);
+            v2FileNamesWithFileSizes.put(newFileName, newFileSize);
         }
-        return map;
-    }
-
-    // TODO: pass a list of the original file names, iterate through original file names and map at the same time
-    private void migrateV1FilesToV2Location(String originalV1FileName, Map<FileName, FileSize> map) {
 
         InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
         internalFilePersistence.initialiseWith(this);
 
-        for (Map.Entry<FileName, FileSize> nameAndSize : map.entrySet()) {
+        for (Map.Entry<FileName, FileSize> nameAndSize : v2FileNamesWithFileSizes.entrySet()) {
             // initialise the InternalFilePersistence
             FileName actualFileName = nameAndSize.getKey();
             FileSize actualFileSize = nameAndSize.getValue();
