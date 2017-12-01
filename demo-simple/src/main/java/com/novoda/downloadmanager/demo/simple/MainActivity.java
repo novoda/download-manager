@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
                 Batch batch = newBatch.build();
                 migrationHolder.setBatch(batch);
 
-                migrateV1FilesToV2Location(migrationHolder);
+                migrateV1FilesToV2Location(migrationHolder, batch);
                 migrateV1DataToV2Database(migrationHolder, batch);
 
                 uriCursor.close();
@@ -124,20 +124,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // TODO: create a map of the v1 filenames and v1 filesizes
-    private void migrateV1FilesToV2Location(MigrationHolder migrationHolder) {
+    private void migrateV1FilesToV2Location(MigrationHolder migrationHolder, Batch batch) {
         InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
         internalFilePersistence.initialiseWith(this);
 
         for (int i = 0; i < migrationHolder.originalFileLocations().size(); i++) {
             // initialise the InternalFilePersistence
-            String actualFileName = migrationHolder.originalFileLocations().get(i);
+            String originalFileLocation = migrationHolder.originalFileLocations().get(i);
             FileSize actualFileSize = migrationHolder.fileSizes().get(i);
-            internalFilePersistence.create(LiteFileName.from(actualFileName), actualFileSize);
+            FileName newFileName = LiteFileName.from(batch, batch.getFileUrls().get(i));
+            internalFilePersistence.create(newFileName, actualFileSize);
 
             FileInputStream inputStream = null;
             try {
                 // open the v1 file
-                inputStream = new FileInputStream(new File(actualFileName));
+                inputStream = new FileInputStream(new File(originalFileLocation));
                 byte[] bytes = new byte[BUFFER_SIZE];
 
                 // read the v1 file
