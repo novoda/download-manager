@@ -10,7 +10,7 @@ public final class MigrationFactory {
         // Uses static methods.
     }
 
-    public static VersionOneToVersionTwoMigrator createVersionOneToVersionTwoMigrator(Context context, File databasePath, Migrator.Callback callback) {
+    public static Migrator createVersionOneToVersionTwoMigrator(Context context, File databasePath, Migrator.Callback callback) {
         RoomDownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
         InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
         internalFilePersistence.initialiseWith(context);

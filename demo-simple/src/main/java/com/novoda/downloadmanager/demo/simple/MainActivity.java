@@ -99,12 +99,13 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                MigrationFactory.createVersionOneToVersionTwoMigrator(getApplicationContext(), getDatabasePath("downloads.db"), new Migrator.Callback() {
+                Migrator migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(getApplicationContext(), getDatabasePath("downloads.db"), new Migrator.Callback() {
                     @Override
                     public void onMigrationComplete() {
                         deleteDatabase("downloads.db");
                     }
                 });
+                migrator.migrate();
             }
         }).start();
     }
