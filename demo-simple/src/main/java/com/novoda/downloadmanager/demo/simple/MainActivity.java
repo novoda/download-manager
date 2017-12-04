@@ -126,6 +126,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void migrateV1FilesToV2Location(List<Migration> migrations) {
+        for (Migration migration : migrations) {
+            migrateV1FilesToV2Location(migration);
+        }
+    }
+
     // TODO: create a map of the v1 filenames and v1 filesizes
     private void migrateV1FilesToV2Location(Migration migration) {
         Batch batch = migration.batch();
@@ -167,6 +173,12 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    private void migrateV1DataToV2Database(List<Migration> migrations) {
+        for (Migration migration : migrations) {
+            migrateV1DataToV2Database(migration);
         }
     }
 
