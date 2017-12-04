@@ -1,7 +1,6 @@
 package com.novoda.downloadmanager;
 
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -9,8 +8,8 @@ import java.util.List;
 
 class MigrationExtractor {
 
-    List<Migration> extractMigrationsFrom(SQLiteDatabase database) {
-        Cursor batchesCursor = database.rawQuery("SELECT _id, batch_title FROM batches", null);
+    List<Migration> extractMigrationsFrom(DatabaseWrapper database) {
+        Cursor batchesCursor = database.rawQuery("SELECT _id, batch_title FROM batches");
 
         List<Migration> migrations = new ArrayList<>();
         while (batchesCursor.moveToNext()) {
@@ -19,7 +18,7 @@ class MigrationExtractor {
             String batchId = batchesCursor.getString(0);
             String batchTitle = batchesCursor.getString(1);
 
-            Cursor uriCursor = database.rawQuery(query, new String[]{batchId});
+            Cursor uriCursor = database.rawQuery(query, batchId);
             Batch.Builder newBatchBuilder = new Batch.Builder(DownloadBatchIdCreator.createFrom(batchId), batchTitle);
 
             List<String> originalFileLocations = new ArrayList<>();
