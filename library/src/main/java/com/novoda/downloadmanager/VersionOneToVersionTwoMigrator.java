@@ -31,10 +31,6 @@ class VersionOneToVersionTwoMigrator implements Migrator {
 
     @Override
     public void migrate() {
-        moveV1DownloadsToV2();
-    }
-
-    private void moveV1DownloadsToV2() {
         if (checkV1DatabaseExists()) {
             SQLiteDatabase database = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
             List<Migration> migrations = extractMigrationsFrom(database);
