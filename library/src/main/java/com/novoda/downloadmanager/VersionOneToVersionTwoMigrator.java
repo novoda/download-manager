@@ -1,6 +1,5 @@
 package com.novoda.downloadmanager;
 
-import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.io.File;
@@ -15,42 +14,32 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     private final MigrationExtractor migrationExtractor;
     private final RoomDownloadsPersistence downloadsPersistence;
     private final InternalFilePersistence internalFilePersistence;
-    private final File databasePath;
+    private final DatabaseWrapper database;
     private final Callback migrationCompleteCallback;
 
     VersionOneToVersionTwoMigrator(MigrationExtractor migrationExtractor,
                                    RoomDownloadsPersistence downloadsPersistence,
                                    InternalFilePersistence internalFilePersistence,
-                                   File databasePath,
+                                   DatabaseWrapper database,
                                    Callback migrationCompleteCallback) {
         this.migrationExtractor = migrationExtractor;
         this.downloadsPersistence = downloadsPersistence;
         this.internalFilePersistence = internalFilePersistence;
-        this.databasePath = databasePath;
+        this.database = database;
         this.migrationCompleteCallback = migrationCompleteCallback;
     }
 
     @Override
     public void migrate() {
-        if (checkV1DatabaseExists()) {
-            SQLiteDatabase database = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
-            DatabaseWrapper databaseWrapper = new DatabaseWrapper(database);
-            List<Migration> migrations = migrationExtractor.extractMigrationsFrom(databaseWrapper);
+        List<Migration> migrations = migrationExtractor.extractMigrationsFrom(database);
 
-            migrateV1FilesToV2Location(migrations);
-            migrateV1DataToV2Database(migrations);
+        migrateV1FilesToV2Location(migrations);
+        migrateV1DataToV2Database(migrations);
 
-            deleteFrom(databaseWrapper, migrations);
-            databaseWrapper.close();
+        deleteFrom(database, migrations);
+        database.close();
 
-            migrationCompleteCallback.onMigrationComplete();
-        } else {
-            Log.d("MainActivity", "downloads.db doesn't exist!");
-        }
-    }
-
-    private boolean checkV1DatabaseExists() {
-        return databasePath.exists();
+        migrationCompleteCallback.onMigrationComplete();
     }
 
     private void migrateV1FilesToV2Location(List<Migration> migrations) {
