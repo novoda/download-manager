@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
                 Cursor uriCursor = database.rawQuery(query, new String[]{batchesCursor.getString(0)});
                 Batch.Builder newBatchBuilder = new Batch.Builder(DownloadBatchIdCreator.createFrom(batchesCursor.getString(0) + batchesCursor.getString(1)), batchesCursor.getString(1));
 
-                MigrationHolder migrationHolder = new MigrationHolder();
+                Migration migration = new Migration();
 
                 while (uriCursor.moveToNext()) {
                     Log.d("MainActivity", batchesCursor.getString(0) + " : " + batchesCursor.getString(1) + " : " + uriCursor.getString(0));
@@ -103,16 +103,16 @@ public class MainActivity extends AppCompatActivity {
                     String originalFileName = uriCursor.getString(1);
                     long rawFileSize = uriCursor.getLong(2);
                     FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
-                    migrationHolder.add(originalFileName, fileSize);
+                    migration.add(originalFileName, fileSize);
                 }
 
                 uriCursor.close();
 
                 Batch batch = newBatchBuilder.build();
-                migrationHolder.setBatch(batch);
+                migration.setBatch(batch);
 
-                migrateV1FilesToV2Location(migrationHolder);
-                migrateV1DataToV2Database(migrationHolder);
+                migrateV1FilesToV2Location(migration);
+                migrateV1DataToV2Database(migration);
 
                 String sql = "DELETE FROM batches WHERE _id = ?";
                 String[] bindArgs = {batchesCursor.getString(0)};
@@ -127,15 +127,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // TODO: create a map of the v1 filenames and v1 filesizes
-    private void migrateV1FilesToV2Location(MigrationHolder migrationHolder) {
-        Batch batch = migrationHolder.batch();
+    private void migrateV1FilesToV2Location(Migration migration) {
+        Batch batch = migration.batch();
         InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
         internalFilePersistence.initialiseWith(this);
 
-        for (int i = 0; i < migrationHolder.originalFileLocations().size(); i++) {
+        for (int i = 0; i < migration.originalFileLocations().size(); i++) {
             // initialise the InternalFilePersistence
-            String originalFileLocation = migrationHolder.originalFileLocations().get(i);
-            FileSize actualFileSize = migrationHolder.fileSizes().get(i);
+            String originalFileLocation = migration.originalFileLocations().get(i);
+            FileSize actualFileSize = migration.fileSizes().get(i);
             FileName newFileName = LiteFileName.from(batch, batch.getFileUrls().get(i));
             internalFilePersistence.create(newFileName, actualFileSize);
 
@@ -170,8 +170,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void migrateV1DataToV2Database(MigrationHolder migrationHolder) {
-        Batch batch = migrationHolder.batch();
+    private void migrateV1DataToV2Database(Migration migration) {
+        Batch batch = migration.batch();
         DownloadsPersistence database = RoomDownloadsPersistence.newInstance(this);
         database.startTransaction();
 
@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
         DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted(downloadBatchTitle, batch.getDownloadBatchId(), DownloadBatchStatus.Status.DOWNLOADED);
         database.persistBatch(persistedBatch);
 
-        for (int i = 0; i < migrationHolder.originalFileLocations().size(); i++) {
+        for (int i = 0; i < migration.originalFileLocations().size(); i++) {
             String url = batch.getFileUrls().get(i);
             FileName fileName = LiteFileName.from(batch, url);
             FilePath filePath = FilePathCreator.create(fileName.name());
@@ -189,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
                     downloadFileId,
                     fileName,
                     filePath,
-                    migrationHolder.fileSizes().get(i).totalSize(),
+                    migration.fileSizes().get(i).totalSize(),
                     url,
                     FilePersistenceType.INTERNAL
             );

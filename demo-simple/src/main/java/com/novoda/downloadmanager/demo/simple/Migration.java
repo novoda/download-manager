@@ -6,7 +6,7 @@ import com.novoda.downloadmanager.FileSize;
 import java.util.ArrayList;
 import java.util.List;
 
-class MigrationHolder {
+class Migration {
 
     private Batch batch;
     private final List<String> originalFileLocations = new ArrayList<>();
