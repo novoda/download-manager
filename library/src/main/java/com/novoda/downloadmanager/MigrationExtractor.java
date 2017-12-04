@@ -10,7 +10,7 @@ import java.util.List;
 class MigrationExtractor {
 
     List<Migration> extractMigrationsFrom(DatabaseWrapper database) {
-        Cursor batchesCursor = database.rawQuery("SELECT _id, batch_title FROM batches");
+        Cursor batchesCursor = database.rawQuery("SELECT batches._id, batches.batch_title FROM batches INNER JOIN DownloadsByBatch ON DownloadsByBatch.batch_id = batches._id WHERE DownloadsByBatch.batch_total_bytes = DownloadsByBatch.batch_current_bytes");
 
         List<Migration> migrations = new ArrayList<>();
         while (batchesCursor.moveToNext()) {
