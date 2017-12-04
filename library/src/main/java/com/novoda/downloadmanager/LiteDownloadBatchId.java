@@ -1,10 +1,10 @@
 package com.novoda.downloadmanager;
 
-public class LiteDownloadBatchId implements DownloadBatchId {
+class LiteDownloadBatchId implements DownloadBatchId {
 
     private final String id;
 
-    public LiteDownloadBatchId(String id) {
+    LiteDownloadBatchId(String id) {
         this.id = id;
     }
 

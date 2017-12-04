@@ -1,15 +1,15 @@
 package com.novoda.downloadmanager;
 
-public final class LiteFileName implements FileName {
+final class LiteFileName implements FileName {
 
     private final String name;
 
-    public static LiteFileName from(Batch batch, String fileUrl) {
+    static LiteFileName from(Batch batch, String fileUrl) {
         String name = batch + fileUrl + String.valueOf(System.nanoTime());
         return new LiteFileName(String.valueOf(name.hashCode()));
     }
 
-    public static LiteFileName from(String name) {
+    static LiteFileName from(String name) {
         return new LiteFileName(name);
     }
 
