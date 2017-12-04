@@ -58,17 +58,22 @@ class VersionOneToVersionTwoMigrator implements Migrator {
         while (batchesCursor.moveToNext()) {
 
             String query = "SELECT uri, _data, total_bytes FROM Downloads WHERE batch_id = ?";
-            Cursor uriCursor = database.rawQuery(query, new String[]{batchesCursor.getString(0)});
-            Batch.Builder newBatchBuilder = new Batch.Builder(DownloadBatchIdCreator.createFrom(batchesCursor.getString(0)), batchesCursor.getString(1));
+            String batchId = batchesCursor.getString(0);
+            String batchTitle = batchesCursor.getString(1);
+
+            Cursor uriCursor = database.rawQuery(query, new String[]{batchId});
+            Batch.Builder newBatchBuilder = new Batch.Builder(DownloadBatchIdCreator.createFrom(batchId), batchTitle);
 
             List<String> originalFileLocations = new ArrayList<>();
             List<FileSize> fileSizes = new ArrayList<>();
 
             while (uriCursor.moveToNext()) {
-                Log.d("MainActivity", batchesCursor.getString(0) + " : " + batchesCursor.getString(1) + " : " + uriCursor.getString(0));
-                newBatchBuilder.addFile(uriCursor.getString(0));
-
+                String uri = uriCursor.getString(0);
                 String originalFileName = uriCursor.getString(1);
+                Log.d("MainActivity", batchId + " : " + batchTitle + " : " + uri);
+
+                newBatchBuilder.addFile(uri);
+
                 originalFileLocations.add(originalFileName);
 
                 long rawFileSize = uriCursor.getLong(2);
