@@ -1,7 +1,4 @@
-package com.novoda.downloadmanager.demo.simple;
-
-import com.novoda.downloadmanager.Batch;
-import com.novoda.downloadmanager.FileSize;
+package com.novoda.downloadmanager;
 
 import java.util.List;
 
@@ -11,7 +8,7 @@ class Migration {
     private final List<String> originalFileLocations;
     private final List<FileSize> fileSizes;
 
-    public Migration(Batch batch, List<String> originalFileLocations, List<FileSize> fileSizes) {
+    Migration(Batch batch, List<String> originalFileLocations, List<FileSize> fileSizes) {
         this.batch = batch;
         this.originalFileLocations = originalFileLocations;
         this.fileSizes = fileSizes;
