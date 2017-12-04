@@ -96,7 +96,6 @@ class VersionOneToVersionTwoMigrator implements Migrator {
         }
     }
 
-    // TODO: create a map of the v1 filenames and v1 filesizes
     private void migrateV1FilesToV2Location(Migration migration) {
         Batch batch = migration.batch();
 
