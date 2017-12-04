@@ -1,28 +1,29 @@
 package com.novoda.downloadmanager;
 
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 class VersionOneToVersionTwoMigrator implements Migrator {
 
     private static final int BUFFER_SIZE = 8 * 512;
 
+    private final MigrationExtractor migrationExtractor;
     private final RoomDownloadsPersistence downloadsPersistence;
     private final InternalFilePersistence internalFilePersistence;
     private final File databasePath;
     private final Callback migrationCompleteCallback;
 
-    VersionOneToVersionTwoMigrator(RoomDownloadsPersistence downloadsPersistence,
+    VersionOneToVersionTwoMigrator(MigrationExtractor migrationExtractor,
+                                   RoomDownloadsPersistence downloadsPersistence,
                                    InternalFilePersistence internalFilePersistence,
                                    File databasePath,
                                    Callback migrationCompleteCallback) {
+        this.migrationExtractor = migrationExtractor;
         this.downloadsPersistence = downloadsPersistence;
         this.internalFilePersistence = internalFilePersistence;
         this.databasePath = databasePath;
@@ -33,7 +34,7 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     public void migrate() {
         if (checkV1DatabaseExists()) {
             SQLiteDatabase database = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
-            List<Migration> migrations = extractMigrationsFrom(database);
+            List<Migration> migrations = migrationExtractor.extractMigrationsFrom(database);
 
             migrateV1FilesToV2Location(migrations);
             migrateV1DataToV2Database(migrations);
@@ -49,45 +50,6 @@ class VersionOneToVersionTwoMigrator implements Migrator {
 
     private boolean checkV1DatabaseExists() {
         return databasePath.exists();
-    }
-
-    private List<Migration> extractMigrationsFrom(SQLiteDatabase database) {
-        Cursor batchesCursor = database.rawQuery("SELECT _id, batch_title FROM batches", null);
-
-        List<Migration> migrations = new ArrayList<>();
-        while (batchesCursor.moveToNext()) {
-
-            String query = "SELECT uri, _data, total_bytes FROM Downloads WHERE batch_id = ?";
-            String batchId = batchesCursor.getString(0);
-            String batchTitle = batchesCursor.getString(1);
-
-            Cursor uriCursor = database.rawQuery(query, new String[]{batchId});
-            Batch.Builder newBatchBuilder = new Batch.Builder(DownloadBatchIdCreator.createFrom(batchId), batchTitle);
-
-            List<String> originalFileLocations = new ArrayList<>();
-            List<FileSize> fileSizes = new ArrayList<>();
-
-            while (uriCursor.moveToNext()) {
-                String uri = uriCursor.getString(0);
-                String originalFileName = uriCursor.getString(1);
-                Log.d("MainActivity", batchId + " : " + batchTitle + " : " + uri);
-
-                newBatchBuilder.addFile(uri);
-
-                originalFileLocations.add(originalFileName);
-
-                long rawFileSize = uriCursor.getLong(2);
-                FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
-                fileSizes.add(fileSize);
-            }
-
-            uriCursor.close();
-
-            Batch batch = newBatchBuilder.build();
-            migrations.add(new Migration(batch, originalFileLocations, fileSizes));
-        }
-        batchesCursor.close();
-        return migrations;
     }
 
     private void migrateV1FilesToV2Location(List<Migration> migrations) {

@@ -11,9 +11,10 @@ public final class MigrationFactory {
     }
 
     public static Migrator createVersionOneToVersionTwoMigrator(Context context, File databasePath, Migrator.Callback callback) {
+        MigrationExtractor migrationExtractor = new MigrationExtractor();
         RoomDownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
         InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
         internalFilePersistence.initialiseWith(context);
-        return new VersionOneToVersionTwoMigrator(downloadsPersistence, internalFilePersistence, databasePath, callback);
+        return new VersionOneToVersionTwoMigrator(migrationExtractor, downloadsPersistence, internalFilePersistence, databasePath, callback);
     }
 }
