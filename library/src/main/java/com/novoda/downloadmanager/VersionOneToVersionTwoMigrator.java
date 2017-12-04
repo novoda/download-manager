@@ -34,14 +34,14 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     public void migrate() {
         if (checkV1DatabaseExists()) {
             SQLiteDatabase database = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
-            DatabaseWrapper databaseWrapper = new DatabaseWrapper(database);        // TODO: Use in all other places.
+            DatabaseWrapper databaseWrapper = new DatabaseWrapper(database);
             List<Migration> migrations = migrationExtractor.extractMigrationsFrom(databaseWrapper);
 
             migrateV1FilesToV2Location(migrations);
             migrateV1DataToV2Database(migrations);
 
-            deleteFrom(database, migrations);
-            database.close();
+            deleteFrom(databaseWrapper, migrations);
+            databaseWrapper.close();
 
             migrationCompleteCallback.onMigrationComplete();
         } else {
@@ -137,12 +137,11 @@ class VersionOneToVersionTwoMigrator implements Migrator {
         downloadsPersistence.endTransaction();
     }
 
-    private void deleteFrom(SQLiteDatabase database, List<Migration> migrations) {
+    private void deleteFrom(DatabaseWrapper database, List<Migration> migrations) {
         for (Migration migration : migrations) {
-            String sql = "DELETE FROM batches WHERE _id = ?";
+            String query = "DELETE FROM batches WHERE _id = ?";
             Batch batch = migration.batch();
-            String[] bindArgs = {batch.getDownloadBatchId().stringValue()};
-            database.execSQL(sql, bindArgs);
+            database.rawQuery(query, batch.getDownloadBatchId().stringValue());
         }
     }
 

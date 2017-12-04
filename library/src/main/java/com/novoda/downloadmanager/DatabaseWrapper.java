@@ -27,4 +27,7 @@ class DatabaseWrapper {
         return sqLiteDatabase.rawQuery(query, arguments.toArray(new String[arguments.size()]));
     }
 
+    public void close() {
+        sqLiteDatabase.close();
+    }
 }
