@@ -3,8 +3,14 @@
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  tools:context="com.novoda.downloadmanager.demo.MainActivity"
-  android:orientation="vertical">
+  android:orientation="vertical"
+  tools:context="com.novoda.downloadmanager.demo.MainActivity">
+
+  <Button
+    android:id="@+id/button_migrate"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="migrate" />
 
   <LinearLayout
     android:layout_width="match_parent"
@@ -15,9 +21,9 @@
       android:id="@+id/batch_1"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="Hello World!"
+      android:layout_weight="1"
       android:lines="7"
-      android:layout_weight="1"/>
+      android:text="Hello World!" />
 
     <Button
       android:id="@+id/button_pause_downloading_1"
@@ -29,7 +35,7 @@
       android:id="@+id/button_resume_downloading_1"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="Resume"/>
+      android:text="Resume" />
 
   </LinearLayout>
 
@@ -43,9 +49,9 @@
       android:id="@+id/batch_2"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="Hello World!"
+      android:layout_weight="1"
       android:lines="7"
-      android:layout_weight="1" />
+      android:text="Hello World!" />
 
     <Button
       android:id="@+id/button_pause_downloading_2"
@@ -57,7 +63,7 @@
       android:id="@+id/button_resume_downloading_2"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="Resume"/>
+      android:text="Resume" />
 
   </LinearLayout>
 
@@ -71,7 +77,7 @@
     android:id="@+id/button_delete_all"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="Delete all"/>
+    android:text="Delete all" />
 
   <Button
     android:id="@+id/button_show_completed_downloads"
