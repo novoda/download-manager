@@ -37,16 +37,12 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     private void moveV1DownloadsToV2() {
         if (checkV1DatabaseExists()) {
             SQLiteDatabase database = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
-            Cursor batchesCursor = database.rawQuery("SELECT _id, batch_title FROM batches", null);
-
-            List<Migration> migrations = extractMigrationsFrom(database, batchesCursor);
+            List<Migration> migrations = extractMigrationsFrom(database);
 
             migrateV1FilesToV2Location(migrations);
             migrateV1DataToV2Database(migrations);
 
             deleteFrom(database, migrations);
-
-            batchesCursor.close();
             database.close();
 
             migrationCompleteCallback.onMigrationComplete();
@@ -59,7 +55,9 @@ class VersionOneToVersionTwoMigrator implements Migrator {
         return databasePath.exists();
     }
 
-    private List<Migration> extractMigrationsFrom(SQLiteDatabase database, Cursor batchesCursor) {
+    private List<Migration> extractMigrationsFrom(SQLiteDatabase database) {
+        Cursor batchesCursor = database.rawQuery("SELECT _id, batch_title FROM batches", null);
+
         List<Migration> migrations = new ArrayList<>();
         while (batchesCursor.moveToNext()) {
 
@@ -87,6 +85,7 @@ class VersionOneToVersionTwoMigrator implements Migrator {
             Batch batch = newBatchBuilder.build();
             migrations.add(new Migration(batch, originalFileLocations, fileSizes));
         }
+        batchesCursor.close();
         return migrations;
     }
 
