@@ -19,7 +19,8 @@ class StubCursor implements Cursor {
     private final List<String> columnNames;
     private final Map<String, List<String>> rowsByColumn;
 
-    private int position = 0;
+    private int position = -1;
+    private boolean isClosed;
 
     private StubCursor(List<String> columnNames, Map<String, List<String>> rowsByColumn) {
         this.columnNames = columnNames;
@@ -70,13 +71,13 @@ class StubCursor implements Cursor {
     @Override
     public boolean moveToNext() {
         position++;
-        return true;
+        return !isAfterLast();
     }
 
     @Override
     public boolean moveToPrevious() {
         position--;
-        return true;
+        return !isBeforeFirst();
     }
 
     @Override
@@ -164,22 +165,25 @@ class StubCursor implements Cursor {
 
     @Override
     public long getLong(int i) {
-        return 0;
+        String longAsString = getString(i);
+        return Long.parseLong(longAsString);
     }
 
     @Override
     public float getFloat(int i) {
-        return 0;
+        String floatAsString = getString(i);
+        return Float.parseFloat(floatAsString);
     }
 
     @Override
     public double getDouble(int i) {
-        return 0;
+        String doubleAsString = getString(i);
+        return Double.parseDouble(doubleAsString);
     }
 
     @Override
     public int getType(int i) {
-        return 0;
+        return FIELD_TYPE_STRING;
     }
 
     @Override
@@ -199,12 +203,13 @@ class StubCursor implements Cursor {
 
     @Override
     public void close() {
-
+        position = -1;
+        isClosed = true;
     }
 
     @Override
     public boolean isClosed() {
-        return false;
+        return isClosed;
     }
 
     @Override
