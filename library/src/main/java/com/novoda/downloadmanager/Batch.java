@@ -27,6 +27,43 @@ public final class Batch {
         return new ArrayList<>(fileUrls);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Batch batch = (Batch) o;
+
+        if (!downloadBatchId.equals(batch.downloadBatchId)) {
+            return false;
+        }
+        if (!title.equals(batch.title)) {
+            return false;
+        }
+        return fileUrls.equals(batch.fileUrls);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = downloadBatchId.hashCode();
+        result = 31 * result + title.hashCode();
+        result = 31 * result + fileUrls.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Batch{" +
+                "downloadBatchId=" + downloadBatchId +
+                ", title='" + title + '\'' +
+                ", fileUrls=" + fileUrls +
+                '}';
+    }
+
     public static class Builder {
 
         private final DownloadBatchId downloadBatchId;

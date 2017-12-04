@@ -34,7 +34,8 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     public void migrate() {
         if (checkV1DatabaseExists()) {
             SQLiteDatabase database = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
-            List<Migration> migrations = migrationExtractor.extractMigrationsFrom(database);
+            DatabaseWrapper databaseWrapper = new DatabaseWrapper(database);        // TODO: Use in all other places.
+            List<Migration> migrations = migrationExtractor.extractMigrationsFrom(databaseWrapper);
 
             migrateV1FilesToV2Location(migrations);
             migrateV1DataToV2Database(migrations);

@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -99,7 +100,7 @@ class StubCursor implements Cursor {
     @Override
     public boolean isAfterLast() {
         String firstColumn = columnNames.get(0);
-        return position >= rowsByColumn.get(firstColumn).size() - 1;
+        return position >= rowsByColumn.get(firstColumn).size();
     }
 
     @Override
@@ -267,13 +268,19 @@ class StubCursor implements Cursor {
         private List<String> columns = new ArrayList<>();
         private Map<String, List<String>> rowsByColumn = new HashMap<>();
 
-        Builder withRowValues(String column, String rowValue, String... rowValues) {
-            columns.add(column);
+        Builder with(String columnName, String value, String... values) {
+            if (columns.contains(columnName)) {
+                Log.w(getClass().getSimpleName(), "Cursor already contains column: " + columnName);
+                return this;
+            }
+
+            columns.add(columnName);
 
             List<String> copyRowValues = new ArrayList<>();
-            copyRowValues.add(rowValue);
-            copyRowValues.addAll(Arrays.asList(rowValues));
-            rowsByColumn.put(column, copyRowValues);
+            copyRowValues.add(value);
+            copyRowValues.addAll(Arrays.asList(values));
+
+            rowsByColumn.put(columnName, copyRowValues);
             return this;
         }
 

@@ -1,7 +1,8 @@
 package com.novoda.downloadmanager;
 
 import android.database.Cursor;
-import android.util.Log;
+
+import com.novoda.notils.logger.simple.Log;
 
 import java.util.ArrayList;
 import java.util.List;
