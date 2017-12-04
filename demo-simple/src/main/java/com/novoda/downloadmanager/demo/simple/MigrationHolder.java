@@ -21,11 +21,15 @@ class MigrationHolder {
         this.batch = batch;
     }
 
-    public List<String> originalFileLocations() {
+    List<String> originalFileLocations() {
         return originalFileLocations;
     }
 
-    public List<FileSize> fileSizes() {
+    List<FileSize> fileSizes() {
         return fileSizes;
+    }
+
+    Batch batch() {
+        return batch;
     }
 }

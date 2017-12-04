@@ -85,9 +85,7 @@ public class MainActivity extends AppCompatActivity {
     private void moveV1DownloadsToV2() {
         if (checkV1DatabaseExists()) {
             File dbFile = this.getDatabasePath("downloads.db");
-
             SQLiteDatabase database = SQLiteDatabase.openDatabase(dbFile.getAbsolutePath(), null, 0);
-
             Cursor batchesCursor = database.rawQuery("SELECT _id, batch_title FROM batches", null);
 
             while (batchesCursor.moveToNext()) {
@@ -113,8 +111,8 @@ public class MainActivity extends AppCompatActivity {
                 Batch batch = newBatchBuilder.build();
                 migrationHolder.setBatch(batch);
 
-                migrateV1FilesToV2Location(migrationHolder, batch);
-                migrateV1DataToV2Database(migrationHolder, batch);
+                migrateV1FilesToV2Location(migrationHolder);
+                migrateV1DataToV2Database(migrationHolder);
 
                 String sql = "DELETE FROM batches WHERE _id = ?";
                 String[] bindArgs = {batchesCursor.getString(0)};
@@ -129,7 +127,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // TODO: create a map of the v1 filenames and v1 filesizes
-    private void migrateV1FilesToV2Location(MigrationHolder migrationHolder, Batch batch) {
+    private void migrateV1FilesToV2Location(MigrationHolder migrationHolder) {
+        Batch batch = migrationHolder.batch();
         InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
         internalFilePersistence.initialiseWith(this);
 
@@ -171,7 +170,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void migrateV1DataToV2Database(MigrationHolder migrationHolder, Batch batch) {
+    private void migrateV1DataToV2Database(MigrationHolder migrationHolder) {
+        Batch batch = migrationHolder.batch();
         DownloadsPersistence database = RoomDownloadsPersistence.newInstance(this);
         database.startTransaction();
 
