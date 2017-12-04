@@ -73,6 +73,50 @@ public class MainActivity extends AppCompatActivity {
         setupQueryingExample();
     }
 
+    private void setupDownloadingExample() {
+        findViewById(R.id.main_download_button).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(@NonNull View v) {
+                        final Batch batch = new Batch.Builder(BEARD_ID, "Family of Penguins")
+                                .addFile(BIG_FILE)
+                                .build();
+                        downloadManagerCommands.download(batch);
+                    }
+                });
+    }
+
+    private void setupQueryingExample() {
+        findViewById(R.id.main_refresh_button).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(@NonNull View v) {
+                        queryForDownloads();
+                        migrateV1DownloadsUsingNewThread();
+                    }
+                }
+        );
+    }
+
+    private void queryForDownloads() {
+        downloadManagerCommands.getAllDownloadBatchStatuses(new AllBatchStatusesCallback() {
+            @Override
+            public void onReceived(List<DownloadBatchStatus> downloadBatchStatuses) {
+                List<BeardDownload> beardDownloads = new ArrayList<>(downloadBatchStatuses.size());
+                for (DownloadBatchStatus downloadBatchStatus : downloadBatchStatuses) {
+                    BeardDownload beardDownload = new BeardDownload(downloadBatchStatus.getDownloadBatchTitle(), downloadBatchStatus.status());
+                    beardDownloads.add(beardDownload);
+                }
+                onQueryResult(beardDownloads);
+            }
+        });
+    }
+
+    public void onQueryResult(List<BeardDownload> beardDownloads) {
+        recyclerView.setAdapter(new BeardDownloadAdapter(beardDownloads));
+        emptyView.setVisibility(beardDownloads.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
     private void migrateV1DownloadsUsingNewThread() {
         new Thread(new Runnable() {
             @Override
@@ -101,6 +145,11 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.d("MainActivity", "downloads.db doesn't exist!");
         }
+    }
+
+    private boolean checkV1DatabaseExists() {
+        File dbFile = this.getDatabasePath("downloads.db");
+        return dbFile.exists();
     }
 
     private List<Migration> extractMigrationsFrom(SQLiteDatabase database, Cursor batchesCursor) {
@@ -132,15 +181,6 @@ public class MainActivity extends AppCompatActivity {
             migrations.add(new Migration(batch, originalFileLocations, fileSizes));
         }
         return migrations;
-    }
-
-    private void deleteFrom(SQLiteDatabase database, List<Migration> migrations) {
-        for (Migration migration : migrations) {
-            String sql = "DELETE FROM batches WHERE _id = ?";
-            Batch batch = migration.batch();
-            String[] bindArgs = {batch.getDownloadBatchId().stringValue()};
-            database.execSQL(sql, bindArgs);
-        }
     }
 
     private void migrateV1FilesToV2Location(List<Migration> migrations) {
@@ -229,52 +269,13 @@ public class MainActivity extends AppCompatActivity {
         database.endTransaction();
     }
 
-    private boolean checkV1DatabaseExists() {
-        File dbFile = this.getDatabasePath("downloads.db");
-        return dbFile.exists();
+    private void deleteFrom(SQLiteDatabase database, List<Migration> migrations) {
+        for (Migration migration : migrations) {
+            String sql = "DELETE FROM batches WHERE _id = ?";
+            Batch batch = migration.batch();
+            String[] bindArgs = {batch.getDownloadBatchId().stringValue()};
+            database.execSQL(sql, bindArgs);
+        }
     }
 
-    private void setupDownloadingExample() {
-        findViewById(R.id.main_download_button).setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(@NonNull View v) {
-                        final Batch batch = new Batch.Builder(BEARD_ID, "Family of Penguins")
-                                .addFile(BIG_FILE)
-                                .build();
-                        downloadManagerCommands.download(batch);
-                    }
-                });
-    }
-
-    private void setupQueryingExample() {
-        findViewById(R.id.main_refresh_button).setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(@NonNull View v) {
-                        queryForDownloads();
-                        migrateV1DownloadsUsingNewThread();
-                    }
-                }
-        );
-    }
-
-    private void queryForDownloads() {
-        downloadManagerCommands.getAllDownloadBatchStatuses(new AllBatchStatusesCallback() {
-            @Override
-            public void onReceived(List<DownloadBatchStatus> downloadBatchStatuses) {
-                List<BeardDownload> beardDownloads = new ArrayList<>(downloadBatchStatuses.size());
-                for (DownloadBatchStatus downloadBatchStatus : downloadBatchStatuses) {
-                    BeardDownload beardDownload = new BeardDownload(downloadBatchStatus.getDownloadBatchTitle(), downloadBatchStatus.status());
-                    beardDownloads.add(beardDownload);
-                }
-                onQueryResult(beardDownloads);
-            }
-        });
-    }
-
-    public void onQueryResult(List<BeardDownload> beardDownloads) {
-        recyclerView.setAdapter(new BeardDownloadAdapter(beardDownloads));
-        emptyView.setVisibility(beardDownloads.isEmpty() ? View.VISIBLE : View.GONE);
-    }
 }
