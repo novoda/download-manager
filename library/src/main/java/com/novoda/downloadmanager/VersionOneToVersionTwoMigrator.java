@@ -119,6 +119,7 @@ class VersionOneToVersionTwoMigrator implements Migrator {
                     }
                 }
             } catch (IOException e) {
+                Log.e(getClass().getSimpleName(), e.getMessage());
                 e.printStackTrace();
             } finally {
                 try {
@@ -127,6 +128,7 @@ class VersionOneToVersionTwoMigrator implements Migrator {
                         inputStream.close();
                     }
                 } catch (IOException e) {
+                    Log.e(getClass().getSimpleName(), e.getMessage());
                     e.printStackTrace();
                 }
             }
