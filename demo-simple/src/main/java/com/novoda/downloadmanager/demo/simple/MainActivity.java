@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
 
                 String query = "SELECT uri, _data, total_bytes FROM Downloads WHERE batch_id = ?";
                 Cursor uriCursor = database.rawQuery(query, new String[]{batchesCursor.getString(0)});
-                Batch.Builder newBatchBuilder = new Batch.Builder(DownloadBatchIdCreator.createFrom(batchesCursor.getString(0) + batchesCursor.getString(1)), batchesCursor.getString(1));
+                Batch.Builder newBatchBuilder = new Batch.Builder(DownloadBatchIdCreator.createFrom(batchesCursor.getString(0)), batchesCursor.getString(1));
 
                 List<String> originalFileLocations = new ArrayList<>();
                 List<FileSize> fileSizes = new ArrayList<>();
@@ -119,15 +119,22 @@ public class MainActivity extends AppCompatActivity {
             migrateV1FilesToV2Location(migrations);
             migrateV1DataToV2Database(migrations);
 
-            String sql = "DELETE FROM batches WHERE _id = ?";
-            String[] bindArgs = {batchesCursor.getString(0)};
-            database.execSQL(sql, bindArgs);
+            deleteFrom(database, migrations);
 
             deleteDatabase("downloads.db");
             batchesCursor.close();
             database.close();
         } else {
             Log.d("MainActivity", "downloads.db doesn't exist!");
+        }
+    }
+
+    private void deleteFrom(SQLiteDatabase database, List<Migration> migrations) {
+        for (Migration migration : migrations) {
+            String sql = "DELETE FROM batches WHERE _id = ?";
+            Batch batch = migration.batch();
+            String[] bindArgs = {batch.getDownloadBatchId().stringValue()};
+            database.execSQL(sql, bindArgs);
         }
     }
 
