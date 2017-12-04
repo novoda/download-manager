@@ -17,7 +17,9 @@ import static org.mockito.Mockito.mock;
 
 public class MigrationExtractorTest {
 
-    private static final String BATCHES_QUERY = "SELECT _id, batch_title FROM batches";
+    private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title FROM batches INNER JOIN DownloadsByBatch ON " +
+            "DownloadsByBatch.batch_id = batches._id WHERE DownloadsByBatch.batch_total_bytes = DownloadsByBatch.batch_current_bytes";
+
     private static final String DOWNLOADS_QUERY = "SELECT uri, _data, total_bytes FROM Downloads WHERE batch_id = ?";
 
     private static final StubCursor BATCHES_CURSOR = new StubCursor.Builder()
