@@ -27,7 +27,6 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private static final String BIG_FILE = "http://ipv4.download.thinkbroadband.com/200MB.zip";
-    //    private static final String PENGUINS_IMAGE = "http://i.imgur.com/Y7pMO5Kb.jpg";
     private static final DownloadBatchId BEARD_ID = DownloadBatchIdCreator.createFrom("beard_id");
 
     private LiteDownloadManagerCommands downloadManagerCommands;

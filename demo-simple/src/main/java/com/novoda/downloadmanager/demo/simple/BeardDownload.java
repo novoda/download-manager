@@ -7,20 +7,20 @@ class BeardDownload {
     private final DownloadBatchTitle title;
     private final DownloadBatchStatus.Status downloadStatus;
 
-    public BeardDownload(DownloadBatchTitle title, DownloadBatchStatus.Status downloadStatus) {
+    BeardDownload(DownloadBatchTitle title, DownloadBatchStatus.Status downloadStatus) {
         this.title = title;
         this.downloadStatus = downloadStatus;
     }
 
-    public String getTitle() {
+    String getTitle() {
         return title.asString();
     }
 
-    public String getFileName() {
+    String getFileName() {
         return " ... Not sure about the file name yet";
     }
 
-    public String getDownloadStatusText() {
+    String getDownloadStatusText() {
         if (downloadStatus == DownloadBatchStatus.Status.DOWNLOADING) {
             return "Downloading";
         } else if (downloadStatus == DownloadBatchStatus.Status.DOWNLOADED) {
