@@ -31,7 +31,7 @@ class VersionOneToVersionTwoMigrator implements Migrator {
 
     @Override
     public void migrate() {
-        List<Migration> migrations = migrationExtractor.extractMigrationsFrom(database);
+        List<Migration> migrations = migrationExtractor.extractMigrations();
 
         migrateV1FilesToV2Location(migrations);
         migrateV1DataToV2Database(migrations);

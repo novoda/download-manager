@@ -24,7 +24,7 @@ public final class MigrationFactory {
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
         DatabaseWrapper database = new DatabaseWrapper(sqLiteDatabase);
 
-        MigrationExtractor migrationExtractor = new MigrationExtractor();
+        MigrationExtractor migrationExtractor = new MigrationExtractor(database);
         RoomDownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
         InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
         internalFilePersistence.initialiseWith(context);

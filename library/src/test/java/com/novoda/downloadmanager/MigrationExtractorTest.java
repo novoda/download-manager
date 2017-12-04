@@ -44,7 +44,7 @@ public class MigrationExtractorTest {
     @Before
     public void setUp() {
         Log.setShowLogs(false);
-        migrationExtractor = new MigrationExtractor();
+        migrationExtractor = new MigrationExtractor(database);
     }
 
     @Test
@@ -53,7 +53,7 @@ public class MigrationExtractorTest {
         given(database.rawQuery(eq(DOWNLOADS_QUERY), eq("1"))).willReturn(BATCH_ONE_DOWNLOADS_CURSOR);
         given(database.rawQuery(eq(DOWNLOADS_QUERY), eq("2"))).willReturn(BATCH_TWO_DOWNLOADS_CURSOR);
 
-        List<Migration> migrations = migrationExtractor.extractMigrationsFrom(database);
+        List<Migration> migrations = migrationExtractor.extractMigrations();
 
         assertThat(migrations).isEqualTo(expectedMigrations());
     }
