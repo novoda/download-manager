@@ -34,4 +34,41 @@ class Migration {
     Batch batch() {
         return batch;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Migration migration = (Migration) o;
+
+        if (!batch.equals(migration.batch)) {
+            return false;
+        }
+        if (!originalFileLocations.equals(migration.originalFileLocations)) {
+            return false;
+        }
+        return fileSizes.equals(migration.fileSizes);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = batch.hashCode();
+        result = 31 * result + originalFileLocations.hashCode();
+        result = 31 * result + fileSizes.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Migration{" +
+                "batch=" + batch +
+                ", originalFileLocations=" + originalFileLocations +
+                ", fileSizes=" + fileSizes +
+                '}';
+    }
 }
