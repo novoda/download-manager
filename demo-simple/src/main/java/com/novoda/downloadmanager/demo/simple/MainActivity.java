@@ -88,36 +88,41 @@ public class MainActivity extends AppCompatActivity {
             SQLiteDatabase database = SQLiteDatabase.openDatabase(dbFile.getAbsolutePath(), null, 0);
             Cursor batchesCursor = database.rawQuery("SELECT _id, batch_title FROM batches", null);
 
+            List<Migration> migrations = new ArrayList<>();
             while (batchesCursor.moveToNext()) {
 
                 String query = "SELECT uri, _data, total_bytes FROM Downloads WHERE batch_id = ?";
                 Cursor uriCursor = database.rawQuery(query, new String[]{batchesCursor.getString(0)});
                 Batch.Builder newBatchBuilder = new Batch.Builder(DownloadBatchIdCreator.createFrom(batchesCursor.getString(0) + batchesCursor.getString(1)), batchesCursor.getString(1));
 
-                Migration migration = new Migration();
+                List<String> originalFileLocations = new ArrayList<>();
+                List<FileSize> fileSizes = new ArrayList<>();
 
                 while (uriCursor.moveToNext()) {
                     Log.d("MainActivity", batchesCursor.getString(0) + " : " + batchesCursor.getString(1) + " : " + uriCursor.getString(0));
                     newBatchBuilder.addFile(uriCursor.getString(0));
 
                     String originalFileName = uriCursor.getString(1);
+                    originalFileLocations.add(originalFileName);
+
                     long rawFileSize = uriCursor.getLong(2);
                     FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
-                    migration.add(originalFileName, fileSize);
+                    fileSizes.add(fileSize);
                 }
 
                 uriCursor.close();
 
                 Batch batch = newBatchBuilder.build();
-                migration.setBatch(batch);
-
-                migrateV1FilesToV2Location(migration);
-                migrateV1DataToV2Database(migration);
-
-                String sql = "DELETE FROM batches WHERE _id = ?";
-                String[] bindArgs = {batchesCursor.getString(0)};
-                database.execSQL(sql, bindArgs);
+                migrations.add(new Migration(batch, originalFileLocations, fileSizes));
             }
+
+            migrateV1FilesToV2Location(migrations);
+            migrateV1DataToV2Database(migrations);
+
+            String sql = "DELETE FROM batches WHERE _id = ?";
+            String[] bindArgs = {batchesCursor.getString(0)};
+            database.execSQL(sql, bindArgs);
+
             deleteDatabase("downloads.db");
             batchesCursor.close();
             database.close();
