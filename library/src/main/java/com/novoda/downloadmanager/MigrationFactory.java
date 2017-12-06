@@ -13,12 +13,7 @@ public final class MigrationFactory {
 
     public static Migrator createVersionOneToVersionTwoMigrator(Context context, File databasePath, Migrator.Callback callback) {
         if (!databasePath.exists()) {
-            return new Migrator() {
-                @Override
-                public void migrate() {
-                    // no-op
-                }
-            };
+            return Migrator.NO_OP;
         }
 
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
