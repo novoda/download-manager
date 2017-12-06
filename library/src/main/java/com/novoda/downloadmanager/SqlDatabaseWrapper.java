@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-class DatabaseWrapper {
+class SqlDatabaseWrapper {
 
     private final SQLiteDatabase sqLiteDatabase;
 
-    DatabaseWrapper(SQLiteDatabase sqLiteDatabase) {
+    SqlDatabaseWrapper(SQLiteDatabase sqLiteDatabase) {
         this.sqLiteDatabase = sqLiteDatabase;
     }
 

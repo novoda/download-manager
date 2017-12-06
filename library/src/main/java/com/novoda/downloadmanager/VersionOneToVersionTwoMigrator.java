@@ -14,13 +14,13 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     private final MigrationExtractor migrationExtractor;
     private final RoomDownloadsPersistence downloadsPersistence;
     private final InternalFilePersistence internalFilePersistence;
-    private final DatabaseWrapper database;
+    private final SqlDatabaseWrapper database;
     private final Callback migrationCompleteCallback;
 
     VersionOneToVersionTwoMigrator(MigrationExtractor migrationExtractor,
                                    RoomDownloadsPersistence downloadsPersistence,
                                    InternalFilePersistence internalFilePersistence,
-                                   DatabaseWrapper database,
+                                   SqlDatabaseWrapper database,
                                    Callback migrationCompleteCallback) {
         this.migrationExtractor = migrationExtractor;
         this.downloadsPersistence = downloadsPersistence;
@@ -126,7 +126,7 @@ class VersionOneToVersionTwoMigrator implements Migrator {
         downloadsPersistence.endTransaction();
     }
 
-    private void deleteFrom(DatabaseWrapper database, List<Migration> migrations) {
+    private void deleteFrom(SqlDatabaseWrapper database, List<Migration> migrations) {
         for (Migration migration : migrations) {
             String query = "DELETE FROM batches WHERE _id = ?";
             Batch batch = migration.batch();

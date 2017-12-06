@@ -39,7 +39,7 @@ public class MigrationExtractorTest {
             .with("total_bytes", "500", "750")
             .build();
 
-    private final DatabaseWrapper database = mock(DatabaseWrapper.class);
+    private final SqlDatabaseWrapper database = mock(SqlDatabaseWrapper.class);
 
     private MigrationExtractor migrationExtractor;
 

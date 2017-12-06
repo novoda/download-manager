@@ -11,9 +11,9 @@ class MigrationExtractor {
 
     private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title FROM batches INNER JOIN DownloadsByBatch ON " +
             "DownloadsByBatch.batch_id = batches._id WHERE DownloadsByBatch.batch_total_bytes = DownloadsByBatch.batch_current_bytes";
-    private final DatabaseWrapper database;
+    private final SqlDatabaseWrapper database;
 
-    MigrationExtractor(DatabaseWrapper database) {
+    MigrationExtractor(SqlDatabaseWrapper database) {
         this.database = database;
     }
 

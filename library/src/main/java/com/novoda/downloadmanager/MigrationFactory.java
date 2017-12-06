@@ -22,7 +22,7 @@ public final class MigrationFactory {
         }
 
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
-        DatabaseWrapper database = new DatabaseWrapper(sqLiteDatabase);
+        SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
 
         MigrationExtractor migrationExtractor = new MigrationExtractor(database);
         RoomDownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
