@@ -10,6 +10,7 @@ import java.util.List;
 class VersionOneToVersionTwoMigrator implements Migrator {
 
     private static final int BUFFER_SIZE = 8 * 512;
+    private static final String DELETE_QUERY = "DELETE FROM batches WHERE _id = ?";
 
     private final MigrationExtractor migrationExtractor;
     private final RoomDownloadsPersistence downloadsPersistence;
@@ -129,9 +130,8 @@ class VersionOneToVersionTwoMigrator implements Migrator {
 
     private void deleteFrom(SqlDatabaseWrapper database, List<Migration> migrations) {
         for (Migration migration : migrations) {
-            String query = "DELETE FROM batches WHERE _id = ?";
             Batch batch = migration.batch();
-            database.rawQuery(query, batch.getDownloadBatchId().stringValue());
+            database.rawQuery(DELETE_QUERY, batch.getDownloadBatchId().stringValue());
         }
     }
 
