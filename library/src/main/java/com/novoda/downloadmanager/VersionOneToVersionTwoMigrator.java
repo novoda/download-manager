@@ -7,6 +7,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status;
+
 class VersionOneToVersionTwoMigrator implements Migrator {
 
     private static final int BUFFER_SIZE = 8 * 512;
@@ -45,17 +47,18 @@ class VersionOneToVersionTwoMigrator implements Migrator {
 
     private void migrateV1FilesToV2Location(List<Migration> migrations) {
         for (Migration migration : migrations) {
-            migrateV1FilesToV2Location(migration);
+            Batch batch = migration.batch();
+            List<FileSize> fileSizes = migration.fileSizes();
+            List<String> originalFileLocations = migration.originalFileLocations();
+
+            migrateV1FilesToV2Location(batch, fileSizes, originalFileLocations);
         }
     }
 
-    private void migrateV1FilesToV2Location(Migration migration) {
-        Batch batch = migration.batch();
-
-        List<String> originalFileLocations = migration.originalFileLocations();
+    private void migrateV1FilesToV2Location(Batch batch, List<FileSize> fileSizes, List<String> originalFileLocations) {
         for (int i = 0; i < originalFileLocations.size(); i++) {
             String originalFileLocation = originalFileLocations.get(i);
-            FileSize actualFileSize = migration.fileSizes().get(i);
+            FileSize actualFileSize = fileSizes.get(i);
             FileName newFileName = LiteFileName.from(batch, batch.getFileUrls().get(i));
             internalFilePersistence.create(newFileName, actualFileSize);
 
@@ -94,20 +97,22 @@ class VersionOneToVersionTwoMigrator implements Migrator {
 
     private void migrateV1DataToV2Database(List<Migration> migrations) {
         for (Migration migration : migrations) {
-            migrateV1DataToV2Database(migration);
+            Batch batch = migration.batch();
+            List<FileSize> fileSizes = migration.fileSizes();
+            List<String> originalFileLocations = migration.originalFileLocations();
+
+            migrateV1DataToV2Database(batch, fileSizes, originalFileLocations);
         }
     }
 
-    private void migrateV1DataToV2Database(Migration migration) {
-        Batch batch = migration.batch();
+    private void migrateV1DataToV2Database(Batch batch, List<FileSize> fileSizes, List<String> originalFileLocations) {
         downloadsPersistence.startTransaction();
 
         DownloadBatchTitle downloadBatchTitle = new LiteDownloadBatchTitle(batch.getTitle());
-        DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted(downloadBatchTitle, batch.getDownloadBatchId(), DownloadBatchStatus.Status.DOWNLOADED);
+        DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted(downloadBatchTitle, batch.getDownloadBatchId(), Status.DOWNLOADED);
         downloadsPersistence.persistBatch(persistedBatch);
 
-        List<FileSize> fileSizes = migration.fileSizes();
-        for (int i = 0; i < migration.originalFileLocations().size(); i++) {
+        for (int i = 0; i < originalFileLocations.size(); i++) {
             String url = batch.getFileUrls().get(i);
             FileName fileName = LiteFileName.from(batch, url);
             FilePath filePath = FilePathCreator.create(fileName.name());
