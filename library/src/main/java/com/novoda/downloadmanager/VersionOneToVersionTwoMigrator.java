@@ -105,6 +105,7 @@ class VersionOneToVersionTwoMigrator implements Migrator {
         DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted(downloadBatchTitle, batch.getDownloadBatchId(), DownloadBatchStatus.Status.DOWNLOADED);
         downloadsPersistence.persistBatch(persistedBatch);
 
+        List<FileSize> fileSizes = migration.fileSizes();
         for (int i = 0; i < migration.originalFileLocations().size(); i++) {
             String url = batch.getFileUrls().get(i);
             FileName fileName = LiteFileName.from(batch, url);
@@ -115,7 +116,7 @@ class VersionOneToVersionTwoMigrator implements Migrator {
                     downloadFileId,
                     fileName,
                     filePath,
-                    migration.fileSizes().get(i).totalSize(),
+                    fileSizes.get(i).totalSize(),
                     url,
                     FilePersistenceType.INTERNAL
             );
