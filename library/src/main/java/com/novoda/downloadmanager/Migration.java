@@ -4,7 +4,7 @@ import java.util.List;
 
 class Migration {
 
-    private Batch batch;
+    private final Batch batch;
     private final List<String> originalFileLocations;
     private final List<FileSize> fileSizes;
 
@@ -17,10 +17,6 @@ class Migration {
     void add(String originalFileLocation, FileSize fileSize) {
         originalFileLocations.add(originalFileLocation);
         fileSizes.add(fileSize);
-    }
-
-    void setBatch(Batch batch) {
-        this.batch = batch;
     }
 
     List<String> originalFileLocations() {
