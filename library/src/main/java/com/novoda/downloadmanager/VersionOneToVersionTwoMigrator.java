@@ -51,9 +51,9 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     private void migrateV1FilesToV2Location(Migration migration) {
         Batch batch = migration.batch();
 
-        for (int i = 0; i < migration.originalFileLocations().size(); i++) {
-            // initialise the InternalFilePersistence
-            String originalFileLocation = migration.originalFileLocations().get(i);
+        List<String> originalFileLocations = migration.originalFileLocations();
+        for (int i = 0; i < originalFileLocations.size(); i++) {
+            String originalFileLocation = originalFileLocations.get(i);
             FileSize actualFileSize = migration.fileSizes().get(i);
             FileName newFileName = LiteFileName.from(batch, batch.getFileUrls().get(i));
             internalFilePersistence.create(newFileName, actualFileSize);
