@@ -11,6 +11,7 @@ class MigrationExtractor {
 
     private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title FROM batches INNER JOIN DownloadsByBatch ON " +
             "DownloadsByBatch.batch_id = batches._id WHERE DownloadsByBatch.batch_total_bytes = DownloadsByBatch.batch_current_bytes";
+    private static final String URIS_QUERY = "SELECT uri, _data, total_bytes FROM Downloads WHERE batch_id = ?";
     private final SqlDatabaseWrapper database;
 
     MigrationExtractor(SqlDatabaseWrapper database) {
@@ -23,11 +24,10 @@ class MigrationExtractor {
         List<Migration> migrations = new ArrayList<>();
         while (batchesCursor.moveToNext()) {
 
-            String query = "SELECT uri, _data, total_bytes FROM Downloads WHERE batch_id = ?";
             String batchId = batchesCursor.getString(0);
             String batchTitle = batchesCursor.getString(1);
 
-            Cursor uriCursor = database.rawQuery(query, batchId);
+            Cursor uriCursor = database.rawQuery(URIS_QUERY, batchId);
             Batch.Builder newBatchBuilder = new Batch.Builder(DownloadBatchIdCreator.createFrom(batchId), batchTitle);
 
             List<String> originalFileLocations = new ArrayList<>();
