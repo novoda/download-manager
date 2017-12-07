@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onServiceDisconnected(ComponentName componentName) {
-
+                        // TODO
                     }
                 };
                 bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
