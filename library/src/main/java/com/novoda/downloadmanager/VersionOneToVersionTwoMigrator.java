@@ -49,8 +49,8 @@ class VersionOneToVersionTwoMigrator implements Migrator {
         for (Migration migration : migrations) {
             Batch batch = migration.batch();
             for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
-                String originalFileLocation = fileMetadata.getOriginalFileLocation();
-                FileSize actualFileSize = fileMetadata.getFileSize();
+                String originalFileLocation = fileMetadata.originalFileLocation();
+                FileSize actualFileSize = fileMetadata.fileSize();
 
                 int i = migration.getFileMetadata().indexOf(fileMetadata); //TODO: Fix
                 FileName newFileName = LiteFileName.from(batch, batch.getFileUrls().get(i));
@@ -112,7 +112,7 @@ class VersionOneToVersionTwoMigrator implements Migrator {
                         downloadFileId,
                         fileName,
                         filePath,
-                        fileMetadata.getFileSize().totalSize(),
+                        fileMetadata.fileSize().totalSize(),
                         url,
                         FilePersistenceType.INTERNAL
                 );

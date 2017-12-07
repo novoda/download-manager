@@ -44,7 +44,7 @@ class MigrationExtractor {
 
                 long rawFileSize = uriCursor.getLong(THIRD_COLUMN);
                 FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
-                Migration.FileMetadata fileMetadata = new Migration.FileMetadata(originalFileName, fileSize);
+                Migration.FileMetadata fileMetadata = new Migration.FileMetadata(originalFileName, fileSize, uri);
                 fileMetadataList.add(fileMetadata);
             }
             uriCursor.close();
