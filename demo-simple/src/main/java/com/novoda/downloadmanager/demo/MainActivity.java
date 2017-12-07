@@ -1,6 +1,11 @@
 package com.novoda.downloadmanager.demo;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -13,8 +18,7 @@ import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
-import com.novoda.downloadmanager.MigrationFactory;
-import com.novoda.downloadmanager.Migrator;
+import com.novoda.downloadmanager.LiteDownloadMigrationService;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
@@ -45,19 +49,20 @@ public class MainActivity extends AppCompatActivity {
         buttonMigrate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO: bind to the service here instead of calling the thread.
-                new Thread(new Runnable() {
+                Intent serviceIntent = new Intent(MainActivity.this, LiteDownloadMigrationService.class);
+                ServiceConnection serviceConnection = new ServiceConnection() {
                     @Override
-                    public void run() {
-                        Migrator migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(getApplicationContext(), getDatabasePath("downloads.db"), new Migrator.Callback() {
-                            @Override
-                            public void onMigrationComplete() {
-                                deleteDatabase("downloads.db");
-                            }
-                        });
-                        migrator.migrate();
+                    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+                        LiteDownloadMigrationService liteDownloadMigrationService = ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) iBinder).getService();
+                        liteDownloadMigrationService.migrate();
                     }
-                }).start();
+
+                    @Override
+                    public void onServiceDisconnected(ComponentName componentName) {
+
+                    }
+                };
+                bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
             }
         });
 
