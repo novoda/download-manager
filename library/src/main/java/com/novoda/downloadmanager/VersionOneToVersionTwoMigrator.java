@@ -48,11 +48,11 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     private void migrateV1FilesToV2Location(List<Migration> migrations) {
         for (Migration migration : migrations) {
             Batch batch = migration.batch();
-            for (Migration.OriginalMetadata originalMetadata : migration.getOriginalMetadata()) {
-                String originalFileLocation = originalMetadata.getOriginalFileLocation();
-                FileSize actualFileSize = originalMetadata.getFileSize();
+            for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
+                String originalFileLocation = fileMetadata.getOriginalFileLocation();
+                FileSize actualFileSize = fileMetadata.getFileSize();
 
-                int i = migration.getOriginalMetadata().indexOf(originalMetadata); //TODO: Fix
+                int i = migration.getFileMetadata().indexOf(fileMetadata); //TODO: Fix
                 FileName newFileName = LiteFileName.from(batch, batch.getFileUrls().get(i));
 
                 internalFilePersistence.create(newFileName, actualFileSize);
@@ -100,8 +100,8 @@ class VersionOneToVersionTwoMigrator implements Migrator {
             DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted(downloadBatchTitle, batch.getDownloadBatchId(), Status.DOWNLOADED);
             downloadsPersistence.persistBatch(persistedBatch);
 
-            for (Migration.OriginalMetadata originalMetadata : migration.getOriginalMetadata()) {
-                int i = migration.getOriginalMetadata().indexOf(originalMetadata);
+            for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
+                int i = migration.getFileMetadata().indexOf(fileMetadata);
                 String url = batch.getFileUrls().get(i); // TODO: Fix
 
                 FileName fileName = LiteFileName.from(batch, url);
@@ -112,7 +112,7 @@ class VersionOneToVersionTwoMigrator implements Migrator {
                         downloadFileId,
                         fileName,
                         filePath,
-                        originalMetadata.getFileSize().totalSize(),
+                        fileMetadata.getFileSize().totalSize(),
                         url,
                         FilePersistenceType.INTERNAL
                 );

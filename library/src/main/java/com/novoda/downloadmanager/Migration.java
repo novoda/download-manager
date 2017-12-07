@@ -5,19 +5,19 @@ import java.util.List;
 class Migration {
 
     private final Batch batch;
-    private List<OriginalMetadata> originalMetadata;
+    private List<FileMetadata> fileMetadata;
 
-    Migration(Batch batch, List<OriginalMetadata> originalMetadata) {
+    Migration(Batch batch, List<FileMetadata> fileMetadata) {
        this.batch = batch;
-        this.originalMetadata = originalMetadata;
+        this.fileMetadata = fileMetadata;
     }
 
     Batch batch() {
         return batch;
     }
 
-    List<OriginalMetadata> getOriginalMetadata() {
-        return originalMetadata;
+    List<FileMetadata> getFileMetadata() {
+        return fileMetadata;
     }
 
     @Override
@@ -34,21 +34,21 @@ class Migration {
         if (batch != null ? !batch.equals(migration.batch) : migration.batch != null) {
             return false;
         }
-        return originalMetadata != null ? originalMetadata.equals(migration.originalMetadata) : migration.originalMetadata == null;
+        return fileMetadata != null ? fileMetadata.equals(migration.fileMetadata) : migration.fileMetadata == null;
     }
 
     @Override
     public int hashCode() {
         int result = batch != null ? batch.hashCode() : 0;
-        result = 31 * result + (originalMetadata != null ? originalMetadata.hashCode() : 0);
+        result = 31 * result + (fileMetadata != null ? fileMetadata.hashCode() : 0);
         return result;
     }
 
-    static class OriginalMetadata {
+    static class FileMetadata {
         private final String originalFileLocation;
         private final FileSize fileSize;
 
-        OriginalMetadata(String originalFileLocation, FileSize fileSize) {
+        FileMetadata(String originalFileLocation, FileSize fileSize) {
             this.originalFileLocation = originalFileLocation;
             this.fileSize = fileSize;
         }
@@ -70,7 +70,7 @@ class Migration {
                 return false;
             }
 
-            OriginalMetadata that = (OriginalMetadata) o;
+            FileMetadata that = (FileMetadata) o;
 
             if (originalFileLocation != null ? !originalFileLocation.equals(that.originalFileLocation) : that.originalFileLocation != null) {
                 return false;

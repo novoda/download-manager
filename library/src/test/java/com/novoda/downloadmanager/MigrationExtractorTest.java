@@ -67,22 +67,22 @@ public class MigrationExtractorTest {
                 .addFile("uri_2")
                 .build();
 
-        List<Migration.OriginalMetadata> firstOriginalMetadata = new ArrayList<>();
-        firstOriginalMetadata.add(new Migration.OriginalMetadata("data_1", new LiteFileSize(1000, 1000)));
-        firstOriginalMetadata.add(new Migration.OriginalMetadata("data_2", new LiteFileSize(2000, 2000)));
+        List<Migration.FileMetadata> firstFileMetadata = new ArrayList<>();
+        firstFileMetadata.add(new Migration.FileMetadata("data_1", new LiteFileSize(1000, 1000)));
+        firstFileMetadata.add(new Migration.FileMetadata("data_2", new LiteFileSize(2000, 2000)));
 
         Batch secondBatch = new Batch.Builder(DownloadBatchIdCreator.createFrom("2"), "title_2")
                 .addFile("uri_3")
                 .addFile("uri_4")
                 .build();
 
-        List<Migration.OriginalMetadata> secondOriginalMetadata = new ArrayList<>();
-        secondOriginalMetadata.add(new Migration.OriginalMetadata("data_3", new LiteFileSize(500, 500)));
-        secondOriginalMetadata.add(new Migration.OriginalMetadata("data_4", new LiteFileSize(750, 750)));
+        List<Migration.FileMetadata> secondFileMetadata = new ArrayList<>();
+        secondFileMetadata.add(new Migration.FileMetadata("data_3", new LiteFileSize(500, 500)));
+        secondFileMetadata.add(new Migration.FileMetadata("data_4", new LiteFileSize(750, 750)));
 
         return Arrays.asList(
-                new Migration(firstBatch, firstOriginalMetadata),
-                new Migration(secondBatch, secondOriginalMetadata)
+                new Migration(firstBatch, firstFileMetadata),
+                new Migration(secondBatch, secondFileMetadata)
         );
     }
 }

@@ -33,7 +33,7 @@ class MigrationExtractor {
 
             Cursor uriCursor = database.rawQuery(URIS_QUERY, batchId);
             Batch.Builder newBatchBuilder = new Batch.Builder(DownloadBatchIdCreator.createFrom(batchId), batchTitle);
-            List<Migration.OriginalMetadata> originalMetadataList = new ArrayList<>();
+            List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
 
             while (uriCursor.moveToNext()) {
                 String uri = uriCursor.getString(FIRST_COLUMN);
@@ -44,13 +44,13 @@ class MigrationExtractor {
 
                 long rawFileSize = uriCursor.getLong(THIRD_COLUMN);
                 FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
-                Migration.OriginalMetadata originalMetadata = new Migration.OriginalMetadata(originalFileName, fileSize);
-                originalMetadataList.add(originalMetadata);
+                Migration.FileMetadata fileMetadata = new Migration.FileMetadata(originalFileName, fileSize);
+                fileMetadataList.add(fileMetadata);
             }
             uriCursor.close();
 
             Batch batch = newBatchBuilder.build();
-            migrations.add(new Migration(batch, originalMetadataList));
+            migrations.add(new Migration(batch, fileMetadataList));
         }
         batchesCursor.close();
         return migrations;
