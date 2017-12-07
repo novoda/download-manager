@@ -4,6 +4,7 @@ import android.database.Cursor;
 
 import com.novoda.notils.logger.simple.Log;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -61,20 +62,27 @@ public class MigrationExtractorTest {
     }
 
     private List<Migration> expectedMigrations() {
-        Batch batch1 = new Batch.Builder(DownloadBatchIdCreator.createFrom("1"), "title_1")
+        Batch firstBatch = new Batch.Builder(DownloadBatchIdCreator.createFrom("1"), "title_1")
                 .addFile("uri_1")
                 .addFile("uri_2")
                 .build();
 
-        Batch batch2 = new Batch.Builder(DownloadBatchIdCreator.createFrom("2"), "title_2")
+        List<Migration.OriginalMetadata> firstOriginalMetadata = new ArrayList<>();
+        firstOriginalMetadata.add(new Migration.OriginalMetadata("data_1", new LiteFileSize(1000, 1000)));
+        firstOriginalMetadata.add(new Migration.OriginalMetadata("data_2", new LiteFileSize(2000, 2000)));
+
+        Batch secondBatch = new Batch.Builder(DownloadBatchIdCreator.createFrom("2"), "title_2")
                 .addFile("uri_3")
                 .addFile("uri_4")
                 .build();
 
+        List<Migration.OriginalMetadata> secondOriginalMetadata = new ArrayList<>();
+        secondOriginalMetadata.add(new Migration.OriginalMetadata("data_3", new LiteFileSize(500, 500)));
+        secondOriginalMetadata.add(new Migration.OriginalMetadata("data_4", new LiteFileSize(750, 750)));
+
         return Arrays.asList(
-                new Migration(batch1, Arrays.asList("data_1", "data_2"), Arrays.<FileSize>asList(new LiteFileSize(1000, 1000), new LiteFileSize(2000, 2000))),
-                new Migration(batch2, Arrays.asList("data_3", "data_4"), Arrays.<FileSize>asList(new LiteFileSize(500, 500), new LiteFileSize(750, 750)))
+                new Migration(firstBatch, firstOriginalMetadata),
+                new Migration(secondBatch, secondOriginalMetadata)
         );
     }
-
 }
