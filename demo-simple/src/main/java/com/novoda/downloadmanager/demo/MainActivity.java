@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         buttonMigrate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // TODO: bind to the service here instead of calling the thread.
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
