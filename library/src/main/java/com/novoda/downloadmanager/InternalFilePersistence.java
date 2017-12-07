@@ -3,8 +3,8 @@ package com.novoda.downloadmanager;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
-import com.novoda.notils.logger.simple.Log;
 import com.novoda.downloadmanager.FilePersistenceResult.Status;
+import com.novoda.notils.logger.simple.Log;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;

@@ -6,7 +6,7 @@ import android.content.Context;
 import java.util.ArrayList;
 import java.util.List;
 
-class RoomDownloadsPersistence implements DownloadsPersistence {
+final class RoomDownloadsPersistence implements DownloadsPersistence {
 
     private final RoomAppDatabase database;
 
@@ -19,7 +19,7 @@ class RoomDownloadsPersistence implements DownloadsPersistence {
         return new RoomDownloadsPersistence(database);
     }
 
-    RoomDownloadsPersistence(RoomAppDatabase database) {
+    private RoomDownloadsPersistence(RoomAppDatabase database) {
         this.database = database;
     }
 

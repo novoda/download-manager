@@ -5,7 +5,7 @@ android {
     buildToolsVersion "27.0.0"
 
     defaultConfig {
-        applicationId "com.litedownloadmanager.demo"
+        applicationId "com.novoda.downloadmanager.demo.simple"
         minSdkVersion 14
         targetSdkVersion 27
         versionCode 1

@@ -13,6 +13,8 @@ import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
+import com.novoda.downloadmanager.MigrationFactory;
+import com.novoda.downloadmanager.Migrator;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
@@ -39,6 +41,25 @@ public class MainActivity extends AppCompatActivity {
         textViewBatch1 = findViewById(R.id.batch_1);
         textViewBatch2 = findViewById(R.id.batch_2);
 
+        View buttonMigrate = findViewById(R.id.button_migrate);
+        buttonMigrate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Migrator migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(getApplicationContext(), getDatabasePath("downloads.db"), new Migrator.Callback() {
+                            @Override
+                            public void onMigrationComplete() {
+                                deleteDatabase("downloads.db");
+                            }
+                        });
+                        migrator.migrate();
+                    }
+                }).start();
+            }
+        });
+
         View buttonDownload = findViewById(R.id.button_start_downloading);
         buttonDownload.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,6 +84,33 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 liteDownloadManagerCommands.delete(BATCH_ID_1);
                 liteDownloadManagerCommands.delete(BATCH_ID_2);
+            }
+        });
+
+        final TextView downloadedTitles = findViewById(R.id.textview_completed_download_title);
+        View buttonShowCompletedDownloads = findViewById(R.id.button_show_completed_downloads);
+        buttonShowCompletedDownloads.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                liteDownloadManagerCommands.getAllDownloadBatchStatuses(new AllBatchStatusesCallback() {
+                    @Override
+                    public void onReceived(List<DownloadBatchStatus> downloadBatchStatuses) {
+                        StringBuilder displayMessage = new StringBuilder();
+                        Log.d("MainActivity", "List Size: " + downloadBatchStatuses.size());
+                        for (DownloadBatchStatus status : downloadBatchStatuses) {
+                            if (status.bytesDownloaded() != status.bytesTotalSize()) {
+                                Log.d("MainActivity", status.getDownloadBatchTitle() + " not downloaded!");
+                                return;
+                            }
+                            String message = "Batch " + status.getDownloadBatchTitle().asString()
+                                    + "\ndownloaded! "
+                                    + "\nbytes: " + status.bytesDownloaded()
+                                    + "\n\n";
+                            displayMessage.append(message);
+                        }
+                        downloadedTitles.setText(displayMessage.toString());
+                    }
+                });
             }
         });
 
