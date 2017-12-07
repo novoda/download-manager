@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
                         LiteDownloadMigrationService liteDownloadMigrationService = ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) iBinder).getService();
-                        liteDownloadMigrationService.migrate();
+                        liteDownloadMigrationService.migrateFromV1ToV2();
                     }
 
                     @Override

@@ -1,34 +1,30 @@
 package com.novoda.downloadmanager;
 
-import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class LiteDownloadMigrationService extends Service {
 
-    private static final String WAKELOCK_TAG = "WakelockTag";
-    private static final String NOTIFICATION_TAG = "download-manager";
-
-    private ExecutorService executor;
-    private IBinder binder;
-    private PowerManager.WakeLock wakeLock;
-    private NotificationManagerCompat notificationManagerCompat;
-
-    private final Migrator.Callback completionCallback = new Migrator.Callback() {
+    private final Migrator.Callback deleteOldDatabaseOnCompletion = new Migrator.Callback() {
         @Override
         public void onMigrationComplete() {
             deleteDatabase("downloads.db");
         }
     };
+    private final Migrator v1ToV2Migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
+            getApplicationContext(),
+            getDatabasePath("downloads.db"),
+            deleteOldDatabaseOnCompletion
+    );
+
+    private ExecutorService executor;
+    private IBinder binder;
 
     public class MigrationDownloadServiceBinder extends Binder {
         public LiteDownloadMigrationService getService() {
@@ -40,32 +36,17 @@ public class LiteDownloadMigrationService extends Service {
     public void onCreate() {
         executor = Executors.newSingleThreadExecutor();
         binder = new MigrationDownloadServiceBinder();
-        notificationManagerCompat = NotificationManagerCompat.from(this);
 
         super.onCreate();
     }
 
-    public void migrate() {
-        showNotification();
-
+    public void migrateFromV1ToV2() {
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                Migrator migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
-                        getApplicationContext(),
-                        getDatabasePath("downloads.db"),
-                        completionCallback
-                );
-                migrator.migrate();
+                v1ToV2Migrator.migrate();
             }
         });
-    }
-
-    private void showNotification() {
-        Notification notification = new NotificationCompat.Builder(getApplicationContext(), "migration-channel")
-                .setContentText("Migrating downloads")
-                .build();
-        startForeground(101, notification);
     }
 
     @Nullable
@@ -77,36 +58,6 @@ public class LiteDownloadMigrationService extends Service {
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
-    }
-
-    private void updateNotification(NotificationInformation notificationInformation) {
-        startForeground(notificationInformation.getId(), notificationInformation.getNotification());
-    }
-
-    private void stackNotification(NotificationInformation notificationInformation) {
-        stopForeground(true);
-        showFinalDownloadedNotification(notificationInformation);
-    }
-
-    private void showFinalDownloadedNotification(NotificationInformation notificationInformation) {
-        Notification notification = notificationInformation.getNotification();
-        notificationManagerCompat.notify(NOTIFICATION_TAG, notificationInformation.getId(), notification);
-    }
-
-    private void dismissNotification() {
-        stopForeground(true);
-    }
-
-    private void acquireCpuWakeLock() {
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        if (powerManager != null) {
-            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
-            wakeLock.acquire();
-        }
-    }
-
-    private void releaseCpuWakeLock() {
-        wakeLock.release();
     }
 
     @Override
