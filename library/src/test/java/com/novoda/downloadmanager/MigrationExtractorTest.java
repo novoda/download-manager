@@ -4,6 +4,7 @@ import android.database.Cursor;
 
 import com.novoda.notils.logger.simple.Log;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -61,20 +62,31 @@ public class MigrationExtractorTest {
     }
 
     private List<Migration> expectedMigrations() {
-        Batch batch1 = new Batch.Builder(DownloadBatchIdCreator.createFrom("1"), "title_1")
-                .addFile("uri_1")
-                .addFile("uri_2")
+        String firstUri = "uri_1";
+        String secondUri = "uri_2";
+        Batch firstBatch = new Batch.Builder(DownloadBatchIdCreator.createFrom("1"), "title_1")
+                .addFile(firstUri)
+                .addFile(secondUri)
                 .build();
 
-        Batch batch2 = new Batch.Builder(DownloadBatchIdCreator.createFrom("2"), "title_2")
-                .addFile("uri_3")
-                .addFile("uri_4")
+        List<Migration.FileMetadata> firstFileMetadata = new ArrayList<>();
+        firstFileMetadata.add(new Migration.FileMetadata("data_1", new LiteFileSize(1000, 1000), firstUri));
+        firstFileMetadata.add(new Migration.FileMetadata("data_2", new LiteFileSize(2000, 2000), secondUri));
+
+        String thirdUri = "uri_3";
+        String fourthUri = "uri_4";
+        Batch secondBatch = new Batch.Builder(DownloadBatchIdCreator.createFrom("2"), "title_2")
+                .addFile(thirdUri)
+                .addFile(fourthUri)
                 .build();
+
+        List<Migration.FileMetadata> secondFileMetadata = new ArrayList<>();
+        secondFileMetadata.add(new Migration.FileMetadata("data_3", new LiteFileSize(500, 500), thirdUri));
+        secondFileMetadata.add(new Migration.FileMetadata("data_4", new LiteFileSize(750, 750), fourthUri));
 
         return Arrays.asList(
-                new Migration(batch1, Arrays.asList("data_1", "data_2"), Arrays.<FileSize>asList(new LiteFileSize(1000, 1000), new LiteFileSize(2000, 2000))),
-                new Migration(batch2, Arrays.asList("data_3", "data_4"), Arrays.<FileSize>asList(new LiteFileSize(500, 500), new LiteFileSize(750, 750)))
+                new Migration(firstBatch, firstFileMetadata),
+                new Migration(secondBatch, secondFileMetadata)
         );
     }
-
 }
