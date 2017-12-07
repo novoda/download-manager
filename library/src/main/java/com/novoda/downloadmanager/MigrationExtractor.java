@@ -12,9 +12,11 @@ class MigrationExtractor {
     private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title FROM batches INNER JOIN DownloadsByBatch ON " +
             "DownloadsByBatch.batch_id = batches._id WHERE DownloadsByBatch.batch_total_bytes = DownloadsByBatch.batch_current_bytes";
     private static final String URIS_QUERY = "SELECT uri, _data, total_bytes FROM Downloads WHERE batch_id = ?";
-    private static final int FIRST_COLUMN = 0;
-    private static final int SECOND_COLUMN = 1;
-    private static final int THIRD_COLUMN = 2;
+    private static final int BATCH_ID_COLUMN = 0;
+    private static final int URI_COLUMN = 0;
+    private static final int TITLE_COLUMN = 1;
+    private static final int FILE_NAME_COLUMN = 1;
+    private static final int FILE_SIZE_COLUMN = 2;
 
     private final SqlDatabaseWrapper database;
 
@@ -28,21 +30,21 @@ class MigrationExtractor {
         List<Migration> migrations = new ArrayList<>();
         while (batchesCursor.moveToNext()) {
 
-            String batchId = batchesCursor.getString(FIRST_COLUMN);
-            String batchTitle = batchesCursor.getString(SECOND_COLUMN);
+            String batchId = batchesCursor.getString(BATCH_ID_COLUMN);
+            String batchTitle = batchesCursor.getString(TITLE_COLUMN);
 
             Cursor uriCursor = database.rawQuery(URIS_QUERY, batchId);
             Batch.Builder newBatchBuilder = new Batch.Builder(DownloadBatchIdCreator.createFrom(batchId), batchTitle);
             List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
 
             while (uriCursor.moveToNext()) {
-                String uri = uriCursor.getString(FIRST_COLUMN);
-                String originalFileName = uriCursor.getString(SECOND_COLUMN);
+                String uri = uriCursor.getString(URI_COLUMN);
+                String originalFileName = uriCursor.getString(FILE_NAME_COLUMN);
                 Log.d("MainActivity", batchId + " : " + batchTitle + " : " + uri);
 
                 newBatchBuilder.addFile(uri);
 
-                long rawFileSize = uriCursor.getLong(THIRD_COLUMN);
+                long rawFileSize = uriCursor.getLong(FILE_SIZE_COLUMN);
                 FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
                 Migration.FileMetadata fileMetadata = new Migration.FileMetadata(originalFileName, fileSize, uri);
                 fileMetadataList.add(fileMetadata);
