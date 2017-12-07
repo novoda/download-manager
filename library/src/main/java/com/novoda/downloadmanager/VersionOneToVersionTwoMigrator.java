@@ -48,12 +48,7 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     private void migrateV1FilesToV2Location(List<Migration> migrations) {
         for (Migration migration : migrations) {
             Batch batch = migration.batch();
-//            List<FileSize> fileSizes = migration.fileSizes();
-//            List<String> originalFileLocations = migration.originalFileLocations();
-
-//            for (int i = 0, size = originalFileLocations.size(); i < size; i++) {
             for (Migration.OriginalMetadata originalMetadata : migration.getOriginalMetadata()) {
-
                 String originalFileLocation = originalMetadata.getOriginalFileLocation();
                 FileSize actualFileSize = originalMetadata.getFileSize();
 
