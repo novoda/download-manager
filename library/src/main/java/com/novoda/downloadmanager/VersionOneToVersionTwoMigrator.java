@@ -49,17 +49,12 @@ class VersionOneToVersionTwoMigrator implements Migrator {
         for (Migration migration : migrations) {
             Batch batch = migration.batch();
             for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
-                String originalFileLocation = fileMetadata.originalFileLocation();
-                FileSize actualFileSize = fileMetadata.fileSize();
-
-                int i = migration.getFileMetadata().indexOf(fileMetadata); //TODO: Fix
-                FileName newFileName = LiteFileName.from(batch, batch.getFileUrls().get(i));
-
-                internalFilePersistence.create(newFileName, actualFileSize);
+                FileName newFileName = LiteFileName.from(batch, fileMetadata.uri());
+                internalFilePersistence.create(newFileName, fileMetadata.fileSize());
                 FileInputStream inputStream = null;
                 try {
                     // open the v1 file
-                    inputStream = new FileInputStream(new File(originalFileLocation));
+                    inputStream = new FileInputStream(new File(fileMetadata.originalFileLocation()));
                     byte[] bytes = new byte[BUFFER_SIZE];
 
                     // read the v1 file
@@ -101,8 +96,7 @@ class VersionOneToVersionTwoMigrator implements Migrator {
             downloadsPersistence.persistBatch(persistedBatch);
 
             for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
-                int i = migration.getFileMetadata().indexOf(fileMetadata);
-                String url = batch.getFileUrls().get(i); // TODO: Fix
+                String url = fileMetadata.uri();
 
                 FileName fileName = LiteFileName.from(batch, url);
                 FilePath filePath = FilePathCreator.create(fileName.name());

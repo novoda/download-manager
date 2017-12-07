@@ -62,23 +62,27 @@ public class MigrationExtractorTest {
     }
 
     private List<Migration> expectedMigrations() {
+        String firstUri = "uri_1";
+        String secondUri = "uri_2";
         Batch firstBatch = new Batch.Builder(DownloadBatchIdCreator.createFrom("1"), "title_1")
-                .addFile("uri_1")
-                .addFile("uri_2")
+                .addFile(firstUri)
+                .addFile(secondUri)
                 .build();
 
         List<Migration.FileMetadata> firstFileMetadata = new ArrayList<>();
-        firstFileMetadata.add(new Migration.FileMetadata("data_1", new LiteFileSize(1000, 1000), uri));
-        firstFileMetadata.add(new Migration.FileMetadata("data_2", new LiteFileSize(2000, 2000), uri));
+        firstFileMetadata.add(new Migration.FileMetadata("data_1", new LiteFileSize(1000, 1000), firstUri));
+        firstFileMetadata.add(new Migration.FileMetadata("data_2", new LiteFileSize(2000, 2000), secondUri));
 
+        String thirdUri = "uri_3";
+        String fourthUri = "uri_4";
         Batch secondBatch = new Batch.Builder(DownloadBatchIdCreator.createFrom("2"), "title_2")
-                .addFile("uri_3")
-                .addFile("uri_4")
+                .addFile(thirdUri)
+                .addFile(fourthUri)
                 .build();
 
         List<Migration.FileMetadata> secondFileMetadata = new ArrayList<>();
-        secondFileMetadata.add(new Migration.FileMetadata("data_3", new LiteFileSize(500, 500), uri));
-        secondFileMetadata.add(new Migration.FileMetadata("data_4", new LiteFileSize(750, 750), uri));
+        secondFileMetadata.add(new Migration.FileMetadata("data_3", new LiteFileSize(500, 500), thirdUri));
+        secondFileMetadata.add(new Migration.FileMetadata("data_4", new LiteFileSize(750, 750), fourthUri));
 
         return Arrays.asList(
                 new Migration(firstBatch, firstFileMetadata),
