@@ -11,7 +11,7 @@ import static com.novoda.downloadmanager.DownloadBatchStatus.Status;
 
 class VersionOneToVersionTwoMigrator implements Migrator {
 
-    private static final int BUFFER_SIZE = 8 * 512;
+    private static final int RANDOMLY_CHOSEN_BUFFER_SIZE_THAT_SEEMS_TO_WORK = 4096;
     private static final String DELETE_BY_ID_QUERY = "DELETE FROM batches WHERE _id = ?";
 
     private final MigrationExtractor migrationExtractor;
@@ -55,7 +55,7 @@ class VersionOneToVersionTwoMigrator implements Migrator {
                 try {
                     // open the v1 file
                     inputStream = new FileInputStream(new File(fileMetadata.originalFileLocation()));
-                    byte[] bytes = new byte[BUFFER_SIZE];
+                    byte[] bytes = new byte[RANDOMLY_CHOSEN_BUFFER_SIZE_THAT_SEEMS_TO_WORK];
 
                     // read the v1 file
                     int readLast = 0;
@@ -64,7 +64,7 @@ class VersionOneToVersionTwoMigrator implements Migrator {
                         if (readLast != 0 && readLast != -1) {
                             // write the v1 file to the v2 location
                             internalFilePersistence.write(bytes, 0, readLast);
-                            bytes = new byte[BUFFER_SIZE];
+                            bytes = new byte[RANDOMLY_CHOSEN_BUFFER_SIZE_THAT_SEEMS_TO_WORK];
                         }
                     }
                 } catch (IOException e) {
