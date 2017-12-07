@@ -1,15 +1,16 @@
 package com.novoda.downloadmanager;
 
+import java.util.Collections;
 import java.util.List;
 
 class Migration {
 
     private final Batch batch;
-    private List<FileMetadata> fileMetadata;
+    private final List<FileMetadata> fileMetadata;
 
     Migration(Batch batch, List<FileMetadata> fileMetadata) {
         this.batch = batch;
-        this.fileMetadata = fileMetadata;
+        this.fileMetadata = Collections.unmodifiableList(fileMetadata);
     }
 
     Batch batch() {
