@@ -56,7 +56,7 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     }
 
     private void migrateV1FilesToV2Location(Batch batch, List<FileSize> fileSizes, List<String> originalFileLocations) {
-        for (int i = 0; i < originalFileLocations.size(); i++) {
+        for (int i = 0, size = originalFileLocations.size(); i < size; i++) {
             String originalFileLocation = originalFileLocations.get(i);
             FileSize actualFileSize = fileSizes.get(i);
             FileName newFileName = LiteFileName.from(batch, batch.getFileUrls().get(i));
@@ -112,7 +112,7 @@ class VersionOneToVersionTwoMigrator implements Migrator {
         DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted(downloadBatchTitle, batch.getDownloadBatchId(), Status.DOWNLOADED);
         downloadsPersistence.persistBatch(persistedBatch);
 
-        for (int i = 0; i < originalFileLocations.size(); i++) {
+        for (int i = 0, size = originalFileLocations.size(); i < size; i++) {
             String url = batch.getFileUrls().get(i);
             FileName fileName = LiteFileName.from(batch, url);
             FilePath filePath = FilePathCreator.create(fileName.name());
