@@ -12,7 +12,7 @@ import static com.novoda.downloadmanager.DownloadBatchStatus.Status;
 class VersionOneToVersionTwoMigrator implements Migrator {
 
     private static final int BUFFER_SIZE = 8 * 512;
-    private static final String DELETE_QUERY = "DELETE FROM batches WHERE _id = ?";
+    private static final String DELETE_BY_ID_QUERY = "DELETE FROM batches WHERE _id = ?";
 
     private final MigrationExtractor migrationExtractor;
     private final RoomDownloadsPersistence downloadsPersistence;
@@ -121,7 +121,7 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     private void deleteFrom(SqlDatabaseWrapper database, List<Migration> migrations) {
         for (Migration migration : migrations) {
             Batch batch = migration.batch();
-            database.rawQuery(DELETE_QUERY, batch.getDownloadBatchId().stringValue());
+            database.rawQuery(DELETE_BY_ID_QUERY, batch.getDownloadBatchId().stringValue());
         }
     }
 
