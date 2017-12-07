@@ -30,9 +30,21 @@ public class MainActivity extends AppCompatActivity {
     private static final DownloadBatchId BATCH_ID_1 = DownloadBatchIdCreator.createFrom("batch_id_1");
     private static final DownloadBatchId BATCH_ID_2 = DownloadBatchIdCreator.createFrom("batch_id_2");
 
+    private final ServiceConnection migrationServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            LiteDownloadMigrationService liteDownloadMigrationService = ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) iBinder).getService();
+            liteDownloadMigrationService.migrateFromV1ToV2();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            // TODO
+        }
+    };
+
     private TextView textViewBatch1;
     private TextView textViewBatch2;
-
     private LiteDownloadManagerCommands liteDownloadManagerCommands;
 
     @Override
@@ -50,19 +62,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent serviceIntent = new Intent(MainActivity.this, LiteDownloadMigrationService.class);
-                ServiceConnection serviceConnection = new ServiceConnection() {
-                    @Override
-                    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-                        LiteDownloadMigrationService liteDownloadMigrationService = ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) iBinder).getService();
-                        liteDownloadMigrationService.migrateFromV1ToV2();
-                    }
-
-                    @Override
-                    public void onServiceDisconnected(ComponentName componentName) {
-                        // TODO
-                    }
-                };
-                bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+                bindService(serviceIntent, migrationServiceConnection, Context.BIND_AUTO_CREATE);
             }
         });
 
