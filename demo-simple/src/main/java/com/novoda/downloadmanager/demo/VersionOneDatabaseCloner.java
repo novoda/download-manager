@@ -13,7 +13,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -25,8 +24,8 @@ class VersionOneDatabaseCloner {
     private static final String DATABASE_PATH = "/data/data/com.novoda.downloadmanager.demo.simple/databases/";
     private static final String DATABASE_NAME = "downloads.db";
     private static final String DOWNLOAD_FILE_NAME = "file.zip";
-    private static final String HINTS_QUERY = "SELECT hint FROM Downloads";
-    private static final int HINT_COLUMN_INDEX = 0;
+    private static final String ORIGINAL_FILE_LOCATION_QUERY = "SELECT _data FROM Downloads WHERE _data IS NOT NULL";
+    private static final int ORIGINAL_FILE_LOCATION_COLUMN_INDEX = 0;
 
     private final AssetManager assetManager;
     private final Executor executor;
@@ -46,6 +45,7 @@ class VersionOneDatabaseCloner {
 
                 Log.d(getClass().getSimpleName(), "Copying files!");
                 cloneDownloadFiles();
+                Log.d(getClass().getSimpleName(), "Finished Copying DB and Files!");
             }
         });
     }
@@ -56,8 +56,6 @@ class VersionOneDatabaseCloner {
         int length;
         try {
             inputStream = assetManager.open(assetName);
-            Log.e(getClass().getSimpleName(), outputFile.exists());
-            Log.e(getClass().getSimpleName(), "can write: " + outputFile.canWrite());
             myOutput = new FileOutputStream(outputFile, true);
             while ((length = inputStream.read(BUFFER)) > 0) {
                 myOutput.write(BUFFER, 0, length);
@@ -77,7 +75,7 @@ class VersionOneDatabaseCloner {
         List<String> localFileLocations = localFileLocations();
 
         for (String localFileLocation : localFileLocations) {
-            File outputFile = new File(URI.create(localFileLocation));
+            File outputFile = new File(localFileLocation);
 
             createFileIfDoesNotExist(outputFile);
             copyAssetToFile(DOWNLOAD_FILE_NAME, outputFile);
@@ -101,15 +99,15 @@ class VersionOneDatabaseCloner {
     private List<String> localFileLocations() {
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(DATABASE_PATH + DATABASE_NAME, null, 0);
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
-        Cursor hintsCursor = database.rawQuery(HINTS_QUERY);
-        List<String> hints = new ArrayList<>();
+        Cursor originalFileLocationsCursor = database.rawQuery(ORIGINAL_FILE_LOCATION_QUERY);
+        List<String> originalFileLocations = new ArrayList<>();
 
-        while (hintsCursor.moveToNext()) {
-            String hint = hintsCursor.getString(HINT_COLUMN_INDEX);
-            hints.add(hint);
+        while (originalFileLocationsCursor.moveToNext()) {
+            String originalFileLocation = originalFileLocationsCursor.getString(ORIGINAL_FILE_LOCATION_COLUMN_INDEX);
+            originalFileLocations.add(originalFileLocation);
         }
         sqLiteDatabase.close();
-        return hints;
+        return originalFileLocations;
     }
 
 }
