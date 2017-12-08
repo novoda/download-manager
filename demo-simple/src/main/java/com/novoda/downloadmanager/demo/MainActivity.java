@@ -51,12 +51,19 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 String originalDatabaseLocation = getFilesDir().getParentFile().getAbsolutePath() + "/databases/downloads.db";
                 Executor executor = Executors.newSingleThreadExecutor();
-                VersionOneDatabaseCloner versionOneDatabaseCloner = new VersionOneDatabaseCloner(getAssets(), executor, new VersionOneDatabaseCloner.UpdateListener() {
+                VersionOneDatabaseCloner.UpdateListener updateListener = new VersionOneDatabaseCloner.UpdateListener() {
                     @Override
                     public void onUpdate(String updateMessage) {
                         databaseCloningUpdates.setText(updateMessage);
                     }
-                }, new Handler(getMainLooper()), originalDatabaseLocation);
+                };
+                VersionOneDatabaseCloner versionOneDatabaseCloner = new VersionOneDatabaseCloner(
+                        getAssets(),
+                        executor,
+                        updateListener,
+                        new Handler(getMainLooper()),
+                        originalDatabaseLocation
+                );
                 versionOneDatabaseCloner.cloneDatabase();
             }
         });
@@ -68,12 +75,17 @@ public class MainActivity extends AppCompatActivity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        Migrator migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(getApplicationContext(), getDatabasePath("downloads.db"), new Migrator.Callback() {
+                        Migrator.Callback migrationCompletionCallback = new Migrator.Callback() {
                             @Override
                             public void onMigrationComplete() {
                                 deleteDatabase("downloads.db");
                             }
-                        });
+                        };
+                        Migrator migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
+                                getApplicationContext(),
+                                getDatabasePath("downloads.db"),
+                                migrationCompletionCallback
+                        );
                         migrator.migrate();
                     }
                 }).start();
