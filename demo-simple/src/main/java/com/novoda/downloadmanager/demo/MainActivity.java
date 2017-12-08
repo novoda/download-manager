@@ -66,6 +66,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        View buttonAbortMigration = findViewById(R.id.button_abort_migration);
+        buttonAbortMigration.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // TODO: I don't think this is guaranteed to stop the service.
+                // We need to unbind and then stop the service for it to be killed.
+                stopService(new Intent(getApplicationContext(), LiteDownloadMigrationService.class));
+            }
+        });
+
         View buttonDownload = findViewById(R.id.button_start_downloading);
         buttonDownload.setOnClickListener(new View.OnClickListener() {
             @Override

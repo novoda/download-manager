@@ -10,7 +10,13 @@
     android:id="@+id/button_migrate"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="migrate" />
+    android:text="Migrate" />
+
+  <Button
+    android:id="@+id/button_abort_migration"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Abort Migration" />
 
   <LinearLayout
     android:layout_width="match_parent"
