@@ -16,7 +16,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_weight="1"
-      android:text="Hello World!" />
+      android:text="Tap to begin cloning" />
 
     <Button
       android:id="@+id/button_create_v1_db"
