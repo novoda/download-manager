@@ -19,6 +19,8 @@ import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.LiteDownloadMigrationService;
+import com.novoda.downloadmanager.MigrationFactory;
+import com.novoda.downloadmanager.Migrator;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
@@ -33,9 +35,21 @@ public class MainActivity extends AppCompatActivity {
     private final ServiceConnection migrationServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            LiteDownloadMigrationService liteDownloadMigrationService = ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) iBinder).getService();
-            liteDownloadMigrationService.migrateFromV1ToV2();
+            ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) iBinder)
+                    .withMigrator(MigrationFactory.createVersionOneToVersionTwoMigrator(
+                            getApplicationContext(),
+                            getDatabasePath("downloads.db"),
+                            deleteOldDatabaseOnCompletion
+                    ))
+                    .bind();
         }
+
+        private final Migrator.Callback deleteOldDatabaseOnCompletion = new Migrator.Callback() {
+            @Override
+            public void onMigrationComplete() {
+                deleteDatabase("downloads.db");
+            }
+        };
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {

@@ -11,26 +11,10 @@ import java.util.concurrent.Executors;
 
 public class LiteDownloadMigrationService extends Service {
 
-    private final Migrator.Callback deleteOldDatabaseOnCompletion = new Migrator.Callback() {
-        @Override
-        public void onMigrationComplete() {
-            deleteDatabase("downloads.db");
-        }
-    };
-    private final Migrator v1ToV2Migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
-            getApplicationContext(),
-            getDatabasePath("downloads.db"),
-            deleteOldDatabaseOnCompletion
-    );
+    private Migrator v1ToV2Migrator;
 
     private ExecutorService executor;
     private IBinder binder;
-
-    public class MigrationDownloadServiceBinder extends Binder {
-        public LiteDownloadMigrationService getService() {
-            return LiteDownloadMigrationService.this;
-        }
-    }
 
     @Override
     public void onCreate() {
@@ -40,7 +24,7 @@ public class LiteDownloadMigrationService extends Service {
         super.onCreate();
     }
 
-    public void migrateFromV1ToV2() {
+    private void migrateFromV1ToV2() {
         executor.execute(new Runnable() {
             @Override
             public void run() {
@@ -64,6 +48,18 @@ public class LiteDownloadMigrationService extends Service {
     public void onDestroy() {
         executor.shutdown();
         super.onDestroy();
+    }
+
+    public class MigrationDownloadServiceBinder extends Binder {
+
+        public MigrationDownloadServiceBinder withMigrator(Migrator migrator) {
+            LiteDownloadMigrationService.this.v1ToV2Migrator = migrator;
+            return this;
+        }
+
+        public void bind() {
+            LiteDownloadMigrationService.this.migrateFromV1ToV2();
+        }
     }
 
 }
