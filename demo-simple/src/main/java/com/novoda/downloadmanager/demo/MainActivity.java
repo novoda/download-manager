@@ -45,8 +45,9 @@ public class MainActivity extends AppCompatActivity {
         buttonCreateDB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new VersionOneDatabaseCloner(getAssets())
-                        .cloneDatabase();
+                VersionOneDatabaseCloner versionOneDatabaseCloner = new VersionOneDatabaseCloner(getAssets());
+                versionOneDatabaseCloner.cloneDatabase();
+                versionOneDatabaseCloner.cloneDownloadFiles();
             }
         });
 
