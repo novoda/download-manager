@@ -18,6 +18,8 @@ import com.novoda.downloadmanager.Migrator;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 
@@ -45,9 +47,9 @@ public class MainActivity extends AppCompatActivity {
         buttonCreateDB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                VersionOneDatabaseCloner versionOneDatabaseCloner = new VersionOneDatabaseCloner(getAssets());
+                Executor executor = Executors.newSingleThreadExecutor();
+                VersionOneDatabaseCloner versionOneDatabaseCloner = new VersionOneDatabaseCloner(getAssets(), executor);
                 versionOneDatabaseCloner.cloneDatabase();
-                versionOneDatabaseCloner.cloneDownloadFiles();
             }
         });
 

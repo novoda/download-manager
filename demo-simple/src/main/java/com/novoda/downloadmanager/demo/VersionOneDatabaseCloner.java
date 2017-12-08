@@ -16,6 +16,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 class VersionOneDatabaseCloner {
 
@@ -28,16 +29,25 @@ class VersionOneDatabaseCloner {
     private static final int HINT_COLUMN_INDEX = 0;
 
     private final AssetManager assetManager;
+    private final Executor executor;
 
-    VersionOneDatabaseCloner(AssetManager assetManager) {
+    VersionOneDatabaseCloner(AssetManager assetManager, Executor executor) {
         this.assetManager = assetManager;
+        this.executor = executor;
     }
 
     void cloneDatabase() {
-        Log.d(getClass().getSimpleName(), "Copying database!");
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(getClass().getSimpleName(), "Copying database!");
+                File outputFile = new File(DATABASE_PATH, DATABASE_NAME);
+                copyAssetToFile(DATABASE_NAME, outputFile);
 
-        File outputFile = new File(DATABASE_PATH, DATABASE_NAME);
-        copyAssetToFile(DATABASE_NAME, outputFile);
+                Log.d(getClass().getSimpleName(), "Copying files!");
+                cloneDownloadFiles();
+            }
+        });
     }
 
     private void copyAssetToFile(String assetName, File outputFile) {
@@ -56,14 +66,14 @@ class VersionOneDatabaseCloner {
             myOutput.flush();
             inputStream.close();
 
-            Log.d(getClass().getSimpleName(), "Copying asset: " + assetName);
+            Log.d(getClass().getSimpleName(), "Copied asset: " + assetName);
         } catch (IOException e) {
             e.printStackTrace();
             Log.e("Failed to copy asset: " + assetName, e);
         }
     }
 
-    void cloneDownloadFiles() {
+    private void cloneDownloadFiles() {
         List<String> localFileLocations = localFileLocations();
 
         for (String localFileLocation : localFileLocations) {
