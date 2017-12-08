@@ -3,6 +3,7 @@ package com.novoda.downloadmanager.demo;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Handler;
 
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
 import com.novoda.notils.exception.DeveloperError;
@@ -29,23 +30,43 @@ class VersionOneDatabaseCloner {
 
     private final AssetManager assetManager;
     private final Executor executor;
+    private final UpdateListener updateListener;
+    private final Handler updateHandler;
 
-    VersionOneDatabaseCloner(AssetManager assetManager, Executor executor) {
+    VersionOneDatabaseCloner(AssetManager assetManager,
+                             Executor executor,
+                             UpdateListener updateListener,
+                             Handler updateHandler) {
         this.assetManager = assetManager;
         this.executor = executor;
+        this.updateListener = updateListener;
+        this.updateHandler = updateHandler;
+    }
+
+    interface UpdateListener {
+        void onUpdate(String updateMessage);
     }
 
     void cloneDatabase() {
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                Log.d(getClass().getSimpleName(), "Copying database!");
+                notifyOfUpdate("Cloning Database");
                 File outputFile = new File(DATABASE_PATH, DATABASE_NAME);
                 copyAssetToFile(DATABASE_NAME, outputFile);
 
-                Log.d(getClass().getSimpleName(), "Copying files!");
+                notifyOfUpdate("Cloning Files");
                 cloneDownloadFiles();
-                Log.d(getClass().getSimpleName(), "Finished Copying DB and Files!");
+                notifyOfUpdate("Cloning Complete");
+            }
+        });
+    }
+
+    private void notifyOfUpdate(final String message) {
+        updateHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                updateListener.onUpdate(message);
             }
         });
     }

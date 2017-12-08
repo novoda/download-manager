@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager.demo;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -43,12 +44,18 @@ public class MainActivity extends AppCompatActivity {
         textViewBatch1 = findViewById(R.id.batch_1);
         textViewBatch2 = findViewById(R.id.batch_2);
 
+        final TextView databaseCloningUpdates = findViewById(R.id.database_cloning_updates);
         View buttonCreateDB = findViewById(R.id.button_create_v1_db);
         buttonCreateDB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Executor executor = Executors.newSingleThreadExecutor();
-                VersionOneDatabaseCloner versionOneDatabaseCloner = new VersionOneDatabaseCloner(getAssets(), executor);
+                VersionOneDatabaseCloner versionOneDatabaseCloner = new VersionOneDatabaseCloner(getAssets(), executor, new VersionOneDatabaseCloner.UpdateListener() {
+                    @Override
+                    public void onUpdate(String updateMessage) {
+                        databaseCloningUpdates.setText(updateMessage);
+                    }
+                }, new Handler(getMainLooper()));
                 versionOneDatabaseCloner.cloneDatabase();
             }
         });
