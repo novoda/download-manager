@@ -7,6 +7,12 @@
   tools:context="com.novoda.downloadmanager.demo.MainActivity">
 
   <Button
+    android:id="@+id/button_create_v1_db"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Create V1 DB" />
+
+  <Button
     android:id="@+id/button_migrate"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"

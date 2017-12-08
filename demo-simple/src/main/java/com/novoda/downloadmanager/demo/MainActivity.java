@@ -41,6 +41,15 @@ public class MainActivity extends AppCompatActivity {
         textViewBatch1 = findViewById(R.id.batch_1);
         textViewBatch2 = findViewById(R.id.batch_2);
 
+        View buttonCreateDB = findViewById(R.id.button_create_v1_db);
+        buttonCreateDB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new VersionOneDatabaseCloner(getAssets())
+                        .cloneDatabase();
+            }
+        });
+
         View buttonMigrate = findViewById(R.id.button_migrate);
         buttonMigrate.setOnClickListener(new View.OnClickListener() {
             @Override
