@@ -22,7 +22,7 @@ class VersionOneDatabaseCloner {
 
     private static final byte[] BUFFER = new byte[1024];
 
-    private static final String DATABASE_PATH = "/data/data/com.novoda.downloadmanager.demo.simple/databases/";
+    private static final String DATABASE_PATH = "/data/data/com.novoda.downloadmanager.demo.simple/databases/downloads.db";
     private static final String DATABASE_NAME = "downloads.db";
     private static final String DOWNLOAD_FILE_NAME = "file.zip";
     private static final String ORIGINAL_FILE_LOCATION_QUERY = "SELECT _data FROM Downloads WHERE _data IS NOT NULL";
@@ -52,7 +52,8 @@ class VersionOneDatabaseCloner {
             @Override
             public void run() {
                 notifyOfUpdate("Cloning Database");
-                File outputFile = new File(DATABASE_PATH, DATABASE_NAME);
+                File outputFile = new File(DATABASE_PATH);
+                createFileIfDoesNotExist(outputFile);
                 copyAssetToFile(DATABASE_NAME, outputFile);
 
                 notifyOfUpdate("Cloning Files");
@@ -118,7 +119,7 @@ class VersionOneDatabaseCloner {
     }
 
     private List<String> localFileLocations() {
-        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(DATABASE_PATH + DATABASE_NAME, null, 0);
+        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(DATABASE_PATH, null, 0);
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
         Cursor originalFileLocationsCursor = database.rawQuery(ORIGINAL_FILE_LOCATION_QUERY);
         List<String> originalFileLocations = new ArrayList<>();
