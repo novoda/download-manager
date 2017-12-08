@@ -6,6 +6,8 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
+import com.novoda.notils.exception.DeveloperError;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -58,6 +60,9 @@ public class LiteDownloadMigrationService extends Service {
         }
 
         public void bind() {
+            if (LiteDownloadMigrationService.this.v1ToV2Migrator == null) {
+                throw new DeveloperError("You need to set a `Migrator` before calling `bind()`.");
+            }
             LiteDownloadMigrationService.this.migrateFromV1ToV2();
         }
     }
