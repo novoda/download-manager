@@ -19,8 +19,6 @@ import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.LiteDownloadMigrationService;
-import com.novoda.downloadmanager.MigrationFactory;
-import com.novoda.downloadmanager.Migrator;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
@@ -36,20 +34,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) iBinder)
-                    .withMigrator(MigrationFactory.createVersionOneToVersionTwoMigrator(
-                            getApplicationContext(),
-                            getDatabasePath("downloads.db"),
-                            deleteOldDatabaseOnCompletion
-                    ))
-                    .bind();
+                    .migrate();
         }
-
-        private final Migrator.Callback deleteOldDatabaseOnCompletion = new Migrator.Callback() {
-            @Override
-            public void onMigrationComplete() {
-                deleteDatabase("downloads.db");
-            }
-        };
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
@@ -84,9 +70,7 @@ public class MainActivity extends AppCompatActivity {
         buttonAbortMigration.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO: I don't think this is guaranteed to stop the service.
-                // We need to unbind and then stop the service for it to be killed.
-                stopService(new Intent(getApplicationContext(), LiteDownloadMigrationService.class));
+                unbindService(migrationServiceConnection);
             }
         });
 
