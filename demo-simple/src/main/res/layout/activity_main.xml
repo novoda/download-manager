@@ -6,6 +6,26 @@
   android:orientation="vertical"
   tools:context="com.novoda.downloadmanager.demo.MainActivity">
 
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <TextView
+      android:id="@+id/database_cloning_updates"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:text="Tap to begin cloning" />
+
+    <Button
+      android:id="@+id/button_create_v1_db"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Create V1 DB" />
+
+  </LinearLayout>
+
   <Button
     android:id="@+id/button_migrate"
     android:layout_width="wrap_content"
