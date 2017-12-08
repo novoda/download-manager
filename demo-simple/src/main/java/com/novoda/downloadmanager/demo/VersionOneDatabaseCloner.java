@@ -22,7 +22,6 @@ class VersionOneDatabaseCloner {
 
     private static final byte[] BUFFER = new byte[1024];
 
-    private static final String DATABASE_PATH = "/data/data/com.novoda.downloadmanager.demo.simple/databases/downloads.db";
     private static final String DATABASE_NAME = "downloads.db";
     private static final String DOWNLOAD_FILE_NAME = "file.zip";
     private static final String ORIGINAL_FILE_LOCATION_QUERY = "SELECT _data FROM Downloads WHERE _data IS NOT NULL";
@@ -32,15 +31,18 @@ class VersionOneDatabaseCloner {
     private final Executor executor;
     private final UpdateListener updateListener;
     private final Handler updateHandler;
+    private final String originalDatabaseLocation;
 
     VersionOneDatabaseCloner(AssetManager assetManager,
                              Executor executor,
                              UpdateListener updateListener,
-                             Handler updateHandler) {
+                             Handler updateHandler,
+                             String originalDatabaseLocation) {
         this.assetManager = assetManager;
         this.executor = executor;
         this.updateListener = updateListener;
         this.updateHandler = updateHandler;
+        this.originalDatabaseLocation = originalDatabaseLocation;
     }
 
     interface UpdateListener {
@@ -52,7 +54,7 @@ class VersionOneDatabaseCloner {
             @Override
             public void run() {
                 notifyOfUpdate("Cloning Database");
-                File outputFile = new File(DATABASE_PATH);
+                File outputFile = new File(originalDatabaseLocation);
                 createFileIfDoesNotExist(outputFile);
                 copyAssetToFile(DATABASE_NAME, outputFile);
 
@@ -119,7 +121,7 @@ class VersionOneDatabaseCloner {
     }
 
     private List<String> localFileLocations() {
-        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(DATABASE_PATH, null, 0);
+        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(originalDatabaseLocation, null, 0);
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
         Cursor originalFileLocationsCursor = database.rawQuery(ORIGINAL_FILE_LOCATION_QUERY);
         List<String> originalFileLocations = new ArrayList<>();

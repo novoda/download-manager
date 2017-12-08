@@ -49,13 +49,14 @@ public class MainActivity extends AppCompatActivity {
         buttonCreateDB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                String originalDatabaseLocation = getFilesDir().getParentFile().getAbsolutePath() + "/databases/downloads.db";
                 Executor executor = Executors.newSingleThreadExecutor();
                 VersionOneDatabaseCloner versionOneDatabaseCloner = new VersionOneDatabaseCloner(getAssets(), executor, new VersionOneDatabaseCloner.UpdateListener() {
                     @Override
                     public void onUpdate(String updateMessage) {
                         databaseCloningUpdates.setText(updateMessage);
                     }
-                }, new Handler(getMainLooper()));
+                }, new Handler(getMainLooper()), originalDatabaseLocation);
                 versionOneDatabaseCloner.cloneDatabase();
             }
         });
