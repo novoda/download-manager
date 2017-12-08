@@ -12,6 +12,9 @@ import java.io.OutputStream;
 
 class VersionOneDatabaseCloner {
 
+    private static final String DATABASE_PATH = "/data/data/com.novoda.downloadmanager.demo.simple/databases/";
+    private static final String DATABASE_NAME = "downloads.db";
+
     private final AssetManager assetManager;
 
     VersionOneDatabaseCloner(AssetManager assetManager) {
@@ -19,18 +22,16 @@ class VersionOneDatabaseCloner {
     }
 
     boolean cloneDatabase() {
-        String outputDatabasePath = "/data/data/com.novoda.downloadmanager.demo.simple/databases/";
-
         Log.d(getClass().getSimpleName(), "Copying database!");
 
         byte[] buffer = new byte[1024];
         OutputStream myOutput;
         int length;
         InputStream inputStream;
-        File outputFile = new File(outputDatabasePath, "downloads.db");
+        File outputFile = new File(DATABASE_PATH, DATABASE_NAME);
 
         try {
-            inputStream = assetManager.open("downloads.db");
+            inputStream = assetManager.open(DATABASE_NAME);
             myOutput = new FileOutputStream(outputFile);
             while ((length = inputStream.read(buffer)) > 0) {
                 myOutput.write(buffer, 0, length);
