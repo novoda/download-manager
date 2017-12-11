@@ -20,6 +20,7 @@ public class LiteDownloadMigrationService extends Service {
     private ExecutorService executor;
     private IBinder binder;
     private Migrator.Callback migrationCallback;
+    private String updateMessage;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -58,6 +59,7 @@ public class LiteDownloadMigrationService extends Service {
         return new Migrator.Callback() {
             @Override
             public void onUpdate(String message) {
+                updateMessage = message;
                 if (migrationCallback != null) {
                     migrationCallback.onUpdate(message);
                 }
@@ -108,9 +110,13 @@ public class LiteDownloadMigrationService extends Service {
 
     class MigrationDownloadServiceBinder extends Binder {
 
-        MigrationDownloadServiceBinder bindWithCallback(Migrator.Callback migrationCallback) {
+        MigrationDownloadServiceBinder withCallback(Migrator.Callback migrationCallback) {
             LiteDownloadMigrationService.this.migrationCallback = migrationCallback;
             return this;
+        }
+
+        void bind() {
+            LiteDownloadMigrationService.this.migrationCallback.onUpdate(LiteDownloadMigrationService.this.updateMessage);
         }
 
     }
