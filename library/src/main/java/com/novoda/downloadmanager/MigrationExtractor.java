@@ -2,14 +2,12 @@ package com.novoda.downloadmanager;
 
 import android.database.Cursor;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.util.ArrayList;
 import java.util.List;
 
 class MigrationExtractor {
 
-    private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title FROM batches INNER JOIN DownloadsByBatch ON " +
+    private static final String BATCHES_QUERY = "SELECT DISTINCT batches._id, batches.batch_title FROM batches INNER JOIN DownloadsByBatch ON " +
             "DownloadsByBatch.batch_id = batches._id WHERE DownloadsByBatch.batch_total_bytes = DownloadsByBatch.batch_current_bytes";
     private static final String URIS_QUERY = "SELECT uri, _data, total_bytes FROM Downloads WHERE batch_id = ?";
     private static final int BATCH_ID_COLUMN = 0;
@@ -40,8 +38,6 @@ class MigrationExtractor {
             while (uriCursor.moveToNext()) {
                 String uri = uriCursor.getString(URI_COLUMN);
                 String originalFileName = uriCursor.getString(FILE_NAME_COLUMN);
-                Log.d("MainActivity", batchId + " : " + batchTitle + " : " + uri);
-
                 newBatchBuilder.addFile(uri);
 
                 long rawFileSize = uriCursor.getLong(FILE_SIZE_COLUMN);
