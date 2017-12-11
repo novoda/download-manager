@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private static final DownloadBatchId BATCH_ID_2 = DownloadBatchIdCreator.createFrom("batch_id_2");
 
     private TextView databaseCloningUpdates;
+    private TextView databaseMigrationUpdates;
     private TextView textViewBatch1;
     private TextView textViewBatch2;
     private LiteDownloadManagerCommands liteDownloadManagerCommands;
@@ -63,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        databaseMigrationUpdates = findViewById(R.id.database_migration_updates);
         View buttonMigrate = findViewById(R.id.button_migrate);
         buttonMigrate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -158,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
     Migrator.Callback migrationCallback = new Migrator.Callback() {
         @Override
         public void onUpdate(String message) {
-
+            databaseMigrationUpdates.setText(message);
         }
     };
 

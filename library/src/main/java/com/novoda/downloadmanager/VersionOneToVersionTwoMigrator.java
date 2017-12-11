@@ -20,23 +20,28 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     private final RoomDownloadsPersistence downloadsPersistence;
     private final InternalFilePersistence internalFilePersistence;
     private final SqlDatabaseWrapper database;
+    private final Callback migrationCallback;
 
     VersionOneToVersionTwoMigrator(MigrationExtractor migrationExtractor,
                                    RoomDownloadsPersistence downloadsPersistence,
                                    InternalFilePersistence internalFilePersistence,
-                                   SqlDatabaseWrapper database) {
+                                   SqlDatabaseWrapper database,
+                                   Callback migrationCallback) {
         this.migrationExtractor = migrationExtractor;
         this.downloadsPersistence = downloadsPersistence;
         this.internalFilePersistence = internalFilePersistence;
         this.database = database;
+        this.migrationCallback = migrationCallback;
     }
 
     @Override
     public void migrate() {
+        migrationCallback.onUpdate("Extracting Migrations");
         Log.d(TAG, "about to extract migrations, time is " + System.nanoTime());
         List<Migration> migrations = migrationExtractor.extractMigrations();
         Log.d(TAG, "migrations are all EXTRACTED, time is " + System.nanoTime());
 
+        migrationCallback.onUpdate("Migrating Files");
         Log.d(TAG, "about to migrate the files, time is " + System.nanoTime());
         migrateV1FilesToV2Location(migrations);
         Log.d(TAG, "files are all MOVED, about to start migrating the database, time is " + System.nanoTime());
@@ -44,11 +49,13 @@ class VersionOneToVersionTwoMigrator implements Migrator {
         migrateV1DataToV2Database(migrations);
         Log.d(TAG, "all data migrations are COMMITTED, about to delete the old database, time is " + System.nanoTime());
 
+        migrationCallback.onUpdate("Deleting Database");
         deleteFrom(database, migrations);
         Log.d(TAG, "all traces of v1 are ERASED, time is " + System.nanoTime());
         database.close();
 
         database.deleteDatabase();
+        migrationCallback.onUpdate("Migration Complete");
     }
 
     private void migrateV1FilesToV2Location(List<Migration> migrations) {

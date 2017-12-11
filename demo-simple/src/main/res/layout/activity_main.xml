@@ -31,17 +31,31 @@
 
   </LinearLayout>
 
-  <Button
-    android:id="@+id/button_migrate"
-    android:layout_width="wrap_content"
+  <LinearLayout
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:text="Migrate" />
+    android:orientation="horizontal">
 
-  <Button
-    android:id="@+id/button_abort_migration"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Abort Migration" />
+    <TextView
+      android:id="@+id/database_migration_updates"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:text="Tap to begin migration" />
+
+    <Button
+      android:id="@+id/button_migrate"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Migrate" />
+
+    <Button
+      android:id="@+id/button_abort_migration"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Abort" />
+
+  </LinearLayout>
 
   <LinearLayout
     android:layout_width="match_parent"
