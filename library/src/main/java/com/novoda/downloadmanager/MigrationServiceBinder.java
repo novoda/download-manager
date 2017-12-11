@@ -25,6 +25,7 @@ public class MigrationServiceBinder {
 
         Intent serviceIntent = new Intent(context, LiteDownloadMigrationService.class);
         context.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+        context.startService(new Intent(context, LiteDownloadMigrationService.class));
     }
 
     public void unbind() {
@@ -38,8 +39,7 @@ public class MigrationServiceBinder {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) iBinder)
-                    .withCallback(migrationCallback)
-                    .migrate();
+                    .bindWithCallback(migrationCallback);
         }
 
         @Override

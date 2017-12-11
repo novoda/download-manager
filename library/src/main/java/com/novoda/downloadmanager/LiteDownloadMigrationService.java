@@ -24,11 +24,25 @@ public class LiteDownloadMigrationService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
+
+        Log.e(getClass().getSimpleName(), "onStartCommand");
+
+        if (v1ToV2Migrator != null) {
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d(getClass().getSimpleName(), "Begin Migration");
+                    v1ToV2Migrator.migrate();
+                }
+            });
+        }
+
         return START_STICKY;
     }
 
     @Override
     public void onCreate() {
+        Log.e(getClass().getSimpleName(), "onCreate");
         executor = Executors.newSingleThreadExecutor();
         binder = new MigrationDownloadServiceBinder();
         v1ToV2Migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
@@ -51,16 +65,6 @@ public class LiteDownloadMigrationService extends Service {
         };
     }
 
-    private void migrateFromV1ToV2() {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(getClass().getSimpleName(), "Begin Migration");
-                v1ToV2Migrator.migrate();
-            }
-        });
-    }
-
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -69,6 +73,7 @@ public class LiteDownloadMigrationService extends Service {
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
+        Log.e(getClass().getSimpleName(), "onTaskRemoved");
         Intent intent = new Intent(getApplicationContext(), LiteDownloadMigrationService.class);
         PendingIntent pendingIntent = PendingIntent.getService(this, 1, intent, PendingIntent.FLAG_ONE_SHOT);
         schedule(pendingIntent);
@@ -87,6 +92,7 @@ public class LiteDownloadMigrationService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent) {
+        Log.e(getClass().getSimpleName(), "onUnbind");
         stopSelf();
         migrationCallback = null;
         Log.d(getClass().getSimpleName(), "Stopping service");
@@ -95,20 +101,18 @@ public class LiteDownloadMigrationService extends Service {
 
     @Override
     public void onDestroy() {
+        Log.e(getClass().getSimpleName(), "onDestroy");
         executor.shutdown();
         super.onDestroy();
     }
 
     class MigrationDownloadServiceBinder extends Binder {
 
-        MigrationDownloadServiceBinder withCallback(Migrator.Callback migrationCallback) {
+        MigrationDownloadServiceBinder bindWithCallback(Migrator.Callback migrationCallback) {
             LiteDownloadMigrationService.this.migrationCallback = migrationCallback;
             return this;
         }
 
-        void migrate() {
-            LiteDownloadMigrationService.this.migrateFromV1ToV2();
-        }
     }
 
 }
