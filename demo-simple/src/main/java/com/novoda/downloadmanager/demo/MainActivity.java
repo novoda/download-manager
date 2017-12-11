@@ -120,30 +120,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        final TextView downloadedTitles = findViewById(R.id.textview_completed_download_title);
-        View buttonShowCompletedDownloads = findViewById(R.id.button_show_completed_downloads);
-        buttonShowCompletedDownloads.setOnClickListener(new View.OnClickListener() {
+        View buttonLogFilesDir = findViewById(R.id.btn_log_files_dir);
+        buttonLogFilesDir.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                liteDownloadManagerCommands.getAllDownloadBatchStatuses(new AllBatchStatusesCallback() {
-                    @Override
-                    public void onReceived(List<DownloadBatchStatus> downloadBatchStatuses) {
-                        StringBuilder displayMessage = new StringBuilder();
-                        Log.d("MainActivity", "List Size: " + downloadBatchStatuses.size());
-                        for (DownloadBatchStatus status : downloadBatchStatuses) {
-                            if (status.bytesDownloaded() != status.bytesTotalSize()) {
-                                Log.d("MainActivity", status.getDownloadBatchTitle() + " not downloaded!");
-                                return;
-                            }
-                            String message = "Batch " + status.getDownloadBatchTitle().asString()
-                                    + "\ndownloaded! "
-                                    + "\nbytes: " + status.bytesDownloaded()
-                                    + "\n\n";
-                            displayMessage.append(message);
-                        }
-                        downloadedTitles.setText(displayMessage.toString());
-                    }
-                });
+            public void onClick(View v) {
+                for (String s : getFilesDir().list()) {
+                    Log.d("FilesDirLog", s);
+                }
             }
         });
 
