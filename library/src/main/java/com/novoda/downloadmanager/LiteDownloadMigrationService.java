@@ -74,14 +74,14 @@ public class LiteDownloadMigrationService extends Service {
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         Log.e(getClass().getSimpleName(), "onTaskRemoved");
-        Intent intent = new Intent(getApplicationContext(), LiteDownloadMigrationService.class);
-        PendingIntent pendingIntent = PendingIntent.getService(this, 1, intent, PendingIntent.FLAG_ONE_SHOT);
-        schedule(pendingIntent);
+        rescheduleMigration();
         Log.d(getClass().getSimpleName(), "rescheduling");
         super.onTaskRemoved(rootIntent);
     }
 
-    private void schedule(PendingIntent pendingIntent) {
+    private void rescheduleMigration() {
+        Intent intent = new Intent(getApplicationContext(), LiteDownloadMigrationService.class);
+        PendingIntent pendingIntent = PendingIntent.getService(this, 1, intent, PendingIntent.FLAG_ONE_SHOT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         if (alarmManager == null) {
             Log.w(getClass().getSimpleName(), "Could not retrieve AlarmManager for rescheduling.");
