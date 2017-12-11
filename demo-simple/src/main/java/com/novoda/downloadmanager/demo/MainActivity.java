@@ -16,6 +16,7 @@ import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.MigrationFactory;
+import com.novoda.downloadmanager.MigrationServiceBinder;
 import com.novoda.downloadmanager.Migrator;
 import com.novoda.notils.logger.simple.Log;
 
@@ -29,10 +30,11 @@ public class MainActivity extends AppCompatActivity {
     private static final DownloadBatchId BATCH_ID_2 = DownloadBatchIdCreator.createFrom("batch_id_2");
 
     private TextView databaseCloningUpdates;
+    private TextView databaseMigrationUpdates;
     private TextView textViewBatch1;
     private TextView textViewBatch2;
-
     private LiteDownloadManagerCommands liteDownloadManagerCommands;
+    private MigrationServiceBinder migrationServiceBinder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Log.setShowLogs(true);
+
+        migrationServiceBinder = MigrationFactory.migrationServiceBinder(this, migrationCallback);
 
         textViewBatch1 = findViewById(R.id.batch_1);
         textViewBatch2 = findViewById(R.id.batch_2);
@@ -60,27 +64,20 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        databaseMigrationUpdates = findViewById(R.id.database_migration_updates);
         View buttonMigrate = findViewById(R.id.button_migrate);
         buttonMigrate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Migrator.Callback migrationCompletionCallback = new Migrator.Callback() {
-                            @Override
-                            public void onMigrationComplete() {
-                                deleteDatabase("downloads.db");
-                            }
-                        };
-                        Migrator migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
-                                getApplicationContext(),
-                                getDatabasePath("downloads.db"),
-                                migrationCompletionCallback
-                        );
-                        migrator.migrate();
-                    }
-                }).start();
+                migrationServiceBinder.bind();
+            }
+        });
+
+        View buttonAbortMigration = findViewById(R.id.button_abort_migration);
+        buttonAbortMigration.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                migrationServiceBinder.unbind();
             }
         });
 
@@ -157,6 +154,13 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onUpdate(String updateMessage) {
             databaseCloningUpdates.setText(updateMessage);
+        }
+    };
+
+    Migrator.Callback migrationCallback = new Migrator.Callback() {
+        @Override
+        public void onUpdate(String message) {
+            databaseMigrationUpdates.setText(message);
         }
     };
 

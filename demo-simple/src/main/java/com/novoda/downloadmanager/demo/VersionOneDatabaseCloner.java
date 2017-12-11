@@ -120,7 +120,7 @@ class VersionOneDatabaseCloner {
             String originalFileLocation = originalFileLocationsCursor.getString(ORIGINAL_FILE_LOCATION_COLUMN_INDEX);
             originalFileLocations.add(originalFileLocation);
         }
-        sqLiteDatabase.close();
+        database.close();
         return originalFileLocations;
     }
 
