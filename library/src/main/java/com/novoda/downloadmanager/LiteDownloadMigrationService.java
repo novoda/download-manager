@@ -19,6 +19,7 @@ public class LiteDownloadMigrationService extends Service {
     private Migrator v1ToV2Migrator;
     private ExecutorService executor;
     private IBinder binder;
+    private MigrationCallback migrationCallback;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -94,7 +95,11 @@ public class LiteDownloadMigrationService extends Service {
         super.onDestroy();
     }
 
-    public class MigrationDownloadServiceBinder extends Binder {
+    public interface MigrationCallback {
+        void onUpdate(String updateMessage);
+    }
+
+    class MigrationDownloadServiceBinder extends Binder {
 
         public void migrate() {
             LiteDownloadMigrationService.this.migrateFromV1ToV2();
