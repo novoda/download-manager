@@ -26,7 +26,7 @@ public class LiteDownloadMigrationService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
 
-        Log.e(getClass().getSimpleName(), "onStartCommand");
+        Log.d(getClass().getSimpleName(), "onStartCommand");
 
         if (v1ToV2Migrator != null) {
             executor.execute(new Runnable() {
@@ -43,7 +43,7 @@ public class LiteDownloadMigrationService extends Service {
 
     @Override
     public void onCreate() {
-        Log.e(getClass().getSimpleName(), "onCreate");
+        Log.d(getClass().getSimpleName(), "onCreate");
         executor = Executors.newSingleThreadExecutor();
         binder = new MigrationDownloadServiceBinder();
         v1ToV2Migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
@@ -75,9 +75,9 @@ public class LiteDownloadMigrationService extends Service {
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
-        Log.e(getClass().getSimpleName(), "onTaskRemoved");
+        Log.d(getClass().getSimpleName(), "onTaskRemoved");
         rescheduleMigration();
-        Log.d(getClass().getSimpleName(), "rescheduling");
+        Log.d(getClass().getSimpleName(), "Rescheduling");
         super.onTaskRemoved(rootIntent);
     }
 
@@ -94,7 +94,7 @@ public class LiteDownloadMigrationService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent) {
-        Log.e(getClass().getSimpleName(), "onUnbind");
+        Log.d(getClass().getSimpleName(), "onUnbind");
         stopSelf();
         migrationCallback = null;
         Log.d(getClass().getSimpleName(), "Stopping service");
@@ -103,7 +103,7 @@ public class LiteDownloadMigrationService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.e(getClass().getSimpleName(), "onDestroy");
+        Log.d(getClass().getSimpleName(), "onDestroy");
         executor.shutdown();
         super.onDestroy();
     }
