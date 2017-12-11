@@ -20,15 +20,30 @@ public class LiteDownloadMigrationService extends Service {
     private ExecutorService executor;
     private IBinder binder;
     private Migrator.Callback migrationCallback;
+    private String updateMessage;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
+
+        Log.d(getClass().getSimpleName(), "onStartCommand");
+
+        if (v1ToV2Migrator != null) {
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d(getClass().getSimpleName(), "Begin Migration");
+                    v1ToV2Migrator.migrate();
+                }
+            });
+        }
+
         return START_STICKY;
     }
 
     @Override
     public void onCreate() {
+        Log.d(getClass().getSimpleName(), "onCreate");
         executor = Executors.newSingleThreadExecutor();
         binder = new MigrationDownloadServiceBinder();
         v1ToV2Migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
@@ -44,21 +59,12 @@ public class LiteDownloadMigrationService extends Service {
         return new Migrator.Callback() {
             @Override
             public void onUpdate(String message) {
+                updateMessage = message;
                 if (migrationCallback != null) {
                     migrationCallback.onUpdate(message);
                 }
             }
         };
-    }
-
-    private void migrateFromV1ToV2() {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(getClass().getSimpleName(), "Begin Migration");
-                v1ToV2Migrator.migrate();
-            }
-        });
     }
 
     @Nullable
@@ -69,14 +75,15 @@ public class LiteDownloadMigrationService extends Service {
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
-        Intent intent = new Intent(getApplicationContext(), LiteDownloadMigrationService.class);
-        PendingIntent pendingIntent = PendingIntent.getService(this, 1, intent, PendingIntent.FLAG_ONE_SHOT);
-        schedule(pendingIntent);
-        Log.d(getClass().getSimpleName(), "rescheduling");
+        Log.d(getClass().getSimpleName(), "onTaskRemoved");
+        rescheduleMigration();
+        Log.d(getClass().getSimpleName(), "Rescheduling");
         super.onTaskRemoved(rootIntent);
     }
 
-    private void schedule(PendingIntent pendingIntent) {
+    private void rescheduleMigration() {
+        Intent intent = new Intent(getApplicationContext(), LiteDownloadMigrationService.class);
+        PendingIntent pendingIntent = PendingIntent.getService(this, 1, intent, PendingIntent.FLAG_ONE_SHOT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         if (alarmManager == null) {
             Log.w(getClass().getSimpleName(), "Could not retrieve AlarmManager for rescheduling.");
@@ -87,7 +94,7 @@ public class LiteDownloadMigrationService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent) {
-        stopSelf();
+        Log.d(getClass().getSimpleName(), "onUnbind");
         migrationCallback = null;
         Log.d(getClass().getSimpleName(), "Stopping service");
         return super.onUnbind(intent);
@@ -95,6 +102,7 @@ public class LiteDownloadMigrationService extends Service {
 
     @Override
     public void onDestroy() {
+        Log.d(getClass().getSimpleName(), "onDestroy");
         executor.shutdown();
         super.onDestroy();
     }
@@ -106,9 +114,10 @@ public class LiteDownloadMigrationService extends Service {
             return this;
         }
 
-        void migrate() {
-            LiteDownloadMigrationService.this.migrateFromV1ToV2();
+        void bind() {
+            LiteDownloadMigrationService.this.migrationCallback.onUpdate(LiteDownloadMigrationService.this.updateMessage);
         }
+
     }
 
 }
