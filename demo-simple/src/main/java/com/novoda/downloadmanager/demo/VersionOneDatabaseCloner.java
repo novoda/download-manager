@@ -3,7 +3,6 @@ package com.novoda.downloadmanager.demo;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Handler;
 
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
 import com.novoda.notils.exception.DeveloperError;
@@ -30,18 +29,15 @@ class VersionOneDatabaseCloner {
     private final AssetManager assetManager;
     private final Executor executor;
     private final CloneCallback cloneCallback;
-    private final Handler updateHandler;
     private final String originalDatabaseLocation;
 
     VersionOneDatabaseCloner(AssetManager assetManager,
                              Executor executor,
                              CloneCallback cloneCallback,
-                             Handler updateHandler,
                              String originalDatabaseLocation) {
         this.assetManager = assetManager;
         this.executor = executor;
         this.cloneCallback = cloneCallback;
-        this.updateHandler = updateHandler;
         this.originalDatabaseLocation = originalDatabaseLocation;
     }
 
@@ -53,32 +49,18 @@ class VersionOneDatabaseCloner {
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                cloneDatabase(cloneCallback());
-                cloneDownloadFilesWithSize(selectedFileSize, cloneCallback());
-                cloneCallback().onUpdate("Cloning Complete");
+                cloneDatabase();
+                cloneDownloadFilesWithSize(selectedFileSize);
+                cloneCallback.onUpdate("Cloning Complete");
             }
         });
     }
 
-    private void cloneDatabase(CloneCallback cloneCallback) {
+    private void cloneDatabase() {
         cloneCallback.onUpdate("Cloning Database...");
         File outputFile = new File(originalDatabaseLocation);
         createFileIfDoesNotExist(outputFile);
         copyAssetToFile(DATABASE_NAME, outputFile);
-    }
-
-    private CloneCallback cloneCallback() {
-        return new CloneCallback() {
-            @Override
-            public void onUpdate(final String updateMessage) {
-                updateHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        cloneCallback.onUpdate(updateMessage);
-                    }
-                });
-            }
-        };
     }
 
     private void createFileIfDoesNotExist(File outputFile) {
@@ -115,7 +97,7 @@ class VersionOneDatabaseCloner {
         }
     }
 
-    private void cloneDownloadFilesWithSize(String selectedFileSize, CloneCallback cloneCallback) {
+    private void cloneDownloadFilesWithSize(String selectedFileSize) {
         cloneCallback.onUpdate("Cloning Files...");
         List<String> localFileLocations = localFileLocations();
         String fileName = String.format(DOWNLOAD_FILE_NAME_FORMAT, selectedFileSize);
