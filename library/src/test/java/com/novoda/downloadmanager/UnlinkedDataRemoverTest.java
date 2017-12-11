@@ -10,21 +10,21 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class UnlinkedDataRemoverTest {
-    private static final File file1 = mock(File.class);
-    private static final File file2 = mock(File.class);
-    private static final File file3 = mock(File.class); // Orphan
+    private static final File FIRST_FILE = mock(File.class);
+    private static final File SECOND_FILE = mock(File.class);
+    private static final File THIRD_FILE = mock(File.class); // Orphan
 
     @Test
     public void givenUnlinkedFilesInLocalStorage_whenRemoving_thenUnlinkedFilesAreDeleted() throws Exception {
-        LocalFilesDirectory localFilesDirectory = new MyLocalFilesDirectory(Arrays.asList(file1, file2, file3));
-        V2DatabaseFiles v2DatabaseFiles = new MyV2DatabaseFiles(Arrays.asList(file1, file2));
+        LocalFilesDirectory localFilesDirectory = new MyLocalFilesDirectory(Arrays.asList(FIRST_FILE, SECOND_FILE, THIRD_FILE));
+        V2DatabaseFiles v2DatabaseFiles = new MyV2DatabaseFiles(Arrays.asList(FIRST_FILE, SECOND_FILE));
 
         // Act
         UnlinkedDataRemover remover = new UnlinkedDataRemover(localFilesDirectory, v2DatabaseFiles);
         remover.remove();
 
         // Assert
-        verify(file3).delete();
+        verify(THIRD_FILE).delete();
     }
 
     interface LocalFilesDirectory {
