@@ -1,10 +1,11 @@
 package com.novoda.downloadmanager.demo;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.novoda.downloadmanager.AllBatchStatusesCallback;
@@ -18,8 +19,6 @@ import com.novoda.downloadmanager.MigrationServiceBinder;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 
@@ -28,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private static final DownloadBatchId BATCH_ID_1 = DownloadBatchIdCreator.createFrom("batch_id_1");
     private static final DownloadBatchId BATCH_ID_2 = DownloadBatchIdCreator.createFrom("batch_id_2");
 
+    private TextView databaseCloningUpdates;
     private TextView textViewBatch1;
     private TextView textViewBatch2;
     private LiteDownloadManagerCommands liteDownloadManagerCommands;
@@ -44,27 +44,19 @@ public class MainActivity extends AppCompatActivity {
         textViewBatch1 = findViewById(R.id.batch_1);
         textViewBatch2 = findViewById(R.id.batch_2);
 
-        final TextView databaseCloningUpdates = findViewById(R.id.database_cloning_updates);
+        final VersionOneDatabaseCloner versionOneDatabaseCloner = DatabaseClonerFactory.databaseCloner(this, cloneCallback);
+
+        final Spinner spinner = findViewById(R.id.database_download_file_size);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.file_sizes, android.R.layout.simple_spinner_item);
+        spinner.setAdapter(adapter);
+
+        databaseCloningUpdates = findViewById(R.id.database_cloning_updates);
         View buttonCreateDB = findViewById(R.id.button_create_v1_db);
         buttonCreateDB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String originalDatabaseLocation = getFilesDir().getParentFile().getAbsolutePath() + "/databases/downloads.db";
-                Executor executor = Executors.newSingleThreadExecutor();
-                VersionOneDatabaseCloner.UpdateListener updateListener = new VersionOneDatabaseCloner.UpdateListener() {
-                    @Override
-                    public void onUpdate(String updateMessage) {
-                        databaseCloningUpdates.setText(updateMessage);
-                    }
-                };
-                VersionOneDatabaseCloner versionOneDatabaseCloner = new VersionOneDatabaseCloner(
-                        getAssets(),
-                        executor,
-                        updateListener,
-                        new Handler(getMainLooper()),
-                        originalDatabaseLocation
-                );
-                versionOneDatabaseCloner.cloneDatabase();
+                String selectedFileSize = (String) spinner.getSelectedItem();
+                versionOneDatabaseCloner.cloneDatabaseWithDownloadSize(selectedFileSize);
             }
         });
 
@@ -152,6 +144,13 @@ public class MainActivity extends AppCompatActivity {
 
         bindViews();
     }
+
+    VersionOneDatabaseCloner.CloneCallback cloneCallback = new VersionOneDatabaseCloner.CloneCallback() {
+        @Override
+        public void onUpdate(String updateMessage) {
+            databaseCloningUpdates.setText(updateMessage);
+        }
+    };
 
     private void bindViews() {
         View buttonPauseDownload1 = findViewById(R.id.button_pause_downloading_1);
