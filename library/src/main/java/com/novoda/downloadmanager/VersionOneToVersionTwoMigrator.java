@@ -21,21 +21,24 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     private final InternalFilePersistence internalFilePersistence;
     private final SqlDatabaseWrapper database;
     private final Callback migrationCompleteCallback;
+    private final UnlinkedDataRemover remover;
 
     VersionOneToVersionTwoMigrator(MigrationExtractor migrationExtractor,
                                    RoomDownloadsPersistence downloadsPersistence,
                                    InternalFilePersistence internalFilePersistence,
                                    SqlDatabaseWrapper database,
-                                   Callback migrationCompleteCallback) {
+                                   Callback migrationCompleteCallback, UnlinkedDataRemover remover) {
         this.migrationExtractor = migrationExtractor;
         this.downloadsPersistence = downloadsPersistence;
         this.internalFilePersistence = internalFilePersistence;
         this.database = database;
         this.migrationCompleteCallback = migrationCompleteCallback;
+        this.remover = remover;
     }
 
     @Override
     public void migrate() {
+        remover.remove();
         Log.d(TAG, "about to extract migrations, time is " + System.nanoTime());
         List<Migration> migrations = migrationExtractor.extractMigrations();
         Log.d(TAG, "migrations are all EXTRACTED, time is " + System.nanoTime());

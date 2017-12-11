@@ -23,7 +23,9 @@ public final class MigrationFactory {
         RoomDownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
         InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
         internalFilePersistence.initialiseWith(context);
-        return new VersionOneToVersionTwoMigrator(migrationExtractor, downloadsPersistence, internalFilePersistence, database, callback);
+        RoomAppDatabase roomAppDatabase = RoomAppDatabase.obtainInstance(context);
+        UnlinkedDataRemover remover = new UnlinkedDataRemover(new AndroidLocalFileDirectory(context), new RoomV2DatabaseFiles(roomAppDatabase.roomFileDao()));
+        return new VersionOneToVersionTwoMigrator(migrationExtractor, downloadsPersistence, internalFilePersistence, database, callback, remover);
     }
 
 }
