@@ -33,20 +33,11 @@ public class LiteDownloadMigrationService extends Service {
         binder = new MigrationDownloadServiceBinder();
         v1ToV2Migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
                 getApplicationContext(),
-                getDatabasePath("downloads.db"),
-                deleteOldDatabaseOnCompletion
+                getDatabasePath("downloads.db")
         );
 
         super.onCreate();
     }
-
-    private final Migrator.Callback deleteOldDatabaseOnCompletion = new Migrator.Callback() {
-        @Override
-        public void onMigrationComplete() {
-            Log.d(getClass().getSimpleName(), "Deleting DB");
-            deleteDatabase("downloads.db");
-        }
-    };
 
     private void migrateFromV1ToV2() {
         executor.execute(new Runnable() {
@@ -101,7 +92,11 @@ public class LiteDownloadMigrationService extends Service {
 
     class MigrationDownloadServiceBinder extends Binder {
 
-        public void migrate() {
+        void withCallback(MigrationCallback migrationCallback) {
+            LiteDownloadMigrationService.this.migrationCallback = migrationCallback;
+        }
+
+        void migrate() {
             LiteDownloadMigrationService.this.migrateFromV1ToV2();
         }
     }

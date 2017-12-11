@@ -5,13 +5,13 @@ import android.database.sqlite.SQLiteDatabase;
 
 import java.io.File;
 
-public final class MigrationFactory {
+final class MigrationFactory {
 
     private MigrationFactory() {
         // Uses static methods.
     }
 
-    public static Migrator createVersionOneToVersionTwoMigrator(Context context, File databasePath, Migrator.Callback callback) {
+    static Migrator createVersionOneToVersionTwoMigrator(Context context, File databasePath) {
         if (!databasePath.exists()) {
             return Migrator.NO_OP;
         }
@@ -23,7 +23,7 @@ public final class MigrationFactory {
         RoomDownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
         InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
         internalFilePersistence.initialiseWith(context);
-        return new VersionOneToVersionTwoMigrator(migrationExtractor, downloadsPersistence, internalFilePersistence, database, callback);
+        return new VersionOneToVersionTwoMigrator(migrationExtractor, downloadsPersistence, internalFilePersistence, database);
     }
 
 }

@@ -20,18 +20,15 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     private final RoomDownloadsPersistence downloadsPersistence;
     private final InternalFilePersistence internalFilePersistence;
     private final SqlDatabaseWrapper database;
-    private final Callback migrationCompleteCallback;
 
     VersionOneToVersionTwoMigrator(MigrationExtractor migrationExtractor,
                                    RoomDownloadsPersistence downloadsPersistence,
                                    InternalFilePersistence internalFilePersistence,
-                                   SqlDatabaseWrapper database,
-                                   Callback migrationCompleteCallback) {
+                                   SqlDatabaseWrapper database) {
         this.migrationExtractor = migrationExtractor;
         this.downloadsPersistence = downloadsPersistence;
         this.internalFilePersistence = internalFilePersistence;
         this.database = database;
-        this.migrationCompleteCallback = migrationCompleteCallback;
     }
 
     @Override
@@ -51,7 +48,7 @@ class VersionOneToVersionTwoMigrator implements Migrator {
         Log.d(TAG, "all traces of v1 are ERASED, time is " + System.nanoTime());
         database.close();
 
-        migrationCompleteCallback.onMigrationComplete();
+        database.deleteDatabase();
     }
 
     private void migrateV1FilesToV2Location(List<Migration> migrations) {

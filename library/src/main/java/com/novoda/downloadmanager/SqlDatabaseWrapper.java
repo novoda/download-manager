@@ -3,6 +3,7 @@ package com.novoda.downloadmanager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,7 +28,14 @@ public class SqlDatabaseWrapper {
         return sqLiteDatabase.rawQuery(query, arguments.toArray(new String[arguments.size()]));
     }
 
-    void close() {
+    public void close() {
         sqLiteDatabase.close();
+    }
+
+    public void deleteDatabase() {
+        File outputFile = new File(sqLiteDatabase.getPath());
+        if (outputFile.exists()) {
+            outputFile.delete();
+        }
     }
 }
