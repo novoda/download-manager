@@ -30,7 +30,7 @@ public final class MigrationFactory {
         return new MigrationServiceBinder(context, mainThreadReportingMigrationCallback);
     }
 
-    public static Migrator createVersionOneToVersionTwoMigrator(Context context, File databasePath, Migrator.Callback migrationCallback) {
+    static Migrator createVersionOneToVersionTwoMigrator(Context context, File databasePath, Migrator.Callback migrationCallback) {
         if (!databasePath.exists()) {
             return Migrator.NO_OP;
         }
