@@ -18,6 +18,11 @@
       android:layout_weight="1"
       android:text="Tap to begin cloning" />
 
+    <Spinner
+      android:id="@+id/database_download_file_size"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content" />
+
     <Button
       android:id="@+id/button_create_v1_db"
       android:layout_width="wrap_content"
