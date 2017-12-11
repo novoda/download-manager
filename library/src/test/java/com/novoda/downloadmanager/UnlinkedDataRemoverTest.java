@@ -16,8 +16,8 @@ public class UnlinkedDataRemoverTest {
     @Test
     public void givenUnlinkedFilesInLocalStorage_whenRemoving_thenUnlinkedFilesAreDeleted() throws Exception {
         // Arrange
-        LocalFilesDirectory localFilesDirectory = new MyLocalFilesDirectory(Arrays.asList(FIRST_FILE, SECOND_FILE, THIRD_FILE));
-        V2DatabaseFiles v2DatabaseFiles = new MyV2DatabaseFiles(Arrays.asList(FIRST_FILE, SECOND_FILE));
+        LocalFilesDirectory localFilesDirectory = new FakeLocalFilesDirectory(Arrays.asList(FIRST_FILE, SECOND_FILE, THIRD_FILE));
+        V2DatabaseFiles v2DatabaseFiles = new FakeV2DatabaseFiles(Arrays.asList(FIRST_FILE, SECOND_FILE));
 
         // Act
         UnlinkedDataRemover remover = new UnlinkedDataRemover(localFilesDirectory, v2DatabaseFiles);
@@ -29,10 +29,10 @@ public class UnlinkedDataRemoverTest {
         assertThat(actualContents).isEqualTo(expectedContents);
     }
 
-    private static class MyLocalFilesDirectory implements LocalFilesDirectory {
+    private static class FakeLocalFilesDirectory implements LocalFilesDirectory {
         private List<String> fileList;
 
-        MyLocalFilesDirectory(List<String> fileList) {
+        FakeLocalFilesDirectory(List<String> fileList) {
             this.fileList = new ArrayList<>(fileList);
         }
 
@@ -57,10 +57,10 @@ public class UnlinkedDataRemoverTest {
         }
     }
 
-    private static class MyV2DatabaseFiles implements V2DatabaseFiles {
+    private static class FakeV2DatabaseFiles implements V2DatabaseFiles {
         private final List<String> fileList;
 
-        private MyV2DatabaseFiles(List<String> fileList) {
+        private FakeV2DatabaseFiles(List<String> fileList) {
             this.fileList = fileList;
         }
 
