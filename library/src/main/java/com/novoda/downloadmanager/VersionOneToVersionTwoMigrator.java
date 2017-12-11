@@ -131,7 +131,10 @@ class VersionOneToVersionTwoMigrator implements Migrator {
         for (Migration migration : migrations) {
             Batch batch = migration.batch();
             database.rawQuery(DELETE_BY_ID_QUERY, batch.getDownloadBatchId().stringValue());
+            for (Migration.FileMetadata metadata : migration.getFileMetadata()) {
+                File file = new File(metadata.originalFileLocation());
+                file.delete();
+            }
         }
     }
-
 }

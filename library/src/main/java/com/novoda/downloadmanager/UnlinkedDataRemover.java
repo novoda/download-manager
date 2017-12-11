@@ -1,10 +1,12 @@
 package com.novoda.downloadmanager;
 
-class UnlinkedDataRemover {
-    private final UnlinkedDataRemoverTest.LocalFilesDirectory localFilesDirectory;
-    private final UnlinkedDataRemoverTest.V2DatabaseFiles v2DatabaseFiles;
+import java.util.List;
 
-    UnlinkedDataRemover(UnlinkedDataRemoverTest.LocalFilesDirectory localFilesDirectory, UnlinkedDataRemoverTest.V2DatabaseFiles v2DatabaseFiles) {
+class UnlinkedDataRemover {
+    private final LocalFilesDirectory localFilesDirectory;
+    private final V2DatabaseFiles v2DatabaseFiles;
+
+    UnlinkedDataRemover(LocalFilesDirectory localFilesDirectory, V2DatabaseFiles v2DatabaseFiles) {
         this.localFilesDirectory = localFilesDirectory;
         this.v2DatabaseFiles = v2DatabaseFiles;
     }
@@ -15,5 +17,9 @@ class UnlinkedDataRemover {
                 localFilesDirectory.deleteFile(filename);
             }
         }
+    }
+
+    interface V2DatabaseFiles {
+        List<String> databaseContents();
     }
 }
