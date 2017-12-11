@@ -5,8 +5,6 @@ public interface Migrator {
     void migrate();
 
     interface Callback {
-        void onMigrationComplete();
-
         void onUpdate(String message);
     }
 

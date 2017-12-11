@@ -9,11 +9,13 @@ import android.os.IBinder;
 public class MigrationServiceBinder {
 
     private final Context context;
+    private final Migrator.Callback migrationCallback;
 
     private MigrationServiceConnection serviceConnection;
 
-    public MigrationServiceBinder(Context context) {
+    MigrationServiceBinder(Context context, Migrator.Callback migrationCallback) {
         this.context = context;
+        this.migrationCallback = migrationCallback;
     }
 
     public void bind() {
@@ -36,6 +38,7 @@ public class MigrationServiceBinder {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) iBinder)
+                    .withCallback(migrationCallback)
                     .migrate();
         }
 

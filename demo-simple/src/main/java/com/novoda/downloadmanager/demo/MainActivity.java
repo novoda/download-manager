@@ -15,7 +15,9 @@ import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
+import com.novoda.downloadmanager.MigrationFactory;
 import com.novoda.downloadmanager.MigrationServiceBinder;
+import com.novoda.downloadmanager.Migrator;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
@@ -31,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView textViewBatch1;
     private TextView textViewBatch2;
     private LiteDownloadManagerCommands liteDownloadManagerCommands;
+    private MigrationServiceBinder migrationServiceBinder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
         Log.setShowLogs(true);
 
-        final MigrationServiceBinder migrationServiceBinder = new MigrationServiceBinder(this);
+        migrationServiceBinder = MigrationFactory.migrationServiceBinder(this, migrationCallback);
 
         textViewBatch1 = findViewById(R.id.batch_1);
         textViewBatch2 = findViewById(R.id.batch_2);
@@ -149,6 +152,13 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onUpdate(String updateMessage) {
             databaseCloningUpdates.setText(updateMessage);
+        }
+    };
+
+    Migrator.Callback migrationCallback = new Migrator.Callback() {
+        @Override
+        public void onUpdate(String message) {
+
         }
     };
 
