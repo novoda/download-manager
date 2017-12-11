@@ -29,23 +29,23 @@ class VersionOneDatabaseCloner {
 
     private final AssetManager assetManager;
     private final Executor executor;
-    private final UpdateListener updateListener;
+    private final CloneCallback cloneCallback;
     private final Handler updateHandler;
     private final String originalDatabaseLocation;
 
     VersionOneDatabaseCloner(AssetManager assetManager,
                              Executor executor,
-                             UpdateListener updateListener,
+                             CloneCallback cloneCallback,
                              Handler updateHandler,
                              String originalDatabaseLocation) {
         this.assetManager = assetManager;
         this.executor = executor;
-        this.updateListener = updateListener;
+        this.cloneCallback = cloneCallback;
         this.updateHandler = updateHandler;
         this.originalDatabaseLocation = originalDatabaseLocation;
     }
 
-    interface UpdateListener {
+    interface CloneCallback {
         void onUpdate(String updateMessage);
     }
 
@@ -53,25 +53,45 @@ class VersionOneDatabaseCloner {
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                notifyOfUpdate("Cloning Database");
-                File outputFile = new File(originalDatabaseLocation);
-                createFileIfDoesNotExist(outputFile);
-                copyAssetToFile(DATABASE_NAME, outputFile);
-
-                notifyOfUpdate("Cloning Files");
-                cloneDownloadFiles(selectedFileSize);
-                notifyOfUpdate("Cloning Complete");
+                cloneDatabase(cloneCallback());
+                cloneDownloadFilesWithSize(selectedFileSize, cloneCallback());
+                cloneCallback().onUpdate("Cloning Complete");
             }
         });
     }
 
-    private void notifyOfUpdate(final String message) {
-        updateHandler.post(new Runnable() {
+    private void cloneDatabase(CloneCallback cloneCallback) {
+        cloneCallback.onUpdate("Cloning Database...");
+        File outputFile = new File(originalDatabaseLocation);
+        createFileIfDoesNotExist(outputFile);
+        copyAssetToFile(DATABASE_NAME, outputFile);
+    }
+
+    private CloneCallback cloneCallback() {
+        return new CloneCallback() {
             @Override
-            public void run() {
-                updateListener.onUpdate(message);
+            public void onUpdate(final String updateMessage) {
+                updateHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        cloneCallback.onUpdate(updateMessage);
+                    }
+                });
             }
-        });
+        };
+    }
+
+    private void createFileIfDoesNotExist(File outputFile) {
+        boolean parentPathDoesNotExist = !outputFile.getParentFile().exists();
+        if (parentPathDoesNotExist) {
+            Log.w(String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
+            outputFile.getParentFile().mkdirs();
+            parentPathDoesNotExist = !outputFile.getParentFile().exists();
+        }
+
+        if (parentPathDoesNotExist) {
+            throw new DeveloperError("Unable to create path: " + outputFile.getParentFile().getAbsolutePath());
+        }
     }
 
     private void copyAssetToFile(String assetName, File outputFile) {
@@ -95,7 +115,8 @@ class VersionOneDatabaseCloner {
         }
     }
 
-    private void cloneDownloadFiles(String selectedFileSize) {
+    private void cloneDownloadFilesWithSize(String selectedFileSize, CloneCallback cloneCallback) {
+        cloneCallback.onUpdate("Cloning Files...");
         List<String> localFileLocations = localFileLocations();
         String fileName = String.format(DOWNLOAD_FILE_NAME_FORMAT, selectedFileSize);
 
@@ -104,20 +125,6 @@ class VersionOneDatabaseCloner {
 
             createFileIfDoesNotExist(outputFile);
             copyAssetToFile(fileName, outputFile);
-        }
-
-    }
-
-    private void createFileIfDoesNotExist(File outputFile) {
-        boolean parentPathDoesNotExist = !outputFile.getParentFile().exists();
-        if (parentPathDoesNotExist) {
-            Log.w(String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
-            outputFile.getParentFile().mkdirs();
-            parentPathDoesNotExist = !outputFile.getParentFile().exists();
-        }
-
-        if (parentPathDoesNotExist) {
-            throw new DeveloperError("Unable to create path: " + outputFile.getParentFile().getAbsolutePath());
         }
     }
 

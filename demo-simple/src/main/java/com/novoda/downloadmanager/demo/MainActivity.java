@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         final VersionOneDatabaseCloner versionOneDatabaseCloner = new VersionOneDatabaseCloner(
                 getAssets(),
                 executor,
-                updateListener,
+                cloneCallback,
                 new Handler(getMainLooper()),
                 originalDatabaseLocation
         );
@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
         bindViews();
     }
 
-    VersionOneDatabaseCloner.UpdateListener updateListener = new VersionOneDatabaseCloner.UpdateListener() {
+    VersionOneDatabaseCloner.CloneCallback cloneCallback = new VersionOneDatabaseCloner.CloneCallback() {
         @Override
         public void onUpdate(String updateMessage) {
             databaseCloningUpdates.setText(updateMessage);
