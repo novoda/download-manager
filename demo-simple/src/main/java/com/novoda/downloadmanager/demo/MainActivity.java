@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager.demo;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -18,6 +19,8 @@ import com.novoda.downloadmanager.Migrator;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 
@@ -41,6 +44,30 @@ public class MainActivity extends AppCompatActivity {
         textViewBatch1 = findViewById(R.id.batch_1);
         textViewBatch2 = findViewById(R.id.batch_2);
 
+        final TextView databaseCloningUpdates = findViewById(R.id.database_cloning_updates);
+        View buttonCreateDB = findViewById(R.id.button_create_v1_db);
+        buttonCreateDB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String originalDatabaseLocation = getFilesDir().getParentFile().getAbsolutePath() + "/databases/downloads.db";
+                Executor executor = Executors.newSingleThreadExecutor();
+                VersionOneDatabaseCloner.UpdateListener updateListener = new VersionOneDatabaseCloner.UpdateListener() {
+                    @Override
+                    public void onUpdate(String updateMessage) {
+                        databaseCloningUpdates.setText(updateMessage);
+                    }
+                };
+                VersionOneDatabaseCloner versionOneDatabaseCloner = new VersionOneDatabaseCloner(
+                        getAssets(),
+                        executor,
+                        updateListener,
+                        new Handler(getMainLooper()),
+                        originalDatabaseLocation
+                );
+                versionOneDatabaseCloner.cloneDatabase();
+            }
+        });
+
         View buttonMigrate = findViewById(R.id.button_migrate);
         buttonMigrate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -48,12 +75,17 @@ public class MainActivity extends AppCompatActivity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        Migrator migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(getApplicationContext(), getDatabasePath("downloads.db"), new Migrator.Callback() {
+                        Migrator.Callback migrationCompletionCallback = new Migrator.Callback() {
                             @Override
                             public void onMigrationComplete() {
                                 deleteDatabase("downloads.db");
                             }
-                        });
+                        };
+                        Migrator migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
+                                getApplicationContext(),
+                                getDatabasePath("downloads.db"),
+                                migrationCompletionCallback
+                        );
                         migrator.migrate();
                     }
                 }).start();
