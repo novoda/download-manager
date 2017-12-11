@@ -1,62 +1,81 @@
 package com.novoda.downloadmanager;
 
-import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static com.google.common.truth.Truth.assertThat;
 
 public class UnlinkedDataRemoverTest {
-    private static final File file1 = mock(File.class);
-    private static final File file2 = mock(File.class);
-    private static final File file3 = mock(File.class); // Orphan
+    private static final String FIRST_FILE = "a filename";
+    private static final String SECOND_FILE = "another filename";
+    private static final String THIRD_FILE = "yet another filename"; // Orphan
 
     @Test
     public void givenUnlinkedFilesInLocalStorage_whenRemoving_thenUnlinkedFilesAreDeleted() throws Exception {
-        LocalFilesDirectory localFilesDirectory = new MyLocalFilesDirectory(Arrays.asList(file1, file2, file3));
-        V2DatabaseFiles v2DatabaseFiles = new MyV2DatabaseFiles(Arrays.asList(file1, file2));
+        // Arrange
+        LocalFilesDirectory localFilesDirectory = new MyLocalFilesDirectory(Arrays.asList(FIRST_FILE, SECOND_FILE, THIRD_FILE));
+        V2DatabaseFiles v2DatabaseFiles = new MyV2DatabaseFiles(Arrays.asList(FIRST_FILE, SECOND_FILE));
 
         // Act
         UnlinkedDataRemover remover = new UnlinkedDataRemover(localFilesDirectory, v2DatabaseFiles);
         remover.remove();
 
         // Assert
-        verify(file3).delete();
+        List<String> expectedContents = Arrays.asList(FIRST_FILE, SECOND_FILE);
+        List<String> actualContents = localFilesDirectory.contents();
+        assertThat(actualContents).isEqualTo(expectedContents);
     }
 
     interface LocalFilesDirectory {
-        List<File> contents();
+        List<String> contents();
+
+        boolean deleteFile(String filename);
     }
 
     interface V2DatabaseFiles {
-        List<File> databaseContents();
+        List<String> databaseContents();
     }
 
     private static class MyLocalFilesDirectory implements LocalFilesDirectory {
-        private final List<File> fileList;
+        private List<String> fileList;
 
-        MyLocalFilesDirectory(List<File> fileList) {
-            this.fileList = fileList;
+        MyLocalFilesDirectory(List<String> fileList) {
+            this.fileList = new ArrayList<>(fileList);
         }
 
         @Override
-        public List<File> contents() {
+        public List<String> contents() {
             return fileList;
+        }
+
+        @Override
+        public boolean deleteFile(String filename) {
+            boolean fileWasRemoved = false;
+            List<String> newFileList = new ArrayList<>();
+            for (String s : fileList) {
+                if (filename.equals(s)) {
+                    fileWasRemoved = true;
+                } else {
+                    newFileList.add(s);
+                }
+            }
+            fileList = newFileList;
+            return fileWasRemoved;
         }
     }
 
     private static class MyV2DatabaseFiles implements V2DatabaseFiles {
-        private final List<File> fileList;
+        private final List<String> fileList;
 
-        private MyV2DatabaseFiles(List<File> fileList) {
+        private MyV2DatabaseFiles(List<String> fileList) {
             this.fileList = fileList;
         }
 
         @Override
-        public List<File> databaseContents() {
+        public List<String> databaseContents() {
             return fileList;
         }
     }
