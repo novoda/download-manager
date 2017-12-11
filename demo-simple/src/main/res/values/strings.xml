@@ -2,9 +2,9 @@
   <string name="app_name">Lite Download Manager</string>
 
   <string-array name="file_sizes">
-    <item>10mb</item>
-    <item>50mb</item>
-    <item>100mb</item>
-    <item>512mb</item>
+    <item>10MB</item>
+    <item>20MB</item>
+    <item>50MB</item>
+    <item>100MB</item>
   </string-array>
 </resources>

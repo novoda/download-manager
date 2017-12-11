@@ -23,7 +23,7 @@ class VersionOneDatabaseCloner {
     private static final byte[] BUFFER = new byte[1024];
 
     private static final String DATABASE_NAME = "downloads.db";
-    private static final String DOWNLOAD_FILE_NAME = "file.zip";
+    private static final String DOWNLOAD_FILE_NAME_FORMAT = "%s.zip";
     private static final String ORIGINAL_FILE_LOCATION_QUERY = "SELECT _data FROM Downloads WHERE _data IS NOT NULL";
     private static final int ORIGINAL_FILE_LOCATION_COLUMN_INDEX = 0;
 
@@ -49,7 +49,7 @@ class VersionOneDatabaseCloner {
         void onUpdate(String updateMessage);
     }
 
-    void cloneDatabase() {
+    void cloneDatabaseWithDownloadSize(final String selectedFileSize) {
         executor.execute(new Runnable() {
             @Override
             public void run() {
@@ -59,7 +59,7 @@ class VersionOneDatabaseCloner {
                 copyAssetToFile(DATABASE_NAME, outputFile);
 
                 notifyOfUpdate("Cloning Files");
-                cloneDownloadFiles();
+                cloneDownloadFiles(selectedFileSize);
                 notifyOfUpdate("Cloning Complete");
             }
         });
@@ -95,14 +95,15 @@ class VersionOneDatabaseCloner {
         }
     }
 
-    private void cloneDownloadFiles() {
+    private void cloneDownloadFiles(String selectedFileSize) {
         List<String> localFileLocations = localFileLocations();
+        String fileName = String.format(DOWNLOAD_FILE_NAME_FORMAT, selectedFileSize);
 
         for (String localFileLocation : localFileLocations) {
             File outputFile = new File(localFileLocation);
 
             createFileIfDoesNotExist(outputFile);
-            copyAssetToFile(DOWNLOAD_FILE_NAME, outputFile);
+            copyAssetToFile(fileName, outputFile);
         }
 
     }
