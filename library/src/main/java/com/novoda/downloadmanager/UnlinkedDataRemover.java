@@ -1,7 +1,5 @@
 package com.novoda.downloadmanager;
 
-import java.util.List;
-
 class UnlinkedDataRemover {
     private final LocalFilesDirectory localFilesDirectory;
     private final V2DatabaseFiles v2DatabaseFiles;
@@ -19,7 +17,4 @@ class UnlinkedDataRemover {
         }
     }
 
-    interface V2DatabaseFiles {
-        List<String> databaseContents();
-    }
 }

@@ -12,10 +12,6 @@ import android.support.v4.app.NotificationManagerCompat;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-// TODO: You will need a new one of these to perform the migration. Would suggest again to take
-// inspiration from Merlin to not rely on `null` checks but rather use an `isBound` method.
-// https://github.com/novoda/merlin/blob/master/core/src/main/java/com/novoda/merlin/service/MerlinService.java.
-// Services are not run in their own threads by default so we need to handle that too.
 public class LiteDownloadService extends Service implements DownloadService {
 
     private static final String WAKELOCK_TAG = "WakelockTag";

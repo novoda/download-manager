@@ -17,32 +17,35 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     private static final String DELETE_BY_ID_QUERY = "DELETE FROM batches WHERE _id = ?";
 
     private final MigrationExtractor migrationExtractor;
-    private final RoomDownloadsPersistence downloadsPersistence;
+    private final DownloadsPersistence downloadsPersistence;
     private final InternalFilePersistence internalFilePersistence;
     private final SqlDatabaseWrapper database;
-    private final Callback migrationCompleteCallback;
-    private final UnlinkedDataRemover remover;
+    private final Callback migrationCallback;
+    private final UnlinkedDataRemover unlinkedDataRemover;
 
     VersionOneToVersionTwoMigrator(MigrationExtractor migrationExtractor,
                                    RoomDownloadsPersistence downloadsPersistence,
                                    InternalFilePersistence internalFilePersistence,
                                    SqlDatabaseWrapper database,
-                                   Callback migrationCompleteCallback, UnlinkedDataRemover remover) {
+                                   Callback migrationCallback,
+                                   UnlinkedDataRemover unlinkedDataRemover) {
         this.migrationExtractor = migrationExtractor;
         this.downloadsPersistence = downloadsPersistence;
         this.internalFilePersistence = internalFilePersistence;
         this.database = database;
-        this.migrationCompleteCallback = migrationCompleteCallback;
-        this.remover = remover;
+        this.migrationCallback = migrationCallback;
+        this.unlinkedDataRemover = unlinkedDataRemover;
     }
 
     @Override
     public void migrate() {
-        remover.remove();
+        unlinkedDataRemover.remove();
+        migrationCallback.onUpdate("Extracting Migrations");
         Log.d(TAG, "about to extract migrations, time is " + System.nanoTime());
         List<Migration> migrations = migrationExtractor.extractMigrations();
         Log.d(TAG, "migrations are all EXTRACTED, time is " + System.nanoTime());
 
+        migrationCallback.onUpdate("Migrating Files");
         Log.d(TAG, "about to migrate the files, time is " + System.nanoTime());
         migrateV1FilesToV2Location(migrations);
         Log.d(TAG, "files are all MOVED, about to start migrating the database, time is " + System.nanoTime());
@@ -50,11 +53,13 @@ class VersionOneToVersionTwoMigrator implements Migrator {
         migrateV1DataToV2Database(migrations);
         Log.d(TAG, "all data migrations are COMMITTED, about to delete the old database, time is " + System.nanoTime());
 
+        migrationCallback.onUpdate("Deleting Database");
         deleteFrom(database, migrations);
         Log.d(TAG, "all traces of v1 are ERASED, time is " + System.nanoTime());
         database.close();
 
-        migrationCompleteCallback.onMigrationComplete();
+        database.deleteDatabase();
+        migrationCallback.onUpdate("Migration Complete");
     }
 
     private void migrateV1FilesToV2Location(List<Migration> migrations) {
@@ -135,6 +140,7 @@ class VersionOneToVersionTwoMigrator implements Migrator {
             Batch batch = migration.batch();
             database.rawQuery(DELETE_BY_ID_QUERY, batch.getDownloadBatchId().stringValue());
             for (Migration.FileMetadata metadata : migration.getFileMetadata()) {
+                // TODO: Handle error cases, pay attention to file.delete() result
                 File file = new File(metadata.originalFileLocation());
                 file.delete();
             }

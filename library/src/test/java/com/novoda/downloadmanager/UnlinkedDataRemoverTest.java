@@ -17,7 +17,7 @@ public class UnlinkedDataRemoverTest {
     public void givenUnlinkedFilesInLocalStorage_whenRemoving_thenUnlinkedFilesAreDeleted() throws Exception {
         // Arrange
         LocalFilesDirectory localFilesDirectory = new MyLocalFilesDirectory(Arrays.asList(FIRST_FILE, SECOND_FILE, THIRD_FILE));
-        UnlinkedDataRemover.V2DatabaseFiles v2DatabaseFiles = new MyV2DatabaseFiles(Arrays.asList(FIRST_FILE, SECOND_FILE));
+        V2DatabaseFiles v2DatabaseFiles = new MyV2DatabaseFiles(Arrays.asList(FIRST_FILE, SECOND_FILE));
 
         // Act
         UnlinkedDataRemover remover = new UnlinkedDataRemover(localFilesDirectory, v2DatabaseFiles);
@@ -57,7 +57,7 @@ public class UnlinkedDataRemoverTest {
         }
     }
 
-    private static class MyV2DatabaseFiles implements UnlinkedDataRemover.V2DatabaseFiles {
+    private static class MyV2DatabaseFiles implements V2DatabaseFiles {
         private final List<String> fileList;
 
         private MyV2DatabaseFiles(List<String> fileList) {

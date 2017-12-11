@@ -1,11 +1,6 @@
 package com.novoda.downloadmanager.demo;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -20,7 +15,9 @@ import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
-import com.novoda.downloadmanager.LiteDownloadMigrationService;
+import com.novoda.downloadmanager.MigrationFactory;
+import com.novoda.downloadmanager.MigrationServiceBinder;
+import com.novoda.downloadmanager.Migrator;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
@@ -32,23 +29,12 @@ public class MainActivity extends AppCompatActivity {
     private static final DownloadBatchId BATCH_ID_1 = DownloadBatchIdCreator.createFrom("batch_id_1");
     private static final DownloadBatchId BATCH_ID_2 = DownloadBatchIdCreator.createFrom("batch_id_2");
 
-    private final ServiceConnection migrationServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) iBinder)
-                    .migrate();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            // TODO
-        }
-    };
-
     private TextView databaseCloningUpdates;
+    private TextView databaseMigrationUpdates;
     private TextView textViewBatch1;
     private TextView textViewBatch2;
     private LiteDownloadManagerCommands liteDownloadManagerCommands;
+    private MigrationServiceBinder migrationServiceBinder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Log.setShowLogs(true);
+
+        migrationServiceBinder = MigrationFactory.migrationServiceBinder(this, migrationCallback);
 
         textViewBatch1 = findViewById(R.id.batch_1);
         textViewBatch2 = findViewById(R.id.batch_2);
@@ -76,12 +64,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        databaseMigrationUpdates = findViewById(R.id.database_migration_updates);
         View buttonMigrate = findViewById(R.id.button_migrate);
         buttonMigrate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent serviceIntent = new Intent(MainActivity.this, LiteDownloadMigrationService.class);
-                bindService(serviceIntent, migrationServiceConnection, Context.BIND_AUTO_CREATE);
+                migrationServiceBinder.bind();
             }
         });
 
@@ -89,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         buttonAbortMigration.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                unbindService(migrationServiceConnection);
+                migrationServiceBinder.unbind();
             }
         });
 
@@ -149,6 +137,13 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onUpdate(String updateMessage) {
             databaseCloningUpdates.setText(updateMessage);
+        }
+    };
+
+    Migrator.Callback migrationCallback = new Migrator.Callback() {
+        @Override
+        public void onUpdate(String message) {
+            databaseMigrationUpdates.setText(message);
         }
     };
 

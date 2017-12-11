@@ -19,6 +19,7 @@ public class LiteDownloadMigrationService extends Service {
     private Migrator v1ToV2Migrator;
     private ExecutorService executor;
     private IBinder binder;
+    private Migrator.Callback migrationCallback;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -33,19 +34,22 @@ public class LiteDownloadMigrationService extends Service {
         v1ToV2Migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
                 getApplicationContext(),
                 getDatabasePath("downloads.db"),
-                deleteOldDatabaseOnCompletion
+                migrationCallback()
         );
 
         super.onCreate();
     }
 
-    private final Migrator.Callback deleteOldDatabaseOnCompletion = new Migrator.Callback() {
-        @Override
-        public void onMigrationComplete() {
-            Log.d(getClass().getSimpleName(), "Deleting DB");
-            deleteDatabase("downloads.db");
-        }
-    };
+    private Migrator.Callback migrationCallback() {
+        return new Migrator.Callback() {
+            @Override
+            public void onUpdate(String message) {
+                if (migrationCallback != null) {
+                    migrationCallback.onUpdate(message);
+                }
+            }
+        };
+    }
 
     private void migrateFromV1ToV2() {
         executor.execute(new Runnable() {
@@ -84,6 +88,7 @@ public class LiteDownloadMigrationService extends Service {
     @Override
     public boolean onUnbind(Intent intent) {
         stopSelf();
+        migrationCallback = null;
         Log.d(getClass().getSimpleName(), "Stopping service");
         return super.onUnbind(intent);
     }
@@ -94,9 +99,14 @@ public class LiteDownloadMigrationService extends Service {
         super.onDestroy();
     }
 
-    public class MigrationDownloadServiceBinder extends Binder {
+    class MigrationDownloadServiceBinder extends Binder {
 
-        public void migrate() {
+        MigrationDownloadServiceBinder withCallback(Migrator.Callback migrationCallback) {
+            LiteDownloadMigrationService.this.migrationCallback = migrationCallback;
+            return this;
+        }
+
+        void migrate() {
             LiteDownloadMigrationService.this.migrateFromV1ToV2();
         }
     }
