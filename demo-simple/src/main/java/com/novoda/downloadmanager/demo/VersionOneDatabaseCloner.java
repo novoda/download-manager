@@ -3,7 +3,6 @@ package com.novoda.downloadmanager.demo;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Handler;
 
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
 import com.novoda.notils.exception.DeveloperError;
@@ -23,55 +22,58 @@ class VersionOneDatabaseCloner {
     private static final byte[] BUFFER = new byte[1024];
 
     private static final String DATABASE_NAME = "downloads.db";
-    private static final String DOWNLOAD_FILE_NAME = "file.zip";
+    private static final String DOWNLOAD_FILE_NAME_FORMAT = "%s.zip";
     private static final String ORIGINAL_FILE_LOCATION_QUERY = "SELECT _data FROM Downloads WHERE _data IS NOT NULL";
     private static final int ORIGINAL_FILE_LOCATION_COLUMN_INDEX = 0;
 
     private final AssetManager assetManager;
     private final Executor executor;
-    private final UpdateListener updateListener;
-    private final Handler updateHandler;
+    private final CloneCallback cloneCallback;
     private final String originalDatabaseLocation;
 
     VersionOneDatabaseCloner(AssetManager assetManager,
                              Executor executor,
-                             UpdateListener updateListener,
-                             Handler updateHandler,
+                             CloneCallback cloneCallback,
                              String originalDatabaseLocation) {
         this.assetManager = assetManager;
         this.executor = executor;
-        this.updateListener = updateListener;
-        this.updateHandler = updateHandler;
+        this.cloneCallback = cloneCallback;
         this.originalDatabaseLocation = originalDatabaseLocation;
     }
 
-    interface UpdateListener {
+    interface CloneCallback {
         void onUpdate(String updateMessage);
     }
 
-    void cloneDatabase() {
+    void cloneDatabaseWithDownloadSize(final String selectedFileSize) {
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                notifyOfUpdate("Cloning Database");
-                File outputFile = new File(originalDatabaseLocation);
-                createFileIfDoesNotExist(outputFile);
-                copyAssetToFile(DATABASE_NAME, outputFile);
-
-                notifyOfUpdate("Cloning Files");
-                cloneDownloadFiles();
-                notifyOfUpdate("Cloning Complete");
+                cloneDatabase();
+                cloneDownloadFilesWithSize(selectedFileSize);
+                cloneCallback.onUpdate("Cloning Complete");
             }
         });
     }
 
-    private void notifyOfUpdate(final String message) {
-        updateHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                updateListener.onUpdate(message);
-            }
-        });
+    private void cloneDatabase() {
+        cloneCallback.onUpdate("Cloning Database...");
+        File outputFile = new File(originalDatabaseLocation);
+        createFileIfDoesNotExist(outputFile);
+        copyAssetToFile(DATABASE_NAME, outputFile);
+    }
+
+    private void createFileIfDoesNotExist(File outputFile) {
+        boolean parentPathDoesNotExist = !outputFile.getParentFile().exists();
+        if (parentPathDoesNotExist) {
+            Log.w(String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
+            outputFile.getParentFile().mkdirs();
+            parentPathDoesNotExist = !outputFile.getParentFile().exists();
+        }
+
+        if (parentPathDoesNotExist) {
+            throw new DeveloperError("Unable to create path: " + outputFile.getParentFile().getAbsolutePath());
+        }
     }
 
     private void copyAssetToFile(String assetName, File outputFile) {
@@ -95,28 +97,16 @@ class VersionOneDatabaseCloner {
         }
     }
 
-    private void cloneDownloadFiles() {
+    private void cloneDownloadFilesWithSize(String selectedFileSize) {
+        cloneCallback.onUpdate("Cloning Files...");
         List<String> localFileLocations = localFileLocations();
+        String fileName = String.format(DOWNLOAD_FILE_NAME_FORMAT, selectedFileSize);
 
         for (String localFileLocation : localFileLocations) {
             File outputFile = new File(localFileLocation);
 
             createFileIfDoesNotExist(outputFile);
-            copyAssetToFile(DOWNLOAD_FILE_NAME, outputFile);
-        }
-
-    }
-
-    private void createFileIfDoesNotExist(File outputFile) {
-        boolean parentPathDoesNotExist = !outputFile.getParentFile().exists();
-        if (parentPathDoesNotExist) {
-            Log.w(String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
-            outputFile.getParentFile().mkdirs();
-            parentPathDoesNotExist = !outputFile.getParentFile().exists();
-        }
-
-        if (parentPathDoesNotExist) {
-            throw new DeveloperError("Unable to create path: " + outputFile.getParentFile().getAbsolutePath());
+            copyAssetToFile(fileName, outputFile);
         }
     }
 
