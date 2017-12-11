@@ -163,9 +163,6 @@ public final class DownloadManagerBuilder {
         return this;
     }
 
-    // TODO: Bound services essentially work with this `ServiceConnection` object. Personally
-    // would try and keep it contained like in `Merlin` https://github.com/novoda/merlin/blob/master/core/src/main/java/com/novoda/merlin/service/MerlinServiceBinder.java.
-    // Merlin shows how you can pass Callbacks to the service in that class.
     public DownloadManager build() {
         Intent intent = new Intent(context, LiteDownloadService.class);
         ServiceConnection serviceConnection = new ServiceConnection() {
