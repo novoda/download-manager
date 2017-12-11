@@ -95,7 +95,6 @@ public class LiteDownloadMigrationService extends Service {
     @Override
     public boolean onUnbind(Intent intent) {
         Log.d(getClass().getSimpleName(), "onUnbind");
-        stopSelf();
         migrationCallback = null;
         Log.d(getClass().getSimpleName(), "Stopping service");
         return super.onUnbind(intent);
