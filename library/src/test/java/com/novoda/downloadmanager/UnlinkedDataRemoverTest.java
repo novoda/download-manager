@@ -17,18 +17,17 @@ public class UnlinkedDataRemoverTest {
     private static final String UNLINKED_THIRD_FILE = "yet another filename";
 
     private final RoomAppDatabase roomAppDatabase = mock(RoomAppDatabase.class);
+    private final LocalFilesDirectory localFilesDirectory = new FakeLocalFilesDirectory(Arrays.asList(LINKED_FIRST_FILE, LINKED_SECOND_FILE, UNLINKED_THIRD_FILE));
+    private final UnlinkedDataRemover unlinkedDataRemover = new UnlinkedDataRemover(roomAppDatabase, localFilesDirectory);
 
     @Test
     public void removesFiles_whenFileIsUnlinked() {
         given(roomAppDatabase.fileNames()).willReturn(Arrays.asList(LINKED_FIRST_FILE, LINKED_SECOND_FILE));
 
-        LocalFilesDirectory localFilesDirectory = new FakeLocalFilesDirectory(Arrays.asList(LINKED_FIRST_FILE, LINKED_SECOND_FILE, UNLINKED_THIRD_FILE));
-        UnlinkedDataRemover remover = new UnlinkedDataRemover(roomAppDatabase, localFilesDirectory);
-        remover.remove();
+        unlinkedDataRemover.remove();
 
         List<String> expectedContents = Arrays.asList(LINKED_FIRST_FILE, LINKED_SECOND_FILE);
         List<String> actualContents = localFilesDirectory.contents();
-
         assertThat(actualContents).isEqualTo(expectedContents);
     }
 
