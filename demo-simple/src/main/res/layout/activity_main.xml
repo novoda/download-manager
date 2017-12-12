@@ -125,7 +125,7 @@
     android:text="Delete all" />
 
   <Button
-    android:id="@+id/button_show_files_in_directory"
+    android:id="@+id/button_log_file_directory"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="Log File Directory" />

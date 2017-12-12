@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        View buttonLogFileDirectory = findViewById(R.id.button_show_files_in_directory);
+        View buttonLogFileDirectory = findViewById(R.id.button_log_file_directory);
         buttonLogFileDirectory.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
