@@ -136,7 +136,8 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     // TODO: See https://github.com/novoda/download-manager/issues/270
     private void deleteFrom(SqlDatabaseWrapper database, Migration migration) {
         Batch batch = migration.batch();
-        database.rawQuery(DELETE_BY_ID_QUERY, batch.getDownloadBatchId().stringValue());
+        Log.d(TAG, "deleting: " + batch.getDownloadBatchId().stringValue());
+        database.delete("batches", "_id =", batch.getDownloadBatchId().stringValue());
         for (Migration.FileMetadata metadata : migration.getFileMetadata()) {
             File file = new File(metadata.originalFileLocation());
             file.delete();

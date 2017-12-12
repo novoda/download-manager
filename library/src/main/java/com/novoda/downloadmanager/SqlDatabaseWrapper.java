@@ -38,4 +38,12 @@ public class SqlDatabaseWrapper {
             outputFile.delete();
         }
     }
+
+    public void delete(String table, String whereClause, String selectionArgument, String... selectionArguments) {
+        List<String> arguments = new ArrayList<>();
+        arguments.add(selectionArgument);
+        arguments.addAll(Arrays.asList(selectionArguments));
+
+        sqLiteDatabase.delete(table, whereClause, new String[]{selectionArgument});
+    }
 }
