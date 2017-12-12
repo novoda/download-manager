@@ -14,7 +14,8 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     private static final String TAG = "V1 to V2 migrator";
 
     private static final int RANDOMLY_CHOSEN_BUFFER_SIZE_THAT_SEEMS_TO_WORK = 4096;
-    private static final String DELETE_BY_ID_QUERY = "DELETE FROM batches WHERE _id = ?";
+    private static final String TABLE_BATCHES = "batches";
+    private static final String WHERE_CLAUSE_ID = "_id = ?";
 
     private final MigrationExtractor migrationExtractor;
     private final DownloadsPersistence downloadsPersistence;
@@ -136,8 +137,8 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     // TODO: See https://github.com/novoda/download-manager/issues/270
     private void deleteFrom(SqlDatabaseWrapper database, Migration migration) {
         Batch batch = migration.batch();
-        Log.d(TAG, "deleting: " + batch.getDownloadBatchId().stringValue());
-        database.delete("batches", "_id =", batch.getDownloadBatchId().stringValue());
+        Log.d(TAG, "about to delete the batch: " + batch.getDownloadBatchId().stringValue() + ", time is " + System.nanoTime());
+        database.delete(TABLE_BATCHES, WHERE_CLAUSE_ID, batch.getDownloadBatchId().stringValue());
         for (Migration.FileMetadata metadata : migration.getFileMetadata()) {
             File file = new File(metadata.originalFileLocation());
             file.delete();

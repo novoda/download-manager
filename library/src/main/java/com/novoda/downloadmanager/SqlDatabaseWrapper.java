@@ -40,10 +40,15 @@ public class SqlDatabaseWrapper {
     }
 
     public void delete(String table, String whereClause, String selectionArgument, String... selectionArguments) {
+        sqLiteDatabase.beginTransaction();
+
         List<String> arguments = new ArrayList<>();
         arguments.add(selectionArgument);
         arguments.addAll(Arrays.asList(selectionArguments));
 
-        sqLiteDatabase.delete(table, whereClause, new String[]{selectionArgument});
+        sqLiteDatabase.delete(table, whereClause, arguments.toArray(new String[arguments.size()]));
+
+        sqLiteDatabase.setTransactionSuccessful();
+        sqLiteDatabase.endTransaction();
     }
 }
