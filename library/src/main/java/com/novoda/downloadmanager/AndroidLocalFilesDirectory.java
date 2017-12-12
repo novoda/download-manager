@@ -5,10 +5,10 @@ import android.content.Context;
 import java.util.Arrays;
 import java.util.List;
 
-class AndroidLocalFilesDirectory implements LocalFilesDirectory {
+public class AndroidLocalFilesDirectory implements LocalFilesDirectory {
     private final Context context;
 
-    AndroidLocalFilesDirectory(Context context) {
+    public AndroidLocalFilesDirectory(Context context) {
         this.context = context;
     }
 

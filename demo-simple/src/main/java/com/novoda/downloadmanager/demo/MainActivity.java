@@ -9,6 +9,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.novoda.downloadmanager.AllBatchStatusesCallback;
+import com.novoda.downloadmanager.AndroidLocalFilesDirectory;
 import com.novoda.downloadmanager.Batch;
 import com.novoda.downloadmanager.DownloadBatchCallback;
 import com.novoda.downloadmanager.DownloadBatchId;
@@ -108,11 +109,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        View buttonLogFilesDir = findViewById(R.id.btn_log_files_dir);
-        buttonLogFilesDir.setOnClickListener(new View.OnClickListener() {
+        View buttonLogFileDirectory = findViewById(R.id.button_show_files_in_directory);
+        buttonLogFileDirectory.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for (String s : getFilesDir().list()) {
+                AndroidLocalFilesDirectory localFilesDirectory = new AndroidLocalFilesDirectory(getApplicationContext());
+                for (String s : localFilesDirectory.contents()) {
                     Log.d("FilesDirLog", s);
                 }
             }

@@ -1,18 +1,19 @@
 package com.novoda.downloadmanager;
 
 class UnlinkedDataRemover {
+    
     private final LocalFilesDirectory localFilesDirectory;
-    private final V2DatabaseFiles v2DatabaseFiles;
+    private final V2DatabaseFiles downloadFiles;
 
-    UnlinkedDataRemover(LocalFilesDirectory localFilesDirectory, V2DatabaseFiles v2DatabaseFiles) {
+    UnlinkedDataRemover(LocalFilesDirectory localFilesDirectory, V2DatabaseFiles downloadFiles) {
         this.localFilesDirectory = localFilesDirectory;
-        this.v2DatabaseFiles = v2DatabaseFiles;
+        this.downloadFiles = downloadFiles;
     }
 
     void remove() {
-        for (String filename : localFilesDirectory.contents()) {
-            if (!v2DatabaseFiles.databaseContents().contains(filename)) {
-                localFilesDirectory.deleteFile(filename);
+        for (String fileName : localFilesDirectory.contents()) {
+            if (!downloadFiles.fileNames().contains(fileName)) {
+                localFilesDirectory.deleteFile(fileName);
             }
         }
     }

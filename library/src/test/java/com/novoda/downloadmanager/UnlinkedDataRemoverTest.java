@@ -9,27 +9,25 @@ import org.junit.Test;
 import static com.google.common.truth.Truth.assertThat;
 
 public class UnlinkedDataRemoverTest {
+    
     private static final String FIRST_FILE = "a filename";
     private static final String SECOND_FILE = "another filename";
     private static final String THIRD_FILE = "yet another filename"; // Orphan
 
     @Test
-    public void givenUnlinkedFilesInLocalStorage_whenRemoving_thenUnlinkedFilesAreDeleted() throws Exception {
-        // Arrange
+    public void removeUnlinkedFiles_whenDataRemoverCalled() throws Exception {
         LocalFilesDirectory localFilesDirectory = new FakeLocalFilesDirectory(Arrays.asList(FIRST_FILE, SECOND_FILE, THIRD_FILE));
-        V2DatabaseFiles v2DatabaseFiles = new FakeV2DatabaseFiles(Arrays.asList(FIRST_FILE, SECOND_FILE));
-
-        // Act
-        UnlinkedDataRemover remover = new UnlinkedDataRemover(localFilesDirectory, v2DatabaseFiles);
+        UnlinkedDataRemover remover = new UnlinkedDataRemover(localFilesDirectory, new FakeV2DatabaseFiles(Arrays.asList(FIRST_FILE, SECOND_FILE)));
         remover.remove();
 
-        // Assert
         List<String> expectedContents = Arrays.asList(FIRST_FILE, SECOND_FILE);
         List<String> actualContents = localFilesDirectory.contents();
+
         assertThat(actualContents).isEqualTo(expectedContents);
     }
 
     private static class FakeLocalFilesDirectory implements LocalFilesDirectory {
+        
         private List<String> fileList;
 
         FakeLocalFilesDirectory(List<String> fileList) {
@@ -58,6 +56,7 @@ public class UnlinkedDataRemoverTest {
     }
 
     private static class FakeV2DatabaseFiles implements V2DatabaseFiles {
+        
         private final List<String> fileList;
 
         private FakeV2DatabaseFiles(List<String> fileList) {
@@ -65,7 +64,7 @@ public class UnlinkedDataRemoverTest {
         }
 
         @Override
-        public List<String> databaseContents() {
+        public List<String> fileNames() {
             return fileList;
         }
     }
