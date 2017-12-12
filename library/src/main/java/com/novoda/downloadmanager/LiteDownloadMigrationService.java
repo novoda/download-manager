@@ -16,6 +16,7 @@ import java.util.concurrent.Executors;
 
 public class LiteDownloadMigrationService extends Service {
 
+    private static final String TAG = "MigrationService";
     private Migrator v1ToV2Migrator;
     private ExecutorService executor;
     private IBinder binder;
@@ -26,13 +27,13 @@ public class LiteDownloadMigrationService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
 
-        Log.d(getClass().getSimpleName(), "onStartCommand");
+        Log.d(TAG, "onStartCommand");
 
-        if (v1ToV2Migrator != null) {
+        if (v1ToV2Migrator != null && !v1ToV2Migrator.isRunning()) {
             executor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d(getClass().getSimpleName(), "Begin Migration");
+                    Log.d(TAG, "Begin Migration");
                     v1ToV2Migrator.migrate();
                 }
             });
@@ -43,7 +44,7 @@ public class LiteDownloadMigrationService extends Service {
 
     @Override
     public void onCreate() {
-        Log.d(getClass().getSimpleName(), "onCreate");
+        Log.d(TAG, "onCreate");
         executor = Executors.newSingleThreadExecutor();
         binder = new MigrationDownloadServiceBinder();
         v1ToV2Migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
@@ -75,9 +76,9 @@ public class LiteDownloadMigrationService extends Service {
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
-        Log.d(getClass().getSimpleName(), "onTaskRemoved");
+        Log.d(TAG, "onTaskRemoved");
         rescheduleMigration();
-        Log.d(getClass().getSimpleName(), "Rescheduling");
+        Log.d(TAG, "Rescheduling");
         super.onTaskRemoved(rootIntent);
     }
 
@@ -86,7 +87,7 @@ public class LiteDownloadMigrationService extends Service {
         PendingIntent pendingIntent = PendingIntent.getService(this, 1, intent, PendingIntent.FLAG_ONE_SHOT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         if (alarmManager == null) {
-            Log.w(getClass().getSimpleName(), "Could not retrieve AlarmManager for rescheduling.");
+            Log.w(TAG, "Could not retrieve AlarmManager for rescheduling.");
             return;
         }
         alarmManager.set(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + 5000, pendingIntent);
@@ -94,15 +95,15 @@ public class LiteDownloadMigrationService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent) {
-        Log.d(getClass().getSimpleName(), "onUnbind");
+        Log.d(TAG, "onUnbind");
         migrationCallback = null;
-        Log.d(getClass().getSimpleName(), "Stopping service");
+        Log.d(TAG, "Stopping service");
         return super.onUnbind(intent);
     }
 
     @Override
     public void onDestroy() {
-        Log.d(getClass().getSimpleName(), "onDestroy");
+        Log.d(TAG, "onDestroy");
         executor.shutdown();
         super.onDestroy();
     }
