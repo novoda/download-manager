@@ -50,9 +50,17 @@ class VersionOneToVersionTwoMigrator implements Migrator {
         Log.d(TAG, "about to migrate the files, time is " + System.nanoTime());
 
         for (Migration migration : migrations) {
+            downloadsPersistence.startTransaction();
+            database.startTransaction();
+
             migrateV1FilesToV2Location(migration);
             migrateV1DataToV2Database(migration);
             deleteFrom(database, migration);
+
+            downloadsPersistence.transactionSuccess();
+            downloadsPersistence.endTransaction();
+            database.setTransactionSuccessful();
+            database.endTransaction();
         }
 
         Log.d(TAG, "all data migrations are COMMITTED, about to delete the old database, time is " + System.nanoTime());
@@ -106,8 +114,6 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     private void migrateV1DataToV2Database(Migration migration) {
         Batch batch = migration.batch();
 
-        downloadsPersistence.startTransaction();
-
         DownloadBatchTitle downloadBatchTitle = new LiteDownloadBatchTitle(batch.getTitle());
         DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted(downloadBatchTitle, batch.getDownloadBatchId(), Status.DOWNLOADED);
         downloadsPersistence.persistBatch(persistedBatch);
@@ -129,9 +135,6 @@ class VersionOneToVersionTwoMigrator implements Migrator {
             );
             downloadsPersistence.persistFile(persistedFile);
         }
-
-        downloadsPersistence.transactionSuccess();
-        downloadsPersistence.endTransaction();
     }
 
     // TODO: See https://github.com/novoda/download-manager/issues/270

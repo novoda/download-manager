@@ -39,16 +39,23 @@ public class SqlDatabaseWrapper {
         }
     }
 
-    public void delete(String table, String whereClause, String selectionArgument, String... selectionArguments) {
+    public void startTransaction() {
         sqLiteDatabase.beginTransaction();
+    }
 
+    public void setTransactionSuccessful() {
+        sqLiteDatabase.setTransactionSuccessful();
+    }
+
+    public void endTransaction() {
+        sqLiteDatabase.endTransaction();
+    }
+
+    public void delete(String table, String whereClause, String selectionArgument, String... selectionArguments) {
         List<String> arguments = new ArrayList<>();
         arguments.add(selectionArgument);
         arguments.addAll(Arrays.asList(selectionArguments));
 
         sqLiteDatabase.delete(table, whereClause, arguments.toArray(new String[arguments.size()]));
-
-        sqLiteDatabase.setTransactionSuccessful();
-        sqLiteDatabase.endTransaction();
     }
 }
