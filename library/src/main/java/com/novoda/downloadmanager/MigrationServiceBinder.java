@@ -29,9 +29,11 @@ public class MigrationServiceBinder {
     }
 
     public void unbind() {
-        context.unbindService(serviceConnection);
-        context.stopService(new Intent(context, LiteDownloadMigrationService.class));
-        serviceConnection = null;
+        if (LiteDownloadMigrationService.isBound() && migrationCallback != null) {
+            context.unbindService(serviceConnection);
+            context.stopService(new Intent(context, LiteDownloadMigrationService.class));
+            serviceConnection = null;
+        }
     }
 
     class MigrationServiceConnection implements ServiceConnection {

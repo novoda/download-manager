@@ -23,6 +23,12 @@ public class LiteDownloadMigrationService extends Service {
     private Migrator.Callback migrationCallback;
     private String updateMessage;
 
+    private static boolean isBound;
+
+    public static boolean isBound() {
+        return isBound;
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
@@ -71,6 +77,7 @@ public class LiteDownloadMigrationService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        isBound = true;
         return binder;
     }
 
@@ -98,6 +105,7 @@ public class LiteDownloadMigrationService extends Service {
         Log.d(TAG, "onUnbind");
         migrationCallback = null;
         Log.d(TAG, "Stopping service");
+        isBound = false;
         return super.onUnbind(intent);
     }
 
