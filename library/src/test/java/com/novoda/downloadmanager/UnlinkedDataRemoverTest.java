@@ -7,6 +7,8 @@ import java.util.List;
 import org.junit.Test;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 public class UnlinkedDataRemoverTest {
 
@@ -14,10 +16,14 @@ public class UnlinkedDataRemoverTest {
     private static final String LINKED_SECOND_FILE = "another filename";
     private static final String UNLINKED_THIRD_FILE = "yet another filename";
 
+    private final RoomAppDatabase roomAppDatabase = mock(RoomAppDatabase.class);
+
     @Test
-    public void removeUnlinkedFiles_whenDataRemoverCalled() throws Exception {
+    public void removesFiles_whenFileIsUnlinked() {
+        given(roomAppDatabase.fileNames()).willReturn(Arrays.asList(LINKED_FIRST_FILE, LINKED_SECOND_FILE));
+
         LocalFilesDirectory localFilesDirectory = new FakeLocalFilesDirectory(Arrays.asList(LINKED_FIRST_FILE, LINKED_SECOND_FILE, UNLINKED_THIRD_FILE));
-        UnlinkedDataRemover remover = new UnlinkedDataRemover(new FakeV2DatabaseFiles(Arrays.asList(LINKED_FIRST_FILE, LINKED_SECOND_FILE)), localFilesDirectory);
+        UnlinkedDataRemover remover = new UnlinkedDataRemover(roomAppDatabase, localFilesDirectory);
         remover.remove();
 
         List<String> expectedContents = Arrays.asList(LINKED_FIRST_FILE, LINKED_SECOND_FILE);
@@ -52,20 +58,6 @@ public class UnlinkedDataRemoverTest {
             }
             fileList = newFileList;
             return fileWasRemoved;
-        }
-    }
-
-    private static class FakeV2DatabaseFiles implements V2DatabaseFiles {
-        
-        private final List<String> fileList;
-
-        private FakeV2DatabaseFiles(List<String> fileList) {
-            this.fileList = fileList;
-        }
-
-        @Override
-        public List<String> fileNames() {
-            return fileList;
         }
     }
 }

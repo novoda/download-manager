@@ -5,6 +5,9 @@ import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Database(entities = {RoomBatch.class, RoomFile.class}, version = 1)
 abstract class RoomAppDatabase extends RoomDatabase {
 
@@ -13,6 +16,16 @@ abstract class RoomAppDatabase extends RoomDatabase {
     abstract RoomBatchDao roomBatchDao();
 
     abstract RoomFileDao roomFileDao();
+
+    List<String> fileNames() {
+        List<RoomFile> roomFiles = roomFileDao().loadAllFiles();
+        List<String> fileNames = new ArrayList<>();
+
+        for (RoomFile roomFile : roomFiles) {
+            fileNames.add(roomFile.name);
+        }
+        return fileNames;
+    }
 
     static RoomAppDatabase obtainInstance(Context context) {
         if (SINGLE_INSTANCE == null) {
