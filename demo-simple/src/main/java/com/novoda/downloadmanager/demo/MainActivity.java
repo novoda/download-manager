@@ -16,6 +16,7 @@ import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
+import com.novoda.downloadmanager.LocalFilesDirectory;
 import com.novoda.downloadmanager.MigrationFactory;
 import com.novoda.downloadmanager.MigrationServiceBinder;
 import com.novoda.downloadmanager.Migrator;
@@ -113,9 +114,9 @@ public class MainActivity extends AppCompatActivity {
         buttonLogFileDirectory.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AndroidLocalFilesDirectory localFilesDirectory = new AndroidLocalFilesDirectory(getApplicationContext());
-                for (String s : localFilesDirectory.contents()) {
-                    Log.d("FilesDirLog", s);
+                LocalFilesDirectory localFilesDirectory = new AndroidLocalFilesDirectory(getApplicationContext());
+                for (String fileName : localFilesDirectory.contents()) {
+                    Log.d("LogFileDirectory", fileName);
                 }
             }
         });

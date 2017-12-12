@@ -2,7 +2,7 @@ package com.novoda.downloadmanager;
 
 import java.util.List;
 
-interface LocalFilesDirectory {
+public interface LocalFilesDirectory {
 
     List<String> contents();
 
