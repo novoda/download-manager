@@ -7,8 +7,6 @@ import java.util.List;
 import org.junit.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 
 public class UnlinkedDataRemoverTest {
 
@@ -16,19 +14,66 @@ public class UnlinkedDataRemoverTest {
     private static final String LINKED_SECOND_FILE = "another filename";
     private static final String UNLINKED_THIRD_FILE = "yet another filename";
 
-    private final RoomAppDatabase roomAppDatabase = mock(RoomAppDatabase.class);
+    private final DownloadsPersistence downloadsPersistence = new DownloadsPersistence() {
+        @Override
+        public void startTransaction() {
+
+        }
+
+        @Override
+        public void endTransaction() {
+
+        }
+
+        @Override
+        public void transactionSuccess() {
+
+        }
+
+        @Override
+        public void persistBatch(DownloadsBatchPersisted batchPersisted) {
+
+        }
+
+        @Override
+        public List<DownloadsBatchPersisted> loadBatches() {
+            return null;
+        }
+
+        @Override
+        public void persistFile(DownloadsFilePersisted filePersisted) {
+
+        }
+
+        @Override
+        public List<DownloadsFilePersisted> loadFiles(DownloadBatchId batchId) {
+            return null;
+        }
+
+        @Override
+        public void delete(DownloadBatchId downloadBatchId) {
+
+        }
+
+        @Override
+        public void update(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status) {
+
+        }
+    };
     private final LocalFilesDirectory localFilesDirectory = new FakeLocalFilesDirectory(Arrays.asList(LINKED_FIRST_FILE, LINKED_SECOND_FILE, UNLINKED_THIRD_FILE));
-    private final UnlinkedDataRemover unlinkedDataRemover = new UnlinkedDataRemover(roomAppDatabase, localFilesDirectory);
+    private final UnlinkedDataRemover unlinkedDataRemover = instantiateTestSubject(downloadsPersistence, localFilesDirectory);
 
     @Test
-    public void removesFiles_whenFileIsUnlinked() {
-        given(roomAppDatabase.fileNames()).willReturn(Arrays.asList(LINKED_FIRST_FILE, LINKED_SECOND_FILE));
-
+    public void removesFiles_whenPresentInLocalStorageButNotInV2Database() {
         unlinkedDataRemover.remove();
 
         List<String> expectedContents = Arrays.asList(LINKED_FIRST_FILE, LINKED_SECOND_FILE);
         List<String> actualContents = localFilesDirectory.contents();
         assertThat(actualContents).isEqualTo(expectedContents);
+    }
+
+    private static UnlinkedDataRemover instantiateTestSubject(DownloadsPersistence downloadsPersistence, LocalFilesDirectory localFilesDirectory) {
+        return new UnlinkedDataRemover(downloadsPersistence, localFilesDirectory);
     }
 
     private static class FakeLocalFilesDirectory implements LocalFilesDirectory {
