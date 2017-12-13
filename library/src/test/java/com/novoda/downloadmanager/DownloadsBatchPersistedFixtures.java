@@ -15,7 +15,7 @@ final class DownloadsBatchPersistedFixtures {
         // use aBatch() to get an instance of this class
     }
 
-    DownloadsBatchPersistedFixtures withDownloadBatchId(final String rawId) {
+    DownloadsBatchPersistedFixtures withRawDownloadBatchId(final String rawId) {
         downloadBatchId = aDownloadBatchId().withRawDownloadBatchId(rawId).build();
         return this;
     }

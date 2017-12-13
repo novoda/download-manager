@@ -87,8 +87,8 @@ public class UnlinkedDataRemoverTest {
 
         @Override
         public List<DownloadsBatchPersisted> loadBatches() {
-            DownloadsBatchPersisted firstBatch = aDownloadsBatchPersisted().withDownloadBatchId("first batch id").withDownloadBatchTitle("first batch title").build();
-            DownloadsBatchPersisted secondBatch = aDownloadsBatchPersisted().withDownloadBatchId("second batch id").withDownloadBatchTitle("second batch title").build();
+            DownloadsBatchPersisted firstBatch = aDownloadsBatchPersisted().withRawDownloadBatchId("first batch id").withDownloadBatchTitle("first batch title").build();
+            DownloadsBatchPersisted secondBatch = aDownloadsBatchPersisted().withRawDownloadBatchId("second batch id").withDownloadBatchTitle("second batch title").build();
 
             return Arrays.asList(firstBatch, secondBatch);
         }
@@ -100,8 +100,8 @@ public class UnlinkedDataRemoverTest {
 
         @Override
         public List<DownloadsFilePersisted> loadFiles(final DownloadBatchId batchId) {
-            DownloadsFilePersisted firstFile = aDownloadsFilePersisted().withDownloadBatchId(batchId).withFileName(LINKED_FIRST_FILENAME).build();
-            DownloadsFilePersisted secondFile = aDownloadsFilePersisted().withDownloadBatchId(batchId).withFileName(LINKED_SECOND_FILENAME).build();
+            DownloadsFilePersisted firstFile = aDownloadsFilePersisted().withDownloadBatchId(batchId).withRawFileName(LINKED_FIRST_FILENAME).build();
+            DownloadsFilePersisted secondFile = aDownloadsFilePersisted().withDownloadBatchId(batchId).withRawFileName(LINKED_SECOND_FILENAME).build();
             return Arrays.asList(firstFile, secondFile);
         }
 
