@@ -2,7 +2,9 @@ package com.novoda.downloadmanager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -16,7 +18,7 @@ public class UnlinkedDataRemoverTest {
     private static final String LINKED_SECOND_FILENAME = "another filename";
     private static final String UNLINKED_THIRD_FILE = "yet another filename";
 
-    private final DownloadsPersistence downloadsPersistence = new DummyDownloadsPersistence();
+    private final DownloadsPersistence downloadsPersistence = new FakeDownloadsPersistence(createBatchesWithFiles());
 
     private final LocalFilesDirectory localFilesDirectory = new FakeLocalFilesDirectory(Arrays.asList(LINKED_FIRST_FILENAME, LINKED_SECOND_FILENAME, UNLINKED_THIRD_FILE));
     private final UnlinkedDataRemover unlinkedDataRemover = instantiateTestSubject(downloadsPersistence, localFilesDirectory);
@@ -32,6 +34,15 @@ public class UnlinkedDataRemoverTest {
 
     private static UnlinkedDataRemover instantiateTestSubject(DownloadsPersistence downloadsPersistence, LocalFilesDirectory localFilesDirectory) {
         return new UnlinkedDataRemover(downloadsPersistence, localFilesDirectory);
+    }
+
+    private Map<DownloadsBatchPersisted, List<DownloadsFilePersisted>> createBatchesWithFiles() {
+        Map<DownloadsBatchPersisted, List<DownloadsFilePersisted>> batchesWithFiles = new HashMap<>();
+        DownloadsBatchPersisted batch = aDownloadsBatchPersisted().withRawDownloadBatchId("a batch id").build();
+        DownloadsFilePersisted firstFile = aDownloadsFilePersisted().withRawFileName(LINKED_FIRST_FILENAME).build();
+        DownloadsFilePersisted secondFile = aDownloadsFilePersisted().withRawFileName(LINKED_SECOND_FILENAME).build();
+        batchesWithFiles.put(batch, Arrays.asList(firstFile, secondFile));
+        return batchesWithFiles;
     }
 
     private static class FakeLocalFilesDirectory implements LocalFilesDirectory {
@@ -63,56 +74,4 @@ public class UnlinkedDataRemoverTest {
         }
     }
 
-    private class DummyDownloadsPersistence implements DownloadsPersistence {
-
-        @Override
-        public void startTransaction() {
-
-        }
-
-        @Override
-        public void endTransaction() {
-
-        }
-
-        @Override
-        public void transactionSuccess() {
-
-        }
-
-        @Override
-        public void persistBatch(DownloadsBatchPersisted batchPersisted) {
-
-        }
-
-        @Override
-        public List<DownloadsBatchPersisted> loadBatches() {
-            DownloadsBatchPersisted firstBatch = aDownloadsBatchPersisted().withRawDownloadBatchId("first batch id").withDownloadBatchTitle("first batch title").build();
-            DownloadsBatchPersisted secondBatch = aDownloadsBatchPersisted().withRawDownloadBatchId("second batch id").withDownloadBatchTitle("second batch title").build();
-
-            return Arrays.asList(firstBatch, secondBatch);
-        }
-
-        @Override
-        public void persistFile(DownloadsFilePersisted filePersisted) {
-
-        }
-
-        @Override
-        public List<DownloadsFilePersisted> loadFiles(final DownloadBatchId batchId) {
-            DownloadsFilePersisted firstFile = aDownloadsFilePersisted().withDownloadBatchId(batchId).withRawFileName(LINKED_FIRST_FILENAME).build();
-            DownloadsFilePersisted secondFile = aDownloadsFilePersisted().withDownloadBatchId(batchId).withRawFileName(LINKED_SECOND_FILENAME).build();
-            return Arrays.asList(firstFile, secondFile);
-        }
-
-        @Override
-        public void delete(DownloadBatchId downloadBatchId) {
-
-        }
-
-        @Override
-        public void update(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status) {
-
-        }
-    }
 }
