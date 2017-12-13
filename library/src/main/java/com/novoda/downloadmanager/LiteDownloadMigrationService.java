@@ -19,7 +19,6 @@ public class LiteDownloadMigrationService extends Service {
     private static final String TAG = "MigrationService";
     private static ExecutorService executor;
 
-    private Migrator v1ToV2Migrator;
     private IBinder binder;
     private Migrator.Callback migrationCallback;
     private String updateMessage;
@@ -38,8 +37,14 @@ public class LiteDownloadMigrationService extends Service {
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                Log.d(TAG, "Begin Migration");
-                v1ToV2Migrator.migrate();
+                Migrator migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
+                        getApplicationContext(),
+                        getDatabasePath("downloads.db"),
+                        migrationCallback()
+                );
+                migrator.migrate();
+                Log.d(TAG, "Begin Migration: " + migrator.getClass());
+                migrator.migrate();
             }
         });
 
@@ -54,11 +59,6 @@ public class LiteDownloadMigrationService extends Service {
         }
 
         binder = new MigrationDownloadServiceBinder();
-        v1ToV2Migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
-                getApplicationContext(),
-                getDatabasePath("downloads.db"),
-                migrationCallback()
-        );
 
         super.onCreate();
     }
