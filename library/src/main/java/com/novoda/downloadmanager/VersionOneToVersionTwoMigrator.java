@@ -22,8 +22,6 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     private final SqlDatabaseWrapper database;
     private final Callback migrationCallback;
 
-    private static boolean isRunning;
-
     VersionOneToVersionTwoMigrator(MigrationExtractor migrationExtractor,
                                    RoomDownloadsPersistence downloadsPersistence,
                                    InternalFilePersistence internalFilePersistence,
@@ -42,7 +40,7 @@ class VersionOneToVersionTwoMigrator implements Migrator {
             Log.w(TAG, "Attempting to access an already closed database.");
             return;
         }
-        isRunning = true;
+
         migrationCallback.onUpdate("Extracting Migrations");
         Log.d(TAG, "about to extract migrations, time is " + System.nanoTime());
         List<Migration> migrations = migrationExtractor.extractMigrations();
@@ -63,12 +61,6 @@ class VersionOneToVersionTwoMigrator implements Migrator {
 
         database.deleteDatabase();
         migrationCallback.onUpdate("Migration Complete");
-        isRunning = false;
-    }
-
-    @Override
-    public boolean isRunning() {
-        return isRunning;
     }
 
     private void migrateV1FilesToV2Location(List<Migration> migrations) {
