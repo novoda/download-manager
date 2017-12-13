@@ -8,7 +8,7 @@ import android.content.Context;
 @Database(entities = {RoomBatch.class, RoomFile.class}, version = 1)
 abstract class RoomAppDatabase extends RoomDatabase {
 
-    private static RoomAppDatabase SINGLE_INSTANCE;
+    private static volatile RoomAppDatabase SINGLE_INSTANCE;
 
     abstract RoomBatchDao roomBatchDao();
 
@@ -21,7 +21,7 @@ abstract class RoomAppDatabase extends RoomDatabase {
         return SINGLE_INSTANCE;
     }
 
-    private static RoomAppDatabase newInstance(Context context) {
+    private static synchronized RoomAppDatabase newInstance(Context context) {
         return Room.databaseBuilder(
                 context.getApplicationContext(),
                 RoomAppDatabase.class,
