@@ -19,17 +19,18 @@ public class MigrationServiceBinder {
     }
 
     public void bind() {
-        if (serviceConnection == null) {
-            serviceConnection = new MigrationServiceConnection();
+        if (serviceConnection != null) {
+            return;
         }
 
+        serviceConnection = new MigrationServiceConnection();
         Intent serviceIntent = new Intent(context, LiteDownloadMigrationService.class);
         context.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
         context.startService(new Intent(context, LiteDownloadMigrationService.class));
     }
 
     public void unbind() {
-        if (LiteDownloadMigrationService.isBound() && migrationCallback != null) {
+        if (serviceConnection != null) {
             context.unbindService(serviceConnection);
             context.stopService(new Intent(context, LiteDownloadMigrationService.class));
             serviceConnection = null;
