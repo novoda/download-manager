@@ -17,8 +17,9 @@ import java.util.concurrent.Executors;
 public class LiteDownloadMigrationService extends Service {
 
     private static final String TAG = "MigrationService";
+    private static ExecutorService executor;
+
     private Migrator v1ToV2Migrator;
-    private ExecutorService executor;
     private IBinder binder;
     private Migrator.Callback migrationCallback;
     private String updateMessage;
@@ -32,18 +33,15 @@ public class LiteDownloadMigrationService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-
         Log.d(TAG, "onStartCommand");
 
-        if (v1ToV2Migrator != null && !v1ToV2Migrator.isRunning()) {
-            executor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    Log.d(TAG, "Begin Migration");
-                    v1ToV2Migrator.migrate();
-                }
-            });
-        }
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "Begin Migration");
+                v1ToV2Migrator.migrate();
+            }
+        });
 
         return START_STICKY;
     }
@@ -51,7 +49,10 @@ public class LiteDownloadMigrationService extends Service {
     @Override
     public void onCreate() {
         Log.d(TAG, "onCreate");
-        executor = Executors.newSingleThreadExecutor();
+        if (executor == null) {
+            executor = Executors.newSingleThreadExecutor();
+        }
+
         binder = new MigrationDownloadServiceBinder();
         v1ToV2Migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
                 getApplicationContext(),
