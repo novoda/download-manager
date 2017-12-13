@@ -110,13 +110,6 @@ public class LiteDownloadMigrationService extends Service {
         return super.onUnbind(intent);
     }
 
-    @Override
-    public void onDestroy() {
-        Log.d(TAG, "onDestroy");
-        executor.shutdown();
-        super.onDestroy();
-    }
-
     class MigrationDownloadServiceBinder extends Binder {
 
         MigrationDownloadServiceBinder withCallback(Migrator.Callback migrationCallback) {

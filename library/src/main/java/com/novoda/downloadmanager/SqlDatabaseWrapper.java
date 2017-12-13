@@ -16,6 +16,10 @@ public class SqlDatabaseWrapper {
         this.sqLiteDatabase = sqLiteDatabase;
     }
 
+    public boolean isOpen() {
+        return sqLiteDatabase.isOpen();
+    }
+
     public Cursor rawQuery(String query) {
         return sqLiteDatabase.rawQuery(query, null);
     }
