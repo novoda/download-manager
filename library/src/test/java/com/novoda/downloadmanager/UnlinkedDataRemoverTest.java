@@ -19,7 +19,6 @@ public class UnlinkedDataRemoverTest {
     private static final String UNLINKED_THIRD_FILE = "yet another filename";
 
     private final DownloadsPersistence downloadsPersistence = new FakeDownloadsPersistence(createBatchesWithFiles());
-
     private final LocalFilesDirectory localFilesDirectory = new FakeLocalFilesDirectory(Arrays.asList(LINKED_FIRST_FILENAME, LINKED_SECOND_FILENAME, UNLINKED_THIRD_FILE));
     private final UnlinkedDataRemover unlinkedDataRemover = instantiateTestSubject(downloadsPersistence, localFilesDirectory);
 
