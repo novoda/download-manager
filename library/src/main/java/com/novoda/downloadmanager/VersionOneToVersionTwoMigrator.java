@@ -36,11 +36,6 @@ class VersionOneToVersionTwoMigrator implements Migrator {
 
     @Override
     public void migrate() {
-        if (!database.isOpen()) {
-            Log.w(TAG, "Attempting to access an already closed database.");
-            return;
-        }
-
         migrationCallback.onUpdate("Extracting Migrations");
         Log.d(TAG, "about to extract migrations, time is " + System.nanoTime());
         List<Migration> migrations = migrationExtractor.extractMigrations();
