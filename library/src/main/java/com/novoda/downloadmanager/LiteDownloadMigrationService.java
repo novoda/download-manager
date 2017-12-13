@@ -42,7 +42,6 @@ public class LiteDownloadMigrationService extends Service {
                         getDatabasePath("downloads.db"),
                         migrationCallback()
                 );
-                migrator.migrate();
                 Log.d(TAG, "Begin Migration: " + migrator.getClass());
                 migrator.migrate();
             }
