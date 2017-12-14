@@ -39,7 +39,7 @@ public final class MigrationFactory {
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
 
         MigrationExtractor migrationExtractor = new MigrationExtractor(database);
-        RoomDownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
+        DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
         InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
         internalFilePersistence.initialiseWith(context);
         LocalFilesDirectory localFilesDirectory = new AndroidLocalFilesDirectory(context);
