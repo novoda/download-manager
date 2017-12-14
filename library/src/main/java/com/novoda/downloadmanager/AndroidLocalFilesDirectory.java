@@ -9,7 +9,7 @@ class AndroidLocalFilesDirectory implements LocalFilesDirectory {
 
     private final Context context;
 
-    public AndroidLocalFilesDirectory(Context context) {
+    AndroidLocalFilesDirectory(Context context) {
         this.context = context;
     }
 
