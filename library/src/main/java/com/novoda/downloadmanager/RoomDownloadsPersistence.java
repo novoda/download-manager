@@ -75,8 +75,18 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
     }
 
     @Override
+    public List<DownloadsFilePersisted> loadAllFiles() {
+        List<RoomFile> roomFiles = database.roomFileDao().loadAllFiles();
+        return getDownloadsFilePersisted(roomFiles);
+    }
+
+    @Override
     public List<DownloadsFilePersisted> loadFiles(DownloadBatchId downloadBatchId) {
         List<RoomFile> roomFiles = database.roomFileDao().loadAllFilesFor(downloadBatchId.stringValue());
+        return getDownloadsFilePersisted(roomFiles);
+    }
+
+    private List<DownloadsFilePersisted> getDownloadsFilePersisted(List<RoomFile> roomFiles) {
         List<DownloadsFilePersisted> filePersistedList = new ArrayList<>(roomFiles.size());
         for (RoomFile roomFile : roomFiles) {
             DownloadsFilePersisted filePersisted = new LiteDownloadsFilePersisted(
