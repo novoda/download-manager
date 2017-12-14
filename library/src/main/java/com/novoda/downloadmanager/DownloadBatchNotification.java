@@ -25,7 +25,7 @@ class DownloadBatchNotification implements NotificationCreator {
         String title = downloadBatchTitle.asString();
         String content = percentageDownloaded + "% downloaded";
 
-        String notificationChannel = NotificationChannelCreator.createDownloadNotificationChannel(context);
+        String notificationChannel = DownloadNotificationChannelCreator.createDownloadNotificationChannel(context);
 
         Notification notification = new NotificationCompat.Builder(context, notificationChannel)
                 .setProgress(bytesFileSize, bytesDownloaded, NOT_INDETERMINATE)

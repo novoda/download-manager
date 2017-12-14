@@ -5,7 +5,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
 
-public class NotificationChannelCreator {
+public class DownloadNotificationChannelCreator {
 
     public static String createDownloadNotificationChannel(Context context) {
         if (CHANNEL_ID == null) {
