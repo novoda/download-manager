@@ -1,7 +1,10 @@
 package com.novoda.downloadmanager;
 
+import android.support.annotation.WorkerThread;
+
 public interface Migrator {
 
+    @WorkerThread
     void migrate();
 
     interface Callback {

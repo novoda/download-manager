@@ -225,4 +225,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
+
+    @Override
+    protected void onStop() {
+        migrationServiceBinder.unbind();
+        super.onStop();
+    }
 }
