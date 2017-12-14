@@ -35,19 +35,14 @@ public final class MigrationFactory {
             return Migrator.NO_OP;
         }
 
-        if (INSTANCE == null) {
-            SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
-            SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
+        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
+        SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
 
-            MigrationExtractor migrationExtractor = new MigrationExtractor(database);
-            RoomDownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
-            InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
-            internalFilePersistence.initialiseWith(context);
-            INSTANCE = new VersionOneToVersionTwoMigrator(migrationExtractor, downloadsPersistence, internalFilePersistence, database, migrationCallback);
-        }
-        return INSTANCE;
+        MigrationExtractor migrationExtractor = new MigrationExtractor(database);
+        RoomDownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
+        InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
+        internalFilePersistence.initialiseWith(context);
+        return new VersionOneToVersionTwoMigrator(migrationExtractor, downloadsPersistence, internalFilePersistence, database, migrationCallback);
     }
-
-    private static Migrator INSTANCE;
 
 }
