@@ -16,8 +16,9 @@ import java.util.concurrent.Executors;
 
 public class LiteDownloadMigrationService extends Service {
 
-    private Migrator v1ToV2Migrator;
-    private ExecutorService executor;
+    private static final String TAG = "MigrationService";
+    private static ExecutorService executor;
+
     private IBinder binder;
     private Migrator.Callback migrationCallback;
     private String updateMessage;
@@ -25,32 +26,32 @@ public class LiteDownloadMigrationService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
+        Log.d(TAG, "onStartCommand");
 
-        Log.d(getClass().getSimpleName(), "onStartCommand");
-
-        if (v1ToV2Migrator != null) {
-            executor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    Log.d(getClass().getSimpleName(), "Begin Migration");
-                    v1ToV2Migrator.migrate();
-                }
-            });
-        }
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                Migrator migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
+                        getApplicationContext(),
+                        getDatabasePath("downloads.db"),
+                        migrationCallback()
+                );
+                Log.d(TAG, "Begin Migration: " + migrator.getClass());
+                migrator.migrate();
+            }
+        });
 
         return START_STICKY;
     }
 
     @Override
     public void onCreate() {
-        Log.d(getClass().getSimpleName(), "onCreate");
-        executor = Executors.newSingleThreadExecutor();
+        Log.d(TAG, "onCreate");
+        if (executor == null) {
+            executor = Executors.newSingleThreadExecutor();
+        }
+
         binder = new MigrationDownloadServiceBinder();
-        v1ToV2Migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
-                getApplicationContext(),
-                getDatabasePath("downloads.db"),
-                migrationCallback()
-        );
 
         super.onCreate();
     }
@@ -75,9 +76,9 @@ public class LiteDownloadMigrationService extends Service {
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
-        Log.d(getClass().getSimpleName(), "onTaskRemoved");
+        Log.d(TAG, "onTaskRemoved");
         rescheduleMigration();
-        Log.d(getClass().getSimpleName(), "Rescheduling");
+        Log.d(TAG, "Rescheduling");
         super.onTaskRemoved(rootIntent);
     }
 
@@ -86,7 +87,7 @@ public class LiteDownloadMigrationService extends Service {
         PendingIntent pendingIntent = PendingIntent.getService(this, 1, intent, PendingIntent.FLAG_ONE_SHOT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         if (alarmManager == null) {
-            Log.w(getClass().getSimpleName(), "Could not retrieve AlarmManager for rescheduling.");
+            Log.w(TAG, "Could not retrieve AlarmManager for rescheduling.");
             return;
         }
         alarmManager.set(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + 5000, pendingIntent);
@@ -94,17 +95,10 @@ public class LiteDownloadMigrationService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent) {
-        Log.d(getClass().getSimpleName(), "onUnbind");
+        Log.d(TAG, "onUnbind");
         migrationCallback = null;
-        Log.d(getClass().getSimpleName(), "Stopping service");
+        Log.d(TAG, "Stopping service");
         return super.onUnbind(intent);
-    }
-
-    @Override
-    public void onDestroy() {
-        Log.d(getClass().getSimpleName(), "onDestroy");
-        executor.shutdown();
-        super.onDestroy();
     }
 
     class MigrationDownloadServiceBinder extends Binder {
