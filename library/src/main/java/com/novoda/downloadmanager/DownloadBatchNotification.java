@@ -11,10 +11,12 @@ class DownloadBatchNotification implements NotificationCreator {
 
     private final Context context;
     private final int iconDrawable;
+    private final NotificationChannelCreator notificationChannelCreator;
 
-    DownloadBatchNotification(Context context, @DrawableRes int iconDrawable) {
+    DownloadBatchNotification(Context context, @DrawableRes int iconDrawable, NotificationChannelCreator notificationChannelCreator) {
         this.context = context.getApplicationContext();
         this.iconDrawable = iconDrawable;
+        this.notificationChannelCreator = notificationChannelCreator;
     }
 
     @Override
@@ -25,7 +27,7 @@ class DownloadBatchNotification implements NotificationCreator {
         String title = downloadBatchTitle.asString();
         String content = percentageDownloaded + "% downloaded";
 
-        String notificationChannel = DownloadNotificationChannelCreator.createDownloadNotificationChannel(context);
+        String notificationChannel = notificationChannelCreator.createDownloadNotificationChannel(context);
 
         Notification notification = new NotificationCompat.Builder(context, notificationChannel)
                 .setProgress(bytesFileSize, bytesDownloaded, NOT_INDETERMINATE)

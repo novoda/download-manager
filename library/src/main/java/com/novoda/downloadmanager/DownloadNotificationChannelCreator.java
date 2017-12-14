@@ -5,9 +5,18 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
 
-public class DownloadNotificationChannelCreator {
+class DownloadNotificationChannelCreator implements NotificationChannelCreator {
 
-    public static String createDownloadNotificationChannel(Context context) {
+    private final NotificationManager notificationManager;
+
+    DownloadNotificationChannelCreator(NotificationManager notificationManager) {
+        this.notificationManager = notificationManager;
+    }
+
+    private static String CHANNEL_ID;
+
+    @Override
+    public String createDownloadNotificationChannel(Context context) {
         if (CHANNEL_ID == null) {
             CHANNEL_ID = "download-manager";
             createNotificationChannelForAndroidOreo(context);
@@ -16,15 +25,12 @@ public class DownloadNotificationChannelCreator {
         return CHANNEL_ID;
     }
 
-    private static void createNotificationChannelForAndroidOreo(Context context) {
+    private void createNotificationChannelForAndroidOreo(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String channelName = "Download Manager Notification Service";
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_HIGH);
-            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.createNotificationChannel(channel);
         }
     }
-
-    private static String CHANNEL_ID;
 
 }

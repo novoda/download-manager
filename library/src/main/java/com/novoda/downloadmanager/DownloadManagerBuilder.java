@@ -1,5 +1,6 @@
 package com.novoda.downloadmanager;
 
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -61,7 +62,10 @@ public final class DownloadManagerBuilder {
         FileSizeRequester fileSizeRequester = new NetworkFileSizeRequester(httpClient, requestCreator);
         FileDownloader fileDownloader = new NetworkFileDownloader(httpClient, requestCreator);
 
-        DownloadBatchNotification downloadBatchNotification = new DownloadBatchNotification(context, notificationIcon);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationChannelCreator notificationChannelCreator = new DownloadNotificationChannelCreator(notificationManager);
+
+        DownloadBatchNotification downloadBatchNotification = new DownloadBatchNotification(context, notificationIcon, notificationChannelCreator);
 
         ConnectionType connectionTypeAllowed = ConnectionType.ALL;
         boolean allowNetworkRecovery = true;
