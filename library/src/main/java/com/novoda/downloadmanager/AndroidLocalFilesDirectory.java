@@ -5,7 +5,7 @@ import android.content.Context;
 import java.util.Arrays;
 import java.util.List;
 
-public class AndroidLocalFilesDirectory implements LocalFilesDirectory {
+class AndroidLocalFilesDirectory implements LocalFilesDirectory {
 
     private final Context context;
 
