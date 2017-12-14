@@ -8,8 +8,9 @@ class FileNameFixtures {
         return new FileNameFixtures();
     }
 
-    void withRawFileName(String rawFileName) {
+    FileNameFixtures withRawFileName(String rawFileName) {
         this.rawFileName = rawFileName;
+        return this;
     }
 
     FileName build() {

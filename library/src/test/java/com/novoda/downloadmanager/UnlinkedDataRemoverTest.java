@@ -2,33 +2,46 @@ package com.novoda.downloadmanager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import static com.novoda.downloadmanager.DownloadsBatchPersistedFixtures.aDownloadsBatchPersisted;
+import static com.novoda.downloadmanager.DownloadsFilePersistedFixtures.aDownloadsFilePersisted;
 
 public class UnlinkedDataRemoverTest {
 
-    private static final String LINKED_FIRST_FILE = "a filename";
-    private static final String LINKED_SECOND_FILE = "another filename";
+    private static final String LINKED_FIRST_FILENAME = "a filename";
+    private static final String LINKED_SECOND_FILENAME = "another filename";
     private static final String UNLINKED_THIRD_FILE = "yet another filename";
 
-    private final RoomAppDatabase roomAppDatabase = mock(RoomAppDatabase.class);
-    private final LocalFilesDirectory localFilesDirectory = new FakeLocalFilesDirectory(Arrays.asList(LINKED_FIRST_FILE, LINKED_SECOND_FILE, UNLINKED_THIRD_FILE));
-    private final UnlinkedDataRemover unlinkedDataRemover = new UnlinkedDataRemover(roomAppDatabase, localFilesDirectory);
+    private final DownloadsPersistence downloadsPersistence = new FakeDownloadsPersistence(createBatchesWithFiles());
+    private final LocalFilesDirectory localFilesDirectory = new FakeLocalFilesDirectory(Arrays.asList(LINKED_FIRST_FILENAME, LINKED_SECOND_FILENAME, UNLINKED_THIRD_FILE));
+    private final UnlinkedDataRemover unlinkedDataRemover = instantiateTestSubject(downloadsPersistence, localFilesDirectory);
 
     @Test
-    public void removesFiles_whenFileIsUnlinked() {
-        given(roomAppDatabase.fileNames()).willReturn(Arrays.asList(LINKED_FIRST_FILE, LINKED_SECOND_FILE));
-
+    public void removesFiles_whenPresentInLocalStorageButNotInV2Database() {
         unlinkedDataRemover.remove();
 
-        List<String> expectedContents = Arrays.asList(LINKED_FIRST_FILE, LINKED_SECOND_FILE);
+        List<String> expectedContents = Arrays.asList(LINKED_FIRST_FILENAME, LINKED_SECOND_FILENAME);
         List<String> actualContents = localFilesDirectory.contents();
         assertThat(actualContents).isEqualTo(expectedContents);
+    }
+
+    private static UnlinkedDataRemover instantiateTestSubject(DownloadsPersistence downloadsPersistence, LocalFilesDirectory localFilesDirectory) {
+        return new UnlinkedDataRemover(downloadsPersistence, localFilesDirectory);
+    }
+
+    private Map<DownloadsBatchPersisted, List<DownloadsFilePersisted>> createBatchesWithFiles() {
+        Map<DownloadsBatchPersisted, List<DownloadsFilePersisted>> batchesWithFiles = new HashMap<>();
+        DownloadsBatchPersisted batch = aDownloadsBatchPersisted().withRawDownloadBatchId("a batch id").build();
+        DownloadsFilePersisted firstFile = aDownloadsFilePersisted().withRawFileName(LINKED_FIRST_FILENAME).build();
+        DownloadsFilePersisted secondFile = aDownloadsFilePersisted().withRawFileName(LINKED_SECOND_FILENAME).build();
+        batchesWithFiles.put(batch, Arrays.asList(firstFile, secondFile));
+        return batchesWithFiles;
     }
 
     private static class FakeLocalFilesDirectory implements LocalFilesDirectory {
@@ -59,4 +72,5 @@ public class UnlinkedDataRemoverTest {
             return fileWasRemoved;
         }
     }
+
 }

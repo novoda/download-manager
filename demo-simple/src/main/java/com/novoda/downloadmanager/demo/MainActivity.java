@@ -9,7 +9,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.novoda.downloadmanager.AllBatchStatusesCallback;
-import com.novoda.downloadmanager.AndroidLocalFilesDirectory;
 import com.novoda.downloadmanager.Batch;
 import com.novoda.downloadmanager.DownloadBatchCallback;
 import com.novoda.downloadmanager.DownloadBatchId;
@@ -17,6 +16,7 @@ import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.LocalFilesDirectory;
+import com.novoda.downloadmanager.LocalFilesDirectoryFactory;
 import com.novoda.downloadmanager.MigrationFactory;
 import com.novoda.downloadmanager.MigrationServiceBinder;
 import com.novoda.downloadmanager.Migrator;
@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
         buttonLogFileDirectory.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LocalFilesDirectory localFilesDirectory = new AndroidLocalFilesDirectory(getApplicationContext());
+                LocalFilesDirectory localFilesDirectory = LocalFilesDirectoryFactory.create(getApplicationContext());
                 for (String fileName : localFilesDirectory.contents()) {
                     Log.d("LogFileDirectory", fileName);
                 }

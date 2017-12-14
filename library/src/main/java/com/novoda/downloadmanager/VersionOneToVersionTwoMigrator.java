@@ -25,7 +25,7 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     private final UnlinkedDataRemover unlinkedDataRemover;
 
     VersionOneToVersionTwoMigrator(MigrationExtractor migrationExtractor,
-                                   RoomDownloadsPersistence downloadsPersistence,
+                                   DownloadsPersistence downloadsPersistence,
                                    InternalFilePersistence internalFilePersistence,
                                    SqlDatabaseWrapper database,
                                    Callback migrationCallback,
