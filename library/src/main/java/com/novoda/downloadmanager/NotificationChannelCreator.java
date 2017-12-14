@@ -5,9 +5,9 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
 
-class NotificationChannelCreator {
+public class NotificationChannelCreator {
 
-    static String createDownloadNotificationChannel(Context context) {
+    public static String createDownloadNotificationChannel(Context context) {
         if (CHANNEL_ID == null) {
             CHANNEL_ID = "download-manager";
             createNotificationChannelForAndroidOreo(context);
