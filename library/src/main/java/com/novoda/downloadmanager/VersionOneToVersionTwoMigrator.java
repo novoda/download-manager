@@ -17,25 +17,29 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     private static final String DELETE_BY_ID_QUERY = "DELETE FROM batches WHERE _id = ?";
 
     private final MigrationExtractor migrationExtractor;
-    private final RoomDownloadsPersistence downloadsPersistence;
+    private final DownloadsPersistence downloadsPersistence;
     private final InternalFilePersistence internalFilePersistence;
     private final SqlDatabaseWrapper database;
     private final Callback migrationCallback;
+    private final UnlinkedDataRemover unlinkedDataRemover;
 
     VersionOneToVersionTwoMigrator(MigrationExtractor migrationExtractor,
-                                   RoomDownloadsPersistence downloadsPersistence,
+                                   DownloadsPersistence downloadsPersistence,
                                    InternalFilePersistence internalFilePersistence,
                                    SqlDatabaseWrapper database,
-                                   Callback migrationCallback) {
+                                   Callback migrationCallback,
+                                   UnlinkedDataRemover unlinkedDataRemover) {
         this.migrationExtractor = migrationExtractor;
         this.downloadsPersistence = downloadsPersistence;
         this.internalFilePersistence = internalFilePersistence;
         this.database = database;
         this.migrationCallback = migrationCallback;
+        this.unlinkedDataRemover = unlinkedDataRemover;
     }
 
     @Override
     public void migrate() {
+        unlinkedDataRemover.remove();
         migrationCallback.onUpdate("Extracting Migrations");
         Log.d(TAG, "about to extract migrations, time is " + System.nanoTime());
         List<Migration> migrations = migrationExtractor.extractMigrations();
@@ -131,11 +135,15 @@ class VersionOneToVersionTwoMigrator implements Migrator {
         }
     }
 
+    // TODO: See https://github.com/novoda/download-manager/issues/270
     private void deleteFrom(SqlDatabaseWrapper database, List<Migration> migrations) {
         for (Migration migration : migrations) {
             Batch batch = migration.batch();
             database.rawQuery(DELETE_BY_ID_QUERY, batch.getDownloadBatchId().stringValue());
+            for (Migration.FileMetadata metadata : migration.getFileMetadata()) {
+                File file = new File(metadata.originalFileLocation());
+                file.delete();
+            }
         }
     }
-
 }

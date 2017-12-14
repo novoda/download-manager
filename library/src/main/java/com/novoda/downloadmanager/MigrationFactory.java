@@ -30,7 +30,7 @@ public final class MigrationFactory {
         return new MigrationServiceBinder(context, mainThreadReportingMigrationCallback);
     }
 
-    static Migrator createVersionOneToVersionTwoMigrator(Context context, File databasePath, Migrator.Callback migrationCallback) {
+    static Migrator createVersionOneToVersionTwoMigrator(Context context, File databasePath, Migrator.Callback callback) {
         if (!databasePath.exists()) {
             return Migrator.NO_OP;
         }
@@ -39,10 +39,12 @@ public final class MigrationFactory {
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
 
         MigrationExtractor migrationExtractor = new MigrationExtractor(database);
-        RoomDownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
+        DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
         InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
         internalFilePersistence.initialiseWith(context);
-        return new VersionOneToVersionTwoMigrator(migrationExtractor, downloadsPersistence, internalFilePersistence, database, migrationCallback);
+        LocalFilesDirectory localFilesDirectory = new AndroidLocalFilesDirectory(context);
+        UnlinkedDataRemover remover = new UnlinkedDataRemover(downloadsPersistence, localFilesDirectory);
+        return new VersionOneToVersionTwoMigrator(migrationExtractor, downloadsPersistence, internalFilePersistence, database, callback, remover);
     }
 
 }

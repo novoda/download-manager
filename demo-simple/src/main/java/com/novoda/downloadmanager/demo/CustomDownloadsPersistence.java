@@ -44,6 +44,12 @@ public class CustomDownloadsPersistence implements DownloadsPersistence {
     }
 
     @Override
+    public List<DownloadsFilePersisted> loadAllFiles() {
+        Log.v("Load all files");
+        return Collections.emptyList();
+    }
+
+    @Override
     public List<DownloadsFilePersisted> loadFiles(DownloadBatchId batchId) {
         Log.v("Load files for batch id: " + batchId);
         return Collections.emptyList();

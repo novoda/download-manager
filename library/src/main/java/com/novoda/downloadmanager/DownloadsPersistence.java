@@ -16,6 +16,8 @@ public interface DownloadsPersistence {
 
     void persistFile(DownloadsFilePersisted filePersisted);
 
+    List<DownloadsFilePersisted> loadAllFiles();
+
     List<DownloadsFilePersisted> loadFiles(DownloadBatchId batchId);
 
     void delete(DownloadBatchId downloadBatchId);

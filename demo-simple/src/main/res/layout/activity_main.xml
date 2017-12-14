@@ -125,17 +125,9 @@
     android:text="Delete all" />
 
   <Button
-    android:id="@+id/button_show_completed_downloads"
+    android:id="@+id/button_log_file_directory"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="Show Completed Downloads" />
-
-  <TextView
-    android:id="@+id/textview_completed_download_title"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:text="TextView"
-    android:textColor="@android:color/black"
-    android:textSize="16sp" />
+    android:text="Log File Directory" />
 
 </LinearLayout>

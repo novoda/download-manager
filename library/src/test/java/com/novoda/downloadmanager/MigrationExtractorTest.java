@@ -18,7 +18,7 @@ import static org.mockito.Mockito.mock;
 
 public class MigrationExtractorTest {
 
-    private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title FROM batches INNER JOIN DownloadsByBatch ON " +
+    private static final String BATCHES_QUERY = "SELECT DISTINCT batches._id, batches.batch_title FROM batches INNER JOIN DownloadsByBatch ON " +
             "DownloadsByBatch.batch_id = batches._id WHERE DownloadsByBatch.batch_total_bytes = DownloadsByBatch.batch_current_bytes";
 
     private static final String DOWNLOADS_QUERY = "SELECT uri, _data, total_bytes FROM Downloads WHERE batch_id = ?";

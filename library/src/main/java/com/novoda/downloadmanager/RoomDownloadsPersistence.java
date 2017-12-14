@@ -1,6 +1,5 @@
 package com.novoda.downloadmanager;
 
-import android.arch.persistence.room.Room;
 import android.content.Context;
 
 import java.util.ArrayList;
@@ -11,11 +10,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
     private final RoomAppDatabase database;
 
     static RoomDownloadsPersistence newInstance(Context context) {
-        RoomAppDatabase database = Room.databaseBuilder(
-                context.getApplicationContext(),
-                RoomAppDatabase.class,
-                "database-litedownloadmanager"
-        ).build();
+        RoomAppDatabase database = RoomAppDatabase.obtainInstance(context);
         return new RoomDownloadsPersistence(database);
     }
 
@@ -80,8 +75,18 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
     }
 
     @Override
+    public List<DownloadsFilePersisted> loadAllFiles() {
+        List<RoomFile> roomFiles = database.roomFileDao().loadAllFiles();
+        return getDownloadsFilePersisted(roomFiles);
+    }
+
+    @Override
     public List<DownloadsFilePersisted> loadFiles(DownloadBatchId downloadBatchId) {
         List<RoomFile> roomFiles = database.roomFileDao().loadAllFilesFor(downloadBatchId.stringValue());
+        return getDownloadsFilePersisted(roomFiles);
+    }
+
+    private List<DownloadsFilePersisted> getDownloadsFilePersisted(List<RoomFile> roomFiles) {
         List<DownloadsFilePersisted> filePersistedList = new ArrayList<>(roomFiles.size());
         for (RoomFile roomFile : roomFiles) {
             DownloadsFilePersisted filePersisted = new LiteDownloadsFilePersisted(
