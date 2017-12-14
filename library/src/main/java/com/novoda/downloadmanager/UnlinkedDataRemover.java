@@ -14,19 +14,17 @@ class UnlinkedDataRemover {
     }
 
     void remove() {
-        List<String> filesInV2Database = new ArrayList<>();
-        for (DownloadsBatchPersisted batch : downloadsPersistence.loadBatches()) {
-            DownloadBatchId downloadBatchId = batch.downloadBatchId();
-            for (DownloadsFilePersisted file : downloadsPersistence.loadFiles(downloadBatchId)) {
-                String name = file.fileName().name();
-                filesInV2Database.add(name);
-            }
+        List<DownloadsFilePersisted> filesInV2Database = downloadsPersistence.loadAllFiles();
+        List<String> databaseFileNames = new ArrayList<>();
+
+        for (DownloadsFilePersisted filePersisted : filesInV2Database) {
+            databaseFileNames.add(filePersisted.fileName().name());
         }
+
         for (String localFile : localFilesDirectory.contents()) {
-            if (!filesInV2Database.contains(localFile)) {
+            if (!databaseFileNames.contains(localFile)) {
                 localFilesDirectory.deleteFile(localFile);
             }
         }
     }
-
 }

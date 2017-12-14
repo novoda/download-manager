@@ -46,6 +46,15 @@ class FakeDownloadsPersistence implements DownloadsPersistence {
     }
 
     @Override
+    public List<DownloadsFilePersisted> loadAllFiles() {
+        List<DownloadsFilePersisted> allFiles = new ArrayList<>();
+        for (Map.Entry<DownloadsBatchPersisted, List<DownloadsFilePersisted>> entry : filesByBatches.entrySet()) {
+            allFiles.addAll(entry.getValue());
+        }
+        return allFiles;
+    }
+
+    @Override
     public List<DownloadsFilePersisted> loadFiles(final DownloadBatchId batchId) {
         for (Map.Entry<DownloadsBatchPersisted, List<DownloadsFilePersisted>> batchWithFiles : filesByBatches.entrySet()) {
             if (batchId.stringValue().equals(batchWithFiles.getKey().downloadBatchId().stringValue())) {
