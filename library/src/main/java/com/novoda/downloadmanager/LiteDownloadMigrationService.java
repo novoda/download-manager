@@ -1,11 +1,14 @@
 package com.novoda.downloadmanager;
 
 import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
@@ -22,6 +25,9 @@ public class LiteDownloadMigrationService extends Service {
     private IBinder binder;
     private Migrator.Callback migrationCallback;
     private String updateMessage;
+    private NotificationCreator<MigrationStatus> notificationCreator;
+    private NotificationChannelCreator channelCreator;
+    private NotificationManager notificationManager;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -52,6 +58,15 @@ public class LiteDownloadMigrationService extends Service {
         }
 
         binder = new MigrationDownloadServiceBinder();
+        channelCreator = new MigrationNotificationChannelCreator(getResources());
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        Optional<NotificationChannel> notificationChannel = channelCreator.createNotificationChannel();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationChannel.isPresent()) {
+            notificationManager.createNotificationChannel(notificationChannel.get());
+        }
+
+        notificationCreator = new MigrationNotification(getApplicationContext(), android.R.drawable.ic_dialog_alert);
 
         super.onCreate();
     }
@@ -62,10 +77,22 @@ public class LiteDownloadMigrationService extends Service {
             public void onUpdate(String message) {
                 updateMessage = message;
                 if (migrationCallback != null) {
+                    MigrationStatus migrationStatus = new VersionOneToVersionTwoMigrationStatus(message);
+                    updateNotification(migrationStatus);
                     migrationCallback.onUpdate(message);
                 }
             }
         };
+    }
+
+    private void updateNotification(MigrationStatus migrationStatus) {
+        NotificationInformation notification = notificationCreator.createNotification(channelCreator.getNotificationChannelName(), migrationStatus);
+        startForeground(notification.getId(), notification.getNotification());
+
+        if (migrationStatus.message().equals("Migration Complete")) {
+            stopForeground(true);
+            notificationManager.notify(notification.getId(), notification.getNotification());
+        }
     }
 
     @Nullable
@@ -110,6 +137,7 @@ public class LiteDownloadMigrationService extends Service {
 
         void bind() {
             LiteDownloadMigrationService.this.migrationCallback.onUpdate(LiteDownloadMigrationService.this.updateMessage);
+            LiteDownloadMigrationService.this.updateNotification(new VersionOneToVersionTwoMigrationStatus(updateMessage));
         }
 
     }
