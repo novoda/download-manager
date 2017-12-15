@@ -4,13 +4,14 @@ import android.app.Notification;
 import android.content.Context;
 import android.support.v4.app.NotificationCompat;
 
+import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.DownloadBatchTitle;
 import com.novoda.downloadmanager.NotificationChannelCreator;
 import com.novoda.downloadmanager.NotificationCreator;
 import com.novoda.downloadmanager.NotificationInformation;
 import com.novoda.notils.logger.simple.Log;
 
-public class CustomNotificationCreator implements NotificationCreator {
+public class CustomNotificationCreator implements NotificationCreator<DownloadBatchStatus> {
 
     private static final int ID = 1;
     private static final boolean NOT_INDETERMINATE = false;
@@ -26,11 +27,12 @@ public class CustomNotificationCreator implements NotificationCreator {
     }
 
     @Override
-    public NotificationInformation createNotificationWithProgress(String notificationChannelName, DownloadBatchTitle downloadBatchTitle,
-                                                                  int percentageDownloaded,
-                                                                  int bytesFileSize,
-                                                                  int bytesDownloaded) {
-        String title = downloadBatchTitle.toString();
+    public NotificationInformation createNotification(String notificationChannelName, DownloadBatchStatus downloadBatchStatus) {
+        DownloadBatchTitle downloadBatchTitle = downloadBatchStatus.getDownloadBatchTitle();
+        int percentageDownloaded = downloadBatchStatus.percentageDownloaded();
+        int bytesFileSize = (int) downloadBatchStatus.bytesTotalSize();
+        int bytesDownloaded = (int) downloadBatchStatus.bytesDownloaded();
+        String title = downloadBatchTitle.asString();
         String content = percentageDownloaded + "% downloaded";
 
         Log.v("Create notification for " + title + ", " + content);

@@ -1,10 +1,7 @@
 package com.novoda.downloadmanager;
 
-public interface NotificationCreator {
+public interface NotificationCreator<PAYLOAD> {
 
-    NotificationInformation createNotificationWithProgress(String notificationChannelName,
-                                                           DownloadBatchTitle downloadBatchTitle,
-                                                           int percentageDownloaded,
-                                                           int bytesFileSize,
-                                                           int bytesDownloaded);
+    NotificationInformation createNotification(String notificationChannelName, PAYLOAD notificationPayload);
+
 }
