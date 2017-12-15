@@ -18,11 +18,11 @@ class DownloadBatchNotification implements NotificationCreator {
     }
 
     @Override
-    public NotificationInformation createNotification(String notificationChannelName,
-                                                      DownloadBatchTitle downloadBatchTitle,
-                                                      int percentageDownloaded,
-                                                      int bytesFileSize,
-                                                      int bytesDownloaded) {
+    public NotificationInformation createNotificationWithProgress(String notificationChannelName,
+                                                                  DownloadBatchTitle downloadBatchTitle,
+                                                                  int percentageDownloaded,
+                                                                  int bytesFileSize,
+                                                                  int bytesDownloaded) {
         String title = downloadBatchTitle.asString();
         String content = percentageDownloaded + "% downloaded";
 

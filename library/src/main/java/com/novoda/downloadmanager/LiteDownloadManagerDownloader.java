@@ -128,7 +128,7 @@ class LiteDownloadManagerDownloader {
     }
 
     private void updateNotification(DownloadBatchStatus liteDownloadBatchStatus, DownloadService downloadService) {
-        NotificationInformation notificationInformation = notificationCreator.createNotification(
+        NotificationInformation notificationInformation = notificationCreator.createNotificationWithProgress(
                 notificationChannelCreator.getNotificationChannelName(),
                 liteDownloadBatchStatus.getDownloadBatchTitle(),
                 liteDownloadBatchStatus.percentageDownloaded(),

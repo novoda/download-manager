@@ -26,10 +26,10 @@ public class CustomNotificationCreator implements NotificationCreator {
     }
 
     @Override
-    public NotificationInformation createNotification(String notificationChannelName, DownloadBatchTitle downloadBatchTitle,
-                                                      int percentageDownloaded,
-                                                      int bytesFileSize,
-                                                      int bytesDownloaded) {
+    public NotificationInformation createNotificationWithProgress(String notificationChannelName, DownloadBatchTitle downloadBatchTitle,
+                                                                  int percentageDownloaded,
+                                                                  int bytesFileSize,
+                                                                  int bytesDownloaded) {
         String title = downloadBatchTitle.toString();
         String content = percentageDownloaded + "% downloaded";
 
