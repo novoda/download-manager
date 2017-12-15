@@ -16,7 +16,7 @@ class DownloadNotificationChannelCreator implements NotificationChannelCreator {
     @Override
     public Optional<NotificationChannel> createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(channelName(), channelDescription(), NotificationManager.IMPORTANCE_HIGH);
+            NotificationChannel channel = new NotificationChannel(channelName(), channelDescription(), NotificationManager.IMPORTANCE_LOW);
             return Optional.of(channel);
         }
 
