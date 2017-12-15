@@ -77,7 +77,7 @@ public class LiteDownloadMigrationService extends Service {
             public void onUpdate(String message) {
                 updateMessage = message;
                 if (migrationCallback != null) {
-                    MigrationStatus migrationStatus = new VersionOneToVersionTwoMigrationStatus(message);
+                    MigrationStatus migrationStatus = new VersionOneToVersionTwoMigrationStatus(0, MigrationStatus.Status.MIGRATING_FILES);
                     updateNotification(migrationStatus);
                     migrationCallback.onUpdate(message);
                 }
@@ -89,8 +89,9 @@ public class LiteDownloadMigrationService extends Service {
         NotificationInformation notification = notificationCreator.createNotification(channelCreator.getNotificationChannelName(), migrationStatus);
         startForeground(notification.getId(), notification.getNotification());
 
-        if (migrationStatus.message().equals("Migration Complete")) {
+        if (updateMessage.equals("Migration Complete")) {
             stopForeground(true);
+            notificationCreator.createNotification(channelCreator.getNotificationChannelName(), new VersionOneToVersionTwoMigrationStatus(0, MigrationStatus.Status.COMPLETE));
             notificationManager.notify(notification.getId(), notification.getNotification());
         }
     }
@@ -137,7 +138,7 @@ public class LiteDownloadMigrationService extends Service {
 
         void bind() {
             LiteDownloadMigrationService.this.migrationCallback.onUpdate(LiteDownloadMigrationService.this.updateMessage);
-            LiteDownloadMigrationService.this.updateNotification(new VersionOneToVersionTwoMigrationStatus(updateMessage));
+            LiteDownloadMigrationService.this.updateNotification(new VersionOneToVersionTwoMigrationStatus(0, MigrationStatus.Status.MIGRATING_FILES));
         }
 
     }

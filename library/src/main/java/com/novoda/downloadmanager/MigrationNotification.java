@@ -17,14 +17,13 @@ class MigrationNotification implements NotificationCreator<MigrationStatus> {
 
     @Override
     public NotificationInformation createNotification(String notificationChannelName, MigrationStatus migrationStatus) {
-        String title = migrationStatus.message();
-
         Notification notification = new NotificationCompat.Builder(context, notificationChannelName)
+                .setProgress(100, migrationStatus.percentageMigrated(), false)
                 .setSmallIcon(iconDrawable)
-                .setContentTitle(migrationStatus.message())
+                .setContentTitle(migrationStatus.status().toRawValue())
                 .build();
 
-        return new MigrationNotificationInformation(title.hashCode(), notification);
+        return new MigrationNotificationInformation(migrationStatus.hashCode(), notification);
     }
 
     private static class MigrationNotificationInformation implements NotificationInformation {

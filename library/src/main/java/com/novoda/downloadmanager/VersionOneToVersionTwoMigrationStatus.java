@@ -2,14 +2,21 @@ package com.novoda.downloadmanager;
 
 class VersionOneToVersionTwoMigrationStatus implements MigrationStatus {
 
-    private final String message;
+    private int percentageMigrated;
+    private Status status;
 
-    VersionOneToVersionTwoMigrationStatus(String message) {
-        this.message = message;
+    VersionOneToVersionTwoMigrationStatus(int percentageMigrated, Status status) {
+        this.percentageMigrated = percentageMigrated;
+        this.status = status;
     }
 
     @Override
-    public String message() {
-        return message;
+    public int percentageMigrated() {
+        return percentageMigrated;
+    }
+
+    @Override
+    public Status status() {
+        return status;
     }
 }
