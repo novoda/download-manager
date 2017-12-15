@@ -2,35 +2,38 @@ package com.novoda.downloadmanager;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.content.Context;
+import android.content.res.Resources;
 import android.os.Build;
 
 class DownloadNotificationChannelCreator implements NotificationChannelCreator {
 
-    private final NotificationManager notificationManager;
+    private final Resources resources;
 
-    DownloadNotificationChannelCreator(NotificationManager notificationManager) {
-        this.notificationManager = notificationManager;
+    DownloadNotificationChannelCreator(Resources resources) {
+        this.resources = resources;
     }
-
-    private static String CHANNEL_ID;
 
     @Override
-    public String createDownloadNotificationChannel(Context context) {
-        if (CHANNEL_ID == null) {
-            CHANNEL_ID = "download-manager";
-            createNotificationChannelForAndroidOreo(context);
+    public Optional<NotificationChannel> createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(channelName(), channelDescription(), NotificationManager.IMPORTANCE_HIGH);
+            return Optional.of(channel);
         }
 
-        return CHANNEL_ID;
+        return Optional.absent();
     }
 
-    private void createNotificationChannelForAndroidOreo(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String channelName = "Download Manager Notification Service";
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_HIGH);
-            notificationManager.createNotificationChannel(channel);
-        }
+    private String channelName() {
+        return resources.getString(R.string.notification_channel_name);
+    }
+
+    private String channelDescription() {
+        return resources.getString(R.string.notification_channel_description);
+    }
+
+    @Override
+    public String getNotificationChannelName() {
+        return channelName();
     }
 
 }

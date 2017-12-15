@@ -1,11 +1,13 @@
 package com.novoda.downloadmanager;
 
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.DrawableRes;
@@ -33,6 +35,7 @@ public final class DownloadManagerBuilder {
     private FileDownloader fileDownloader;
     private DownloadService downloadService;
     private DownloadManager downloadManager;
+    private final NotificationChannelCreator notificationChannelCreator;
     private NotificationCreator notificationCreator;
     private ConnectionType connectionTypeAllowed;
     private boolean allowNetworkRecovery;
@@ -63,9 +66,9 @@ public final class DownloadManagerBuilder {
         FileDownloader fileDownloader = new NetworkFileDownloader(httpClient, requestCreator);
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        NotificationChannelCreator notificationChannelCreator = new DownloadNotificationChannelCreator(notificationManager);
+        NotificationChannelCreator notificationChannelCreator = new DownloadNotificationChannelCreator(context.getResources());
 
-        DownloadBatchNotification downloadBatchNotification = new DownloadBatchNotification(context, notificationIcon, notificationChannelCreator);
+        DownloadBatchNotification downloadBatchNotification = new DownloadBatchNotification(context, notificationIcon);
 
         ConnectionType connectionTypeAllowed = ConnectionType.ALL;
         boolean allowNetworkRecovery = true;
@@ -79,6 +82,7 @@ public final class DownloadManagerBuilder {
                 downloadsPersistence,
                 fileSizeRequester,
                 fileDownloader,
+                notificationChannelCreator,
                 downloadBatchNotification,
                 connectionTypeAllowed,
                 allowNetworkRecovery,
@@ -92,6 +96,7 @@ public final class DownloadManagerBuilder {
                                    DownloadsPersistence downloadsPersistence,
                                    FileSizeRequester fileSizeRequester,
                                    FileDownloader fileDownloader,
+                                   NotificationChannelCreator notificationChannelCreator,
                                    NotificationCreator notificationCreator,
                                    ConnectionType connectionTypeAllowed,
                                    boolean allowNetworkRecovery,
@@ -102,6 +107,7 @@ public final class DownloadManagerBuilder {
         this.downloadsPersistence = downloadsPersistence;
         this.fileSizeRequester = fileSizeRequester;
         this.fileDownloader = fileDownloader;
+        this.notificationChannelCreator = notificationChannelCreator;
         this.notificationCreator = notificationCreator;
         this.connectionTypeAllowed = connectionTypeAllowed;
         this.allowNetworkRecovery = allowNetworkRecovery;
@@ -215,6 +221,12 @@ public final class DownloadManagerBuilder {
                 callbackThrottleCreator
         );
 
+        Optional<NotificationChannel> notificationChannel = notificationChannelCreator.createNotificationChannel();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationChannel.isPresent()) {
+            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.createNotificationChannel(notificationChannel.get());
+        }
+
         LiteDownloadManagerDownloader downloader = new LiteDownloadManagerDownloader(
                 LOCK,
                 EXECUTOR,
@@ -222,6 +234,7 @@ public final class DownloadManagerBuilder {
                 fileOperations,
                 downloadsBatchPersistence,
                 downloadsFilePersistence,
+                notificationChannelCreator,
                 notificationCreator,
                 callbacks,
                 callbackThrottleCreator

@@ -1,9 +1,11 @@
 package com.novoda.downloadmanager;
 
-import android.content.Context;
+import android.app.NotificationChannel;
 
 public interface NotificationChannelCreator {
 
-    String createDownloadNotificationChannel(Context context);
+    Optional<NotificationChannel> createNotificationChannel();
+
+    String getNotificationChannelName();
 
 }

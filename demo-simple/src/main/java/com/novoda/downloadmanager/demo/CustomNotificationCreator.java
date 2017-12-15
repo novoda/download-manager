@@ -26,7 +26,7 @@ public class CustomNotificationCreator implements NotificationCreator {
     }
 
     @Override
-    public NotificationInformation createNotification(DownloadBatchTitle downloadBatchTitle,
+    public NotificationInformation createNotification(String notificationChannelName, DownloadBatchTitle downloadBatchTitle,
                                                       int percentageDownloaded,
                                                       int bytesFileSize,
                                                       int bytesDownloaded) {
@@ -35,7 +35,7 @@ public class CustomNotificationCreator implements NotificationCreator {
 
         Log.v("Create notification for " + title + ", " + content);
 
-        String notificationChannel = notificationChannelCreator.createDownloadNotificationChannel(context);
+        String notificationChannel = notificationChannelCreator.getNotificationChannelName();
 
         Notification notification = new NotificationCompat.Builder(context, notificationChannel)
                 .setProgress(bytesFileSize, bytesDownloaded, NOT_INDETERMINATE)
