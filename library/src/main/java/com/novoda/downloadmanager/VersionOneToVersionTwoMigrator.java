@@ -21,32 +21,38 @@ class VersionOneToVersionTwoMigrator implements Migrator {
     private final DownloadsPersistence downloadsPersistence;
     private final InternalFilePersistence internalFilePersistence;
     private final SqlDatabaseWrapper database;
-    private final Callback migrationCallback;
     private final UnlinkedDataRemover unlinkedDataRemover;
+    private final MigrationService migrationService;
+    private final NotificationChannelCreator channelCreator;
+    private final NotificationCreator<MigrationStatus> notificationCreator;
 
     VersionOneToVersionTwoMigrator(MigrationExtractor migrationExtractor,
                                    DownloadsPersistence downloadsPersistence,
                                    InternalFilePersistence internalFilePersistence,
                                    SqlDatabaseWrapper database,
-                                   Callback migrationCallback,
-                                   UnlinkedDataRemover unlinkedDataRemover) {
+                                   UnlinkedDataRemover unlinkedDataRemover,
+                                   MigrationService migrationService,
+                                   NotificationChannelCreator channelCreator,
+                                   NotificationCreator<MigrationStatus> notificationCreator) {
         this.migrationExtractor = migrationExtractor;
         this.downloadsPersistence = downloadsPersistence;
         this.internalFilePersistence = internalFilePersistence;
         this.database = database;
-        this.migrationCallback = migrationCallback;
         this.unlinkedDataRemover = unlinkedDataRemover;
+        this.migrationService = migrationService;
+        this.channelCreator = channelCreator;
+        this.notificationCreator = notificationCreator;
     }
 
     @Override
     public void migrate() {
         unlinkedDataRemover.remove();
-        migrationCallback.onUpdate("Extracting Migrations");
+        notify(MigrationStatus.Status.EXTRACTING);
         Log.d(TAG, "about to extract migrations, time is " + System.nanoTime());
         List<Migration> migrations = migrationExtractor.extractMigrations();
         Log.d(TAG, "migrations are all EXTRACTED, time is " + System.nanoTime());
 
-        migrationCallback.onUpdate("Migrating Files");
+        notify(MigrationStatus.Status.MIGRATING_FILES);
         Log.d(TAG, "about to migrate the files, time is " + System.nanoTime());
 
         for (Migration migration : migrations) {
@@ -65,12 +71,25 @@ class VersionOneToVersionTwoMigrator implements Migrator {
 
         Log.d(TAG, "all data migrations are COMMITTED, about to delete the old database, time is " + System.nanoTime());
 
-        migrationCallback.onUpdate("Deleting Database");
+        notify(MigrationStatus.Status.DELETING_V1_DATABASE);
         Log.d(TAG, "all traces of v1 are ERASED, time is " + System.nanoTime());
         database.close();
 
         database.deleteDatabase();
-        migrationCallback.onUpdate("Migration Complete");
+        notify(MigrationStatus.Status.COMPLETE);
+    }
+
+    private void notify(MigrationStatus.Status status) {
+        String channelName = channelCreator.getNotificationChannelName();
+        MigrationStatus migrationStatus = new VersionOneToVersionTwoMigrationStatus(0, status);
+        NotificationInformation notification = notificationCreator.createNotification(channelName, migrationStatus);
+
+        if (status == MigrationStatus.Status.COMPLETE) {
+            migrationService.stackNotification(notification);
+        } else {
+            migrationService.updateNotification(notification);
+        }
+
     }
 
     private void migrateV1FilesToV2Location(Migration migration) {

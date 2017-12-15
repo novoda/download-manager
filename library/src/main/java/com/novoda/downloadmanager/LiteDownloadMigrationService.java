@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager;
 
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -17,14 +18,13 @@ import android.util.Log;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class LiteDownloadMigrationService extends Service {
+public class LiteDownloadMigrationService extends Service implements MigrationService {
 
     private static final String TAG = "MigrationService";
     private static ExecutorService executor;
 
     private IBinder binder;
     private Migrator.Callback migrationCallback;
-    private String updateMessage;
     private NotificationCreator<MigrationStatus> notificationCreator;
     private NotificationChannelCreator channelCreator;
     private NotificationManager notificationManager;
@@ -40,7 +40,9 @@ public class LiteDownloadMigrationService extends Service {
                 Migrator migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
                         getApplicationContext(),
                         getDatabasePath("downloads.db"),
-                        migrationCallback()
+                        LiteDownloadMigrationService.this,
+                        channelCreator,
+                        notificationCreator
                 );
                 Log.d(TAG, "Begin Migration: " + migrator.getClass());
                 migrator.migrate();
@@ -48,6 +50,18 @@ public class LiteDownloadMigrationService extends Service {
         });
 
         return START_STICKY;
+    }
+
+    @Override
+    public void updateNotification(NotificationInformation notificationInformation) {
+        startForeground(notificationInformation.getId(), notificationInformation.getNotification());
+    }
+
+    @Override
+    public void stackNotification(NotificationInformation notificationInformation) {
+        stopForeground(true);
+        Notification notification = notificationInformation.getNotification();
+        notificationManager.notify(notificationInformation.getId(), notification);
     }
 
     @Override
@@ -69,31 +83,6 @@ public class LiteDownloadMigrationService extends Service {
         notificationCreator = new MigrationNotification(getApplicationContext(), android.R.drawable.ic_dialog_alert);
 
         super.onCreate();
-    }
-
-    private Migrator.Callback migrationCallback() {
-        return new Migrator.Callback() {
-            @Override
-            public void onUpdate(String message) {
-                updateMessage = message;
-                if (migrationCallback != null) {
-                    MigrationStatus migrationStatus = new VersionOneToVersionTwoMigrationStatus(0, MigrationStatus.Status.MIGRATING_FILES);
-                    updateNotification(migrationStatus);
-                    migrationCallback.onUpdate(message);
-                }
-            }
-        };
-    }
-
-    private void updateNotification(MigrationStatus migrationStatus) {
-        NotificationInformation notification = notificationCreator.createNotification(channelCreator.getNotificationChannelName(), migrationStatus);
-        startForeground(notification.getId(), notification.getNotification());
-
-        if (updateMessage.equals("Migration Complete")) {
-            stopForeground(true);
-            notificationCreator.createNotification(channelCreator.getNotificationChannelName(), new VersionOneToVersionTwoMigrationStatus(0, MigrationStatus.Status.COMPLETE));
-            notificationManager.notify(notification.getId(), notification.getNotification());
-        }
     }
 
     @Nullable
@@ -137,8 +126,7 @@ public class LiteDownloadMigrationService extends Service {
         }
 
         void bind() {
-            LiteDownloadMigrationService.this.migrationCallback.onUpdate(LiteDownloadMigrationService.this.updateMessage);
-            LiteDownloadMigrationService.this.updateNotification(new VersionOneToVersionTwoMigrationStatus(0, MigrationStatus.Status.MIGRATING_FILES));
+            LiteDownloadMigrationService.this.migrationCallback.onUpdate("foo");
         }
 
     }
