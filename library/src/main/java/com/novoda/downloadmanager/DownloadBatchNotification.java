@@ -8,7 +8,6 @@ import android.support.v4.app.NotificationCompat;
 class DownloadBatchNotification implements NotificationCreator {
 
     private static final boolean NOT_INDETERMINATE = false;
-    private static final String CHANNEL_ID = "download_manager";
 
     private final Context context;
     private final int iconDrawable;
@@ -19,14 +18,15 @@ class DownloadBatchNotification implements NotificationCreator {
     }
 
     @Override
-    public NotificationInformation createNotification(DownloadBatchTitle downloadBatchTitle,
+    public NotificationInformation createNotification(String notificationChannelName,
+                                                      DownloadBatchTitle downloadBatchTitle,
                                                       int percentageDownloaded,
                                                       int bytesFileSize,
                                                       int bytesDownloaded) {
         String title = downloadBatchTitle.asString();
         String content = percentageDownloaded + "% downloaded";
 
-        Notification notification = new NotificationCompat.Builder(context, CHANNEL_ID)
+        Notification notification = new NotificationCompat.Builder(context, notificationChannelName)
                 .setProgress(bytesFileSize, bytesDownloaded, NOT_INDETERMINATE)
                 .setSmallIcon(iconDrawable)
                 .setContentTitle(title)
