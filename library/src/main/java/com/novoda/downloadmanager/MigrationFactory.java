@@ -48,6 +48,7 @@ public final class MigrationFactory {
         internalFilePersistence.initialiseWith(context);
         LocalFilesDirectory localFilesDirectory = new AndroidLocalFilesDirectory(context);
         UnlinkedDataRemover remover = new UnlinkedDataRemover(downloadsPersistence, localFilesDirectory);
+        InternalMigrationStatus migrationStatus = new VersionOneToVersionTwoMigrationStatus(MigrationStatus.Status.EXTRACTING);
 
         return new VersionOneToVersionTwoMigrator(
                 migrationExtractor,
@@ -56,7 +57,8 @@ public final class MigrationFactory {
                 database,
                 remover, migrationService,
                 channelCreator,
-                notificationCreator
+                notificationCreator,
+                migrationStatus
         );
     }
 

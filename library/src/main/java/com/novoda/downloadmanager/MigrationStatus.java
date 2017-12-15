@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-interface MigrationStatus {
+public interface MigrationStatus {
 
     enum Status {
 
@@ -14,6 +14,10 @@ interface MigrationStatus {
         }
 
     }
+
+    int numberOfBatches();
+
+    int totalNumberOfBatches();
 
     int percentageMigrated();
 

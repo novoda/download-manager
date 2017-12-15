@@ -7,6 +7,7 @@ import android.support.v4.app.NotificationCompat;
 
 class MigrationNotification implements NotificationCreator<MigrationStatus> {
 
+    private static final int MAX_PROGRESS = 100;
     private final Context context;
     private final int iconDrawable;
 
@@ -17,10 +18,13 @@ class MigrationNotification implements NotificationCreator<MigrationStatus> {
 
     @Override
     public NotificationInformation createNotification(String notificationChannelName, MigrationStatus migrationStatus) {
+        String title = migrationStatus.status().toRawValue();
+        String content = migrationStatus.percentageMigrated() + "% migrated";
         Notification notification = new NotificationCompat.Builder(context, notificationChannelName)
-                .setProgress(100, migrationStatus.percentageMigrated(), false)
+                .setProgress(MAX_PROGRESS, migrationStatus.percentageMigrated(), false)
                 .setSmallIcon(iconDrawable)
-                .setContentTitle(migrationStatus.status().toRawValue())
+                .setContentTitle(title)
+                .setContentText(content)
                 .build();
 
         return new MigrationNotificationInformation(migrationStatus.hashCode(), notification);
