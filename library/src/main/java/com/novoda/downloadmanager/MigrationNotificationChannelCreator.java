@@ -5,11 +5,11 @@ import android.app.NotificationManager;
 import android.content.res.Resources;
 import android.os.Build;
 
-class DownloadNotificationChannelCreator implements NotificationChannelCreator {
+class MigrationNotificationChannelCreator implements NotificationChannelCreator {
 
     private final Resources resources;
 
-    DownloadNotificationChannelCreator(Resources resources) {
+    MigrationNotificationChannelCreator(Resources resources) {
         this.resources = resources;
     }
 
@@ -24,11 +24,11 @@ class DownloadNotificationChannelCreator implements NotificationChannelCreator {
     }
 
     private String channelName() {
-        return resources.getString(R.string.download_notification_channel_name);
+        return resources.getString(R.string.migration_notification_channel_name);
     }
 
     private String channelDescription() {
-        return resources.getString(R.string.download_notification_channel_description);
+        return resources.getString(R.string.migration_notification_channel_description);
     }
 
     @Override
