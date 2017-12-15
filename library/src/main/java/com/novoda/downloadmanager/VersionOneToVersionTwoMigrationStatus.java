@@ -4,7 +4,7 @@ class VersionOneToVersionTwoMigrationStatus implements MigrationStatus {
 
     private final String message;
 
-    public VersionOneToVersionTwoMigrationStatus(String message) {
+    VersionOneToVersionTwoMigrationStatus(String message) {
         this.message = message;
     }
 
