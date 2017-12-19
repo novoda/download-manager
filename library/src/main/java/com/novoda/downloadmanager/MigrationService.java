@@ -6,4 +6,6 @@ interface MigrationService {
 
     void stackNotification(NotificationInformation notificationInformation);
 
+    void updateMessage(MigrationStatus migrationStatus);
+
 }

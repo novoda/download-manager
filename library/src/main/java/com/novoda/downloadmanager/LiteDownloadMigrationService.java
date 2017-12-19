@@ -28,6 +28,7 @@ public class LiteDownloadMigrationService extends Service implements MigrationSe
     private NotificationCreator<MigrationStatus> notificationCreator;
     private NotificationChannelCreator channelCreator;
     private NotificationManager notificationManager;
+    private MigrationStatus migrationStatus;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -62,6 +63,13 @@ public class LiteDownloadMigrationService extends Service implements MigrationSe
         stopForeground(true);
         Notification notification = notificationInformation.getNotification();
         notificationManager.notify(notificationInformation.getId(), notification);
+    }
+
+    @Override
+    public void updateMessage(MigrationStatus migrationStatus) {
+        if (migrationCallback != null) {
+            migrationCallback.onUpdate(migrationStatus);
+        }
     }
 
     @Override
@@ -126,7 +134,9 @@ public class LiteDownloadMigrationService extends Service implements MigrationSe
         }
 
         void bind() {
-            LiteDownloadMigrationService.this.migrationCallback.onUpdate("foo");
+            if (migrationStatus != null && migrationCallback != null) {
+                LiteDownloadMigrationService.this.migrationCallback.onUpdate(migrationStatus);
+            }
         }
 
     }

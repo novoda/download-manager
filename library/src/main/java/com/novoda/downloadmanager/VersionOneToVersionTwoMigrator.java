@@ -95,6 +95,8 @@ class VersionOneToVersionTwoMigrator implements Migrator {
         String channelName = channelCreator.getNotificationChannelName();
         NotificationInformation notification = notificationCreator.createNotification(channelName, migrationStatus);
 
+        migrationService.updateMessage(migrationStatus);
+
         if (migrationStatus.status() == MigrationStatus.Status.COMPLETE) {
             migrationService.stackNotification(notification);
         } else {

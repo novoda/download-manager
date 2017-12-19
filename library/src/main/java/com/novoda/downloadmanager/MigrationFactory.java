@@ -17,11 +17,11 @@ public final class MigrationFactory {
         final Handler mainThreadHandler = new Handler(Looper.getMainLooper());
         Migrator.Callback mainThreadReportingMigrationCallback = new Migrator.Callback() {
             @Override
-            public void onUpdate(final String message) {
+            public void onUpdate(final MigrationStatus migrationStatus) {
                 mainThreadHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        migrationCallback.onUpdate(message);
+                        migrationCallback.onUpdate(migrationStatus);
                     }
                 });
             }
