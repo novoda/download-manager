@@ -68,6 +68,7 @@ public class LiteDownloadMigrationService extends Service implements MigrationSe
     @Override
     public void updateMessage(MigrationStatus migrationStatus) {
         if (migrationCallback != null) {
+            this.migrationStatus = migrationStatus;
             migrationCallback.onUpdate(migrationStatus);
         }
     }
