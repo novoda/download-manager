@@ -5,7 +5,7 @@ import android.content.Context;
 import android.support.annotation.DrawableRes;
 import android.support.v4.app.NotificationCompat;
 
-class DownloadBatchNotification implements NotificationCreator {
+class DownloadBatchNotification implements NotificationCreator<DownloadBatchStatus> {
 
     private static final boolean NOT_INDETERMINATE = false;
 
@@ -18,11 +18,11 @@ class DownloadBatchNotification implements NotificationCreator {
     }
 
     @Override
-    public NotificationInformation createNotification(String notificationChannelName,
-                                                      DownloadBatchTitle downloadBatchTitle,
-                                                      int percentageDownloaded,
-                                                      int bytesFileSize,
-                                                      int bytesDownloaded) {
+    public NotificationInformation createNotification(String notificationChannelName, DownloadBatchStatus downloadBatchStatus) {
+        DownloadBatchTitle downloadBatchTitle = downloadBatchStatus.getDownloadBatchTitle();
+        int percentageDownloaded = downloadBatchStatus.percentageDownloaded();
+        int bytesFileSize = (int) downloadBatchStatus.bytesTotalSize();
+        int bytesDownloaded = (int) downloadBatchStatus.bytesDownloaded();
         String title = downloadBatchTitle.asString();
         String content = percentageDownloaded + "% downloaded";
 

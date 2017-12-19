@@ -17,7 +17,7 @@ class LiteDownloadManagerDownloader {
     private final DownloadsBatchPersistence downloadsBatchPersistence;
     private final DownloadsFilePersistence downloadsFilePersistence;
     private final NotificationChannelCreator notificationChannelCreator;
-    private final NotificationCreator notificationCreator;
+    private final NotificationCreator<DownloadBatchStatus> notificationCreator;
     private final List<DownloadBatchCallback> callbacks;
     private final CallbackThrottleCreator callbackThrottleCreator;
 
@@ -30,7 +30,7 @@ class LiteDownloadManagerDownloader {
                                   DownloadsBatchPersistence downloadsBatchPersistence,
                                   DownloadsFilePersistence downloadsFilePersistence,
                                   NotificationChannelCreator notificationChannelCreator,
-                                  NotificationCreator notificationCreator,
+                                  NotificationCreator<DownloadBatchStatus> notificationCreator,
                                   List<DownloadBatchCallback> callbacks,
                                   CallbackThrottleCreator callbackThrottleCreator) {
         this.waitForDownloadService = waitForDownloadService;
@@ -130,10 +130,7 @@ class LiteDownloadManagerDownloader {
     private void updateNotification(DownloadBatchStatus liteDownloadBatchStatus, DownloadService downloadService) {
         NotificationInformation notificationInformation = notificationCreator.createNotification(
                 notificationChannelCreator.getNotificationChannelName(),
-                liteDownloadBatchStatus.getDownloadBatchTitle(),
-                liteDownloadBatchStatus.percentageDownloaded(),
-                (int) liteDownloadBatchStatus.bytesTotalSize(),
-                (int) liteDownloadBatchStatus.bytesDownloaded()
+                liteDownloadBatchStatus
         );
 
         if (liteDownloadBatchStatus.status() == DELETION) {
