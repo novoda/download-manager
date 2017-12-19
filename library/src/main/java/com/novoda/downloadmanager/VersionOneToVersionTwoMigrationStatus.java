@@ -43,12 +43,12 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
     }
 
     @Override
-    public int numberOfBatches() {
+    public int numberOfMigratedBatches() {
         return numberOfBatches;
     }
 
     @Override
-    public int totalNumberOfBatches() {
+    public int totalNumberOfBatchesToMigrate() {
         return totalNumberOfBatches;
     }
 

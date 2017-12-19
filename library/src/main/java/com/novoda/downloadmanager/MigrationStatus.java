@@ -15,9 +15,9 @@ public interface MigrationStatus {
 
     }
 
-    int numberOfBatches();
+    int numberOfMigratedBatches();
 
-    int totalNumberOfBatches();
+    int totalNumberOfBatchesToMigrate();
 
     int percentageMigrated();
 
