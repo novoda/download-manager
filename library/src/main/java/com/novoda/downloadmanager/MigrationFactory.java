@@ -55,7 +55,8 @@ public final class MigrationFactory {
                 downloadsPersistence,
                 internalFilePersistence,
                 database,
-                remover, migrationService,
+                remover,
+                migrationService,
                 channelCreator,
                 notificationCreator,
                 migrationStatus
