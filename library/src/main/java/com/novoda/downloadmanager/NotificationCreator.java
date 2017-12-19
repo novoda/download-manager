@@ -1,7 +1,7 @@
 package com.novoda.downloadmanager;
 
-public interface NotificationCreator<PAYLOAD> {
+public interface NotificationCreator<T> {
 
-    NotificationInformation createNotification(String notificationChannelName, PAYLOAD notificationPayload);
+    NotificationInformation createNotification(String notificationChannelName, T notificationPayload);
 
 }
