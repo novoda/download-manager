@@ -8,35 +8,42 @@ import android.os.IBinder;
 
 public class MigrationServiceBinder {
 
+    private final Context applicationContext;
+    private final Callback migrationCallback;
+    private final NotificationChannelCreator notificationChannelCreator;
+    private final NotificationCreator<MigrationStatus> notificationCreator;
+
     public interface Callback {
         void onUpdate(MigrationStatus migrationStatus);
     }
 
-    private final Context context;
-    private final MigrationServiceBinder.Callback migrationCallback;
+    MigrationServiceBinder(Context applicationContext,
+                           Callback migrationCallback,
+                           NotificationChannelCreator notificationChannelCreator,
+                           NotificationCreator<MigrationStatus> notificationCreator) {
+        this.applicationContext = applicationContext;
+        this.migrationCallback = migrationCallback;
+        this.notificationChannelCreator = notificationChannelCreator;
+        this.notificationCreator = notificationCreator;
+    }
 
     private MigrationServiceConnection serviceConnection;
 
-    MigrationServiceBinder(Context context, MigrationServiceBinder.Callback migrationCallback) {
-        this.context = context;
-        this.migrationCallback = migrationCallback;
-    }
-
-    public void bind() {
+    public void migrate() {
         if (serviceConnection != null) {
             return;
         }
 
         serviceConnection = new MigrationServiceConnection();
-        Intent serviceIntent = new Intent(context, LiteDownloadMigrationService.class);
-        context.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-        context.startService(new Intent(context, LiteDownloadMigrationService.class));
+        Intent serviceIntent = new Intent(applicationContext, LiteDownloadMigrationService.class);
+        applicationContext.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+        applicationContext.startService(serviceIntent);
     }
 
-    public void unbind() {
+    public void dispose() {
         if (serviceConnection != null) {
-            context.unbindService(serviceConnection);
-            context.stopService(new Intent(context, LiteDownloadMigrationService.class));
+            applicationContext.unbindService(serviceConnection);
+            applicationContext.stopService(new Intent(applicationContext, LiteDownloadMigrationService.class));
             serviceConnection = null;
         }
     }
@@ -47,7 +54,9 @@ public class MigrationServiceBinder {
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) iBinder)
                     .withUpdates(migrationCallback)
-                    .bind();
+                    .withNotificationChannelCreator(notificationChannelCreator)
+                    .withNotificationCreator(notificationCreator)
+                    .onDependenciesBound();
         }
 
         @Override

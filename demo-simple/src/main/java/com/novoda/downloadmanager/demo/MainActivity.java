@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager.demo;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -17,8 +18,8 @@ import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.LocalFilesDirectory;
 import com.novoda.downloadmanager.LocalFilesDirectoryFactory;
-import com.novoda.downloadmanager.MigrationFactory;
 import com.novoda.downloadmanager.MigrationServiceBinder;
+import com.novoda.downloadmanager.MigrationServiceBinderBuilder;
 import com.novoda.downloadmanager.MigrationStatus;
 import com.novoda.notils.logger.simple.Log;
 
@@ -45,7 +46,8 @@ public class MainActivity extends AppCompatActivity {
 
         Log.setShowLogs(true);
 
-        migrationServiceBinder = MigrationFactory.migrationServiceBinder(this, migrationCallback);
+        migrationServiceBinder = MigrationServiceBinderBuilder.newInstance(getApplicationContext(), new Handler(getMainLooper()))
+                .build();
 
         textViewBatch1 = findViewById(R.id.batch_1);
         textViewBatch2 = findViewById(R.id.batch_2);
@@ -71,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
         buttonMigrate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                migrationServiceBinder.bind();
+                migrationServiceBinder.migrate();
             }
         });
 
@@ -79,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         buttonAbortMigration.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                migrationServiceBinder.unbind();
+                migrationServiceBinder.dispose();
             }
         });
 
@@ -214,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        migrationServiceBinder.unbind();
+        migrationServiceBinder.dispose();
         super.onStop();
     }
 }

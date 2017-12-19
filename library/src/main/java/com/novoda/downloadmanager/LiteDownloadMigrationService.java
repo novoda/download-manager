@@ -112,7 +112,7 @@ public class LiteDownloadMigrationService extends Service implements MigrationSe
             return this;
         }
 
-        void bind() {
+        void onDependenciesBound() {
             startMigration();
         }
 

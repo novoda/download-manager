@@ -2,8 +2,6 @@ package com.novoda.downloadmanager;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Handler;
-import android.os.Looper;
 
 import java.io.File;
 
@@ -11,23 +9,6 @@ public final class MigrationFactory {
 
     private MigrationFactory() {
         // Uses static methods.
-    }
-
-    public static MigrationServiceBinder migrationServiceBinder(Context context, final MigrationServiceBinder.Callback migrationCallback) {
-        final Handler mainThreadHandler = new Handler(Looper.getMainLooper());
-        MigrationServiceBinder.Callback mainThreadReportingMigrationCallback = new MigrationServiceBinder.Callback() {
-            @Override
-            public void onUpdate(final MigrationStatus migrationStatus) {
-                mainThreadHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        migrationCallback.onUpdate(migrationStatus);
-                    }
-                });
-            }
-        };
-
-        return new MigrationServiceBinder(context, mainThreadReportingMigrationCallback);
     }
 
     static Migrator createVersionOneToVersionTwoMigrator(Context context,
