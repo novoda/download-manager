@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import java.io.File;
 
-public final class MigrationFactory {
+final class MigrationFactory {
 
     private MigrationFactory() {
         // Uses static methods.
@@ -13,9 +13,7 @@ public final class MigrationFactory {
 
     static Migrator createVersionOneToVersionTwoMigrator(Context context,
                                                          File databasePath,
-                                                         MigrationService migrationService,
-                                                         NotificationChannelCreator channelCreator,
-                                                         NotificationCreator<MigrationStatus> notificationCreator) {
+                                                         Migrator.Callback migrationServiceCallback) {
         if (!databasePath.exists()) {
             return Migrator.NO_OP;
         }
@@ -37,9 +35,7 @@ public final class MigrationFactory {
                 internalFilePersistence,
                 database,
                 remover,
-                migrationService,
-                channelCreator,
-                notificationCreator,
+                migrationServiceCallback,
                 migrationStatus
         );
     }

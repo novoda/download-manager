@@ -7,6 +7,10 @@ interface Migrator {
     @WorkerThread
     void migrate();
 
+    interface Callback {
+        void onUpdate(MigrationStatus migrationStatus);
+    }
+
     Migrator NO_OP = new Migrator() {
         @Override
         public void migrate() {

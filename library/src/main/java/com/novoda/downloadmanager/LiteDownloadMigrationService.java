@@ -16,7 +16,7 @@ import android.util.Log;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class LiteDownloadMigrationService extends Service implements MigrationService {
+public class LiteDownloadMigrationService extends Service {
 
     private static final String TAG = "MigrationService";
     private static ExecutorService executor;
@@ -26,53 +26,6 @@ public class LiteDownloadMigrationService extends Service implements MigrationSe
     private NotificationCreator<MigrationStatus> notificationCreator;
     private NotificationChannelCreator notificationChannelCreator;
     private NotificationManager notificationManager;
-
-    private void startMigration() {
-        Optional<NotificationChannel> notificationChannel = notificationChannelCreator.createNotificationChannel();
-        String channelName = notificationChannelCreator.getNotificationChannelName();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationChannel.isPresent() && notificationChannelDoesNotExist(channelName)) {
-            notificationManager.createNotificationChannel(notificationChannel.get());
-        }
-
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                Migrator migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
-                        getApplicationContext(),
-                        getDatabasePath("downloads.db"),
-                        LiteDownloadMigrationService.this,
-                        notificationChannelCreator,
-                        notificationCreator
-                );
-                Log.d(TAG, "Begin Migration: " + migrator.getClass());
-                migrator.migrate();
-            }
-        });
-    }
-
-    @TargetApi(Build.VERSION_CODES.O)
-    private boolean notificationChannelDoesNotExist(String channelName) {
-        return notificationManager.getNotificationChannel(channelName) == null;
-    }
-
-    @Override
-    public void updateNotification(NotificationInformation notificationInformation) {
-        startForeground(notificationInformation.getId(), notificationInformation.getNotification());
-    }
-
-    @Override
-    public void stackNotification(NotificationInformation notificationInformation) {
-        stopForeground(true);
-        Notification notification = notificationInformation.getNotification();
-        notificationManager.notify(notificationInformation.getId(), notification);
-    }
-
-    @Override
-    public void updateMessage(MigrationStatus migrationStatus) {
-        if (migrationCallback != null) {
-            migrationCallback.onUpdate(migrationStatus);
-        }
-    }
 
     @Override
     public void onCreate() {
@@ -94,6 +47,58 @@ public class LiteDownloadMigrationService extends Service implements MigrationSe
     public IBinder onBind(Intent intent) {
         return binder;
     }
+
+    private void startMigration() {
+        Optional<NotificationChannel> notificationChannel = notificationChannelCreator.createNotificationChannel();
+        String channelName = notificationChannelCreator.getNotificationChannelName();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationChannel.isPresent() && notificationChannelDoesNotExist(channelName)) {
+            notificationManager.createNotificationChannel(notificationChannel.get());
+        }
+
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                Migrator migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
+                        getApplicationContext(),
+                        getDatabasePath("downloads.db"),
+                        migrationStatusCallback
+                );
+                Log.d(TAG, "Begin Migration: " + migrator.getClass());
+                migrator.migrate();
+            }
+        });
+    }
+
+    @TargetApi(Build.VERSION_CODES.O)
+    private boolean notificationChannelDoesNotExist(String channelName) {
+        return notificationManager.getNotificationChannel(channelName) == null;
+    }
+
+    private final Migrator.Callback migrationStatusCallback = new Migrator.Callback() {
+        @Override
+        public void onUpdate(MigrationStatus migrationStatus) {
+            String channelName = notificationChannelCreator.getNotificationChannelName();
+            NotificationInformation notification = notificationCreator.createNotification(channelName, migrationStatus);
+
+            migrationCallback.onUpdate(migrationStatus);
+
+            if (migrationStatus.status() == MigrationStatus.Status.COMPLETE) {
+                stackNotification(notification);
+            } else {
+                updateNotification(notification);
+            }
+        }
+
+        private void updateNotification(NotificationInformation notificationInformation) {
+            startForeground(notificationInformation.getId(), notificationInformation.getNotification());
+        }
+
+        private void stackNotification(NotificationInformation notificationInformation) {
+            stopForeground(true);
+            Notification notification = notificationInformation.getNotification();
+            notificationManager.notify(notificationInformation.getId(), notification);
+        }
+    };
 
     class MigrationDownloadServiceBinder extends Binder {
 
