@@ -42,7 +42,7 @@ public class MigrationServiceBinder {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) iBinder)
-                    .withCallback(migrationCallback)
+                    .withUpdates(migrationCallback)
                     .bind();
         }
 

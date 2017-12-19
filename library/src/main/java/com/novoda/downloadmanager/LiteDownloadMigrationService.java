@@ -1,17 +1,15 @@
 package com.novoda.downloadmanager;
 
-import android.app.AlarmManager;
+import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -26,14 +24,15 @@ public class LiteDownloadMigrationService extends Service implements MigrationSe
     private IBinder binder;
     private Migrator.Callback migrationCallback;
     private NotificationCreator<MigrationStatus> notificationCreator;
-    private NotificationChannelCreator channelCreator;
+    private NotificationChannelCreator notificationChannelCreator;
     private NotificationManager notificationManager;
-    private MigrationStatus migrationStatus;
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        super.onStartCommand(intent, flags, startId);
-        Log.d(TAG, "onStartCommand");
+    private void startMigration() {
+        Optional<NotificationChannel> notificationChannel = notificationChannelCreator.createNotificationChannel();
+        String channelName = notificationChannelCreator.getNotificationChannelName();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationChannel.isPresent() && notificationChannelDoesNotExist(channelName)) {
+            notificationManager.createNotificationChannel(notificationChannel.get());
+        }
 
         executor.execute(new Runnable() {
             @Override
@@ -42,15 +41,18 @@ public class LiteDownloadMigrationService extends Service implements MigrationSe
                         getApplicationContext(),
                         getDatabasePath("downloads.db"),
                         LiteDownloadMigrationService.this,
-                        channelCreator,
+                        notificationChannelCreator,
                         notificationCreator
                 );
                 Log.d(TAG, "Begin Migration: " + migrator.getClass());
                 migrator.migrate();
             }
         });
+    }
 
-        return START_STICKY;
+    @TargetApi(Build.VERSION_CODES.O)
+    private boolean notificationChannelDoesNotExist(String channelName) {
+        return notificationManager.getNotificationChannel(channelName) == null;
     }
 
     @Override
@@ -68,7 +70,6 @@ public class LiteDownloadMigrationService extends Service implements MigrationSe
     @Override
     public void updateMessage(MigrationStatus migrationStatus) {
         if (migrationCallback != null) {
-            this.migrationStatus = migrationStatus;
             migrationCallback.onUpdate(migrationStatus);
         }
     }
@@ -81,15 +82,9 @@ public class LiteDownloadMigrationService extends Service implements MigrationSe
         }
 
         binder = new MigrationDownloadServiceBinder();
-        channelCreator = new MigrationNotificationChannelCreator(getResources());
-        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        Optional<NotificationChannel> notificationChannel = channelCreator.createNotificationChannel();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationChannel.isPresent()) {
-            notificationManager.createNotificationChannel(notificationChannel.get());
-        }
-
+        notificationChannelCreator = new MigrationNotificationChannelCreator(getResources());
         notificationCreator = new MigrationNotification(getApplicationContext(), android.R.drawable.ic_dialog_alert);
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         super.onCreate();
     }
@@ -100,44 +95,25 @@ public class LiteDownloadMigrationService extends Service implements MigrationSe
         return binder;
     }
 
-    @Override
-    public void onTaskRemoved(Intent rootIntent) {
-        Log.d(TAG, "onTaskRemoved");
-        rescheduleMigration();
-        Log.d(TAG, "Rescheduling");
-        super.onTaskRemoved(rootIntent);
-    }
-
-    private void rescheduleMigration() {
-        Intent intent = new Intent(getApplicationContext(), LiteDownloadMigrationService.class);
-        PendingIntent pendingIntent = PendingIntent.getService(this, 1, intent, PendingIntent.FLAG_ONE_SHOT);
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        if (alarmManager == null) {
-            Log.w(TAG, "Could not retrieve AlarmManager for rescheduling.");
-            return;
-        }
-        alarmManager.set(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + 5000, pendingIntent);
-    }
-
-    @Override
-    public boolean onUnbind(Intent intent) {
-        Log.d(TAG, "onUnbind");
-        migrationCallback = null;
-        Log.d(TAG, "Stopping service");
-        return super.onUnbind(intent);
-    }
-
     class MigrationDownloadServiceBinder extends Binder {
 
-        MigrationDownloadServiceBinder withCallback(Migrator.Callback migrationCallback) {
+        MigrationDownloadServiceBinder withUpdates(Migrator.Callback migrationCallback) {
             LiteDownloadMigrationService.this.migrationCallback = migrationCallback;
             return this;
         }
 
+        MigrationDownloadServiceBinder withNotificationCreator(NotificationCreator<MigrationStatus> notificationCreator) {
+            LiteDownloadMigrationService.this.notificationCreator = notificationCreator;
+            return this;
+        }
+
+        MigrationDownloadServiceBinder withNotificationChannelCreator(NotificationChannelCreator notificationChannelCreator) {
+            LiteDownloadMigrationService.this.notificationChannelCreator = notificationChannelCreator;
+            return this;
+        }
+
         void bind() {
-            if (migrationStatus != null && migrationCallback != null) {
-                LiteDownloadMigrationService.this.migrationCallback.onUpdate(migrationStatus);
-            }
+            startMigration();
         }
 
     }
