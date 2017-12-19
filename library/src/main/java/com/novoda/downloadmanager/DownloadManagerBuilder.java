@@ -27,7 +27,7 @@ public final class DownloadManagerBuilder {
     private static final Object LOCK = new Object();
     private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
 
-    private final Context context;
+    private final Context applicationContext;
     private final Handler callbackHandler;
 
     private FilePersistenceCreator filePersistenceCreator;
@@ -47,12 +47,13 @@ public final class DownloadManagerBuilder {
 
     public static DownloadManagerBuilder newInstance(Context context, Handler callbackHandler, @DrawableRes int notificationIcon) {
         Log.setShowLogs(true);
+        Context applicationContext = context.getApplicationContext();
 
         // File persistence
-        FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(context);
+        FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(applicationContext);
 
         // Downloads information persistence
-        DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
+        DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(applicationContext);
 
         // Network downloader
         OkHttpClient okHttpClient = new OkHttpClient();
@@ -75,7 +76,7 @@ public final class DownloadManagerBuilder {
         CallbackThrottleCreator.Type callbackThrottleCreatorType = CallbackThrottleCreator.Type.THROTTLE_BY_PROGRESS_INCREASE;
 
         return new DownloadManagerBuilder(
-                context,
+                applicationContext,
                 callbackHandler,
                 filePersistenceCreator,
                 downloadsPersistence,
@@ -89,7 +90,7 @@ public final class DownloadManagerBuilder {
         );
     }
 
-    private DownloadManagerBuilder(Context context,
+    private DownloadManagerBuilder(Context applicationContext,
                                    Handler callbackHandler,
                                    FilePersistenceCreator filePersistenceCreator,
                                    DownloadsPersistence downloadsPersistence,
@@ -100,7 +101,7 @@ public final class DownloadManagerBuilder {
                                    ConnectionType connectionTypeAllowed,
                                    boolean allowNetworkRecovery,
                                    CallbackThrottleCreator.Type callbackThrottleCreatorType) {
-        this.context = context;
+        this.applicationContext = applicationContext;
         this.callbackHandler = callbackHandler;
         this.filePersistenceCreator = filePersistenceCreator;
         this.downloadsPersistence = downloadsPersistence;
@@ -114,12 +115,12 @@ public final class DownloadManagerBuilder {
     }
 
     public DownloadManagerBuilder withFilePersistenceInternal() {
-        filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(context);
+        filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(applicationContext);
         return this;
     }
 
     public DownloadManagerBuilder withFilePersistenceExternal() {
-        filePersistenceCreator = FilePersistenceCreator.newExternalFilePersistenceCreator(context);
+        filePersistenceCreator = FilePersistenceCreator.newExternalFilePersistenceCreator(applicationContext);
         return this;
     }
 
@@ -130,7 +131,7 @@ public final class DownloadManagerBuilder {
     }
 
     public DownloadManagerBuilder withFilePersistenceCustom(Class<? extends FilePersistence> customFilePersistenceClass) {
-        filePersistenceCreator = FilePersistenceCreator.newCustomFilePersistenceCreator(context, customFilePersistenceClass);
+        filePersistenceCreator = FilePersistenceCreator.newCustomFilePersistenceCreator(applicationContext, customFilePersistenceClass);
         return this;
     }
 
@@ -173,7 +174,7 @@ public final class DownloadManagerBuilder {
     }
 
     public DownloadManager build() {
-        Intent intent = new Intent(context, LiteDownloadService.class);
+        Intent intent = new Intent(applicationContext, LiteDownloadService.class);
         ServiceConnection serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
@@ -185,7 +186,7 @@ public final class DownloadManagerBuilder {
                         downloadManager.initialise(downloadService);
 
                         if (allowNetworkRecovery) {
-                            DownloadsNetworkRecoveryCreator.createEnabled(context, downloadManager, connectionTypeAllowed);
+                            DownloadsNetworkRecoveryCreator.createEnabled(applicationContext, downloadManager, connectionTypeAllowed);
                         } else {
                             DownloadsNetworkRecoveryCreator.createDisabled();
                         }
@@ -199,7 +200,7 @@ public final class DownloadManagerBuilder {
             }
         };
 
-        context.bindService(intent, serviceConnection, Service.BIND_AUTO_CREATE);
+        applicationContext.bindService(intent, serviceConnection, Service.BIND_AUTO_CREATE);
 
         FileOperations fileOperations = new FileOperations(filePersistenceCreator, fileSizeRequester, fileDownloader);
         ArrayList<DownloadBatchCallback> callbacks = new ArrayList<>();
@@ -222,7 +223,7 @@ public final class DownloadManagerBuilder {
 
         Optional<NotificationChannel> notificationChannel = notificationChannelCreator.createNotificationChannel();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationChannel.isPresent()) {
-            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            NotificationManager notificationManager = (NotificationManager) applicationContext.getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.createNotificationChannel(notificationChannel.get());
         }
 
