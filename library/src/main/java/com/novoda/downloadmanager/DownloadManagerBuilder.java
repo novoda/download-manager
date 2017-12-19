@@ -66,7 +66,6 @@ public final class DownloadManagerBuilder {
         FileSizeRequester fileSizeRequester = new NetworkFileSizeRequester(httpClient, requestCreator);
         FileDownloader fileDownloader = new NetworkFileDownloader(httpClient, requestCreator);
 
-        NotificationManager notificationManager = (NotificationManager) applicationContext.getSystemService(Context.NOTIFICATION_SERVICE);
         NotificationChannelCreator notificationChannelCreator = new DownloadNotificationChannelCreator(applicationContext.getResources());
 
         DownloadBatchNotification downloadBatchNotification = new DownloadBatchNotification(applicationContext, notificationIcon);
