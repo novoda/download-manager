@@ -22,7 +22,7 @@ public class LiteDownloadMigrationService extends Service implements MigrationSe
     private static ExecutorService executor;
 
     private IBinder binder;
-    private Migrator.Callback migrationCallback;
+    private MigrationServiceBinder.Callback migrationCallback;
     private NotificationCreator<MigrationStatus> notificationCreator;
     private NotificationChannelCreator notificationChannelCreator;
     private NotificationManager notificationManager;
@@ -97,7 +97,7 @@ public class LiteDownloadMigrationService extends Service implements MigrationSe
 
     class MigrationDownloadServiceBinder extends Binder {
 
-        MigrationDownloadServiceBinder withUpdates(Migrator.Callback migrationCallback) {
+        MigrationDownloadServiceBinder withUpdates(MigrationServiceBinder.Callback migrationCallback) {
             LiteDownloadMigrationService.this.migrationCallback = migrationCallback;
             return this;
         }

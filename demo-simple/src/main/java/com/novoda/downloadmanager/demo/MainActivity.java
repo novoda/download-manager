@@ -20,7 +20,6 @@ import com.novoda.downloadmanager.LocalFilesDirectoryFactory;
 import com.novoda.downloadmanager.MigrationFactory;
 import com.novoda.downloadmanager.MigrationServiceBinder;
 import com.novoda.downloadmanager.MigrationStatus;
-import com.novoda.downloadmanager.Migrator;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
@@ -144,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    Migrator.Callback migrationCallback = new Migrator.Callback() {
+    MigrationServiceBinder.Callback migrationCallback = new MigrationServiceBinder.Callback() {
         @Override
         public void onUpdate(MigrationStatus migrationStatus) {
             databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());

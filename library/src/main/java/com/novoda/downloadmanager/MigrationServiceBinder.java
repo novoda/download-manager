@@ -8,12 +8,16 @@ import android.os.IBinder;
 
 public class MigrationServiceBinder {
 
+    public interface Callback {
+        void onUpdate(MigrationStatus migrationStatus);
+    }
+
     private final Context context;
-    private final Migrator.Callback migrationCallback;
+    private final MigrationServiceBinder.Callback migrationCallback;
 
     private MigrationServiceConnection serviceConnection;
 
-    MigrationServiceBinder(Context context, Migrator.Callback migrationCallback) {
+    MigrationServiceBinder(Context context, MigrationServiceBinder.Callback migrationCallback) {
         this.context = context;
         this.migrationCallback = migrationCallback;
     }

@@ -13,9 +13,9 @@ public final class MigrationFactory {
         // Uses static methods.
     }
 
-    public static MigrationServiceBinder migrationServiceBinder(Context context, final Migrator.Callback migrationCallback) {
+    public static MigrationServiceBinder migrationServiceBinder(Context context, final MigrationServiceBinder.Callback migrationCallback) {
         final Handler mainThreadHandler = new Handler(Looper.getMainLooper());
-        Migrator.Callback mainThreadReportingMigrationCallback = new Migrator.Callback() {
+        MigrationServiceBinder.Callback mainThreadReportingMigrationCallback = new MigrationServiceBinder.Callback() {
             @Override
             public void onUpdate(final MigrationStatus migrationStatus) {
                 mainThreadHandler.post(new Runnable() {
