@@ -1,12 +1,11 @@
 package com.novoda.downloadmanager;
 
-interface DownloadService {
-
-    void download(DownloadBatch downloadBatch, DownloadBatchCallback callback);
+interface MigrationService {
 
     void updateNotification(NotificationInformation notificationInformation);
 
     void stackNotification(NotificationInformation notificationInformation);
 
-    void dismissNotification();
+    void updateMessage(MigrationStatus migrationStatus);
+
 }

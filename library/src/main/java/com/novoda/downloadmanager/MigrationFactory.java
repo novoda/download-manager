@@ -17,11 +17,11 @@ public final class MigrationFactory {
         final Handler mainThreadHandler = new Handler(Looper.getMainLooper());
         Migrator.Callback mainThreadReportingMigrationCallback = new Migrator.Callback() {
             @Override
-            public void onUpdate(final String message) {
+            public void onUpdate(final MigrationStatus migrationStatus) {
                 mainThreadHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        migrationCallback.onUpdate(message);
+                        migrationCallback.onUpdate(migrationStatus);
                     }
                 });
             }
@@ -30,7 +30,11 @@ public final class MigrationFactory {
         return new MigrationServiceBinder(context, mainThreadReportingMigrationCallback);
     }
 
-    static Migrator createVersionOneToVersionTwoMigrator(Context context, File databasePath, Migrator.Callback callback) {
+    static Migrator createVersionOneToVersionTwoMigrator(Context context,
+                                                         File databasePath,
+                                                         MigrationService migrationService,
+                                                         NotificationChannelCreator channelCreator,
+                                                         NotificationCreator<MigrationStatus> notificationCreator) {
         if (!databasePath.exists()) {
             return Migrator.NO_OP;
         }
@@ -44,7 +48,19 @@ public final class MigrationFactory {
         internalFilePersistence.initialiseWith(context);
         LocalFilesDirectory localFilesDirectory = new AndroidLocalFilesDirectory(context);
         UnlinkedDataRemover remover = new UnlinkedDataRemover(downloadsPersistence, localFilesDirectory);
-        return new VersionOneToVersionTwoMigrator(migrationExtractor, downloadsPersistence, internalFilePersistence, database, callback, remover);
+        InternalMigrationStatus migrationStatus = new VersionOneToVersionTwoMigrationStatus(MigrationStatus.Status.EXTRACTING);
+
+        return new VersionOneToVersionTwoMigrator(
+                migrationExtractor,
+                downloadsPersistence,
+                internalFilePersistence,
+                database,
+                remover,
+                migrationService,
+                channelCreator,
+                notificationCreator,
+                migrationStatus
+        );
     }
 
 }

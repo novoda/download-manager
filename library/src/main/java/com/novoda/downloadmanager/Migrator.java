@@ -8,7 +8,7 @@ public interface Migrator {
     void migrate();
 
     interface Callback {
-        void onUpdate(String message);
+        void onUpdate(MigrationStatus migrationStatus);
     }
 
     Migrator NO_OP = new Migrator() {
