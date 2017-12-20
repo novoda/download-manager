@@ -16,6 +16,8 @@ import android.util.Log;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.novoda.downloadmanager.MigrationStatus.Status;
+
 public class LiteDownloadMigrationService extends Service implements DownloadMigrationService {
 
     private static final String TAG = "MigrationService";
@@ -82,7 +84,7 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
             String channelName = notificationChannelCreator.getNotificationChannelName();
             NotificationInformation notification = notificationCreator.createNotification(channelName, migrationStatus);
 
-            if (migrationStatus.status() == MigrationStatus.Status.COMPLETE) {
+            if (migrationStatus.status() == Status.COMPLETE || migrationStatus.status() == Status.DB_NOT_PRESENT) {
                 stackNotification(notification);
             } else {
                 updateNotification(notification);
