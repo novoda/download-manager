@@ -26,6 +26,11 @@ class MigrationJob extends MigrationFutureWithCallbacks implements Runnable, Dow
     }
 
     public void run() {
+        InternalMigrationStatus migrationStatus = new VersionOneToVersionTwoMigrationStatus(MigrationStatus.Status.DB_NOT_PRESENT);
+        if (!databasePath.exists()) {
+            onUpdate(migrationStatus);
+        }
+
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
 
@@ -35,7 +40,6 @@ class MigrationJob extends MigrationFutureWithCallbacks implements Runnable, Dow
         internalFilePersistence.initialiseWith(context);
         LocalFilesDirectory localFilesDirectory = new AndroidLocalFilesDirectory(context);
         UnlinkedDataRemover unlinkedDataRemover = new UnlinkedDataRemover(downloadsPersistence, localFilesDirectory);
-        InternalMigrationStatus migrationStatus = new VersionOneToVersionTwoMigrationStatus(MigrationStatus.Status.EXTRACTING);
 
         unlinkedDataRemover.remove();
         migrationStatus.markAsExtracting();
