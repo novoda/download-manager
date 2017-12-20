@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 downloadMigrationService.startMigration()
-                        .observe(migrationCallback);
+                        .addCallback(migrationCallback);
             }
         });
 

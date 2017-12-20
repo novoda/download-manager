@@ -8,7 +8,7 @@ public interface DownloadMigrationService {
     MigrationFuture startMigration(NotificationChannelCreator notificationChannelCreator, NotificationCreator<MigrationStatus> notificationCreator);
 
     interface MigrationFuture {
-        void observe(@NonNull MigrationCallback migrationCallback);
+        void addCallback(@NonNull MigrationCallback migrationCallback);
     }
 
     interface MigrationCallback {
@@ -16,12 +16,6 @@ public interface DownloadMigrationService {
         @WorkerThread
         void onUpdate(MigrationStatus migrationStatus);
 
-        MigrationCallback NO_OP = new MigrationCallback() {
-            @Override
-            public void onUpdate(MigrationStatus migrationStatus) {
-                // do nothing.
-            }
-        };
     }
 
 }

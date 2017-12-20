@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -43,35 +42,21 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
     }
 
     @Override
-    public MigrationFuture startMigration(final NotificationChannelCreator notificationChannelCreator, NotificationCreator<MigrationStatus> notificationCreator) {
-        return new MigrationFuture() {
-            @Override
-            public void observe(@NonNull final MigrationCallback migrationCallback) {
-                createNotificationChannel();
+    public MigrationFuture startMigration(final NotificationChannelCreator notificationChannelCreator, final NotificationCreator<MigrationStatus> notificationCreator) {
+        createNotificationChannel();
+        MigrationJob migrationJob = new MigrationJob(getApplicationContext(), getDatabasePath("downloads.db"));
+        migrationJob.addCallback(migrationCallback);
+        executor.execute(migrationJob);
+        return migrationJob;
+    }
 
-                executor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        Migrator migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
-                                getApplicationContext(),
-                                getDatabasePath("downloads.db"),
-                                migrationStatusCallback(migrationCallback)
-                        );
-                        Log.d(TAG, "Begin Migration: " + migrator.getClass());
-                        migrator.migrate();
-                    }
-                });
-            }
+    private void createNotificationChannel() {
+        Optional<NotificationChannel> notificationChannel = notificationChannelCreator.createNotificationChannel();
+        String channelName = notificationChannelCreator.getNotificationChannelName();
 
-            private void createNotificationChannel() {
-                Optional<NotificationChannel> notificationChannel = notificationChannelCreator.createNotificationChannel();
-                String channelName = notificationChannelCreator.getNotificationChannelName();
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationChannel.isPresent() && notificationChannelDoesNotExist(channelName)) {
-                    notificationManager.createNotificationChannel(notificationChannel.get());
-                }
-            }
-        };
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationChannel.isPresent() && notificationChannelDoesNotExist(channelName)) {
+            notificationManager.createNotificationChannel(notificationChannel.get());
+        }
     }
 
     class MigrationDownloadServiceBinder extends Binder {
@@ -91,32 +76,28 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
         return notificationManager.getNotificationChannel(channelName) == null;
     }
 
-    private Migrator.Callback migrationStatusCallback(final MigrationCallback migrationCallback) {
-        return new Migrator.Callback() {
-            @Override
-            public void onUpdate(MigrationStatus migrationStatus) {
-                String channelName = notificationChannelCreator.getNotificationChannelName();
-                NotificationInformation notification = notificationCreator.createNotification(channelName, migrationStatus);
+    private final DownloadMigrationService.MigrationCallback migrationCallback = new MigrationCallback() {
+        @Override
+        public void onUpdate(MigrationStatus migrationStatus) {
+            String channelName = notificationChannelCreator.getNotificationChannelName();
+            NotificationInformation notification = notificationCreator.createNotification(channelName, migrationStatus);
 
-                migrationCallback.onUpdate(migrationStatus);
-
-                if (migrationStatus.status() == MigrationStatus.Status.COMPLETE) {
-                    stackNotification(notification);
-                } else {
-                    updateNotification(notification);
-                }
+            if (migrationStatus.status() == MigrationStatus.Status.COMPLETE) {
+                stackNotification(notification);
+            } else {
+                updateNotification(notification);
             }
+        }
 
-            private void updateNotification(NotificationInformation notificationInformation) {
-                startForeground(notificationInformation.getId(), notificationInformation.getNotification());
-            }
+        private void updateNotification(NotificationInformation notificationInformation) {
+            startForeground(notificationInformation.getId(), notificationInformation.getNotification());
+        }
 
-            private void stackNotification(NotificationInformation notificationInformation) {
-                stopForeground(true);
-                Notification notification = notificationInformation.getNotification();
-                notificationManager.notify(notificationInformation.getId(), notification);
-            }
-        };
-    }
+        private void stackNotification(NotificationInformation notificationInformation) {
+            stopForeground(true);
+            Notification notification = notificationInformation.getNotification();
+            notificationManager.notify(notificationInformation.getId(), notification);
+        }
+    };
 
 }

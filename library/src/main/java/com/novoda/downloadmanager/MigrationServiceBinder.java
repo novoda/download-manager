@@ -25,22 +25,23 @@ class MigrationServiceBinder implements DownloadMigrationService {
         return serviceConnection;
     }
 
-    class MigrationServiceConnection implements ServiceConnection, MigrationFuture {
+    class MigrationServiceConnection implements ServiceConnection, MigrationFuture, MigrationCallback {
 
         private final NotificationChannelCreator notificationChannelCreator;
         private final NotificationCreator<MigrationStatus> notificationCreator;
-        private MigrationCallback migrationCallback = MigrationCallback.NO_OP;
+        private final MigrationFutureWithCallbacks callbacks;
 
         MigrationServiceConnection(NotificationChannelCreator notificationChannelCreator, NotificationCreator<MigrationStatus> notificationCreator) {
             this.notificationChannelCreator = notificationChannelCreator;
             this.notificationCreator = notificationCreator;
+            this.callbacks = new MigrationFutureWithCallbacks();
         }
 
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             DownloadMigrationService migrationService = ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) iBinder).getService();
             MigrationFuture migrationFuture = migrationService.startMigration(notificationChannelCreator, notificationCreator);
-            migrationFuture.observe(migrationCallback);
+            migrationFuture.addCallback(this);
         }
 
         @Override
@@ -49,8 +50,13 @@ class MigrationServiceBinder implements DownloadMigrationService {
         }
 
         @Override
-        public void observe(@NonNull MigrationCallback migrationCallback) {
-            this.migrationCallback = migrationCallback;
+        public void addCallback(@NonNull MigrationCallback migrationCallback) {
+            callbacks.addCallback(migrationCallback);
+        }
+
+        @Override
+        public void onUpdate(MigrationStatus migrationStatus) {
+            callbacks.onUpdate(migrationStatus);
         }
     }
 
