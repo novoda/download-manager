@@ -29,6 +29,7 @@ class MigrationJob extends MigrationFutureWithCallbacks implements Runnable, Dow
         InternalMigrationStatus migrationStatus = new VersionOneToVersionTwoMigrationStatus(MigrationStatus.Status.DB_NOT_PRESENT);
         if (!databasePath.exists()) {
             onUpdate(migrationStatus);
+            return;
         }
 
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
