@@ -1,12 +1,27 @@
 package com.novoda.downloadmanager;
 
-interface DownloadMigrationService {
+import android.support.annotation.NonNull;
+import android.support.annotation.WorkerThread;
 
-    void setMigrationCallback(MigrationServiceBinder.Callback migrationCallback);
+public interface DownloadMigrationService {
 
-    void setNotificationChannelCreator(NotificationChannelCreator notificationChannelCreator);
+    MigrationFuture startMigration(NotificationChannelCreator notificationChannelCreator, NotificationCreator<MigrationStatus> notificationCreator);
 
-    void setNotificationCreator(NotificationCreator<MigrationStatus> notificationCreator);
+    interface MigrationFuture {
+        void observe(@NonNull MigrationCallback migrationCallback);
+    }
 
-    void startMigration();
+    interface MigrationCallback {
+
+        @WorkerThread
+        void onUpdate(MigrationStatus migrationStatus);
+
+        MigrationCallback NO_OP = new MigrationCallback() {
+            @Override
+            public void onUpdate(MigrationStatus migrationStatus) {
+                // do nothing.
+            }
+        };
+    }
+
 }

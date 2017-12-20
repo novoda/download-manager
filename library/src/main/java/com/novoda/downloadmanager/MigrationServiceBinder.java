@@ -5,63 +5,52 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 
-public class MigrationServiceBinder {
+class MigrationServiceBinder implements DownloadMigrationService {
 
     private final Context applicationContext;
-    private final Callback migrationCallback;
-    private final NotificationChannelCreator notificationChannelCreator;
-    private final NotificationCreator<MigrationStatus> notificationCreator;
 
-    public interface Callback {
-        void onUpdate(MigrationStatus migrationStatus);
+    MigrationServiceBinder(Context context) {
+        this.applicationContext = context.getApplicationContext();
     }
 
-    MigrationServiceBinder(Context applicationContext,
-                           Callback migrationCallback,
-                           NotificationChannelCreator notificationChannelCreator,
-                           NotificationCreator<MigrationStatus> notificationCreator) {
-        this.applicationContext = applicationContext;
-        this.migrationCallback = migrationCallback;
-        this.notificationChannelCreator = notificationChannelCreator;
-        this.notificationCreator = notificationCreator;
-    }
-
-    private MigrationServiceConnection serviceConnection;
-
-    public void migrate() {
-        if (serviceConnection != null) {
-            return;
-        }
-
-        serviceConnection = new MigrationServiceConnection();
+    @Override
+    public MigrationFuture startMigration(final NotificationChannelCreator notificationChannelCreator,
+                                          final NotificationCreator<MigrationStatus> notificationCreator) {
+        MigrationServiceConnection serviceConnection = new MigrationServiceConnection(notificationChannelCreator, notificationCreator);
         Intent serviceIntent = new Intent(applicationContext, LiteDownloadMigrationService.class);
         applicationContext.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
         applicationContext.startService(serviceIntent);
+        return serviceConnection;
     }
 
-    public void dispose() {
-        if (serviceConnection != null) {
-            applicationContext.unbindService(serviceConnection);
-            applicationContext.stopService(new Intent(applicationContext, LiteDownloadMigrationService.class));
-            serviceConnection = null;
+    class MigrationServiceConnection implements ServiceConnection, MigrationFuture {
+
+        private final NotificationChannelCreator notificationChannelCreator;
+        private final NotificationCreator<MigrationStatus> notificationCreator;
+        private MigrationCallback migrationCallback = MigrationCallback.NO_OP;
+
+        MigrationServiceConnection(NotificationChannelCreator notificationChannelCreator, NotificationCreator<MigrationStatus> notificationCreator) {
+            this.notificationChannelCreator = notificationChannelCreator;
+            this.notificationCreator = notificationCreator;
         }
-    }
-
-    class MigrationServiceConnection implements ServiceConnection {
 
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             DownloadMigrationService migrationService = ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) iBinder).getService();
-            migrationService.setMigrationCallback(migrationCallback);
-            migrationService.setNotificationChannelCreator(notificationChannelCreator);
-            migrationService.setNotificationCreator(notificationCreator);
-            migrationService.startMigration();
+            MigrationFuture migrationFuture = migrationService.startMigration(notificationChannelCreator, notificationCreator);
+            migrationFuture.observe(migrationCallback);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
             // Do nothing.
+        }
+
+        @Override
+        public void observe(@NonNull MigrationCallback migrationCallback) {
+            this.migrationCallback = migrationCallback;
         }
     }
 
