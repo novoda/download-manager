@@ -52,11 +52,11 @@ public class MigrationServiceBinder {
 
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) iBinder)
-                    .withUpdates(migrationCallback)
-                    .withNotificationChannelCreator(notificationChannelCreator)
-                    .withNotificationCreator(notificationCreator)
-                    .onDependenciesBound();
+            DownloadMigrationService migrationService = ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) iBinder).getService();
+            migrationService.setMigrationCallback(migrationCallback);
+            migrationService.setNotificationChannelCreator(notificationChannelCreator);
+            migrationService.setNotificationCreator(notificationCreator);
+            migrationService.startMigration();
         }
 
         @Override

@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
         Log.setShowLogs(true);
 
         migrationServiceBinder = MigrationServiceBinderBuilder.newInstance(getApplicationContext(), new Handler(getMainLooper()))
+                .withMigrationUpdates(migrationCallback)
                 .build();
 
         textViewBatch1 = findViewById(R.id.batch_1);
@@ -138,14 +139,14 @@ public class MainActivity extends AppCompatActivity {
         bindViews();
     }
 
-    VersionOneDatabaseCloner.CloneCallback cloneCallback = new VersionOneDatabaseCloner.CloneCallback() {
+    private final VersionOneDatabaseCloner.CloneCallback cloneCallback = new VersionOneDatabaseCloner.CloneCallback() {
         @Override
         public void onUpdate(String updateMessage) {
             databaseCloningUpdates.setText(updateMessage);
         }
     };
 
-    MigrationServiceBinder.Callback migrationCallback = new MigrationServiceBinder.Callback() {
+    private final MigrationServiceBinder.Callback migrationCallback = new MigrationServiceBinder.Callback() {
         @Override
         public void onUpdate(MigrationStatus migrationStatus) {
             databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());

@@ -37,7 +37,7 @@ public class MigrationServiceBinderBuilder {
         this.notificationCreator = notificationCreator;
     }
 
-    public MigrationServiceBinderBuilder withUpdates(MigrationServiceBinder.Callback migrationCallback) {
+    public MigrationServiceBinderBuilder withMigrationUpdates(MigrationServiceBinder.Callback migrationCallback) {
         this.migrationCallback = migrationCallback;
         return this;
     }

@@ -16,7 +16,7 @@ import android.util.Log;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class LiteDownloadMigrationService extends Service {
+public class LiteDownloadMigrationService extends Service implements DownloadMigrationService {
 
     private static final String TAG = "MigrationService";
     private static ExecutorService executor;
@@ -42,13 +42,35 @@ public class LiteDownloadMigrationService extends Service {
         super.onCreate();
     }
 
+    class MigrationDownloadServiceBinder extends Binder {
+        DownloadMigrationService getService() {
+            return LiteDownloadMigrationService.this;
+        }
+    }
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return binder;
     }
 
-    private void startMigration() {
+    @Override
+    public void setMigrationCallback(MigrationServiceBinder.Callback migrationCallback) {
+        this.migrationCallback = migrationCallback;
+    }
+
+    @Override
+    public void setNotificationChannelCreator(NotificationChannelCreator notificationChannelCreator) {
+        this.notificationChannelCreator = notificationChannelCreator;
+    }
+
+    @Override
+    public void setNotificationCreator(NotificationCreator<MigrationStatus> notificationCreator) {
+        this.notificationCreator = notificationCreator;
+    }
+
+    @Override
+    public void startMigration() {
         Optional<NotificationChannel> notificationChannel = notificationChannelCreator.createNotificationChannel();
         String channelName = notificationChannelCreator.getNotificationChannelName();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationChannel.isPresent() && notificationChannelDoesNotExist(channelName)) {
@@ -99,28 +121,5 @@ public class LiteDownloadMigrationService extends Service {
             notificationManager.notify(notificationInformation.getId(), notification);
         }
     };
-
-    class MigrationDownloadServiceBinder extends Binder {
-
-        MigrationDownloadServiceBinder withUpdates(MigrationServiceBinder.Callback migrationCallback) {
-            LiteDownloadMigrationService.this.migrationCallback = migrationCallback;
-            return this;
-        }
-
-        MigrationDownloadServiceBinder withNotificationCreator(NotificationCreator<MigrationStatus> notificationCreator) {
-            LiteDownloadMigrationService.this.notificationCreator = notificationCreator;
-            return this;
-        }
-
-        MigrationDownloadServiceBinder withNotificationChannelCreator(NotificationChannelCreator notificationChannelCreator) {
-            LiteDownloadMigrationService.this.notificationChannelCreator = notificationChannelCreator;
-            return this;
-        }
-
-        void onDependenciesBound() {
-            startMigration();
-        }
-
-    }
 
 }
