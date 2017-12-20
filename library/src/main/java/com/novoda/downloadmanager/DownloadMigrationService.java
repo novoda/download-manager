@@ -7,6 +7,8 @@ public interface DownloadMigrationService {
 
     MigrationFuture startMigration(NotificationChannelCreator notificationChannelCreator, NotificationCreator<MigrationStatus> notificationCreator);
 
+    MigrationFuture startMigration();
+
     interface MigrationFuture {
         void addCallback(@NonNull MigrationCallback migrationCallback);
     }

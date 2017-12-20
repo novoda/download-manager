@@ -7,17 +7,28 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 
-class MigrationServiceBinder implements DownloadMigrationService {
+public class MigrationServiceBinder implements DownloadMigrationService {
 
     private final Context applicationContext;
 
-    MigrationServiceBinder(Context context) {
+    public MigrationServiceBinder(Context context) {
         this.applicationContext = context.getApplicationContext();
     }
 
     @Override
     public MigrationFuture startMigration(final NotificationChannelCreator notificationChannelCreator,
                                           final NotificationCreator<MigrationStatus> notificationCreator) {
+        MigrationServiceConnection serviceConnection = new MigrationServiceConnection(notificationChannelCreator, notificationCreator);
+        Intent serviceIntent = new Intent(applicationContext, LiteDownloadMigrationService.class);
+        applicationContext.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+        applicationContext.startService(serviceIntent);
+        return serviceConnection;
+    }
+
+    @Override
+    public MigrationFuture startMigration() {
+        NotificationChannelCreator notificationChannelCreator = new MigrationNotificationChannelCreator(applicationContext.getResources());
+        NotificationCreator<MigrationStatus> notificationCreator = new MigrationNotification(applicationContext, android.R.drawable.ic_dialog_alert);
         MigrationServiceConnection serviceConnection = new MigrationServiceConnection(notificationChannelCreator, notificationCreator);
         Intent serviceIntent = new Intent(applicationContext, LiteDownloadMigrationService.class);
         applicationContext.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);

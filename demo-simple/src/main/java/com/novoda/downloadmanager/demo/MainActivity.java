@@ -1,8 +1,13 @@
 package com.novoda.downloadmanager.demo;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -19,9 +24,12 @@ import com.novoda.downloadmanager.DownloadMigrationService;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.LocalFilesDirectory;
 import com.novoda.downloadmanager.LocalFilesDirectoryFactory;
-import com.novoda.downloadmanager.ManagedDownloadMigrationService;
-import com.novoda.downloadmanager.MigrationService;
+import com.novoda.downloadmanager.MigrationServiceBinder;
 import com.novoda.downloadmanager.MigrationStatus;
+import com.novoda.downloadmanager.NotificationChannelCreator;
+import com.novoda.downloadmanager.NotificationCreator;
+import com.novoda.downloadmanager.NotificationInformation;
+import com.novoda.downloadmanager.Optional;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
@@ -38,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView textViewBatch1;
     private TextView textViewBatch2;
     private LiteDownloadManagerCommands liteDownloadManagerCommands;
-    private ManagedDownloadMigrationService downloadMigrationService;
+    private DownloadMigrationService downloadMigrationService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
         Log.setShowLogs(true);
 
-        downloadMigrationService = new MigrationService(this);
+        downloadMigrationService = new MigrationServiceBinder(this);
 
         textViewBatch1 = findViewById(R.id.batch_1);
         textViewBatch2 = findViewById(R.id.batch_2);
@@ -73,7 +81,44 @@ public class MainActivity extends AppCompatActivity {
         buttonMigrate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                downloadMigrationService.startMigration()
+                NotificationChannelCreator notificationChannelCreator = new NotificationChannelCreator() {
+                    @Override
+                    public Optional<NotificationChannel> createNotificationChannel() {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            return Optional.of(new NotificationChannel("1", "KinderBueno", NotificationManager.IMPORTANCE_DEFAULT));
+                        }
+                        return Optional.absent();
+                    }
+
+                    @Override
+                    public String getNotificationChannelName() {
+                        return "KinderBueno";
+                    }
+                };
+
+                NotificationCreator<MigrationStatus> notificationCreator = new NotificationCreator<MigrationStatus>() {
+                    @Override
+                    public NotificationInformation createNotification(final String notificationChannelName, final MigrationStatus notificationPayload) {
+                        return new NotificationInformation() {
+                            @Override
+                            public int getId() {
+                                return 1;
+                            }
+
+                            @Override
+                            public Notification getNotification() {
+                                return new NotificationCompat.Builder(getApplicationContext(), notificationChannelName)
+                                        .setProgress(notificationPayload.numberOfMigratedBatches(), notificationPayload.totalNumberOfBatchesToMigrate(), false)
+                                        .setSmallIcon(android.R.drawable.ic_menu_sort_by_size)
+                                        .setContentTitle("Lindt")
+                                        .setContentText("Bountys")
+                                        .build();
+                            }
+                        };
+                    }
+                };
+
+                downloadMigrationService.startMigration(notificationChannelCreator, notificationCreator)
                         .addCallback(migrationCallback);
             }
         });

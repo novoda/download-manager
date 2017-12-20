@@ -45,6 +45,17 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
 
     @Override
     public MigrationFuture startMigration(final NotificationChannelCreator notificationChannelCreator, final NotificationCreator<MigrationStatus> notificationCreator) {
+        this.notificationChannelCreator = notificationChannelCreator;
+        this.notificationCreator = notificationCreator;
+        createNotificationChannel();
+        MigrationJob migrationJob = new MigrationJob(getApplicationContext(), getDatabasePath("downloads.db"));
+        migrationJob.addCallback(migrationCallback);
+        executor.execute(migrationJob);
+        return migrationJob;
+    }
+
+    @Override
+    public MigrationFuture startMigration() {
         createNotificationChannel();
         MigrationJob migrationJob = new MigrationJob(getApplicationContext(), getDatabasePath("downloads.db"));
         migrationJob.addCallback(migrationCallback);
