@@ -47,11 +47,7 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
         return new MigrationFuture() {
             @Override
             public void observe(@NonNull final MigrationCallback migrationCallback) {
-                Optional<NotificationChannel> notificationChannel = notificationChannelCreator.createNotificationChannel();
-                String channelName = notificationChannelCreator.getNotificationChannelName();
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationChannel.isPresent() && notificationChannelDoesNotExist(channelName)) {
-                    notificationManager.createNotificationChannel(notificationChannel.get());
-                }
+                createNotificationChannel();
 
                 executor.execute(new Runnable() {
                     @Override
@@ -65,6 +61,15 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
                         migrator.migrate();
                     }
                 });
+            }
+
+            private void createNotificationChannel() {
+                Optional<NotificationChannel> notificationChannel = notificationChannelCreator.createNotificationChannel();
+                String channelName = notificationChannelCreator.getNotificationChannelName();
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationChannel.isPresent() && notificationChannelDoesNotExist(channelName)) {
+                    notificationManager.createNotificationChannel(notificationChannel.get());
+                }
             }
         };
     }
