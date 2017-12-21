@@ -45,14 +45,14 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public Optional<NotificationChannel> createNotificationChannel() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                return Optional.of(new NotificationChannel("1", "KinderBueno", NotificationManager.IMPORTANCE_DEFAULT));
+                return Optional.of(new NotificationChannel("download-manager-migration", "CategoryName", NotificationManager.IMPORTANCE_DEFAULT));
             }
             return Optional.absent();
         }
 
         @Override
         public String getNotificationChannelName() {
-            return "KinderBueno";
+            return "download-manager-migration";
         }
     };
     private final NotificationCreator<MigrationStatus> notificationCreator = new NotificationCreator<MigrationStatus>() {
