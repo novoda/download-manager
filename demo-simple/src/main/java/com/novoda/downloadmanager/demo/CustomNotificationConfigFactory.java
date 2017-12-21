@@ -15,6 +15,10 @@ public final class CustomNotificationConfigFactory {
 
     private static final boolean NOT_INDETERMINATE = false;
 
+    private CustomNotificationConfigFactory() {
+        // uses static factory methods
+    }
+
     public static NotificationConfig<DownloadBatchStatus> createDownloadNotificationConfig(Context context, String channelId, String channelDescription, final int iconDrawable) {
 
         NotificationCustomizer<DownloadBatchStatus> notificationCustomizer = new NotificationCustomizer<DownloadBatchStatus>() {
