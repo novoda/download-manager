@@ -40,6 +40,6 @@ public class DownloadMigratorBuilder {
     }
 
     public DownloadMigrator build() {
-        return new DownloadMigrator(applicationContext, handler, notificationChannelCreator, notificationCreator);
+        return new LiteDownloadMigrator(applicationContext, handler, notificationChannelCreator, notificationCreator);
     }
 }
