@@ -32,7 +32,7 @@ class DownloadNotificationChannelCreator implements NotificationChannelCreator {
     }
 
     @Override
-    public String getNotificationChannelName() {
+    public String getNotificationChannelId() {
         return channelName();
     }
 

@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public String getNotificationChannelName() {
+        public String getNotificationChannelId() {
             return "download-manager";
         }
     };

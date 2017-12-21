@@ -129,7 +129,7 @@ class LiteDownloadManagerDownloader {
 
     private void updateNotification(DownloadBatchStatus liteDownloadBatchStatus, DownloadService downloadService) {
         NotificationInformation notificationInformation = notificationCreator.createNotification(
-                notificationChannelCreator.getNotificationChannelName(),
+                notificationChannelCreator.getNotificationChannelId(),
                 liteDownloadBatchStatus
         );
 

@@ -6,6 +6,6 @@ public interface NotificationChannelCreator {
 
     Optional<NotificationChannel> createNotificationChannel();
 
-    String getNotificationChannelName();
+    String getNotificationChannelId();
 
 }

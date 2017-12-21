@@ -37,7 +37,7 @@ public class CustomNotificationCreator implements NotificationCreator<DownloadBa
 
         Log.v("Create notification for " + title + ", " + content);
 
-        String notificationChannel = notificationChannelCreator.getNotificationChannelName();
+        String notificationChannel = notificationChannelCreator.getNotificationChannelId();
 
         Notification notification = new NotificationCompat.Builder(context, notificationChannel)
                 .setProgress(bytesFileSize, bytesDownloaded, NOT_INDETERMINATE)

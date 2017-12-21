@@ -6,16 +6,16 @@ import android.content.Context;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 
-class NotificationConfig<T> {
+class NotificationConfig<T> implements NotificationChannelCreator, NotificationCreator<T> {
 
-    private final Context context;
+    private final Context applicationContext;
     private final String channelId;
     private final String userFacingChannelName;
     private final NotificationCustomiser<T> notificationCustomiser;
     private final int importance;
 
     NotificationConfig(Context context, String channelId, String userFacingChannelName, NotificationCustomiser<T> customiser, int importance) {
-        this.context = context.getApplicationContext();
+        this.applicationContext = context.getApplicationContext();
         this.channelId = channelId;
         this.userFacingChannelName = userFacingChannelName;
         this.notificationCustomiser = customiser;
@@ -31,7 +31,7 @@ class NotificationConfig<T> {
 
             @Override
             public Notification getNotification() {
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channelId);
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(applicationContext, channelId);
                 return notificationCustomiser.customNotificationFrom(builder, payload);
             }
         };
@@ -42,5 +42,20 @@ class NotificationConfig<T> {
             return Optional.of(new NotificationChannel(channelId, userFacingChannelName, importance));
         }
         return Optional.absent();
+    }
+
+    @Override
+    public NotificationInformation createNotification(String notificationChannelName, T notificationPayload) {
+        return notificationInformation(notificationPayload);
+    }
+
+    @Override
+    public Optional<NotificationChannel> createNotificationChannel() {
+        return notificationChannel();
+    }
+
+    @Override
+    public String getNotificationChannelId() {
+        return channelId;
     }
 }
