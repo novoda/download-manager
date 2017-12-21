@@ -21,27 +21,7 @@ public final class CustomNotificationConfigFactory {
 
     public static NotificationConfig<DownloadBatchStatus> createDownloadNotificationConfig(Context context, String channelId, String channelDescription, final int iconDrawable) {
 
-        NotificationCustomizer<DownloadBatchStatus> notificationCustomizer = new NotificationCustomizer<DownloadBatchStatus>() {
-            @Override
-            public Notification customNotificationFrom(NotificationCompat.Builder builder, DownloadBatchStatus downloadBatchStatus) {
-                DownloadBatchTitle downloadBatchTitle = downloadBatchStatus.getDownloadBatchTitle();
-                int percentageDownloaded = downloadBatchStatus.percentageDownloaded();
-                int bytesFileSize = (int) downloadBatchStatus.bytesTotalSize();
-                int bytesDownloaded = (int) downloadBatchStatus.bytesDownloaded();
-                String title = downloadBatchTitle.asString();
-                String content = percentageDownloaded + "% downloaded";
-
-                Log.v("Create notification for " + title + ", " + content);
-
-                return builder
-                        .setProgress(bytesFileSize, bytesDownloaded, NOT_INDETERMINATE)
-                        .setSmallIcon(iconDrawable)
-                        .setContentTitle(title)
-                        .setContentText(content)
-                        .build();
-
-            }
-        };
+        NotificationCustomizer<DownloadBatchStatus> notificationCustomizer = new DownloadNotificationCustomizer(iconDrawable);
         return new NotificationConfig<>(
                 context,
                 channelId,
@@ -51,4 +31,31 @@ public final class CustomNotificationConfigFactory {
         );
     }
 
+    private static class DownloadNotificationCustomizer implements NotificationCustomizer<DownloadBatchStatus> {
+        private final int iconDrawable;
+
+        private DownloadNotificationCustomizer(int iconDrawable) {
+            this.iconDrawable = iconDrawable;
+        }
+
+        @Override
+        public Notification customNotificationFrom(NotificationCompat.Builder builder, DownloadBatchStatus downloadBatchStatus) {
+            DownloadBatchTitle downloadBatchTitle = downloadBatchStatus.getDownloadBatchTitle();
+            int percentageDownloaded = downloadBatchStatus.percentageDownloaded();
+            int bytesFileSize = (int) downloadBatchStatus.bytesTotalSize();
+            int bytesDownloaded = (int) downloadBatchStatus.bytesDownloaded();
+            String title = downloadBatchTitle.asString();
+            String content = percentageDownloaded + "% downloaded";
+
+            Log.v("Create notification for " + title + ", " + content);
+
+            return builder
+                    .setProgress(bytesFileSize, bytesDownloaded, NOT_INDETERMINATE)
+                    .setSmallIcon(iconDrawable)
+                    .setContentTitle(title)
+                    .setContentText(content)
+                    .build();
+
+        }
+    }
 }

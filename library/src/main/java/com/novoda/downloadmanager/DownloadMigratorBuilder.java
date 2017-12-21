@@ -19,27 +19,12 @@ public class DownloadMigratorBuilder {
 
         String channelId = context.getResources().getString(R.string.migration_notification_channel_name);
         String channelDescription = context.getResources().getString(R.string.migration_notification_channel_description);
-        NotificationCustomizer<MigrationStatus> customiser = new NotificationCustomizer<MigrationStatus>() {
-            private static final int MAX_PROGRESS = 100;
-
-            @Override
-            public Notification customNotificationFrom(NotificationCompat.Builder builder, MigrationStatus payload) {
-                String title = payload.status().toRawValue();
-                String content = payload.percentageMigrated() + "% migrated";
-                return builder
-                        .setProgress(MAX_PROGRESS, payload.percentageMigrated(), false)
-                        .setSmallIcon(android.R.drawable.ic_menu_gallery)
-                        .setContentTitle(title)
-                        .setContentText(content)
-                        .build();
-            }
-
-        };
+        NotificationCustomizer<MigrationStatus> customizer = new MigrationNotificationCustomizer();
         NotificationConfig<MigrationStatus> defaultNotificationConfig = new NotificationConfig<>(
                 applicationContext,
                 channelId,
                 channelDescription,
-                customiser,
+                customizer,
                 NotificationManagerCompat.IMPORTANCE_LOW
         );
 
@@ -62,5 +47,22 @@ public class DownloadMigratorBuilder {
 
     public DownloadMigrator build() {
         return new LiteDownloadMigrator(applicationContext, handler, notificationConfig, notificationConfig);
+    }
+
+    private static class MigrationNotificationCustomizer implements NotificationCustomizer<MigrationStatus> {
+        private static final int MAX_PROGRESS = 100;
+
+        @Override
+        public Notification customNotificationFrom(NotificationCompat.Builder builder, MigrationStatus payload) {
+            String title = payload.status().toRawValue();
+            String content = payload.percentageMigrated() + "% migrated";
+            return builder
+                    .setProgress(MAX_PROGRESS, payload.percentageMigrated(), false)
+                    .setSmallIcon(android.R.drawable.ic_menu_gallery)
+                    .setContentTitle(title)
+                    .setContentText(content)
+                    .build();
+        }
+
     }
 }

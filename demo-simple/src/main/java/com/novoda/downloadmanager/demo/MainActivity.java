@@ -50,17 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
         Log.setShowLogs(true);
 
-        NotificationCustomizer<MigrationStatus> notificationCustomizer = new NotificationCustomizer<MigrationStatus>() {
-            @Override
-            public Notification customNotificationFrom(NotificationCompat.Builder builder, MigrationStatus payload) {
-                return builder
-                        .setProgress(payload.totalNumberOfBatchesToMigrate(), payload.numberOfMigratedBatches(), false)
-                        .setSmallIcon(android.R.drawable.ic_lock_power_off)
-                        .setContentTitle(payload.status().toRawValue())
-                        .setContentText(payload.percentageMigrated() + "%")
-                        .build();
-            }
-        };
+        NotificationCustomizer<MigrationStatus> notificationCustomizer = new ChocolateBasedNotificationCustomizer();
 
         NotificationConfig<MigrationStatus> notificationConfig = new NotificationConfig<>(
                 this,
@@ -231,4 +221,15 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private static class ChocolateBasedNotificationCustomizer implements NotificationCustomizer<MigrationStatus> {
+        @Override
+        public Notification customNotificationFrom(NotificationCompat.Builder builder, MigrationStatus payload) {
+            return builder
+                    .setProgress(payload.totalNumberOfBatchesToMigrate(), payload.numberOfMigratedBatches(), false)
+                    .setSmallIcon(android.R.drawable.ic_lock_power_off)
+                    .setContentTitle(payload.status().toRawValue())
+                    .setContentText(payload.percentageMigrated() + "%")
+                    .build();
+        }
+    }
 }
