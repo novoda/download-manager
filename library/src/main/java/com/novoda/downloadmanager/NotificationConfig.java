@@ -44,9 +44,4 @@ public class NotificationConfig<T> implements NotificationChannelCreator, Notifi
     public NotificationChannel createNotificationChannel() {
         return new NotificationChannel(channelId, userFacingChannelDescription, importance);
     }
-
-    @Override
-    public String getNotificationChannelId() {
-        return channelId;
-    }
 }
