@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final MigrationCallback migrationCallback = new MigrationCallback() {
         @Override
-        public void onUpdate(final MigrationStatus migrationStatus) {
+        public void onUpdate(MigrationStatus migrationStatus) {
             databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());
         }
     };
