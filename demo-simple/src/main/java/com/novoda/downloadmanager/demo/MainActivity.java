@@ -90,8 +90,8 @@ public class MainActivity extends AppCompatActivity {
         Log.setShowLogs(true);
 
         downloadMigrator = DownloadMigratorBuilder.newInstance(this)
-                .withNotificationChannelCreator(notificationChannelCreator)
-                .withNotificationCreator(notificationCreator)
+//                .withNotificationChannelCreator(notificationChannelCreator)
+//                .withNotificationCreator(notificationCreator)
                 .build();
 
         textViewBatch1 = findViewById(R.id.batch_1);

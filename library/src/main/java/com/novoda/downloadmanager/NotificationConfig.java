@@ -10,14 +10,14 @@ class NotificationConfig<T> implements NotificationChannelCreator, NotificationC
 
     private final Context applicationContext;
     private final String channelId;
-    private final String userFacingChannelName;
+    private final String userFacingChannelDescription;
     private final NotificationCustomiser<T> notificationCustomiser;
     private final int importance;
 
-    NotificationConfig(Context context, String channelId, String userFacingChannelName, NotificationCustomiser<T> customiser, int importance) {
+    NotificationConfig(Context context, String channelId, String userFacingChannelDescription, NotificationCustomiser<T> customiser, int importance) {
         this.applicationContext = context.getApplicationContext();
         this.channelId = channelId;
-        this.userFacingChannelName = userFacingChannelName;
+        this.userFacingChannelDescription = userFacingChannelDescription;
         this.notificationCustomiser = customiser;
         this.importance = importance;
     }
@@ -39,7 +39,7 @@ class NotificationConfig<T> implements NotificationChannelCreator, NotificationC
 
     Optional<NotificationChannel> notificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return Optional.of(new NotificationChannel(channelId, userFacingChannelName, importance));
+            return Optional.of(new NotificationChannel(channelId, userFacingChannelDescription, importance));
         }
         return Optional.absent();
     }
