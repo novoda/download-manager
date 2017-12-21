@@ -15,12 +15,12 @@ import com.novoda.downloadmanager.DownloadBatchCallback;
 import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
-import com.novoda.downloadmanager.DownloadMigrationService;
+import com.novoda.downloadmanager.DownloadMigrator;
+import com.novoda.downloadmanager.DownloadMigratorBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.LocalFilesDirectory;
 import com.novoda.downloadmanager.LocalFilesDirectoryFactory;
-import com.novoda.downloadmanager.ManagedDownloadMigrationService;
-import com.novoda.downloadmanager.MigrationService;
+import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
 import com.novoda.notils.logger.simple.Log;
 
@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView textViewBatch1;
     private TextView textViewBatch2;
     private LiteDownloadManagerCommands liteDownloadManagerCommands;
-    private ManagedDownloadMigrationService downloadMigrationService;
+    private DownloadMigrator downloadMigrator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +47,8 @@ public class MainActivity extends AppCompatActivity {
 
         Log.setShowLogs(true);
 
-        downloadMigrationService = new MigrationService(this);
+        downloadMigrator = DownloadMigratorBuilder.newInstance(this)
+                .build();
 
         textViewBatch1 = findViewById(R.id.batch_1);
         textViewBatch2 = findViewById(R.id.batch_2);
@@ -73,8 +74,7 @@ public class MainActivity extends AppCompatActivity {
         buttonMigrate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                downloadMigrationService.startMigration()
-                        .addCallback(migrationCallback);
+                downloadMigrator.startMigration(migrationCallback);
             }
         });
 
@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private final DownloadMigrationService.MigrationCallback migrationCallback = new DownloadMigrationService.MigrationCallback() {
+    private final MigrationCallback migrationCallback = new MigrationCallback() {
         @Override
         public void onUpdate(final MigrationStatus migrationStatus) {
             Handler handler = new Handler(getMainLooper());
