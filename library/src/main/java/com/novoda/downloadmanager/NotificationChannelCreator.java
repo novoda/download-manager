@@ -2,7 +2,7 @@ package com.novoda.downloadmanager;
 
 import android.app.NotificationChannel;
 
-public interface NotificationChannelCreator {
+interface NotificationChannelCreator {
 
     Optional<NotificationChannel> createNotificationChannel();
 
