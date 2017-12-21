@@ -20,11 +20,12 @@ import com.novoda.downloadmanager.DownloadBatchCallback;
 import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
-import com.novoda.downloadmanager.DownloadMigrationService;
+import com.novoda.downloadmanager.DownloadMigrator;
+import com.novoda.downloadmanager.DownloadMigratorBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.LocalFilesDirectory;
 import com.novoda.downloadmanager.LocalFilesDirectoryFactory;
-import com.novoda.downloadmanager.MigrationServiceBinder;
+import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
 import com.novoda.downloadmanager.NotificationChannelCreator;
 import com.novoda.downloadmanager.NotificationCreator;
@@ -40,13 +41,47 @@ public class MainActivity extends AppCompatActivity {
 
     private static final DownloadBatchId BATCH_ID_1 = DownloadBatchIdCreator.createFrom("batch_id_1");
     private static final DownloadBatchId BATCH_ID_2 = DownloadBatchIdCreator.createFrom("batch_id_2");
+    private final NotificationChannelCreator notificationChannelCreator = new NotificationChannelCreator() {
+        @Override
+        public Optional<NotificationChannel> createNotificationChannel() {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                return Optional.of(new NotificationChannel("1", "KinderBueno", NotificationManager.IMPORTANCE_DEFAULT));
+            }
+            return Optional.absent();
+        }
 
+        @Override
+        public String getNotificationChannelName() {
+            return "KinderBueno";
+        }
+    };
+    private final NotificationCreator<MigrationStatus> notificationCreator = new NotificationCreator<MigrationStatus>() {
+        @Override
+        public NotificationInformation createNotification(final String notificationChannelName, final MigrationStatus notificationPayload) {
+            return new NotificationInformation() {
+                @Override
+                public int getId() {
+                    return 1;
+                }
+
+                @Override
+                public Notification getNotification() {
+                    return new NotificationCompat.Builder(getApplicationContext(), notificationChannelName)
+                            .setProgress(notificationPayload.numberOfMigratedBatches(), notificationPayload.totalNumberOfBatchesToMigrate(), false)
+                            .setSmallIcon(android.R.drawable.ic_menu_sort_by_size)
+                            .setContentTitle("Lindt")
+                            .setContentText("Bountys")
+                            .build();
+                }
+            };
+        }
+    };
     private TextView databaseCloningUpdates;
     private TextView databaseMigrationUpdates;
     private TextView textViewBatch1;
     private TextView textViewBatch2;
     private LiteDownloadManagerCommands liteDownloadManagerCommands;
-    private DownloadMigrationService downloadMigrationService;
+    private DownloadMigrator downloadMigrator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +90,10 @@ public class MainActivity extends AppCompatActivity {
 
         Log.setShowLogs(true);
 
-        downloadMigrationService = new MigrationServiceBinder(this);
+        downloadMigrator = DownloadMigratorBuilder.newInstance(this)
+                .withNotificationChannelCreator(notificationChannelCreator)
+                .withNotificationCreator(notificationCreator)
+                .build();
 
         textViewBatch1 = findViewById(R.id.batch_1);
         textViewBatch2 = findViewById(R.id.batch_2);
@@ -81,45 +119,7 @@ public class MainActivity extends AppCompatActivity {
         buttonMigrate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NotificationChannelCreator notificationChannelCreator = new NotificationChannelCreator() {
-                    @Override
-                    public Optional<NotificationChannel> createNotificationChannel() {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            return Optional.of(new NotificationChannel("1", "KinderBueno", NotificationManager.IMPORTANCE_DEFAULT));
-                        }
-                        return Optional.absent();
-                    }
-
-                    @Override
-                    public String getNotificationChannelName() {
-                        return "KinderBueno";
-                    }
-                };
-
-                NotificationCreator<MigrationStatus> notificationCreator = new NotificationCreator<MigrationStatus>() {
-                    @Override
-                    public NotificationInformation createNotification(final String notificationChannelName, final MigrationStatus notificationPayload) {
-                        return new NotificationInformation() {
-                            @Override
-                            public int getId() {
-                                return 1;
-                            }
-
-                            @Override
-                            public Notification getNotification() {
-                                return new NotificationCompat.Builder(getApplicationContext(), notificationChannelName)
-                                        .setProgress(notificationPayload.numberOfMigratedBatches(), notificationPayload.totalNumberOfBatchesToMigrate(), false)
-                                        .setSmallIcon(android.R.drawable.ic_menu_sort_by_size)
-                                        .setContentTitle("Lindt")
-                                        .setContentText("Bountys")
-                                        .build();
-                            }
-                        };
-                    }
-                };
-
-                downloadMigrationService.startMigration(notificationChannelCreator, notificationCreator)
-                        .addCallback(migrationCallback);
+                downloadMigrator.startMigration(migrationCallback);
             }
         });
 
@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private final DownloadMigrationService.MigrationCallback migrationCallback = new DownloadMigrationService.MigrationCallback() {
+    private final MigrationCallback migrationCallback = new MigrationCallback() {
         @Override
         public void onUpdate(final MigrationStatus migrationStatus) {
             Handler handler = new Handler(getMainLooper());

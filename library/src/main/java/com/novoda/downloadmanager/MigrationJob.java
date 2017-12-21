@@ -7,9 +7,10 @@ import android.util.Log;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-class MigrationJob extends MigrationFutureWithCallbacks implements Runnable, DownloadMigrationService.MigrationFuture {
+class MigrationJob implements Runnable {
 
     private static final String TAG = "V1 to V2 migrator";
 
@@ -19,10 +20,15 @@ class MigrationJob extends MigrationFutureWithCallbacks implements Runnable, Dow
 
     private final Context context;
     private final File databasePath;
+    private final List<MigrationCallback> migrationCallbacks = new ArrayList<>();
 
     MigrationJob(Context context, File databasePath) {
         this.context = context;
         this.databasePath = databasePath;
+    }
+
+    void addCallback(MigrationCallback callback) {
+        migrationCallbacks.add(callback);
     }
 
     public void run() {
@@ -82,6 +88,12 @@ class MigrationJob extends MigrationFutureWithCallbacks implements Runnable, Dow
         database.deleteDatabase();
         migrationStatus.markAsComplete();
         onUpdate(migrationStatus);
+    }
+
+    private void onUpdate(MigrationStatus migrationStatus) {
+        for (MigrationCallback migrationCallback : migrationCallbacks) {
+            migrationCallback.onUpdate(migrationStatus);
+        }
     }
 
     private void migrateV1FilesToV2Location(InternalFilePersistence internalFilePersistence, Migration migration) {

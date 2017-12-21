@@ -24,8 +24,8 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
     private static ExecutorService executor;
 
     private IBinder binder;
-    private NotificationCreator<MigrationStatus> notificationCreator;
     private NotificationChannelCreator notificationChannelCreator;
+    private NotificationCreator<MigrationStatus> notificationCreator;
     private NotificationManager notificationManager;
 
     @Override
@@ -36,40 +36,9 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
         }
 
         binder = new MigrationDownloadServiceBinder();
-        notificationChannelCreator = new MigrationNotificationChannelCreator(getResources());
-        notificationCreator = new MigrationNotification(getApplicationContext(), android.R.drawable.ic_dialog_alert);
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         super.onCreate();
-    }
-
-    @Override
-    public MigrationFuture startMigration(final NotificationChannelCreator notificationChannelCreator, final NotificationCreator<MigrationStatus> notificationCreator) {
-        this.notificationChannelCreator = notificationChannelCreator;
-        this.notificationCreator = notificationCreator;
-        createNotificationChannel();
-        MigrationJob migrationJob = new MigrationJob(getApplicationContext(), getDatabasePath("downloads.db"));
-        migrationJob.addCallback(migrationCallback);
-        executor.execute(migrationJob);
-        return migrationJob;
-    }
-
-    @Override
-    public MigrationFuture startMigration() {
-        createNotificationChannel();
-        MigrationJob migrationJob = new MigrationJob(getApplicationContext(), getDatabasePath("downloads.db"));
-        migrationJob.addCallback(migrationCallback);
-        executor.execute(migrationJob);
-        return migrationJob;
-    }
-
-    private void createNotificationChannel() {
-        Optional<NotificationChannel> notificationChannel = notificationChannelCreator.createNotificationChannel();
-        String channelName = notificationChannelCreator.getNotificationChannelName();
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationChannel.isPresent() && notificationChannelDoesNotExist(channelName)) {
-            notificationManager.createNotificationChannel(notificationChannel.get());
-        }
     }
 
     class MigrationDownloadServiceBinder extends Binder {
@@ -84,12 +53,40 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
         return binder;
     }
 
+    @Override
+    public void setNotificationChannelCreator(NotificationChannelCreator notificationChannelCreator) {
+        this.notificationChannelCreator = notificationChannelCreator;
+    }
+
+    @Override
+    public void setNotificationCreator(NotificationCreator<MigrationStatus> notificationCreator) {
+        this.notificationCreator = notificationCreator;
+    }
+
+    @Override
+    public void startMigration(MigrationCallback migrationCallback) {
+        createNotificationChannel();
+        MigrationJob migrationJob = new MigrationJob(getApplicationContext(), getDatabasePath("downloads.db"));
+        migrationJob.addCallback(migrationCallback);
+        migrationJob.addCallback(notificationMigrationCallback);
+        executor.execute(migrationJob);
+    }
+
+    private void createNotificationChannel() {
+        Optional<NotificationChannel> notificationChannel = notificationChannelCreator.createNotificationChannel();
+        String channelName = notificationChannelCreator.getNotificationChannelName();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationChannel.isPresent() && notificationChannelDoesNotExist(channelName)) {
+            notificationManager.createNotificationChannel(notificationChannel.get());
+        }
+    }
+
     @TargetApi(Build.VERSION_CODES.O)
     private boolean notificationChannelDoesNotExist(String channelName) {
         return notificationManager.getNotificationChannel(channelName) == null;
     }
 
-    private final DownloadMigrationService.MigrationCallback migrationCallback = new MigrationCallback() {
+    private final MigrationCallback notificationMigrationCallback = new MigrationCallback() {
         @Override
         public void onUpdate(MigrationStatus migrationStatus) {
             String channelName = notificationChannelCreator.getNotificationChannelName();
