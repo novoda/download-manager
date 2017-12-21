@@ -21,6 +21,15 @@ class Migration {
         return fileMetadata;
     }
 
+    boolean hasDownloadedBatch() {
+        for (FileMetadata fileMetadatum : fileMetadata) {
+            if (fileMetadatum.fileSize().currentSize() != fileMetadatum.fileSize().totalSize()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
