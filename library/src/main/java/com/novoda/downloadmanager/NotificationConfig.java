@@ -14,11 +14,11 @@ public class NotificationConfig<T> implements NotificationChannelCreator, Notifi
     private final NotificationCustomizer<T> notificationCustomizer;
     private final int importance;
 
-    public NotificationConfig(Context context, String channelId, String userFacingChannelDescription, NotificationCustomizer<T> customiser, int importance) {
+    public NotificationConfig(Context context, String channelId, String userFacingChannelDescription, NotificationCustomizer<T> customizer, int importance) {
         this.applicationContext = context.getApplicationContext();
         this.channelId = channelId;
         this.userFacingChannelDescription = userFacingChannelDescription;
-        this.notificationCustomizer = customiser;
+        this.notificationCustomizer = customizer;
         this.importance = importance;
     }
 
