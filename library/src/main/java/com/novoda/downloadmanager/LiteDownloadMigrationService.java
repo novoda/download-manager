@@ -90,7 +90,7 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
         @Override
         public void onUpdate(MigrationStatus migrationStatus) {
             String channelName = notificationChannelCreator.getNotificationChannelId();
-            NotificationInformation notification = notificationCreator.createNotification(channelName, migrationStatus);
+            NotificationInformation notification = notificationCreator.createNotification(migrationStatus);
 
             if (migrationStatus.status() == Status.COMPLETE || migrationStatus.status() == Status.DB_NOT_PRESENT) {
                 stackNotification(notification);

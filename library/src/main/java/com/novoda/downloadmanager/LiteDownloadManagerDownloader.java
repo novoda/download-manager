@@ -128,10 +128,7 @@ class LiteDownloadManagerDownloader {
     }
 
     private void updateNotification(DownloadBatchStatus liteDownloadBatchStatus, DownloadService downloadService) {
-        NotificationInformation notificationInformation = notificationCreator.createNotification(
-                notificationChannelCreator.getNotificationChannelId(),
-                liteDownloadBatchStatus
-        );
+        NotificationInformation notificationInformation = notificationCreator.createNotification(liteDownloadBatchStatus);
 
         if (liteDownloadBatchStatus.status() == DELETION) {
             downloadService.dismissNotification();

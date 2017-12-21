@@ -23,7 +23,7 @@ public class NotificationConfig<T> implements NotificationChannelCreator, Notifi
     }
 
     @Override
-    public NotificationInformation createNotification(String notificationChannelName, final T notificationPayload) {
+    public NotificationInformation createNotification(final T notificationPayload) {
         return new NotificationInformation() {
             @Override
             public int getId() {
