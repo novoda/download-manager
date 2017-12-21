@@ -1,11 +1,11 @@
 package com.novoda.downloadmanager;
 
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 
 public class DownloadMigratorBuilder {
 
@@ -35,7 +35,13 @@ public class DownloadMigratorBuilder {
             }
 
         };
-        NotificationConfig<MigrationStatus> defaultNotificationConfig = new NotificationConfig<>(applicationContext, channelId, channelDescription, customiser, NotificationManager.IMPORTANCE_LOW);
+        NotificationConfig<MigrationStatus> defaultNotificationConfig = new NotificationConfig<>(
+                applicationContext,
+                channelId,
+                channelDescription,
+                customiser,
+                NotificationManagerCompat.IMPORTANCE_LOW
+        );
 
         Handler handler = new Handler(Looper.getMainLooper());
         return new DownloadMigratorBuilder(applicationContext, handler, defaultNotificationConfig);

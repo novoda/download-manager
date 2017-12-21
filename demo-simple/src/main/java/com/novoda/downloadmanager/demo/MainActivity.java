@@ -1,10 +1,10 @@
 package com.novoda.downloadmanager.demo;
 
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
                 "chocolate",
                 "Migration notifications",
                 notificationCustomiser,
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManagerCompat.IMPORTANCE_DEFAULT
         );
 
         downloadMigrator = DownloadMigratorBuilder.newInstance(this)

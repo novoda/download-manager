@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.DrawableRes;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 
 import com.novoda.notils.logger.simple.Log;
 import com.squareup.okhttp.OkHttpClient;
@@ -94,7 +95,7 @@ public final class DownloadManagerBuilder {
                 context.getResources().getString(R.string.download_notification_channel_name),
                 context.getResources().getString(R.string.download_notification_channel_description),
                 notificationCustomiser,
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManagerCompat.IMPORTANCE_LOW
         );
 
         ConnectionType connectionTypeAllowed = ConnectionType.ALL;
