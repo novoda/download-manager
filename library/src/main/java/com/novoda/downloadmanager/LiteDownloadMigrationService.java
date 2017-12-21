@@ -1,77 +1,32 @@
 package com.novoda.downloadmanager;
 
-import android.app.AlarmManager;
+import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class LiteDownloadMigrationService extends Service implements MigrationService {
+import static com.novoda.downloadmanager.MigrationStatus.Status;
+
+public class LiteDownloadMigrationService extends Service implements DownloadMigrationService {
 
     private static final String TAG = "MigrationService";
     private static ExecutorService executor;
 
     private IBinder binder;
-    private Migrator.Callback migrationCallback;
+    private NotificationChannelCreator notificationChannelCreator;
     private NotificationCreator<MigrationStatus> notificationCreator;
-    private NotificationChannelCreator channelCreator;
     private NotificationManager notificationManager;
-    private MigrationStatus migrationStatus;
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        super.onStartCommand(intent, flags, startId);
-        Log.d(TAG, "onStartCommand");
-
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                Migrator migrator = MigrationFactory.createVersionOneToVersionTwoMigrator(
-                        getApplicationContext(),
-                        getDatabasePath("downloads.db"),
-                        LiteDownloadMigrationService.this,
-                        channelCreator,
-                        notificationCreator
-                );
-                Log.d(TAG, "Begin Migration: " + migrator.getClass());
-                migrator.migrate();
-            }
-        });
-
-        return START_STICKY;
-    }
-
-    @Override
-    public void updateNotification(NotificationInformation notificationInformation) {
-        startForeground(notificationInformation.getId(), notificationInformation.getNotification());
-    }
-
-    @Override
-    public void stackNotification(NotificationInformation notificationInformation) {
-        stopForeground(true);
-        Notification notification = notificationInformation.getNotification();
-        notificationManager.notify(notificationInformation.getId(), notification);
-    }
-
-    @Override
-    public void updateMessage(MigrationStatus migrationStatus) {
-        if (migrationCallback != null) {
-            this.migrationStatus = migrationStatus;
-            migrationCallback.onUpdate(migrationStatus);
-        }
-    }
 
     @Override
     public void onCreate() {
@@ -81,17 +36,15 @@ public class LiteDownloadMigrationService extends Service implements MigrationSe
         }
 
         binder = new MigrationDownloadServiceBinder();
-        channelCreator = new MigrationNotificationChannelCreator(getResources());
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        Optional<NotificationChannel> notificationChannel = channelCreator.createNotificationChannel();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationChannel.isPresent()) {
-            notificationManager.createNotificationChannel(notificationChannel.get());
-        }
-
-        notificationCreator = new MigrationNotification(getApplicationContext(), android.R.drawable.ic_dialog_alert);
-
         super.onCreate();
+    }
+
+    class MigrationDownloadServiceBinder extends Binder {
+        DownloadMigrationService getService() {
+            return LiteDownloadMigrationService.this;
+        }
     }
 
     @Nullable
@@ -101,45 +54,60 @@ public class LiteDownloadMigrationService extends Service implements MigrationSe
     }
 
     @Override
-    public void onTaskRemoved(Intent rootIntent) {
-        Log.d(TAG, "onTaskRemoved");
-        rescheduleMigration();
-        Log.d(TAG, "Rescheduling");
-        super.onTaskRemoved(rootIntent);
-    }
-
-    private void rescheduleMigration() {
-        Intent intent = new Intent(getApplicationContext(), LiteDownloadMigrationService.class);
-        PendingIntent pendingIntent = PendingIntent.getService(this, 1, intent, PendingIntent.FLAG_ONE_SHOT);
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        if (alarmManager == null) {
-            Log.w(TAG, "Could not retrieve AlarmManager for rescheduling.");
-            return;
-        }
-        alarmManager.set(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + 5000, pendingIntent);
+    public void setNotificationChannelCreator(NotificationChannelCreator notificationChannelCreator) {
+        this.notificationChannelCreator = notificationChannelCreator;
     }
 
     @Override
-    public boolean onUnbind(Intent intent) {
-        Log.d(TAG, "onUnbind");
-        migrationCallback = null;
-        Log.d(TAG, "Stopping service");
-        return super.onUnbind(intent);
+    public void setNotificationCreator(NotificationCreator<MigrationStatus> notificationCreator) {
+        this.notificationCreator = notificationCreator;
     }
 
-    class MigrationDownloadServiceBinder extends Binder {
+    @Override
+    public void startMigration(MigrationCallback migrationCallback) {
+        createNotificationChannel();
+        MigrationJob migrationJob = new MigrationJob(getApplicationContext(), getDatabasePath("downloads.db"));
+        migrationJob.addCallback(migrationCallback);
+        migrationJob.addCallback(notificationMigrationCallback);
+        executor.execute(migrationJob);
+    }
 
-        MigrationDownloadServiceBinder withCallback(Migrator.Callback migrationCallback) {
-            LiteDownloadMigrationService.this.migrationCallback = migrationCallback;
-            return this;
+    private void createNotificationChannel() {
+        Optional<NotificationChannel> notificationChannel = notificationChannelCreator.createNotificationChannel();
+        String channelName = notificationChannelCreator.getNotificationChannelName();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationChannel.isPresent() && notificationChannelDoesNotExist(channelName)) {
+            notificationManager.createNotificationChannel(notificationChannel.get());
         }
+    }
 
-        void bind() {
-            if (migrationStatus != null && migrationCallback != null) {
-                LiteDownloadMigrationService.this.migrationCallback.onUpdate(migrationStatus);
+    @TargetApi(Build.VERSION_CODES.O)
+    private boolean notificationChannelDoesNotExist(String channelName) {
+        return notificationManager.getNotificationChannel(channelName) == null;
+    }
+
+    private final MigrationCallback notificationMigrationCallback = new MigrationCallback() {
+        @Override
+        public void onUpdate(MigrationStatus migrationStatus) {
+            String channelName = notificationChannelCreator.getNotificationChannelName();
+            NotificationInformation notification = notificationCreator.createNotification(channelName, migrationStatus);
+
+            if (migrationStatus.status() == Status.COMPLETE || migrationStatus.status() == Status.DB_NOT_PRESENT) {
+                stackNotification(notification);
+            } else {
+                updateNotification(notification);
             }
         }
 
-    }
+        private void updateNotification(NotificationInformation notificationInformation) {
+            startForeground(notificationInformation.getId(), notificationInformation.getNotification());
+        }
+
+        private void stackNotification(NotificationInformation notificationInformation) {
+            stopForeground(true);
+            Notification notification = notificationInformation.getNotification();
+            notificationManager.notify(notificationInformation.getId(), notification);
+        }
+    };
 
 }

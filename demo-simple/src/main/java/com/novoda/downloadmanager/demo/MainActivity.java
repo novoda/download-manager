@@ -14,13 +14,13 @@ import com.novoda.downloadmanager.DownloadBatchCallback;
 import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
+import com.novoda.downloadmanager.DownloadMigrator;
+import com.novoda.downloadmanager.DownloadMigratorBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.LocalFilesDirectory;
 import com.novoda.downloadmanager.LocalFilesDirectoryFactory;
-import com.novoda.downloadmanager.MigrationFactory;
-import com.novoda.downloadmanager.MigrationServiceBinder;
+import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
-import com.novoda.downloadmanager.Migrator;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView textViewBatch1;
     private TextView textViewBatch2;
     private LiteDownloadManagerCommands liteDownloadManagerCommands;
-    private MigrationServiceBinder migrationServiceBinder;
+    private DownloadMigrator downloadMigrator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +46,8 @@ public class MainActivity extends AppCompatActivity {
 
         Log.setShowLogs(true);
 
-        migrationServiceBinder = MigrationFactory.migrationServiceBinder(this, migrationCallback);
+        downloadMigrator = DownloadMigratorBuilder.newInstance(this)
+                .build();
 
         textViewBatch1 = findViewById(R.id.batch_1);
         textViewBatch2 = findViewById(R.id.batch_2);
@@ -72,15 +73,7 @@ public class MainActivity extends AppCompatActivity {
         buttonMigrate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                migrationServiceBinder.bind();
-            }
-        });
-
-        View buttonAbortMigration = findViewById(R.id.button_abort_migration);
-        buttonAbortMigration.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                migrationServiceBinder.unbind();
+                downloadMigrator.startMigration(migrationCallback);
             }
         });
 
@@ -137,14 +130,14 @@ public class MainActivity extends AppCompatActivity {
         bindViews();
     }
 
-    VersionOneDatabaseCloner.CloneCallback cloneCallback = new VersionOneDatabaseCloner.CloneCallback() {
+    private final VersionOneDatabaseCloner.CloneCallback cloneCallback = new VersionOneDatabaseCloner.CloneCallback() {
         @Override
         public void onUpdate(String updateMessage) {
             databaseCloningUpdates.setText(updateMessage);
         }
     };
 
-    Migrator.Callback migrationCallback = new Migrator.Callback() {
+    private final MigrationCallback migrationCallback = new MigrationCallback() {
         @Override
         public void onUpdate(MigrationStatus migrationStatus) {
             databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());
@@ -213,9 +206,4 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    @Override
-    protected void onStop() {
-        migrationServiceBinder.unbind();
-        super.onStop();
-    }
 }
