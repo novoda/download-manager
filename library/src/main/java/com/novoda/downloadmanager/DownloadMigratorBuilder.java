@@ -35,10 +35,10 @@ public class DownloadMigratorBuilder {
             }
 
         };
-        NotificationConfig<MigrationStatus> config = new NotificationConfig<>(applicationContext, channelId, channelDescription, customiser, NotificationManager.IMPORTANCE_LOW);
+        NotificationConfig<MigrationStatus> defaultNotificationConfig = new NotificationConfig<>(applicationContext, channelId, channelDescription, customiser, NotificationManager.IMPORTANCE_LOW);
 
         Handler handler = new Handler(Looper.getMainLooper());
-        return new DownloadMigratorBuilder(applicationContext, handler, config);
+        return new DownloadMigratorBuilder(applicationContext, handler, defaultNotificationConfig);
     }
 
     private DownloadMigratorBuilder(Context applicationContext,
