@@ -19,7 +19,7 @@ public class DownloadMigratorBuilder {
 
         String channelId = context.getResources().getString(R.string.migration_notification_channel_name);
         String channelDescription = context.getResources().getString(R.string.migration_notification_channel_description);
-        NotificationCustomiser<MigrationStatus> customiser = new NotificationCustomiser<MigrationStatus>() {
+        NotificationCustomizer<MigrationStatus> customiser = new NotificationCustomizer<MigrationStatus>() {
             private static final int MAX_PROGRESS = 100;
 
             @Override
