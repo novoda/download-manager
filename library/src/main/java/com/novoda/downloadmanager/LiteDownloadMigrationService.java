@@ -41,6 +41,18 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
         super.onCreate();
     }
 
+    class MigrationDownloadServiceBinder extends Binder {
+        DownloadMigrationService getService() {
+            return LiteDownloadMigrationService.this;
+        }
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return binder;
+    }
+
     @Override
     public void setNotificationChannelCreator(NotificationChannelCreator notificationChannelCreator) {
         this.notificationChannelCreator = notificationChannelCreator;
@@ -67,18 +79,6 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationChannel.isPresent() && notificationChannelDoesNotExist(channelName)) {
             notificationManager.createNotificationChannel(notificationChannel.get());
         }
-    }
-
-    class MigrationDownloadServiceBinder extends Binder {
-        DownloadMigrationService getService() {
-            return LiteDownloadMigrationService.this;
-        }
-    }
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return binder;
     }
 
     @TargetApi(Build.VERSION_CODES.O)
