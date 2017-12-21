@@ -60,12 +60,8 @@ public class MainActivity extends AppCompatActivity {
                         .setContentText(payload.percentageMigrated() + "%")
                         .build();
             }
-
-            @Override
-            public int notificationId(MigrationStatus payload) {
-                return payload.hashCode();
-            }
         };
+
         NotificationConfig<MigrationStatus> notificationConfig = new NotificationConfig<>(
                 this,
                 "chocolate",

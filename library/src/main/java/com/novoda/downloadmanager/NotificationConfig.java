@@ -26,7 +26,7 @@ public class NotificationConfig<T> implements NotificationChannelCreator, Notifi
         return new NotificationInformation() {
             @Override
             public int getId() {
-                return notificationCustomiser.notificationId(payload);
+                return payload.hashCode();
             }
 
             @Override

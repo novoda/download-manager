@@ -34,10 +34,6 @@ public class DownloadMigratorBuilder {
                         .build();
             }
 
-            @Override
-            public int notificationId(MigrationStatus payload) {
-                return payload.hashCode();
-            }
         };
         NotificationConfig<MigrationStatus> config = new NotificationConfig<>(applicationContext, channelId, channelDescription, customiser, NotificationManager.IMPORTANCE_LOW);
 
