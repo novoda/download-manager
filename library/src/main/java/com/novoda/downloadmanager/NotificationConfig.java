@@ -22,36 +22,28 @@ public class NotificationConfig<T> implements NotificationChannelCreator, Notifi
         this.importance = importance;
     }
 
-    NotificationInformation notificationInformation(final T payload) {
+    @Override
+    public NotificationInformation createNotification(String notificationChannelName, final T notificationPayload) {
         return new NotificationInformation() {
             @Override
             public int getId() {
-                return payload.hashCode();
+                return notificationPayload.hashCode();
             }
 
             @Override
             public Notification getNotification() {
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(applicationContext, channelId);
-                return notificationCustomiser.customNotificationFrom(builder, payload);
+                return notificationCustomiser.customNotificationFrom(builder, notificationPayload);
             }
         };
     }
 
-    Optional<NotificationChannel> notificationChannel() {
+    @Override
+    public Optional<NotificationChannel> createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             return Optional.of(new NotificationChannel(channelId, userFacingChannelDescription, importance));
         }
         return Optional.absent();
-    }
-
-    @Override
-    public NotificationInformation createNotification(String notificationChannelName, T notificationPayload) {
-        return notificationInformation(notificationPayload);
-    }
-
-    @Override
-    public Optional<NotificationChannel> createNotificationChannel() {
-        return notificationChannel();
     }
 
     @Override
