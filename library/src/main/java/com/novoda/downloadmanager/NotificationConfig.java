@@ -6,7 +6,7 @@ import android.content.Context;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 
-class NotificationConfig<T> implements NotificationChannelCreator, NotificationCreator<T> {
+public class NotificationConfig<T> implements NotificationChannelCreator, NotificationCreator<T> {
 
     private final Context applicationContext;
     private final String channelId;
@@ -14,7 +14,7 @@ class NotificationConfig<T> implements NotificationChannelCreator, NotificationC
     private final NotificationCustomiser<T> notificationCustomiser;
     private final int importance;
 
-    NotificationConfig(Context context, String channelId, String userFacingChannelDescription, NotificationCustomiser<T> customiser, int importance) {
+    public NotificationConfig(Context context, String channelId, String userFacingChannelDescription, NotificationCustomiser<T> customiser, int importance) {
         this.applicationContext = context.getApplicationContext();
         this.channelId = channelId;
         this.userFacingChannelDescription = userFacingChannelDescription;

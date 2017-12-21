@@ -27,7 +27,9 @@ import com.novoda.downloadmanager.LocalFilesDirectoryFactory;
 import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
 import com.novoda.downloadmanager.NotificationChannelCreator;
+import com.novoda.downloadmanager.NotificationConfig;
 import com.novoda.downloadmanager.NotificationCreator;
+import com.novoda.downloadmanager.NotificationCustomiser;
 import com.novoda.downloadmanager.NotificationInformation;
 import com.novoda.downloadmanager.Optional;
 import com.novoda.notils.logger.simple.Log;
@@ -89,9 +91,34 @@ public class MainActivity extends AppCompatActivity {
 
         Log.setShowLogs(true);
 
+        NotificationCustomiser<MigrationStatus> notificationCustomiser = new NotificationCustomiser<MigrationStatus>() {
+            @Override
+            public Notification customNotificationFrom(NotificationCompat.Builder builder, MigrationStatus payload) {
+                return builder
+                        .setProgress(payload.totalNumberOfBatchesToMigrate(), payload.numberOfMigratedBatches(), false)
+                        .setSmallIcon(android.R.drawable.ic_lock_power_off)
+                        .setContentTitle(payload.status().toRawValue())
+                        .setContentText(payload.percentageMigrated() + "%")
+                        .build();
+            }
+
+            @Override
+            public int notificationId(MigrationStatus payload) {
+                return payload.hashCode();
+            }
+        };
+        NotificationConfig<MigrationStatus> notificationConfig = new NotificationConfig<>(
+                this,
+                "chocolate",
+                "Migration notifications",
+                notificationCustomiser,
+                NotificationManager.IMPORTANCE_DEFAULT
+        );
+
         downloadMigrator = DownloadMigratorBuilder.newInstance(this)
 //                .withNotificationChannelCreator(notificationChannelCreator)
 //                .withNotificationCreator(notificationCreator)
+                .withNotificationConfig(notificationConfig)
                 .build();
 
         textViewBatch1 = findViewById(R.id.batch_1);

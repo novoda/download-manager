@@ -11,10 +11,8 @@ public class DownloadMigratorBuilder {
 
     private final Context applicationContext;
     private final Handler handler;
-    private NotificationChannelCreator notificationChannelCreator;
-    private NotificationCreator<MigrationStatus> notificationCreator;
 
-    private NotificationConfig<MigrationStatus> config;
+    private NotificationConfig<MigrationStatus> notificationConfig;
 
     public static DownloadMigratorBuilder newInstance(Context context) {
         Context applicationContext = context.getApplicationContext();
@@ -44,30 +42,23 @@ public class DownloadMigratorBuilder {
         NotificationConfig<MigrationStatus> config = new NotificationConfig<>(applicationContext, channelId, channelDescription, customiser, NotificationManager.IMPORTANCE_LOW);
 
         Handler handler = new Handler(Looper.getMainLooper());
-        return new DownloadMigratorBuilder(applicationContext, handler, config, config);
+        return new DownloadMigratorBuilder(applicationContext, handler, config);
     }
 
     private DownloadMigratorBuilder(Context applicationContext,
                                     Handler handler,
-                                    NotificationChannelCreator notificationChannelCreator,
-                                    NotificationCreator<MigrationStatus> notificationCreator) {
+                                    NotificationConfig<MigrationStatus> notificationConfig) {
         this.applicationContext = applicationContext;
         this.handler = handler;
-        this.notificationChannelCreator = notificationChannelCreator;
-        this.notificationCreator = notificationCreator;
+        this.notificationConfig = notificationConfig;
     }
 
-    public DownloadMigratorBuilder withNotificationChannelCreator(NotificationChannelCreator notificationChannelCreator) {
-        this.notificationChannelCreator = notificationChannelCreator;
-        return this;
-    }
-
-    public DownloadMigratorBuilder withNotificationCreator(NotificationCreator<MigrationStatus> notificationCreator) {
-        this.notificationCreator = notificationCreator;
+    public DownloadMigratorBuilder withNotificationConfig(NotificationConfig<MigrationStatus> notificationConfig) {
+        this.notificationConfig = notificationConfig;
         return this;
     }
 
     public DownloadMigrator build() {
-        return new LiteDownloadMigrator(applicationContext, handler, notificationChannelCreator, notificationCreator);
+        return new LiteDownloadMigrator(applicationContext, handler, notificationConfig, notificationConfig);
     }
 }
