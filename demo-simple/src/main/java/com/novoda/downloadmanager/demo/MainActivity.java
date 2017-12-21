@@ -1,9 +1,7 @@
 package com.novoda.downloadmanager.demo;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
@@ -26,12 +24,8 @@ import com.novoda.downloadmanager.LocalFilesDirectory;
 import com.novoda.downloadmanager.LocalFilesDirectoryFactory;
 import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
-import com.novoda.downloadmanager.NotificationChannelCreator;
 import com.novoda.downloadmanager.NotificationConfig;
-import com.novoda.downloadmanager.NotificationCreator;
 import com.novoda.downloadmanager.NotificationCustomiser;
-import com.novoda.downloadmanager.NotificationInformation;
-import com.novoda.downloadmanager.Optional;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
@@ -42,41 +36,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static final DownloadBatchId BATCH_ID_1 = DownloadBatchIdCreator.createFrom("batch_id_1");
     private static final DownloadBatchId BATCH_ID_2 = DownloadBatchIdCreator.createFrom("batch_id_2");
-    private final NotificationChannelCreator notificationChannelCreator = new NotificationChannelCreator() {
-        @Override
-        public Optional<NotificationChannel> createNotificationChannel() {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                return Optional.of(new NotificationChannel("download-manager", "CategoryName", NotificationManager.IMPORTANCE_DEFAULT));
-            }
-            return Optional.absent();
-        }
-
-        @Override
-        public String getNotificationChannelId() {
-            return "download-manager";
-        }
-    };
-    private final NotificationCreator<MigrationStatus> notificationCreator = new NotificationCreator<MigrationStatus>() {
-        @Override
-        public NotificationInformation createNotification(final String notificationChannelName, final MigrationStatus notificationPayload) {
-            return new NotificationInformation() {
-                @Override
-                public int getId() {
-                    return 1;
-                }
-
-                @Override
-                public Notification getNotification() {
-                    return new NotificationCompat.Builder(getApplicationContext(), notificationChannelName)
-                            .setProgress(notificationPayload.totalNumberOfBatchesToMigrate(), notificationPayload.numberOfMigratedBatches(), false)
-                            .setSmallIcon(android.R.drawable.ic_lock_power_off)
-                            .setContentTitle(notificationPayload.status().toRawValue())
-                            .setContentText(notificationPayload.percentageMigrated() + "%")
-                            .build();
-                }
-            };
-        }
-    };
     private TextView databaseCloningUpdates;
     private TextView databaseMigrationUpdates;
     private TextView textViewBatch1;
