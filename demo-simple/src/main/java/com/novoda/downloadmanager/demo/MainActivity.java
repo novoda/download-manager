@@ -1,7 +1,6 @@
 package com.novoda.downloadmanager.demo;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -141,13 +140,7 @@ public class MainActivity extends AppCompatActivity {
     private final MigrationCallback migrationCallback = new MigrationCallback() {
         @Override
         public void onUpdate(final MigrationStatus migrationStatus) {
-            Handler handler = new Handler(getMainLooper());
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());
-                }
-            });
+            databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());
         }
     };
 
