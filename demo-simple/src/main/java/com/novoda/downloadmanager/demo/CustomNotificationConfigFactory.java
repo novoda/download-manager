@@ -8,7 +8,7 @@ import android.support.v4.app.NotificationManagerCompat;
 import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.DownloadBatchTitle;
 import com.novoda.downloadmanager.NotificationConfig;
-import com.novoda.downloadmanager.NotificationCustomiser;
+import com.novoda.downloadmanager.NotificationCustomizer;
 import com.novoda.notils.logger.simple.Log;
 
 public final class CustomNotificationConfigFactory {
@@ -17,7 +17,7 @@ public final class CustomNotificationConfigFactory {
 
     public static NotificationConfig<DownloadBatchStatus> createDownloadNotificationConfig(Context context, String channelId, String channelDescription, final int iconDrawable) {
 
-        NotificationCustomiser<DownloadBatchStatus> notificationCustomiser = new NotificationCustomiser<DownloadBatchStatus>() {
+        NotificationCustomizer<DownloadBatchStatus> notificationCustomizer = new NotificationCustomizer<DownloadBatchStatus>() {
             @Override
             public Notification customNotificationFrom(NotificationCompat.Builder builder, DownloadBatchStatus downloadBatchStatus) {
                 DownloadBatchTitle downloadBatchTitle = downloadBatchStatus.getDownloadBatchTitle();
@@ -42,7 +42,7 @@ public final class CustomNotificationConfigFactory {
                 context,
                 channelId,
                 channelDescription,
-                notificationCustomiser,
+                notificationCustomizer,
                 NotificationManagerCompat.IMPORTANCE_LOW
         );
     }

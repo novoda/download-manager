@@ -25,7 +25,7 @@ import com.novoda.downloadmanager.LocalFilesDirectoryFactory;
 import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
 import com.novoda.downloadmanager.NotificationConfig;
-import com.novoda.downloadmanager.NotificationCustomiser;
+import com.novoda.downloadmanager.NotificationCustomizer;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
         Log.setShowLogs(true);
 
-        NotificationCustomiser<MigrationStatus> notificationCustomiser = new NotificationCustomiser<MigrationStatus>() {
+        NotificationCustomizer<MigrationStatus> notificationCustomizer = new NotificationCustomizer<MigrationStatus>() {
             @Override
             public Notification customNotificationFrom(NotificationCompat.Builder builder, MigrationStatus payload) {
                 return builder
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
                 this,
                 "chocolate",
                 "Migration notifications",
-                notificationCustomiser,
+                notificationCustomizer,
                 NotificationManagerCompat.IMPORTANCE_DEFAULT
         );
 

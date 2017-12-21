@@ -68,7 +68,7 @@ public final class DownloadManagerBuilder {
         FileSizeRequester fileSizeRequester = new NetworkFileSizeRequester(httpClient, requestCreator);
         FileDownloader fileDownloader = new NetworkFileDownloader(httpClient, requestCreator);
 
-        NotificationCustomiser<DownloadBatchStatus> notificationCustomiser = new NotificationCustomiser<DownloadBatchStatus>() {
+        NotificationCustomizer<DownloadBatchStatus> notificationCustomizer = new NotificationCustomizer<DownloadBatchStatus>() {
 
             private static final boolean NOT_INDETERMINATE = false;
 
@@ -94,7 +94,7 @@ public final class DownloadManagerBuilder {
                 context,
                 context.getResources().getString(R.string.download_notification_channel_name),
                 context.getResources().getString(R.string.download_notification_channel_description),
-                notificationCustomiser,
+                notificationCustomizer,
                 NotificationManagerCompat.IMPORTANCE_LOW
         );
 
@@ -246,10 +246,10 @@ public final class DownloadManagerBuilder {
                 callbackThrottleCreator
         );
 
-        Optional<NotificationChannel> notificationChannel = notificationConfig.createNotificationChannel();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationChannel.isPresent()) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel notificationChannel = notificationConfig.createNotificationChannel();
             NotificationManager notificationManager = (NotificationManager) applicationContext.getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.createNotificationChannel(notificationChannel.get());
+            notificationManager.createNotificationChannel(notificationChannel);
         }
 
         LiteDownloadManagerDownloader downloader = new LiteDownloadManagerDownloader(

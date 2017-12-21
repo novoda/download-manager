@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.content.Context;
 import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 
 public class NotificationConfig<T> implements NotificationChannelCreator, NotificationCreator<T> {
@@ -11,14 +12,14 @@ public class NotificationConfig<T> implements NotificationChannelCreator, Notifi
     private final Context applicationContext;
     private final String channelId;
     private final String userFacingChannelDescription;
-    private final NotificationCustomiser<T> notificationCustomiser;
+    private final NotificationCustomizer<T> notificationCustomizer;
     private final int importance;
 
-    public NotificationConfig(Context context, String channelId, String userFacingChannelDescription, NotificationCustomiser<T> customiser, int importance) {
+    public NotificationConfig(Context context, String channelId, String userFacingChannelDescription, NotificationCustomizer<T> customiser, int importance) {
         this.applicationContext = context.getApplicationContext();
         this.channelId = channelId;
         this.userFacingChannelDescription = userFacingChannelDescription;
-        this.notificationCustomiser = customiser;
+        this.notificationCustomizer = customiser;
         this.importance = importance;
     }
 
@@ -33,17 +34,15 @@ public class NotificationConfig<T> implements NotificationChannelCreator, Notifi
             @Override
             public Notification getNotification() {
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(applicationContext, channelId);
-                return notificationCustomiser.customNotificationFrom(builder, notificationPayload);
+                return notificationCustomizer.customNotificationFrom(builder, notificationPayload);
             }
         };
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @Override
-    public Optional<NotificationChannel> createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return Optional.of(new NotificationChannel(channelId, userFacingChannelDescription, importance));
-        }
-        return Optional.absent();
+    public NotificationChannel createNotificationChannel() {
+        return new NotificationChannel(channelId, userFacingChannelDescription, importance);
     }
 
     @Override
