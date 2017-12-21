@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
         Log.setShowLogs(true);
 
-        NotificationCustomizer<MigrationStatus> notificationCustomizer = new ChocolateBasedNotificationCustomizer();
+        NotificationCustomizer<MigrationStatus> notificationCustomizer = new MigrationNotificationCustomizer();
 
         NotificationConfig<MigrationStatus> notificationConfig = new NotificationConfig<>(
                 this,
@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private static class ChocolateBasedNotificationCustomizer implements NotificationCustomizer<MigrationStatus> {
+    private static class MigrationNotificationCustomizer implements NotificationCustomizer<MigrationStatus> {
         @Override
         public Notification customNotificationFrom(NotificationCompat.Builder builder, MigrationStatus payload) {
             return builder
