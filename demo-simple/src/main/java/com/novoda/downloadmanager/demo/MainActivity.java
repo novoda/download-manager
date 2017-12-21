@@ -71,8 +71,6 @@ public class MainActivity extends AppCompatActivity {
         );
 
         downloadMigrator = DownloadMigratorBuilder.newInstance(this)
-//                .withNotificationChannelCreator(notificationChannelCreator)
-//                .withNotificationCreator(notificationCreator)
                 .withNotificationConfig(notificationConfig)
                 .build();
 
