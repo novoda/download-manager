@@ -85,14 +85,14 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public Optional<NotificationChannel> createNotificationChannel() {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            return Optional.of(new NotificationChannel("1", "KinderBueno", NotificationManager.IMPORTANCE_DEFAULT));
+                            return Optional.of(new NotificationChannel("download-manager-migration", "CategoryName", NotificationManager.IMPORTANCE_DEFAULT));
                         }
                         return Optional.absent();
                     }
 
                     @Override
                     public String getNotificationChannelName() {
-                        return "KinderBueno";
+                        return "download-manager-migration";
                     }
                 };
 
@@ -102,16 +102,16 @@ public class MainActivity extends AppCompatActivity {
                         return new NotificationInformation() {
                             @Override
                             public int getId() {
-                                return 1;
+                                return 7;
                             }
 
                             @Override
                             public Notification getNotification() {
                                 return new NotificationCompat.Builder(getApplicationContext(), notificationChannelName)
-                                        .setProgress(notificationPayload.numberOfMigratedBatches(), notificationPayload.totalNumberOfBatchesToMigrate(), false)
-                                        .setSmallIcon(android.R.drawable.ic_menu_sort_by_size)
-                                        .setContentTitle("Lindt")
-                                        .setContentText("Bountys")
+                                        .setProgress(notificationPayload.totalNumberOfBatchesToMigrate(), notificationPayload.numberOfMigratedBatches(), false)
+                                        .setSmallIcon(android.R.drawable.ic_dialog_info)
+                                        .setContentTitle(notificationPayload.status().toRawValue())
+                                        .setContentText(notificationPayload.percentageMigrated() + "%")
                                         .build();
                             }
                         };
