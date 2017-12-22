@@ -131,7 +131,11 @@ class MigrationJob implements Runnable {
         return metadata.originalFileLocation() != null && !metadata.originalFileLocation().isEmpty();
     }
 
-    private void migrateCompleteDownloads(InternalMigrationStatus migrationStatus, SqlDatabaseWrapper database, MigrationExtractor migrationExtractor, DownloadsPersistence downloadsPersistence, InternalFilePersistence internalFilePersistence) {
+    private void migrateCompleteDownloads(InternalMigrationStatus migrationStatus,
+                                          SqlDatabaseWrapper database,
+                                          MigrationExtractor migrationExtractor,
+                                          DownloadsPersistence downloadsPersistence,
+                                          InternalFilePersistence internalFilePersistence) {
         List<Migration> migrations = migrationExtractor.extractMigrations();
         Log.d(TAG, "migrations are all EXTRACTED, time is " + System.nanoTime());
 
