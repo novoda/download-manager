@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.content.Context;
 import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 
 public class NotificationConfig<T> implements NotificationChannelCreator, NotificationCreator<T> {
@@ -43,17 +44,10 @@ public class NotificationConfig<T> implements NotificationChannelCreator, Notifi
         };
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @Override
-    public Optional<NotificationChannel> createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return Optional.of(new NotificationChannel(channelId, userFacingChannelDescription, importance));
-        }
-        return Optional.absent();
-    }
-
-    @Override
-    public String getNotificationChannelId() {
-        return channelId;
+    public NotificationChannel createNotificationChannel() {
+        return new NotificationChannel(channelId, userFacingChannelDescription, importance);
     }
 
 }

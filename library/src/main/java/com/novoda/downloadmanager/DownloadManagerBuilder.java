@@ -225,10 +225,10 @@ public final class DownloadManagerBuilder {
                 callbackThrottleCreator
         );
 
-        Optional<NotificationChannel> notificationChannel = notificationConfig.createNotificationChannel();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationChannel.isPresent()) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel notificationChannel = notificationConfig.createNotificationChannel();
             NotificationManager notificationManager = (NotificationManager) applicationContext.getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.createNotificationChannel(notificationChannel.get());
+            notificationManager.createNotificationChannel(notificationChannel);
         }
 
         LiteDownloadManagerDownloader downloader = new LiteDownloadManagerDownloader(

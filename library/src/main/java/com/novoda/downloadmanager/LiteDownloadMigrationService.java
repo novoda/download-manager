@@ -1,6 +1,5 @@
 package com.novoda.downloadmanager;
 
-import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -73,17 +72,10 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
     }
 
     private void createNotificationChannel() {
-        Optional<NotificationChannel> notificationChannel = notificationChannelCreator.createNotificationChannel();
-        String channelName = notificationChannelCreator.getNotificationChannelId();
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationChannel.isPresent() && notificationChannelDoesNotExist(channelName)) {
-            notificationManager.createNotificationChannel(notificationChannel.get());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel notificationChannel = notificationChannelCreator.createNotificationChannel();
+            notificationManager.createNotificationChannel(notificationChannel);
         }
-    }
-
-    @TargetApi(Build.VERSION_CODES.O)
-    private boolean notificationChannelDoesNotExist(String channelName) {
-        return notificationManager.getNotificationChannel(channelName) == null;
     }
 
     private final MigrationCallback notificationMigrationCallback = new MigrationCallback() {
