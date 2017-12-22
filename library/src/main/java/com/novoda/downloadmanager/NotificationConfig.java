@@ -49,5 +49,4 @@ public class NotificationConfig<T> implements NotificationMetadata<T> {
     public NotificationChannel createNotificationChannel() {
         return new NotificationChannel(channelId, userFacingChannelDescription, importance);
     }
-
 }
