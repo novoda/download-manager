@@ -239,7 +239,6 @@ public final class DownloadManagerBuilder {
                 downloadsBatchPersistence,
                 downloadsFilePersistence,
                 notificationConfig,
-                notificationConfig,
                 callbacks,
                 callbackThrottleCreator
         );
