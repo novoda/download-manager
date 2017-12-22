@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status;
+
 class MigrationJob implements Runnable {
 
     private static final String TAG = "V1 to V2 migrator";
@@ -41,6 +43,7 @@ class MigrationJob implements Runnable {
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
 
+        PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database);
         MigrationExtractor migrationExtractor = new MigrationExtractor(database);
         DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
         InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
@@ -53,6 +56,85 @@ class MigrationJob implements Runnable {
         onUpdate(migrationStatus);
 
         Log.d(TAG, "about to extract migrations, time is " + System.nanoTime());
+
+        migratePartialDownloads(database, partialDownloadMigrationExtractor, downloadsPersistence);
+        migrateCompleteDownloads(migrationStatus, database, migrationExtractor, downloadsPersistence, internalFilePersistence);
+    }
+
+    private void onUpdate(MigrationStatus migrationStatus) {
+        for (MigrationCallback migrationCallback : migrationCallbacks) {
+            migrationCallback.onUpdate(migrationStatus);
+        }
+    }
+
+    private void migratePartialDownloads(SqlDatabaseWrapper database, PartialDownloadMigrationExtractor partialDownloadMigrationExtractor, DownloadsPersistence downloadsPersistence) {
+        List<Migration> partialMigrations = partialDownloadMigrationExtractor.extractMigrations();
+        for (Migration partialMigration : partialMigrations) {
+            downloadsPersistence.startTransaction();
+            database.startTransaction();
+
+            migrateV1DataToV2Database(downloadsPersistence, partialMigration);
+            deleteFrom(database, partialMigration);
+
+            downloadsPersistence.transactionSuccess();
+            downloadsPersistence.endTransaction();
+            database.setTransactionSuccessful();
+            database.endTransaction();
+        }
+        Log.d(TAG, "partial migrations are all EXTRACTED, time is " + System.nanoTime());
+    }
+
+    private void migrateV1DataToV2Database(DownloadsPersistence downloadsPersistence, Migration migration) {
+        Batch batch = migration.batch();
+
+        DownloadBatchTitle downloadBatchTitle = new LiteDownloadBatchTitle(batch.getTitle());
+
+        Status downloadBatchStatus = migration.hasDownloadedBatch() ? Status.DOWNLOADED : Status.QUEUED;
+
+        DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted(downloadBatchTitle, batch.getDownloadBatchId(), downloadBatchStatus);
+        downloadsPersistence.persistBatch(persistedBatch);
+
+        for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
+            String url = fileMetadata.uri();
+
+            FileName fileName = LiteFileName.from(batch, url);
+            FilePath filePath = FilePathCreator.create(fileName.name());
+            DownloadFileId downloadFileId = DownloadFileId.from(batch);
+            DownloadsFilePersisted persistedFile = new LiteDownloadsFilePersisted(
+                    batch.getDownloadBatchId(),
+                    downloadFileId,
+                    fileName,
+                    filePath,
+                    fileMetadata.fileSize().totalSize(),
+                    url,
+                    FilePersistenceType.INTERNAL
+            );
+            downloadsPersistence.persistFile(persistedFile);
+        }
+    }
+
+    // TODO: See https://github.com/novoda/download-manager/issues/270
+    private void deleteFrom(SqlDatabaseWrapper database, Migration migration) {
+        Batch batch = migration.batch();
+        Log.d(TAG, "about to delete the batch: " + batch.getDownloadBatchId().stringValue() + ", time is " + System.nanoTime());
+        database.delete(TABLE_BATCHES, WHERE_CLAUSE_ID, batch.getDownloadBatchId().stringValue());
+        for (Migration.FileMetadata metadata : migration.getFileMetadata()) {
+            if (hasValidFileLocation(metadata)) {
+                File file = new File(metadata.originalFileLocation());
+                file.delete();
+            }
+        }
+    }
+
+    private boolean hasValidFileLocation(Migration.FileMetadata metadata) {
+        return metadata.originalFileLocation() != null && !metadata.originalFileLocation().isEmpty();
+    }
+
+    private void migrateCompleteDownloads(InternalMigrationStatus migrationStatus,
+                                          SqlDatabaseWrapper database,
+                                          MigrationExtractor migrationExtractor,
+                                          DownloadsPersistence downloadsPersistence,
+                                          InternalFilePersistence internalFilePersistence) {
         List<Migration> migrations = migrationExtractor.extractMigrations();
         Log.d(TAG, "migrations are all EXTRACTED, time is " + System.nanoTime());
 
@@ -90,12 +172,6 @@ class MigrationJob implements Runnable {
         onUpdate(migrationStatus);
     }
 
-    private void onUpdate(MigrationStatus migrationStatus) {
-        for (MigrationCallback migrationCallback : migrationCallbacks) {
-            migrationCallback.onUpdate(migrationStatus);
-        }
-    }
-
     private void migrateV1FilesToV2Location(InternalFilePersistence internalFilePersistence, Migration migration) {
         Batch batch = migration.batch();
         for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
@@ -131,43 +207,6 @@ class MigrationJob implements Runnable {
                     e.printStackTrace();
                 }
             }
-        }
-    }
-
-    private void migrateV1DataToV2Database(DownloadsPersistence downloadsPersistence, Migration migration) {
-        Batch batch = migration.batch();
-
-        DownloadBatchTitle downloadBatchTitle = new LiteDownloadBatchTitle(batch.getTitle());
-        DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted(downloadBatchTitle, batch.getDownloadBatchId(), DownloadBatchStatus.Status.DOWNLOADED);
-        downloadsPersistence.persistBatch(persistedBatch);
-
-        for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
-            String url = fileMetadata.uri();
-
-            FileName fileName = LiteFileName.from(batch, url);
-            FilePath filePath = FilePathCreator.create(fileName.name());
-            DownloadFileId downloadFileId = DownloadFileId.from(batch);
-            DownloadsFilePersisted persistedFile = new LiteDownloadsFilePersisted(
-                    batch.getDownloadBatchId(),
-                    downloadFileId,
-                    fileName,
-                    filePath,
-                    fileMetadata.fileSize().totalSize(),
-                    url,
-                    FilePersistenceType.INTERNAL
-            );
-            downloadsPersistence.persistFile(persistedFile);
-        }
-    }
-
-    // TODO: See https://github.com/novoda/download-manager/issues/270
-    private void deleteFrom(SqlDatabaseWrapper database, Migration migration) {
-        Batch batch = migration.batch();
-        Log.d(TAG, "about to delete the batch: " + batch.getDownloadBatchId().stringValue() + ", time is " + System.nanoTime());
-        database.delete(TABLE_BATCHES, WHERE_CLAUSE_ID, batch.getDownloadBatchId().stringValue());
-        for (Migration.FileMetadata metadata : migration.getFileMetadata()) {
-            File file = new File(metadata.originalFileLocation());
-            file.delete();
         }
     }
 
