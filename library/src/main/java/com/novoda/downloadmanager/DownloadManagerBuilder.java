@@ -144,8 +144,8 @@ public final class DownloadManagerBuilder {
         return this;
     }
 
-    public DownloadManagerBuilder withNotification(LiteNoticationCreator<DownloadBatchStatus> liteNoticationCreator) {
-        this.notificationCreator = liteNoticationCreator;
+    public DownloadManagerBuilder withNotification(NotificationCreator<DownloadBatchStatus> notificationCreator) {
+        this.notificationCreator = notificationCreator;
         return this;
     }
 

@@ -7,7 +7,7 @@ import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 
-class LiteNoticationCreator<T> implements NotificationCreator<T> {
+class LiteNotificationCreator<T> implements NotificationCreator<T> {
 
     private final Context applicationContext;
     private final String channelId;
@@ -16,11 +16,11 @@ class LiteNoticationCreator<T> implements NotificationCreator<T> {
     @Importance
     private final int importance;
 
-    LiteNoticationCreator(Context context,
-                          String channelId,
-                          String userFacingChannelDescription,
-                          NotificationCustomizer<T> customizer,
-                          @Importance int importance) {
+    LiteNotificationCreator(Context context,
+                            String channelId,
+                            String userFacingChannelDescription,
+                            NotificationCustomizer<T> customizer,
+                            @Importance int importance) {
         this.applicationContext = context.getApplicationContext();
         this.channelId = channelId;
         this.userFacingChannelDescription = userFacingChannelDescription;

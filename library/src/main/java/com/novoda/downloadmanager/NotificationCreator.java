@@ -17,7 +17,7 @@ public interface NotificationCreator<T> {
         }
 
         public static <T> NotificationCreator<T> build(Context context, String channelId, String userFacingChannelDescription, NotificationCustomizer<T> customizer, @Importance int importance) {
-            return new LiteNoticationCreator<>(context, channelId, userFacingChannelDescription, customizer, importance);
+            return new LiteNotificationCreator<>(context, channelId, userFacingChannelDescription, customizer, importance);
         }
     }
 }
