@@ -7,28 +7,24 @@ import android.support.v4.app.NotificationManagerCompat;
 
 import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.DownloadBatchTitle;
-import com.novoda.downloadmanager.NotificationConfig;
+import com.novoda.downloadmanager.NotificationCreator;
 import com.novoda.downloadmanager.NotificationCustomizer;
 import com.novoda.notils.logger.simple.Log;
 
-public final class CustomNotificationConfigFactory {
+public final class CustomNotificationCreatorFactory {
 
     private static final boolean NOT_INDETERMINATE = false;
 
-    private CustomNotificationConfigFactory() {
+    private CustomNotificationCreatorFactory() {
         // uses static factory methods
     }
 
-    public static NotificationConfig<DownloadBatchStatus> createDownloadNotificationConfig(Context context, String channelId, String channelDescription, final int iconDrawable) {
-
-        NotificationCustomizer<DownloadBatchStatus> notificationCustomizer = new DownloadNotificationCustomizer(iconDrawable);
-        return new NotificationConfig<>(
-                context,
-                channelId,
-                channelDescription,
-                notificationCustomizer,
-                NotificationManagerCompat.IMPORTANCE_LOW
-        );
+    public static NotificationCreator<DownloadBatchStatus> createDownloadNotificationCreator(Context context,
+                                                                                             String channelId,
+                                                                                             String channelDescription,
+                                                                                             final int iconDrawable) {
+        NotificationCustomizer<DownloadBatchStatus> customizer = new DownloadNotificationCustomizer(iconDrawable);
+        return new NotificationCreator<>(context, channelId, channelDescription, NotificationManagerCompat.IMPORTANCE_LOW, customizer);
     }
 
     private static class DownloadNotificationCustomizer implements NotificationCustomizer<DownloadBatchStatus> {
@@ -55,7 +51,6 @@ public final class CustomNotificationConfigFactory {
                     .setContentTitle(title)
                     .setContentText(content)
                     .build();
-
         }
     }
 }

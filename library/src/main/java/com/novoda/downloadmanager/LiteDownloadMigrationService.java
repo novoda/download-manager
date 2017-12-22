@@ -23,9 +23,8 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
     private static ExecutorService executor;
 
     private IBinder binder;
-    private NotificationChannelCreator notificationChannelCreator;
-    private NotificationCreator<MigrationStatus> notificationCreator;
     private NotificationManager notificationManager;
+    private NotificationCreator<MigrationStatus> notificationCreator;
 
     @Override
     public void onCreate() {
@@ -53,11 +52,6 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
     }
 
     @Override
-    public void setNotificationChannelCreator(NotificationChannelCreator notificationChannelCreator) {
-        this.notificationChannelCreator = notificationChannelCreator;
-    }
-
-    @Override
     public void setNotificationCreator(NotificationCreator<MigrationStatus> notificationCreator) {
         this.notificationCreator = notificationCreator;
     }
@@ -73,7 +67,7 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel notificationChannel = notificationChannelCreator.createNotificationChannel();
+            NotificationChannel notificationChannel = notificationCreator.createNotificationChannel();
             notificationManager.createNotificationChannel(notificationChannel);
         }
     }
@@ -100,5 +94,4 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
             notificationManager.notify(notificationInformation.getId(), notification);
         }
     };
-
 }

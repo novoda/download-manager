@@ -16,7 +16,6 @@ class LiteDownloadManagerDownloader {
     private final FileOperations fileOperations;
     private final DownloadsBatchPersistence downloadsBatchPersistence;
     private final DownloadsFilePersistence downloadsFilePersistence;
-    private final NotificationChannelCreator notificationChannelCreator;
     private final NotificationCreator<DownloadBatchStatus> notificationCreator;
     private final List<DownloadBatchCallback> callbacks;
     private final CallbackThrottleCreator callbackThrottleCreator;
@@ -29,7 +28,6 @@ class LiteDownloadManagerDownloader {
                                   FileOperations fileOperations,
                                   DownloadsBatchPersistence downloadsBatchPersistence,
                                   DownloadsFilePersistence downloadsFilePersistence,
-                                  NotificationChannelCreator notificationChannelCreator,
                                   NotificationCreator<DownloadBatchStatus> notificationCreator,
                                   List<DownloadBatchCallback> callbacks,
                                   CallbackThrottleCreator callbackThrottleCreator) {
@@ -39,7 +37,6 @@ class LiteDownloadManagerDownloader {
         this.fileOperations = fileOperations;
         this.downloadsBatchPersistence = downloadsBatchPersistence;
         this.downloadsFilePersistence = downloadsFilePersistence;
-        this.notificationChannelCreator = notificationChannelCreator;
         this.notificationCreator = notificationCreator;
         this.callbacks = callbacks;
         this.callbackThrottleCreator = callbackThrottleCreator;

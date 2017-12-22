@@ -38,7 +38,7 @@ public final class DownloadManagerBuilder {
     private FileDownloader fileDownloader;
     private DownloadService downloadService;
     private DownloadManager downloadManager;
-    private NotificationConfig<DownloadBatchStatus> notificationConfig;
+    private NotificationCreator<DownloadBatchStatus> notificationCreator;
     private ConnectionType connectionTypeAllowed;
     private boolean allowNetworkRecovery;
     private Class<? extends CallbackThrottle> customCallbackThrottle;
@@ -69,12 +69,12 @@ public final class DownloadManagerBuilder {
         FileDownloader fileDownloader = new NetworkFileDownloader(httpClient, requestCreator);
 
         NotificationCustomizer<DownloadBatchStatus> notificationCustomizer = new DownloadNotificationCustomizer(notificationIcon);
-        NotificationConfig<DownloadBatchStatus> notificationConfig = new NotificationConfig<>(
+        NotificationCreator<DownloadBatchStatus> notificationCreator = new NotificationCreator<>(
                 context,
                 context.getResources().getString(R.string.download_notification_channel_name),
                 context.getResources().getString(R.string.download_notification_channel_description),
-                notificationCustomizer,
-                NotificationManagerCompat.IMPORTANCE_LOW
+                NotificationManagerCompat.IMPORTANCE_LOW,
+                notificationCustomizer
         );
 
         ConnectionType connectionTypeAllowed = ConnectionType.ALL;
@@ -89,7 +89,7 @@ public final class DownloadManagerBuilder {
                 downloadsPersistence,
                 fileSizeRequester,
                 fileDownloader,
-                notificationConfig,
+                notificationCreator,
                 connectionTypeAllowed,
                 allowNetworkRecovery,
                 callbackThrottleCreatorType
@@ -102,7 +102,7 @@ public final class DownloadManagerBuilder {
                                    DownloadsPersistence downloadsPersistence,
                                    FileSizeRequester fileSizeRequester,
                                    FileDownloader fileDownloader,
-                                   NotificationConfig<DownloadBatchStatus> notificationConfig,
+                                   NotificationCreator<DownloadBatchStatus> notificationCreator,
                                    ConnectionType connectionTypeAllowed,
                                    boolean allowNetworkRecovery,
                                    CallbackThrottleCreator.Type callbackThrottleCreatorType) {
@@ -112,7 +112,7 @@ public final class DownloadManagerBuilder {
         this.downloadsPersistence = downloadsPersistence;
         this.fileSizeRequester = fileSizeRequester;
         this.fileDownloader = fileDownloader;
-        this.notificationConfig = notificationConfig;
+        this.notificationCreator = notificationCreator;
         this.connectionTypeAllowed = connectionTypeAllowed;
         this.allowNetworkRecovery = allowNetworkRecovery;
         this.callbackThrottleCreatorType = callbackThrottleCreatorType;
@@ -144,8 +144,8 @@ public final class DownloadManagerBuilder {
         return this;
     }
 
-    public DownloadManagerBuilder withNotification(NotificationConfig<DownloadBatchStatus> notificationConfig) {
-        this.notificationConfig = notificationConfig;
+    public DownloadManagerBuilder withNotification(NotificationCreator<DownloadBatchStatus> notificationCreator) {
+        this.notificationCreator = notificationCreator;
         return this;
     }
 
@@ -226,7 +226,7 @@ public final class DownloadManagerBuilder {
         );
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel notificationChannel = notificationConfig.createNotificationChannel();
+            NotificationChannel notificationChannel = notificationCreator.createNotificationChannel();
             NotificationManager notificationManager = (NotificationManager) applicationContext.getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.createNotificationChannel(notificationChannel);
         }
@@ -238,8 +238,7 @@ public final class DownloadManagerBuilder {
                 fileOperations,
                 downloadsBatchPersistence,
                 downloadsFilePersistence,
-                notificationConfig,
-                notificationConfig,
+                notificationCreator,
                 callbacks,
                 callbackThrottleCreator
         );
