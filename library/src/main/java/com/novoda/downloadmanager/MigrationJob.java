@@ -56,7 +56,6 @@ class MigrationJob implements Runnable {
         onUpdate(migrationStatus);
 
         Log.d(TAG, "about to extract migrations, time is " + System.nanoTime());
-        Log.d(TAG, "partial migrations are all EXTRACTED, time is " + System.nanoTime());
 
         migratePartialDownloads(database, partialDownloadMigrationExtractor, downloadsPersistence);
         migrateCompleteDownloads(migrationStatus, database, migrationExtractor, downloadsPersistence, internalFilePersistence);
@@ -83,6 +82,7 @@ class MigrationJob implements Runnable {
             database.setTransactionSuccessful();
             database.endTransaction();
         }
+        Log.d(TAG, "partial migrations are all EXTRACTED, time is " + System.nanoTime());
     }
 
     private void migrateV1DataToV2Database(DownloadsPersistence downloadsPersistence, Migration migration) {
