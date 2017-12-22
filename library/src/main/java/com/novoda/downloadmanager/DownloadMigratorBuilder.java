@@ -46,7 +46,7 @@ public class DownloadMigratorBuilder {
     }
 
     public DownloadMigrator build() {
-        return new LiteDownloadMigrator(applicationContext, handler, notificationConfig, notificationConfig);
+        return new LiteDownloadMigrator(applicationContext, handler, notificationMetadata);
     }
 
     private static class MigrationNotificationCustomizer implements NotificationCustomizer<MigrationStatus> {
