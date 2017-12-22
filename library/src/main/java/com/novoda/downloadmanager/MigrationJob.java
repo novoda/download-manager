@@ -69,13 +69,12 @@ class MigrationJob implements Runnable {
 
     private void migratePartialDownloads(SqlDatabaseWrapper database, PartialDownloadMigrationExtractor partialDownloadMigrationExtractor, DownloadsPersistence downloadsPersistence) {
         List<Migration> partialMigrations = partialDownloadMigrationExtractor.extractMigrations();
-        for (int i = 0; i < partialMigrations.size(); i++) {
+        for (Migration partialMigration : partialMigrations) {
             downloadsPersistence.startTransaction();
             database.startTransaction();
 
-            Migration migration = partialMigrations.get(i);
-            migrateV1DataToV2Database(downloadsPersistence, migration);
-            deleteFrom(database, migration);
+            migrateV1DataToV2Database(downloadsPersistence, partialMigration);
+            deleteFrom(database, partialMigration);
 
             downloadsPersistence.transactionSuccess();
             downloadsPersistence.endTransaction();
