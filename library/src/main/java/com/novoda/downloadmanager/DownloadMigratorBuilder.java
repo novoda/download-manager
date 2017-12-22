@@ -40,7 +40,7 @@ public class DownloadMigratorBuilder {
         this.notificationCreator = notificationCreator;
     }
 
-    public DownloadMigratorBuilder withNotificationMetadata(NotificationCreator<MigrationStatus> notificationCreator) {
+    public DownloadMigratorBuilder withNotification(NotificationCreator<MigrationStatus> notificationCreator) {
         this.notificationCreator = notificationCreator;
         return this;
     }

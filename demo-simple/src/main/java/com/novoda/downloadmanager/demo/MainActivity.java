@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         );
 
         downloadMigrator = DownloadMigratorBuilder.newInstance(this)
-                .withNotificationMetadata(notificationCreator)
+                .withNotification(notificationCreator)
                 .build();
 
         textViewBatch1 = findViewById(R.id.batch_1);
