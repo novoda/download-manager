@@ -12,7 +12,7 @@ public class DownloadMigratorBuilder {
     private final Context applicationContext;
     private final Handler handler;
 
-    private NotificationConfig<MigrationStatus> notificationConfig;
+    private NotificationMetadata<MigrationStatus> notificationMetadata;
 
     public static DownloadMigratorBuilder newInstance(Context context) {
         Context applicationContext = context.getApplicationContext();
@@ -20,7 +20,7 @@ public class DownloadMigratorBuilder {
         String channelId = context.getResources().getString(R.string.migration_notification_channel_name);
         String channelDescription = context.getResources().getString(R.string.migration_notification_channel_description);
         NotificationCustomizer<MigrationStatus> customizer = new MigrationNotificationCustomizer();
-        NotificationConfig<MigrationStatus> defaultNotificationConfig = new NotificationConfig<>(
+        NotificationMetadata<MigrationStatus> defaultNotificationMetadata = new NotificationConfig<>(
                 applicationContext,
                 channelId,
                 channelDescription,
@@ -29,19 +29,19 @@ public class DownloadMigratorBuilder {
         );
 
         Handler handler = new Handler(Looper.getMainLooper());
-        return new DownloadMigratorBuilder(applicationContext, handler, defaultNotificationConfig);
+        return new DownloadMigratorBuilder(applicationContext, handler, defaultNotificationMetadata);
     }
 
     private DownloadMigratorBuilder(Context applicationContext,
                                     Handler handler,
-                                    NotificationConfig<MigrationStatus> notificationConfig) {
+                                    NotificationMetadata<MigrationStatus> notificationMetadata) {
         this.applicationContext = applicationContext;
         this.handler = handler;
-        this.notificationConfig = notificationConfig;
+        this.notificationMetadata = notificationMetadata;
     }
 
-    public DownloadMigratorBuilder withNotificationConfig(NotificationConfig<MigrationStatus> notificationConfig) {
-        this.notificationConfig = notificationConfig;
+    public DownloadMigratorBuilder withNotificationMetadata(NotificationMetadata<MigrationStatus> notificationMetadata) {
+        this.notificationMetadata = notificationMetadata;
         return this;
     }
 
@@ -63,6 +63,5 @@ public class DownloadMigratorBuilder {
                     .setContentText(content)
                     .build();
         }
-
     }
 }
