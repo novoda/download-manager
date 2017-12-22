@@ -20,11 +20,11 @@ import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.DownloadMigrator;
 import com.novoda.downloadmanager.DownloadMigratorBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
-import com.novoda.downloadmanager.NotificationCreator;
 import com.novoda.downloadmanager.LocalFilesDirectory;
 import com.novoda.downloadmanager.LocalFilesDirectoryFactory;
 import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
+import com.novoda.downloadmanager.NotificationCreator;
 import com.novoda.downloadmanager.NotificationCustomizer;
 import com.novoda.notils.logger.simple.Log;
 
@@ -56,7 +56,8 @@ public class MainActivity extends AppCompatActivity {
                 this,
                 "chocolate",
                 "Migration notifications",
-                NotificationManagerCompat.IMPORTANCE_DEFAULT, notificationCustomizer
+                NotificationManagerCompat.IMPORTANCE_DEFAULT,
+                notificationCustomizer
         );
 
         downloadMigrator = DownloadMigratorBuilder.newInstance(this)
