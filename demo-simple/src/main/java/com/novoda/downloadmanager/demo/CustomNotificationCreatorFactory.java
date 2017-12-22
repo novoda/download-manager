@@ -24,7 +24,7 @@ public final class CustomNotificationCreatorFactory {
                                                                                              String channelDescription,
                                                                                              final int iconDrawable) {
         NotificationCustomizer<DownloadBatchStatus> customizer = new DownloadNotificationCustomizer(iconDrawable);
-        return new NotificationCreator<>(context, channelId, channelDescription, customizer, NotificationManagerCompat.IMPORTANCE_LOW);
+        return new NotificationCreator<>(context, channelId, channelDescription, NotificationManagerCompat.IMPORTANCE_LOW, customizer);
     }
 
     private static class DownloadNotificationCustomizer implements NotificationCustomizer<DownloadBatchStatus> {

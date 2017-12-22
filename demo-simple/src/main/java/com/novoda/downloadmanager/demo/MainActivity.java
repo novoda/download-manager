@@ -56,8 +56,7 @@ public class MainActivity extends AppCompatActivity {
                 this,
                 "chocolate",
                 "Migration notifications",
-                notificationCustomizer,
-                NotificationManagerCompat.IMPORTANCE_DEFAULT
+                NotificationManagerCompat.IMPORTANCE_DEFAULT, notificationCustomizer
         );
 
         downloadMigrator = DownloadMigratorBuilder.newInstance(this)

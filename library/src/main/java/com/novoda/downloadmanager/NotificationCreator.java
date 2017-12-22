@@ -19,8 +19,8 @@ public class NotificationCreator<T> {
     public NotificationCreator(Context context,
                                String channelId,
                                String userFacingChannelDescription,
-                               NotificationCustomizer<T> customizer,
-                               @Importance int importance) {
+                               @Importance int importance,
+                               NotificationCustomizer<T> customizer) {
         this.applicationContext = context.getApplicationContext();
         this.channelId = channelId;
         this.userFacingChannelDescription = userFacingChannelDescription;

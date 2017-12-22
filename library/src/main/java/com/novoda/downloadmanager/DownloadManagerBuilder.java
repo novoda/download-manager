@@ -73,8 +73,8 @@ public final class DownloadManagerBuilder {
                 context,
                 context.getResources().getString(R.string.download_notification_channel_name),
                 context.getResources().getString(R.string.download_notification_channel_description),
-                notificationCustomizer,
-                NotificationManagerCompat.IMPORTANCE_LOW
+                NotificationManagerCompat.IMPORTANCE_LOW,
+                notificationCustomizer
         );
 
         ConnectionType connectionTypeAllowed = ConnectionType.ALL;

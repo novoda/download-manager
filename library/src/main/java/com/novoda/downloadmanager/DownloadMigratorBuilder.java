@@ -24,8 +24,8 @@ public class DownloadMigratorBuilder {
                 applicationContext,
                 channelId,
                 channelDescription,
-                customizer,
-                NotificationManagerCompat.IMPORTANCE_LOW
+                NotificationManagerCompat.IMPORTANCE_LOW,
+                customizer
         );
 
         Handler handler = new Handler(Looper.getMainLooper());
