@@ -38,7 +38,7 @@ public final class DownloadManagerBuilder {
     private FileDownloader fileDownloader;
     private DownloadService downloadService;
     private DownloadManager downloadManager;
-    private NotificationMetadata<DownloadBatchStatus> notificationMetadata;
+    private NotificationCreator<DownloadBatchStatus> notificationCreator;
     private ConnectionType connectionTypeAllowed;
     private boolean allowNetworkRecovery;
     private Class<? extends CallbackThrottle> customCallbackThrottle;
@@ -69,7 +69,7 @@ public final class DownloadManagerBuilder {
         FileDownloader fileDownloader = new NetworkFileDownloader(httpClient, requestCreator);
 
         NotificationCustomizer<DownloadBatchStatus> notificationCustomizer = new DownloadNotificationCustomizer(notificationIcon);
-        NotificationMetadata<DownloadBatchStatus> notificationMetadata = NotificationMetadata.Factory.build(
+        NotificationCreator<DownloadBatchStatus> notificationCreator = NotificationCreator.Factory.build(
                 context,
                 context.getResources().getString(R.string.download_notification_channel_name),
                 context.getResources().getString(R.string.download_notification_channel_description),
@@ -89,7 +89,7 @@ public final class DownloadManagerBuilder {
                 downloadsPersistence,
                 fileSizeRequester,
                 fileDownloader,
-                notificationMetadata,
+                notificationCreator,
                 connectionTypeAllowed,
                 allowNetworkRecovery,
                 callbackThrottleCreatorType
@@ -102,7 +102,7 @@ public final class DownloadManagerBuilder {
                                    DownloadsPersistence downloadsPersistence,
                                    FileSizeRequester fileSizeRequester,
                                    FileDownloader fileDownloader,
-                                   NotificationMetadata<DownloadBatchStatus> notificationMetadata,
+                                   NotificationCreator<DownloadBatchStatus> notificationCreator,
                                    ConnectionType connectionTypeAllowed,
                                    boolean allowNetworkRecovery,
                                    CallbackThrottleCreator.Type callbackThrottleCreatorType) {
@@ -112,7 +112,7 @@ public final class DownloadManagerBuilder {
         this.downloadsPersistence = downloadsPersistence;
         this.fileSizeRequester = fileSizeRequester;
         this.fileDownloader = fileDownloader;
-        this.notificationMetadata = notificationMetadata;
+        this.notificationCreator = notificationCreator;
         this.connectionTypeAllowed = connectionTypeAllowed;
         this.allowNetworkRecovery = allowNetworkRecovery;
         this.callbackThrottleCreatorType = callbackThrottleCreatorType;
@@ -144,8 +144,8 @@ public final class DownloadManagerBuilder {
         return this;
     }
 
-    public DownloadManagerBuilder withNotification(NotificationConfig<DownloadBatchStatus> notificationConfig) {
-        this.notificationMetadata = notificationConfig;
+    public DownloadManagerBuilder withNotification(LiteNoticationCreator<DownloadBatchStatus> liteNoticationCreator) {
+        this.notificationCreator = liteNoticationCreator;
         return this;
     }
 
@@ -226,7 +226,7 @@ public final class DownloadManagerBuilder {
         );
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel notificationChannel = notificationMetadata.createNotificationChannel();
+            NotificationChannel notificationChannel = notificationCreator.createNotificationChannel();
             NotificationManager notificationManager = (NotificationManager) applicationContext.getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.createNotificationChannel(notificationChannel);
         }
@@ -238,7 +238,7 @@ public final class DownloadManagerBuilder {
                 fileOperations,
                 downloadsBatchPersistence,
                 downloadsFilePersistence,
-                notificationMetadata,
+                notificationCreator,
                 callbacks,
                 callbackThrottleCreator
         );

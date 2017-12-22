@@ -24,7 +24,7 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
 
     private IBinder binder;
     private NotificationManager notificationManager;
-    private NotificationMetadata<MigrationStatus> notificationMetadata;
+    private NotificationCreator<MigrationStatus> notificationCreator;
 
     @Override
     public void onCreate() {
@@ -52,8 +52,8 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
     }
 
     @Override
-    public void setNotificationMetadata(NotificationMetadata<MigrationStatus> notificationMetadata) {
-        this.notificationMetadata = notificationMetadata;
+    public void setNotificationCreator(NotificationCreator<MigrationStatus> notificationCreator) {
+        this.notificationCreator = notificationCreator;
     }
 
     @Override
@@ -67,7 +67,7 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel notificationChannel = notificationMetadata.createNotificationChannel();
+            NotificationChannel notificationChannel = notificationCreator.createNotificationChannel();
             notificationManager.createNotificationChannel(notificationChannel);
         }
     }
@@ -75,7 +75,7 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
     private final MigrationCallback notificationMigrationCallback = new MigrationCallback() {
         @Override
         public void onUpdate(MigrationStatus migrationStatus) {
-            NotificationInformation notification = notificationMetadata.createNotification(migrationStatus);
+            NotificationInformation notification = notificationCreator.createNotification(migrationStatus);
 
             if (migrationStatus.status() == Status.COMPLETE || migrationStatus.status() == Status.DB_NOT_PRESENT) {
                 stackNotification(notification);

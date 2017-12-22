@@ -12,7 +12,7 @@ public class DownloadMigratorBuilder {
     private final Context applicationContext;
     private final Handler handler;
 
-    private NotificationMetadata<MigrationStatus> notificationMetadata;
+    private NotificationCreator<MigrationStatus> notificationCreator;
 
     public static DownloadMigratorBuilder newInstance(Context context) {
         Context applicationContext = context.getApplicationContext();
@@ -20,7 +20,7 @@ public class DownloadMigratorBuilder {
         String channelId = context.getResources().getString(R.string.migration_notification_channel_name);
         String channelDescription = context.getResources().getString(R.string.migration_notification_channel_description);
         NotificationCustomizer<MigrationStatus> customizer = new MigrationNotificationCustomizer();
-        NotificationMetadata<MigrationStatus> defaultNotificationMetadata = NotificationMetadata.Factory.build(
+        NotificationCreator<MigrationStatus> defaultNotificationCreator = NotificationCreator.Factory.build(
                 applicationContext,
                 channelId,
                 channelDescription,
@@ -29,24 +29,24 @@ public class DownloadMigratorBuilder {
         );
 
         Handler handler = new Handler(Looper.getMainLooper());
-        return new DownloadMigratorBuilder(applicationContext, handler, defaultNotificationMetadata);
+        return new DownloadMigratorBuilder(applicationContext, handler, defaultNotificationCreator);
     }
 
     private DownloadMigratorBuilder(Context applicationContext,
                                     Handler handler,
-                                    NotificationMetadata<MigrationStatus> notificationMetadata) {
+                                    NotificationCreator<MigrationStatus> notificationCreator) {
         this.applicationContext = applicationContext;
         this.handler = handler;
-        this.notificationMetadata = notificationMetadata;
+        this.notificationCreator = notificationCreator;
     }
 
-    public DownloadMigratorBuilder withNotificationMetadata(NotificationMetadata<MigrationStatus> notificationMetadata) {
-        this.notificationMetadata = notificationMetadata;
+    public DownloadMigratorBuilder withNotificationMetadata(NotificationCreator<MigrationStatus> notificationCreator) {
+        this.notificationCreator = notificationCreator;
         return this;
     }
 
     public DownloadMigrator build() {
-        return new LiteDownloadMigrator(applicationContext, handler, notificationMetadata);
+        return new LiteDownloadMigrator(applicationContext, handler, notificationCreator);
     }
 
     private static class MigrationNotificationCustomizer implements NotificationCustomizer<MigrationStatus> {

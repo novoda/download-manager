@@ -2,7 +2,7 @@ package com.novoda.downloadmanager;
 
 interface DownloadMigrationService {
 
-    void setNotificationMetadata(NotificationMetadata<MigrationStatus> notificationMetadata);
+    void setNotificationCreator(NotificationCreator<MigrationStatus> notificationCreator);
 
     void startMigration(MigrationCallback migrationCallback);
 }

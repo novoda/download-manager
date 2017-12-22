@@ -5,7 +5,7 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
-public interface NotificationMetadata<T> {
+public interface NotificationCreator<T> {
     NotificationInformation createNotification(T notificationPayload);
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -16,8 +16,8 @@ public interface NotificationMetadata<T> {
             // Uses static methods
         }
 
-        public static <T> NotificationMetadata<T> build(Context context, String channelId, String userFacingChannelDescription, NotificationCustomizer<T> customizer, @Importance int importance) {
-            return new NotificationConfig<>(context, channelId, userFacingChannelDescription, customizer, importance);
+        public static <T> NotificationCreator<T> build(Context context, String channelId, String userFacingChannelDescription, NotificationCustomizer<T> customizer, @Importance int importance) {
+            return new LiteNoticationCreator<>(context, channelId, userFacingChannelDescription, customizer, importance);
         }
     }
 }

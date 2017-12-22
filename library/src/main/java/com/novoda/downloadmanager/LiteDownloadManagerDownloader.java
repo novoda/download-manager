@@ -16,7 +16,7 @@ class LiteDownloadManagerDownloader {
     private final FileOperations fileOperations;
     private final DownloadsBatchPersistence downloadsBatchPersistence;
     private final DownloadsFilePersistence downloadsFilePersistence;
-    private final NotificationMetadata<DownloadBatchStatus> notificationMetadata;
+    private final NotificationCreator<DownloadBatchStatus> notificationCreator;
     private final List<DownloadBatchCallback> callbacks;
     private final CallbackThrottleCreator callbackThrottleCreator;
 
@@ -28,7 +28,7 @@ class LiteDownloadManagerDownloader {
                                   FileOperations fileOperations,
                                   DownloadsBatchPersistence downloadsBatchPersistence,
                                   DownloadsFilePersistence downloadsFilePersistence,
-                                  NotificationMetadata<DownloadBatchStatus> notificationMetadata,
+                                  NotificationCreator<DownloadBatchStatus> notificationCreator,
                                   List<DownloadBatchCallback> callbacks,
                                   CallbackThrottleCreator callbackThrottleCreator) {
         this.waitForDownloadService = waitForDownloadService;
@@ -37,7 +37,7 @@ class LiteDownloadManagerDownloader {
         this.fileOperations = fileOperations;
         this.downloadsBatchPersistence = downloadsBatchPersistence;
         this.downloadsFilePersistence = downloadsFilePersistence;
-        this.notificationMetadata = notificationMetadata;
+        this.notificationCreator = notificationCreator;
         this.callbacks = callbacks;
         this.callbackThrottleCreator = callbackThrottleCreator;
     }
@@ -125,7 +125,7 @@ class LiteDownloadManagerDownloader {
     }
 
     private void updateNotification(DownloadBatchStatus liteDownloadBatchStatus, DownloadService downloadService) {
-        NotificationInformation notificationInformation = notificationMetadata.createNotification(liteDownloadBatchStatus);
+        NotificationInformation notificationInformation = notificationCreator.createNotification(liteDownloadBatchStatus);
 
         if (liteDownloadBatchStatus.status() == DELETION) {
             downloadService.dismissNotification();

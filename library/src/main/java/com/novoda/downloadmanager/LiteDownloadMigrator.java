@@ -11,14 +11,14 @@ class LiteDownloadMigrator implements DownloadMigrator {
 
     private final Context applicationContext;
     private final Handler handler;
-    private final NotificationMetadata<MigrationStatus> notificationMetadata;
+    private final NotificationCreator<MigrationStatus> notificationCreator;
 
     LiteDownloadMigrator(Context context,
                          Handler handler,
-                         NotificationMetadata<MigrationStatus> notificationMetadata) {
+                         NotificationCreator<MigrationStatus> notificationCreator) {
         this.applicationContext = context.getApplicationContext();
         this.handler = handler;
-        this.notificationMetadata = notificationMetadata;
+        this.notificationCreator = notificationCreator;
     }
 
     @Override
@@ -27,7 +27,7 @@ class LiteDownloadMigrator implements DownloadMigrator {
             @Override
             public void onServiceConnected(ComponentName name, IBinder binder) {
                 DownloadMigrationService migrationService = ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) binder).getService();
-                migrationService.setNotificationMetadata(notificationMetadata);
+                migrationService.setNotificationCreator(notificationCreator);
 
                 MigrationCallback mainThreadReportingMigrationCallback = new MigrationCallback() {
                     @Override
