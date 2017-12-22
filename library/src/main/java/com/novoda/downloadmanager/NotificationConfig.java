@@ -7,7 +7,7 @@ import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 
-public class NotificationConfig<T> implements NotificationChannelCreator, NotificationCreator<T> {
+public class NotificationConfig<T> implements NotificationMetadata<T> {
 
     private final Context applicationContext;
     private final String channelId;
