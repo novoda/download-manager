@@ -20,12 +20,12 @@ import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.DownloadMigrator;
 import com.novoda.downloadmanager.DownloadMigratorBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
+import com.novoda.downloadmanager.NotificationCreator;
 import com.novoda.downloadmanager.LocalFilesDirectory;
 import com.novoda.downloadmanager.LocalFilesDirectoryFactory;
 import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
 import com.novoda.downloadmanager.NotificationCustomizer;
-import com.novoda.downloadmanager.NotificationCreator;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
 
         NotificationCustomizer<MigrationStatus> notificationCustomizer = new MigrationNotificationCustomizer();
 
-        NotificationCreator<MigrationStatus> notificationCreator = NotificationCreator.Factory.build(
+        NotificationCreator<MigrationStatus> notificationCreator = new NotificationCreator<>(
                 this,
                 "chocolate",
                 "Migration notifications",

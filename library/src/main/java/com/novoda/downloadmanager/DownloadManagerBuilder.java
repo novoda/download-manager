@@ -69,7 +69,7 @@ public final class DownloadManagerBuilder {
         FileDownloader fileDownloader = new NetworkFileDownloader(httpClient, requestCreator);
 
         NotificationCustomizer<DownloadBatchStatus> notificationCustomizer = new DownloadNotificationCustomizer(notificationIcon);
-        NotificationCreator<DownloadBatchStatus> notificationCreator = NotificationCreator.Factory.build(
+        NotificationCreator<DownloadBatchStatus> notificationCreator = new NotificationCreator<>(
                 context,
                 context.getResources().getString(R.string.download_notification_channel_name),
                 context.getResources().getString(R.string.download_notification_channel_description),
