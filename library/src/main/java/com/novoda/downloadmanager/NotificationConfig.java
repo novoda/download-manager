@@ -13,13 +13,18 @@ public class NotificationConfig<T> implements NotificationChannelCreator, Notifi
     private final String channelId;
     private final String userFacingChannelDescription;
     private final NotificationCustomizer<T> notificationCustomizer;
+    @Importance
     private final int importance;
 
-    public NotificationConfig(Context context, String channelId, String userFacingChannelDescription, NotificationCustomizer<T> customiser, int importance) {
+    public NotificationConfig(Context context,
+                              String channelId,
+                              String userFacingChannelDescription,
+                              NotificationCustomizer<T> customizer,
+                              @Importance int importance) {
         this.applicationContext = context.getApplicationContext();
         this.channelId = channelId;
         this.userFacingChannelDescription = userFacingChannelDescription;
-        this.notificationCustomizer = customiser;
+        this.notificationCustomizer = customizer;
         this.importance = importance;
     }
 
@@ -44,4 +49,5 @@ public class NotificationConfig<T> implements NotificationChannelCreator, Notifi
     public NotificationChannel createNotificationChannel() {
         return new NotificationChannel(channelId, userFacingChannelDescription, importance);
     }
+
 }

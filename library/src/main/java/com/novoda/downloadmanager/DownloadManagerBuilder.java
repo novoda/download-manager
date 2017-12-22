@@ -68,28 +68,7 @@ public final class DownloadManagerBuilder {
         FileSizeRequester fileSizeRequester = new NetworkFileSizeRequester(httpClient, requestCreator);
         FileDownloader fileDownloader = new NetworkFileDownloader(httpClient, requestCreator);
 
-        NotificationCustomizer<DownloadBatchStatus> notificationCustomizer = new NotificationCustomizer<DownloadBatchStatus>() {
-
-            private static final boolean NOT_INDETERMINATE = false;
-
-            @Override
-            public Notification customNotificationFrom(NotificationCompat.Builder builder, DownloadBatchStatus payload) {
-                DownloadBatchTitle downloadBatchTitle = payload.getDownloadBatchTitle();
-                int percentageDownloaded = payload.percentageDownloaded();
-                int bytesFileSize = (int) payload.bytesTotalSize();
-                int bytesDownloaded = (int) payload.bytesDownloaded();
-                String title = downloadBatchTitle.asString();
-                String content = percentageDownloaded + "% downloaded";
-
-                return builder
-                        .setProgress(bytesFileSize, bytesDownloaded, NOT_INDETERMINATE)
-                        .setSmallIcon(notificationIcon)
-                        .setContentTitle(title)
-                        .setContentText(content)
-                        .build();
-
-            }
-        };
+        NotificationCustomizer<DownloadBatchStatus> notificationCustomizer = new DownloadNotificationCustomizer(notificationIcon);
         NotificationConfig<DownloadBatchStatus> notificationConfig = new NotificationConfig<>(
                 context,
                 context.getResources().getString(R.string.download_notification_channel_name),
@@ -291,6 +270,34 @@ public final class DownloadManagerBuilder {
                 return CallbackThrottleCreator.ByCustomThrottle(customCallbackThrottle);
             default:
                 throw new IllegalStateException("callbackThrottle type " + callbackThrottleType + " not implemented yet");
+        }
+    }
+
+    private static class DownloadNotificationCustomizer implements NotificationCustomizer<DownloadBatchStatus> {
+
+        private static final boolean NOT_INDETERMINATE = false;
+        private final int notificationIcon;
+
+        DownloadNotificationCustomizer(int notificationIcon) {
+            this.notificationIcon = notificationIcon;
+        }
+
+        @Override
+        public Notification customNotificationFrom(NotificationCompat.Builder builder, DownloadBatchStatus payload) {
+            DownloadBatchTitle downloadBatchTitle = payload.getDownloadBatchTitle();
+            int percentageDownloaded = payload.percentageDownloaded();
+            int bytesFileSize = (int) payload.bytesTotalSize();
+            int bytesDownloaded = (int) payload.bytesDownloaded();
+            String title = downloadBatchTitle.asString();
+            String content = percentageDownloaded + "% downloaded";
+
+            return builder
+                    .setProgress(bytesFileSize, bytesDownloaded, NOT_INDETERMINATE)
+                    .setSmallIcon(notificationIcon)
+                    .setContentTitle(title)
+                    .setContentText(content)
+                    .build();
+
         }
     }
 }
