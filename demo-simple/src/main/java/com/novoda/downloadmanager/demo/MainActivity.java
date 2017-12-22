@@ -1,7 +1,10 @@
 package com.novoda.downloadmanager.demo;
 
+import android.app.Notification;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -21,6 +24,8 @@ import com.novoda.downloadmanager.LocalFilesDirectory;
 import com.novoda.downloadmanager.LocalFilesDirectoryFactory;
 import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
+import com.novoda.downloadmanager.NotificationConfig;
+import com.novoda.downloadmanager.NotificationCustomizer;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
@@ -31,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static final DownloadBatchId BATCH_ID_1 = DownloadBatchIdCreator.createFrom("batch_id_1");
     private static final DownloadBatchId BATCH_ID_2 = DownloadBatchIdCreator.createFrom("batch_id_2");
-
     private TextView databaseCloningUpdates;
     private TextView databaseMigrationUpdates;
     private TextView textViewBatch1;
@@ -46,7 +50,18 @@ public class MainActivity extends AppCompatActivity {
 
         Log.setShowLogs(true);
 
+        NotificationCustomizer<MigrationStatus> notificationCustomizer = new MigrationNotificationCustomizer();
+
+        NotificationConfig<MigrationStatus> notificationConfig = new NotificationConfig<>(
+                this,
+                "chocolate",
+                "Migration notifications",
+                notificationCustomizer,
+                NotificationManagerCompat.IMPORTANCE_DEFAULT
+        );
+
         downloadMigrator = DownloadMigratorBuilder.newInstance(this)
+                .withNotificationConfig(notificationConfig)
                 .build();
 
         textViewBatch1 = findViewById(R.id.batch_1);
@@ -206,4 +221,15 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private static class MigrationNotificationCustomizer implements NotificationCustomizer<MigrationStatus> {
+        @Override
+        public Notification customNotificationFrom(NotificationCompat.Builder builder, MigrationStatus payload) {
+            return builder
+                    .setProgress(payload.totalNumberOfBatchesToMigrate(), payload.numberOfMigratedBatches(), false)
+                    .setSmallIcon(android.R.drawable.ic_lock_power_off)
+                    .setContentTitle(payload.status().toRawValue())
+                    .setContentText(payload.percentageMigrated() + "%")
+                    .build();
+        }
+    }
 }

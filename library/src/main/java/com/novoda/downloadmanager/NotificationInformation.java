@@ -2,7 +2,7 @@ package com.novoda.downloadmanager;
 
 import android.app.Notification;
 
-public interface NotificationInformation {
+interface NotificationInformation {
 
     int getId();
 

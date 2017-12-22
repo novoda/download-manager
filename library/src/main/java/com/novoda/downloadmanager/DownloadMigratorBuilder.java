@@ -1,45 +1,68 @@
 package com.novoda.downloadmanager;
 
+import android.app.Notification;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 
 public class DownloadMigratorBuilder {
 
     private final Context applicationContext;
     private final Handler handler;
-    private NotificationChannelCreator notificationChannelCreator;
-    private NotificationCreator<MigrationStatus> notificationCreator;
+
+    private NotificationConfig<MigrationStatus> notificationConfig;
 
     public static DownloadMigratorBuilder newInstance(Context context) {
         Context applicationContext = context.getApplicationContext();
-        NotificationChannelCreator notificationChannelCreator = new MigrationNotificationChannelCreator(applicationContext.getResources());
-        NotificationCreator<MigrationStatus> notificationCreator = new MigrationNotification(applicationContext, android.R.drawable.ic_menu_gallery);
+
+        String channelId = context.getResources().getString(R.string.migration_notification_channel_name);
+        String channelDescription = context.getResources().getString(R.string.migration_notification_channel_description);
+        NotificationCustomizer<MigrationStatus> customizer = new MigrationNotificationCustomizer();
+        NotificationConfig<MigrationStatus> defaultNotificationConfig = new NotificationConfig<>(
+                applicationContext,
+                channelId,
+                channelDescription,
+                customizer,
+                NotificationManagerCompat.IMPORTANCE_LOW
+        );
+
         Handler handler = new Handler(Looper.getMainLooper());
-        return new DownloadMigratorBuilder(applicationContext, handler, notificationChannelCreator, notificationCreator);
+        return new DownloadMigratorBuilder(applicationContext, handler, defaultNotificationConfig);
     }
 
     private DownloadMigratorBuilder(Context applicationContext,
                                     Handler handler,
-                                    NotificationChannelCreator notificationChannelCreator,
-                                    NotificationCreator<MigrationStatus> notificationCreator) {
+                                    NotificationConfig<MigrationStatus> notificationConfig) {
         this.applicationContext = applicationContext;
         this.handler = handler;
-        this.notificationChannelCreator = notificationChannelCreator;
-        this.notificationCreator = notificationCreator;
+        this.notificationConfig = notificationConfig;
     }
 
-    public DownloadMigratorBuilder withNotificationChannelCreator(NotificationChannelCreator notificationChannelCreator) {
-        this.notificationChannelCreator = notificationChannelCreator;
-        return this;
-    }
-
-    public DownloadMigratorBuilder withNotificationCreator(NotificationCreator<MigrationStatus> notificationCreator) {
-        this.notificationCreator = notificationCreator;
+    public DownloadMigratorBuilder withNotificationConfig(NotificationConfig<MigrationStatus> notificationConfig) {
+        this.notificationConfig = notificationConfig;
         return this;
     }
 
     public DownloadMigrator build() {
-        return new LiteDownloadMigrator(applicationContext, handler, notificationChannelCreator, notificationCreator);
+        return new LiteDownloadMigrator(applicationContext, handler, notificationConfig, notificationConfig);
+    }
+
+    private static class MigrationNotificationCustomizer implements NotificationCustomizer<MigrationStatus> {
+        private static final int MAX_PROGRESS = 100;
+
+        @Override
+        public Notification customNotificationFrom(NotificationCompat.Builder builder, MigrationStatus payload) {
+            String title = payload.status().toRawValue();
+            String content = payload.percentageMigrated() + "% migrated";
+            return builder
+                    .setProgress(MAX_PROGRESS, payload.percentageMigrated(), false)
+                    .setSmallIcon(android.R.drawable.ic_menu_gallery)
+                    .setContentTitle(title)
+                    .setContentText(content)
+                    .build();
+        }
+
     }
 }
