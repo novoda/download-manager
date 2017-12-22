@@ -24,8 +24,8 @@ import com.novoda.downloadmanager.LocalFilesDirectory;
 import com.novoda.downloadmanager.LocalFilesDirectoryFactory;
 import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
-import com.novoda.downloadmanager.NotificationConfig;
 import com.novoda.downloadmanager.NotificationCustomizer;
+import com.novoda.downloadmanager.NotificationMetadata;
 import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
 
         NotificationCustomizer<MigrationStatus> notificationCustomizer = new MigrationNotificationCustomizer();
 
-        NotificationConfig<MigrationStatus> notificationConfig = new NotificationConfig<>(
+        NotificationMetadata<MigrationStatus> notificationMetadata = NotificationMetadata.Factory.build(
                 this,
                 "chocolate",
                 "Migration notifications",
@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         );
 
         downloadMigrator = DownloadMigratorBuilder.newInstance(this)
-                .withNotificationMetadata(notificationConfig)
+                .withNotificationMetadata(notificationMetadata)
                 .build();
 
         textViewBatch1 = findViewById(R.id.batch_1);

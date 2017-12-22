@@ -69,7 +69,7 @@ public final class DownloadManagerBuilder {
         FileDownloader fileDownloader = new NetworkFileDownloader(httpClient, requestCreator);
 
         NotificationCustomizer<DownloadBatchStatus> notificationCustomizer = new DownloadNotificationCustomizer(notificationIcon);
-        NotificationConfig<DownloadBatchStatus> notificationConfig = new NotificationConfig<>(
+        NotificationMetadata<DownloadBatchStatus> notificationMetadata = NotificationMetadata.Factory.build(
                 context,
                 context.getResources().getString(R.string.download_notification_channel_name),
                 context.getResources().getString(R.string.download_notification_channel_description),
@@ -89,7 +89,7 @@ public final class DownloadManagerBuilder {
                 downloadsPersistence,
                 fileSizeRequester,
                 fileDownloader,
-                notificationConfig,
+                notificationMetadata,
                 connectionTypeAllowed,
                 allowNetworkRecovery,
                 callbackThrottleCreatorType
@@ -102,7 +102,7 @@ public final class DownloadManagerBuilder {
                                    DownloadsPersistence downloadsPersistence,
                                    FileSizeRequester fileSizeRequester,
                                    FileDownloader fileDownloader,
-                                   NotificationConfig<DownloadBatchStatus> notificationMetadata,
+                                   NotificationMetadata<DownloadBatchStatus> notificationMetadata,
                                    ConnectionType connectionTypeAllowed,
                                    boolean allowNetworkRecovery,
                                    CallbackThrottleCreator.Type callbackThrottleCreatorType) {
