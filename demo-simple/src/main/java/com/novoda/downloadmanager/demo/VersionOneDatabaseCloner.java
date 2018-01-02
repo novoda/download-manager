@@ -68,8 +68,7 @@ class VersionOneDatabaseCloner {
         boolean parentPathDoesNotExist = !outputFile.getParentFile().exists();
         if (parentPathDoesNotExist) {
             Log.w(String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
-            outputFile.getParentFile().mkdirs();
-            parentPathDoesNotExist = !outputFile.getParentFile().exists();
+            parentPathDoesNotExist = !outputFile.getParentFile().mkdirs();
         }
 
         if (parentPathDoesNotExist) {
@@ -78,8 +77,8 @@ class VersionOneDatabaseCloner {
     }
 
     private void copyAssetToFile(String assetName, File outputFile) {
-        InputStream inputStream;
-        OutputStream myOutput;
+        InputStream inputStream = null;
+        OutputStream myOutput = null;
         int length;
         try {
             inputStream = assetManager.open(assetName);
@@ -87,14 +86,24 @@ class VersionOneDatabaseCloner {
             while ((length = inputStream.read(BUFFER)) > 0) {
                 myOutput.write(BUFFER, 0, length);
             }
-            myOutput.close();
-            myOutput.flush();
-            inputStream.close();
-
             Log.d(getClass().getSimpleName(), "Copied asset: " + assetName);
         } catch (IOException e) {
             e.printStackTrace();
             Log.e("Failed to copy asset: " + assetName, e);
+        } finally {
+            try {
+                if (myOutput != null) {
+                    myOutput.close();
+                    myOutput.flush();
+                }
+
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.e("Failed to close streams.", e);
+            }
         }
     }
 
