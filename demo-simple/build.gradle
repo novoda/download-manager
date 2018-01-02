@@ -14,8 +14,9 @@ android {
     }
 
     lintOptions {
-        abortOnError false
-        lintConfig file("$rootProject.projectDir/team-props/lint-rules/config.xml")
+        lintConfig teamPropsFile('static-analysis/lint-config.xml')
+        abortOnError true
+        warningsAsErrors true
     }
 
     buildTypes {
