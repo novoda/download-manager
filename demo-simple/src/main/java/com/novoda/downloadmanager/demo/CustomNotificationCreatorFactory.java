@@ -30,7 +30,7 @@ public final class CustomNotificationCreatorFactory {
     private static final class DownloadNotificationCustomizer implements NotificationCustomizer<DownloadBatchStatus> {
         private final int iconDrawable;
 
-        private DownloadNotificationCustomizer(int iconDrawable) {
+        DownloadNotificationCustomizer(int iconDrawable) {
             this.iconDrawable = iconDrawable;
         }
 

@@ -88,7 +88,6 @@ class VersionOneDatabaseCloner {
             }
             Log.d(getClass().getSimpleName(), "Copied asset: " + assetName);
         } catch (IOException e) {
-            e.printStackTrace();
             Log.e("Failed to copy asset: " + assetName, e);
         } finally {
             try {
@@ -101,7 +100,6 @@ class VersionOneDatabaseCloner {
                     inputStream.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
                 Log.e("Failed to close streams.", e);
             }
         }

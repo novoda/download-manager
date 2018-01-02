@@ -13,7 +13,7 @@ import com.novoda.notils.logger.simple.Log;
 // Must be public
 public class CustomFilePersistence implements FilePersistence {
 
-    private int currentSize = 0;
+    private int currentSize;
 
     @Override
     public void initialiseWith(Context context) {

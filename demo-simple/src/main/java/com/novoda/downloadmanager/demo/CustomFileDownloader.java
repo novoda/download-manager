@@ -10,7 +10,7 @@ class CustomFileDownloader implements FileDownloader {
     private static final int BUFFER_SIZE = 5000;
     private static final int SLEEP_IN_MILLIS = 200;
 
-    private byte[] buffer = new byte[BUFFER_SIZE];
+    private final byte[] buffer = new byte[BUFFER_SIZE];
 
     private boolean canDownload;
 
@@ -24,7 +24,7 @@ class CustomFileDownloader implements FileDownloader {
             try {
                 Thread.sleep(SLEEP_IN_MILLIS);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.e("CustomFileDownloader Thread interrupted.", e);
             }
             callback.onBytesRead(buffer, BYTES_READ);
         }
