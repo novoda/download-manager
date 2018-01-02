@@ -67,7 +67,9 @@ class MigrationJob implements Runnable {
         }
     }
 
-    private void migratePartialDownloads(SqlDatabaseWrapper database, PartialDownloadMigrationExtractor partialDownloadMigrationExtractor, DownloadsPersistence downloadsPersistence) {
+    private void migratePartialDownloads(SqlDatabaseWrapper database,
+                                         PartialDownloadMigrationExtractor partialDownloadMigrationExtractor,
+                                         DownloadsPersistence downloadsPersistence) {
         List<Migration> partialMigrations = partialDownloadMigrationExtractor.extractMigrations();
         for (Migration partialMigration : partialMigrations) {
             downloadsPersistence.startTransaction();

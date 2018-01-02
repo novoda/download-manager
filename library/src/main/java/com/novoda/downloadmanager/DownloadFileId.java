@@ -43,8 +43,8 @@ final class DownloadFileId {
 
     @Override
     public String toString() {
-        return "DownloadFileId{" +
-                "id=" + id +
-                '}';
+        return "DownloadFileId{"
+                + "id=" + id
+                + '}';
     }
 }

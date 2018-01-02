@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-public class FilePersistenceResult {
+public final class FilePersistenceResult {
 
     public enum Status {
         SUCCESS,

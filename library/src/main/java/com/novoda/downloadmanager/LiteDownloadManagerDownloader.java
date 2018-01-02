@@ -22,6 +22,7 @@ class LiteDownloadManagerDownloader {
 
     private DownloadService downloadService;
 
+    @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"}) // Can't group anymore these are customisable options.
     LiteDownloadManagerDownloader(Object waitForDownloadService,
                                   ExecutorService executor,
                                   Handler callbackHandler,

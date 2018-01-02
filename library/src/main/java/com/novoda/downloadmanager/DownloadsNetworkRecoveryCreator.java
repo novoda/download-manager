@@ -2,23 +2,27 @@ package com.novoda.downloadmanager;
 
 import android.content.Context;
 
-class DownloadsNetworkRecoveryCreator {
+final class DownloadsNetworkRecoveryCreator {
 
-    private static DownloadsNetworkRecovery INSTANCE;
+    private DownloadsNetworkRecoveryCreator() {
+        // Uses static factory methods.
+    }
+
+    private static DownloadsNetworkRecovery singleInstance;
 
     static void createDisabled() {
-        DownloadsNetworkRecoveryCreator.INSTANCE = DownloadsNetworkRecovery.DISABLED;
+        DownloadsNetworkRecoveryCreator.singleInstance = DownloadsNetworkRecovery.DISABLED;
     }
 
     static void createEnabled(Context context, DownloadManager downloadManager, ConnectionType connectionType) {
-        DownloadsNetworkRecoveryCreator.INSTANCE = new LiteDownloadsNetworkRecoveryEnabled(context, downloadManager, connectionType);
+        DownloadsNetworkRecoveryCreator.singleInstance = new LiteDownloadsNetworkRecoveryEnabled(context, downloadManager, connectionType);
     }
 
     static DownloadsNetworkRecovery getInstance() {
-        if (INSTANCE == null) {
+        if (singleInstance == null) {
             throw new IllegalStateException("There is no instance available, make sure you call DownloadsNetworkRecoveryCreator.create(...) first");
         } else {
-            return INSTANCE;
+            return singleInstance;
         }
     }
 }

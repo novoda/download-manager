@@ -59,10 +59,10 @@ class LiteFileSize implements InternalFileSize {
 
     @Override
     public String toString() {
-        return "LiteFileSize{" +
-                "currentSize=" + currentSize +
-                ", totalSize=" + totalSize +
-                '}';
+        return "LiteFileSize{"
+                + "currentSize=" + currentSize
+                + ", totalSize=" + totalSize
+                + '}';
     }
 
     @Override

@@ -57,11 +57,11 @@ public final class Batch {
 
     @Override
     public String toString() {
-        return "Batch{" +
-                "downloadBatchId=" + downloadBatchId +
-                ", title='" + title + '\'' +
-                ", fileUrls=" + fileUrls +
-                '}';
+        return "Batch{"
+                + "downloadBatchId=" + downloadBatchId
+                + ", title='" + title + '\''
+                + ", fileUrls=" + fileUrls
+                + '}';
     }
 
     public static class Builder {

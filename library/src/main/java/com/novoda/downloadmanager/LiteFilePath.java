@@ -20,8 +20,8 @@ class LiteFilePath implements FilePath {
 
     @Override
     public String toString() {
-        return "LiteFilePath{" +
-                "path='" + path + '\'' +
-                '}';
+        return "LiteFilePath{"
+                + "path='" + path + '\''
+                + '}';
     }
 }

@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
@@ -31,6 +32,9 @@ class LiteDownloadsNetworkRecoveryEnabled implements DownloadsNetworkRecovery {
                 break;
             case METERED:
                 builder.setRequiredNetworkType(JobRequest.NetworkType.METERED);
+                break;
+            default:
+                Log.w(getClass().getSimpleName(), "Unknown ConnectionType: " + connectionType);
                 break;
         }
 

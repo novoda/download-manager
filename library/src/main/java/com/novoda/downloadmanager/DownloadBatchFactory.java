@@ -21,7 +21,7 @@ final class DownloadBatchFactory {
         DownloadBatchId downloadBatchId = batch.getDownloadBatchId();
 
         for (String fileUrl : fileUrls) {
-            InternalFileSize fileSize = InternalFileSizeCreator.UNKNOWN;
+            InternalFileSize fileSize = InternalFileSizeCreator.unknownFileSize();
             DownloadFileId downloadFileId = DownloadFileId.from(batch);
             DownloadFileStatus downloadFileStatus = new DownloadFileStatus(
                     downloadFileId,

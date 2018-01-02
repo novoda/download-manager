@@ -2,6 +2,8 @@ package com.novoda.downloadmanager;
 
 class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
 
+    private static final int TOTAL_PERCENTAGE = 100;
+
     private Status status;
     private int numberOfBatches;
     private int totalNumberOfBatches;
@@ -19,7 +21,7 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
     }
 
     private int getPercentageFrom(int numberOfBatches, int totalNumberOfBatches) {
-        return (int) ((((float) numberOfBatches) / ((float) totalNumberOfBatches)) * 100);
+        return (int) ((((float) numberOfBatches) / ((float) totalNumberOfBatches)) * TOTAL_PERCENTAGE);
     }
 
     @Override

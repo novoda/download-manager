@@ -1,6 +1,10 @@
 package com.novoda.downloadmanager;
 
-class DownloadBatchTitleCreator {
+final class DownloadBatchTitleCreator {
+
+    private DownloadBatchTitleCreator() {
+        // Uses static factory methods.
+    }
 
     static DownloadBatchTitle createFrom(Batch batch) {
         return new LiteDownloadBatchTitle(batch.getTitle());

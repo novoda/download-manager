@@ -17,6 +17,7 @@ class DownloadFile {
     private InternalFileSize fileSize;
     private FilePath filePath;
 
+    @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"}) // Model that knows how to interact with low-level components.
     DownloadFile(DownloadBatchId downloadBatchId,
                  String url,
                  DownloadFileStatus downloadFileStatus,
