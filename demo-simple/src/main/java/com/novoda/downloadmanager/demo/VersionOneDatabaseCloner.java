@@ -19,7 +19,8 @@ import java.util.concurrent.Executor;
 
 class VersionOneDatabaseCloner {
 
-    private static final byte[] BUFFER = new byte[1024];
+    private static final int BUFFER_SIZE = 1024;
+    private static final byte[] BUFFER = new byte[BUFFER_SIZE];
 
     private static final String DATABASE_NAME = "downloads.db";
     private static final String DOWNLOAD_FILE_NAME_FORMAT = "%s.zip";
