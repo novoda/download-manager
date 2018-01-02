@@ -13,10 +13,10 @@
 
     <TextView
       android:id="@+id/database_cloning_updates"
-      android:layout_width="wrap_content"
+      android:layout_width="0dp"
       android:layout_height="wrap_content"
       android:layout_weight="1"
-      android:text="Tap to begin cloning" />
+      android:text="@string/tap_to_begin_cloning" />
 
     <Spinner
       android:id="@+id/database_download_file_size"
@@ -27,7 +27,7 @@
       android:id="@+id/button_create_v1_db"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="Create V1 DB" />
+      android:text="@string/create_v1_db" />
 
   </LinearLayout>
 
@@ -38,16 +38,16 @@
 
     <TextView
       android:id="@+id/database_migration_updates"
-      android:layout_width="wrap_content"
+      android:layout_width="0dp"
       android:layout_height="wrap_content"
       android:layout_weight="1"
-      android:text="Tap to begin migration" />
+      android:text="@string/tap_to_begin_migration" />
 
     <Button
       android:id="@+id/button_migrate"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="Migrate" />
+      android:text="@string/migrate" />
 
   </LinearLayout>
 
@@ -58,7 +58,7 @@
 
     <TextView
       android:id="@+id/batch_1"
-      android:layout_width="wrap_content"
+      android:layout_width="0dp"
       android:layout_height="wrap_content"
       android:layout_weight="1"
       android:lines="7"
@@ -68,13 +68,13 @@
       android:id="@+id/button_pause_downloading_1"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="Pause" />
+      android:text="@string/pause" />
 
     <Button
       android:id="@+id/button_resume_downloading_1"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="Resume" />
+      android:text="@string/resume" />
 
   </LinearLayout>
 
@@ -86,7 +86,7 @@
 
     <TextView
       android:id="@+id/batch_2"
-      android:layout_width="wrap_content"
+      android:layout_width="0dp"
       android:layout_height="wrap_content"
       android:layout_weight="1"
       android:lines="7"
@@ -96,13 +96,13 @@
       android:id="@+id/button_pause_downloading_2"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="Pause" />
+      android:text="@string/pause" />
 
     <Button
       android:id="@+id/button_resume_downloading_2"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="Resume" />
+      android:text="@string/resume" />
 
   </LinearLayout>
 
@@ -110,18 +110,18 @@
     android:id="@+id/button_start_downloading"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="Start downloading" />
+    android:text="@string/start_downloading" />
 
   <Button
     android:id="@+id/button_delete_all"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="Delete all" />
+    android:text="@string/delete_all" />
 
   <Button
     android:id="@+id/button_log_file_directory"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="Log File Directory" />
+    android:text="@string/log_file_directory" />
 
 </LinearLayout>
