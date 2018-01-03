@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  name="No-player PMD rules"
+  name="Project PMD rules"
   xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
   xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
 
-  <description>PMD rules for the No-player codebase.</description>
+  <description>PMD rules for the Project codebase.</description>
 
   <exclude-pattern>.*\.R\$.*</exclude-pattern>
   <exclude-pattern>.*Test.*</exclude-pattern>
