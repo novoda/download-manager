@@ -9,7 +9,7 @@ public final class Batch {
     private final String title;
     private final List<String> fileUrls;
 
-    private Batch(DownloadBatchId downloadBatchId, String title, List<String> fileUrls) {
+    Batch(DownloadBatchId downloadBatchId, String title, List<String> fileUrls) {
         this.downloadBatchId = downloadBatchId;
         this.title = title;
         this.fileUrls = fileUrls;
@@ -57,11 +57,11 @@ public final class Batch {
 
     @Override
     public String toString() {
-        return "Batch{" +
-                "downloadBatchId=" + downloadBatchId +
-                ", title='" + title + '\'' +
-                ", fileUrls=" + fileUrls +
-                '}';
+        return "Batch{"
+                + "downloadBatchId=" + downloadBatchId
+                + ", title='" + title + '\''
+                + ", fileUrls=" + fileUrls
+                + '}';
     }
 
     public static class Builder {

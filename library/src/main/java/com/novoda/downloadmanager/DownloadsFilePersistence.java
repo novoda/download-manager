@@ -94,8 +94,8 @@ class DownloadsFilePersistence {
                 return DownloadFileStatus.Status.DELETION;
             case DOWNLOADED:
                 return DownloadFileStatus.Status.DOWNLOADING;
+            default:
+                throw new InvalidParameterException("Batch status " + batchStatus + " is unsupported");
         }
-
-        throw new InvalidParameterException("Batch status " + batchStatus + " is unsupported");
     }
 }

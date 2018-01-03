@@ -11,9 +11,11 @@ import android.support.v4.app.NotificationManagerCompat;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class LiteDownloadService extends Service implements DownloadService {
 
+    private static final long TEN_MINUTES_IN_MILLIS = TimeUnit.MINUTES.toMillis(10);
     private static final String WAKELOCK_TAG = "WakelockTag";
     private static final String NOTIFICATION_TAG = "download-manager";
 
@@ -24,11 +26,10 @@ public class LiteDownloadService extends Service implements DownloadService {
 
     @Override
     public void onCreate() {
+        super.onCreate();
         executor = Executors.newSingleThreadExecutor();
         binder = new DownloadServiceBinder();
         notificationManagerCompat = NotificationManagerCompat.from(this);
-
-        super.onCreate();
     }
 
     class DownloadServiceBinder extends Binder {
@@ -84,7 +85,7 @@ public class LiteDownloadService extends Service implements DownloadService {
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         if (powerManager != null) {
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
-            wakeLock.acquire();
+            wakeLock.acquire(TEN_MINUTES_IN_MILLIS);
         }
     }
 

@@ -5,7 +5,7 @@ final class LiteFileName implements FileName {
     private final String name;
 
     static LiteFileName from(Batch batch, String fileUrl) {
-        String name = batch + fileUrl + String.valueOf(System.nanoTime());
+        String name = batch + fileUrl + System.nanoTime();
         return new LiteFileName(String.valueOf(name.hashCode()));
     }
 

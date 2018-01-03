@@ -67,7 +67,9 @@ class MigrationJob implements Runnable {
         }
     }
 
-    private void migratePartialDownloads(SqlDatabaseWrapper database, PartialDownloadMigrationExtractor partialDownloadMigrationExtractor, DownloadsPersistence downloadsPersistence) {
+    private void migratePartialDownloads(SqlDatabaseWrapper database,
+                                         PartialDownloadMigrationExtractor partialDownloadMigrationExtractor,
+                                         DownloadsPersistence downloadsPersistence) {
         List<Migration> partialMigrations = partialDownloadMigrationExtractor.extractMigrations();
         for (Migration partialMigration : partialMigrations) {
             downloadsPersistence.startTransaction();
@@ -121,7 +123,9 @@ class MigrationJob implements Runnable {
         for (Migration.FileMetadata metadata : migration.getFileMetadata()) {
             if (hasValidFileLocation(metadata)) {
                 File file = new File(metadata.originalFileLocation());
-                file.delete();
+                boolean deleted = file.delete();
+                String message = String.format("File or Directory: %s deleted: %s", file.getPath(), deleted);
+                Log.d(getClass().getSimpleName(), message);
             }
         }
     }
@@ -195,7 +199,6 @@ class MigrationJob implements Runnable {
                 }
             } catch (IOException e) {
                 Log.e(getClass().getSimpleName(), e.getMessage());
-                e.printStackTrace();
             } finally {
                 try {
                     internalFilePersistence.close();
@@ -204,7 +207,6 @@ class MigrationJob implements Runnable {
                     }
                 } catch (IOException e) {
                     Log.e(getClass().getSimpleName(), e.getMessage());
-                    e.printStackTrace();
                 }
             }
         }

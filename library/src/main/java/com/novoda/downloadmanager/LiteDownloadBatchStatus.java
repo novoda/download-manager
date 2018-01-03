@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
 
     private static final long ZERO_BYTES = 0;
+    private static final int TOTAL_PERCENTAGE = 100;
 
     private final DownloadBatchTitle downloadBatchTitle;
     private final DownloadBatchId downloadBatchId;
@@ -48,7 +49,7 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
         if (totalBatchSizeBytes <= ZERO_BYTES) {
             return 0;
         } else {
-            return (int) ((((float) bytesDownloaded) / ((float) totalFileSizeBytes)) * 100);
+            return (int) ((((float) bytesDownloaded) / ((float) totalFileSizeBytes)) * TOTAL_PERCENTAGE);
         }
     }
 

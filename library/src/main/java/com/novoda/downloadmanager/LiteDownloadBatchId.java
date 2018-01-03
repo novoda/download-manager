@@ -35,8 +35,8 @@ class LiteDownloadBatchId implements DownloadBatchId {
 
     @Override
     public String toString() {
-        return "LiteDownloadBatchId{" +
-                "id='" + id + '\'' +
-                '}';
+        return "LiteDownloadBatchId{"
+                + "id='" + id + '\''
+                + '}';
     }
 }

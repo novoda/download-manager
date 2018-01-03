@@ -5,8 +5,8 @@ import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 
-import com.novoda.notils.logger.simple.Log;
 import com.novoda.downloadmanager.FilePersistenceResult.Status;
+import com.novoda.notils.logger.simple.Log;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -119,7 +119,10 @@ class ExternalFilePersistence implements FilePersistence {
             return;
         }
 
-        file.delete();
+        boolean deleted = file.delete();
+
+        String message = String.format("File or Directory: %s deleted: %s", file.getPath(), deleted);
+        Log.d(getClass().getSimpleName(), message);
     }
 
     @Override
@@ -157,7 +160,7 @@ class ExternalFilePersistence implements FilePersistence {
         try {
             fileOutputStream.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(e, "Failed to close fileOutputStream.");
         }
     }
 

@@ -2,7 +2,9 @@ package com.novoda.downloadmanager;
 
 import android.content.Context;
 
+import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 class AndroidLocalFilesDirectory implements LocalFilesDirectory {
@@ -15,7 +17,15 @@ class AndroidLocalFilesDirectory implements LocalFilesDirectory {
 
     @Override
     public List<String> contents() {
-        return Arrays.asList(context.getFilesDir().list());
+        File filesDir = context.getFilesDir();
+        if (filesDir != null) {
+            String[] directoryAsStrings = filesDir.list();
+            if (directoryAsStrings != null) {
+                return Arrays.asList(directoryAsStrings);
+            }
+        }
+
+        return Collections.emptyList();
     }
 
     @Override

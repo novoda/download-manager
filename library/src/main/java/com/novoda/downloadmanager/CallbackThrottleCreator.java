@@ -2,7 +2,7 @@ package com.novoda.downloadmanager;
 
 import java.util.concurrent.TimeUnit;
 
-class CallbackThrottleCreator {
+final class CallbackThrottleCreator {
 
     private static final Class<? extends CallbackThrottle> NO_CUSTOM_CALLBACK_THROTTLE = null;
     private static final TimeUnit UNUSED_TIME_UNIT = TimeUnit.SECONDS;
@@ -19,15 +19,15 @@ class CallbackThrottleCreator {
     private final long frequency;
     private final Class<? extends CallbackThrottle> customCallbackThrottle;
 
-    static CallbackThrottleCreator ByTime(TimeUnit timeUnit, long quantity) {
+    static CallbackThrottleCreator byTime(TimeUnit timeUnit, long quantity) {
         return new CallbackThrottleCreator(Type.THROTTLE_BY_TIME, timeUnit, quantity, NO_CUSTOM_CALLBACK_THROTTLE);
     }
 
-    static CallbackThrottleCreator ByProgressIncrease() {
+    static CallbackThrottleCreator byProgressIncrease() {
         return new CallbackThrottleCreator(Type.THROTTLE_BY_PROGRESS_INCREASE, UNUSED_TIME_UNIT, UNUSED_FREQUENCY, NO_CUSTOM_CALLBACK_THROTTLE);
     }
 
-    static CallbackThrottleCreator ByCustomThrottle(Class<? extends CallbackThrottle> customCallbackThrottle) {
+    static CallbackThrottleCreator byCustomThrottle(Class<? extends CallbackThrottle> customCallbackThrottle) {
         return new CallbackThrottleCreator(Type.CUSTOM, UNUSED_TIME_UNIT, UNUSED_FREQUENCY, customCallbackThrottle);
     }
 

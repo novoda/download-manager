@@ -36,7 +36,7 @@ public class NetworkFileSizeRequesterTest {
 
         FileSize fileSize = fileSizeRequester.requestFileSize(ANY_RAW_URL);
 
-        assertThat(fileSize).isEqualTo(FileSizeCreator.UNKNOWN);
+        assertThat(fileSize).isEqualTo(FileSizeCreator.unknownFileSize());
     }
 
     @Test
@@ -45,7 +45,7 @@ public class NetworkFileSizeRequesterTest {
 
         FileSize fileSize = fileSizeRequester.requestFileSize(ANY_RAW_URL);
 
-        assertThat(fileSize).isEqualTo(FileSizeCreator.UNKNOWN);
+        assertThat(fileSize).isEqualTo(FileSizeCreator.unknownFileSize());
     }
 
     @Test
