@@ -33,7 +33,7 @@ dependencies {
 
     compile 'com.android.support:support-v4:27.0.2'
     compile 'com.novoda:notils:2.2.16'
-    compile 'com.squareup.okhttp:okhttp:2.3.0'
+    compile 'com.squareup.okhttp:okhttp:2.7.5'
     compile 'com.facebook.stetho:stetho:1.5.0'
     compile 'android.arch.persistence.room:runtime:1.0.0'
     compile 'com.evernote:android-job:1.2.0-alpha3'
