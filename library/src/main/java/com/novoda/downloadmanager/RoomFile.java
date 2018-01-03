@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 
 import static android.arch.persistence.room.ForeignKey.CASCADE;
 
+@SuppressWarnings("checkstyle:visibilitymodifier") // Accessors will add a lot of boilerplate code.
 @Entity(
         foreignKeys = @ForeignKey(entity = RoomBatch.class, parentColumns = "batch_id", childColumns = "batch_id", onDelete = CASCADE),
         indices = {@Index("batch_id")}

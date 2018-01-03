@@ -6,6 +6,7 @@ import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
+@SuppressWarnings("checkstyle:visibilitymodifier") // Accessors will add a lot of boilerplate code.
 @Entity(indices = {@Index("batch_id")})
 class RoomBatch {
 
