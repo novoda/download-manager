@@ -14,6 +14,7 @@ abstract class RoomAppDatabase extends RoomDatabase {
 
     abstract RoomFileDao roomFileDao();
 
+    @SuppressWarnings("PMD.NonThreadSafeSingleton")     // See https://en.wikipedia.org/wiki/Double-checked_locking#Usage_in_Java.
     static RoomAppDatabase obtainInstance(Context context) {
         if (singleInstance == null) {
             synchronized (RoomAppDatabase.class) {
