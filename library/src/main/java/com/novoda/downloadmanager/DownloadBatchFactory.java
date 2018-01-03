@@ -33,7 +33,7 @@ final class DownloadBatchFactory {
             FilePersistenceCreator filePersistenceCreator = fileOperations.filePersistenceCreator();
             FileDownloader fileDownloader = fileOperations.fileDownloader();
             FileSizeRequester fileSizeRequester = fileOperations.fileSizeRequester();
-            FilePath filePath = FilePathCreator.UNKNOWN_FILEPATH;
+            FilePath filePath = FilePathCreator.unknownFilePath();
 
             FilePersistence filePersistence = filePersistenceCreator.create();
             DownloadFile downloadFile = new DownloadFile(
