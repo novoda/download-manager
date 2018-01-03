@@ -3,6 +3,8 @@ package com.novoda.downloadmanager;
 import com.novoda.downloadmanager.DownloadError.Error;
 import com.novoda.notils.logger.simple.Log;
 
+// This model knows how to interact with low level components.
+@SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.StdCyclomaticComplexity", "PMD.ModifiedCyclomaticComplexity"})
 class DownloadFile {
 
     private final DownloadBatchId downloadBatchId;

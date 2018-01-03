@@ -24,11 +24,10 @@ public class LiteDownloadService extends Service implements DownloadService {
 
     @Override
     public void onCreate() {
+        super.onCreate();
         executor = Executors.newSingleThreadExecutor();
         binder = new DownloadServiceBinder();
         notificationManagerCompat = NotificationManagerCompat.from(this);
-
-        super.onCreate();
     }
 
     class DownloadServiceBinder extends Binder {

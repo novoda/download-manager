@@ -28,6 +28,7 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
 
     @Override
     public void onCreate() {
+        super.onCreate();
         Log.d(TAG, "onCreate");
         binder = new MigrationDownloadServiceBinder();
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

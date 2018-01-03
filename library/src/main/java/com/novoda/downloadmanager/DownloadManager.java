@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager;
 
+import com.novoda.notils.logger.simple.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -144,7 +146,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
                 waitForDownloadService.wait();
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e(e, "Interruped waiting for download service.");
         }
     }
 

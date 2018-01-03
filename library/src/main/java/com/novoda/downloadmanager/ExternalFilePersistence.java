@@ -160,7 +160,7 @@ class ExternalFilePersistence implements FilePersistence {
         try {
             fileOutputStream.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(e, "Failed to close fileOutputStream.");
         }
     }
 

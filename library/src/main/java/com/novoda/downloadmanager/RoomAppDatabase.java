@@ -9,23 +9,32 @@ import android.content.Context;
 abstract class RoomAppDatabase extends RoomDatabase {
 
     private static volatile RoomAppDatabase singleInstance;
+    private static final Object LOCK = new Object();
 
     abstract RoomBatchDao roomBatchDao();
 
     abstract RoomFileDao roomFileDao();
 
     static RoomAppDatabase obtainInstance(Context context) {
-        if (singleInstance == null) {
-            singleInstance = newInstance(context);
+        RoomAppDatabase database = singleInstance;
+        if (database == null) {
+            synchronized (LOCK) {
+                database = singleInstance;
+                if (database == null) {
+                    singleInstance = newInstance(context);
+                    database = singleInstance;
+                }
+            }
         }
-        return singleInstance;
+        return database;
     }
 
-    private static synchronized RoomAppDatabase newInstance(Context context) {
+    static RoomAppDatabase newInstance(Context context) {
         return Room.databaseBuilder(
                 context.getApplicationContext(),
                 RoomAppDatabase.class,
                 "database-litedownloadmanager"
         ).build();
     }
+
 }

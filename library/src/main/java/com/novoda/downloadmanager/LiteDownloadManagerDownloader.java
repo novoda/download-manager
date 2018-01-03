@@ -2,11 +2,15 @@ package com.novoda.downloadmanager;
 
 import android.os.Handler;
 
+import com.novoda.notils.logger.simple.Log;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.*;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETION;
 
 class LiteDownloadManagerDownloader {
 
@@ -22,7 +26,7 @@ class LiteDownloadManagerDownloader {
 
     private DownloadService downloadService;
 
-    @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"}) // Can't group anymore these are customisable options.
+    @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})// Can't group anymore these are customisable options.
     LiteDownloadManagerDownloader(Object waitForDownloadService,
                                   ExecutorService executor,
                                   Handler callbackHandler,
@@ -90,7 +94,7 @@ class LiteDownloadManagerDownloader {
                 }
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e(e, "Interrupted whilst waiting for download service.");
         }
     }
 
@@ -126,13 +130,12 @@ class LiteDownloadManagerDownloader {
     }
 
     private void updateNotification(DownloadBatchStatus liteDownloadBatchStatus, DownloadService downloadService) {
-        NotificationInformation notificationInformation = notificationCreator.createNotification(liteDownloadBatchStatus);
-
         if (liteDownloadBatchStatus.status() == DELETION) {
             downloadService.dismissNotification();
             return;
         }
 
+        NotificationInformation notificationInformation = notificationCreator.createNotification(liteDownloadBatchStatus);
         if (liteDownloadBatchStatus.status() == DOWNLOADED) {
             downloadService.stackNotification(notificationInformation);
             return;

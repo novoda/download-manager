@@ -199,7 +199,6 @@ class MigrationJob implements Runnable {
                 }
             } catch (IOException e) {
                 Log.e(getClass().getSimpleName(), e.getMessage());
-                e.printStackTrace();
             } finally {
                 try {
                     internalFilePersistence.close();
@@ -208,7 +207,6 @@ class MigrationJob implements Runnable {
                     }
                 } catch (IOException e) {
                     Log.e(getClass().getSimpleName(), e.getMessage());
-                    e.printStackTrace();
                 }
             }
         }
