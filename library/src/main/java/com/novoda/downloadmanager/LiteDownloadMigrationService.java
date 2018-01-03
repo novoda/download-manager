@@ -20,7 +20,7 @@ import static com.novoda.downloadmanager.MigrationStatus.Status;
 public class LiteDownloadMigrationService extends Service implements DownloadMigrationService {
 
     private static final String TAG = "MigrationService";
-    private static ExecutorService executor;
+    private static volatile ExecutorService singleInstanceExecutor = Executors.newSingleThreadExecutor();
 
     private IBinder binder;
     private NotificationManager notificationManager;
@@ -29,10 +29,6 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
     @Override
     public void onCreate() {
         Log.d(TAG, "onCreate");
-        if (executor == null) {
-            executor = Executors.newSingleThreadExecutor();
-        }
-
         binder = new MigrationDownloadServiceBinder();
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -62,7 +58,7 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
         MigrationJob migrationJob = new MigrationJob(getApplicationContext(), getDatabasePath("downloads.db"));
         migrationJob.addCallback(migrationCallback);
         migrationJob.addCallback(notificationMigrationCallback);
-        executor.execute(migrationJob);
+        singleInstanceExecutor.execute(migrationJob);
     }
 
     private void createNotificationChannel() {

@@ -10,7 +10,7 @@ final class DownloadFileId {
     }
 
     static DownloadFileId from(String id) {
-        return new DownloadFileId(Integer.valueOf(id));
+        return new DownloadFileId(Integer.parseInt(id));
     }
 
     private DownloadFileId(int id) {

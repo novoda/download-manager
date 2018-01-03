@@ -123,7 +123,9 @@ class MigrationJob implements Runnable {
         for (Migration.FileMetadata metadata : migration.getFileMetadata()) {
             if (hasValidFileLocation(metadata)) {
                 File file = new File(metadata.originalFileLocation());
-                file.delete();
+                boolean deleted = file.delete();
+                String message = String.format("File or Directory: %s deleted: %s", file.getPath(), deleted);
+                Log.d(getClass().getSimpleName(), message);
             }
         }
     }
