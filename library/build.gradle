@@ -31,16 +31,16 @@ android {
 dependencies {
     annotationProcessor 'android.arch.persistence.room:compiler:1.0.0'
 
-    compile 'com.android.support:support-v4:27.0.2'
-    compile 'com.novoda:notils:2.2.16'
-    compile 'com.squareup.okhttp:okhttp:2.7.5'
-    compile 'com.facebook.stetho:stetho:1.5.0'
-    compile 'android.arch.persistence.room:runtime:1.0.0'
-    compile 'com.evernote:android-job:1.2.0-alpha3'
+    implementation 'com.novoda:notils:2.2.16'
+    implementation 'com.facebook.stetho:stetho:1.5.0'
+    implementation 'com.android.support:support-v4:27.0.2'
+    implementation 'com.squareup.okhttp:okhttp:2.7.5'
+    implementation 'android.arch.persistence.room:runtime:1.0.0'
+    implementation 'com.evernote:android-job:1.2.0-alpha3'
 
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.12.0'
-    testCompile "com.google.truth:truth:0.36"
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.mockito:mockito-core:2.12.0'
+    testImplementation "com.google.truth:truth:0.36"
 }
 
 publish {
