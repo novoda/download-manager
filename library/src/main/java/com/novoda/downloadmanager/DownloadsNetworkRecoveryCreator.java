@@ -4,11 +4,11 @@ import android.content.Context;
 
 final class DownloadsNetworkRecoveryCreator {
 
+    private static DownloadsNetworkRecovery singleInstance;
+
     private DownloadsNetworkRecoveryCreator() {
         // Uses static factory methods.
     }
-
-    private static DownloadsNetworkRecovery singleInstance;
 
     static void createDisabled() {
         DownloadsNetworkRecoveryCreator.singleInstance = DownloadsNetworkRecovery.DISABLED;
