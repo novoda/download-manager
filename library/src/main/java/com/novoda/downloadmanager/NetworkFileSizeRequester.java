@@ -31,6 +31,6 @@ class NetworkFileSizeRequester implements FileSizeRequester {
             Log.e(e, "Error requesting file size for " + url);
         }
 
-        return FileSizeCreator.UNKNOWN;
+        return FileSizeCreator.unknownFileSize();
     }
 }

@@ -5,12 +5,12 @@ final class DownloadFileId {
     private final int id;
 
     static DownloadFileId from(Batch batch) {
-        String id = batch.getTitle() + String.valueOf(System.nanoTime());
+        String id = batch.getTitle() + System.nanoTime();
         return new DownloadFileId(id.hashCode());
     }
 
     static DownloadFileId from(String id) {
-        return new DownloadFileId(Integer.valueOf(id));
+        return new DownloadFileId(Integer.parseInt(id));
     }
 
     private DownloadFileId(int id) {
@@ -43,8 +43,8 @@ final class DownloadFileId {
 
     @Override
     public String toString() {
-        return "DownloadFileId{" +
-                "id=" + id +
-                '}';
+        return "DownloadFileId{"
+                + "id=" + id
+                + '}';
     }
 }

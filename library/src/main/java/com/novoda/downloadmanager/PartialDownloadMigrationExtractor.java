@@ -7,9 +7,9 @@ import java.util.List;
 
 class PartialDownloadMigrationExtractor {
 
-    private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title FROM batches INNER JOIN DownloadsByBatch ON " +
-            "DownloadsByBatch.batch_id = batches._id WHERE DownloadsByBatch.batch_total_bytes != DownloadsByBatch.batch_current_bytes " +
-            "GROUP BY batches._id";
+    private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title FROM batches INNER JOIN DownloadsByBatch ON "
+            + "DownloadsByBatch.batch_id = batches._id WHERE DownloadsByBatch.batch_total_bytes != DownloadsByBatch.batch_current_bytes "
+            + "GROUP BY batches._id";
     private static final String URIS_QUERY = "SELECT uri, _data, current_bytes, total_bytes FROM Downloads WHERE batch_id = ?";
     private static final int BATCH_ID_COLUMN = 0;
     private static final int URI_COLUMN = 0;

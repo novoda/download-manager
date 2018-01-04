@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+
+  <issue id="MissingTranslation" severity="ignore" />
+  <issue id="GoogleAppIndexingWarning" severity="ignore" />
+
+  <issue id="OldTargetApi" severity="informational" />
+
+  <!-- Ignore RtL warnings since the app doesn't support RtL -->
+  <issue id="RtlSymmetry" severity="ignore" />
+  <issue id="RtlHardcoded" severity="ignore" />
+  <issue id="RtlEnabled" severity="ignore" />
+
+  <!-- Lint only flags only missing content descriptions in XML ImageViews but we rarely put content descriptions here -->
+  <issue id="ContentDescription" severity="ignore" />
+
+  <!-- The Google Services JSON plugin generates some API keys even if we don't actually use them -->
+  <issue id="UnusedResources" severity="informational">
+    <ignore path="*generated/res/google-services/*" />
+  </issue>
+
+  <!-- This issue flags the adaptive icons' background drawables too, which must be square and fully opaque -->
+  <issue id="IconLauncherShape" severity="error">
+    <ignore path="*res/mipmap*/ic_launcher_background.png" />
+  </issue>
+
+</lint>

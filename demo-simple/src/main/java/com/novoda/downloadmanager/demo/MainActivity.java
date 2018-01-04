@@ -36,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final DownloadBatchId BATCH_ID_1 = DownloadBatchIdCreator.createFrom("batch_id_1");
     private static final DownloadBatchId BATCH_ID_2 = DownloadBatchIdCreator.createFrom("batch_id_2");
+    private static final String FILE_URL = "http://ipv4.download.thinkbroadband.com/10MB.zip";
+
     private TextView databaseCloningUpdates;
     private TextView databaseMigrationUpdates;
     private TextView textViewBatch1;
@@ -97,14 +99,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Batch batch = new Batch.Builder(BATCH_ID_1, "Made in chelsea")
-                        .addFile("http://ipv4.download.thinkbroadband.com/10MB.zip")
-                        .addFile("http://ipv4.download.thinkbroadband.com/10MB.zip")
+                        .addFile(FILE_URL)
+                        .addFile(FILE_URL)
                         .build();
                 liteDownloadManagerCommands.download(batch);
 
                 batch = new Batch.Builder(BATCH_ID_2, "Hollyoaks")
-                        .addFile("http://ipv4.download.thinkbroadband.com/10MB.zip")
-                        .addFile("http://ipv4.download.thinkbroadband.com/10MB.zip")
+                        .addFile(FILE_URL)
+                        .addFile(FILE_URL)
                         .build();
                 liteDownloadManagerCommands.download(batch);
             }

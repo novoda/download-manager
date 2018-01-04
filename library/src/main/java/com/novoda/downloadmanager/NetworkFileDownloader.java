@@ -29,21 +29,7 @@ class NetworkFileDownloader implements FileDownloader {
         try {
             response = httpClient.execute(request);
             int responseCode = response.code();
-            if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_PARTIAL) {
-                InputStream in = response.openByteStream();
-                byte[] buffer = new byte[BUFFER_SIZE];
-                int readLast = 0;
-                while (canDownload && readLast != -1) {
-                    readLast = in.read(buffer);
-
-                    if (readLast != 0 && readLast != -1) {
-                        callback.onBytesRead(buffer, readLast);
-                    }
-                }
-            } else {
-                Log.e("Network response code is not ok, responseCode: " + responseCode);
-                callback.onError();
-            }
+            processResponse(callback, response, responseCode);
         } catch (IOException e) {
             Log.e(e, "Exception with http request");
             callback.onError();
@@ -58,6 +44,28 @@ class NetworkFileDownloader implements FileDownloader {
         }
 
         callback.onDownloadFinished();
+    }
+
+    private void processResponse(Callback callback, HttpClient.NetworkResponse response, int responseCode) throws IOException {
+        if (isValid(responseCode)) {
+            InputStream in = response.openByteStream();
+            byte[] buffer = new byte[BUFFER_SIZE];
+            int readLast = 0;
+            while (canDownload && readLast != -1) {
+                readLast = in.read(buffer);
+
+                if (readLast != 0 && readLast != -1) {
+                    callback.onBytesRead(buffer, readLast);
+                }
+            }
+        } else {
+            Log.e("Network response code is not ok, responseCode: " + responseCode);
+            callback.onError();
+        }
+    }
+
+    private boolean isValid(int responseCode) {
+        return responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_PARTIAL;
     }
 
     private NetworkRequest createRequestFrom(String url, FileSize fileSize) {

@@ -7,7 +7,7 @@ import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
-public class DownloadMigratorBuilder {
+public final class DownloadMigratorBuilder {
 
     private final Context applicationContext;
     private final Handler handler;

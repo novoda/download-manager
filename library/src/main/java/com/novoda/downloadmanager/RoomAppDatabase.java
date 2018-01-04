@@ -8,24 +8,30 @@ import android.content.Context;
 @Database(entities = {RoomBatch.class, RoomFile.class}, version = 1)
 abstract class RoomAppDatabase extends RoomDatabase {
 
-    private static volatile RoomAppDatabase SINGLE_INSTANCE;
+    private static volatile RoomAppDatabase singleInstance;
 
     abstract RoomBatchDao roomBatchDao();
 
     abstract RoomFileDao roomFileDao();
 
+    @SuppressWarnings("PMD.NonThreadSafeSingleton")     // See https://en.wikipedia.org/wiki/Double-checked_locking#Usage_in_Java.
     static RoomAppDatabase obtainInstance(Context context) {
-        if (SINGLE_INSTANCE == null) {
-            SINGLE_INSTANCE = newInstance(context);
+        if (singleInstance == null) {
+            synchronized (RoomAppDatabase.class) {
+                if (singleInstance == null) {
+                    singleInstance = newInstance(context);
+                }
+            }
         }
-        return SINGLE_INSTANCE;
+        return singleInstance;
     }
 
-    private static synchronized RoomAppDatabase newInstance(Context context) {
+    static RoomAppDatabase newInstance(Context context) {
         return Room.databaseBuilder(
                 context.getApplicationContext(),
                 RoomAppDatabase.class,
                 "database-litedownloadmanager"
         ).build();
     }
+
 }

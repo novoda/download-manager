@@ -10,7 +10,7 @@ public class CallbackThrottleCreatorTest {
 
     @Test
     public void createsTimeThrottle() {
-        CallbackThrottle callbackThrottle = CallbackThrottleCreator.ByTime(TimeUnit.SECONDS, 1)
+        CallbackThrottle callbackThrottle = CallbackThrottleCreator.byTime(TimeUnit.SECONDS, 1)
                 .create();
 
         assertThat(callbackThrottle).isInstanceOf(CallbackThrottleByTime.class);
@@ -18,7 +18,7 @@ public class CallbackThrottleCreatorTest {
 
     @Test
     public void createsProgressThrottle() {
-        CallbackThrottle callbackThrottle = CallbackThrottleCreator.ByProgressIncrease()
+        CallbackThrottle callbackThrottle = CallbackThrottleCreator.byProgressIncrease()
                 .create();
 
         assertThat(callbackThrottle).isInstanceOf(CallbackThrottleByProgressIncrease.class);
@@ -26,31 +26,31 @@ public class CallbackThrottleCreatorTest {
 
     @Test(expected = RuntimeException.class)
     public void throwsException_whenCallbackThrottleDoesNotExist() {
-        CallbackThrottleCreator.ByCustomThrottle(null)
+        CallbackThrottleCreator.byCustomThrottle(null)
                 .create();
     }
 
     @Test(expected = RuntimeException.class)
     public void throwsException_whenCustomCallbackIsNotPublic() {
-        CallbackThrottleCreator.ByCustomThrottle(TestNonPublicCustomThrottle.class)
+        CallbackThrottleCreator.byCustomThrottle(TestNonPublicCustomThrottle.class)
                 .create();
     }
 
     @Test(expected = RuntimeException.class)
     public void throwsException_whenCustomCallbackIsNotFound() {
-        CallbackThrottleCreator.ByCustomThrottle(TestNotFoundCustomThrottle.class)
+        CallbackThrottleCreator.byCustomThrottle(TestNotFoundCustomThrottle.class)
                 .create();
     }
 
     @Test(expected = RuntimeException.class)
     public void throwsException_whenCustomCallbackIsNotInstantiable() {
-        CallbackThrottleCreator.ByCustomThrottle(TestNonInstantiableCustomThrottle.class)
+        CallbackThrottleCreator.byCustomThrottle(TestNonInstantiableCustomThrottle.class)
                 .create();
     }
 
     @Test
     public void createsCustomThrottle() {
-        CallbackThrottle callbackThrottle = CallbackThrottleCreator.ByCustomThrottle(TestValidCustomThrottle.class)
+        CallbackThrottle callbackThrottle = CallbackThrottleCreator.byCustomThrottle(TestValidCustomThrottle.class)
                 .create();
 
         assertThat(callbackThrottle).isInstanceOf(TestValidCustomThrottle.class);

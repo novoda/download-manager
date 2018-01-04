@@ -1,0 +1,37 @@
+apply plugin: 'com.novoda.static-analysis'
+
+staticAnalysis {
+    penalty {
+        maxErrors = 0
+//      Need to address GH Issue #284 before reducing.
+        maxWarnings = 3
+    }
+
+    checkstyle {
+        toolVersion checkstyleVersion
+        exclude project.fileTree('src/test/java')
+        exclude project.fileTree('src/testDebug/java')
+        configFile teamPropsFile('static-analysis/checkstyle-modules.xml')
+        includeVariants { variant -> excludeTestAndRelease(variant) }
+    }
+
+    pmd {
+        toolVersion pmdVersion
+        exclude project.fileTree('src/test/java')
+        exclude project.fileTree('src/testDebug/java')
+
+        ruleSetFiles = rootProject.files('team-props/static-analysis/pmd-rules.xml')
+        ruleSets = []   // Note: this is a workaround to make the <exclude-pattern>s in pmd-rules.xml actually work
+        includeVariants { variant -> excludeTestAndRelease(variant) }
+    }
+
+    findbugs {
+        toolVersion findbugsVersion
+        excludeFilter teamPropsFile('static-analysis/findbugs-excludes.xml')
+        includeVariants { variant -> excludeTestAndRelease(variant) }
+    }
+}
+
+static boolean excludeTestAndRelease(variant) {
+    return !variant.name.toLowerCase().endsWith('test') && !variant.name.toLowerCase().endsWith('release')
+}

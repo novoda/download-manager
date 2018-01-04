@@ -29,6 +29,7 @@ public final class DownloadManagerBuilder {
 
     private static final Object LOCK = new Object();
     private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
+    private static final int TIMEOUT = 5;
 
     private final Context applicationContext;
     private final Handler callbackHandler;
@@ -59,9 +60,9 @@ public final class DownloadManagerBuilder {
 
         // Network downloader
         OkHttpClient okHttpClient = new OkHttpClient();
-        okHttpClient.setConnectTimeout(5, TimeUnit.SECONDS);
-        okHttpClient.setWriteTimeout(5, TimeUnit.SECONDS);
-        okHttpClient.setReadTimeout(5, TimeUnit.SECONDS);
+        okHttpClient.setConnectTimeout(TIMEOUT, TimeUnit.SECONDS);
+        okHttpClient.setWriteTimeout(TIMEOUT, TimeUnit.SECONDS);
+        okHttpClient.setReadTimeout(TIMEOUT, TimeUnit.SECONDS);
         HttpClient httpClient = new WrappedOkHttpClient(okHttpClient);
 
         NetworkRequestCreator requestCreator = new NetworkRequestCreator();
@@ -96,6 +97,7 @@ public final class DownloadManagerBuilder {
         );
     }
 
+    @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})     // Can't group anymore these are customisable options.
     private DownloadManagerBuilder(Context applicationContext,
                                    Handler callbackHandler,
                                    FilePersistenceCreator filePersistenceCreator,
@@ -262,11 +264,11 @@ public final class DownloadManagerBuilder {
                                                                Class<? extends CallbackThrottle> customCallbackThrottle) {
         switch (callbackThrottleType) {
             case THROTTLE_BY_TIME:
-                return CallbackThrottleCreator.ByTime(timeUnit, frequency);
+                return CallbackThrottleCreator.byTime(timeUnit, frequency);
             case THROTTLE_BY_PROGRESS_INCREASE:
-                return CallbackThrottleCreator.ByProgressIncrease();
+                return CallbackThrottleCreator.byProgressIncrease();
             case CUSTOM:
-                return CallbackThrottleCreator.ByCustomThrottle(customCallbackThrottle);
+                return CallbackThrottleCreator.byCustomThrottle(customCallbackThrottle);
             default:
                 throw new IllegalStateException("callbackThrottle type " + callbackThrottleType + " not implemented yet");
         }

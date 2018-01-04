@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  name="Project PMD rules"
+  xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+  xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+
+  <description>PMD rules for the Project codebase.</description>
+
+  <exclude-pattern>.*\.R\$.*</exclude-pattern>
+  <exclude-pattern>.*Test.*</exclude-pattern>
+
+  <rule ref="rulesets/java/strictexception.xml">
+    <!-- Ignored because of the Callable pattern -->
+    <exclude name="SignatureDeclareThrowsException" />
+  </rule>
+  <rule ref="rulesets/java/typeresolution.xml">
+    <!-- Ignored because of the Callable pattern -->
+    <exclude name="SignatureDeclareThrowsException" />
+  </rule>
+
+  <rule ref="rulesets/java/naming.xml/ShortMethodName">
+    <properties>
+      <property name="xpath">
+        <value>
+          //MethodDeclarator[string-length(@Image) &lt; 2]
+        </value>
+      </property>
+    </properties>
+  </rule>
+
+  <rule ref="rulesets/java/braces.xml" />
+
+  <rule ref="rulesets/java/design.xml">
+    <exclude name="TooFewBranchesForASwitchStatement" />
+    <exclude name="EmptyMethodInAbstractClassShouldBeAbstract" />
+    <exclude name="FieldDeclarationsShouldBeAtStartOfClass" />
+    <exclude name="ConfusingTernary" />
+    <exclude name="AccessorMethodGeneration" />
+  </rule>
+
+  <rule ref="rulesets/java/design.xml/EmptyMethodInAbstractClassShouldBeAbstract">
+    <priority>5</priority>
+  </rule>
+
+  <!-- Suppress ImmutableField check for Api models -->
+  <rule ref="rulesets/java/design.xml/ImmutableField">
+    <properties>
+      <property name="violationSuppressXPath"
+        value="//ClassOrInterfaceDeclaration[starts-with(@Image, 'Api')]//FieldDeclaration" />
+    </properties>
+  </rule>
+
+  <rule ref="rulesets/java/unusedcode.xml" />
+  <rule ref="rulesets/java/logging-java.xml" />
+
+  <rule ref="rulesets/java/strings.xml" />
+
+  <!-- Suppress AvoidDuplicateLiterals check for annotations -->
+  <rule ref="rulesets/java/strings.xml/AvoidDuplicateLiterals">
+    <properties>
+      <property name="skipAnnotations" value="true" />
+    </properties>
+  </rule>
+
+  <rule ref="rulesets/java/migrating.xml" />
+  <rule ref="rulesets/java/optimizations.xml">
+    <exclude name="LocalVariableCouldBeFinal" />
+    <exclude name="MethodArgumentCouldBeFinal" />
+    <exclude name="AvoidInstantiatingObjectsInLoops" />
+  </rule>
+  <rule ref="rulesets/java/basic.xml" />
+  <rule ref="rulesets/java/sunsecure.xml" />
+  <rule ref="rulesets/java/coupling.xml">
+    <exclude name="LoosePackageCoupling" />
+    <!-- LawOfDemeter seems to be bugged -->
+    <exclude name="LawOfDemeter" />
+  </rule>
+
+  <rule ref="rulesets/java/imports.xml">
+    <exclude name="TooManyStaticImports" />
+  </rule>
+
+  <rule ref="rulesets/java/junit.xml" />
+  <rule ref="rulesets/java/naming.xml">
+    <exclude name="AbstractNaming" />
+    <exclude name="LongVariable" />
+    <exclude name="ShortVariable" />
+    <exclude name="ShortClassName" />
+    <exclude name="AvoidFieldNameMatchingMethodName" />
+  </rule>
+
+  <rule ref="rulesets/java/codesize.xml">
+    <exclude name="TooManyMethods" />
+    <exclude name="TooManyFields" />
+  </rule>
+
+  <!-- Suppress CyclomaticComplexity check for equals and hashCode -->
+  <rule ref="rulesets/java/codesize.xml/CyclomaticComplexity">
+    <properties>
+      <property name="violationSuppressXPath"
+        value="//MethodDeclarator[@Image='equals' or @Image='hashCode']" />
+    </properties>
+  </rule>
+
+  <!-- Suppress ModifiedCyclomaticComplexity check for equals and hashCode -->
+  <rule ref="rulesets/java/codesize.xml/ModifiedCyclomaticComplexity">
+    <properties>
+      <property name="violationSuppressXPath"
+        value="//MethodDeclarator[@Image='equals' or @Image='hashCode']" />
+    </properties>
+  </rule>
+
+  <!-- Suppress StdCyclomaticComplexity check for equals and hashCode -->
+  <rule ref="rulesets/java/codesize.xml/StdCyclomaticComplexity">
+    <properties>
+      <property name="violationSuppressXPath"
+        value="//MethodDeclarator[@Image='equals' or @Image='hashCode']" />
+    </properties>
+  </rule>
+
+  <!-- Suppress NPathComplexity check for equals and hashCode -->
+  <rule ref="rulesets/java/codesize.xml/NPathComplexity">
+    <properties>
+      <property name="violationSuppressXPath"
+        value="//MethodDeclarator[@Image='equals' or @Image='hashCode']" />
+    </properties>
+  </rule>
+
+  <rule ref="rulesets/java/finalizers.xml" />
+  <rule ref="rulesets/java/logging-jakarta-commons.xml" />
+  <rule ref="rulesets/java/clone.xml" />
+  <rule ref="rulesets/java/android.xml" />
+
+</ruleset>

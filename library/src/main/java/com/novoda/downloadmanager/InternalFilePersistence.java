@@ -122,7 +122,7 @@ class InternalFilePersistence implements FilePersistence {
         try {
             file.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(e, "Failed to close: " + fileName);
         }
     }
 
