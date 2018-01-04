@@ -94,14 +94,6 @@
     <exclude name="TooManyFields" />
   </rule>
 
-  <!-- Suppress ExcessiveParameterList check for Api models ctors and factory methods -->
-  <rule ref="rulesets/java/codesize.xml/ExcessiveParameterList">
-    <properties>
-      <property name="violationSuppressXPath"
-        value="//ClassOrInterfaceDeclaration[starts-with(@Image, 'Api')]//MethodDeclaration[@Static = 'true' and @Private = 'false'] | //ClassOrInterfaceDeclaration[starts-with(@Image, 'Api')]//ConstructorDeclaration" />
-    </properties>
-  </rule>
-
   <!-- Suppress CyclomaticComplexity check for equals and hashCode -->
   <rule ref="rulesets/java/codesize.xml/CyclomaticComplexity">
     <properties>
