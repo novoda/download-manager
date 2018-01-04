@@ -44,10 +44,11 @@ dependencies {
 }
 
 publish {
+    repoName = 'maven-private'
     userOrg = 'novoda'
     groupId = 'com.novoda'
     artifactId = 'download-manager'
-    publishVersion = '0.3.0'
+    publishVersion = 'SNAPSHOT-2.0.0'
     description = 'Download manager based on AOSP DM but allowing downloading to internal private storage.'
     website = 'https://github.com/novoda/download-manager'
 }
