@@ -147,11 +147,6 @@
     <module name="FinalClass" />
     <module name="HideUtilityClassConstructor" />
     <module name="InterfaceIsType" />
-    <module name="VisibilityModifier">
-      <!-- Ignore fields injected by Dagger as it requires at least package private visibility -->
-      <property name="ignoreAnnotationCanonicalNames"
-        value="javax.inject.Inject" />
-    </module>
 
     <!-- Miscellaneous other checks.                   -->
     <!-- See http://checkstyle.sf.net/config_misc.html -->
