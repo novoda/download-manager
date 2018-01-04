@@ -24,6 +24,7 @@ public class DemoApplication extends Application {
 
         liteDownloadManagerCommands = DownloadManagerBuilder
                 .newInstance(this, handler, R.mipmap.ic_launcher_round)
+                .withFilePersistenceExternal()
                 .build();
     }
 

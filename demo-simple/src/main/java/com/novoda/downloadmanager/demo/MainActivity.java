@@ -17,8 +17,10 @@ import com.novoda.downloadmanager.DownloadBatchCallback;
 import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
+import com.novoda.downloadmanager.DownloadFilePathCallback;
 import com.novoda.downloadmanager.DownloadMigrator;
 import com.novoda.downloadmanager.DownloadMigratorBuilder;
+import com.novoda.downloadmanager.FilePath;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.LocalFilesDirectory;
 import com.novoda.downloadmanager.LocalFilesDirectoryFactory;
@@ -36,7 +38,9 @@ public class MainActivity extends AppCompatActivity {
 
     private static final DownloadBatchId BATCH_ID_1 = DownloadBatchIdCreator.createFrom("batch_id_1");
     private static final DownloadBatchId BATCH_ID_2 = DownloadBatchIdCreator.createFrom("batch_id_2");
-    private static final String FILE_URL = "http://ipv4.download.thinkbroadband.com/10MB.zip";
+    private static final String FIVE_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/5MB.zip";
+    private static final String TEN_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/10MB.zip";
+    private static final String TWENTY_FILE_URL = "http://ipv4.download.thinkbroadband.com/20MB.zip";
 
     private TextView databaseCloningUpdates;
     private TextView databaseMigrationUpdates;
@@ -99,14 +103,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Batch batch = new Batch.Builder(BATCH_ID_1, "Made in chelsea")
-                        .addFile(FILE_URL)
-                        .addFile(FILE_URL)
+                        .addFile(FIVE_MB_FILE_URL)
+                        .addFile(TEN_MB_FILE_URL)
                         .build();
                 liteDownloadManagerCommands.download(batch);
 
                 batch = new Batch.Builder(BATCH_ID_2, "Hollyoaks")
-                        .addFile(FILE_URL)
-                        .addFile(FILE_URL)
+                        .addFile(TEN_MB_FILE_URL)
+                        .addFile(TWENTY_FILE_URL)
                         .build();
                 liteDownloadManagerCommands.download(batch);
             }
@@ -129,6 +133,19 @@ public class MainActivity extends AppCompatActivity {
                 for (String fileName : localFilesDirectory.contents()) {
                     Log.d("LogFileDirectory", fileName);
                 }
+            }
+        });
+
+        View buttonLogLocalUri = findViewById(R.id.button_log_local_uri);
+        buttonLogLocalUri.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                liteDownloadManagerCommands.getDownloadFilePath(TWENTY_FILE_URL, new DownloadFilePathCallback() {
+                    @Override
+                    public void onReceived(FilePath filePath) {
+                        Log.d("LocalUriForTwentyMBFile: ", filePath.path());
+                    }
+                });
             }
         });
 

@@ -159,4 +159,33 @@ class DownloadManager implements LiteDownloadManagerCommands {
 
         callback.onReceived(downloadBatchStatuses);
     }
+
+    @Override
+    public void getDownloadFilePath(String networkUri, DownloadFilePathCallback callback) {
+        if (downloadService == null) {
+            ensureDownloadServiceExistsAndGetDownloadFilePath(networkUri, callback);
+        } else {
+            executeGetDownloadFilePath(networkUri, callback);
+        }
+    }
+
+    private void ensureDownloadServiceExistsAndGetDownloadFilePath(final String uri, final DownloadFilePathCallback callback) {
+        executor.submit(new Runnable() {
+            @Override
+            public void run() {
+                waitForDownloadService();
+                executeGetDownloadFilePath(uri, callback);
+            }
+        });
+    }
+
+    private void executeGetDownloadFilePath(String uri, DownloadFilePathCallback callback) {
+        for (DownloadBatch downloadBatch : downloadBatchMap.values()) {
+            DownloadFile downloadFile = downloadBatch.getDownloadFile(uri);
+            if (downloadFile != null) {
+                callback.onReceived(downloadFile.filePath());
+                return;
+            }
+        }
+    }
 }

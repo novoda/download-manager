@@ -19,7 +19,8 @@ class DownloadFile {
     private InternalFileSize fileSize;
     private FilePath filePath;
 
-    @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"}) // Model that knows how to interact with low-level components.
+    @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
+        // Model that knows how to interact with low-level components.
     DownloadFile(DownloadBatchId downloadBatchId,
                  String url,
                  DownloadFileStatus downloadFileStatus,
@@ -203,6 +204,14 @@ class DownloadFile {
 
     DownloadFileId id() {
         return downloadFileStatus.getDownloadFileId();
+    }
+
+    boolean matches(String networkUrl) {
+        return networkUrl.equals(url);
+    }
+
+    FilePath filePath() {
+        return filePath;
     }
 
     interface Callback {
