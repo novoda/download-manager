@@ -9,7 +9,7 @@
   <string name="start_downloading">Start downloading</string>
   <string name="delete_all">Delete all</string>
   <string name="log_file_directory">Log File Directory</string>
-  <string name="log_local_uri">Log Local Uri</string>
+  <string name="log_download_file_status">Log Download File Status</string>
 
   <string-array name="file_sizes">
     <item>10MB</item>
