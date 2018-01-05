@@ -103,14 +103,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Batch batch = new Batch.Builder(BATCH_ID_1, "Made in chelsea")
-                        .addFile(TEN_MB_FILE_URL)
+                        .addFile(FIVE_MB_FILE_URL)
                         .addFile(TEN_MB_FILE_URL)
                         .build();
                 liteDownloadManagerCommands.download(batch);
 
                 batch = new Batch.Builder(BATCH_ID_2, "Hollyoaks")
                         .addFile(TEN_MB_FILE_URL)
-                        .addFile(TEN_MB_FILE_URL)
+                        .addFile(TWENTY_FILE_URL)
                         .build();
                 liteDownloadManagerCommands.download(batch);
             }
