@@ -9,7 +9,7 @@ class DownloadFile {
 
     private final DownloadBatchId downloadBatchId;
     private final String url;
-    private final LiteDownloadFileStatus downloadFileStatus;
+    private final InternalDownloadFileStatus downloadFileStatus;
     private final FileName fileName;
     private final FileDownloader fileDownloader;
     private final FileSizeRequester fileSizeRequester;
@@ -23,7 +23,7 @@ class DownloadFile {
     @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
     DownloadFile(DownloadBatchId downloadBatchId,
                  String url,
-                 LiteDownloadFileStatus downloadFileStatus,
+                 InternalDownloadFileStatus downloadFileStatus,
                  FileName fileName,
                  FilePath filePath,
                  InternalFileSize fileSize,
@@ -216,6 +216,6 @@ class DownloadFile {
 
     interface Callback {
 
-        void onUpdate(LiteDownloadFileStatus downloadFileStatus);
+        void onUpdate(InternalDownloadFileStatus downloadFileStatus);
     }
 }

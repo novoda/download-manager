@@ -24,10 +24,10 @@ final class DownloadBatchFactory {
             InternalFileSize fileSize = InternalFileSizeCreator.unknownFileSize();
             DownloadFileId downloadFileId = DownloadFileId.from(batch);
             FilePath filePath = FilePathCreator.unknownFilePath();
-            LiteDownloadFileStatus downloadFileStatus = new LiteDownloadFileStatus(
+            InternalDownloadFileStatus downloadFileStatus = new LiteDownloadFileStatus(
                     batch.getDownloadBatchId(),
                     downloadFileId,
-                    LiteDownloadFileStatus.Status.QUEUED,
+                    InternalDownloadFileStatus.Status.QUEUED,
                     fileSize,
                     filePath
             );

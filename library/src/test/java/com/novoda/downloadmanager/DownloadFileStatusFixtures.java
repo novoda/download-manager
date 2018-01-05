@@ -4,7 +4,7 @@ class DownloadFileStatusFixtures {
 
     private DownloadBatchId downloadBatchId = DownloadBatchIdCreator.createFrom("batch_01");
     private DownloadFileId downloadFileId = DownloadFileId.from("01");
-    private LiteDownloadFileStatus.Status status = LiteDownloadFileStatus.Status.QUEUED;
+    private InternalDownloadFileStatus.Status status = InternalDownloadFileStatus.Status.QUEUED;
     private FileSize fileSize = InternalFileSizeFixtures.aFileSize().build();
     private FilePath localFilePath = FilePathCreator.unknownFilePath();
 
@@ -22,7 +22,7 @@ class DownloadFileStatusFixtures {
         return this;
     }
 
-    DownloadFileStatusFixtures withStatus(LiteDownloadFileStatus.Status status) {
+    DownloadFileStatusFixtures withStatus(InternalDownloadFileStatus.Status status) {
         this.status = status;
         return this;
     }
@@ -37,7 +37,7 @@ class DownloadFileStatusFixtures {
         return this;
     }
 
-    LiteDownloadFileStatus build() {
+    InternalDownloadFileStatus build() {
         return new LiteDownloadFileStatus(
                 downloadBatchId,
                 downloadFileId,

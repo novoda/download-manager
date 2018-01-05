@@ -52,7 +52,7 @@ class DownloadsFilePersistence {
             String url = filePersisted.url();
 
             FilePath filePath = filePersisted.filePath();
-            LiteDownloadFileStatus downloadFileStatus = new LiteDownloadFileStatus(
+            InternalDownloadFileStatus downloadFileStatus = new LiteDownloadFileStatus(
                     batchId,
                     downloadFileId,
                     getFileStatusFrom(batchStatus),
@@ -82,20 +82,20 @@ class DownloadsFilePersistence {
         return downloadFiles;
     }
 
-    private LiteDownloadFileStatus.Status getFileStatusFrom(DownloadBatchStatus.Status batchStatus) {
+    private InternalDownloadFileStatus.Status getFileStatusFrom(DownloadBatchStatus.Status batchStatus) {
         switch (batchStatus) {
             case QUEUED:
-                return LiteDownloadFileStatus.Status.QUEUED;
+                return InternalDownloadFileStatus.Status.QUEUED;
             case DOWNLOADING:
-                return LiteDownloadFileStatus.Status.DOWNLOADING;
+                return InternalDownloadFileStatus.Status.DOWNLOADING;
             case PAUSED:
-                return LiteDownloadFileStatus.Status.PAUSED;
+                return InternalDownloadFileStatus.Status.PAUSED;
             case ERROR:
-                return LiteDownloadFileStatus.Status.ERROR;
+                return InternalDownloadFileStatus.Status.ERROR;
             case DELETION:
-                return LiteDownloadFileStatus.Status.DELETION;
+                return InternalDownloadFileStatus.Status.DELETION;
             case DOWNLOADED:
-                return LiteDownloadFileStatus.Status.DOWNLOADING;
+                return InternalDownloadFileStatus.Status.DOWNLOADING;
             default:
                 throw new InvalidParameterException("Batch status " + batchStatus + " is unsupported");
         }
