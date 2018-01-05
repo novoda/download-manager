@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager;
 
+import android.os.Handler;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +11,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
 
     private final Object waitForDownloadService;
     private final ExecutorService executor;
+    private final Handler callbackHandler;
     private final Map<DownloadBatchId, DownloadBatch> downloadBatchMap;
     private final List<DownloadBatchCallback> callbacks;
     private final FileOperations fileOperations;
@@ -17,8 +20,11 @@ class DownloadManager implements LiteDownloadManagerCommands {
 
     private DownloadService downloadService;
 
+    // DownloadManager is a complex object.
+    @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
     DownloadManager(Object waitForDownloadService,
                     ExecutorService executor,
+                    Handler callbackHandler,
                     Map<DownloadBatchId, DownloadBatch> downloadBatchMap,
                     List<DownloadBatchCallback> callbacks,
                     FileOperations fileOperations,
@@ -26,6 +32,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
                     LiteDownloadManagerDownloader downloader) {
         this.waitForDownloadService = waitForDownloadService;
         this.executor = executor;
+        this.callbackHandler = callbackHandler;
         this.downloadBatchMap = downloadBatchMap;
         this.callbacks = callbacks;
         this.fileOperations = fileOperations;
@@ -52,7 +59,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
                 downloader.download(downloadBatch, downloadBatchMap);
             }
 
-            callback.onAllDownloadsSubmitted();
+            callbackHandler.post(callback::onAllDownloadsSubmitted);
         };
     }
 
@@ -128,14 +135,14 @@ class DownloadManager implements LiteDownloadManagerCommands {
         }
     }
 
-    private void executeGetAllDownloadBatchStatuses(AllBatchStatusesCallback callback) {
-        List<DownloadBatchStatus> downloadBatchStatuses = new ArrayList<>(downloadBatchMap.size());
+    private void executeGetAllDownloadBatchStatuses(final AllBatchStatusesCallback callback) {
+        final List<DownloadBatchStatus> downloadBatchStatuses = new ArrayList<>(downloadBatchMap.size());
 
         for (DownloadBatch downloadBatch : downloadBatchMap.values()) {
             downloadBatchStatuses.add(downloadBatch.status());
         }
 
-        callback.onReceived(downloadBatchStatuses);
+        callbackHandler.post(() -> callback.onReceived(downloadBatchStatuses));
     }
 
     @Override
@@ -150,11 +157,11 @@ class DownloadManager implements LiteDownloadManagerCommands {
         }
     }
 
-    private void executeFirstLocalPathForDownloadWithMatching(String networkUri, DownloadFilePathCallback callback) {
+    private void executeFirstLocalPathForDownloadWithMatching(String networkUri, final DownloadFilePathCallback callback) {
         for (DownloadBatch downloadBatch : downloadBatchMap.values()) {
-            DownloadFile downloadFile = downloadBatch.getDownloadFile(networkUri);
+            final DownloadFile downloadFile = downloadBatch.getDownloadFile(networkUri);
             if (downloadFile != null) {
-                callback.onReceived(downloadFile.filePath());
+                callbackHandler.post(() -> callback.onReceived(downloadFile.filePath()));
                 return;
             }
         }

@@ -245,6 +245,7 @@ public final class DownloadManagerBuilder {
         downloadManager = new DownloadManager(
                 LOCK,
                 EXECUTOR,
+                callbackHandler,
                 new HashMap<>(),
                 callbacks,
                 fileOperations,
