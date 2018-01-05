@@ -248,6 +248,7 @@ public final class DownloadManagerBuilder {
         downloadManager = new DownloadManager(
                 LOCK,
                 EXECUTOR,
+                callbackHandler,
                 new HashMap<DownloadBatchId, DownloadBatch>(),
                 callbacks,
                 fileOperations,

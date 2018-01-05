@@ -57,7 +57,7 @@ public class DownloadManagerTest {
 
         downloadManager = new DownloadManager(
                 lock,
-                executorService,
+                executorService, ,
                 downloadBatches,
                 downloadBatchCallbacks,
                 fileOperations,
