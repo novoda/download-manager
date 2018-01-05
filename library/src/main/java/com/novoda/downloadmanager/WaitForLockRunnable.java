@@ -2,7 +2,7 @@ package com.novoda.downloadmanager;
 
 import com.novoda.notils.logger.simple.Log;
 
-class WaitForLockRunnable {
+final class WaitForLockRunnable {
 
     interface Action {
         void performAction();
