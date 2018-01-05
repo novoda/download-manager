@@ -21,13 +21,17 @@ class LiteDownloadFileStatus implements InternalDownloadFileStatus {
     }
 
     @Override
-    public void update(FileSize fileSize) {
+    public void update(FileSize fileSize, FilePath localFilePath) {
         this.fileSize = fileSize;
+        this.localFilePath = localFilePath;
+
+        if (fileSize.currentSize() == fileSize.totalSize()) {
+            markAsDownloaded();
+        }
     }
 
-    @Override
-    public void update(FilePath filePath) {
-        this.localFilePath = filePath;
+    private void markAsDownloaded() {
+        status = Status.DOWNLOADED;
     }
 
     @Override
@@ -110,5 +114,17 @@ class LiteDownloadFileStatus implements InternalDownloadFileStatus {
     @Override
     public Status status() {
         return status;
+    }
+
+    @Override
+    public String toString() {
+        return "LiteDownloadFileStatus{" +
+                "downloadBatchId=" + downloadBatchId +
+                ", downloadFileId=" + downloadFileId +
+                ", fileSize=" + fileSize +
+                ", localFilePath=" + localFilePath +
+                ", status=" + status +
+                ", downloadError=" + downloadError +
+                '}';
     }
 }

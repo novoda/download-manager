@@ -68,7 +68,7 @@ class DownloadFile {
         persistSync();
 
         if (fileSize.currentSize() == fileSize.totalSize()) {
-            downloadFileStatus.update(fileSize);
+            downloadFileStatus.update(fileSize, filePath);
             callback.onUpdate(downloadFileStatus);
             return;
         }
@@ -83,7 +83,7 @@ class DownloadFile {
 
                 if (downloadFileStatus.isMarkedAsDownloading()) {
                     fileSize.addToCurrentSize(bytesRead);
-                    downloadFileStatus.update(fileSize);
+                    downloadFileStatus.update(fileSize, filePath);
                     callback.onUpdate(downloadFileStatus);
                 }
             }
@@ -210,8 +210,8 @@ class DownloadFile {
         return networkUrl.equals(url);
     }
 
-    FilePath filePath() {
-        return filePath;
+    DownloadFileStatus fileStatus() {
+        return downloadFileStatus;
     }
 
     interface Callback {

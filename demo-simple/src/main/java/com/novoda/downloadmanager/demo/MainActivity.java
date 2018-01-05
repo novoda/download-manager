@@ -143,9 +143,9 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private final View.OnClickListener logLocalFilePathOfDownloadOnClick = v -> liteDownloadManagerCommands.getFirstLocalPathForDownloadWithMatching(
+    private final View.OnClickListener logLocalFilePathOfDownloadOnClick = v -> liteDownloadManagerCommands.getDownloadStatusWithMatching(
             TWENTY_FILE_URL,
-            filePath -> Log.d("LocalUriForTwentyMBFile: ", filePath.path())
+            downloadFileStatus -> Log.d("DownloadStatusForTwentyMBFile: ", downloadFileStatus)
     );
 
     private final DownloadBatchCallback callback = downloadBatchStatus -> {

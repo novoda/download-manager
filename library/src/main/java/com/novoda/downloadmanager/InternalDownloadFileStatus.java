@@ -2,11 +2,9 @@ package com.novoda.downloadmanager;
 
 import android.support.annotation.Nullable;
 
-interface InternalDownloadFileStatus extends InterfaceDownloadFileStatus {
+interface InternalDownloadFileStatus extends DownloadFileStatus {
 
-    void update(FileSize fileSize);
-
-    void update(FilePath filePath);
+    void update(FileSize fileSize, FilePath localFilePath);
 
     boolean isMarkedAsDownloading();
 

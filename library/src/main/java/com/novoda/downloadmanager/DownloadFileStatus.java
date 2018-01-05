@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-interface InterfaceDownloadFileStatus {
+public interface DownloadFileStatus {
 
     enum Status {
         PAUSED,
