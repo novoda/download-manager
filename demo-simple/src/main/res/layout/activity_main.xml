@@ -127,14 +127,16 @@
       android:id="@+id/button_log_file_directory"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="@string/log_file_directory" />
+      android:text="@string/log_file_directory"
+      tools:ignore="ButtonStyle" />
 
     <Button
       android:id="@+id/button_log_local_uri"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="@string/log_local_uri" />
-    
+      android:text="@string/log_local_uri"
+      tools:ignore="ButtonStyle" />
+
   </LinearLayout>
 
 </LinearLayout>
