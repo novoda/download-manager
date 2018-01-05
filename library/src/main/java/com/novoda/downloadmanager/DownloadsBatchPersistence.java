@@ -27,110 +27,98 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence {
                       final DownloadBatchId downloadBatchId,
                       final DownloadBatchStatus.Status status,
                       final List<DownloadFile> downloadFiles) {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                downloadsPersistence.startTransaction();
+        executor.execute(() -> {
+            downloadsPersistence.startTransaction();
 
-                try {
-                    LiteDownloadsBatchPersisted batchPersisted = new LiteDownloadsBatchPersisted(downloadBatchTitle, downloadBatchId, status);
-                    downloadsPersistence.persistBatch(batchPersisted);
+            try {
+                LiteDownloadsBatchPersisted batchPersisted = new LiteDownloadsBatchPersisted(downloadBatchTitle, downloadBatchId, status);
+                downloadsPersistence.persistBatch(batchPersisted);
 
-                    for (DownloadFile downloadFile : downloadFiles) {
-                        downloadFile.persistSync();
-                    }
-
-                    downloadsPersistence.transactionSuccess();
-                } finally {
-                    downloadsPersistence.endTransaction();
+                for (DownloadFile downloadFile : downloadFiles) {
+                    downloadFile.persistSync();
                 }
+
+                downloadsPersistence.transactionSuccess();
+            } finally {
+                downloadsPersistence.endTransaction();
             }
         });
     }
 
     void loadAsync(final FileOperations fileOperations, final LoadBatchesCallback callback) {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                List<DownloadsBatchPersisted> batchPersistedList = downloadsPersistence.loadBatches();
+        executor.execute(() -> {
+            List<DownloadsBatchPersisted> batchPersistedList = downloadsPersistence.loadBatches();
 
-                List<DownloadBatch> downloadBatches = new ArrayList<>(batchPersistedList.size());
-                for (DownloadsBatchPersisted batchPersisted : batchPersistedList) {
-                    DownloadBatchStatus.Status status = batchPersisted.downloadBatchStatus();
-                    DownloadBatchId downloadBatchId = batchPersisted.downloadBatchId();
-                    DownloadBatchTitle downloadBatchTitle = batchPersisted.downloadBatchTitle();
-                    InternalDownloadBatchStatus liteDownloadBatchStatus = new LiteDownloadBatchStatus(
-                            downloadBatchId,
-                            downloadBatchTitle,
-                            status
-                    );
+            List<DownloadBatch> downloadBatches = new ArrayList<>(batchPersistedList.size());
+            for (DownloadsBatchPersisted batchPersisted : batchPersistedList) {
+                DownloadBatchStatus.Status status = batchPersisted.downloadBatchStatus();
+                DownloadBatchId downloadBatchId = batchPersisted.downloadBatchId();
+                DownloadBatchTitle downloadBatchTitle = batchPersisted.downloadBatchTitle();
+                InternalDownloadBatchStatus liteDownloadBatchStatus = new LiteDownloadBatchStatus(
+                        downloadBatchId,
+                        downloadBatchTitle,
+                        status
+                );
 
-                    List<DownloadFile> downloadFiles = downloadsFilePersistence.loadSync(
-                            downloadBatchId,
-                            status,
-                            fileOperations,
-                            downloadsFilePersistence
-                    );
+                List<DownloadFile> downloadFiles = downloadsFilePersistence.loadSync(
+                        downloadBatchId,
+                        status,
+                        fileOperations,
+                        downloadsFilePersistence
+                );
 
-                    Map<DownloadFileId, Long> downloadedFileSizeMap = new HashMap<>(downloadFiles.size());
+                Map<DownloadFileId, Long> downloadedFileSizeMap = new HashMap<>(downloadFiles.size());
 
-                    long currentBytesDownloaded = 0;
-                    long totalBatchSizeBytes = 0;
-                    for (DownloadFile downloadFile : downloadFiles) {
-                        downloadedFileSizeMap.put(downloadFile.id(), downloadFile.getCurrentDownloadedBytes());
-                        currentBytesDownloaded += downloadFile.getCurrentDownloadedBytes();
-                        totalBatchSizeBytes += downloadFile.getTotalSize();
-                    }
-
-                    liteDownloadBatchStatus.update(currentBytesDownloaded, totalBatchSizeBytes);
-
-                    CallbackThrottle callbackThrottle = callbackThrottleCreator.create();
-
-                    DownloadBatch downloadBatch = new DownloadBatch(
-                            downloadBatchTitle,
-                            downloadBatchId,
-                            downloadFiles,
-                            downloadedFileSizeMap,
-                            liteDownloadBatchStatus,
-                            DownloadsBatchPersistence.this,
-                            callbackThrottle
-                    );
-
-                    downloadBatches.add(downloadBatch);
+                long currentBytesDownloaded = 0;
+                long totalBatchSizeBytes = 0;
+                for (DownloadFile downloadFile : downloadFiles) {
+                    downloadedFileSizeMap.put(downloadFile.id(), downloadFile.getCurrentDownloadedBytes());
+                    currentBytesDownloaded += downloadFile.getCurrentDownloadedBytes();
+                    totalBatchSizeBytes += downloadFile.getTotalSize();
                 }
 
-                callback.onLoaded(downloadBatches);
+                liteDownloadBatchStatus.update(currentBytesDownloaded, totalBatchSizeBytes);
+
+                CallbackThrottle callbackThrottle = callbackThrottleCreator.create();
+
+                DownloadBatch downloadBatch = new DownloadBatch(
+                        downloadBatchTitle,
+                        downloadBatchId,
+                        downloadFiles,
+                        downloadedFileSizeMap,
+                        liteDownloadBatchStatus,
+                        DownloadsBatchPersistence.this,
+                        callbackThrottle
+                );
+
+                downloadBatches.add(downloadBatch);
             }
+
+            callback.onLoaded(downloadBatches);
         });
     }
 
     void deleteAsync(final DownloadBatchId downloadBatchId) {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                downloadsPersistence.startTransaction();
-                try {
-                    downloadsPersistence.delete(downloadBatchId);
-                    downloadsPersistence.transactionSuccess();
-                } finally {
-                    downloadsPersistence.endTransaction();
-                }
+        executor.execute(() -> {
+            downloadsPersistence.startTransaction();
+            try {
+                downloadsPersistence.delete(downloadBatchId);
+                downloadsPersistence.transactionSuccess();
+            } finally {
+                downloadsPersistence.endTransaction();
             }
         });
     }
 
     @Override
     public void updateStatusAsync(final DownloadBatchId downloadBatchId, final DownloadBatchStatus.Status status) {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                downloadsPersistence.startTransaction();
-                try {
-                    downloadsPersistence.update(downloadBatchId, status);
-                    downloadsPersistence.transactionSuccess();
-                } finally {
-                    downloadsPersistence.endTransaction();
-                }
+        executor.execute(() -> {
+            downloadsPersistence.startTransaction();
+            try {
+                downloadsPersistence.update(downloadBatchId, status);
+                downloadsPersistence.transactionSuccess();
+            } finally {
+                downloadsPersistence.endTransaction();
             }
         });
     }

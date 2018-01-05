@@ -16,10 +16,8 @@ import com.novoda.downloadmanager.DownloadBatchCallback;
 import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
-import com.novoda.downloadmanager.DownloadFilePathCallback;
 import com.novoda.downloadmanager.DownloadMigrator;
 import com.novoda.downloadmanager.DownloadMigratorBuilder;
-import com.novoda.downloadmanager.FilePath;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.LocalFilesDirectory;
 import com.novoda.downloadmanager.LocalFilesDirectoryFactory;
@@ -28,8 +26,6 @@ import com.novoda.downloadmanager.MigrationStatus;
 import com.novoda.downloadmanager.NotificationCreator;
 import com.novoda.downloadmanager.NotificationCustomizer;
 import com.novoda.notils.logger.simple.Log;
-
-import java.util.List;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 
@@ -94,13 +90,7 @@ public class MainActivity extends AppCompatActivity {
         buttonDownload.setOnClickListener(downloadBatchesOnClick);
 
         View buttonDeleteAll = findViewById(R.id.button_delete_all);
-        buttonDeleteAll.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                liteDownloadManagerCommands.delete(BATCH_ID_1);
-                liteDownloadManagerCommands.delete(BATCH_ID_2);
-            }
-        });
+        buttonDeleteAll.setOnClickListener(deleteAllOnClick);
 
         View buttonLogFileDirectory = findViewById(R.id.button_log_file_directory);
         buttonLogFileDirectory.setOnClickListener(logFileDirectoryOnClick);
@@ -116,143 +106,93 @@ public class MainActivity extends AppCompatActivity {
         bindBatchViews();
     }
 
-    private final VersionOneDatabaseCloner.CloneCallback cloneCallback = new VersionOneDatabaseCloner.CloneCallback() {
-        @Override
-        public void onUpdate(String updateMessage) {
-            databaseCloningUpdates.setText(updateMessage);
+    private final VersionOneDatabaseCloner.CloneCallback cloneCallback = updateMessage -> databaseCloningUpdates.setText(updateMessage);
+
+    private final View.OnClickListener createDatabaseOnClick = v -> {
+        String selectedFileSize = (String) downloadFileSizeSpinner.getSelectedItem();
+        versionOneDatabaseCloner.cloneDatabaseWithDownloadSize(selectedFileSize);
+    };
+
+    private final MigrationCallback migrationCallback = migrationStatus -> databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());
+
+    private final View.OnClickListener startMigrationOnClick = v -> downloadMigrator.startMigration(migrationCallback);
+
+    private final View.OnClickListener downloadBatchesOnClick = v -> {
+        Batch batch = new Batch.Builder(BATCH_ID_1, "Made in chelsea")
+                .addFile(FIVE_MB_FILE_URL)
+                .addFile(TEN_MB_FILE_URL)
+                .build();
+        liteDownloadManagerCommands.download(batch);
+
+        batch = new Batch.Builder(BATCH_ID_2, "Hollyoaks")
+                .addFile(TEN_MB_FILE_URL)
+                .addFile(TWENTY_FILE_URL)
+                .build();
+        liteDownloadManagerCommands.download(batch);
+    };
+
+    private final View.OnClickListener deleteAllOnClick = v -> {
+        liteDownloadManagerCommands.delete(BATCH_ID_1);
+        liteDownloadManagerCommands.delete(BATCH_ID_2);
+    };
+
+    private final View.OnClickListener logFileDirectoryOnClick = v -> {
+        LocalFilesDirectory localFilesDirectory = LocalFilesDirectoryFactory.create(getApplicationContext());
+        for (String fileName : localFilesDirectory.contents()) {
+            Log.d("LogFileDirectory", fileName);
         }
     };
 
-    private final View.OnClickListener createDatabaseOnClick = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            String selectedFileSize = (String) downloadFileSizeSpinner.getSelectedItem();
-            versionOneDatabaseCloner.cloneDatabaseWithDownloadSize(selectedFileSize);
+    private final View.OnClickListener logLocalFilePathOfDownloadOnClick = v -> liteDownloadManagerCommands.getFirstLocalPathForDownloadWithMatching(
+            TWENTY_FILE_URL,
+            filePath -> Log.d("LocalUriForTwentyMBFile: ", filePath.path())
+    );
+
+    private final DownloadBatchCallback callback = downloadBatchStatus -> {
+        String status = getStatusMessage(downloadBatchStatus);
+
+        String message = "Batch " + downloadBatchStatus.getDownloadBatchTitle().asString()
+                + "\ndownloaded: " + downloadBatchStatus.percentageDownloaded() + "%"
+                + "\nbytes: " + downloadBatchStatus.bytesDownloaded()
+                + status
+                + "\n";
+
+        DownloadBatchId downloadBatchId = downloadBatchStatus.getDownloadBatchId();
+        if (downloadBatchId.equals(BATCH_ID_1)) {
+            textViewBatch1.setText(message);
+        } else if (downloadBatchId.equals(BATCH_ID_2)) {
+            textViewBatch2.setText(message);
         }
     };
 
-    View.OnClickListener startMigrationOnClick = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            downloadMigrator.startMigration(migrationCallback);
+    private String getStatusMessage(DownloadBatchStatus downloadBatchStatus) {
+        if (downloadBatchStatus.status() == ERROR) {
+            return "\nstatus: " + downloadBatchStatus.status()
+                    + " - " + downloadBatchStatus.getDownloadErrorType();
+        } else {
+            return "\nstatus: " + downloadBatchStatus.status();
         }
-    };
+    }
 
-    private final MigrationCallback migrationCallback = new MigrationCallback() {
-        @Override
-        public void onUpdate(MigrationStatus migrationStatus) {
-            databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());
-        }
-    };
-
-    private final View.OnClickListener downloadBatchesOnClick = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Batch batch = new Batch.Builder(BATCH_ID_1, "Made in chelsea")
-                    .addFile(FIVE_MB_FILE_URL)
-                    .addFile(TEN_MB_FILE_URL)
-                    .build();
-            liteDownloadManagerCommands.download(batch);
-
-            batch = new Batch.Builder(BATCH_ID_2, "Hollyoaks")
-                    .addFile(TEN_MB_FILE_URL)
-                    .addFile(TWENTY_FILE_URL)
-                    .build();
-            liteDownloadManagerCommands.download(batch);
-        }
-    };
-
-    private final View.OnClickListener logFileDirectoryOnClick = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            LocalFilesDirectory localFilesDirectory = LocalFilesDirectoryFactory.create(getApplicationContext());
-            for (String fileName : localFilesDirectory.contents()) {
-                Log.d("LogFileDirectory", fileName);
-            }
-        }
-    };
-
-    View.OnClickListener logLocalFilePathOfDownloadOnClick = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            liteDownloadManagerCommands.getFirstLocalPathForDownloadWithMatching(TWENTY_FILE_URL, new DownloadFilePathCallback() {
-                @Override
-                public void onReceived(FilePath filePath) {
-                    Log.d("LocalUriForTwentyMBFile: ", filePath.path());
-                }
-            });
-        }
-    };
-
-    private final AllBatchStatusesCallback batchStatusesCallback = new AllBatchStatusesCallback() {
-        @Override
-        public void onReceived(List<DownloadBatchStatus> downloadBatchStatuses) {
-            for (DownloadBatchStatus downloadBatchStatus : downloadBatchStatuses) {
-                callback.onUpdate(downloadBatchStatus);
-            }
+    private final AllBatchStatusesCallback batchStatusesCallback = downloadBatchStatuses -> {
+        for (DownloadBatchStatus downloadBatchStatus : downloadBatchStatuses) {
+            callback.onUpdate(downloadBatchStatus);
         }
     };
 
     private void bindBatchViews() {
         View buttonPauseDownload1 = findViewById(R.id.button_pause_downloading_1);
-        setPause(buttonPauseDownload1, BATCH_ID_1);
+        buttonPauseDownload1.setOnClickListener(v -> liteDownloadManagerCommands.pause(BATCH_ID_1));
 
         View buttonPauseDownload2 = findViewById(R.id.button_pause_downloading_2);
-        setPause(buttonPauseDownload2, BATCH_ID_2);
+        buttonPauseDownload2.setOnClickListener(v -> liteDownloadManagerCommands.pause(BATCH_ID_2));
 
         View buttonResumeDownload1 = findViewById(R.id.button_resume_downloading_1);
-        setResume(buttonResumeDownload1, BATCH_ID_1);
+        buttonResumeDownload1.setOnClickListener(v -> liteDownloadManagerCommands.resume(BATCH_ID_1));
 
         View buttonResumeDownload2 = findViewById(R.id.button_resume_downloading_2);
-        setResume(buttonResumeDownload2, BATCH_ID_2);
+        buttonResumeDownload2.setOnClickListener(v -> liteDownloadManagerCommands.resume(BATCH_ID_2));
     }
-
-    private void setPause(View button, final DownloadBatchId downloadBatchId) {
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                liteDownloadManagerCommands.pause(downloadBatchId);
-            }
-        });
-    }
-
-    private void setResume(View button, final DownloadBatchId downloadBatchId) {
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                liteDownloadManagerCommands.resume(downloadBatchId);
-            }
-        });
-    }
-
-    private final DownloadBatchCallback callback = new DownloadBatchCallback() {
-        @Override
-        public void onUpdate(DownloadBatchStatus downloadBatchStatus) {
-            String status = getStatusMessage(downloadBatchStatus);
-
-            String message = "Batch " + downloadBatchStatus.getDownloadBatchTitle().asString()
-                    + "\ndownloaded: " + downloadBatchStatus.percentageDownloaded()
-                    + "\nbytes: " + downloadBatchStatus.bytesDownloaded()
-                    + status
-                    + "\n";
-
-            DownloadBatchId downloadBatchId = downloadBatchStatus.getDownloadBatchId();
-            if (downloadBatchId.equals(BATCH_ID_1)) {
-                textViewBatch1.setText(message);
-            } else if (downloadBatchId.equals(BATCH_ID_2)) {
-                textViewBatch2.setText(message);
-            }
-        }
-
-        private String getStatusMessage(DownloadBatchStatus downloadBatchStatus) {
-            if (downloadBatchStatus.status() == ERROR) {
-                return "\nstatus: " + downloadBatchStatus.status()
-                        + " - " + downloadBatchStatus.getDownloadErrorType();
-            } else {
-                return "\nstatus: " + downloadBatchStatus.status();
-            }
-        }
-    };
 
     private static class MigrationNotificationCustomizer implements NotificationCustomizer<MigrationStatus> {
         @Override

@@ -12,15 +12,15 @@ class FileOperations {
         this.fileDownloader = fileDownloader;
     }
 
-    public FilePersistenceCreator filePersistenceCreator() {
+    FilePersistenceCreator filePersistenceCreator() {
         return filePersistenceCreator;
     }
 
-    public FileSizeRequester fileSizeRequester() {
+    FileSizeRequester fileSizeRequester() {
         return fileSizeRequester;
     }
 
-    public FileDownloader fileDownloader() {
+    FileDownloader fileDownloader() {
         return fileDownloader;
     }
 }

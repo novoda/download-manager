@@ -25,12 +25,9 @@ final class WaitForLockRunnable {
         }
 
         Runnable thenPerform(final Action action) {
-            return new Runnable() {
-                @Override
-                public void run() {
-                    waitOnLock();
-                    action.performAction();
-                }
+            return () -> {
+                waitOnLock();
+                action.performAction();
             };
         }
 

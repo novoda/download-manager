@@ -186,16 +186,13 @@ public final class DownloadManagerBuilder {
             public void onServiceConnected(ComponentName name, IBinder service) {
                 LiteDownloadService.DownloadServiceBinder binder = (LiteDownloadService.DownloadServiceBinder) service;
                 downloadService = binder.getService();
-                downloadManager.submitAllStoredDownloads(new AllStoredDownloadsSubmittedCallback() {
-                    @Override
-                    public void onAllDownloadsSubmitted() {
-                        downloadManager.initialise(downloadService);
+                downloadManager.submitAllStoredDownloads(() -> {
+                    downloadManager.initialise(downloadService);
 
-                        if (allowNetworkRecovery) {
-                            DownloadsNetworkRecoveryCreator.createEnabled(applicationContext, downloadManager, connectionTypeAllowed);
-                        } else {
-                            DownloadsNetworkRecoveryCreator.createDisabled();
-                        }
+                    if (allowNetworkRecovery) {
+                        DownloadsNetworkRecoveryCreator.createEnabled(applicationContext, downloadManager, connectionTypeAllowed);
+                    } else {
+                        DownloadsNetworkRecoveryCreator.createDisabled();
                     }
                 });
             }
@@ -249,7 +246,7 @@ public final class DownloadManagerBuilder {
                 LOCK,
                 EXECUTOR,
                 callbackHandler,
-                new HashMap<DownloadBatchId, DownloadBatch>(),
+                new HashMap<>(),
                 callbacks,
                 fileOperations,
                 downloadsBatchPersistence,

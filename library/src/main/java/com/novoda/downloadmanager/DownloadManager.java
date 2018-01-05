@@ -52,21 +52,13 @@ class DownloadManager implements LiteDownloadManagerCommands {
     }
 
     private DownloadsBatchPersistence.LoadBatchesCallback loadBatchesCallback(final AllStoredDownloadsSubmittedCallback callback) {
-        return new DownloadsBatchPersistence.LoadBatchesCallback() {
-            @Override
-            public void onLoaded(List<DownloadBatch> downloadBatches) {
-                for (DownloadBatch downloadBatch : downloadBatches) {
-                    downloader.download(downloadBatch, downloadBatchMap);
-                }
-
-                MainThreadPostingCallback.postTo(callbackHandler)
-                        .action(new MainThreadPostingCallback.Action() {
-                            @Override
-                            public void performAction() {
-                                callback.onAllDownloadsSubmitted();
-                            }
-                        });
+        return downloadBatches -> {
+            for (DownloadBatch downloadBatch : downloadBatches) {
+                downloader.download(downloadBatch, downloadBatchMap);
             }
+
+            MainThreadPostingCallback.postTo(callbackHandler)
+                    .action(() -> callback.onAllDownloadsSubmitted());
         };
     }
 
@@ -135,12 +127,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
         if (downloadService == null) {
             executor.submit(
                     WaitForLockRunnable.waitFor(waitForDownloadService)
-                            .thenPerform(new WaitForLockRunnable.Action() {
-                                @Override
-                                public void performAction() {
-                                    executeGetAllDownloadBatchStatuses(callback);
-                                }
-                            })
+                            .thenPerform(() -> executeGetAllDownloadBatchStatuses(callback))
             );
         } else {
             executeGetAllDownloadBatchStatuses(callback);
@@ -155,12 +142,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
         }
 
         MainThreadPostingCallback.postTo(callbackHandler)
-                .action(new MainThreadPostingCallback.Action() {
-                    @Override
-                    public void performAction() {
-                        callback.onReceived(downloadBatchStatuses);
-                    }
-                });
+                .action(() -> callback.onReceived(downloadBatchStatuses));
     }
 
     @Override
@@ -168,12 +150,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
         if (downloadService == null) {
             executor.submit(
                     WaitForLockRunnable.waitFor(waitForDownloadService)
-                            .thenPerform(new WaitForLockRunnable.Action() {
-                                @Override
-                                public void performAction() {
-                                    executeFirstLocalPathForDownloadWithMatching(networkUri, callback);
-                                }
-                            })
+                            .thenPerform(() -> executeFirstLocalPathForDownloadWithMatching(networkUri, callback))
             );
         } else {
             executeFirstLocalPathForDownloadWithMatching(networkUri, callback);
@@ -185,12 +162,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
             final DownloadFile downloadFile = downloadBatch.getDownloadFile(networkUri);
             if (downloadFile != null) {
                 MainThreadPostingCallback.postTo(callbackHandler)
-                        .action(new MainThreadPostingCallback.Action() {
-                            @Override
-                            public void performAction() {
-                                callback.onReceived(downloadFile.filePath());
-                            }
-                        });
+                        .action(() -> callback.onReceived(downloadFile.filePath()));
                 return;
             }
         }
