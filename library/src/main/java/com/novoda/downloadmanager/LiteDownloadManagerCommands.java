@@ -18,5 +18,5 @@ public interface LiteDownloadManagerCommands {
 
     void submitAllStoredDownloads(AllStoredDownloadsSubmittedCallback callback);
 
-    void getDownloadFilePath(String uri, DownloadFilePathCallback callback);
+    void getFirstLocalPathForDownloadWithMatching(String uri, DownloadFilePathCallback callback);
 }

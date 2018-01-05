@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
         buttonLogLocalUri.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                liteDownloadManagerCommands.getDownloadFilePath(TWENTY_FILE_URL, new DownloadFilePathCallback() {
+                liteDownloadManagerCommands.getFirstLocalPathForDownloadWithMatching(TWENTY_FILE_URL, new DownloadFilePathCallback() {
                     @Override
                     public void onReceived(FilePath filePath) {
                         Log.d("LocalUriForTwentyMBFile: ", filePath.path());
