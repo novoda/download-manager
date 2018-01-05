@@ -95,8 +95,8 @@ public class MainActivity extends AppCompatActivity {
         View buttonLogFileDirectory = findViewById(R.id.button_log_file_directory);
         buttonLogFileDirectory.setOnClickListener(logFileDirectoryOnClick);
 
-        View buttonLogLocalUri = findViewById(R.id.button_log_local_uri);
-        buttonLogLocalUri.setOnClickListener(logLocalFilePathOfDownloadOnClick);
+        View buttonLogDownloadFileStatus = findViewById(R.id.button_log_download_file_status);
+        buttonLogDownloadFileStatus.setOnClickListener(logDownloadFileStatusOnClick);
 
         DemoApplication demoApplication = (DemoApplication) getApplicationContext();
         liteDownloadManagerCommands = demoApplication.getLiteDownloadManagerCommands();
@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private final View.OnClickListener logLocalFilePathOfDownloadOnClick = v -> liteDownloadManagerCommands.getDownloadStatusWithMatching(
+    private final View.OnClickListener logDownloadFileStatusOnClick = v -> liteDownloadManagerCommands.getDownloadStatusWithMatching(
             TWENTY_FILE_URL,
             downloadFileStatus -> Log.d("DownloadStatusForTwentyMBFile: ", downloadFileStatus)
     );
