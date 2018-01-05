@@ -33,6 +33,7 @@ import java.util.List;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 
+// Need to extract collaborators for this demo to reduce complexity.
 @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.StdCyclomaticComplexity", "PMD.ModifiedCyclomaticComplexity"})
 public class MainActivity extends AppCompatActivity {
 
