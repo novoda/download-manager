@@ -12,7 +12,7 @@ class DownloadFileFixtures {
 
     private DownloadBatchId downloadBatchId = aDownloadBatchId().build();
     private String url = "http://example.com";
-    private DownloadFileStatus downloadFileStatus = aDownloadFileStatus().build();
+    private LiteDownloadFileStatus downloadFileStatus = aDownloadFileStatus().build();
     private FileName fileName = aFileName().build();
     private FilePath filePath = aFilePath().build();
     private InternalFileSize fileSize = aFileSize().build();
@@ -35,7 +35,7 @@ class DownloadFileFixtures {
         return this;
     }
 
-    DownloadFileFixtures withDownloadFileStatus(DownloadFileStatus downloadFileStatus) {
+    DownloadFileFixtures withDownloadFileStatus(LiteDownloadFileStatus downloadFileStatus) {
         this.downloadFileStatus = downloadFileStatus;
         return this;
     }

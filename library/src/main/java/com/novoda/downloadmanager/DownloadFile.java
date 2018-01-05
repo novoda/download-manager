@@ -9,7 +9,7 @@ class DownloadFile {
 
     private final DownloadBatchId downloadBatchId;
     private final String url;
-    private final DownloadFileStatus downloadFileStatus;
+    private final LiteDownloadFileStatus downloadFileStatus;
     private final FileName fileName;
     private final FileDownloader fileDownloader;
     private final FileSizeRequester fileSizeRequester;
@@ -23,7 +23,7 @@ class DownloadFile {
     @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
     DownloadFile(DownloadBatchId downloadBatchId,
                  String url,
-                 DownloadFileStatus downloadFileStatus,
+                 LiteDownloadFileStatus downloadFileStatus,
                  FileName fileName,
                  FilePath filePath,
                  InternalFileSize fileSize,
@@ -193,7 +193,7 @@ class DownloadFile {
                 filePath,
                 fileSize,
                 url,
-                downloadFileStatus.getDownloadFileId(),
+                downloadFileStatus.downloadFileId(),
                 filePersistence.getType()
         );
     }
@@ -203,7 +203,7 @@ class DownloadFile {
     }
 
     DownloadFileId id() {
-        return downloadFileStatus.getDownloadFileId();
+        return downloadFileStatus.downloadFileId();
     }
 
     boolean matches(String networkUrl) {
@@ -216,6 +216,6 @@ class DownloadFile {
 
     interface Callback {
 
-        void onUpdate(DownloadFileStatus downloadFileStatus);
+        void onUpdate(LiteDownloadFileStatus downloadFileStatus);
     }
 }

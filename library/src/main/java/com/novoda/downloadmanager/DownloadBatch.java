@@ -72,12 +72,12 @@ class DownloadBatch {
         }
 
         DownloadFile.Callback fileDownloadCallback = downloadFileStatus -> {
-            fileBytesDownloadedMap.put(downloadFileStatus.getDownloadFileId(), downloadFileStatus.bytesDownloaded());
+            fileBytesDownloadedMap.put(downloadFileStatus.downloadFileId(), downloadFileStatus.bytesDownloaded());
             long currentBytesDownloaded = getBytesDownloadedFrom(fileBytesDownloadedMap);
             downloadBatchStatus.update(currentBytesDownloaded, totalBatchSizeBytes);
 
             if (downloadFileStatus.isMarkedAsError()) {
-                downloadBatchStatus.markAsError(downloadFileStatus.getError(), downloadsBatchPersistence);
+                downloadBatchStatus.markAsError(downloadFileStatus.error(), downloadsBatchPersistence);
             }
 
             callbackThrottle.update(downloadBatchStatus);
