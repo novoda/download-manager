@@ -61,7 +61,7 @@ final class DownloadBatchFactory {
                 downloadBatchTitle,
                 downloadBatchId,
                 downloadFiles,
-                new HashMap<DownloadFileId, Long>(),
+                new HashMap<>(),
                 liteDownloadBatchStatus,
                 downloadsBatchPersistence,
                 callbackThrottle

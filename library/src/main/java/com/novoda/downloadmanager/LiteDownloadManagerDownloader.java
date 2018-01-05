@@ -77,12 +77,9 @@ class LiteDownloadManagerDownloader {
     }
 
     private void ensureDownloadServiceExistsAndDownload(final DownloadBatch downloadBatch) {
-        executor.submit(new Runnable() {
-            @Override
-            public void run() {
-                waitForDownloadService();
-                executeDownload(downloadBatch);
-            }
+        executor.submit(() -> {
+            waitForDownloadService();
+            executeDownload(downloadBatch);
         });
     }
 
@@ -113,20 +110,12 @@ class LiteDownloadManagerDownloader {
     }
 
     private DownloadBatchCallback downloadBatchCallback() {
-        return new DownloadBatchCallback() {
-            @Override
-            public void onUpdate(final DownloadBatchStatus downloadBatchStatus) {
-                callbackHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        for (DownloadBatchCallback callback : callbacks) {
-                            callback.onUpdate(downloadBatchStatus);
-                        }
-                        updateNotification(downloadBatchStatus, downloadService);
-                    }
-                });
+        return downloadBatchStatus -> callbackHandler.post(() -> {
+            for (DownloadBatchCallback callback : callbacks) {
+                callback.onUpdate(downloadBatchStatus);
             }
-        };
+            updateNotification(downloadBatchStatus, downloadService);
+        });
     }
 
     private void updateNotification(DownloadBatchStatus liteDownloadBatchStatus, DownloadService downloadService) {

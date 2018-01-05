@@ -50,13 +50,10 @@ public class LiteDownloadService extends Service implements DownloadService {
 
         downloadBatch.setCallback(callback);
 
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                acquireCpuWakeLock();
-                downloadBatch.download();
-                releaseCpuWakeLock();
-            }
+        executor.execute(() -> {
+            acquireCpuWakeLock();
+            downloadBatch.download();
+            releaseCpuWakeLock();
         });
     }
 
