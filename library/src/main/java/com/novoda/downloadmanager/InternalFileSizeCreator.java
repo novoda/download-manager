@@ -10,7 +10,7 @@ final class InternalFileSizeCreator {
     }
 
     static InternalFileSize unknownFileSize() {
-        return UNKNOWN;
+        return UNKNOWN.copy();
     }
 
     static InternalFileSize createFromCurrentAndTotalSize(long currentSize, long totalSize) {
