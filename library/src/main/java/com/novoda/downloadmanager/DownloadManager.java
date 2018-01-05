@@ -1,7 +1,5 @@
 package com.novoda.downloadmanager;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -122,31 +120,19 @@ class DownloadManager implements LiteDownloadManagerCommands {
     }
 
     @Override
-    public void getAllDownloadBatchStatuses(AllBatchStatusesCallback callback) {
+    public void getAllDownloadBatchStatuses(final AllBatchStatusesCallback callback) {
         if (downloadService == null) {
-            ensureDownloadServiceExistsAndGetAllDownloadBatchStatuses(callback);
+            executor.submit(
+                    WaitForServiceRunnable.waitFor(waitForDownloadService)
+                            .thenPerform(new WaitForServiceRunnable.Action() {
+                                @Override
+                                public void performAction() {
+                                    executeGetAllDownloadBatchStatuses(callback);
+                                }
+                            })
+            );
         } else {
             executeGetAllDownloadBatchStatuses(callback);
-        }
-    }
-
-    private void ensureDownloadServiceExistsAndGetAllDownloadBatchStatuses(final AllBatchStatusesCallback callback) {
-        executor.submit(new Runnable() {
-            @Override
-            public void run() {
-                waitForDownloadService();
-                executeGetAllDownloadBatchStatuses(callback);
-            }
-        });
-    }
-
-    private void waitForDownloadService() {
-        try {
-            synchronized (waitForDownloadService) {
-                waitForDownloadService.wait();
-            }
-        } catch (InterruptedException e) {
-            Log.e(e, "Interruped waiting for download service.");
         }
     }
 
@@ -161,22 +147,20 @@ class DownloadManager implements LiteDownloadManagerCommands {
     }
 
     @Override
-    public void getFirstLocalPathForDownloadWithMatching(String networkUri, DownloadFilePathCallback callback) {
+    public void getFirstLocalPathForDownloadWithMatching(final String networkUri, final DownloadFilePathCallback callback) {
         if (downloadService == null) {
-            ensureDownloadServiceExistsAndGetFirstLocalPathForDownloadWithMatching(networkUri, callback);
+            executor.submit(
+                    WaitForServiceRunnable.waitFor(waitForDownloadService)
+                            .thenPerform(new WaitForServiceRunnable.Action() {
+                                @Override
+                                public void performAction() {
+                                    executeFirstLocalPathForDownloadWithMatching(networkUri, callback);
+                                }
+                            })
+            );
         } else {
             executeFirstLocalPathForDownloadWithMatching(networkUri, callback);
         }
-    }
-
-    private void ensureDownloadServiceExistsAndGetFirstLocalPathForDownloadWithMatching(final String networkUri, final DownloadFilePathCallback callback) {
-        executor.submit(new Runnable() {
-            @Override
-            public void run() {
-                waitForDownloadService();
-                executeFirstLocalPathForDownloadWithMatching(networkUri, callback);
-            }
-        });
     }
 
     private void executeFirstLocalPathForDownloadWithMatching(String networkUri, DownloadFilePathCallback callback) {
@@ -188,4 +172,5 @@ class DownloadManager implements LiteDownloadManagerCommands {
             }
         }
     }
+
 }
