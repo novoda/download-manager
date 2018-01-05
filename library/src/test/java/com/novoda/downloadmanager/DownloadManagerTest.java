@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager;
 
+import android.os.Handler;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,6 +35,7 @@ public class DownloadManagerTest {
     private final DownloadService downloadService = mock(DownloadService.class);
     private final Object lock = spy(new Object());
     private final ExecutorService executorService = mock(ExecutorService.class);
+    private final Handler handler = mock(Handler.class);
     private final DownloadBatch downloadBatch = mock(DownloadBatch.class);
     private final DownloadBatch additionalDownloadBatch = mock(DownloadBatch.class);
     private final DownloadBatchCallback downloadBatchCallback = mock(DownloadBatchCallback.class);
@@ -55,7 +58,8 @@ public class DownloadManagerTest {
 
         downloadManager = new DownloadManager(
                 lock,
-                executorService, ,
+                executorService,
+                handler,
                 downloadBatches,
                 downloadBatchCallbacks,
                 fileOperations,
@@ -68,6 +72,11 @@ public class DownloadManagerTest {
 
         given(downloadBatch.status()).willReturn(BATCH_STATUS);
         given(additionalDownloadBatch.status()).willReturn(ADDITIONAL_BATCH_STATUS);
+
+        willAnswer(invocation -> {
+            ((Runnable) invocation.getArgument(0)).run();
+            return null;
+        }).given(handler).post(any(Runnable.class));
     }
 
     private void setupDownloadBatchesResponse() {
@@ -82,7 +91,7 @@ public class DownloadManagerTest {
         willAnswer(invocation -> {
             downloadBatchStatuses = invocation.getArgument(0);
             return null;
-        }).given(allBatchStatusesCallback).onReceived(ArgumentMatchers.<DownloadBatchStatus>anyList());
+        }).given(allBatchStatusesCallback).onReceived(ArgumentMatchers.anyList());
     }
 
     @Test
