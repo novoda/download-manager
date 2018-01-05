@@ -20,6 +20,8 @@ class DownloadManager implements LiteDownloadManagerCommands {
 
     private DownloadService downloadService;
 
+    // DownloadManager is a complex object.
+    @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
     DownloadManager(Object waitForDownloadService,
                     ExecutorService executor,
                     Handler callbackHandler,
