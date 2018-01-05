@@ -47,13 +47,10 @@ class VersionOneDatabaseCloner {
     }
 
     void cloneDatabaseWithDownloadSize(final String selectedFileSize) {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                cloneDatabase();
-                cloneDownloadFilesWithSize(selectedFileSize);
-                cloneCallback.onUpdate("Cloning Complete");
-            }
+        executor.execute(() -> {
+            cloneDatabase();
+            cloneDownloadFilesWithSize(selectedFileSize);
+            cloneCallback.onUpdate("Cloning Complete");
         });
     }
 

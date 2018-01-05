@@ -16,13 +16,7 @@ class LiteJobDownload extends Job {
     @NonNull
     @Override
     protected Result onRunJob(Params params) {
-        downloadManager.submitAllStoredDownloads(new AllStoredDownloadsSubmittedCallback() {
-            @Override
-            public void onAllDownloadsSubmitted() {
-                // done
-                Log.v("LiteJobDownload all jobs submitted");
-            }
-        });
+        downloadManager.submitAllStoredDownloads(() -> Log.v("LiteJobDownload all jobs submitted"));
         Log.v("LiteJobDownload run network recovery job");
         return Result.SUCCESS;
     }

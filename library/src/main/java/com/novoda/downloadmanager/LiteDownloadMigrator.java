@@ -29,17 +29,9 @@ class LiteDownloadMigrator implements DownloadMigrator {
                 DownloadMigrationService migrationService = ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) binder).getService();
                 migrationService.setNotificationCreator(notificationCreator);
 
-                MigrationCallback mainThreadReportingMigrationCallback = new MigrationCallback() {
-                    @Override
-                    public void onUpdate(final MigrationStatus migrationStatus) {
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                migrationCallback.onUpdate(migrationStatus);
-                            }
-                        });
-                    }
-                };
+                MigrationCallback mainThreadReportingMigrationCallback = migrationStatus -> handler.post(
+                        () -> migrationCallback.onUpdate(migrationStatus)
+                );
 
                 migrationService.startMigration(mainThreadReportingMigrationCallback);
             }

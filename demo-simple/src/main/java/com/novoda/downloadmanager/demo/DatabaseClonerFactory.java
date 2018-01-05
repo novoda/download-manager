@@ -23,12 +23,7 @@ final class DatabaseClonerFactory {
         VersionOneDatabaseCloner.CloneCallback mainThreadReportingCloneCallback = new VersionOneDatabaseCloner.CloneCallback() {
             @Override
             public void onUpdate(final String updateMessage) {
-                mainThreadHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        cloneCallback.onUpdate(updateMessage);
-                    }
-                });
+                mainThreadHandler.post(() -> cloneCallback.onUpdate(updateMessage));
             }
         };
 

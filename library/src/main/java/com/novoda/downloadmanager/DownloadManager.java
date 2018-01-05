@@ -47,15 +47,12 @@ class DownloadManager implements LiteDownloadManagerCommands {
     }
 
     private DownloadsBatchPersistence.LoadBatchesCallback loadBatchesCallback(final AllStoredDownloadsSubmittedCallback callback) {
-        return new DownloadsBatchPersistence.LoadBatchesCallback() {
-            @Override
-            public void onLoaded(List<DownloadBatch> downloadBatches) {
-                for (DownloadBatch downloadBatch : downloadBatches) {
-                    downloader.download(downloadBatch, downloadBatchMap);
-                }
-
-                callback.onAllDownloadsSubmitted();
+        return downloadBatches -> {
+            for (DownloadBatch downloadBatch : downloadBatches) {
+                downloader.download(downloadBatch, downloadBatchMap);
             }
+
+            callback.onAllDownloadsSubmitted();
         };
     }
 
@@ -124,12 +121,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
         if (downloadService == null) {
             executor.submit(
                     WaitForLockRunnable.waitFor(waitForDownloadService)
-                            .thenPerform(new WaitForLockRunnable.Action() {
-                                @Override
-                                public void performAction() {
-                                    executeGetAllDownloadBatchStatuses(callback);
-                                }
-                            })
+                            .thenPerform(() -> executeGetAllDownloadBatchStatuses(callback))
             );
         } else {
             executeGetAllDownloadBatchStatuses(callback);
@@ -151,12 +143,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
         if (downloadService == null) {
             executor.submit(
                     WaitForLockRunnable.waitFor(waitForDownloadService)
-                            .thenPerform(new WaitForLockRunnable.Action() {
-                                @Override
-                                public void performAction() {
-                                    executeFirstLocalPathForDownloadWithMatching(networkUri, callback);
-                                }
-                            })
+                            .thenPerform(() -> executeFirstLocalPathForDownloadWithMatching(networkUri, callback))
             );
         } else {
             executeFirstLocalPathForDownloadWithMatching(networkUri, callback);

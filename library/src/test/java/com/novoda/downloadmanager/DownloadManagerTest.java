@@ -12,8 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.novoda.downloadmanager.DownloadBatchIdFixtures.aDownloadBatchId;
@@ -73,23 +71,17 @@ public class DownloadManagerTest {
     }
 
     private void setupDownloadBatchesResponse() {
-        willAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                DownloadsBatchPersistence.LoadBatchesCallback loadBatchesCallback = invocation.getArgument(1);
-                loadBatchesCallback.onLoaded(Arrays.asList(downloadBatch, additionalDownloadBatch));
-                return null;
-            }
+        willAnswer(invocation -> {
+            DownloadsBatchPersistence.LoadBatchesCallback loadBatchesCallback = invocation.getArgument(1);
+            loadBatchesCallback.onLoaded(Arrays.asList(downloadBatch, additionalDownloadBatch));
+            return null;
         }).given(downloadsBatchPersistence).loadAsync(any(FileOperations.class), any(DownloadsBatchPersistence.LoadBatchesCallback.class));
     }
 
     private void setupDownloadBatchStatusesResponse() {
-        willAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                downloadBatchStatuses = invocation.getArgument(0);
-                return null;
-            }
+        willAnswer(invocation -> {
+            downloadBatchStatuses = invocation.getArgument(0);
+            return null;
         }).given(allBatchStatusesCallback).onReceived(ArgumentMatchers.<DownloadBatchStatus>anyList());
     }
 
@@ -103,12 +95,7 @@ public class DownloadManagerTest {
     @Test(timeout = 500)
     public void notifyAll_whenInitialising() throws InterruptedException {
         synchronized (lock) {
-            Executors.newSingleThreadExecutor().submit(new Runnable() {
-                @Override
-                public void run() {
-                    downloadManager.initialise(downloadService);
-                }
-            });
+            Executors.newSingleThreadExecutor().submit(() -> downloadManager.initialise(downloadService));
 
             lock.wait();
         }
@@ -235,12 +222,9 @@ public class DownloadManagerTest {
 
     @Test(timeout = 500)
     public void waitsForServiceToExist_whenGettingAllBatchStatuses() throws InterruptedException {
-        willAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                ((Runnable) invocation.getArgument(0)).run();
-                return null;
-            }
+        willAnswer(invocation -> {
+            ((Runnable) invocation.getArgument(0)).run();
+            return null;
         }).given(executorService).submit(any(Runnable.class));
 
         notifyLockOnAnotherThread();
@@ -260,18 +244,15 @@ public class DownloadManagerTest {
 
     private void notifyLockOnAnotherThread() {
         Executors.newSingleThreadExecutor()
-                .submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                .submit(() -> {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
 
-                        synchronized (lock) {
-                            lock.notifyAll();
-                        }
+                    synchronized (lock) {
+                        lock.notifyAll();
                     }
                 });
     }
