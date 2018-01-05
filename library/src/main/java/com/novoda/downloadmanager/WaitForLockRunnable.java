@@ -2,21 +2,21 @@ package com.novoda.downloadmanager;
 
 import com.novoda.notils.logger.simple.Log;
 
-class WaitForServiceRunnable {
+class WaitForLockRunnable {
 
     interface Action {
         void performAction();
     }
 
-    static ActionBuilder waitFor(Object lock) {
-        return new ActionBuilder(lock);
+    static WaitForLockAndThenPerformActionRunnable waitFor(Object lock) {
+        return new WaitForLockAndThenPerformActionRunnable(lock);
     }
 
-    static class ActionBuilder {
+    static class WaitForLockAndThenPerformActionRunnable {
 
         private final Object lock;
 
-        ActionBuilder(Object lock) {
+        WaitForLockAndThenPerformActionRunnable(Object lock) {
             this.lock = lock;
         }
 

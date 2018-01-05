@@ -123,8 +123,8 @@ class DownloadManager implements LiteDownloadManagerCommands {
     public void getAllDownloadBatchStatuses(final AllBatchStatusesCallback callback) {
         if (downloadService == null) {
             executor.submit(
-                    WaitForServiceRunnable.waitFor(waitForDownloadService)
-                            .thenPerform(new WaitForServiceRunnable.Action() {
+                    WaitForLockRunnable.waitFor(waitForDownloadService)
+                            .thenPerform(new WaitForLockRunnable.Action() {
                                 @Override
                                 public void performAction() {
                                     executeGetAllDownloadBatchStatuses(callback);
@@ -150,8 +150,8 @@ class DownloadManager implements LiteDownloadManagerCommands {
     public void getFirstLocalPathForDownloadWithMatching(final String networkUri, final DownloadFilePathCallback callback) {
         if (downloadService == null) {
             executor.submit(
-                    WaitForServiceRunnable.waitFor(waitForDownloadService)
-                            .thenPerform(new WaitForServiceRunnable.Action() {
+                    WaitForLockRunnable.waitFor(waitForDownloadService)
+                            .thenPerform(new WaitForLockRunnable.Action() {
                                 @Override
                                 public void performAction() {
                                     executeFirstLocalPathForDownloadWithMatching(networkUri, callback);
