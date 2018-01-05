@@ -57,8 +57,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
                 downloader.download(downloadBatch, downloadBatchMap);
             }
 
-            MainThreadPostingCallback.postTo(callbackHandler)
-                    .action(() -> callback.onAllDownloadsSubmitted());
+            callbackHandler.post(callback::onAllDownloadsSubmitted);
         };
     }
 
@@ -141,8 +140,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
             downloadBatchStatuses.add(downloadBatch.status());
         }
 
-        MainThreadPostingCallback.postTo(callbackHandler)
-                .action(() -> callback.onReceived(downloadBatchStatuses));
+        callbackHandler.post(() -> callback.onReceived(downloadBatchStatuses));
     }
 
     @Override
@@ -161,8 +159,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
         for (DownloadBatch downloadBatch : downloadBatchMap.values()) {
             final DownloadFile downloadFile = downloadBatch.getDownloadFile(networkUri);
             if (downloadFile != null) {
-                MainThreadPostingCallback.postTo(callbackHandler)
-                        .action(() -> callback.onReceived(downloadFile.filePath()));
+                callbackHandler.post(() -> callback.onReceived(downloadFile.filePath()));
                 return;
             }
         }
