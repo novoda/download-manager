@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
             String status = getStatusMessage(downloadBatchStatus);
 
             String message = "Batch " + downloadBatchStatus.getDownloadBatchTitle().asString()
-                    + "\ndownloaded: " + downloadBatchStatus.percentageDownloaded()
+                    + "\ndownloaded: " + downloadBatchStatus.percentageDownloaded() + "%"
                     + "\nbytes: " + downloadBatchStatus.bytesDownloaded()
                     + status
                     + "\n";
