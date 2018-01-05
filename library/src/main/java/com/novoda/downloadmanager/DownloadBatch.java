@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager;
 
+import android.support.annotation.Nullable;
+
 import java.util.List;
 import java.util.Map;
 
@@ -181,6 +183,16 @@ class DownloadBatch {
 
     InternalDownloadBatchStatus status() {
         return downloadBatchStatus;
+    }
+
+    @Nullable
+    DownloadFile getDownloadFile(String networkUri) {
+        for (DownloadFile downloadFile : downloadFiles) {
+            if (downloadFile.matches(networkUri)) {
+                return downloadFile;
+            }
+        }
+        return null;
     }
 
     void persist() {
