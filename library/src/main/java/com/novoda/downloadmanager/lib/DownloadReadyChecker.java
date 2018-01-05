@@ -47,6 +47,7 @@ class DownloadReadyChecker {
             case DownloadStatus.PENDING: // download is explicit marked as ready to start
             case DownloadStatus.RUNNING: // download interrupted (process killed etc) while
                 // running, without a chance to update the database
+            case DownloadStatus.BATCH_RUNNING: // same as RUNNING
                 return true;
 
             case DownloadStatus.WAITING_FOR_NETWORK:

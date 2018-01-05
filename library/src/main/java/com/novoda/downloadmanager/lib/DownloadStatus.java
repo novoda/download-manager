@@ -32,6 +32,10 @@ public final class DownloadStatus {
      */
     public static final int PENDING = 190;
     /**
+     * This batch has started
+     */
+    public static final int BATCH_RUNNING = 191;
+    /**
      * This download has started
      */
     public static final int RUNNING = 192;
