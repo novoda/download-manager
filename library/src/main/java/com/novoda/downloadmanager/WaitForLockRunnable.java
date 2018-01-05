@@ -8,6 +8,10 @@ class WaitForLockRunnable {
         void performAction();
     }
 
+    private WaitForLockRunnable() {
+        // Uses static factory method.
+    }
+
     static WaitForLockAndThenPerformActionRunnable waitFor(Object lock) {
         return new WaitForLockAndThenPerformActionRunnable(lock);
     }
