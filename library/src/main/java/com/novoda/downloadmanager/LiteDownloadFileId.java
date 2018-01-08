@@ -4,16 +4,7 @@ final class LiteDownloadFileId implements DownloadFileId {
 
     private final int id;
 
-    static DownloadFileId from(Batch batch) {
-        String id = batch.getTitle() + System.nanoTime();
-        return new LiteDownloadFileId(id.hashCode());
-    }
-
-    static DownloadFileId from(String id) {
-        return new LiteDownloadFileId(Integer.parseInt(id));
-    }
-
-    private LiteDownloadFileId(int id) {
+    LiteDownloadFileId(int id) {
         this.id = id;
     }
 
