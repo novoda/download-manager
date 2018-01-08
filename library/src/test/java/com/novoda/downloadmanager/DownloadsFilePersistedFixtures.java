@@ -9,7 +9,7 @@ class DownloadsFilePersistedFixtures {
     private FilePath filePath;
     private long totalFileSize;
     private String url;
-    private LiteDownloadFileId downloadFileId;
+    private DownloadFileId downloadFileId;
     private FilePersistenceType filePersistenceType;
 
     private DownloadsFilePersistedFixtures() {
@@ -45,7 +45,7 @@ class DownloadsFilePersistedFixtures {
         return this;
     }
 
-    DownloadsFilePersistedFixtures withDownloadFileId(LiteDownloadFileId downloadFileId) {
+    DownloadsFilePersistedFixtures withDownloadFileId(DownloadFileId downloadFileId) {
         this.downloadFileId = downloadFileId;
         return this;
     }
@@ -83,7 +83,7 @@ class DownloadsFilePersistedFixtures {
             }
 
             @Override
-            public LiteDownloadFileId downloadFileId() {
+            public DownloadFileId downloadFileId() {
                 return downloadFileId;
             }
 

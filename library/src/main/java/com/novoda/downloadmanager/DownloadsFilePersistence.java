@@ -17,7 +17,7 @@ class DownloadsFilePersistence {
                      FilePath filePath,
                      FileSize fileSize,
                      String url,
-                     LiteDownloadFileId downloadFileId,
+                     DownloadFileId downloadFileId,
                      FilePersistenceType filePersistenceType) {
         LiteDownloadsFilePersisted filePersisted = new LiteDownloadsFilePersisted(
                 downloadBatchId,
@@ -40,7 +40,7 @@ class DownloadsFilePersistence {
 
         List<DownloadFile> downloadFiles = new ArrayList<>(filePersistedList.size());
         for (DownloadsFilePersisted filePersisted : filePersistedList) {
-            LiteDownloadFileId downloadFileId = filePersisted.downloadFileId();
+            DownloadFileId downloadFileId = filePersisted.downloadFileId();
             FileName fileName = filePersisted.fileName();
 
             FilePersistenceCreator filePersistenceCreator = fileOperations.filePersistenceCreator();

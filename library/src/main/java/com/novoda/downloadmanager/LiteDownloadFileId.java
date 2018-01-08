@@ -1,15 +1,15 @@
 package com.novoda.downloadmanager;
 
-final class LiteDownloadFileId {
+final class LiteDownloadFileId implements DownloadFileId {
 
     private final int id;
 
-    static LiteDownloadFileId from(Batch batch) {
+    static DownloadFileId from(Batch batch) {
         String id = batch.getTitle() + System.nanoTime();
         return new LiteDownloadFileId(id.hashCode());
     }
 
-    static LiteDownloadFileId from(String id) {
+    static DownloadFileId from(String id) {
         return new LiteDownloadFileId(Integer.parseInt(id));
     }
 
@@ -32,7 +32,8 @@ final class LiteDownloadFileId {
 
     }
 
-    String toRawId() {
+    @Override
+    public String toRawId() {
         return String.valueOf(id);
     }
 

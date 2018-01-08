@@ -12,7 +12,7 @@ public interface DownloadsFilePersisted {
 
     String url();
 
-    LiteDownloadFileId downloadFileId();
+    DownloadFileId downloadFileId();
 
     FilePersistenceType filePersistenceType();
 }

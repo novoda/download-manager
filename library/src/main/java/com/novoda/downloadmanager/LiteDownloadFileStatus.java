@@ -5,14 +5,14 @@ import android.support.annotation.Nullable;
 class LiteDownloadFileStatus implements InternalDownloadFileStatus {
 
     private final DownloadBatchId downloadBatchId;
-    private final LiteDownloadFileId downloadFileId;
+    private final DownloadFileId downloadFileId;
 
     private FileSize fileSize;
     private FilePath localFilePath;
     private Status status;
     private DownloadError downloadError;
 
-    LiteDownloadFileStatus(DownloadBatchId downloadBatchId, LiteDownloadFileId downloadFileId, Status status, FileSize fileSize, FilePath localFilePath) {
+    LiteDownloadFileStatus(DownloadBatchId downloadBatchId, DownloadFileId downloadFileId, Status status, FileSize fileSize, FilePath localFilePath) {
         this.downloadBatchId = downloadBatchId;
         this.downloadFileId = downloadFileId;
         this.status = status;
@@ -55,7 +55,7 @@ class LiteDownloadFileStatus implements InternalDownloadFileStatus {
     }
 
     @Override
-    public LiteDownloadFileId downloadFileId() {
+    public DownloadFileId downloadFileId() {
         return downloadFileId;
     }
 
