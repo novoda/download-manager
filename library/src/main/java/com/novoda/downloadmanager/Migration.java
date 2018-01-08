@@ -56,10 +56,10 @@ class Migration {
 
     @Override
     public String toString() {
-        return "Migration{" +
-                "batch=" + batch +
-                ", fileMetadata=" + fileMetadata +
-                '}';
+        return "Migration{"
+                + "batch=" + batch
+                + ", fileMetadata=" + fileMetadata
+                + '}';
     }
 
     static class FileMetadata {
@@ -115,11 +115,10 @@ class Migration {
 
         @Override
         public String toString() {
-            return "FileMetadata{" +
-                    "originalFileLocation='" + originalFileLocation + '\'' +
-                    ", fileSize=" + fileSize +
-                    ", uri='" + uri + '\'' +
-                    '}';
+            return "FileMetadata{" + "originalFileLocation='" + originalFileLocation + '\''
+                    + ", fileSize=" + fileSize
+                    + ", uri='" + uri + '\''
+                    + '}';
         }
     }
 }
