@@ -2,12 +2,19 @@ package com.novoda.downloadmanager;
 
 class DownloadFileStatusFixtures {
 
+    private DownloadBatchId downloadBatchId = DownloadBatchIdCreator.createFrom("batch_01");
     private DownloadFileId downloadFileId = DownloadFileId.from("01");
-    private DownloadFileStatus.Status status = DownloadFileStatus.Status.QUEUED;
+    private InternalDownloadFileStatus.Status status = InternalDownloadFileStatus.Status.QUEUED;
     private FileSize fileSize = InternalFileSizeFixtures.aFileSize().build();
+    private FilePath localFilePath = FilePathCreator.unknownFilePath();
 
     static DownloadFileStatusFixtures aDownloadFileStatus() {
         return new DownloadFileStatusFixtures();
+    }
+
+    public DownloadFileStatusFixtures withDownloadBatchId(DownloadBatchId downloadBatchId) {
+        this.downloadBatchId = downloadBatchId;
+        return this;
     }
 
     DownloadFileStatusFixtures withDownloadFileId(DownloadFileId downloadFileId) {
@@ -15,7 +22,7 @@ class DownloadFileStatusFixtures {
         return this;
     }
 
-    DownloadFileStatusFixtures withStatus(DownloadFileStatus.Status status) {
+    DownloadFileStatusFixtures withStatus(InternalDownloadFileStatus.Status status) {
         this.status = status;
         return this;
     }
@@ -25,11 +32,18 @@ class DownloadFileStatusFixtures {
         return this;
     }
 
-    DownloadFileStatus build() {
-        return new DownloadFileStatus(
+    public DownloadFileStatusFixtures withLocalFilePath(FilePath localFilePath) {
+        this.localFilePath = localFilePath;
+        return this;
+    }
+
+    InternalDownloadFileStatus build() {
+        return new LiteDownloadFileStatus(
+                downloadBatchId,
                 downloadFileId,
                 status,
-                fileSize
+                fileSize,
+                localFilePath
         );
     }
 }

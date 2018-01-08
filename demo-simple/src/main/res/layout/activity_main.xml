@@ -131,10 +131,10 @@
       tools:ignore="ButtonStyle" />
 
     <Button
-      android:id="@+id/button_log_local_uri"
+      android:id="@+id/button_log_download_file_status"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="@string/log_local_uri"
+      android:text="@string/log_download_file_status"
       tools:ignore="ButtonStyle" />
 
   </LinearLayout>

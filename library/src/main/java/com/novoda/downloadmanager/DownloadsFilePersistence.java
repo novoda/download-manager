@@ -51,15 +51,17 @@ class DownloadsFilePersistence {
             InternalFileSize fileSize = InternalFileSizeCreator.createFromCurrentAndTotalSize(currentSize, totalFileSize);
             String url = filePersisted.url();
 
-            DownloadFileStatus downloadFileStatus = new DownloadFileStatus(
+            FilePath filePath = filePersisted.filePath();
+            InternalDownloadFileStatus downloadFileStatus = new LiteDownloadFileStatus(
+                    batchId,
                     downloadFileId,
                     getFileStatusFrom(batchStatus),
-                    fileSize
+                    fileSize,
+                    filePath
             );
 
             FileSizeRequester fileSizeRequester = fileOperations.fileSizeRequester();
             FileDownloader fileDownloader = fileOperations.fileDownloader();
-            FilePath filePath = filePersisted.filePath();
 
             DownloadFile downloadFile = new DownloadFile(
                     batchId,
@@ -80,20 +82,20 @@ class DownloadsFilePersistence {
         return downloadFiles;
     }
 
-    private DownloadFileStatus.Status getFileStatusFrom(DownloadBatchStatus.Status batchStatus) {
+    private InternalDownloadFileStatus.Status getFileStatusFrom(DownloadBatchStatus.Status batchStatus) {
         switch (batchStatus) {
             case QUEUED:
-                return DownloadFileStatus.Status.QUEUED;
+                return InternalDownloadFileStatus.Status.QUEUED;
             case DOWNLOADING:
-                return DownloadFileStatus.Status.DOWNLOADING;
+                return InternalDownloadFileStatus.Status.DOWNLOADING;
             case PAUSED:
-                return DownloadFileStatus.Status.PAUSED;
+                return InternalDownloadFileStatus.Status.PAUSED;
             case ERROR:
-                return DownloadFileStatus.Status.ERROR;
+                return InternalDownloadFileStatus.Status.ERROR;
             case DELETION:
-                return DownloadFileStatus.Status.DELETION;
+                return InternalDownloadFileStatus.Status.DELETION;
             case DOWNLOADED:
-                return DownloadFileStatus.Status.DOWNLOADING;
+                return InternalDownloadFileStatus.Status.DOWNLOADING;
             default:
                 throw new InvalidParameterException("Batch status " + batchStatus + " is unsupported");
         }

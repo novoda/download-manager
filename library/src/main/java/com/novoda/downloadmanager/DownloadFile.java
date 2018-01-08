@@ -9,7 +9,7 @@ class DownloadFile {
 
     private final DownloadBatchId downloadBatchId;
     private final String url;
-    private final DownloadFileStatus downloadFileStatus;
+    private final InternalDownloadFileStatus downloadFileStatus;
     private final FileName fileName;
     private final FileDownloader fileDownloader;
     private final FileSizeRequester fileSizeRequester;
@@ -23,7 +23,7 @@ class DownloadFile {
     @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
     DownloadFile(DownloadBatchId downloadBatchId,
                  String url,
-                 DownloadFileStatus downloadFileStatus,
+                 InternalDownloadFileStatus downloadFileStatus,
                  FileName fileName,
                  FilePath filePath,
                  InternalFileSize fileSize,
@@ -68,7 +68,7 @@ class DownloadFile {
         persistSync();
 
         if (fileSize.currentSize() == fileSize.totalSize()) {
-            downloadFileStatus.update(fileSize);
+            downloadFileStatus.update(fileSize, filePath);
             callback.onUpdate(downloadFileStatus);
             return;
         }
@@ -83,7 +83,7 @@ class DownloadFile {
 
                 if (downloadFileStatus.isMarkedAsDownloading()) {
                     fileSize.addToCurrentSize(bytesRead);
-                    downloadFileStatus.update(fileSize);
+                    downloadFileStatus.update(fileSize, filePath);
                     callback.onUpdate(downloadFileStatus);
                 }
             }
@@ -193,7 +193,7 @@ class DownloadFile {
                 filePath,
                 fileSize,
                 url,
-                downloadFileStatus.getDownloadFileId(),
+                downloadFileStatus.downloadFileId(),
                 filePersistence.getType()
         );
     }
@@ -203,19 +203,19 @@ class DownloadFile {
     }
 
     DownloadFileId id() {
-        return downloadFileStatus.getDownloadFileId();
+        return downloadFileStatus.downloadFileId();
     }
 
     boolean matches(String networkUrl) {
         return networkUrl.equals(url);
     }
 
-    FilePath filePath() {
-        return filePath;
+    DownloadFileStatus fileStatus() {
+        return downloadFileStatus;
     }
 
     interface Callback {
 
-        void onUpdate(DownloadFileStatus downloadFileStatus);
+        void onUpdate(InternalDownloadFileStatus downloadFileStatus);
     }
 }

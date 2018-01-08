@@ -146,7 +146,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
     }
 
     @Override
-    public void getFirstLocalPathForDownloadWithMatching(final String networkUri, final DownloadFilePathCallback callback) {
+    public void getDownloadStatusWithMatching(final String networkUri, final DownloadFileStatusCallback callback) {
         if (downloadService == null) {
             executor.submit(
                     WaitForLockRunnable.waitFor(waitForDownloadService)
@@ -157,11 +157,11 @@ class DownloadManager implements LiteDownloadManagerCommands {
         }
     }
 
-    private void executeFirstLocalPathForDownloadWithMatching(String networkUri, final DownloadFilePathCallback callback) {
+    private void executeFirstLocalPathForDownloadWithMatching(String networkUri, final DownloadFileStatusCallback callback) {
         for (DownloadBatch downloadBatch : downloadBatchMap.values()) {
-            final DownloadFile downloadFile = downloadBatch.getDownloadFile(networkUri);
+            final DownloadFile downloadFile = downloadBatch.downloadFileWith(networkUri);
             if (downloadFile != null) {
-                callbackHandler.post(() -> callback.onReceived(downloadFile.filePath()));
+                callbackHandler.post(() -> callback.onReceived(downloadFile.fileStatus()));
                 return;
             }
         }

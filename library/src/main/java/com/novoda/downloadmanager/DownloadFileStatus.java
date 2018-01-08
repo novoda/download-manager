@@ -1,8 +1,6 @@
 package com.novoda.downloadmanager;
 
-import android.support.annotation.Nullable;
-
-class DownloadFileStatus {
+public interface DownloadFileStatus {
 
     enum Status {
         PAUSED,
@@ -13,73 +11,15 @@ class DownloadFileStatus {
         DOWNLOADED
     }
 
-    private final DownloadFileId downloadFileId;
+    DownloadBatchId downloadBatchId();
 
-    private FileSize fileSize;
-    private Status status;
-    private DownloadError downloadError;
+    DownloadFileId downloadFileId();
 
-    DownloadFileStatus(DownloadFileId downloadFileId, Status status, FileSize fileSize) {
-        this.downloadFileId = downloadFileId;
-        this.status = status;
-        this.fileSize = fileSize;
-    }
+    long bytesDownloaded();
 
-    void update(FileSize fileSize) {
-        this.fileSize = fileSize;
-    }
+    long totalBytes();
 
-    long bytesDownloaded() {
-        return fileSize.currentSize();
-    }
+    FilePath localFilePath();
 
-    DownloadFileId getDownloadFileId() {
-        return downloadFileId;
-    }
-
-    boolean isMarkedAsDownloading() {
-        return status == Status.DOWNLOADING;
-    }
-
-    boolean isMarkedAsQueued() {
-        return status == Status.QUEUED;
-    }
-
-    boolean isMarkedForDeletion() {
-        return status == Status.DELETION;
-    }
-
-    void markAsDownloading() {
-        status = Status.DOWNLOADING;
-    }
-
-    void isMarkedAsPaused() {
-        status = Status.PAUSED;
-    }
-
-    boolean isMarkedAsError() {
-        return status == Status.ERROR && downloadError != null;
-    }
-
-    void markAsQueued() {
-        status = Status.QUEUED;
-    }
-
-    void markForDeletion() {
-        status = Status.DELETION;
-    }
-
-    void markAsError(DownloadError.Error error) {
-        status = Status.ERROR;
-        downloadError = new DownloadError(error);
-    }
-
-    @Nullable
-    DownloadError getError() {
-        return downloadError;
-    }
-
-    Status getStatus() {
-        return status;
-    }
+    Status status();
 }

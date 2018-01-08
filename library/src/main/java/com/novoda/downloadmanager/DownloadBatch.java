@@ -5,12 +5,12 @@ import android.support.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETION;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.QUEUED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADING;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.QUEUED;
 
 // This model knows how to interact with low level components.
 @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.StdCyclomaticComplexity", "PMD.ModifiedCyclomaticComplexity"})
@@ -72,12 +72,12 @@ class DownloadBatch {
         }
 
         DownloadFile.Callback fileDownloadCallback = downloadFileStatus -> {
-            fileBytesDownloadedMap.put(downloadFileStatus.getDownloadFileId(), downloadFileStatus.bytesDownloaded());
+            fileBytesDownloadedMap.put(downloadFileStatus.downloadFileId(), downloadFileStatus.bytesDownloaded());
             long currentBytesDownloaded = getBytesDownloadedFrom(fileBytesDownloadedMap);
             downloadBatchStatus.update(currentBytesDownloaded, totalBatchSizeBytes);
 
             if (downloadFileStatus.isMarkedAsError()) {
-                downloadBatchStatus.markAsError(downloadFileStatus.getError(), downloadsBatchPersistence);
+                downloadBatchStatus.markAsError(downloadFileStatus.error(), downloadsBatchPersistence);
             }
 
             callbackThrottle.update(downloadBatchStatus);
@@ -182,7 +182,7 @@ class DownloadBatch {
     }
 
     @Nullable
-    DownloadFile getDownloadFile(String networkUri) {
+    DownloadFile downloadFileWith(String networkUri) {
         for (DownloadFile downloadFile : downloadFiles) {
             if (downloadFile.matches(networkUri)) {
                 return downloadFile;
