@@ -91,7 +91,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
         for (RoomFile roomFile : roomFiles) {
             DownloadsFilePersisted filePersisted = new LiteDownloadsFilePersisted(
                     DownloadBatchIdCreator.createFrom(roomFile.batchId),
-                    DownloadFileId.from(roomFile.id),
+                    LiteDownloadFileId.from(roomFile.id),
                     LiteFileName.from(roomFile.name),
                     FilePathCreator.create(roomFile.path),
                     roomFile.totalSize,

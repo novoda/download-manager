@@ -13,7 +13,7 @@ public interface DownloadFileStatus {
 
     DownloadBatchId downloadBatchId();
 
-    DownloadFileId downloadFileId();
+    LiteDownloadFileId downloadFileId();
 
     long bytesDownloaded();
 

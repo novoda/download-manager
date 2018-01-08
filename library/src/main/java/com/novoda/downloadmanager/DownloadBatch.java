@@ -20,7 +20,7 @@ class DownloadBatch {
 
     private final DownloadBatchId downloadBatchId;
     private final DownloadBatchTitle downloadBatchTitle;
-    private final Map<DownloadFileId, Long> fileBytesDownloadedMap;
+    private final Map<LiteDownloadFileId, Long> fileBytesDownloadedMap;
     private final InternalDownloadBatchStatus downloadBatchStatus;
     private final List<DownloadFile> downloadFiles;
     private final DownloadsBatchPersistence downloadsBatchPersistence;
@@ -32,7 +32,7 @@ class DownloadBatch {
     DownloadBatch(DownloadBatchTitle downloadBatchTitle,
                   DownloadBatchId downloadBatchId,
                   List<DownloadFile> downloadFiles,
-                  Map<DownloadFileId, Long> fileBytesDownloadedMap,
+                  Map<LiteDownloadFileId, Long> fileBytesDownloadedMap,
                   InternalDownloadBatchStatus internalDownloadBatchStatus,
                   DownloadsBatchPersistence downloadsBatchPersistence,
                   CallbackThrottle callbackThrottle) {
@@ -117,9 +117,9 @@ class DownloadBatch {
         return status == ERROR || status == DELETION || status == PAUSED;
     }
 
-    private long getBytesDownloadedFrom(Map<DownloadFileId, Long> fileBytesDownloadedMap) {
+    private long getBytesDownloadedFrom(Map<LiteDownloadFileId, Long> fileBytesDownloadedMap) {
         long bytesDownloaded = 0;
-        for (Map.Entry<DownloadFileId, Long> entry : fileBytesDownloadedMap.entrySet()) {
+        for (Map.Entry<LiteDownloadFileId, Long> entry : fileBytesDownloadedMap.entrySet()) {
             bytesDownloaded += entry.getValue();
         }
         return bytesDownloaded;

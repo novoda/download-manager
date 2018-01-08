@@ -1,19 +1,19 @@
 package com.novoda.downloadmanager;
 
-final class DownloadFileId {
+final class LiteDownloadFileId {
 
     private final int id;
 
-    static DownloadFileId from(Batch batch) {
+    static LiteDownloadFileId from(Batch batch) {
         String id = batch.getTitle() + System.nanoTime();
-        return new DownloadFileId(id.hashCode());
+        return new LiteDownloadFileId(id.hashCode());
     }
 
-    static DownloadFileId from(String id) {
-        return new DownloadFileId(Integer.parseInt(id));
+    static LiteDownloadFileId from(String id) {
+        return new LiteDownloadFileId(Integer.parseInt(id));
     }
 
-    private DownloadFileId(int id) {
+    private LiteDownloadFileId(int id) {
         this.id = id;
     }
 
@@ -22,11 +22,11 @@ final class DownloadFileId {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof DownloadFileId)) {
+        if (!(o instanceof LiteDownloadFileId)) {
             return false;
         }
 
-        DownloadFileId that = (DownloadFileId) o;
+        LiteDownloadFileId that = (LiteDownloadFileId) o;
 
         return id == that.id;
 
@@ -43,8 +43,8 @@ final class DownloadFileId {
 
     @Override
     public String toString() {
-        return "DownloadFileId{"
-                + "id=" + id
-                + '}';
+        return "LiteDownloadFileId{" +
+                "id=" + id +
+                '}';
     }
 }

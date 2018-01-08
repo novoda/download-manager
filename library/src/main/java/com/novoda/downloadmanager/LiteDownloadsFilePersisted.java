@@ -3,7 +3,7 @@ package com.novoda.downloadmanager;
 class LiteDownloadsFilePersisted implements DownloadsFilePersisted {
 
     private final DownloadBatchId downloadBatchId;
-    private final DownloadFileId downloadFileId;
+    private final LiteDownloadFileId downloadFileId;
     private final FileName fileName;
     private final FilePath filePath;
     private final long totalFileSize;
@@ -11,7 +11,7 @@ class LiteDownloadsFilePersisted implements DownloadsFilePersisted {
     private final FilePersistenceType filePersistenceType;
 
     LiteDownloadsFilePersisted(DownloadBatchId downloadBatchId,
-                               DownloadFileId downloadFileId,
+                               LiteDownloadFileId downloadFileId,
                                FileName fileName,
                                FilePath filePath,
                                long totalFileSize,
@@ -52,7 +52,7 @@ class LiteDownloadsFilePersisted implements DownloadsFilePersisted {
     }
 
     @Override
-    public DownloadFileId downloadFileId() {
+    public LiteDownloadFileId downloadFileId() {
         return downloadFileId;
     }
 

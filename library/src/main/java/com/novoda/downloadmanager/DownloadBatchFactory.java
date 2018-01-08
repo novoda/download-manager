@@ -22,7 +22,7 @@ final class DownloadBatchFactory {
 
         for (String fileUrl : fileUrls) {
             InternalFileSize fileSize = InternalFileSizeCreator.unknownFileSize();
-            DownloadFileId downloadFileId = DownloadFileId.from(batch);
+            LiteDownloadFileId downloadFileId = LiteDownloadFileId.from(batch);
             FilePath filePath = FilePathCreator.unknownFilePath();
             InternalDownloadFileStatus downloadFileStatus = new LiteDownloadFileStatus(
                     batch.getDownloadBatchId(),

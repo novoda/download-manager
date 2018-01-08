@@ -202,7 +202,7 @@ class DownloadFile {
         return fileSize.currentSize();
     }
 
-    DownloadFileId id() {
+    LiteDownloadFileId id() {
         return downloadFileStatus.downloadFileId();
     }
 

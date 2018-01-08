@@ -67,7 +67,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence {
                         downloadsFilePersistence
                 );
 
-                Map<DownloadFileId, Long> downloadedFileSizeMap = new HashMap<>(downloadFiles.size());
+                Map<LiteDownloadFileId, Long> downloadedFileSizeMap = new HashMap<>(downloadFiles.size());
 
                 long currentBytesDownloaded = 0;
                 long totalBatchSizeBytes = 0;
