@@ -206,8 +206,8 @@ class DownloadFile {
         return downloadFileStatus.downloadFileId();
     }
 
-    boolean matches(String networkUrl) {
-        return networkUrl.equals(url);
+    boolean matches(DownloadFileId downloadFileId) {
+        return downloadFileStatus.downloadFileId().equals(downloadFileId);
     }
 
     DownloadFileStatus fileStatus() {

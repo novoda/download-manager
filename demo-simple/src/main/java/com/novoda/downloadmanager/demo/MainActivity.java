@@ -148,8 +148,8 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private final View.OnClickListener logDownloadFileStatusOnClick = v -> liteDownloadManagerCommands.getDownloadStatusWithMatching(
-            TWENTY_FILE_URL,
-            downloadFileStatus -> Log.d("DownloadStatusForTwentyMBFile: ", downloadFileStatus)
+            FILE_ID_1,
+            downloadFileStatus -> Log.d("FileStatus: ", downloadFileStatus)
     );
 
     private final DownloadBatchCallback callback = downloadBatchStatus -> {

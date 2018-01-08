@@ -146,20 +146,20 @@ class DownloadManager implements LiteDownloadManagerCommands {
     }
 
     @Override
-    public void getDownloadStatusWithMatching(final String networkUri, final DownloadFileStatusCallback callback) {
+    public void getDownloadStatusWithMatching(final DownloadFileId downloadFileId, final DownloadFileStatusCallback callback) {
         if (downloadService == null) {
             executor.submit(
                     WaitForLockRunnable.waitFor(waitForDownloadService)
-                            .thenPerform(() -> executeFirstLocalPathForDownloadWithMatching(networkUri, callback))
+                            .thenPerform(() -> executeFirstLocalPathForDownloadWithMatching(downloadFileId, callback))
             );
         } else {
-            executeFirstLocalPathForDownloadWithMatching(networkUri, callback);
+            executeFirstLocalPathForDownloadWithMatching(downloadFileId, callback);
         }
     }
 
-    private void executeFirstLocalPathForDownloadWithMatching(String networkUri, final DownloadFileStatusCallback callback) {
+    private void executeFirstLocalPathForDownloadWithMatching(DownloadFileId downloadFileId, final DownloadFileStatusCallback callback) {
         for (DownloadBatch downloadBatch : downloadBatchMap.values()) {
-            final DownloadFile downloadFile = downloadBatch.downloadFileWith(networkUri);
+            final DownloadFile downloadFile = downloadBatch.downloadFileWith(downloadFileId);
             if (downloadFile != null) {
                 callbackHandler.post(() -> callback.onReceived(downloadFile.fileStatus()));
                 return;
