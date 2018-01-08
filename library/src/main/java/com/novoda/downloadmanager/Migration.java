@@ -54,6 +54,14 @@ class Migration {
         return result;
     }
 
+    @Override
+    public String toString() {
+        return "Migration{" +
+                "batch=" + batch +
+                ", fileMetadata=" + fileMetadata +
+                '}';
+    }
+
     static class FileMetadata {
         private final String originalFileLocation;
         private final FileSize fileSize;
@@ -73,7 +81,7 @@ class Migration {
             return fileSize;
         }
 
-        public String uri() {
+        String uri() {
             return uri;
         }
 
@@ -103,6 +111,15 @@ class Migration {
             result = 31 * result + (fileSize != null ? fileSize.hashCode() : 0);
             result = 31 * result + (uri != null ? uri.hashCode() : 0);
             return result;
+        }
+
+        @Override
+        public String toString() {
+            return "FileMetadata{" +
+                    "originalFileLocation='" + originalFileLocation + '\'' +
+                    ", fileSize=" + fileSize +
+                    ", uri='" + uri + '\'' +
+                    '}';
         }
     }
 }
