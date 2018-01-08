@@ -3,6 +3,7 @@ package com.novoda.downloadmanager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 final class DownloadBatchFactory {
 
@@ -16,22 +17,21 @@ final class DownloadBatchFactory {
                                      DownloadsFilePersistence downloadsFilePersistence,
                                      CallbackThrottle callbackThrottle) {
         DownloadBatchTitle downloadBatchTitle = DownloadBatchTitleCreator.createFrom(batch);
-        List<String> fileUrls = batch.getFileUrls();
+        Map<DownloadFileId, String> fileUrls = batch.getFileUrls();
         List<DownloadFile> downloadFiles = new ArrayList<>(fileUrls.size());
         DownloadBatchId downloadBatchId = batch.getDownloadBatchId();
 
-        for (String fileUrl : fileUrls) {
+        for (Map.Entry<DownloadFileId, String> urlByDownloadId : fileUrls.entrySet()) {
             InternalFileSize fileSize = InternalFileSizeCreator.unknownFileSize();
-            DownloadFileId downloadFileId = LiteDownloadFileId.from(batch);
             FilePath filePath = FilePathCreator.unknownFilePath();
             InternalDownloadFileStatus downloadFileStatus = new LiteDownloadFileStatus(
                     batch.getDownloadBatchId(),
-                    downloadFileId,
+                    urlByDownloadId.getKey(),
                     InternalDownloadFileStatus.Status.QUEUED,
                     fileSize,
                     filePath
             );
-            FileName fileName = LiteFileName.from(batch, fileUrl);
+            FileName fileName = LiteFileName.from(batch, urlByDownloadId.getValue());
 
             FilePersistenceCreator filePersistenceCreator = fileOperations.filePersistenceCreator();
             FileDownloader fileDownloader = fileOperations.fileDownloader();
@@ -40,7 +40,7 @@ final class DownloadBatchFactory {
             FilePersistence filePersistence = filePersistenceCreator.create();
             DownloadFile downloadFile = new DownloadFile(
                     downloadBatchId,
-                    fileUrl,
+                    urlByDownloadId.getValue(),
                     downloadFileStatus,
                     fileName,
                     filePath,
