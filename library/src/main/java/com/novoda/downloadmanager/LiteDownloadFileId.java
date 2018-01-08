@@ -35,8 +35,8 @@ final class LiteDownloadFileId implements DownloadFileId {
 
     @Override
     public String toString() {
-        return "LiteDownloadFileId{" +
-                "id=" + id +
-                '}';
+        return "LiteDownloadFileId{"
+                + "id=" + id
+                + '}';
     }
 }
