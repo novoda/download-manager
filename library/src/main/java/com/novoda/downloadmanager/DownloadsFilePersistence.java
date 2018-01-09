@@ -65,6 +65,7 @@ class DownloadsFilePersistence {
 
             DownloadFile downloadFile = new DownloadFile(
                     batchId,
+                    downloadFileId,
                     url,
                     downloadFileStatus,
                     fileName,

@@ -14,11 +14,6 @@ class DownloadBatchIdFixtures {
     }
 
     DownloadBatchId build() {
-        return new DownloadBatchId() {
-            @Override
-            public String stringValue() {
-                return rawDownloadBatchId;
-            }
-        };
+        return () -> rawDownloadBatchId;
     }
 }
