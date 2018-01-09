@@ -16,16 +16,16 @@ final class DownloadBatchFactory {
                                      DownloadsFilePersistence downloadsFilePersistence,
                                      CallbackThrottle callbackThrottle) {
         DownloadBatchTitle downloadBatchTitle = DownloadBatchTitleCreator.createFrom(batch);
-        List<String> fileUrls = batch.getFileUrls();
+        List<String> fileUrls = batch.fileUrls();
         List<DownloadFile> downloadFiles = new ArrayList<>(fileUrls.size());
-        DownloadBatchId downloadBatchId = batch.getDownloadBatchId();
+        DownloadBatchId downloadBatchId = batch.downloadBatchId();
 
         for (String fileUrl : fileUrls) {
             InternalFileSize fileSize = InternalFileSizeCreator.unknownFileSize();
             DownloadFileId downloadFileId = DownloadFileId.from(batch);
             FilePath filePath = FilePathCreator.unknownFilePath();
             InternalDownloadFileStatus downloadFileStatus = new LiteDownloadFileStatus(
-                    batch.getDownloadBatchId(),
+                    batch.downloadBatchId(),
                     downloadFileId,
                     InternalDownloadFileStatus.Status.QUEUED,
                     fileSize,

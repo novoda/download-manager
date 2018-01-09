@@ -89,11 +89,11 @@ class MigrationJob implements Runnable {
     private void migrateV1DataToV2Database(DownloadsPersistence downloadsPersistence, Migration migration) {
         Batch batch = migration.batch();
 
-        DownloadBatchTitle downloadBatchTitle = new LiteDownloadBatchTitle(batch.getTitle());
+        DownloadBatchTitle downloadBatchTitle = new LiteDownloadBatchTitle(batch.title());
 
         Status downloadBatchStatus = migration.hasDownloadedBatch() ? Status.DOWNLOADED : Status.QUEUED;
 
-        DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted(downloadBatchTitle, batch.getDownloadBatchId(), downloadBatchStatus);
+        DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted(downloadBatchTitle, batch.downloadBatchId(), downloadBatchStatus);
         downloadsPersistence.persistBatch(persistedBatch);
 
         for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
@@ -103,7 +103,7 @@ class MigrationJob implements Runnable {
             FilePath filePath = FilePathCreator.create(fileName.name());
             DownloadFileId downloadFileId = DownloadFileId.from(batch);
             DownloadsFilePersisted persistedFile = new LiteDownloadsFilePersisted(
-                    batch.getDownloadBatchId(),
+                    batch.downloadBatchId(),
                     downloadFileId,
                     fileName,
                     filePath,
@@ -118,8 +118,8 @@ class MigrationJob implements Runnable {
     // TODO: See https://github.com/novoda/download-manager/issues/270
     private void deleteFrom(SqlDatabaseWrapper database, Migration migration) {
         Batch batch = migration.batch();
-        Log.d(TAG, "about to delete the batch: " + batch.getDownloadBatchId().stringValue() + ", time is " + System.nanoTime());
-        database.delete(TABLE_BATCHES, WHERE_CLAUSE_ID, batch.getDownloadBatchId().stringValue());
+        Log.d(TAG, "about to delete the batch: " + batch.downloadBatchId().stringValue() + ", time is " + System.nanoTime());
+        database.delete(TABLE_BATCHES, WHERE_CLAUSE_ID, batch.downloadBatchId().stringValue());
         for (Migration.FileMetadata metadata : migration.getFileMetadata()) {
             if (hasValidFileLocation(metadata)) {
                 File file = new File(metadata.originalFileLocation());

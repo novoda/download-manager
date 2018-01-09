@@ -5,7 +5,7 @@ final class DownloadFileId {
     private final int id;
 
     static DownloadFileId from(Batch batch) {
-        String id = batch.getTitle() + System.nanoTime();
+        String id = batch.title() + System.nanoTime();
         return new DownloadFileId(id.hashCode());
     }
 

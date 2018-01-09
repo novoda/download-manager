@@ -15,15 +15,15 @@ public final class Batch {
         this.fileUrls = fileUrls;
     }
 
-    DownloadBatchId getDownloadBatchId() {
+    public DownloadBatchId downloadBatchId() {
         return downloadBatchId;
     }
 
-    String getTitle() {
+    public String title() {
         return title;
     }
 
-    List<String> getFileUrls() {
+    public List<String> fileUrls() {
         return new ArrayList<>(fileUrls);
     }
 
