@@ -22,4 +22,6 @@ public interface DownloadFileStatus {
     FilePath localFilePath();
 
     Status status();
+
+    long downloadDateTimeInMillis();
 }

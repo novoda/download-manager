@@ -43,7 +43,8 @@ class DownloadFileStatusFixtures {
                 downloadFileId,
                 status,
                 fileSize,
-                localFilePath
+                localFilePath,
+                downloadDateTimeInMillis
         );
     }
 }

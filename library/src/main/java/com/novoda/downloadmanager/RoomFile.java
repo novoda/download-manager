@@ -33,6 +33,9 @@ class RoomFile {
     @ColumnInfo(name = "total_size")
     long totalSize;
 
+    @ColumnInfo(name = "download_time_date_in_millis")
+    long downloadTimeDateInMillis;
+
     @ColumnInfo(name = "url")
     String url;
 

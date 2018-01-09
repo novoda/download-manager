@@ -70,6 +70,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
         roomFile.path = filePersisted.filePath().path();
         roomFile.id = filePersisted.downloadFileId().toRawId();
         roomFile.persistenceType = filePersisted.filePersistenceType().toRawValue();
+        roomFile.downloadTimeDateInMillis = filePersisted.downloadDateTimeInMillis();
 
         database.roomFileDao().insert(roomFile);
     }
@@ -96,7 +97,8 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
                     FilePathCreator.create(roomFile.path),
                     roomFile.totalSize,
                     roomFile.url,
-                    FilePersistenceType.from(roomFile.persistenceType)
+                    FilePersistenceType.from(roomFile.persistenceType),
+                    roomFile.downloadTimeDateInMillis
             );
             filePersistedList.add(filePersisted);
         }

@@ -109,7 +109,8 @@ class MigrationJob implements Runnable {
                     filePath,
                     fileMetadata.fileSize().totalSize(),
                     url,
-                    FilePersistenceType.INTERNAL
+                    FilePersistenceType.INTERNAL,
+                    0 // TODO: Get from migration.
             );
             downloadsPersistence.persistFile(persistedFile);
         }

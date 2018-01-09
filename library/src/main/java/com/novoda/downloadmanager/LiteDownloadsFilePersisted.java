@@ -9,6 +9,7 @@ class LiteDownloadsFilePersisted implements DownloadsFilePersisted {
     private final long totalFileSize;
     private final String url;
     private final FilePersistenceType filePersistenceType;
+    private final long downloadDateTimeInMillis;
 
     LiteDownloadsFilePersisted(DownloadBatchId downloadBatchId,
                                DownloadFileId downloadFileId,
@@ -16,7 +17,8 @@ class LiteDownloadsFilePersisted implements DownloadsFilePersisted {
                                FilePath filePath,
                                long totalFileSize,
                                String url,
-                               FilePersistenceType filePersistenceType) {
+                               FilePersistenceType filePersistenceType,
+                               long downloadDateTimeInMillis) {
         this.downloadBatchId = downloadBatchId;
         this.downloadFileId = downloadFileId;
         this.fileName = fileName;
@@ -24,6 +26,7 @@ class LiteDownloadsFilePersisted implements DownloadsFilePersisted {
         this.totalFileSize = totalFileSize;
         this.url = url;
         this.filePersistenceType = filePersistenceType;
+        this.downloadDateTimeInMillis = downloadDateTimeInMillis;
     }
 
     @Override
@@ -59,5 +62,10 @@ class LiteDownloadsFilePersisted implements DownloadsFilePersisted {
     @Override
     public FilePersistenceType filePersistenceType() {
         return filePersistenceType;
+    }
+
+    @Override
+    public long downloadDateTimeInMillis() {
+        return downloadDateTimeInMillis;
     }
 }
