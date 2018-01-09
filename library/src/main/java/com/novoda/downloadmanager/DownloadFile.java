@@ -16,6 +16,7 @@ class DownloadFile {
     private final FileSizeRequester fileSizeRequester;
     private final FilePersistence filePersistence;
     private final DownloadsFilePersistence downloadsFilePersistence;
+    private final long downloadDateTimeInMillis;
 
     private InternalFileSize fileSize;
     private FilePath filePath;
@@ -32,7 +33,8 @@ class DownloadFile {
                  FileDownloader fileDownloader,
                  FileSizeRequester fileSizeRequester,
                  FilePersistence filePersistence,
-                 DownloadsFilePersistence downloadsFilePersistence) {
+                 DownloadsFilePersistence downloadsFilePersistence,
+                 long downloadDateTimeInMillis) {
         this.downloadBatchId = downloadBatchId;
         this.downloadFileId = downloadFileId;
         this.url = url;
@@ -44,6 +46,7 @@ class DownloadFile {
         this.filePersistence = filePersistence;
         this.fileSize = fileSize;
         this.downloadsFilePersistence = downloadsFilePersistence;
+        this.downloadDateTimeInMillis = downloadDateTimeInMillis;
     }
 
     void download(final Callback callback) {
@@ -197,7 +200,8 @@ class DownloadFile {
                 fileSize,
                 url,
                 downloadFileStatus.downloadFileId(),
-                filePersistence.getType()
+                filePersistence.getType(),
+                downloadDateTimeInMillis
         );
     }
 

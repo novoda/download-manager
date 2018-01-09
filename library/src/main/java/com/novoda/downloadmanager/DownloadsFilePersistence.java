@@ -12,13 +12,16 @@ class DownloadsFilePersistence {
         this.downloadsPersistence = downloadsPersistence;
     }
 
+    // We need to persist all of this information.
+    @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
     void persistSync(DownloadBatchId downloadBatchId,
                      FileName fileName,
                      FilePath filePath,
                      FileSize fileSize,
                      String url,
                      DownloadFileId downloadFileId,
-                     FilePersistenceType filePersistenceType) {
+                     FilePersistenceType filePersistenceType,
+                     long downloadDateTimeInMillis) {
         LiteDownloadsFilePersisted filePersisted = new LiteDownloadsFilePersisted(
                 downloadBatchId,
                 downloadFileId,
@@ -26,7 +29,8 @@ class DownloadsFilePersistence {
                 filePath,
                 fileSize.totalSize(),
                 url,
-                filePersistenceType
+                filePersistenceType,
+                downloadDateTimeInMillis
         );
 
         downloadsPersistence.persistFile(filePersisted);
@@ -42,6 +46,7 @@ class DownloadsFilePersistence {
         for (DownloadsFilePersisted filePersisted : filePersistedList) {
             DownloadFileId downloadFileId = filePersisted.downloadFileId();
             FileName fileName = filePersisted.fileName();
+            long downloadDateTimeInMillis = filePersisted.downloadDateTimeInMillis();
 
             FilePersistenceCreator filePersistenceCreator = fileOperations.filePersistenceCreator();
             FilePersistence filePersistence = filePersistenceCreator.create(filePersisted.filePersistenceType());
@@ -57,7 +62,8 @@ class DownloadsFilePersistence {
                     downloadFileId,
                     getFileStatusFrom(batchStatus),
                     fileSize,
-                    filePath
+                    filePath,
+                    downloadDateTimeInMillis
             );
 
             FileSizeRequester fileSizeRequester = fileOperations.fileSizeRequester();
@@ -74,7 +80,8 @@ class DownloadsFilePersistence {
                     fileDownloader,
                     fileSizeRequester,
                     filePersistence,
-                    downloadsFilePersistence
+                    downloadsFilePersistence,
+                    downloadDateTimeInMillis
             );
 
             downloadFiles.add(downloadFile);

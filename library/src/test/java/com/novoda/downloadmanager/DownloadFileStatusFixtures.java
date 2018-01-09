@@ -7,6 +7,7 @@ class DownloadFileStatusFixtures {
     private InternalDownloadFileStatus.Status status = InternalDownloadFileStatus.Status.QUEUED;
     private FileSize fileSize = InternalFileSizeFixtures.aFileSize().build();
     private FilePath localFilePath = FilePathCreator.unknownFilePath();
+    private long downloadDateTimeInMillis = 123456789L;
 
     static DownloadFileStatusFixtures aDownloadFileStatus() {
         return new DownloadFileStatusFixtures();
@@ -37,13 +38,19 @@ class DownloadFileStatusFixtures {
         return this;
     }
 
+    public DownloadFileStatusFixtures withDownloadDateTimeInMillis(long downloadDateTimeInMillis) {
+        this.downloadDateTimeInMillis = downloadDateTimeInMillis;
+        return this;
+    }
+
     InternalDownloadFileStatus build() {
         return new LiteDownloadFileStatus(
                 downloadBatchId,
                 downloadFileId,
                 status,
                 fileSize,
-                localFilePath
+                localFilePath,
+                downloadDateTimeInMillis
         );
     }
 }

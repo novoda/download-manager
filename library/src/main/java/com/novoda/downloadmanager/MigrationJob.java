@@ -103,6 +103,8 @@ class MigrationJob implements Runnable {
             FilePath filePath = FilePathCreator.create(fileName.name());
             String rawDownloadFileId = batch.getTitle() + System.nanoTime();
             DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(rawDownloadFileId);
+            long downloadedDateTimeInMillis = fileMetadata.downloadedDateTimeInMillis();
+
             DownloadsFilePersisted persistedFile = new LiteDownloadsFilePersisted(
                     batch.getDownloadBatchId(),
                     downloadFileId,
@@ -110,7 +112,8 @@ class MigrationJob implements Runnable {
                     filePath,
                     fileMetadata.fileSize().totalSize(),
                     url,
-                    FilePersistenceType.INTERNAL
+                    FilePersistenceType.INTERNAL,
+                    downloadedDateTimeInMillis
             );
             downloadsPersistence.persistFile(persistedFile);
         }

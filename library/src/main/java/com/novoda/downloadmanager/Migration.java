@@ -41,16 +41,16 @@ class Migration {
 
         Migration migration = (Migration) o;
 
-        if (batch != null ? !batch.equals(migration.batch) : migration.batch != null) {
+        if (!batch.equals(migration.batch)) {
             return false;
         }
-        return fileMetadata != null ? fileMetadata.equals(migration.fileMetadata) : migration.fileMetadata == null;
+        return fileMetadata.equals(migration.fileMetadata);
     }
 
     @Override
     public int hashCode() {
-        int result = batch != null ? batch.hashCode() : 0;
-        result = 31 * result + (fileMetadata != null ? fileMetadata.hashCode() : 0);
+        int result = batch.hashCode();
+        result = 31 * result + fileMetadata.hashCode();
         return result;
     }
 
@@ -63,14 +63,17 @@ class Migration {
     }
 
     static class FileMetadata {
+
         private final String originalFileLocation;
         private final FileSize fileSize;
         private final String uri;
+        private final long downloadedDateTimeInMillis;
 
-        FileMetadata(String originalFileLocation, FileSize fileSize, String uri) {
+        FileMetadata(String originalFileLocation, FileSize fileSize, String uri, long downloadedDateTimeInMillis) {
             this.originalFileLocation = originalFileLocation;
             this.fileSize = fileSize;
             this.uri = uri;
+            this.downloadedDateTimeInMillis = downloadedDateTimeInMillis;
         }
 
         String originalFileLocation() {
@@ -85,6 +88,10 @@ class Migration {
             return uri;
         }
 
+        long downloadedDateTimeInMillis() {
+            return downloadedDateTimeInMillis;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) {
@@ -96,28 +103,34 @@ class Migration {
 
             FileMetadata that = (FileMetadata) o;
 
-            if (originalFileLocation != null ? !originalFileLocation.equals(that.originalFileLocation) : that.originalFileLocation != null) {
+            if (downloadedDateTimeInMillis != that.downloadedDateTimeInMillis) {
                 return false;
             }
-            if (fileSize != null ? !fileSize.equals(that.fileSize) : that.fileSize != null) {
+            if (!originalFileLocation.equals(that.originalFileLocation)) {
                 return false;
             }
-            return uri != null ? uri.equals(that.uri) : that.uri == null;
+            if (!fileSize.equals(that.fileSize)) {
+                return false;
+            }
+            return uri.equals(that.uri);
         }
 
         @Override
         public int hashCode() {
-            int result = originalFileLocation != null ? originalFileLocation.hashCode() : 0;
-            result = 31 * result + (fileSize != null ? fileSize.hashCode() : 0);
-            result = 31 * result + (uri != null ? uri.hashCode() : 0);
+            int result = originalFileLocation.hashCode();
+            result = 31 * result + fileSize.hashCode();
+            result = 31 * result + uri.hashCode();
+            result = 31 * result + (int) (downloadedDateTimeInMillis ^ (downloadedDateTimeInMillis >>> 32));
             return result;
         }
 
         @Override
         public String toString() {
-            return "FileMetadata{" + "originalFileLocation='" + originalFileLocation + '\''
+            return "FileMetadata{"
+                    + "originalFileLocation='" + originalFileLocation + '\''
                     + ", fileSize=" + fileSize
                     + ", uri='" + uri + '\''
+                    + ", downloadedDateTimeInMillis=" + downloadedDateTimeInMillis
                     + '}';
         }
     }

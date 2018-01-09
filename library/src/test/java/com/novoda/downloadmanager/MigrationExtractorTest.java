@@ -18,10 +18,11 @@ import static org.mockito.Mockito.mock;
 
 public class MigrationExtractorTest {
 
-    private static final String BATCHES_QUERY = "SELECT DISTINCT batches._id, batches.batch_title FROM batches INNER JOIN DownloadsByBatch ON " +
-            "DownloadsByBatch.batch_id = batches._id WHERE DownloadsByBatch.batch_total_bytes = DownloadsByBatch.batch_current_bytes";
+    private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title FROM batches INNER JOIN DownloadsByBatch ON "
+            + "DownloadsByBatch.batch_id = batches._id WHERE DownloadsByBatch.batch_total_bytes = DownloadsByBatch.batch_current_bytes "
+            + "GROUP BY batches._id";
 
-    private static final String DOWNLOADS_QUERY = "SELECT uri, _data, total_bytes FROM Downloads WHERE batch_id = ?";
+    private static final String DOWNLOADS_QUERY = "SELECT uri, _data, total_bytes, last_modified_timestamp FROM Downloads WHERE batch_id = ?";
 
     private static final StubCursor BATCHES_CURSOR = new StubCursor.Builder()
             .with("_id", "1", "2")
@@ -32,12 +33,14 @@ public class MigrationExtractorTest {
             .with("uri", "uri_1", "uri_2")
             .with("_data", "data_1", "data_2")
             .with("total_bytes", "1000", "2000")
+            .with("last_modified_timestamp", "2500", "3500")
             .build();
 
     private static final Cursor BATCH_TWO_DOWNLOADS_CURSOR = new StubCursor.Builder()
             .with("uri", "uri_3", "uri_4")
             .with("_data", "data_3", "data_4")
             .with("total_bytes", "500", "750")
+            .with("last_modified_timestamp", "9600", "6700")
             .build();
 
     private final SqlDatabaseWrapper database = mock(SqlDatabaseWrapper.class);
@@ -70,8 +73,8 @@ public class MigrationExtractorTest {
                 .build();
 
         List<Migration.FileMetadata> firstFileMetadata = new ArrayList<>();
-        firstFileMetadata.add(new Migration.FileMetadata("data_1", new LiteFileSize(1000, 1000), firstUri));
-        firstFileMetadata.add(new Migration.FileMetadata("data_2", new LiteFileSize(2000, 2000), secondUri));
+        firstFileMetadata.add(new Migration.FileMetadata("data_1", new LiteFileSize(1000, 1000), firstUri, 2500));
+        firstFileMetadata.add(new Migration.FileMetadata("data_2", new LiteFileSize(2000, 2000), secondUri, 3500));
 
         String thirdUri = "uri_3";
         String fourthUri = "uri_4";
@@ -81,8 +84,8 @@ public class MigrationExtractorTest {
                 .build();
 
         List<Migration.FileMetadata> secondFileMetadata = new ArrayList<>();
-        secondFileMetadata.add(new Migration.FileMetadata("data_3", new LiteFileSize(500, 500), thirdUri));
-        secondFileMetadata.add(new Migration.FileMetadata("data_4", new LiteFileSize(750, 750), fourthUri));
+        secondFileMetadata.add(new Migration.FileMetadata("data_3", new LiteFileSize(500, 500), thirdUri, 9600));
+        secondFileMetadata.add(new Migration.FileMetadata("data_4", new LiteFileSize(750, 750), fourthUri, 6700));
 
         return Arrays.asList(
                 new Migration(firstBatch, firstFileMetadata),

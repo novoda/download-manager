@@ -20,6 +20,7 @@ final class DownloadBatchFactory {
         Map<DownloadFileId, String> fileUrls = batch.getFileUrls();
         List<DownloadFile> downloadFiles = new ArrayList<>(fileUrls.size());
         DownloadBatchId downloadBatchId = batch.getDownloadBatchId();
+        long downloadDateTimeInMillis = System.currentTimeMillis();
 
         for (Map.Entry<DownloadFileId, String> urlByDownloadId : fileUrls.entrySet()) {
             InternalFileSize fileSize = InternalFileSizeCreator.unknownFileSize();
@@ -30,7 +31,8 @@ final class DownloadBatchFactory {
                     downloadFileId,
                     InternalDownloadFileStatus.Status.QUEUED,
                     fileSize,
-                    filePath
+                    filePath,
+                    downloadDateTimeInMillis
             );
             String fileUrl = urlByDownloadId.getValue();
             FileName fileName = LiteFileName.from(batch, fileUrl);
@@ -51,7 +53,8 @@ final class DownloadBatchFactory {
                     fileDownloader,
                     fileSizeRequester,
                     filePersistence,
-                    downloadsFilePersistence
+                    downloadsFilePersistence,
+                    downloadDateTimeInMillis
             );
             downloadFiles.add(downloadFile);
         }

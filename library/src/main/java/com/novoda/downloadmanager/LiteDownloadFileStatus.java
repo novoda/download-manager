@@ -6,18 +6,25 @@ class LiteDownloadFileStatus implements InternalDownloadFileStatus {
 
     private final DownloadBatchId downloadBatchId;
     private final DownloadFileId downloadFileId;
+    private final long downloadDateTimeInMillis;
 
     private FileSize fileSize;
     private FilePath localFilePath;
     private Status status;
     private DownloadError downloadError;
 
-    LiteDownloadFileStatus(DownloadBatchId downloadBatchId, DownloadFileId downloadFileId, Status status, FileSize fileSize, FilePath localFilePath) {
+    LiteDownloadFileStatus(DownloadBatchId downloadBatchId,
+                           DownloadFileId downloadFileId,
+                           Status status,
+                           FileSize fileSize,
+                           FilePath localFilePath,
+                           long downloadDateTimeInMillis) {
         this.downloadBatchId = downloadBatchId;
         this.downloadFileId = downloadFileId;
         this.status = status;
         this.fileSize = fileSize;
         this.localFilePath = localFilePath;
+        this.downloadDateTimeInMillis = downloadDateTimeInMillis;
     }
 
     @Override
@@ -117,10 +124,16 @@ class LiteDownloadFileStatus implements InternalDownloadFileStatus {
     }
 
     @Override
+    public long downloadDateTimeInMillis() {
+        return downloadDateTimeInMillis;
+    }
+
+    @Override
     public String toString() {
         return "LiteDownloadFileStatus{"
                 + "downloadBatchId=" + downloadBatchId
                 + ", downloadFileId=" + downloadFileId
+                + ", downloadDateTimeInMillis=" + downloadDateTimeInMillis
                 + ", fileSize=" + fileSize
                 + ", localFilePath=" + localFilePath
                 + ", status=" + status
