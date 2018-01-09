@@ -25,13 +25,14 @@ final class DownloadBatchFactory {
             InternalFileSize fileSize = InternalFileSizeCreator.unknownFileSize();
             FilePath filePath = FilePathCreator.unknownFilePath();
             InternalDownloadFileStatus downloadFileStatus = new LiteDownloadFileStatus(
-                    batch.getDownloadBatchId(),
+                    downloadBatchId,
                     urlByDownloadId.getKey(),
                     InternalDownloadFileStatus.Status.QUEUED,
                     fileSize,
                     filePath
             );
-            FileName fileName = LiteFileName.from(batch, urlByDownloadId.getValue());
+            String fileUrl = urlByDownloadId.getValue();
+            FileName fileName = LiteFileName.from(batch, fileUrl);
 
             FilePersistenceCreator filePersistenceCreator = fileOperations.filePersistenceCreator();
             FileDownloader fileDownloader = fileOperations.fileDownloader();
@@ -40,7 +41,7 @@ final class DownloadBatchFactory {
             FilePersistence filePersistence = filePersistenceCreator.create();
             DownloadFile downloadFile = new DownloadFile(
                     downloadBatchId,
-                    urlByDownloadId.getValue(),
+                    fileUrl,
                     downloadFileStatus,
                     fileName,
                     filePath,
