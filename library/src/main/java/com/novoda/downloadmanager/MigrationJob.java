@@ -89,11 +89,17 @@ class MigrationJob implements Runnable {
     private void migrateV1DataToV2Database(DownloadsPersistence downloadsPersistence, Migration migration) {
         Batch batch = migration.batch();
 
+        DownloadBatchId downloadBatchId = batch.getDownloadBatchId();
         DownloadBatchTitle downloadBatchTitle = new LiteDownloadBatchTitle(batch.getTitle());
-
         Status downloadBatchStatus = migration.hasDownloadedBatch() ? Status.DOWNLOADED : Status.QUEUED;
+        long downloadedDateTimeInMillis = migration.downloadedDateTimeInMillis();
 
-        DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted(downloadBatchTitle, batch.getDownloadBatchId(), downloadBatchStatus);
+        DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted(
+                downloadBatchTitle,
+                downloadBatchId,
+                downloadBatchStatus,
+                downloadedDateTimeInMillis
+        );
         downloadsPersistence.persistBatch(persistedBatch);
 
         for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
@@ -104,7 +110,7 @@ class MigrationJob implements Runnable {
             String rawDownloadFileId = batch.getTitle() + System.nanoTime();
             DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(rawDownloadFileId);
             DownloadsFilePersisted persistedFile = new LiteDownloadsFilePersisted(
-                    batch.getDownloadBatchId(),
+                    downloadBatchId,
                     downloadFileId,
                     fileName,
                     filePath,

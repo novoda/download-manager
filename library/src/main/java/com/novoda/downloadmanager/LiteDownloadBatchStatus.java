@@ -9,6 +9,7 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
 
     private final DownloadBatchTitle downloadBatchTitle;
     private final DownloadBatchId downloadBatchId;
+    private final long downloadedDateTimeInMillis;
 
     private long bytesDownloaded;
     private long totalBatchSizeBytes;
@@ -18,9 +19,10 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     @Nullable
     private DownloadError downloadError;
 
-    LiteDownloadBatchStatus(DownloadBatchId downloadBatchId, DownloadBatchTitle downloadBatchTitle, Status status) {
+    LiteDownloadBatchStatus(DownloadBatchId downloadBatchId, DownloadBatchTitle downloadBatchTitle, long downloadedDateTimeInMillis, Status status) {
         this.downloadBatchTitle = downloadBatchTitle;
         this.downloadBatchId = downloadBatchId;
+        this.downloadedDateTimeInMillis = downloadedDateTimeInMillis;
         this.status = status;
     }
 
@@ -71,6 +73,11 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     @Override
     public Status status() {
         return status;
+    }
+
+    @Override
+    public long downloadedDateTimeInMillis() {
+        return downloadedDateTimeInMillis;
     }
 
     @Override

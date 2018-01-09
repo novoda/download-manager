@@ -20,6 +20,7 @@ class DownloadBatch {
 
     private final DownloadBatchId downloadBatchId;
     private final DownloadBatchTitle downloadBatchTitle;
+    private final long downloadedDateTimeInMillis;
     private final Map<DownloadFileId, Long> fileBytesDownloadedMap;
     private final InternalDownloadBatchStatus downloadBatchStatus;
     private final List<DownloadFile> downloadFiles;
@@ -31,6 +32,7 @@ class DownloadBatch {
 
     DownloadBatch(DownloadBatchTitle downloadBatchTitle,
                   DownloadBatchId downloadBatchId,
+                  long downloadedDateTimeInMillis,
                   List<DownloadFile> downloadFiles,
                   Map<DownloadFileId, Long> fileBytesDownloadedMap,
                   InternalDownloadBatchStatus internalDownloadBatchStatus,
@@ -38,6 +40,7 @@ class DownloadBatch {
                   CallbackThrottle callbackThrottle) {
         this.downloadBatchTitle = downloadBatchTitle;
         this.downloadBatchId = downloadBatchId;
+        this.downloadedDateTimeInMillis = downloadedDateTimeInMillis;
         this.downloadFiles = downloadFiles;
         this.fileBytesDownloadedMap = fileBytesDownloadedMap;
         this.downloadBatchStatus = internalDownloadBatchStatus;
@@ -192,6 +195,12 @@ class DownloadBatch {
     }
 
     void persist() {
-        downloadsBatchPersistence.persistAsync(downloadBatchTitle, downloadBatchId, downloadBatchStatus.status(), downloadFiles);
+        downloadsBatchPersistence.persistAsync(
+                downloadBatchTitle,
+                downloadBatchId,
+                downloadBatchStatus.status(),
+                downloadFiles,
+                downloadedDateTimeInMillis
+        );
     }
 }

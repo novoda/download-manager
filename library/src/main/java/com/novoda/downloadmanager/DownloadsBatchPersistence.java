@@ -23,15 +23,21 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence {
         this.callbackThrottleCreator = callbackThrottleCreator;
     }
 
-    void persistAsync(final DownloadBatchTitle downloadBatchTitle,
-                      final DownloadBatchId downloadBatchId,
-                      final DownloadBatchStatus.Status status,
-                      final List<DownloadFile> downloadFiles) {
+    void persistAsync(DownloadBatchTitle downloadBatchTitle,
+                      DownloadBatchId downloadBatchId,
+                      DownloadBatchStatus.Status status,
+                      List<DownloadFile> downloadFiles,
+                      long downloadedDateTimeInMillis) {
         executor.execute(() -> {
             downloadsPersistence.startTransaction();
 
             try {
-                LiteDownloadsBatchPersisted batchPersisted = new LiteDownloadsBatchPersisted(downloadBatchTitle, downloadBatchId, status);
+                LiteDownloadsBatchPersisted batchPersisted = new LiteDownloadsBatchPersisted(
+                        downloadBatchTitle,
+                        downloadBatchId,
+                        status,
+                        downloadedDateTimeInMillis
+                );
                 downloadsPersistence.persistBatch(batchPersisted);
 
                 for (DownloadFile downloadFile : downloadFiles) {
@@ -54,9 +60,11 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence {
                 DownloadBatchStatus.Status status = batchPersisted.downloadBatchStatus();
                 DownloadBatchId downloadBatchId = batchPersisted.downloadBatchId();
                 DownloadBatchTitle downloadBatchTitle = batchPersisted.downloadBatchTitle();
+                long downloadedDateTimeInMillis = batchPersisted.downloadedDateTimeInMillis();
                 InternalDownloadBatchStatus liteDownloadBatchStatus = new LiteDownloadBatchStatus(
                         downloadBatchId,
                         downloadBatchTitle,
+                        downloadedDateTimeInMillis,
                         status
                 );
 
@@ -84,6 +92,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence {
                 DownloadBatch downloadBatch = new DownloadBatch(
                         downloadBatchTitle,
                         downloadBatchId,
+                        downloadedDateTimeInMillis,
                         downloadFiles,
                         downloadedFileSizeMap,
                         liteDownloadBatchStatus,

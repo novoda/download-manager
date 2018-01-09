@@ -23,6 +23,10 @@ class Migration {
         return fileMetadata;
     }
 
+    public long downloadedDateTimeInMillis() {
+        return downloadedDateTimeInMillis;
+    }
+
     boolean hasDownloadedBatch() {
         for (FileMetadata fileMetadatum : fileMetadata) {
             if (fileMetadatum.fileSize().currentSize() != fileMetadatum.fileSize().totalSize()) {
