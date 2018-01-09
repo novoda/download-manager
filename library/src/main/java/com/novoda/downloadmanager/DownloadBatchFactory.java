@@ -24,9 +24,10 @@ final class DownloadBatchFactory {
         for (Map.Entry<DownloadFileId, String> urlByDownloadId : fileUrls.entrySet()) {
             InternalFileSize fileSize = InternalFileSizeCreator.unknownFileSize();
             FilePath filePath = FilePathCreator.unknownFilePath();
+            DownloadFileId downloadFileId = urlByDownloadId.getKey();
             InternalDownloadFileStatus downloadFileStatus = new LiteDownloadFileStatus(
                     downloadBatchId,
-                    urlByDownloadId.getKey(),
+                    downloadFileId,
                     InternalDownloadFileStatus.Status.QUEUED,
                     fileSize,
                     filePath
@@ -41,6 +42,7 @@ final class DownloadBatchFactory {
             FilePersistence filePersistence = filePersistenceCreator.create();
             DownloadFile downloadFile = new DownloadFile(
                     downloadBatchId,
+                    downloadFileId,
                     fileUrl,
                     downloadFileStatus,
                     fileName,

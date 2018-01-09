@@ -8,6 +8,7 @@ import com.novoda.notils.logger.simple.Log;
 class DownloadFile {
 
     private final DownloadBatchId downloadBatchId;
+    private final DownloadFileId downloadFileId;
     private final String url;
     private final InternalDownloadFileStatus downloadFileStatus;
     private final FileName fileName;
@@ -22,6 +23,7 @@ class DownloadFile {
     // Model that knows how to interact with low-level components.
     @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
     DownloadFile(DownloadBatchId downloadBatchId,
+                 DownloadFileId downloadFileId,
                  String url,
                  InternalDownloadFileStatus downloadFileStatus,
                  FileName fileName,
@@ -32,6 +34,7 @@ class DownloadFile {
                  FilePersistence filePersistence,
                  DownloadsFilePersistence downloadsFilePersistence) {
         this.downloadBatchId = downloadBatchId;
+        this.downloadFileId = downloadFileId;
         this.url = url;
         this.downloadFileStatus = downloadFileStatus;
         this.fileName = fileName;
@@ -207,7 +210,7 @@ class DownloadFile {
     }
 
     boolean matches(DownloadFileId downloadFileId) {
-        return downloadFileStatus.downloadFileId().equals(downloadFileId);
+        return this.downloadFileId.equals(downloadFileId);
     }
 
     DownloadFileStatus fileStatus() {
