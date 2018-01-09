@@ -3,6 +3,7 @@ package com.novoda.downloadmanager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 final class DownloadBatchFactory {
 
@@ -16,21 +17,22 @@ final class DownloadBatchFactory {
                                      DownloadsFilePersistence downloadsFilePersistence,
                                      CallbackThrottle callbackThrottle) {
         DownloadBatchTitle downloadBatchTitle = DownloadBatchTitleCreator.createFrom(batch);
-        List<String> fileUrls = batch.fileUrls();
+        Map<DownloadFileId, String> fileUrls = batch.fileUrlsByDownloadFileId();
         List<DownloadFile> downloadFiles = new ArrayList<>(fileUrls.size());
         DownloadBatchId downloadBatchId = batch.downloadBatchId();
 
-        for (String fileUrl : fileUrls) {
+        for (Map.Entry<DownloadFileId, String> urlByDownloadId : fileUrls.entrySet()) {
             InternalFileSize fileSize = InternalFileSizeCreator.unknownFileSize();
-            DownloadFileId downloadFileId = DownloadFileId.from(batch);
             FilePath filePath = FilePathCreator.unknownFilePath();
+            DownloadFileId downloadFileId = urlByDownloadId.getKey();
             InternalDownloadFileStatus downloadFileStatus = new LiteDownloadFileStatus(
-                    batch.downloadBatchId(),
+                    downloadBatchId,
                     downloadFileId,
                     InternalDownloadFileStatus.Status.QUEUED,
                     fileSize,
                     filePath
             );
+            String fileUrl = urlByDownloadId.getValue();
             FileName fileName = LiteFileName.from(batch, fileUrl);
 
             FilePersistenceCreator filePersistenceCreator = fileOperations.filePersistenceCreator();
@@ -40,6 +42,7 @@ final class DownloadBatchFactory {
             FilePersistence filePersistence = filePersistenceCreator.create();
             DownloadFile downloadFile = new DownloadFile(
                     downloadBatchId,
+                    downloadFileId,
                     fileUrl,
                     downloadFileStatus,
                     fileName,

@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager;
 
 import static com.novoda.downloadmanager.DownloadBatchIdFixtures.aDownloadBatchId;
+import static com.novoda.downloadmanager.DownloadFileIdFixtures.aDownloadFileId;
 import static com.novoda.downloadmanager.DownloadFileStatusFixtures.aDownloadFileStatus;
 import static com.novoda.downloadmanager.FileNameFixtures.aFileName;
 import static com.novoda.downloadmanager.FilePathFixtures.aFilePath;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.mock;
 class DownloadFileFixtures {
 
     private DownloadBatchId downloadBatchId = aDownloadBatchId().build();
+    private DownloadFileId downloadFileId = aDownloadFileId().build();
     private String url = "http://example.com";
     private InternalDownloadFileStatus downloadFileStatus = aDownloadFileStatus().build();
     private FileName fileName = aFileName().build();
@@ -27,6 +29,11 @@ class DownloadFileFixtures {
 
     DownloadFileFixtures withDownloadBatchId(DownloadBatchId downloadBatchId) {
         this.downloadBatchId = downloadBatchId;
+        return this;
+    }
+
+    DownloadFileFixtures withDownloadFileId(DownloadFileId downloadFileId) {
+        this.downloadFileId = downloadFileId;
         return this;
     }
 
@@ -78,6 +85,7 @@ class DownloadFileFixtures {
     DownloadFile build() {
         return new DownloadFile(
                 downloadBatchId,
+                downloadFileId,
                 url,
                 downloadFileStatus,
                 fileName,
