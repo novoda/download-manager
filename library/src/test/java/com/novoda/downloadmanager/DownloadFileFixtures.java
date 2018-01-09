@@ -20,6 +20,7 @@ class DownloadFileFixtures {
     private FileSizeRequester fileSizeRequester = new InMemoryFileSizeRequester();
     private FilePersistence filePersistence = aFilePersistence().build();
     private DownloadsFilePersistence downloadsFilePersistence = mock(DownloadsFilePersistence.class);
+    private long downloadDateTimeInMillis = 123456789L;
 
     static DownloadFileFixtures aDownloadFile() {
         return new DownloadFileFixtures();
@@ -72,6 +73,11 @@ class DownloadFileFixtures {
 
     DownloadFileFixtures withDownloadsFilePersistence(DownloadsFilePersistence downloadsFilePersistence) {
         this.downloadsFilePersistence = downloadsFilePersistence;
+        return this;
+    }
+
+    DownloadFileFixtures withDownloadDateTimeInMillis(long downloadDateTimeInMillis) {
+        this.downloadDateTimeInMillis = downloadDateTimeInMillis;
         return this;
     }
 

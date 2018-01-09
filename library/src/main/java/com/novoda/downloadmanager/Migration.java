@@ -49,9 +49,17 @@ class Migration {
 
     @Override
     public int hashCode() {
-        int result = batch != null ? batch.hashCode() : 0;
-        result = 31 * result + (fileMetadata != null ? fileMetadata.hashCode() : 0);
+        int result = batch.hashCode();
+        result = 31 * result + fileMetadata.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Migration{"
+                + "batch=" + batch
+                + ", fileMetadata=" + fileMetadata
+                + '}';
     }
 
     static class FileMetadata {
@@ -114,6 +122,16 @@ class Migration {
             result = 31 * result + uri.hashCode();
             result = 31 * result + (int) (downloadedDateTimeInMillis ^ (downloadedDateTimeInMillis >>> 32));
             return result;
+        }
+
+        @Override
+        public String toString() {
+            return "FileMetadata{"
+                    + "originalFileLocation='" + originalFileLocation + '\''
+                    + ", fileSize=" + fileSize
+                    + ", uri='" + uri + '\''
+                    + ", downloadedDateTimeInMillis=" + downloadedDateTimeInMillis
+                    + '}';
         }
     }
 }

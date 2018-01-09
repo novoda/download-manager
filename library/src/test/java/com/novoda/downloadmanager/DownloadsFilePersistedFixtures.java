@@ -11,6 +11,7 @@ class DownloadsFilePersistedFixtures {
     private String url;
     private DownloadFileId downloadFileId;
     private FilePersistenceType filePersistenceType;
+    private long downloadDateTimeInMillis;
 
     private DownloadsFilePersistedFixtures() {
         // use aFile() to get an instance of this class
@@ -55,6 +56,11 @@ class DownloadsFilePersistedFixtures {
         return this;
     }
 
+    DownloadsFilePersistedFixtures withDownloadDateTimeInMillis(long downloadDateTimeInMillis) {
+        this.downloadDateTimeInMillis = downloadDateTimeInMillis;
+        return this;
+    }
+
     DownloadsFilePersisted build() {
         return new DownloadsFilePersisted() {
             @Override
@@ -90,6 +96,11 @@ class DownloadsFilePersistedFixtures {
             @Override
             public FilePersistenceType filePersistenceType() {
                 return filePersistenceType;
+            }
+
+            @Override
+            public long downloadDateTimeInMillis() {
+                return downloadDateTimeInMillis;
             }
         };
     }
