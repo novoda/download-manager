@@ -16,6 +16,8 @@ import com.novoda.downloadmanager.DownloadBatchCallback;
 import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
+import com.novoda.downloadmanager.DownloadFileId;
+import com.novoda.downloadmanager.DownloadFileIdCreator;
 import com.novoda.downloadmanager.DownloadMigrator;
 import com.novoda.downloadmanager.DownloadMigratorBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
@@ -35,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final DownloadBatchId BATCH_ID_1 = DownloadBatchIdCreator.createFrom("batch_id_1");
     private static final DownloadBatchId BATCH_ID_2 = DownloadBatchIdCreator.createFrom("batch_id_2");
+    private static final DownloadFileId FILE_ID_1 = DownloadFileIdCreator.createFrom("file_id_1");
+    private static final DownloadFileId FILE_ID_2 = DownloadFileIdCreator.createFrom("file_id_2");
     private static final String FIVE_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/5MB.zip";
     private static final String TEN_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/10MB.zip";
     private static final String TWENTY_FILE_URL = "http://ipv4.download.thinkbroadband.com/20MB.zip";
@@ -119,13 +123,13 @@ public class MainActivity extends AppCompatActivity {
 
     private final View.OnClickListener downloadBatchesOnClick = v -> {
         Batch batch = new Batch.Builder(BATCH_ID_1, "Made in chelsea")
-                .addFile(FIVE_MB_FILE_URL)
+                .addFile(FILE_ID_1, FIVE_MB_FILE_URL)
                 .addFile(TEN_MB_FILE_URL)
                 .build();
         liteDownloadManagerCommands.download(batch);
 
         batch = new Batch.Builder(BATCH_ID_2, "Hollyoaks")
-                .addFile(TEN_MB_FILE_URL)
+                .addFile(FILE_ID_2, TEN_MB_FILE_URL)
                 .addFile(TWENTY_FILE_URL)
                 .build();
         liteDownloadManagerCommands.download(batch);
@@ -144,8 +148,8 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private final View.OnClickListener logDownloadFileStatusOnClick = v -> liteDownloadManagerCommands.getDownloadStatusWithMatching(
-            TWENTY_FILE_URL,
-            downloadFileStatus -> Log.d("DownloadStatusForTwentyMBFile: ", downloadFileStatus)
+            FILE_ID_1,
+            downloadFileStatus -> Log.d("FileStatus: ", downloadFileStatus)
     );
 
     private final DownloadBatchCallback callback = downloadBatchStatus -> {

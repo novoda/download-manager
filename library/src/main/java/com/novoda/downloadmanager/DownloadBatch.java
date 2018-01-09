@@ -182,9 +182,9 @@ class DownloadBatch {
     }
 
     @Nullable
-    DownloadFile downloadFileWith(String networkUri) {
+    DownloadFile downloadFileWith(DownloadFileId downloadFileId) {
         for (DownloadFile downloadFile : downloadFiles) {
-            if (downloadFile.matches(networkUri)) {
+            if (downloadFile.matches(downloadFileId)) {
                 return downloadFile;
             }
         }

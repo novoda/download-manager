@@ -18,5 +18,5 @@ public interface LiteDownloadManagerCommands {
 
     void submitAllStoredDownloads(AllStoredDownloadsSubmittedCallback callback);
 
-    void getDownloadStatusWithMatching(String uri, DownloadFileStatusCallback callback);
+    void getDownloadStatusWithMatching(DownloadFileId downloadFileId, DownloadFileStatusCallback callback);
 }

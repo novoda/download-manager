@@ -101,8 +101,10 @@ class MigrationJob implements Runnable {
 
             FileName fileName = LiteFileName.from(batch, url);
             FilePath filePath = FilePathCreator.create(fileName.name());
-            DownloadFileId downloadFileId = DownloadFileId.from(batch);
+            String rawDownloadFileId = batch.getTitle() + System.nanoTime();
+            DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(rawDownloadFileId);
             long downloadedDateTimeInMillis = fileMetadata.downloadedDateTimeInMillis();
+
             DownloadsFilePersisted persistedFile = new LiteDownloadsFilePersisted(
                     batch.getDownloadBatchId(),
                     downloadFileId,

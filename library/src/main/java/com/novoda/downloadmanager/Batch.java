@@ -1,15 +1,15 @@
 package com.novoda.downloadmanager;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public final class Batch {
 
     private final DownloadBatchId downloadBatchId;
     private final String title;
-    private final List<String> fileUrls;
+    private final Map<DownloadFileId, String> fileUrls;
 
-    Batch(DownloadBatchId downloadBatchId, String title, List<String> fileUrls) {
+    Batch(DownloadBatchId downloadBatchId, String title, Map<DownloadFileId, String> fileUrls) {
         this.downloadBatchId = downloadBatchId;
         this.title = title;
         this.fileUrls = fileUrls;
@@ -23,8 +23,8 @@ public final class Batch {
         return title;
     }
 
-    List<String> getFileUrls() {
-        return new ArrayList<>(fileUrls);
+    Map<DownloadFileId, String> getFileUrls() {
+        return new HashMap<>(fileUrls);
     }
 
     @Override
@@ -68,7 +68,7 @@ public final class Batch {
 
         private final DownloadBatchId downloadBatchId;
         private final String title;
-        private final List<String> fileUrls = new ArrayList<>();
+        private final Map<DownloadFileId, String> fileUrls = new HashMap<>();
 
         public Builder(DownloadBatchId downloadBatchId, String title) {
             this.downloadBatchId = downloadBatchId;
@@ -76,7 +76,14 @@ public final class Batch {
         }
 
         public Builder addFile(String fileUrl) {
-            fileUrls.add(fileUrl);
+            String id = downloadBatchId.stringValue() + fileUrl;
+            DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(id);
+            fileUrls.put(downloadFileId, fileUrl);
+            return this;
+        }
+
+        public Builder addFile(DownloadFileId downloadFileId, String fileUrl) {
+            fileUrls.put(downloadFileId, fileUrl);
             return this;
         }
 
