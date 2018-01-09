@@ -130,14 +130,14 @@ class LiteDownloadFileStatus implements InternalDownloadFileStatus {
 
     @Override
     public String toString() {
-        return "LiteDownloadFileStatus{" +
-                "downloadBatchId=" + downloadBatchId +
-                ", downloadFileId=" + downloadFileId +
-                ", downloadDateTimeInMillis=" + downloadDateTimeInMillis +
-                ", fileSize=" + fileSize +
-                ", localFilePath=" + localFilePath +
-                ", status=" + status +
-                ", downloadError=" + downloadError +
-                '}';
+        return "LiteDownloadFileStatus{"
+                + "downloadBatchId=" + downloadBatchId
+                + ", downloadFileId=" + downloadFileId
+                + ", downloadDateTimeInMillis=" + downloadDateTimeInMillis
+                + ", fileSize=" + fileSize
+                + ", localFilePath=" + localFilePath
+                + ", status=" + status
+                + ", downloadError=" + downloadError
+                + '}';
     }
 }

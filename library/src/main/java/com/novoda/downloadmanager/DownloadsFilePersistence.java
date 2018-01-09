@@ -12,6 +12,8 @@ class DownloadsFilePersistence {
         this.downloadsPersistence = downloadsPersistence;
     }
 
+    // We need to persist all of this information.
+    @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
     void persistSync(DownloadBatchId downloadBatchId,
                      FileName fileName,
                      FilePath filePath,

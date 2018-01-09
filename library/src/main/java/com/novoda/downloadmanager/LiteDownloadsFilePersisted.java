@@ -11,6 +11,8 @@ class LiteDownloadsFilePersisted implements DownloadsFilePersisted {
     private final FilePersistenceType filePersistenceType;
     private final long downloadDateTimeInMillis;
 
+    // We need to expose all of these.
+    @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
     LiteDownloadsFilePersisted(DownloadBatchId downloadBatchId,
                                DownloadFileId downloadFileId,
                                FileName fileName,

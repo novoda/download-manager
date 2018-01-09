@@ -102,6 +102,7 @@ class MigrationJob implements Runnable {
             FileName fileName = LiteFileName.from(batch, url);
             FilePath filePath = FilePathCreator.create(fileName.name());
             DownloadFileId downloadFileId = DownloadFileId.from(batch);
+            long downloadedDateTimeInMillis = fileMetadata.downloadedDateTimeInMillis();
             DownloadsFilePersisted persistedFile = new LiteDownloadsFilePersisted(
                     batch.getDownloadBatchId(),
                     downloadFileId,
@@ -110,7 +111,7 @@ class MigrationJob implements Runnable {
                     fileMetadata.fileSize().totalSize(),
                     url,
                     FilePersistenceType.INTERNAL,
-                    0 // TODO: Get from migration.
+                    downloadedDateTimeInMillis
             );
             downloadsPersistence.persistFile(persistedFile);
         }
