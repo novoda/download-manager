@@ -7,10 +7,12 @@ class Migration {
 
     private final Batch batch;
     private final List<FileMetadata> fileMetadata;
+    private final long downloadedDateTimeInMillis;
 
-    Migration(Batch batch, List<FileMetadata> fileMetadata) {
+    Migration(Batch batch, List<FileMetadata> fileMetadata, long downloadedDateTimeInMillis) {
         this.batch = batch;
         this.fileMetadata = Collections.unmodifiableList(fileMetadata);
+        this.downloadedDateTimeInMillis = downloadedDateTimeInMillis;
     }
 
     Batch batch() {
@@ -41,16 +43,20 @@ class Migration {
 
         Migration migration = (Migration) o;
 
-        if (batch != null ? !batch.equals(migration.batch) : migration.batch != null) {
+        if (downloadedDateTimeInMillis != migration.downloadedDateTimeInMillis) {
             return false;
         }
-        return fileMetadata != null ? fileMetadata.equals(migration.fileMetadata) : migration.fileMetadata == null;
+        if (!batch.equals(migration.batch)) {
+            return false;
+        }
+        return fileMetadata.equals(migration.fileMetadata);
     }
 
     @Override
     public int hashCode() {
-        int result = batch != null ? batch.hashCode() : 0;
-        result = 31 * result + (fileMetadata != null ? fileMetadata.hashCode() : 0);
+        int result = batch.hashCode();
+        result = 31 * result + fileMetadata.hashCode();
+        result = 31 * result + (int) (downloadedDateTimeInMillis ^ (downloadedDateTimeInMillis >>> 32));
         return result;
     }
 
@@ -59,6 +65,7 @@ class Migration {
         return "Migration{"
                 + "batch=" + batch
                 + ", fileMetadata=" + fileMetadata
+                + ", downloadedDateTimeInMillis=" + downloadedDateTimeInMillis
                 + '}';
     }
 

@@ -18,14 +18,16 @@ import static org.mockito.Mockito.mock;
 
 public class MigrationExtractorTest {
 
-    private static final String BATCHES_QUERY = "SELECT DISTINCT batches._id, batches.batch_title FROM batches INNER JOIN DownloadsByBatch ON " +
-            "DownloadsByBatch.batch_id = batches._id WHERE DownloadsByBatch.batch_total_bytes = DownloadsByBatch.batch_current_bytes";
+    private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title, batches.last_modified_timestamp FROM "
+            + "batches INNER JOIN DownloadsByBatch ON DownloadsByBatch.batch_id = batches._id "
+            + "WHERE DownloadsByBatch.batch_total_bytes = DownloadsByBatch.batch_current_bytes GROUP BY batches._id";
 
     private static final String DOWNLOADS_QUERY = "SELECT uri, _data, total_bytes FROM Downloads WHERE batch_id = ?";
 
     private static final StubCursor BATCHES_CURSOR = new StubCursor.Builder()
             .with("_id", "1", "2")
             .with("batch_title", "title_1", "title_2")
+            .with("last_modified_timestamp", "12345", "67890")
             .build();
 
     private static final Cursor BATCH_ONE_DOWNLOADS_CURSOR = new StubCursor.Builder()
@@ -85,8 +87,8 @@ public class MigrationExtractorTest {
         secondFileMetadata.add(new Migration.FileMetadata("data_4", new LiteFileSize(750, 750), fourthUri));
 
         return Arrays.asList(
-                new Migration(firstBatch, firstFileMetadata),
-                new Migration(secondBatch, secondFileMetadata)
+                new Migration(firstBatch, firstFileMetadata, 12345),
+                new Migration(secondBatch, secondFileMetadata, 67890)
         );
     }
 }
