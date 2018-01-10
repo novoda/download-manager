@@ -7,4 +7,6 @@ public interface DownloadsBatchPersisted {
     DownloadBatchStatus.Status downloadBatchStatus();
 
     DownloadBatchTitle downloadBatchTitle();
+
+    long downloadedDateTimeInMillis();
 }

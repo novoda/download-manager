@@ -20,6 +20,7 @@ final class DownloadBatchFactory {
         Map<DownloadFileId, String> fileUrls = batch.getFileUrls();
         List<DownloadFile> downloadFiles = new ArrayList<>(fileUrls.size());
         DownloadBatchId downloadBatchId = batch.getDownloadBatchId();
+        long downloadedDateTimeInMillis = System.currentTimeMillis();
 
         for (Map.Entry<DownloadFileId, String> urlByDownloadId : fileUrls.entrySet()) {
             InternalFileSize fileSize = InternalFileSizeCreator.unknownFileSize();
@@ -59,15 +60,14 @@ final class DownloadBatchFactory {
         InternalDownloadBatchStatus liteDownloadBatchStatus = new LiteDownloadBatchStatus(
                 downloadBatchId,
                 downloadBatchTitle,
+                downloadedDateTimeInMillis,
                 DownloadBatchStatus.Status.QUEUED
         );
 
         return new DownloadBatch(
-                downloadBatchTitle,
-                downloadBatchId,
+                liteDownloadBatchStatus,
                 downloadFiles,
                 new HashMap<>(),
-                liteDownloadBatchStatus,
                 downloadsBatchPersistence,
                 callbackThrottle
         );

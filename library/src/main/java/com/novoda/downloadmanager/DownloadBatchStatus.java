@@ -42,6 +42,8 @@ public interface DownloadBatchStatus {
 
     Status status();
 
+    long downloadedDateTimeInMillis();
+
     /**
      * @return null if {@link DownloadBatchStatus#status()} is not {@link Status#ERROR}.
      */

@@ -18,8 +18,6 @@ class DownloadBatch {
 
     private static final int ZERO_BYTES = 0;
 
-    private final DownloadBatchId downloadBatchId;
-    private final DownloadBatchTitle downloadBatchTitle;
     private final Map<DownloadFileId, Long> fileBytesDownloadedMap;
     private final InternalDownloadBatchStatus downloadBatchStatus;
     private final List<DownloadFile> downloadFiles;
@@ -29,15 +27,11 @@ class DownloadBatch {
     private long totalBatchSizeBytes;
     private DownloadBatchCallback callback;
 
-    DownloadBatch(DownloadBatchTitle downloadBatchTitle,
-                  DownloadBatchId downloadBatchId,
+    DownloadBatch(InternalDownloadBatchStatus internalDownloadBatchStatus,
                   List<DownloadFile> downloadFiles,
                   Map<DownloadFileId, Long> fileBytesDownloadedMap,
-                  InternalDownloadBatchStatus internalDownloadBatchStatus,
                   DownloadsBatchPersistence downloadsBatchPersistence,
                   CallbackThrottle callbackThrottle) {
-        this.downloadBatchTitle = downloadBatchTitle;
-        this.downloadBatchId = downloadBatchId;
         this.downloadFiles = downloadFiles;
         this.fileBytesDownloadedMap = fileBytesDownloadedMap;
         this.downloadBatchStatus = internalDownloadBatchStatus;
@@ -165,7 +159,7 @@ class DownloadBatch {
     }
 
     void delete() {
-        downloadsBatchPersistence.deleteAsync(downloadBatchId);
+        downloadsBatchPersistence.deleteAsync(downloadBatchStatus.getDownloadBatchId());
         downloadBatchStatus.markForDeletion();
         notifyCallback(downloadBatchStatus);
         for (DownloadFile downloadFile : downloadFiles) {
@@ -174,7 +168,7 @@ class DownloadBatch {
     }
 
     DownloadBatchId getId() {
-        return downloadBatchId;
+        return downloadBatchStatus.getDownloadBatchId();
     }
 
     InternalDownloadBatchStatus status() {
@@ -192,6 +186,12 @@ class DownloadBatch {
     }
 
     void persist() {
-        downloadsBatchPersistence.persistAsync(downloadBatchTitle, downloadBatchId, downloadBatchStatus.status(), downloadFiles);
+        downloadsBatchPersistence.persistAsync(
+                downloadBatchStatus.getDownloadBatchTitle(),
+                downloadBatchStatus.getDownloadBatchId(),
+                downloadBatchStatus.status(),
+                downloadFiles,
+                downloadBatchStatus.downloadedDateTimeInMillis()
+        );
     }
 }

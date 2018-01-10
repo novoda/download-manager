@@ -20,4 +20,7 @@ class RoomBatch {
 
     @ColumnInfo(name = "batch_status")
     public String status;
+
+    @ColumnInfo(name = "batch_downloaded_date_time_in_millis")
+    public long downloadedDateTimeInMillis;
 }
