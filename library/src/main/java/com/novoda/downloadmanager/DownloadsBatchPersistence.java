@@ -90,12 +90,9 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence {
                 CallbackThrottle callbackThrottle = callbackThrottleCreator.create();
 
                 DownloadBatch downloadBatch = new DownloadBatch(
-                        downloadBatchTitle,
-                        downloadBatchId,
-                        downloadedDateTimeInMillis,
+                        liteDownloadBatchStatus,
                         downloadFiles,
                         downloadedFileSizeMap,
-                        liteDownloadBatchStatus,
                         DownloadsBatchPersistence.this,
                         callbackThrottle
                 );

@@ -65,12 +65,9 @@ final class DownloadBatchFactory {
         );
 
         return new DownloadBatch(
-                downloadBatchTitle,
-                downloadBatchId,
-                downloadedDateTimeInMillis,
+                liteDownloadBatchStatus,
                 downloadFiles,
                 new HashMap<>(),
-                liteDownloadBatchStatus,
                 downloadsBatchPersistence,
                 callbackThrottle
         );
