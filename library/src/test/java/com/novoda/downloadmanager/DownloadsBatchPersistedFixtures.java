@@ -5,7 +5,8 @@ import static com.novoda.downloadmanager.DownloadBatchIdFixtures.aDownloadBatchI
 final class DownloadsBatchPersistedFixtures {
     private DownloadBatchId downloadBatchId = aDownloadBatchId().build();
     private DownloadBatchStatus.Status downloadBatchStatus = DownloadBatchStatus.Status.DOWNLOADED;
-    private DownloadBatchTitle downloadBatchTitle;
+    private DownloadBatchTitle downloadBatchTitle = new LiteDownloadBatchTitle("title");
+    private long downloadedDateTimeInMillis = 123456789L;
 
     static DownloadsBatchPersistedFixtures aDownloadsBatchPersisted() {
         return new DownloadsBatchPersistedFixtures();
@@ -35,6 +36,11 @@ final class DownloadsBatchPersistedFixtures {
         return this;
     }
 
+    DownloadsBatchPersistedFixtures withDownloadedDateTimeInMillis(long downloadedDateTimeInMillis) {
+        this.downloadedDateTimeInMillis = downloadedDateTimeInMillis;
+        return this;
+    }
+
     DownloadsBatchPersisted build() {
         return new DownloadsBatchPersisted() {
             @Override
@@ -50,6 +56,11 @@ final class DownloadsBatchPersistedFixtures {
             @Override
             public DownloadBatchTitle downloadBatchTitle() {
                 return downloadBatchTitle;
+            }
+
+            @Override
+            public long downloadedDateTimeInMillis() {
+                return downloadedDateTimeInMillis;
             }
         };
     }

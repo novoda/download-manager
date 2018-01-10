@@ -11,6 +11,7 @@ class InternalDownloadBatchStatusFixtures {
     private DownloadBatchId downloadBatchId = DownloadBatchIdFixtures.aDownloadBatchId().build();
     private DownloadBatchStatus.Status status = DownloadBatchStatus.Status.QUEUED;
     private DownloadError.Error downloadErrorType = null;
+    private long downloadedDateTimeInMillis = 123456789L;
 
     static InternalDownloadBatchStatusFixtures anInternalDownloadsBatchStatus() {
         return new InternalDownloadBatchStatusFixtures();
@@ -43,6 +44,11 @@ class InternalDownloadBatchStatusFixtures {
 
     InternalDownloadBatchStatusFixtures withStatus(DownloadBatchStatus.Status status) {
         this.status = status;
+        return this;
+    }
+
+    InternalDownloadBatchStatusFixtures withDownloadedDateTimeInMillis(long downloadedDateTimeInMillis) {
+        this.downloadedDateTimeInMillis = downloadedDateTimeInMillis;
         return this;
     }
 
@@ -82,6 +88,11 @@ class InternalDownloadBatchStatusFixtures {
             @Override
             public Status status() {
                 return status;
+            }
+
+            @Override
+            public long downloadedDateTimeInMillis() {
+                return downloadedDateTimeInMillis;
             }
 
             @Nullable
