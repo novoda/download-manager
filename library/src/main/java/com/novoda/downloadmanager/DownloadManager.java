@@ -4,8 +4,6 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -131,13 +129,8 @@ class DownloadManager implements LiteDownloadManagerCommands {
     @Override
     public List<DownloadBatchStatus> getAllDownloadBatchStatuses() {
         if (downloadService == null) {
-            try {
-                synchronized (waitForDownloadService) {
-                    waitForDownloadService.wait();
-                }
-            } catch (InterruptedException e) {
-                Log.e(e, "Interrupted waiting for download service.");
-            }
+            return WaitForLockThenExecute.<List<DownloadBatchStatus>>waitFor(waitForDownloadService)
+                    .thenPerform(this::executeGetAllDownloadBatchStatuses);
         }
         return executeGetAllDownloadBatchStatuses();
     }
@@ -172,13 +165,8 @@ class DownloadManager implements LiteDownloadManagerCommands {
     @Override
     public DownloadFileStatus getDownloadStatusWithMatching(DownloadFileId downloadFileId) {
         if (downloadService == null) {
-            try {
-                synchronized (waitForDownloadService) {
-                    waitForDownloadService.wait();
-                }
-            } catch (InterruptedException e) {
-                Log.e(e, "Interrupted waiting for download service.");
-            }
+            return WaitForLockThenExecute.<DownloadFileStatus>waitFor(waitForDownloadService)
+                    .thenPerform(() -> executeFirstLocalPathForDownloadMatching(downloadFileId));
         }
         return executeFirstLocalPathForDownloadMatching(downloadFileId);
     }
