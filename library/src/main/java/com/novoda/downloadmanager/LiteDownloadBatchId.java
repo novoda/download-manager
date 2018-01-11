@@ -9,7 +9,7 @@ class LiteDownloadBatchId implements DownloadBatchId {
     }
 
     @Override
-    public String stringValue() {
+    public String rawId() {
         return id;
     }
 
