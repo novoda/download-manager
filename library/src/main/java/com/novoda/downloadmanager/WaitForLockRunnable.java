@@ -37,7 +37,7 @@ final class WaitForLockRunnable {
                     lock.wait();
                 }
             } catch (InterruptedException e) {
-                Log.e(e, "Interruped waiting for download service.");
+                Log.e(e, "Interrupted waiting for download service.");
             }
         }
     }

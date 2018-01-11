@@ -1,5 +1,9 @@
 package com.novoda.downloadmanager;
 
+import android.support.annotation.WorkerThread;
+
+import java.util.List;
+
 public interface LiteDownloadManagerCommands {
 
     void download(Batch batch);
@@ -13,6 +17,9 @@ public interface LiteDownloadManagerCommands {
     void addDownloadBatchCallback(DownloadBatchCallback downloadBatchCallback);
 
     void removeDownloadBatchCallback(DownloadBatchCallback downloadBatchCallback);
+
+    @WorkerThread
+    List<DownloadBatchStatus> getAllDownloadBatchStatuses();
 
     void getAllDownloadBatchStatuses(AllBatchStatusesCallback callback);
 

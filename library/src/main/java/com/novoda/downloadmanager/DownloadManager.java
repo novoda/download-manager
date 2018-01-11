@@ -1,6 +1,9 @@
 package com.novoda.downloadmanager;
 
 import android.os.Handler;
+import android.support.annotation.WorkerThread;
+
+import com.novoda.notils.logger.simple.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -123,6 +126,30 @@ class DownloadManager implements LiteDownloadManagerCommands {
         }
     }
 
+    @WorkerThread
+    @Override
+    public List<DownloadBatchStatus> getAllDownloadBatchStatuses() {
+        if (downloadService == null) {
+            try {
+                synchronized (waitForDownloadService) {
+                    waitForDownloadService.wait();
+                }
+            } catch (InterruptedException e) {
+                Log.e(e, "Interrupted waiting for download service.");
+            }
+        }
+        return executeGetAllDownloadBatchStatuses();
+    }
+
+    private List<DownloadBatchStatus> executeGetAllDownloadBatchStatuses() {
+        List<DownloadBatchStatus> downloadBatchStatuses = new ArrayList<>(downloadBatchMap.size());
+
+        for (DownloadBatch downloadBatch : downloadBatchMap.values()) {
+            downloadBatchStatuses.add(downloadBatch.status());
+        }
+        return downloadBatchStatuses;
+    }
+
     @Override
     public void getAllDownloadBatchStatuses(AllBatchStatusesCallback callback) {
         if (downloadService == null) {
@@ -136,12 +163,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
     }
 
     private void executeGetAllDownloadBatchStatuses(AllBatchStatusesCallback callback) {
-        List<DownloadBatchStatus> downloadBatchStatuses = new ArrayList<>(downloadBatchMap.size());
-
-        for (DownloadBatch downloadBatch : downloadBatchMap.values()) {
-            downloadBatchStatuses.add(downloadBatch.status());
-        }
-
+        List<DownloadBatchStatus> downloadBatchStatuses = getAllDownloadBatchStatuses();
         callbackHandler.post(() -> callback.onReceived(downloadBatchStatuses));
     }
 
