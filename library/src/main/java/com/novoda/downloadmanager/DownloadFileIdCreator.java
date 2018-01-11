@@ -7,6 +7,6 @@ public final class DownloadFileIdCreator {
     }
 
     public static DownloadFileId createFrom(String id) {
-        return new LiteDownloadFileId(id.hashCode());
+        return new LiteDownloadFileId(id);
     }
 }

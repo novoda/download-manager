@@ -125,8 +125,8 @@ class MigrationJob implements Runnable {
     // TODO: See https://github.com/novoda/download-manager/issues/270
     private void deleteFrom(SqlDatabaseWrapper database, Migration migration) {
         Batch batch = migration.batch();
-        Log.d(TAG, "about to delete the batch: " + batch.getDownloadBatchId().stringValue() + ", time is " + System.nanoTime());
-        database.delete(TABLE_BATCHES, WHERE_CLAUSE_ID, batch.getDownloadBatchId().stringValue());
+        Log.d(TAG, "about to delete the batch: " + batch.getDownloadBatchId().rawId() + ", time is " + System.nanoTime());
+        database.delete(TABLE_BATCHES, WHERE_CLAUSE_ID, batch.getDownloadBatchId().rawId());
         for (Migration.FileMetadata metadata : migration.getFileMetadata()) {
             if (hasValidFileLocation(metadata)) {
                 File file = new File(metadata.originalFileLocation());

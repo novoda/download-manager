@@ -2,10 +2,15 @@ package com.novoda.downloadmanager;
 
 final class LiteDownloadFileId implements DownloadFileId {
 
-    private final int id;
+    private final String id;
 
-    LiteDownloadFileId(int id) {
+    LiteDownloadFileId(String id) {
         this.id = id;
+    }
+
+    @Override
+    public String rawId() {
+        return String.valueOf(id);
     }
 
     @Override
@@ -13,30 +18,24 @@ final class LiteDownloadFileId implements DownloadFileId {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof LiteDownloadFileId)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
         LiteDownloadFileId that = (LiteDownloadFileId) o;
 
-        return id == that.id;
-
-    }
-
-    @Override
-    public String toRawId() {
-        return String.valueOf(id);
+        return id != null ? id.equals(that.id) : that.id == null;
     }
 
     @Override
     public int hashCode() {
-        return id;
+        return id != null ? id.hashCode() : 0;
     }
 
     @Override
     public String toString() {
         return "LiteDownloadFileId{"
-                + "id=" + id
+                + "id='" + id + '\''
                 + '}';
     }
 }

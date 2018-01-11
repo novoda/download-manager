@@ -57,11 +57,11 @@ public class CustomDownloadsPersistence implements DownloadsPersistence {
 
     @Override
     public void delete(DownloadBatchId downloadBatchId) {
-        Log.v("Delete batch id: " + downloadBatchId.stringValue());
+        Log.v("Delete batch id: " + downloadBatchId.rawId());
     }
 
     @Override
     public void update(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status) {
-        Log.v("update batch id: " + downloadBatchId.stringValue() + " with status: " + status);
+        Log.v("update batch id: " + downloadBatchId.rawId() + " with status: " + status);
     }
 }
