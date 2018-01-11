@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager;
 
+import android.support.annotation.Nullable;
+
 import com.novoda.notils.logger.simple.Log;
 
 final class WaitForLockThenExecute {
@@ -12,20 +14,24 @@ final class WaitForLockThenExecute {
         // Uses static factory method.
     }
 
-    static <T> WaitForLockAndThenPerformAction<T> waitFor(Object lock) {
-        return new WaitForLockAndThenPerformAction<>(lock);
+    static <T> WaitForLockAndThenPerformAction<T> waitFor(@Nullable DownloadService downloadService, Object lock) {
+        return new WaitForLockAndThenPerformAction<>(downloadService, lock);
     }
 
     static class WaitForLockAndThenPerformAction<T> {
 
+        private final DownloadService downloadService;
         private final Object lock;
 
-        WaitForLockAndThenPerformAction(Object lock) {
+        WaitForLockAndThenPerformAction(DownloadService downloadService, Object lock) {
+            this.downloadService = downloadService;
             this.lock = lock;
         }
 
         T thenPerform(final Action<T> action) {
-            waitOnLock();
+            if (downloadService == null) {
+                waitOnLock();
+            }
             return action.performAction();
         }
 
