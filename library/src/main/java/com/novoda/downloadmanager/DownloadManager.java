@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager;
 
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 
 import com.novoda.notils.logger.simple.Log;
@@ -163,8 +164,35 @@ class DownloadManager implements LiteDownloadManagerCommands {
     }
 
     private void executeGetAllDownloadBatchStatuses(AllBatchStatusesCallback callback) {
-        List<DownloadBatchStatus> downloadBatchStatuses = getAllDownloadBatchStatuses();
+        List<DownloadBatchStatus> downloadBatchStatuses = executeGetAllDownloadBatchStatuses();
         callbackHandler.post(() -> callback.onReceived(downloadBatchStatuses));
+    }
+
+    @WorkerThread
+    @Override
+    public DownloadFileStatus getDownloadStatusWithMatching(DownloadFileId downloadFileId) {
+        if (downloadService == null) {
+            try {
+                synchronized (waitForDownloadService) {
+                    waitForDownloadService.wait();
+                }
+            } catch (InterruptedException e) {
+                Log.e(e, "Interrupted waiting for download service.");
+            }
+        }
+        return executeFirstLocalPathForDownloadMatching(downloadFileId);
+    }
+
+    @Nullable
+    private DownloadFileStatus executeFirstLocalPathForDownloadMatching(DownloadFileId downloadFileId) {
+        for (DownloadBatch downloadBatch : downloadBatchMap.values()) {
+            DownloadFile downloadFile = downloadBatch.downloadFileWith(downloadFileId);
+
+            if (downloadFile != null) {
+                return downloadFile.fileStatus();
+            }
+        }
+        return null;
     }
 
     @Override
@@ -180,13 +208,8 @@ class DownloadManager implements LiteDownloadManagerCommands {
     }
 
     private void executeFirstLocalPathForDownloadWithMatching(DownloadFileId downloadFileId, DownloadFileStatusCallback callback) {
-        for (DownloadBatch downloadBatch : downloadBatchMap.values()) {
-            DownloadFile downloadFile = downloadBatch.downloadFileWith(downloadFileId);
-            if (downloadFile != null) {
-                callbackHandler.post(() -> callback.onReceived(downloadFile.fileStatus()));
-                return;
-            }
-        }
+        DownloadFileStatus downloadFileStatus = executeFirstLocalPathForDownloadMatching(downloadFileId);
+        callbackHandler.post(() -> callback.onReceived(downloadFileStatus));
     }
 
 }
