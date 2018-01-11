@@ -128,7 +128,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
     @WorkerThread
     @Override
     public List<DownloadBatchStatus> getAllDownloadBatchStatuses() {
-        return WaitForLockThenExecute.<List<DownloadBatchStatus>>waitFor(downloadService, waitForDownloadService)
+        return WaitForDownloadServiceThenPerform.<List<DownloadBatchStatus>>waitFor(downloadService, waitForDownloadService)
                 .thenPerform(this::executeGetAllDownloadBatchStatuses);
     }
 
@@ -143,31 +143,24 @@ class DownloadManager implements LiteDownloadManagerCommands {
 
     @Override
     public void getAllDownloadBatchStatuses(AllBatchStatusesCallback callback) {
-        if (downloadService == null) {
-            executor.submit(
-                    WaitForLockRunnable.waitFor(waitForDownloadService)
-                            .thenPerform(() -> executeGetAllDownloadBatchStatuses(callback))
-            );
-        } else {
-            executeGetAllDownloadBatchStatuses(callback);
-        }
-    }
-
-    private void executeGetAllDownloadBatchStatuses(AllBatchStatusesCallback callback) {
-        List<DownloadBatchStatus> downloadBatchStatuses = executeGetAllDownloadBatchStatuses();
-        callbackHandler.post(() -> callback.onReceived(downloadBatchStatuses));
+        executor.submit(() -> WaitForDownloadServiceThenPerform.waitFor(downloadService, waitForDownloadService)
+                .thenPerform(() -> {
+                    List<DownloadBatchStatus> downloadBatchStatuses = executeGetAllDownloadBatchStatuses();
+                    callbackHandler.post(() -> callback.onReceived(downloadBatchStatuses));
+                    return null;
+                }));
     }
 
     @Nullable
     @WorkerThread
     @Override
     public DownloadFileStatus getDownloadStatusWithMatching(DownloadFileId downloadFileId) {
-        return WaitForLockThenExecute.<DownloadFileStatus>waitFor(downloadService, waitForDownloadService)
-                .thenPerform(() -> executeFirstLocalPathForDownloadMatching(downloadFileId));
+        return WaitForDownloadServiceThenPerform.<DownloadFileStatus>waitFor(downloadService, waitForDownloadService)
+                .thenPerform(() -> executeGetDownloadStatusWithMatching(downloadFileId));
     }
 
     @Nullable
-    private DownloadFileStatus executeFirstLocalPathForDownloadMatching(DownloadFileId downloadFileId) {
+    private DownloadFileStatus executeGetDownloadStatusWithMatching(DownloadFileId downloadFileId) {
         for (DownloadBatch downloadBatch : downloadBatchMap.values()) {
             DownloadFile downloadFile = downloadBatch.downloadFileWith(downloadFileId);
 
@@ -180,18 +173,12 @@ class DownloadManager implements LiteDownloadManagerCommands {
 
     @Override
     public void getDownloadStatusWithMatching(DownloadFileId downloadFileId, DownloadFileStatusCallback callback) {
-        if (downloadService == null) {
-            executor.submit(
-                    WaitForLockRunnable.waitFor(waitForDownloadService)
-                            .thenPerform(() -> executeFirstLocalPathForDownloadWithMatching(downloadFileId, callback))
-            );
-        } else {
-            executeFirstLocalPathForDownloadWithMatching(downloadFileId, callback);
-        }
+        executor.submit(() -> WaitForDownloadServiceThenPerform.<Runnable>waitFor(downloadService, waitForDownloadService)
+                .thenPerform(() -> {
+                    DownloadFileStatus downloadFileStatus = executeGetDownloadStatusWithMatching(downloadFileId);
+                    callbackHandler.post(() -> callback.onReceived(downloadFileStatus));
+                    return null;
+                }));
     }
 
-    private void executeFirstLocalPathForDownloadWithMatching(DownloadFileId downloadFileId, DownloadFileStatusCallback callback) {
-        DownloadFileStatus downloadFileStatus = executeFirstLocalPathForDownloadMatching(downloadFileId);
-        callbackHandler.post(() -> callback.onReceived(downloadFileStatus));
-    }
 }
