@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -88,9 +87,9 @@ public class DownloadManagerTest {
         given(additionalDownloadBatch.status()).willReturn(ADDITIONAL_BATCH_STATUS);
 
         willAnswer(invocation -> {
-            ((Callable) invocation.getArgument(0)).call();
+            ((Runnable) invocation.getArgument(0)).run();
             return null;
-        }).given(executorService).submit(any(Callable.class));
+        }).given(executorService).submit(any(Runnable.class));
 
         willAnswer(invocation -> {
             ((Runnable) invocation.getArgument(0)).run();
