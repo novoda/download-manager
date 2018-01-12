@@ -6,7 +6,7 @@ public final class DownloadBatchIdCreator {
         // non-instantiable class
     }
 
-    public static DownloadBatchId createFrom(String id) {
-        return new LiteDownloadBatchId(id);
+    public static DownloadBatchId createFrom(String rawId) {
+        return new LiteDownloadBatchId(rawId);
     }
 }
