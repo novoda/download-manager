@@ -21,24 +21,30 @@ final class WaitForDownloadServiceThenPerform {
     static class WaitForDownloadServiceThenPerformAction<T> {
 
         private final DownloadService downloadService;
-        private final Object lock;
+        private final Object downloadServiceLock;
 
-        WaitForDownloadServiceThenPerformAction(DownloadService downloadService, Object lock) {
+        WaitForDownloadServiceThenPerformAction(DownloadService downloadService, Object downloadServiceLock) {
             this.downloadService = downloadService;
-            this.lock = lock;
+            this.downloadServiceLock = downloadServiceLock;
         }
 
         T thenPerform(final Action<T> action) {
             if (downloadService == null) {
-                try {
-                    synchronized (lock) {
-                        lock.wait();
-                    }
-                } catch (InterruptedException e) {
-                    Log.e(e, "Interrupted waiting for download service.");
-                }
+                waitForLock();
             }
             return action.performAction();
+        }
+
+        private void waitForLock() {
+            try {
+                synchronized (downloadServiceLock) {
+                    if (downloadService == null) {
+                        downloadServiceLock.wait();
+                    }
+                }
+            } catch (InterruptedException e) {
+                Log.e(e, "Interrupted waiting for download service.");
+            }
         }
 
     }
