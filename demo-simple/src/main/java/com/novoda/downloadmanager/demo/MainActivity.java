@@ -104,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
 
         DemoApplication demoApplication = (DemoApplication) getApplicationContext();
         liteDownloadManagerCommands = demoApplication.getLiteDownloadManagerCommands();
+        new Thread(() -> Log.e(liteDownloadManagerCommands.getAllDownloadBatchStatuses())).start();
         liteDownloadManagerCommands.addDownloadBatchCallback(callback);
         liteDownloadManagerCommands.getAllDownloadBatchStatuses(batchStatusesCallback);
 

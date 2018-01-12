@@ -14,8 +14,8 @@ final class WaitForDownloadServiceThenPerform {
         // Uses static factory method.
     }
 
-    static <T> WaitForDownloadServiceThenPerformAction<T> waitFor(@Nullable DownloadService downloadService, Object lock) {
-        return new WaitForDownloadServiceThenPerformAction<>(downloadService, lock);
+    static <T> WaitForDownloadServiceThenPerformAction<T> waitFor(@Nullable DownloadService downloadService, Object downloadServiceLock) {
+        return new WaitForDownloadServiceThenPerformAction<>(downloadService, downloadServiceLock);
     }
 
     static class WaitForDownloadServiceThenPerformAction<T> {
@@ -30,20 +30,17 @@ final class WaitForDownloadServiceThenPerform {
 
         T thenPerform(final Action<T> action) {
             if (downloadService == null) {
-                waitOnLock();
+                try {
+                    synchronized (lock) {
+                        lock.wait();
+                    }
+                } catch (InterruptedException e) {
+                    Log.e(e, "Interrupted waiting for download service.");
+                }
             }
             return action.performAction();
         }
 
-        private void waitOnLock() {
-            try {
-                synchronized (lock) {
-                    lock.wait();
-                }
-            } catch (InterruptedException e) {
-                Log.e(e, "Interrupted waiting for download service.");
-            }
-        }
     }
 
 }

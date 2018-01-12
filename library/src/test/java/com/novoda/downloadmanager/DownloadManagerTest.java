@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -20,7 +21,12 @@ import static com.novoda.downloadmanager.DownloadBatchIdFixtures.aDownloadBatchI
 import static com.novoda.downloadmanager.InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willAnswer;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 public class DownloadManagerTest {
 
@@ -72,6 +78,11 @@ public class DownloadManagerTest {
 
         given(downloadBatch.status()).willReturn(BATCH_STATUS);
         given(additionalDownloadBatch.status()).willReturn(ADDITIONAL_BATCH_STATUS);
+
+        willAnswer(invocation -> {
+            ((Callable) invocation.getArgument(0)).call();
+            return null;
+        }).given(executorService).submit(any(Callable.class));
 
         willAnswer(invocation -> {
             ((Runnable) invocation.getArgument(0)).run();
@@ -231,15 +242,11 @@ public class DownloadManagerTest {
 
     @Test(timeout = 500)
     public void waitsForServiceToExist_whenGettingAllBatchStatuses() throws InterruptedException {
-        willAnswer(invocation -> {
-            ((Runnable) invocation.getArgument(0)).run();
-            return null;
-        }).given(executorService).submit(any(Runnable.class));
-
         notifyLockOnAnotherThread();
 
         downloadManager.getAllDownloadBatchStatuses(allBatchStatusesCallback);
 
+        assertThat(downloadBatchStatuses).containsExactly(BATCH_STATUS, ADDITIONAL_BATCH_STATUS);
     }
 
     @Test
