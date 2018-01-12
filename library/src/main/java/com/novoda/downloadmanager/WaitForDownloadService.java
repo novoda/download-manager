@@ -4,26 +4,26 @@ import android.support.annotation.Nullable;
 
 import com.novoda.notils.logger.simple.Log;
 
-final class WaitForDownloadServiceThenPerform {
+final class WaitForDownloadService {
 
-    interface Action<T> {
-        T performAction();
-    }
-
-    private WaitForDownloadServiceThenPerform() {
+    private WaitForDownloadService() {
         // Uses static factory method.
     }
 
-    static <T> WaitForDownloadServiceThenPerformAction<T> waitFor(@Nullable DownloadService downloadService, Object downloadServiceLock) {
-        return new WaitForDownloadServiceThenPerformAction<>(downloadService, downloadServiceLock);
+    static <T> ThenPerform<T> waitFor(@Nullable DownloadService downloadService, Object downloadServiceLock) {
+        return new ThenPerform<>(downloadService, downloadServiceLock);
     }
 
-    static class WaitForDownloadServiceThenPerformAction<T> {
+    static class ThenPerform<T> {
+
+        interface Action<T> {
+            T performAction();
+        }
 
         private final DownloadService downloadService;
         private final Object downloadServiceLock;
 
-        WaitForDownloadServiceThenPerformAction(DownloadService downloadService, Object downloadServiceLock) {
+        ThenPerform(DownloadService downloadService, Object downloadServiceLock) {
             this.downloadService = downloadService;
             this.downloadServiceLock = downloadServiceLock;
         }

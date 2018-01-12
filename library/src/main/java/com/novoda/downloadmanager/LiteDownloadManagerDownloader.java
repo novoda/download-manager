@@ -68,11 +68,11 @@ class LiteDownloadManagerDownloader {
 
     public void download(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         downloadBatchMap.put(downloadBatch.getId(), downloadBatch);
-        executor.submit(() -> WaitForDownloadServiceThenPerform.<Void>waitFor(downloadService, waitForDownloadService)
+        executor.submit(() -> WaitForDownloadService.<Void>waitFor(downloadService, waitForDownloadService)
                 .thenPerform(executeDownload(downloadBatch)));
     }
 
-    private WaitForDownloadServiceThenPerform.Action<Void> executeDownload(DownloadBatch downloadBatch) {
+    private WaitForDownloadService.ThenPerform.Action<Void> executeDownload(DownloadBatch downloadBatch) {
         return () -> {
             InternalDownloadBatchStatus downloadBatchStatus = downloadBatch.status();
             if (downloadBatchStatus.status() != DOWNLOADED) {
