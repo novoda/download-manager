@@ -176,10 +176,10 @@ class DownloadBatch {
     }
 
     @Nullable
-    DownloadFile downloadFileWith(DownloadFileId downloadFileId) {
+    DownloadFileStatus downloadFileStatusWith(DownloadFileId downloadFileId) {
         for (DownloadFile downloadFile : downloadFiles) {
             if (downloadFile.matches(downloadFileId)) {
-                return downloadFile;
+                return downloadFile.fileStatus();
             }
         }
         return null;

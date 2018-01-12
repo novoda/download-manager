@@ -17,10 +17,17 @@ import org.mockito.InOrder;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.novoda.downloadmanager.DownloadBatchIdFixtures.aDownloadBatchId;
+import static com.novoda.downloadmanager.DownloadFileIdFixtures.aDownloadFileId;
+import static com.novoda.downloadmanager.DownloadFileStatusFixtures.aDownloadFileStatus;
 import static com.novoda.downloadmanager.InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willAnswer;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 public class DownloadManagerTest {
 
@@ -29,9 +36,12 @@ public class DownloadManagerTest {
     private static final DownloadBatchId DOWNLOAD_BATCH_ID = aDownloadBatchId().withRawDownloadBatchId("id01").build();
     private static final DownloadBatchId ADDITIONAL_DOWNLOAD_BATCH_ID = aDownloadBatchId().withRawDownloadBatchId("id02").build();
     private static final Batch BATCH = new Batch.Builder(DOWNLOAD_BATCH_ID, "title").build();
+    private static final DownloadFileId DOWNLOAD_FILE_ID = aDownloadFileId().withRawDownloadFileId("file_id_01").build();
+    private static final DownloadFileStatus DOWNLOAD_FILE_STATUS = aDownloadFileStatus().withDownloadFileId(DOWNLOAD_FILE_ID).build();
 
     private final AllStoredDownloadsSubmittedCallback allStoredDownloadsSubmittedCallback = mock(AllStoredDownloadsSubmittedCallback.class);
     private final AllBatchStatusesCallback allBatchStatusesCallback = mock(AllBatchStatusesCallback.class);
+    private final DownloadFileStatusCallback downloadFileStatusCallback = mock(DownloadFileStatusCallback.class);
     private final DownloadService downloadService = mock(DownloadService.class);
     private final Object lock = spy(new Object());
     private final ExecutorService executorService = mock(ExecutorService.class);
@@ -47,6 +57,7 @@ public class DownloadManagerTest {
     private Map<DownloadBatchId, DownloadBatch> downloadBatches = new HashMap<>();
     private List<DownloadBatchStatus> downloadBatchStatuses = new ArrayList<>();
     private List<DownloadBatchCallback> downloadBatchCallbacks = new ArrayList<>();
+    private DownloadFileStatus downloadFileStatus = null;
 
     @Before
     public void setUp() {
@@ -69,9 +80,16 @@ public class DownloadManagerTest {
 
         setupDownloadBatchesResponse();
         setupDownloadBatchStatusesResponse();
+        setupDownloadStatusResponse();
 
         given(downloadBatch.status()).willReturn(BATCH_STATUS);
+        given(additionalDownloadBatch.downloadFileStatusWith(DOWNLOAD_FILE_ID)).willReturn(DOWNLOAD_FILE_STATUS);
         given(additionalDownloadBatch.status()).willReturn(ADDITIONAL_BATCH_STATUS);
+
+        willAnswer(invocation -> {
+            ((Runnable) invocation.getArgument(0)).run();
+            return null;
+        }).given(executorService).submit(any(Runnable.class));
 
         willAnswer(invocation -> {
             ((Runnable) invocation.getArgument(0)).run();
@@ -92,6 +110,13 @@ public class DownloadManagerTest {
             downloadBatchStatuses = invocation.getArgument(0);
             return null;
         }).given(allBatchStatusesCallback).onReceived(ArgumentMatchers.anyList());
+    }
+
+    private void setupDownloadStatusResponse() {
+        willAnswer(invocation -> {
+            downloadFileStatus = invocation.getArgument(0);
+            return null;
+        }).given(downloadFileStatusCallback).onReceived(any(DownloadFileStatus.class));
     }
 
     @Test
@@ -230,16 +255,12 @@ public class DownloadManagerTest {
     }
 
     @Test(timeout = 500)
-    public void waitsForServiceToExist_whenGettingAllBatchStatuses() throws InterruptedException {
-        willAnswer(invocation -> {
-            ((Runnable) invocation.getArgument(0)).run();
-            return null;
-        }).given(executorService).submit(any(Runnable.class));
-
+    public void waitsForServiceToExist_whenGettingAllBatchStatuses() {
         notifyLockOnAnotherThread();
 
         downloadManager.getAllDownloadBatchStatuses(allBatchStatusesCallback);
 
+        assertThat(downloadBatchStatuses).containsExactly(BATCH_STATUS, ADDITIONAL_BATCH_STATUS);
     }
 
     @Test
@@ -249,6 +270,60 @@ public class DownloadManagerTest {
         downloadManager.getAllDownloadBatchStatuses(allBatchStatusesCallback);
 
         assertThat(downloadBatchStatuses).containsExactly(BATCH_STATUS, ADDITIONAL_BATCH_STATUS);
+    }
+
+    @Test(timeout = 500)
+    public void waitsForServiceToExist_whenGettingAllBatchStatusesWithSynchronousCall() {
+        notifyLockOnAnotherThread();
+
+        List<DownloadBatchStatus> allDownloadBatchStatuses = downloadManager.getAllDownloadBatchStatuses();
+
+        assertThat(allDownloadBatchStatuses).containsExactly(BATCH_STATUS, ADDITIONAL_BATCH_STATUS);
+    }
+
+    @Test
+    public void getsAllBatchStatusesWithSynchronousCall_whenServiceAlreadyExists() {
+        downloadManager.initialise(mock(DownloadService.class));
+
+        List<DownloadBatchStatus> allDownloadBatchStatuses = downloadManager.getAllDownloadBatchStatuses();
+
+        assertThat(allDownloadBatchStatuses).containsExactly(BATCH_STATUS, ADDITIONAL_BATCH_STATUS);
+    }
+
+    @Test(timeout = 500)
+    public void waitsForServiceToExist_whenGettingDownloadStatusWithMatchingId() {
+        notifyLockOnAnotherThread();
+
+        downloadManager.getDownloadStatusWithMatching(DOWNLOAD_FILE_ID, downloadFileStatusCallback);
+
+        assertThat(downloadFileStatus).isEqualTo(DOWNLOAD_FILE_STATUS);
+    }
+
+    @Test
+    public void getsDownloadStatusMatchingId_whenServiceAlreadyExists() {
+        downloadManager.initialise(mock(DownloadService.class));
+
+        downloadManager.getDownloadStatusWithMatching(DOWNLOAD_FILE_ID, downloadFileStatusCallback);
+
+        assertThat(downloadFileStatus).isEqualTo(DOWNLOAD_FILE_STATUS);
+    }
+
+    @Test(timeout = 500)
+    public void waitsForServiceToExist_whenGettingDownloadStatusWithMatchingIdWithSynchronousCall() {
+        notifyLockOnAnotherThread();
+
+        DownloadFileStatus fileStatus = downloadManager.getDownloadStatusWithMatching(DOWNLOAD_FILE_ID);
+
+        assertThat(fileStatus).isEqualTo(DOWNLOAD_FILE_STATUS);
+    }
+
+    @Test
+    public void getsDownloadStatusMatchingIdWithSynchronousCall_whenServiceAlreadyExists() {
+        downloadManager.initialise(mock(DownloadService.class));
+
+        DownloadFileStatus fileStatus = downloadManager.getDownloadStatusWithMatching(DOWNLOAD_FILE_ID);
+
+        assertThat(fileStatus).isEqualTo(DOWNLOAD_FILE_STATUS);
     }
 
     private void notifyLockOnAnotherThread() {
