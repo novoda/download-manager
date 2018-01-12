@@ -10,7 +10,7 @@ final class LiteDownloadFileId implements DownloadFileId {
 
     @Override
     public String rawId() {
-        return String.valueOf(id);
+        return id;
     }
 
     @Override
