@@ -9,7 +9,7 @@ class LiteDownloadBatchId implements DownloadBatchId {
     }
 
     @Override
-    public String stringValue() {
+    public String rawId() {
         return id;
     }
 
@@ -18,19 +18,18 @@ class LiteDownloadBatchId implements DownloadBatchId {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof LiteDownloadBatchId)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
         LiteDownloadBatchId that = (LiteDownloadBatchId) o;
 
-        return id.equals(that.id);
-
+        return id != null ? id.equals(that.id) : that.id == null;
     }
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return id != null ? id.hashCode() : 0;
     }
 
     @Override

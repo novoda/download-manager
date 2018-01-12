@@ -76,8 +76,8 @@ public final class Batch {
         }
 
         public Builder addFile(String fileUrl) {
-            String id = downloadBatchId.stringValue() + fileUrl;
-            DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(id);
+            String rawId = downloadBatchId.rawId() + fileUrl;
+            DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(rawId);
             fileUrls.put(downloadFileId, fileUrl);
             return this;
         }

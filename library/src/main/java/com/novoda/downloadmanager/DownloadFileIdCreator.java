@@ -6,7 +6,7 @@ public final class DownloadFileIdCreator {
         // non-instantiable class
     }
 
-    public static DownloadFileId createFrom(String id) {
-        return new LiteDownloadFileId(id.hashCode());
+    public static DownloadFileId createFrom(String rawId) {
+        return new LiteDownloadFileId(rawId);
     }
 }

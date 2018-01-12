@@ -36,7 +36,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
     @Override
     public void persistBatch(final DownloadsBatchPersisted batchPersisted) {
         RoomBatch roomBatch = new RoomBatch();
-        roomBatch.id = batchPersisted.downloadBatchId().stringValue();
+        roomBatch.id = batchPersisted.downloadBatchId().rawId();
         roomBatch.status = batchPersisted.downloadBatchStatus().toRawValue();
         roomBatch.title = batchPersisted.downloadBatchTitle().asString();
         roomBatch.downloadedDateTimeInMillis = batchPersisted.downloadedDateTimeInMillis();
@@ -66,11 +66,11 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
     public void persistFile(DownloadsFilePersisted filePersisted) {
         RoomFile roomFile = new RoomFile();
         roomFile.totalSize = filePersisted.totalFileSize();
-        roomFile.batchId = filePersisted.downloadBatchId().stringValue();
+        roomFile.batchId = filePersisted.downloadBatchId().rawId();
         roomFile.url = filePersisted.url();
         roomFile.name = filePersisted.fileName().name();
         roomFile.path = filePersisted.filePath().path();
-        roomFile.id = filePersisted.downloadFileId().toRawId();
+        roomFile.id = filePersisted.downloadFileId().rawId();
         roomFile.persistenceType = filePersisted.filePersistenceType().toRawValue();
 
         database.roomFileDao().insert(roomFile);
@@ -84,7 +84,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
 
     @Override
     public List<DownloadsFilePersisted> loadFiles(DownloadBatchId downloadBatchId) {
-        List<RoomFile> roomFiles = database.roomFileDao().loadAllFilesFor(downloadBatchId.stringValue());
+        List<RoomFile> roomFiles = database.roomFileDao().loadAllFilesFor(downloadBatchId.rawId());
         return getDownloadsFilePersisted(roomFiles);
     }
 
@@ -108,13 +108,13 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
 
     @Override
     public void delete(DownloadBatchId downloadBatchId) {
-        RoomBatch roomBatch = database.roomBatchDao().load(downloadBatchId.stringValue());
+        RoomBatch roomBatch = database.roomBatchDao().load(downloadBatchId.rawId());
         database.roomBatchDao().delete(roomBatch);
     }
 
     @Override
     public void update(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status) {
-        RoomBatch roomBatch = database.roomBatchDao().load(downloadBatchId.stringValue());
+        RoomBatch roomBatch = database.roomBatchDao().load(downloadBatchId.rawId());
         roomBatch.status = status.toRawValue();
         database.roomBatchDao().update(roomBatch);
     }
