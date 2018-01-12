@@ -28,7 +28,7 @@ final class WaitForDownloadServiceThenPerform {
             this.downloadServiceLock = downloadServiceLock;
         }
 
-        T thenPerform(final Action<T> action) {
+        T thenPerform(Action<T> action) {
             if (downloadService == null) {
                 waitForLock();
             }
