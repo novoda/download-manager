@@ -2,15 +2,13 @@ package com.novoda.downloadmanager;
 
 import android.os.Handler;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETION;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
 
 class LiteDownloadManagerDownloader {
 
@@ -26,7 +24,8 @@ class LiteDownloadManagerDownloader {
 
     private DownloadService downloadService;
 
-    @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})// Can't group anymore these are customisable options.
+    @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
+// Can't group anymore these are customisable options.
     LiteDownloadManagerDownloader(Object waitForDownloadService,
                                   ExecutorService executor,
                                   Handler callbackHandler,
@@ -69,38 +68,19 @@ class LiteDownloadManagerDownloader {
 
     public void download(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         downloadBatchMap.put(downloadBatch.getId(), downloadBatch);
-        if (downloadService == null) {
-            ensureDownloadServiceExistsAndDownload(downloadBatch);
-        } else {
-            executeDownload(downloadBatch);
-        }
+        executor.submit(() -> WaitForDownloadService.<Void>waitFor(downloadService, waitForDownloadService)
+                .thenPerform(executeDownload(downloadBatch)));
     }
 
-    private void ensureDownloadServiceExistsAndDownload(final DownloadBatch downloadBatch) {
-        executor.submit(() -> {
-            waitForDownloadService();
-            executeDownload(downloadBatch);
-        });
-    }
-
-    private void waitForDownloadService() {
-        try {
-            synchronized (waitForDownloadService) {
-                if (downloadService == null) {
-                    waitForDownloadService.wait();
-                }
+    private WaitForDownloadService.ThenPerform.Action<Void> executeDownload(DownloadBatch downloadBatch) {
+        return () -> {
+            InternalDownloadBatchStatus downloadBatchStatus = downloadBatch.status();
+            if (downloadBatchStatus.status() != DOWNLOADED) {
+                updateStatusToQueuedIfNeeded(downloadBatchStatus);
+                downloadService.download(downloadBatch, downloadBatchCallback());
             }
-        } catch (InterruptedException e) {
-            Log.e(e, "Interrupted whilst waiting for download service.");
-        }
-    }
-
-    private void executeDownload(final DownloadBatch downloadBatch) {
-        InternalDownloadBatchStatus downloadBatchStatus = downloadBatch.status();
-        if (downloadBatchStatus.status() != DOWNLOADED) {
-            updateStatusToQueuedIfNeeded(downloadBatchStatus);
-            downloadService.download(downloadBatch, downloadBatchCallback());
-        }
+            return null;
+        };
     }
 
     private void updateStatusToQueuedIfNeeded(InternalDownloadBatchStatus downloadBatchStatus) {
