@@ -256,7 +256,7 @@ public class DownloadManagerTest {
     }
 
     @Test(timeout = 500)
-    public void waitsForServiceToExist_whenGettingAllBatchStatuses() throws InterruptedException {
+    public void waitsForServiceToExist_whenGettingAllBatchStatuses() {
         notifyLockOnAnotherThread();
 
         downloadManager.getAllDownloadBatchStatuses(allBatchStatusesCallback);
@@ -274,7 +274,7 @@ public class DownloadManagerTest {
     }
 
     @Test(timeout = 500)
-    public void waitsForServiceToExist_whenGettingDownloadStatusWithMatching() throws InterruptedException {
+    public void waitsForServiceToExist_whenGettingDownloadStatusWithMatchingId() {
         notifyLockOnAnotherThread();
 
         downloadManager.getDownloadStatusWithMatching(DOWNLOAD_FILE_ID, downloadFileStatusCallback);
@@ -283,7 +283,7 @@ public class DownloadManagerTest {
     }
 
     @Test
-    public void getsAllBatchStatuses_whenGettingDownloadStatusWithMatching() {
+    public void getsDownloadStatusMatchingId_whenServiceAlreadyExists() {
         downloadManager.initialise(mock(DownloadService.class));
 
         downloadManager.getDownloadStatusWithMatching(DOWNLOAD_FILE_ID, downloadFileStatusCallback);
