@@ -230,6 +230,8 @@ public final class DownloadManagerBuilder {
             notificationManager.createNotificationChannel(notificationChannel);
         }
 
+        NotificationDispatcher notificationDispatcher = new NotificationDispatcher(LOCK, notificationCreator);
+
         LiteDownloadManagerDownloader downloader = new LiteDownloadManagerDownloader(
                 LOCK,
                 EXECUTOR,
@@ -237,7 +239,7 @@ public final class DownloadManagerBuilder {
                 fileOperations,
                 downloadsBatchPersistence,
                 downloadsFilePersistence,
-                notificationCreator,
+                notificationDispatcher,
                 callbacks,
                 callbackThrottleCreator
         );
@@ -284,19 +286,35 @@ public final class DownloadManagerBuilder {
         @Override
         public Notification customNotificationFrom(NotificationCompat.Builder builder, DownloadBatchStatus payload) {
             DownloadBatchTitle downloadBatchTitle = payload.getDownloadBatchTitle();
+            String title = downloadBatchTitle.asString();
+            builder.setSmallIcon(notificationIcon)
+                    .setContentTitle(title);
+
+            if (payload.status() == DownloadBatchStatus.Status.DELETION) {
+                return createDeletedNotification(builder);
+            } else {
+                return createProgressNotification(builder, payload);
+            }
+        }
+
+        private Notification createDeletedNotification(NotificationCompat.Builder builder) {
+            String content = "Deleted";
+            return builder
+                    .setContentText(content)
+                    .build();
+        }
+
+        private Notification createProgressNotification(NotificationCompat.Builder builder, DownloadBatchStatus payload) {
             int percentageDownloaded = payload.percentageDownloaded();
             int bytesFileSize = (int) payload.bytesTotalSize();
             int bytesDownloaded = (int) payload.bytesDownloaded();
-            String title = downloadBatchTitle.asString();
             String content = percentageDownloaded + "% downloaded";
 
             return builder
                     .setProgress(bytesFileSize, bytesDownloaded, NOT_INDETERMINATE)
-                    .setSmallIcon(notificationIcon)
-                    .setContentTitle(title)
                     .setContentText(content)
                     .build();
-
         }
+
     }
 }

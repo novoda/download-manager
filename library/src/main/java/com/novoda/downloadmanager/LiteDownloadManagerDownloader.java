@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETION;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
 
@@ -18,7 +17,7 @@ class LiteDownloadManagerDownloader {
     private final FileOperations fileOperations;
     private final DownloadsBatchPersistence downloadsBatchPersistence;
     private final DownloadsFilePersistence downloadsFilePersistence;
-    private final NotificationCreator<DownloadBatchStatus> notificationCreator;
+    private final NotificationDispatcher notificationDispatcher;
     private final List<DownloadBatchCallback> callbacks;
     private final CallbackThrottleCreator callbackThrottleCreator;
 
@@ -32,7 +31,7 @@ class LiteDownloadManagerDownloader {
                                   FileOperations fileOperations,
                                   DownloadsBatchPersistence downloadsBatchPersistence,
                                   DownloadsFilePersistence downloadsFilePersistence,
-                                  NotificationCreator<DownloadBatchStatus> notificationCreator,
+                                  NotificationDispatcher notificationDispatcher,
                                   List<DownloadBatchCallback> callbacks,
                                   CallbackThrottleCreator callbackThrottleCreator) {
         this.waitForDownloadService = waitForDownloadService;
@@ -41,7 +40,7 @@ class LiteDownloadManagerDownloader {
         this.fileOperations = fileOperations;
         this.downloadsBatchPersistence = downloadsBatchPersistence;
         this.downloadsFilePersistence = downloadsFilePersistence;
-        this.notificationCreator = notificationCreator;
+        this.notificationDispatcher = notificationDispatcher;
         this.callbacks = callbacks;
         this.callbackThrottleCreator = callbackThrottleCreator;
     }
@@ -94,26 +93,12 @@ class LiteDownloadManagerDownloader {
             for (DownloadBatchCallback callback : callbacks) {
                 callback.onUpdate(downloadBatchStatus);
             }
-            updateNotification(downloadBatchStatus, downloadService);
+            notificationDispatcher.updateNotification(downloadBatchStatus);
         });
-    }
-
-    private void updateNotification(DownloadBatchStatus liteDownloadBatchStatus, DownloadService downloadService) {
-        if (liteDownloadBatchStatus.status() == DELETION) {
-            downloadService.dismissNotification();
-            return;
-        }
-
-        NotificationInformation notificationInformation = notificationCreator.createNotification(liteDownloadBatchStatus);
-        if (liteDownloadBatchStatus.status() == DOWNLOADED) {
-            downloadService.stackNotification(notificationInformation);
-            return;
-        }
-
-        downloadService.updateNotification(notificationInformation);
     }
 
     void setDownloadService(DownloadService downloadService) {
         this.downloadService = downloadService;
+        notificationDispatcher.setDownloadService(downloadService);
     }
 }
