@@ -24,17 +24,12 @@ class NotificationDispatcher {
         return () -> {
             NotificationInformation notificationInformation = notificationCreator.createNotification(downloadBatchStatus);
 
-            if (downloadBatchStatus.status() == DELETION) {
-                downloadService.dismissNotification(notificationInformation);
-                return null;
-            }
-
-            if (downloadBatchStatus.status() == DOWNLOADED) {
+            if (downloadBatchStatus.status() == DOWNLOADED || downloadBatchStatus.status() == DELETION) {
                 downloadService.stackNotification(notificationInformation);
-                return null;
+            } else {
+                downloadService.updateNotification(notificationInformation);
             }
 
-            downloadService.updateNotification(notificationInformation);
             return null;
         };
     }
