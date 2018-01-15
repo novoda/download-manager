@@ -15,9 +15,9 @@ public interface LiteDownloadManagerCommands {
 
     void delete(DownloadBatchId downloadBatchId);
 
-    void addDownloadBatchCallback(DownloadBatchCallback downloadBatchCallback);
+    void addDownloadBatchCallback(DownloadBatchStatusCallback downloadBatchCallback);
 
-    void removeDownloadBatchCallback(DownloadBatchCallback downloadBatchCallback);
+    void removeDownloadBatchCallback(DownloadBatchStatusCallback downloadBatchCallback);
 
     void submitAllStoredDownloads(AllStoredDownloadsSubmittedCallback callback);
 

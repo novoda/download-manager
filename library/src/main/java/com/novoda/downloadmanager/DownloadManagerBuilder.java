@@ -206,7 +206,7 @@ public final class DownloadManagerBuilder {
         applicationContext.bindService(intent, serviceConnection, Service.BIND_AUTO_CREATE);
 
         FileOperations fileOperations = new FileOperations(filePersistenceCreator, fileSizeRequester, fileDownloader);
-        ArrayList<DownloadBatchCallback> callbacks = new ArrayList<>();
+        ArrayList<DownloadBatchStatusCallback> callbacks = new ArrayList<>();
 
         CallbackThrottleCreator callbackThrottleCreator = getCallbackThrottleCreator(
                 callbackThrottleCreatorType,

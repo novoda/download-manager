@@ -10,7 +10,7 @@ public class CallbackThrottleByProgressIncreaseTest {
 
     private static final int DOWNLOAD_PERCENTAGE = 75;
 
-    private final DownloadBatchCallback downloadBatchCallback = mock(DownloadBatchCallback.class);
+    private final DownloadBatchStatusCallback downloadBatchCallback = mock(DownloadBatchStatusCallback.class);
     private final DownloadBatchStatus downloadBatchStatus = mock(DownloadBatchStatus.class);
 
     private CallbackThrottleByProgressIncrease callbackThrottleByProgressIncrease;

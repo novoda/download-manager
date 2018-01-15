@@ -48,7 +48,7 @@ public class DownloadManagerTest {
     private final Handler handler = mock(Handler.class);
     private final DownloadBatch downloadBatch = mock(DownloadBatch.class);
     private final DownloadBatch additionalDownloadBatch = mock(DownloadBatch.class);
-    private final DownloadBatchCallback downloadBatchCallback = mock(DownloadBatchCallback.class);
+    private final DownloadBatchStatusCallback downloadBatchCallback = mock(DownloadBatchStatusCallback.class);
     private final FileOperations fileOperations = mock(FileOperations.class);
     private final DownloadsBatchPersistence downloadsBatchPersistence = mock(DownloadsBatchPersistence.class);
     private final LiteDownloadManagerDownloader downloadManagerDownloader = mock(LiteDownloadManagerDownloader.class);
@@ -56,7 +56,7 @@ public class DownloadManagerTest {
     private DownloadManager downloadManager;
     private Map<DownloadBatchId, DownloadBatch> downloadBatches = new HashMap<>();
     private List<DownloadBatchStatus> downloadBatchStatuses = new ArrayList<>();
-    private List<DownloadBatchCallback> downloadBatchCallbacks = new ArrayList<>();
+    private List<DownloadBatchStatusCallback> downloadBatchCallbacks = new ArrayList<>();
     private DownloadFileStatus downloadFileStatus = null;
 
     @Before
@@ -240,7 +240,7 @@ public class DownloadManagerTest {
 
     @Test
     public void addsCallbackToInternalList() {
-        DownloadBatchCallback additionalDownloadBatchCallback = mock(DownloadBatchCallback.class);
+        DownloadBatchStatusCallback additionalDownloadBatchCallback = mock(DownloadBatchStatusCallback.class);
 
         downloadManager.addDownloadBatchCallback(additionalDownloadBatchCallback);
 

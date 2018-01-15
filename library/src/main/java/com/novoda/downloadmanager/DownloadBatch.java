@@ -25,7 +25,7 @@ class DownloadBatch {
     private final CallbackThrottle callbackThrottle;
 
     private long totalBatchSizeBytes;
-    private DownloadBatchCallback callback;
+    private DownloadBatchStatusCallback callback;
 
     DownloadBatch(InternalDownloadBatchStatus internalDownloadBatchStatus,
                   List<DownloadFile> downloadFiles,
@@ -39,17 +39,22 @@ class DownloadBatch {
         this.callbackThrottle = callbackThrottle;
     }
 
-    void setCallback(DownloadBatchCallback callback) {
+    void setCallback(DownloadBatchStatusCallback callback) {
         this.callback = callback;
         callbackThrottle.setCallback(callback);
     }
 
     void download() {
-        if (downloadBatchStatus.status() == PAUSED) {
+        DownloadBatchStatus.Status status = downloadBatchStatus.status();
+        if (status == PAUSED) {
             return;
         }
 
-        if (downloadBatchStatus.status() == DELETION) {
+        if (status == DELETION) {
+            return;
+        }
+
+        if (status == DOWNLOADED) {
             return;
         }
 
@@ -88,7 +93,7 @@ class DownloadBatch {
             DownloadsNetworkRecoveryCreator.getInstance().scheduleRecovery();
         }
 
-        if (downloadBatchStatus.status() == DOWNLOADED) {
+        if (status == DOWNLOADED) {
             downloadBatchStatus.markAsDownloaded(downloadsBatchPersistence);
         }
 
@@ -136,7 +141,8 @@ class DownloadBatch {
     }
 
     void pause() {
-        if (downloadBatchStatus.status() == PAUSED) {
+        DownloadBatchStatus.Status status = downloadBatchStatus.status();
+        if (status == PAUSED || status == DOWNLOADED) {
             return;
         }
         downloadBatchStatus.markAsPaused(downloadsBatchPersistence);
@@ -148,7 +154,8 @@ class DownloadBatch {
     }
 
     void resume() {
-        if (downloadBatchStatus.status() == QUEUED || downloadBatchStatus.status() == DOWNLOADING) {
+        DownloadBatchStatus.Status status = downloadBatchStatus.status();
+        if (status == QUEUED || status == DOWNLOADING || status == DOWNLOADED) {
             return;
         }
         downloadBatchStatus.markAsQueued(downloadsBatchPersistence);

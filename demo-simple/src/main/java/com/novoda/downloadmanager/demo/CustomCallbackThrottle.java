@@ -2,16 +2,16 @@ package com.novoda.downloadmanager.demo;
 
 import com.novoda.notils.logger.simple.Log;
 import com.novoda.downloadmanager.CallbackThrottle;
-import com.novoda.downloadmanager.DownloadBatchCallback;
+import com.novoda.downloadmanager.DownloadBatchStatusCallback;
 import com.novoda.downloadmanager.DownloadBatchStatus;
 
 // Must be public
 public class CustomCallbackThrottle implements CallbackThrottle {
 
-    private DownloadBatchCallback callback;
+    private DownloadBatchStatusCallback callback;
 
     @Override
-    public void setCallback(DownloadBatchCallback callback) {
+    public void setCallback(DownloadBatchStatusCallback callback) {
         Log.v("setCallback");
         this.callback = callback;
     }

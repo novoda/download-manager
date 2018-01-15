@@ -32,6 +32,10 @@ public class NotificationCreator<T> {
         return new NotificationInformation() {
             @Override
             public int getId() {
+                if (notificationPayload instanceof DownloadBatchStatus) {
+                    return ((DownloadBatchStatus) notificationPayload).getDownloadBatchId().hashCode();
+                }
+
                 return notificationPayload.hashCode();
             }
 

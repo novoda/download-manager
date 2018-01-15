@@ -7,7 +7,7 @@ package com.novoda.downloadmanager;
 public class TestValidCustomThrottle implements CallbackThrottle {
 
     @Override
-    public void setCallback(DownloadBatchCallback callback) {
+    public void setCallback(DownloadBatchStatusCallback callback) {
 
     }
 

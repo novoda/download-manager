@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-public interface DownloadBatchCallback {
+public interface DownloadBatchStatusCallback {
 
     void onUpdate(DownloadBatchStatus downloadBatchStatus);
 }

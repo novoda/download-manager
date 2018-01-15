@@ -15,7 +15,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
     private final ExecutorService executor;
     private final Handler callbackHandler;
     private final Map<DownloadBatchId, DownloadBatch> downloadBatchMap;
-    private final List<DownloadBatchCallback> callbacks;
+    private final List<DownloadBatchStatusCallback> callbacks;
     private final FileOperations fileOperations;
     private final DownloadsBatchPersistence downloadsBatchPersistence;
     private final LiteDownloadManagerDownloader downloader;
@@ -28,7 +28,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
                     ExecutorService executor,
                     Handler callbackHandler,
                     Map<DownloadBatchId, DownloadBatch> downloadBatchMap,
-                    List<DownloadBatchCallback> callbacks,
+                    List<DownloadBatchStatusCallback> callbacks,
                     FileOperations fileOperations,
                     DownloadsBatchPersistence downloadsBatchPersistence,
                     LiteDownloadManagerDownloader downloader) {
@@ -114,12 +114,12 @@ class DownloadManager implements LiteDownloadManagerCommands {
     }
 
     @Override
-    public void addDownloadBatchCallback(DownloadBatchCallback downloadBatchCallback) {
+    public void addDownloadBatchCallback(DownloadBatchStatusCallback downloadBatchCallback) {
         callbacks.add(downloadBatchCallback);
     }
 
     @Override
-    public void removeDownloadBatchCallback(DownloadBatchCallback downloadBatchCallback) {
+    public void removeDownloadBatchCallback(DownloadBatchStatusCallback downloadBatchCallback) {
         if (callbacks.contains(downloadBatchCallback)) {
             callbacks.remove(downloadBatchCallback);
         }
