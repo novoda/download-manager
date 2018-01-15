@@ -22,12 +22,13 @@ class NotificationDispatcher {
 
     private WaitForDownloadService.ThenPerform.Action<Void> executeUpdateNotification(DownloadBatchStatus downloadBatchStatus) {
         return () -> {
+            NotificationInformation notificationInformation = notificationCreator.createNotification(downloadBatchStatus);
+
             if (downloadBatchStatus.status() == DELETION) {
-                downloadService.dismissNotification();
+                downloadService.dismissNotification(notificationInformation);
                 return null;
             }
 
-            NotificationInformation notificationInformation = notificationCreator.createNotification(downloadBatchStatus);
             if (downloadBatchStatus.status() == DOWNLOADED) {
                 downloadService.stackNotification(notificationInformation);
                 return null;
