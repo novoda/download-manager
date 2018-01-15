@@ -45,15 +45,16 @@ class DownloadBatch {
     }
 
     void download() {
-        if (downloadBatchStatus.status() == PAUSED) {
+        DownloadBatchStatus.Status status = downloadBatchStatus.status();
+        if (status == PAUSED) {
             return;
         }
 
-        if (downloadBatchStatus.status() == DELETION) {
+        if (status == DELETION) {
             return;
         }
 
-        if (downloadBatchStatus.status() == DOWNLOADED) {
+        if (status == DOWNLOADED) {
             return;
         }
 
@@ -92,7 +93,7 @@ class DownloadBatch {
             DownloadsNetworkRecoveryCreator.getInstance().scheduleRecovery();
         }
 
-        if (downloadBatchStatus.status() == DOWNLOADED) {
+        if (status == DOWNLOADED) {
             downloadBatchStatus.markAsDownloaded(downloadsBatchPersistence);
         }
 
@@ -140,7 +141,8 @@ class DownloadBatch {
     }
 
     void pause() {
-        if (downloadBatchStatus.status() == PAUSED || downloadBatchStatus.status() == DOWNLOADED) {
+        DownloadBatchStatus.Status status = downloadBatchStatus.status();
+        if (status == PAUSED || status == DOWNLOADED) {
             return;
         }
         downloadBatchStatus.markAsPaused(downloadsBatchPersistence);
@@ -152,7 +154,8 @@ class DownloadBatch {
     }
 
     void resume() {
-        if (downloadBatchStatus.status() == QUEUED || downloadBatchStatus.status() == DOWNLOADING || downloadBatchStatus.status() == DOWNLOADED) {
+        DownloadBatchStatus.Status status = downloadBatchStatus.status();
+        if (status == QUEUED || status == DOWNLOADING || status == DOWNLOADED) {
             return;
         }
         downloadBatchStatus.markAsQueued(downloadsBatchPersistence);
