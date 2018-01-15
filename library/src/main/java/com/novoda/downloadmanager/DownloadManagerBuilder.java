@@ -230,6 +230,8 @@ public final class DownloadManagerBuilder {
             notificationManager.createNotificationChannel(notificationChannel);
         }
 
+        NotificationDispatcher notificationDispatcher = new NotificationDispatcher(LOCK, notificationCreator);
+
         LiteDownloadManagerDownloader downloader = new LiteDownloadManagerDownloader(
                 LOCK,
                 EXECUTOR,
@@ -237,7 +239,7 @@ public final class DownloadManagerBuilder {
                 fileOperations,
                 downloadsBatchPersistence,
                 downloadsFilePersistence,
-                notificationCreator,
+                notificationDispatcher,
                 callbacks,
                 callbackThrottleCreator
         );
