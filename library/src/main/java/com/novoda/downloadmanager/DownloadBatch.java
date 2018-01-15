@@ -140,7 +140,7 @@ class DownloadBatch {
     }
 
     void pause() {
-        if (downloadBatchStatus.status() == PAUSED) {
+        if (downloadBatchStatus.status() == PAUSED || downloadBatchStatus.status() == DOWNLOADED) {
             return;
         }
         downloadBatchStatus.markAsPaused(downloadsBatchPersistence);
@@ -152,7 +152,7 @@ class DownloadBatch {
     }
 
     void resume() {
-        if (downloadBatchStatus.status() == QUEUED || downloadBatchStatus.status() == DOWNLOADING) {
+        if (downloadBatchStatus.status() == QUEUED || downloadBatchStatus.status() == DOWNLOADING || downloadBatchStatus.status() == DOWNLOADED) {
             return;
         }
         downloadBatchStatus.markAsQueued(downloadsBatchPersistence);
