@@ -75,16 +75,14 @@ class LiteDownloadManagerDownloader {
     private WaitForDownloadService.ThenPerform.Action<Void> executeDownload(DownloadBatch downloadBatch) {
         return () -> {
             InternalDownloadBatchStatus downloadBatchStatus = downloadBatch.status();
-            if (downloadBatchStatus.status() != DOWNLOADED) {
-                updateStatusToQueuedIfNeeded(downloadBatchStatus);
-                downloadService.download(downloadBatch, downloadBatchCallback());
-            }
+            updateStatusToQueuedIfNeeded(downloadBatchStatus);
+            downloadService.download(downloadBatch, downloadBatchCallback());
             return null;
         };
     }
 
     private void updateStatusToQueuedIfNeeded(InternalDownloadBatchStatus downloadBatchStatus) {
-        if (downloadBatchStatus.status() != PAUSED) {
+        if (downloadBatchStatus.status() != PAUSED && downloadBatchStatus.status() != DOWNLOADED) {
             downloadBatchStatus.markAsQueued(downloadsBatchPersistence);
         }
     }
