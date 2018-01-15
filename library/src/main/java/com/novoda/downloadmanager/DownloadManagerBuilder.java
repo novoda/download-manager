@@ -285,36 +285,36 @@ public final class DownloadManagerBuilder {
 
         @Override
         public Notification customNotificationFrom(NotificationCompat.Builder builder, DownloadBatchStatus payload) {
+            DownloadBatchTitle downloadBatchTitle = payload.getDownloadBatchTitle();
+            String title = downloadBatchTitle.asString();
+            builder.setSmallIcon(notificationIcon)
+                    .setContentTitle(title);
+
             if (payload.status() == DownloadBatchStatus.Status.DELETION) {
-                return createDeletedNotification(builder, payload);
+                return createDeletedNotification(builder);
             } else {
-                DownloadBatchTitle downloadBatchTitle = payload.getDownloadBatchTitle();
-                int percentageDownloaded = payload.percentageDownloaded();
-                int bytesFileSize = (int) payload.bytesTotalSize();
-                int bytesDownloaded = (int) payload.bytesDownloaded();
-                String title = downloadBatchTitle.asString();
-                String content = percentageDownloaded + "% downloaded";
-
-                return builder
-                        .setProgress(bytesFileSize, bytesDownloaded, NOT_INDETERMINATE)
-                        .setSmallIcon(notificationIcon)
-                        .setContentTitle(title)
-                        .setContentText(content)
-                        .build();
-
+                return createProgressNotification(builder, payload);
             }
         }
 
-        private Notification createDeletedNotification(NotificationCompat.Builder builder, DownloadBatchStatus payload) {
-            DownloadBatchTitle downloadBatchTitle = payload.getDownloadBatchTitle();
-            String title = downloadBatchTitle.asString();
+        private Notification createDeletedNotification(NotificationCompat.Builder builder) {
             String content = "Deleted";
-
             return builder
-                    .setSmallIcon(notificationIcon)
-                    .setContentTitle(title)
                     .setContentText(content)
                     .build();
         }
+
+        private Notification createProgressNotification(NotificationCompat.Builder builder, DownloadBatchStatus payload) {
+            int percentageDownloaded = payload.percentageDownloaded();
+            int bytesFileSize = (int) payload.bytesTotalSize();
+            int bytesDownloaded = (int) payload.bytesDownloaded();
+            String content = percentageDownloaded + "% downloaded";
+
+            return builder
+                    .setProgress(bytesFileSize, bytesDownloaded, NOT_INDETERMINATE)
+                    .setContentText(content)
+                    .build();
+        }
+
     }
 }
