@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager;
 
+import android.support.annotation.WorkerThread;
+
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETION;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
 
@@ -15,6 +17,7 @@ class NotificationDispatcher {
         this.notificationCreator = notificationCreator;
     }
 
+    @WorkerThread
     void updateNotification(DownloadBatchStatus downloadBatchStatus) {
         WaitForDownloadService.<Void>waitFor(downloadService, waitForDownloadService)
                 .thenPerform(executeUpdateNotification(downloadBatchStatus));
