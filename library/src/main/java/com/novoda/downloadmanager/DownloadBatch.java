@@ -53,10 +53,6 @@ class DownloadBatch {
             return;
         }
 
-        if (downloadBatchStatus.status() == DOWNLOADED) {
-            return;
-        }
-
         downloadBatchStatus.markAsDownloading(downloadsBatchPersistence);
         notifyCallback(downloadBatchStatus);
 
