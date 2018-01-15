@@ -2,7 +2,7 @@ package com.novoda.downloadmanager;
 
 interface DownloadService {
 
-    void download(DownloadBatch downloadBatch, DownloadBatchCallback callback);
+    void download(DownloadBatch downloadBatch, DownloadBatchStatusCallback callback);
 
     void updateNotification(NotificationInformation notificationInformation);
 

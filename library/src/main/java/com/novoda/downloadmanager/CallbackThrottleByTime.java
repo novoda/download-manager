@@ -5,14 +5,14 @@ class CallbackThrottleByTime implements CallbackThrottle {
     private final ActionScheduler actionScheduler;
 
     private DownloadBatchStatus downloadBatchStatus;
-    private DownloadBatchCallback callback;
+    private DownloadBatchStatusCallback callback;
 
     CallbackThrottleByTime(ActionScheduler actionScheduler) {
         this.actionScheduler = actionScheduler;
     }
 
     @Override
-    public void setCallback(final DownloadBatchCallback callback) {
+    public void setCallback(final DownloadBatchStatusCallback callback) {
         this.callback = callback;
     }
 

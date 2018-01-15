@@ -13,7 +13,7 @@ import static org.mockito.Mockito.*;
 public class CallbackThrottleByTimeTest {
 
     private final ActionScheduler actionScheduler = mock(ActionScheduler.class);
-    private final DownloadBatchCallback callback = mock(DownloadBatchCallback.class);
+    private final DownloadBatchStatusCallback callback = mock(DownloadBatchStatusCallback.class);
     private final DownloadBatchStatus downloadBatchStatus = mock(DownloadBatchStatus.class);
 
     private CallbackThrottleByTime callbackThrottleByTime;

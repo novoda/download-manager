@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import com.novoda.downloadmanager.AllBatchStatusesCallback;
 import com.novoda.downloadmanager.Batch;
-import com.novoda.downloadmanager.DownloadBatchCallback;
+import com.novoda.downloadmanager.DownloadBatchStatusCallback;
 import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         DemoApplication demoApplication = (DemoApplication) getApplicationContext();
         liteDownloadManagerCommands = demoApplication.getLiteDownloadManagerCommands();
         liteDownloadManagerCommands.addDownloadBatchCallback(callback);
-        liteDownloadManagerCommands.getAllDownloadBatchStatuses(batchStatusesCallback);
+//        liteDownloadManagerCommands.getAllDownloadBatchStatuses(batchStatusesCallback);
 
         bindBatchViews();
     }
@@ -152,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
             downloadFileStatus -> Log.d("FileStatus: ", downloadFileStatus)
     );
 
-    private final DownloadBatchCallback callback = downloadBatchStatus -> {
+    private final DownloadBatchStatusCallback callback = downloadBatchStatus -> {
         String status = getStatusMessage(downloadBatchStatus);
 
         String message = "Batch " + downloadBatchStatus.getDownloadBatchTitle().asString()

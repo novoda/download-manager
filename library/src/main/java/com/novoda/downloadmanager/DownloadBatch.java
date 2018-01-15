@@ -25,7 +25,7 @@ class DownloadBatch {
     private final CallbackThrottle callbackThrottle;
 
     private long totalBatchSizeBytes;
-    private DownloadBatchCallback callback;
+    private DownloadBatchStatusCallback callback;
 
     DownloadBatch(InternalDownloadBatchStatus internalDownloadBatchStatus,
                   List<DownloadFile> downloadFiles,
@@ -39,7 +39,7 @@ class DownloadBatch {
         this.callbackThrottle = callbackThrottle;
     }
 
-    void setCallback(DownloadBatchCallback callback) {
+    void setCallback(DownloadBatchStatusCallback callback) {
         this.callback = callback;
         callbackThrottle.setCallback(callback);
     }
@@ -50,6 +50,10 @@ class DownloadBatch {
         }
 
         if (downloadBatchStatus.status() == DELETION) {
+            return;
+        }
+
+        if (downloadBatchStatus.status() == DOWNLOADED) {
             return;
         }
 

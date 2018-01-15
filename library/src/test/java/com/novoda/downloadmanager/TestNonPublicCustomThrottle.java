@@ -10,7 +10,7 @@ class TestNonPublicCustomThrottle implements CallbackThrottle {
     }
 
     @Override
-    public void setCallback(DownloadBatchCallback callback) {
+    public void setCallback(DownloadBatchStatusCallback callback) {
 
     }
 

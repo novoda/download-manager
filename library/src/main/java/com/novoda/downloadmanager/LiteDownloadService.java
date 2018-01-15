@@ -45,7 +45,7 @@ public class LiteDownloadService extends Service implements DownloadService {
     }
 
     @Override
-    public void download(final DownloadBatch downloadBatch, final DownloadBatchCallback callback) {
+    public void download(final DownloadBatch downloadBatch, final DownloadBatchStatusCallback callback) {
         callback.onUpdate(downloadBatch.status());
 
         downloadBatch.setCallback(callback);

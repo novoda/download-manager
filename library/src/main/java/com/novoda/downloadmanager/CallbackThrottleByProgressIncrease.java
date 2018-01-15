@@ -2,12 +2,12 @@ package com.novoda.downloadmanager;
 
 class CallbackThrottleByProgressIncrease implements CallbackThrottle {
 
-    private DownloadBatchCallback callback;
+    private DownloadBatchStatusCallback callback;
     private DownloadBatchStatus downloadBatchStatus;
     private int currentProgress;
 
     @Override
-    public void setCallback(DownloadBatchCallback callback) {
+    public void setCallback(DownloadBatchStatusCallback callback) {
         this.callback = callback;
     }
 

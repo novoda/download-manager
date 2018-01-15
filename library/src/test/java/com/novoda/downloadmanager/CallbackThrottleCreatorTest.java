@@ -62,7 +62,7 @@ public class CallbackThrottleCreatorTest {
      */
     private static class TestNotFoundCustomThrottle implements CallbackThrottle {
         @Override
-        public void setCallback(DownloadBatchCallback callback) {
+        public void setCallback(DownloadBatchStatusCallback callback) {
 
         }
 
