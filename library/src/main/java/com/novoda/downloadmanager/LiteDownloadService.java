@@ -13,6 +13,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
+
 public class LiteDownloadService extends Service implements DownloadService {
 
     private static final long TEN_MINUTES_IN_MILLIS = TimeUnit.MINUTES.toMillis(10);
@@ -46,9 +48,13 @@ public class LiteDownloadService extends Service implements DownloadService {
 
     @Override
     public void download(final DownloadBatch downloadBatch, final DownloadBatchCallback callback) {
-        callback.onUpdate(downloadBatch.status());
-
         downloadBatch.setCallback(callback);
+
+        if (downloadBatch.status().status() == DOWNLOADED) {
+            return;
+        }
+
+        callback.onUpdate(downloadBatch.status());
 
         executor.execute(() -> {
             acquireCpuWakeLock();
