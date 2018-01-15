@@ -12,10 +12,10 @@ import android.widget.TextView;
 
 import com.novoda.downloadmanager.AllBatchStatusesCallback;
 import com.novoda.downloadmanager.Batch;
-import com.novoda.downloadmanager.DownloadBatchStatusCallback;
 import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
+import com.novoda.downloadmanager.DownloadBatchStatusCallback;
 import com.novoda.downloadmanager.DownloadFileId;
 import com.novoda.downloadmanager.DownloadFileIdCreator;
 import com.novoda.downloadmanager.DownloadMigrator;
@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         DemoApplication demoApplication = (DemoApplication) getApplicationContext();
         liteDownloadManagerCommands = demoApplication.getLiteDownloadManagerCommands();
         liteDownloadManagerCommands.addDownloadBatchCallback(callback);
-//        liteDownloadManagerCommands.getAllDownloadBatchStatuses(batchStatusesCallback);
+        liteDownloadManagerCommands.getAllDownloadBatchStatuses(batchStatusesCallback);
 
         bindBatchViews();
     }
