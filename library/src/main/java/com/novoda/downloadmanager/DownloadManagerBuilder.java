@@ -285,20 +285,36 @@ public final class DownloadManagerBuilder {
 
         @Override
         public Notification customNotificationFrom(NotificationCompat.Builder builder, DownloadBatchStatus payload) {
+            if (payload.status() == DownloadBatchStatus.Status.DELETION) {
+                return createDeletedNotification(builder, payload);
+            } else {
+                DownloadBatchTitle downloadBatchTitle = payload.getDownloadBatchTitle();
+                int percentageDownloaded = payload.percentageDownloaded();
+                int bytesFileSize = (int) payload.bytesTotalSize();
+                int bytesDownloaded = (int) payload.bytesDownloaded();
+                String title = downloadBatchTitle.asString();
+                String content = percentageDownloaded + "% downloaded";
+
+                return builder
+                        .setProgress(bytesFileSize, bytesDownloaded, NOT_INDETERMINATE)
+                        .setSmallIcon(notificationIcon)
+                        .setContentTitle(title)
+                        .setContentText(content)
+                        .build();
+
+            }
+        }
+
+        private Notification createDeletedNotification(NotificationCompat.Builder builder, DownloadBatchStatus payload) {
             DownloadBatchTitle downloadBatchTitle = payload.getDownloadBatchTitle();
-            int percentageDownloaded = payload.percentageDownloaded();
-            int bytesFileSize = (int) payload.bytesTotalSize();
-            int bytesDownloaded = (int) payload.bytesDownloaded();
             String title = downloadBatchTitle.asString();
-            String content = percentageDownloaded + "% downloaded";
+            String content = "Deleted";
 
             return builder
-                    .setProgress(bytesFileSize, bytesDownloaded, NOT_INDETERMINATE)
                     .setSmallIcon(notificationIcon)
                     .setContentTitle(title)
                     .setContentText(content)
                     .build();
-
         }
     }
 }
