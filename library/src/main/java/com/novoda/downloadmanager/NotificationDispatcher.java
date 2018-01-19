@@ -4,6 +4,7 @@ import android.support.annotation.WorkerThread;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETION;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 
 class NotificationDispatcher {
 
@@ -26,8 +27,9 @@ class NotificationDispatcher {
     private WaitForDownloadService.ThenPerform.Action<Void> executeUpdateNotification(DownloadBatchStatus downloadBatchStatus) {
         return () -> {
             NotificationInformation notificationInformation = notificationCreator.createNotification(downloadBatchStatus);
+            DownloadBatchStatus.Status status = downloadBatchStatus.status();
 
-            if (downloadBatchStatus.status() == DOWNLOADED || downloadBatchStatus.status() == DELETION) {
+            if (status == DOWNLOADED || status == DELETION || status == ERROR) {
                 downloadService.stackNotification(notificationInformation);
             } else {
                 downloadService.updateNotification(notificationInformation);

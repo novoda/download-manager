@@ -292,6 +292,8 @@ public final class DownloadManagerBuilder {
 
             if (payload.status() == DownloadBatchStatus.Status.DELETION) {
                 return createDeletedNotification(builder);
+            } else if (payload.status() == DownloadBatchStatus.Status.ERROR) {
+                return createErrorNotification(builder, payload);
             } else {
                 return createProgressNotification(builder, payload);
             }
@@ -299,6 +301,13 @@ public final class DownloadManagerBuilder {
 
         private Notification createDeletedNotification(NotificationCompat.Builder builder) {
             String content = "Deleted";
+            return builder
+                    .setContentText(content)
+                    .build();
+        }
+
+        private Notification createErrorNotification(NotificationCompat.Builder builder, DownloadBatchStatus downloadBatchStatus) {
+            String content = "Error: " + downloadBatchStatus.getDownloadErrorType();
             return builder
                     .setContentText(content)
                     .build();
