@@ -47,7 +47,7 @@ class ExternalFilePersistence implements FilePersistence {
             return FilePersistenceResult.newInstance(Status.ERROR_INSUFFICIENT_SPACE);
         }
 
-        String absolutePath = externalFileDir.getAbsolutePath() + File.separatorChar + fileName.name();
+        String absolutePath = new File(externalFileDir, fileName.name()).getAbsolutePath();
         FilePath filePath = FilePathCreator.create(absolutePath);
         return create(filePath);
     }

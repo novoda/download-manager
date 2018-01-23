@@ -38,7 +38,7 @@ class InternalFilePersistence implements FilePersistence {
 
         File internalFileDir = context.getFilesDir();
 
-        String absolutePath = internalFileDir.getAbsolutePath() + File.separatorChar + fileName.name();
+        String absolutePath = new File(internalFileDir, fileName.name()).getAbsolutePath();
         FilePath filePath = FilePathCreator.create(absolutePath);
         return create(filePath);
     }
