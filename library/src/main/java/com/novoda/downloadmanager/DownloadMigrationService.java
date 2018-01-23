@@ -4,5 +4,5 @@ interface DownloadMigrationService {
 
     void setNotificationCreator(NotificationCreator<MigrationStatus> notificationCreator);
 
-    void startMigration(MigrationCallback migrationCallback);
+    void startMigration(String databaseFilename, MigrationCallback migrationCallback);
 }

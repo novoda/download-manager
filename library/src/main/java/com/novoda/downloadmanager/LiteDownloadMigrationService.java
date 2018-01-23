@@ -54,9 +54,9 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
     }
 
     @Override
-    public void startMigration(MigrationCallback migrationCallback) {
+    public void startMigration(String databaseFilename, MigrationCallback migrationCallback) {
         createNotificationChannel();
-        MigrationJob migrationJob = new MigrationJob(getApplicationContext(), getDatabasePath("downloads.db"));
+        MigrationJob migrationJob = new MigrationJob(getApplicationContext(), getDatabasePath(databaseFilename));
         migrationJob.addCallback(migrationCallback);
         migrationJob.addCallback(notificationMigrationCallback);
         singleInstanceExecutor.execute(migrationJob);
