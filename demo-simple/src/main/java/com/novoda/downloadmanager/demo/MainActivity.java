@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final MigrationCallback migrationCallback = migrationStatus -> databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());
 
-    private final View.OnClickListener startMigrationOnClick = v -> downloadMigrator.startMigration(migrationCallback);
+    private final View.OnClickListener startMigrationOnClick = v -> downloadMigrator.startMigration("downloads.db", migrationCallback);
 
     private final View.OnClickListener downloadBatchesOnClick = v -> {
         Batch batch = new Batch.Builder(BATCH_ID_1, "Made in chelsea")

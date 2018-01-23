@@ -2,6 +2,6 @@ package com.novoda.downloadmanager;
 
 public interface DownloadMigrator {
 
-    void startMigration(MigrationCallback migrationCallback);
+    void startMigration(String databaseFilename, MigrationCallback migrationCallback);
 
 }
