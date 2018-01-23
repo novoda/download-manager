@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import com.novoda.downloadmanager.FilePersistenceResult.Status;
 import com.novoda.notils.logger.simple.Log;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -35,21 +36,28 @@ class InternalFilePersistence implements FilePersistence {
             return FilePersistenceResult.newInstance(Status.ERROR_INSUFFICIENT_SPACE);
         }
 
-        FilePath filePath = FilePathCreator.create(fileName.name());
+        File internalFileDir = context.getFilesDir();
+
+        String absolutePath = internalFileDir.getAbsolutePath() + File.separatorChar + fileName.name();
+        FilePath filePath = FilePathCreator.create(absolutePath);
         return create(filePath);
     }
 
     @Override
     public FilePersistenceResult create(FilePath filePath) {
         try {
-            file = context.openFileOutput(filePath.path(), Context.MODE_APPEND);
+            file = context.openFileOutput(getLocalNameFrom(filePath), Context.MODE_APPEND);
         } catch (FileNotFoundException e) {
             Log.e(e, "File could not be opened");
             return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE);
         }
 
-        fileName = LiteFileName.from(filePath.path());
+        fileName = LiteFileName.from(getLocalNameFrom(filePath));
         return FilePersistenceResult.newInstance(Status.SUCCESS, filePath);
+    }
+
+    private String getLocalNameFrom(FilePath filePath) {
+        return new File(filePath.path()).getName();
     }
 
     @Override
@@ -97,7 +105,7 @@ class InternalFilePersistence implements FilePersistence {
     public long getCurrentSize(FilePath filePath) {
         FileOutputStream file = null;
         try {
-            file = context.openFileOutput(filePath.path(), Context.MODE_APPEND);
+            file = context.openFileOutput(getLocalNameFrom(filePath), Context.MODE_APPEND);
             return file.getChannel().size();
         } catch (IOException e) {
             Log.e(e, "Error requesting file size for " + fileName);
