@@ -154,7 +154,7 @@ class MigrationJob implements Runnable {
         Log.d(TAG, "about to migrate the files, time is " + System.nanoTime());
 
         for (int i = 0, size = migrations.size(); i < size; i++) {
-            migrationStatus.update(i, size - 1);
+            migrationStatus.update(i, size);
             onUpdate(migrationStatus);
 
             Migration migration = migrations.get(i);
