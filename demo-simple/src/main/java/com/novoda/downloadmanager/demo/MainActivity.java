@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final View.OnClickListener downloadBatchesOnClick = v -> {
         Batch batch = new Batch.Builder(BATCH_ID_1, "Made in chelsea")
-                .addFile(FILE_ID_1, FIVE_MB_FILE_URL)
+                .addFile(FILE_ID_1, FIVE_MB_FILE_URL, "/foo/bar/10mb.zip")
                 .addFile(TEN_MB_FILE_URL)
                 .build();
         liteDownloadManagerCommands.download(batch);

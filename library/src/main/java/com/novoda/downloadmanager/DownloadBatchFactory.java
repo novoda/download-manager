@@ -17,15 +17,17 @@ final class DownloadBatchFactory {
                                      DownloadsFilePersistence downloadsFilePersistence,
                                      CallbackThrottle callbackThrottle) {
         DownloadBatchTitle downloadBatchTitle = DownloadBatchTitleCreator.createFrom(batch);
-        Map<DownloadFileId, String> fileUrls = batch.getFileUrls();
-        List<DownloadFile> downloadFiles = new ArrayList<>(fileUrls.size());
+        Map<DownloadFileId, NetworkAddressAndFileName> networkAddressAndFileNameById = batch.networkAddressAndFileNameById();
+        List<DownloadFile> downloadFiles = new ArrayList<>(networkAddressAndFileNameById.size());
         DownloadBatchId downloadBatchId = batch.getDownloadBatchId();
         long downloadedDateTimeInMillis = System.currentTimeMillis();
 
-        for (Map.Entry<DownloadFileId, String> urlByDownloadId : fileUrls.entrySet()) {
+        for (Map.Entry<DownloadFileId, NetworkAddressAndFileName> networkAddressAndFileNameByDownloadId : networkAddressAndFileNameById.entrySet()) {
+            NetworkAddressAndFileName networkAddressAndFileName = networkAddressAndFileNameByDownloadId.getValue();
+
             InternalFileSize fileSize = InternalFileSizeCreator.unknownFileSize();
             FilePath filePath = FilePathCreator.unknownFilePath();
-            DownloadFileId downloadFileId = urlByDownloadId.getKey();
+            DownloadFileId downloadFileId = networkAddressAndFileNameByDownloadId.getKey();
             InternalDownloadFileStatus downloadFileStatus = new LiteDownloadFileStatus(
                     downloadBatchId,
                     downloadFileId,
@@ -33,8 +35,8 @@ final class DownloadBatchFactory {
                     fileSize,
                     filePath
             );
-            String fileUrl = urlByDownloadId.getValue();
-            FileName fileName = LiteFileName.from(batch, fileUrl);
+            String fileUrl = networkAddressAndFileName.networkAddress();
+            FileName fileName = LiteFileName.from(networkAddressAndFileName.fileName().name());
 
             FilePersistenceCreator filePersistenceCreator = fileOperations.filePersistenceCreator();
             FileDownloader fileDownloader = fileOperations.fileDownloader();
