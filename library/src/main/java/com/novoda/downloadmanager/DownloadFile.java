@@ -58,7 +58,7 @@ class DownloadFile {
             return;
         }
 
-        FilePersistenceResult result = createFile();
+        FilePersistenceResult result = filePersistence.create(filePath, fileSize);
         if (result.isMarkedAsError()) {
             Error error = convertError(result.status());
             updateAndFeedbackWithStatus(error, callback);
@@ -104,15 +104,6 @@ class DownloadFile {
                 }
             }
         });
-    }
-
-    private FilePersistenceResult createFile() {
-        if (filePath.isUnknown()) {
-            return filePersistence.create(fileName, fileSize);
-
-        } else {
-            return filePersistence.create(filePath);
-        }
     }
 
     private Error convertError(FilePersistenceResult.Status status) {

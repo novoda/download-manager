@@ -7,9 +7,9 @@ public final class Batch {
 
     private final DownloadBatchId downloadBatchId;
     private final String title;
-    private final Map<DownloadFileId, NetworkAddressAndFileName> networkAddressAndFileNameById;
+    private final Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFileNameById;
 
-    Batch(DownloadBatchId downloadBatchId, String title, Map<DownloadFileId, NetworkAddressAndFileName> networkAddressAndFileNameById) {
+    Batch(DownloadBatchId downloadBatchId, String title, Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFileNameById) {
         this.downloadBatchId = downloadBatchId;
         this.title = title;
         this.networkAddressAndFileNameById = networkAddressAndFileNameById;
@@ -23,7 +23,7 @@ public final class Batch {
         return title;
     }
 
-    Map<DownloadFileId, NetworkAddressAndFileName> networkAddressAndFileNameById() {
+    Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFileNameById() {
         return new HashMap<>(networkAddressAndFileNameById);
     }
 
@@ -69,7 +69,7 @@ public final class Batch {
 
         private final DownloadBatchId downloadBatchId;
         private final String title;
-        private final Map<DownloadFileId, NetworkAddressAndFileName> networkAddressAndFileNameById = new HashMap<>();
+        private final Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFileNameById = new HashMap<>();
 
         public Builder(DownloadBatchId downloadBatchId, String title) {
             this.downloadBatchId = downloadBatchId;
@@ -79,22 +79,21 @@ public final class Batch {
         public Builder addFile(String fileUrl) {
             String rawId = downloadBatchId.rawId() + fileUrl;
             DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(rawId);
-            FileName fileName = FileNameExtractor.extractFrom(fileUrl);
-            NetworkAddressAndFileName networkAddressAndFileName = new NetworkAddressAndFileName(fileUrl, fileName);
-            networkAddressAndFileNameById.put(downloadFileId, networkAddressAndFileName);
+            NetworkAddressAndFilePath networkAddressAndFilePath = new NetworkAddressAndFilePath(fileUrl, FilePathCreator.unknownFilePath());
+            networkAddressAndFileNameById.put(downloadFileId, networkAddressAndFilePath);
             return this;
         }
 
         public Builder addFile(DownloadFileId downloadFileId, String fileUrl) {
             FileName fileName = FileNameExtractor.extractFrom(fileUrl);
-            NetworkAddressAndFileName networkAddressAndFileName = new NetworkAddressAndFileName(fileUrl, fileName);
-            networkAddressAndFileNameById.put(downloadFileId, networkAddressAndFileName);
+            NetworkAddressAndFilePath networkAddressAndFilePath = new NetworkAddressAndFilePath(fileUrl, FilePathCreator.unknownFilePath());
+            networkAddressAndFileNameById.put(downloadFileId, networkAddressAndFilePath);
             return this;
         }
 
-        public Builder addFile(DownloadFileId downloadFileId, String fileUrl, String fileName) {
-            NetworkAddressAndFileName networkAddressAndFileName = new NetworkAddressAndFileName(fileUrl, LiteFileName.from(fileName));
-            networkAddressAndFileNameById.put(downloadFileId, networkAddressAndFileName);
+        public Builder addFile(DownloadFileId downloadFileId, String fileUrl, FilePath filePath) {
+            NetworkAddressAndFilePath networkAddressAndFilePath = new NetworkAddressAndFilePath(fileUrl, filePath);
+            networkAddressAndFileNameById.put(downloadFileId, networkAddressAndFilePath);
             return this;
         }
 

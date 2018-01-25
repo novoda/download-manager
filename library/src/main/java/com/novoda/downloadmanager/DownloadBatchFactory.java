@@ -17,17 +17,22 @@ final class DownloadBatchFactory {
                                      DownloadsFilePersistence downloadsFilePersistence,
                                      CallbackThrottle callbackThrottle) {
         DownloadBatchTitle downloadBatchTitle = DownloadBatchTitleCreator.createFrom(batch);
-        Map<DownloadFileId, NetworkAddressAndFileName> networkAddressAndFileNameById = batch.networkAddressAndFileNameById();
+        Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFileNameById = batch.networkAddressAndFileNameById();
         List<DownloadFile> downloadFiles = new ArrayList<>(networkAddressAndFileNameById.size());
         DownloadBatchId downloadBatchId = batch.getDownloadBatchId();
         long downloadedDateTimeInMillis = System.currentTimeMillis();
 
-        for (Map.Entry<DownloadFileId, NetworkAddressAndFileName> networkAddressAndFileNameByDownloadId : networkAddressAndFileNameById.entrySet()) {
-            NetworkAddressAndFileName networkAddressAndFileName = networkAddressAndFileNameByDownloadId.getValue();
+        for (Map.Entry<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFilePathByDownloadId : networkAddressAndFileNameById.entrySet()) {
+            NetworkAddressAndFilePath networkAddressAndFilePath = networkAddressAndFilePathByDownloadId.getValue();
 
             InternalFileSize fileSize = InternalFileSizeCreator.unknownFileSize();
-            FilePath filePath = FilePathCreator.unknownFilePath();
-            DownloadFileId downloadFileId = networkAddressAndFileNameByDownloadId.getKey();
+
+            String fileNetworkAddress = networkAddressAndFilePath.networkAddress();
+            FileName fileNameFromNetworkAddress = FileNameExtractor.extractFrom(fileNetworkAddress);
+            FilePath filePath = networkAddressAndFilePath.filePath() == FilePathCreator.unknownFilePath() ? FilePathCreator.create(fileNameFromNetworkAddress.name()) : networkAddressAndFilePath.filePath();
+            FileName fileName = filePath == null ? fileNameFromNetworkAddress : FileNameExtractor.extractFrom(filePath.path());
+
+            DownloadFileId downloadFileId = networkAddressAndFilePathByDownloadId.getKey();
             InternalDownloadFileStatus downloadFileStatus = new LiteDownloadFileStatus(
                     downloadBatchId,
                     downloadFileId,
@@ -35,8 +40,6 @@ final class DownloadBatchFactory {
                     fileSize,
                     filePath
             );
-            String fileUrl = networkAddressAndFileName.networkAddress();
-            FileName fileName = LiteFileName.from(networkAddressAndFileName.fileName().name());
 
             FilePersistenceCreator filePersistenceCreator = fileOperations.filePersistenceCreator();
             FileDownloader fileDownloader = fileOperations.fileDownloader();
@@ -46,7 +49,7 @@ final class DownloadBatchFactory {
             DownloadFile downloadFile = new DownloadFile(
                     downloadBatchId,
                     downloadFileId,
-                    fileUrl,
+                    fileNetworkAddress,
                     downloadFileStatus,
                     fileName,
                     filePath,

@@ -46,6 +46,11 @@ class FilePersistenceFixtures {
             }
 
             @Override
+            public FilePersistenceResult create(FilePath filePath, FileSize fileSize) {
+                return filePersistenceResult;
+            }
+
+            @Override
             public FilePersistenceResult create(FilePath filePath) {
                 return filePersistenceResult;
             }

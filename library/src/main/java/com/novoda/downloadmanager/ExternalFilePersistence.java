@@ -53,6 +53,11 @@ class ExternalFilePersistence implements FilePersistence {
     }
 
     @Override
+    public FilePersistenceResult create(FilePath filePath, FileSize fileSize) {
+        return null;
+    }
+
+    @Override
     public FilePersistenceResult create(FilePath filePath) {
         if (filePath.isUnknown()) {
             return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, filePath);

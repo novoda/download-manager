@@ -1,21 +1,21 @@
 package com.novoda.downloadmanager;
 
-class NetworkAddressAndFileName {
+class NetworkAddressAndFilePath {
 
     private final String networkAddress;
-    private final FileName fileName;
+    private final FilePath filePath;
 
-    NetworkAddressAndFileName(String networkAddress, FileName fileName) {
+    NetworkAddressAndFilePath(String networkAddress, FilePath filePath) {
         this.networkAddress = networkAddress;
-        this.fileName = fileName;
+        this.filePath = filePath;
     }
 
     String networkAddress() {
         return networkAddress;
     }
 
-    FileName fileName() {
-        return fileName;
+    FilePath filePath() {
+        return filePath;
     }
 
     @Override
@@ -27,26 +27,26 @@ class NetworkAddressAndFileName {
             return false;
         }
 
-        NetworkAddressAndFileName that = (NetworkAddressAndFileName) o;
+        NetworkAddressAndFilePath that = (NetworkAddressAndFilePath) o;
 
         if (networkAddress != null ? !networkAddress.equals(that.networkAddress) : that.networkAddress != null) {
             return false;
         }
-        return fileName != null ? fileName.equals(that.fileName) : that.fileName == null;
+        return filePath != null ? filePath.equals(that.filePath) : that.filePath == null;
     }
 
     @Override
     public int hashCode() {
         int result = networkAddress != null ? networkAddress.hashCode() : 0;
-        result = 31 * result + (fileName != null ? fileName.hashCode() : 0);
+        result = 31 * result + (filePath != null ? filePath.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        return "NetworkAddressAndFileName{"
+        return "NetworkAddressAndFilePath{"
                 + "networkAddress='" + networkAddress + '\''
-                + ", fileName=" + fileName
+                + ", filePath=" + filePath
                 + '}';
     }
 }

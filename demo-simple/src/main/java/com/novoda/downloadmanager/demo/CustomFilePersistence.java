@@ -27,6 +27,11 @@ public class CustomFilePersistence implements FilePersistence {
     }
 
     @Override
+    public FilePersistenceResult create(FilePath filePath, FileSize fileSize) {
+        return null;
+    }
+
+    @Override
     public FilePersistenceResult create(FilePath filePath) {
         Log.v("create " + filePath.toString());
         return FilePersistenceResult.newInstance(FilePersistenceResult.Status.SUCCESS);
