@@ -57,17 +57,31 @@ class ExternalFilePersistence implements FilePersistence {
             return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, absoluteFilePath);
         }
 
-        String absolutePath = absoluteFilePath.path();
-
         try {
-            file = new File(absolutePath);
-            fileOutputStream = new FileOutputStream(absolutePath, APPEND);
+            file = new File(absoluteFilePath.path());
+            boolean parentDirectoriesCreated = createParentDirectoriesIfDoesNotExist(file);
+
+            if (!parentDirectoriesCreated) {
+                return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, FilePathCreator.create(file.getParentFile().getAbsolutePath()));
+            }
+
+            fileOutputStream = new FileOutputStream(file, APPEND);
         } catch (FileNotFoundException e) {
             Log.e(e, "File could not be opened");
-            return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, absoluteFilePath);
+            return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE);
         }
 
         return FilePersistenceResult.newInstance(Status.SUCCESS, absoluteFilePath);
+    }
+
+    private boolean createParentDirectoriesIfDoesNotExist(File outputFile) {
+        boolean parentExists = outputFile.getParentFile().exists();
+        if (parentExists) {
+            return true;
+        }
+
+        Log.w(String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
+        return outputFile.getParentFile().mkdirs();
     }
 
     private boolean isExternalStorageWritable() {

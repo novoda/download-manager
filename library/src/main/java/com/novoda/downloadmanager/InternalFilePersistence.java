@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.annotation.Nullable;
 
 import com.novoda.downloadmanager.FilePersistenceResult.Status;
-import com.novoda.notils.exception.DeveloperError;
 import com.novoda.notils.logger.simple.Log;
 
 import java.io.File;
@@ -17,7 +16,7 @@ class InternalFilePersistence implements FilePersistence {
     private Context context;
 
     @Nullable
-    private FileOutputStream file;
+    private FileOutputStream fileOutputStream;
     @Nullable
     private FileName fileName;
 
@@ -45,10 +44,19 @@ class InternalFilePersistence implements FilePersistence {
     }
 
     private FilePersistenceResult create(FilePath absoluteFilePath) {
+        if (absoluteFilePath.isUnknown()) {
+            return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, absoluteFilePath);
+        }
+
         try {
             File outputFile = new File(absoluteFilePath.path());
-            createFileIfDoesNotExist(outputFile);
-            file = new FileOutputStream(outputFile, true);
+            boolean parentDirectoriesCreated = createParentDirectoriesIfDoesNotExist(outputFile);
+
+            if (!parentDirectoriesCreated) {
+                return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, FilePathCreator.create(outputFile.getParentFile().getAbsolutePath()));
+            }
+
+            fileOutputStream = new FileOutputStream(outputFile, true);
         } catch (FileNotFoundException e) {
             Log.e(e, "File could not be opened");
             return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE);
@@ -58,16 +66,14 @@ class InternalFilePersistence implements FilePersistence {
         return FilePersistenceResult.newInstance(Status.SUCCESS, absoluteFilePath);
     }
 
-    private void createFileIfDoesNotExist(File outputFile) {
-        boolean parentPathDoesNotExist = !outputFile.getParentFile().exists();
-        if (parentPathDoesNotExist) {
-            Log.w(String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
-            parentPathDoesNotExist = !outputFile.getParentFile().mkdirs();
+    private boolean createParentDirectoriesIfDoesNotExist(File outputFile) {
+        boolean parentExists = outputFile.getParentFile().exists();
+        if (parentExists) {
+            return true;
         }
 
-        if (parentPathDoesNotExist) {
-            throw new DeveloperError("Unable to create path: " + outputFile.getParentFile().getAbsolutePath());
-        }
+        Log.w(String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
+        return outputFile.getParentFile().mkdirs();
     }
 
     private String getLocalNameFrom(FilePath filePath) {
@@ -76,13 +82,13 @@ class InternalFilePersistence implements FilePersistence {
 
     @Override
     public boolean write(byte[] buffer, int offset, int numberOfBytesToWrite) {
-        if (file == null) {
+        if (fileOutputStream == null) {
             Log.e("Cannot write, you must create the file first");
             return false;
         }
 
         try {
-            file.write(buffer, offset, numberOfBytesToWrite);
+            fileOutputStream.write(buffer, offset, numberOfBytesToWrite);
             return true;
         } catch (IOException e) {
             Log.e(e, "Exception while writing to internal physical storage");
@@ -102,13 +108,13 @@ class InternalFilePersistence implements FilePersistence {
 
     @Override
     public long getCurrentSize() {
-        if (file == null) {
+        if (fileOutputStream == null) {
             Log.e("Cannot get the current file size, you must create the file first");
             return 0;
         }
 
         try {
-            return file.getChannel().size();
+            return fileOutputStream.getChannel().size();
         } catch (IOException e) {
             Log.e(e, "Error requesting file size, make sure you create one first");
             return 0;
@@ -137,12 +143,12 @@ class InternalFilePersistence implements FilePersistence {
 
     @Override
     public void close() {
-        if (file == null) {
+        if (fileOutputStream == null) {
             return;
         }
 
         try {
-            file.close();
+            fileOutputStream.close();
         } catch (IOException e) {
             Log.e(e, "Failed to close: " + fileName);
         }
