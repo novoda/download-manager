@@ -52,22 +52,22 @@ class ExternalFilePersistence implements FilePersistence {
         return create(absoluteFilePath);
     }
 
-    private FilePersistenceResult create(FilePath filePath) {
-        if (filePath.isUnknown()) {
-            return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, filePath);
+    private FilePersistenceResult create(FilePath absoluteFilePath) {
+        if (absoluteFilePath.isUnknown()) {
+            return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, absoluteFilePath);
         }
 
-        String absolutePath = filePath.path();
+        String absolutePath = absoluteFilePath.path();
 
         try {
             file = new File(absolutePath);
             fileOutputStream = new FileOutputStream(absolutePath, APPEND);
         } catch (FileNotFoundException e) {
             Log.e(e, "File could not be opened");
-            return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, filePath);
+            return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, absoluteFilePath);
         }
 
-        return FilePersistenceResult.newInstance(Status.SUCCESS, filePath);
+        return FilePersistenceResult.newInstance(Status.SUCCESS, absoluteFilePath);
     }
 
     private boolean isExternalStorageWritable() {

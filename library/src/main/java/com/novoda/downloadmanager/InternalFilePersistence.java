@@ -44,9 +44,9 @@ class InternalFilePersistence implements FilePersistence {
         return create(absoluteFilePath);
     }
 
-    private FilePersistenceResult create(FilePath filePath) {
+    private FilePersistenceResult create(FilePath absoluteFilePath) {
         try {
-            File outputFile = new File(filePath.path());
+            File outputFile = new File(absoluteFilePath.path());
             createFileIfDoesNotExist(outputFile);
             file = new FileOutputStream(outputFile, true);
         } catch (FileNotFoundException e) {
@@ -54,8 +54,8 @@ class InternalFilePersistence implements FilePersistence {
             return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE);
         }
 
-        fileName = LiteFileName.from(getLocalNameFrom(filePath));
-        return FilePersistenceResult.newInstance(Status.SUCCESS, filePath);
+        fileName = LiteFileName.from(getLocalNameFrom(absoluteFilePath));
+        return FilePersistenceResult.newInstance(Status.SUCCESS, absoluteFilePath);
     }
 
     private void createFileIfDoesNotExist(File outputFile) {

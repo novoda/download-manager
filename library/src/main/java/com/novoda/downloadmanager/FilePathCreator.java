@@ -13,7 +13,7 @@ public final class FilePathCreator {
         return UNKNOWN_FILEPATH;
     }
 
-    public static FilePath create(String absolutePath) {
-        return new LiteFilePath(absolutePath);
+    public static FilePath create(String relativePath) {
+        return new LiteFilePath(relativePath);
     }
 }
