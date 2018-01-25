@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.Nullable;
 
 import com.novoda.downloadmanager.FilePersistenceResult.Status;
+import com.novoda.notils.exception.DeveloperError;
 import com.novoda.notils.logger.simple.Log;
 
 import java.io.File;
@@ -46,7 +47,9 @@ class InternalFilePersistence implements FilePersistence {
     @Override
     public FilePersistenceResult create(FilePath filePath) {
         try {
-            file = context.openFileOutput(getLocalNameFrom(filePath), Context.MODE_APPEND);
+            File outputFile = new File(filePath.path());
+            createFileIfDoesNotExist(outputFile);
+            file = new FileOutputStream(outputFile, true);
         } catch (FileNotFoundException e) {
             Log.e(e, "File could not be opened");
             return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE);
@@ -54,6 +57,18 @@ class InternalFilePersistence implements FilePersistence {
 
         fileName = LiteFileName.from(getLocalNameFrom(filePath));
         return FilePersistenceResult.newInstance(Status.SUCCESS, filePath);
+    }
+
+    private void createFileIfDoesNotExist(File outputFile) {
+        boolean parentPathDoesNotExist = !outputFile.getParentFile().exists();
+        if (parentPathDoesNotExist) {
+            Log.w(String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
+            parentPathDoesNotExist = !outputFile.getParentFile().mkdirs();
+        }
+
+        if (parentPathDoesNotExist) {
+            throw new DeveloperError("Unable to create path: " + outputFile.getParentFile().getAbsolutePath());
+        }
     }
 
     private String getLocalNameFrom(FilePath filePath) {
