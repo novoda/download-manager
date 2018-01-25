@@ -1,8 +1,12 @@
 package com.novoda.downloadmanager;
 
-class FileNameExtractor {
+final class FileNameExtractor {
 
     private static final String PATH_SEPARATOR = "/";
+
+    private FileNameExtractor() {
+        // Uses static method.
+    }
 
     static FileName extractFrom(String assetUrl) {
         String rawFileName = getRawFileName(assetUrl);

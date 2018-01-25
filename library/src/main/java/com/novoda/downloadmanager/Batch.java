@@ -85,7 +85,6 @@ public final class Batch {
         }
 
         public Builder addFile(DownloadFileId downloadFileId, String fileUrl) {
-            FileName fileName = FileNameExtractor.extractFrom(fileUrl);
             NetworkAddressAndFilePath networkAddressAndFilePath = new NetworkAddressAndFilePath(fileUrl, FilePathCreator.unknownFilePath());
             networkAddressAndFileNameById.put(downloadFileId, networkAddressAndFilePath);
             return this;

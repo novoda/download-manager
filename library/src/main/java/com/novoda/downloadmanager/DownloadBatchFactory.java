@@ -29,7 +29,7 @@ final class DownloadBatchFactory {
 
             String fileNetworkAddress = networkAddressAndFilePath.networkAddress();
             FileName fileNameFromNetworkAddress = FileNameExtractor.extractFrom(fileNetworkAddress);
-            FilePath filePath = networkAddressAndFilePath.filePath() == FilePathCreator.unknownFilePath() ? FilePathCreator.create(fileNameFromNetworkAddress.name()) : networkAddressAndFilePath.filePath();
+            FilePath filePath = extractFilePathFrom(networkAddressAndFilePath, fileNameFromNetworkAddress);
             FileName fileName = filePath == null ? fileNameFromNetworkAddress : FileNameExtractor.extractFrom(filePath.path());
 
             DownloadFileId downloadFileId = networkAddressAndFilePathByDownloadId.getKey();
@@ -76,5 +76,10 @@ final class DownloadBatchFactory {
                 downloadsBatchPersistence,
                 callbackThrottle
         );
+    }
+
+    private static FilePath extractFilePathFrom(NetworkAddressAndFilePath networkAddressAndFilePath, FileName fileNameFromNetworkAddress) {
+        return networkAddressAndFilePath.filePath() == FilePathCreator.unknownFilePath()
+                ? FilePathCreator.create(fileNameFromNetworkAddress.name()) : networkAddressAndFilePath.filePath();
     }
 }
