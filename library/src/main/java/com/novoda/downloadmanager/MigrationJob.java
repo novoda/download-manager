@@ -184,10 +184,9 @@ class MigrationJob implements Runnable {
     }
 
     private void migrateV1FilesToV2Location(InternalFilePersistence internalFilePersistence, Migration migration) {
-        Batch batch = migration.batch();
         for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
-            FileName newFileName = LiteFileName.from(batch, fileMetadata.uri());
-            internalFilePersistence.create(newFileName, fileMetadata.fileSize());
+            FilePath filePath = FilePathCreator.create(fileMetadata.uri());
+            internalFilePersistence.create(filePath, fileMetadata.fileSize());
             FileInputStream inputStream = null;
             try {
                 // open the v1 file

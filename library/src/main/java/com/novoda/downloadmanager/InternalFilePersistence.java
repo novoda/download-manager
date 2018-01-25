@@ -27,24 +27,6 @@ class InternalFilePersistence implements FilePersistence {
     }
 
     @Override
-    public FilePersistenceResult create(FileName fileName, FileSize fileSize) {
-        if (fileSize.isTotalSizeUnknown()) {
-            return FilePersistenceResult.newInstance(Status.ERROR_UNKNOWN_TOTAL_FILE_SIZE);
-        }
-
-        long usableSpace = context.getFilesDir().getUsableSpace();
-        if (usableSpace < fileSize.totalSize()) {
-            return FilePersistenceResult.newInstance(Status.ERROR_INSUFFICIENT_SPACE);
-        }
-
-        File internalFileDir = context.getFilesDir();
-
-        String absolutePath = new File(internalFileDir, fileName.name()).getAbsolutePath();
-        FilePath filePath = FilePathCreator.create(absolutePath);
-        return create(filePath);
-    }
-
-    @Override
     public FilePersistenceResult create(FilePath filePath, FileSize fileSize) {
         if (fileSize.isTotalSizeUnknown()) {
             return FilePersistenceResult.newInstance(Status.ERROR_UNKNOWN_TOTAL_FILE_SIZE);
@@ -62,8 +44,7 @@ class InternalFilePersistence implements FilePersistence {
         return create(absoluteFilePath);
     }
 
-    @Override
-    public FilePersistenceResult create(FilePath filePath) {
+    private FilePersistenceResult create(FilePath filePath) {
         try {
             File outputFile = new File(filePath.path());
             createFileIfDoesNotExist(outputFile);

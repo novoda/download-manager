@@ -2,7 +2,6 @@ package com.novoda.downloadmanager.demo;
 
 import android.content.Context;
 
-import com.novoda.downloadmanager.FileName;
 import com.novoda.downloadmanager.FilePath;
 import com.novoda.downloadmanager.FilePersistence;
 import com.novoda.downloadmanager.FilePersistenceResult;
@@ -21,19 +20,8 @@ public class CustomFilePersistence implements FilePersistence {
     }
 
     @Override
-    public FilePersistenceResult create(FileName fileName, FileSize fileSize) {
-        Log.v("create " + fileName.toString() + ", " + fileSize.toString());
-        return FilePersistenceResult.newInstance(FilePersistenceResult.Status.SUCCESS);
-    }
-
-    @Override
     public FilePersistenceResult create(FilePath filePath, FileSize fileSize) {
-        return null;
-    }
-
-    @Override
-    public FilePersistenceResult create(FilePath filePath) {
-        Log.v("create " + filePath.toString());
+        Log.v("create " + filePath.toString() + ", " + fileSize.toString());
         return FilePersistenceResult.newInstance(FilePersistenceResult.Status.SUCCESS);
     }
 
