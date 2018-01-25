@@ -1,7 +1,5 @@
 package com.novoda.downloadmanager;
 
-import android.net.Uri;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -81,14 +79,14 @@ public final class Batch {
         public Builder addFile(String fileUrl) {
             String rawId = downloadBatchId.rawId() + fileUrl;
             DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(rawId);
-            FileName fileName = LiteFileName.from(Uri.parse(fileUrl).getLastPathSegment());
+            FileName fileName = FileNameExtractor.extractFrom(fileUrl);
             NetworkAddressAndFileName networkAddressAndFileName = new NetworkAddressAndFileName(fileUrl, fileName);
             networkAddressAndFileNameById.put(downloadFileId, networkAddressAndFileName);
             return this;
         }
 
         public Builder addFile(DownloadFileId downloadFileId, String fileUrl) {
-            FileName fileName = LiteFileName.from(Uri.parse(fileUrl).getLastPathSegment());
+            FileName fileName = FileNameExtractor.extractFrom(fileUrl);
             NetworkAddressAndFileName networkAddressAndFileName = new NetworkAddressAndFileName(fileUrl, fileName);
             networkAddressAndFileNameById.put(downloadFileId, networkAddressAndFileName);
             return this;
