@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager;
 
 class NetworkAddressAndFileName {
+
     private final String networkAddress;
     private final FileName fileName;
 

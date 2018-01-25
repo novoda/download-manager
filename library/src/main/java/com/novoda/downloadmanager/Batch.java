@@ -46,7 +46,8 @@ public final class Batch {
         if (title != null ? !title.equals(batch.title) : batch.title != null) {
             return false;
         }
-        return networkAddressAndFileNameById != null ? networkAddressAndFileNameById.equals(batch.networkAddressAndFileNameById) : batch.networkAddressAndFileNameById == null;
+        return networkAddressAndFileNameById != null
+                ? networkAddressAndFileNameById.equals(batch.networkAddressAndFileNameById) : batch.networkAddressAndFileNameById == null;
     }
 
     @Override
@@ -59,11 +60,11 @@ public final class Batch {
 
     @Override
     public String toString() {
-        return "Batch{" +
-                "downloadBatchId=" + downloadBatchId +
-                ", title='" + title + '\'' +
-                ", networkAddressAndFileNameById=" + networkAddressAndFileNameById +
-                '}';
+        return "Batch{"
+                + "downloadBatchId=" + downloadBatchId
+                + ", title='" + title + '\''
+                + ", networkAddressAndFileNameById=" + networkAddressAndFileNameById
+                + '}';
     }
 
     public static class Builder {
