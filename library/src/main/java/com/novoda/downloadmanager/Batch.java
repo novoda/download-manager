@@ -23,7 +23,7 @@ public final class Batch {
         return title;
     }
 
-    Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFileNameById() {
+    Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFilePathById() {
         return new HashMap<>(networkAddressAndFilePathById);
     }
 

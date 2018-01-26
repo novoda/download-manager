@@ -17,12 +17,12 @@ final class DownloadBatchFactory {
                                      DownloadsFilePersistence downloadsFilePersistence,
                                      CallbackThrottle callbackThrottle) {
         DownloadBatchTitle downloadBatchTitle = DownloadBatchTitleCreator.createFrom(batch);
-        Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFileNameById = batch.networkAddressAndFileNameById();
-        List<DownloadFile> downloadFiles = new ArrayList<>(networkAddressAndFileNameById.size());
+        Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFilePathById = batch.networkAddressAndFilePathById();
+        List<DownloadFile> downloadFiles = new ArrayList<>(networkAddressAndFilePathById.size());
         DownloadBatchId downloadBatchId = batch.getDownloadBatchId();
         long downloadedDateTimeInMillis = System.currentTimeMillis();
 
-        for (Map.Entry<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFilePathByDownloadId : networkAddressAndFileNameById.entrySet()) {
+        for (Map.Entry<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFilePathByDownloadId : networkAddressAndFilePathById.entrySet()) {
             NetworkAddressAndFilePath networkAddressAndFilePath = networkAddressAndFilePathByDownloadId.getValue();
 
             InternalFileSize fileSize = InternalFileSizeCreator.unknownFileSize();
