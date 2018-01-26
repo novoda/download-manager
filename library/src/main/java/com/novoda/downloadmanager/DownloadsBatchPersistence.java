@@ -8,6 +8,8 @@ import java.util.concurrent.Executor;
 
 class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence {
 
+    private static final long ZERO_BYTES = 0;
+
     private final Executor executor;
     private final DownloadsFilePersistence downloadsFilePersistence;
     private final DownloadsPersistence downloadsPersistence;
