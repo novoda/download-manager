@@ -83,11 +83,11 @@ public final class Batch {
         }
 
         public Builder addFile(DownloadFileId downloadFileId, String fileUrl) {
-            return addFile(downloadFileId, fileUrl, FilePathCreator.unknownFilePath());
+            return addFile(downloadFileId, fileUrl, "");
         }
 
-        public Builder addFile(DownloadFileId downloadFileId, String fileUrl, FilePath filePath) {
-            NetworkAddressAndFilePath networkAddressAndFilePath = new NetworkAddressAndFilePath(fileUrl, filePath);
+        public Builder addFile(DownloadFileId downloadFileId, String fileUrl, String relativePathToStoreDownload) {
+            NetworkAddressAndFilePath networkAddressAndFilePath = new NetworkAddressAndFilePath(fileUrl, relativePathToStoreDownload);
             networkAddressAndFilePathById.put(downloadFileId, networkAddressAndFilePath);
             return this;
         }
