@@ -28,14 +28,12 @@ final class DownloadBatchFactory {
             InternalFileSize fileSize = InternalFileSizeCreator.unknownFileSize();
 
             String fileNetworkAddress = networkAddressAndFilePath.networkAddress();
-            FileName fileNameFromNetworkAddress = FileNameExtractor.extractFrom(fileNetworkAddress);
-
-            String relativePath = networkAddressAndFilePath.relativePathToStoreDownload();
 
             FilePersistenceCreator filePersistenceCreator = fileOperations.filePersistenceCreator();
             FilePersistence filePersistence = filePersistenceCreator.create();
 
-            FilePath filePath = FilePathCreator.create(filePersistence.basePath().path(), relativePath == null || relativePath.isEmpty() ? fileNameFromNetworkAddress.name() : relativePath);
+            String basePath = filePersistence.basePath().path();
+            FilePath filePath = FilePathCreator.create(basePath, relativePathFrom(networkAddressAndFilePath));
             FileName fileName = FileNameExtractor.extractFrom(filePath.path());
 
             DownloadFileId downloadFileId = networkAddressAndFilePathByDownloadId.getKey();
@@ -81,4 +79,11 @@ final class DownloadBatchFactory {
                 callbackThrottle
         );
     }
+
+    private static String relativePathFrom(NetworkAddressAndFilePath networkAddressAndFilePath) {
+        String relativePath = networkAddressAndFilePath.relativePathToStoreDownload();
+        String fileNameFromNetworkAddress = FileNameExtractor.extractFrom(networkAddressAndFilePath.networkAddress()).name();
+        return relativePath == null || relativePath.isEmpty() ? fileNameFromNetworkAddress : relativePath;
+    }
+
 }
