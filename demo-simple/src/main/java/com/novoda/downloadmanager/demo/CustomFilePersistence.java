@@ -3,6 +3,7 @@ package com.novoda.downloadmanager.demo;
 import android.content.Context;
 
 import com.novoda.downloadmanager.FilePath;
+import com.novoda.downloadmanager.FilePathCreator;
 import com.novoda.downloadmanager.FilePersistence;
 import com.novoda.downloadmanager.FilePersistenceResult;
 import com.novoda.downloadmanager.FilePersistenceType;
@@ -17,6 +18,13 @@ public class CustomFilePersistence implements FilePersistence {
     @Override
     public void initialiseWith(Context context) {
         Log.v("initialise");
+    }
+
+    @Override
+    public FilePath basePath() {
+        FilePath filePath = FilePathCreator.unknownFilePath();
+        Log.v("basePath " + filePath.toString());
+        return filePath;
     }
 
     @Override

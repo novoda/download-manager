@@ -31,6 +31,11 @@ class ExternalFilePersistence implements FilePersistence {
     }
 
     @Override
+    public FilePath basePath() {
+        return FilePathCreator.create(getExternalFileDirWithBiggerAvailableSpace().getAbsolutePath());
+    }
+
+    @Override
     public FilePersistenceResult create(FilePath filePath, FileSize fileSize) {
         if (fileSize.isTotalSizeUnknown()) {
             return FilePersistenceResult.newInstance(Status.ERROR_UNKNOWN_TOTAL_FILE_SIZE);
