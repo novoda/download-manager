@@ -8,7 +8,7 @@ public interface FilePersistence {
 
     FilePath basePath();
 
-    FilePersistenceResult create(FilePath filePath, FileSize fileSize);
+    FilePersistenceResult create(FilePath absoluteFilePath, FileSize fileSize);
 
     boolean write(byte[] buffer, int offset, int numberOfBytesToWrite);
 

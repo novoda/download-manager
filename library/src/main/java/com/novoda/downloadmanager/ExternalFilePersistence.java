@@ -36,7 +36,7 @@ class ExternalFilePersistence implements FilePersistence {
     }
 
     @Override
-    public FilePersistenceResult create(FilePath filePath, FileSize fileSize) {
+    public FilePersistenceResult create(FilePath absoluteFilePath, FileSize fileSize) {
         if (fileSize.isTotalSizeUnknown()) {
             return FilePersistenceResult.newInstance(Status.ERROR_UNKNOWN_TOTAL_FILE_SIZE);
         }
@@ -52,7 +52,7 @@ class ExternalFilePersistence implements FilePersistence {
             return FilePersistenceResult.newInstance(Status.ERROR_INSUFFICIENT_SPACE);
         }
 
-        return create(filePath);
+        return create(absoluteFilePath);
     }
 
     private FilePersistenceResult create(FilePath absoluteFilePath) {
