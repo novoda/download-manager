@@ -95,7 +95,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
                     DownloadBatchIdCreator.createFrom(roomFile.batchId),
                     DownloadFileIdCreator.createFrom(roomFile.id),
                     LiteFileName.from(roomFile.name),
-                    FilePathCreator.create(roomFile.path),
+                    FilePathCreator.create("", roomFile.path),
                     roomFile.totalSize,
                     roomFile.url,
                     FilePersistenceType.from(roomFile.persistenceType)

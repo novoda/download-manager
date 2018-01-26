@@ -35,8 +35,8 @@ final class DownloadBatchFactory {
             FilePersistenceCreator filePersistenceCreator = fileOperations.filePersistenceCreator();
             FilePersistence filePersistence = filePersistenceCreator.create();
 
-            FilePathExtractor.DownloadFilePath downloadFilePath = FilePathExtractor.extractFrom(filePersistence.basePath().path(), relativePath == null || relativePath.isEmpty() ? fileNameFromNetworkAddress.name() : relativePath);
-            FilePath filePath = FilePathCreator.create(downloadFilePath.absolutePath());
+            FilePath filePath = FilePathCreator.create(filePersistence.basePath().path(), relativePath == null || relativePath.isEmpty() ? fileNameFromNetworkAddress.name() : relativePath);
+            FileName fileName = FileNameExtractor.extractFrom(filePath.path());
 
             DownloadFileId downloadFileId = networkAddressAndFilePathByDownloadId.getKey();
             InternalDownloadFileStatus downloadFileStatus = new LiteDownloadFileStatus(
@@ -55,7 +55,7 @@ final class DownloadBatchFactory {
                     downloadFileId,
                     fileNetworkAddress,
                     downloadFileStatus,
-                    downloadFilePath.fileName(),
+                    fileName,
                     filePath,
                     fileSize,
                     fileDownloader,

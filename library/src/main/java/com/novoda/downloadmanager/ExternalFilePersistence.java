@@ -32,7 +32,7 @@ class ExternalFilePersistence implements FilePersistence {
 
     @Override
     public FilePath basePath() {
-        return FilePathCreator.create(getExternalFileDirWithBiggerAvailableSpace().getAbsolutePath());
+        return FilePathCreator.create(getExternalFileDirWithBiggerAvailableSpace().getAbsolutePath(), "");
     }
 
     @Override
@@ -52,9 +52,7 @@ class ExternalFilePersistence implements FilePersistence {
             return FilePersistenceResult.newInstance(Status.ERROR_INSUFFICIENT_SPACE);
         }
 
-        String absolutePath = new File(externalFileDir, filePath.path()).getAbsolutePath();
-        FilePath absoluteFilePath = FilePathCreator.create(absolutePath);
-        return create(absoluteFilePath);
+        return create(filePath);
     }
 
     private FilePersistenceResult create(FilePath absoluteFilePath) {
@@ -67,7 +65,7 @@ class ExternalFilePersistence implements FilePersistence {
             boolean parentDirectoriesExist = ensureParentDirectoriesExistFor(file);
 
             if (!parentDirectoriesExist) {
-                return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, FilePathCreator.create(file.getParentFile().getAbsolutePath()));
+                return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, absoluteFilePath);
             }
 
             fileOutputStream = new FileOutputStream(file, APPEND);
