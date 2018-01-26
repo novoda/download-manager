@@ -79,15 +79,11 @@ public final class Batch {
         public Builder addFile(String fileUrl) {
             String rawId = downloadBatchId.rawId() + fileUrl;
             DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(rawId);
-            NetworkAddressAndFilePath networkAddressAndFilePath = new NetworkAddressAndFilePath(fileUrl, FilePathCreator.unknownFilePath());
-            networkAddressAndFilePathById.put(downloadFileId, networkAddressAndFilePath);
-            return this;
+            return addFile(downloadFileId, fileUrl);
         }
 
         public Builder addFile(DownloadFileId downloadFileId, String fileUrl) {
-            NetworkAddressAndFilePath networkAddressAndFilePath = new NetworkAddressAndFilePath(fileUrl, FilePathCreator.unknownFilePath());
-            networkAddressAndFilePathById.put(downloadFileId, networkAddressAndFilePath);
-            return this;
+            return addFile(downloadFileId, fileUrl, FilePathCreator.unknownFilePath());
         }
 
         public Builder addFile(DownloadFileId downloadFileId, String fileUrl, FilePath filePath) {
