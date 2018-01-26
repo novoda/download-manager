@@ -62,22 +62,6 @@ class DownloadBatch {
             return;
         }
 
-        DownloadFile.Callback fileDownloadCallback = downloadFileStatus -> {
-            fileBytesDownloadedMap.put(downloadFileStatus.downloadFileId(), downloadFileStatus.bytesDownloaded());
-            long currentBytesDownloaded = getBytesDownloadedFrom(fileBytesDownloadedMap);
-            downloadBatchStatus.update(currentBytesDownloaded, totalBatchSizeBytes);
-
-            if (currentBytesDownloaded == totalBatchSizeBytes && totalBatchSizeBytes != ZERO_BYTES) {
-                downloadBatchStatus.markAsDownloaded(downloadsBatchPersistence);
-            }
-
-            if (downloadFileStatus.isMarkedAsError()) {
-                downloadBatchStatus.markAsError(downloadFileStatus.error(), downloadsBatchPersistence);
-            }
-
-            callbackThrottle.update(downloadBatchStatus);
-        };
-
         for (DownloadFile downloadFile : downloadFiles) {
             downloadFile.download(fileDownloadCallback);
             if (batchCannotContinue()) {
@@ -91,6 +75,25 @@ class DownloadBatch {
 
         callbackThrottle.stopUpdates();
     }
+
+    private final DownloadFile.Callback fileDownloadCallback = new DownloadFile.Callback() {
+        @Override
+        public void onUpdate(InternalDownloadFileStatus downloadFileStatus) {
+            fileBytesDownloadedMap.put(downloadFileStatus.downloadFileId(), downloadFileStatus.bytesDownloaded());
+            long currentBytesDownloaded = getBytesDownloadedFrom(fileBytesDownloadedMap);
+            downloadBatchStatus.update(currentBytesDownloaded, totalBatchSizeBytes);
+
+            if (currentBytesDownloaded == totalBatchSizeBytes && totalBatchSizeBytes != ZERO_BYTES) {
+                downloadBatchStatus.markAsDownloaded(downloadsBatchPersistence);
+            }
+
+            if (downloadFileStatus.isMarkedAsError()) {
+                downloadBatchStatus.markAsError(downloadFileStatus.error(), downloadsBatchPersistence);
+            }
+
+            callbackThrottle.update(downloadBatchStatus);
+        }
+    };
 
     private boolean networkError() {
         DownloadBatchStatus.Status status = downloadBatchStatus.status();

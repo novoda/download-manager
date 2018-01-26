@@ -14,7 +14,6 @@ class MigrationJob implements Runnable {
 
     private static final String TAG = "V1 to V2 migrator";
 
-    private static final int RANDOMLY_CHOSEN_BUFFER_SIZE_THAT_SEEMS_TO_WORK = 4096;
     private static final String TABLE_BATCHES = "batches";
     private static final String WHERE_CLAUSE_ID = "_id = ?";
 
