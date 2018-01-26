@@ -50,9 +50,9 @@ class InternalFilePersistence implements FilePersistence {
 
         try {
             File outputFile = new File(absoluteFilePath.path());
-            boolean parentDirectoriesCreated = createParentDirectoriesIfDoesNotExist(outputFile);
+            boolean parentDirectoriesExist = ensureParentDirectoriesExistFor(outputFile);
 
-            if (!parentDirectoriesCreated) {
+            if (!parentDirectoriesExist) {
                 return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, FilePathCreator.create(outputFile.getParentFile().getAbsolutePath()));
             }
 
@@ -66,7 +66,7 @@ class InternalFilePersistence implements FilePersistence {
         return FilePersistenceResult.newInstance(Status.SUCCESS, absoluteFilePath);
     }
 
-    private boolean createParentDirectoriesIfDoesNotExist(File outputFile) {
+    private boolean ensureParentDirectoriesExistFor(File outputFile) {
         boolean parentExists = outputFile.getParentFile().exists();
         if (parentExists) {
             return true;

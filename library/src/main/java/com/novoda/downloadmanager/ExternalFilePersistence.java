@@ -59,9 +59,9 @@ class ExternalFilePersistence implements FilePersistence {
 
         try {
             file = new File(absoluteFilePath.path());
-            boolean parentDirectoriesCreated = createParentDirectoriesIfDoesNotExist(file);
+            boolean parentDirectoriesExist = ensureParentDirectoriesExistFor(file);
 
-            if (!parentDirectoriesCreated) {
+            if (!parentDirectoriesExist) {
                 return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, FilePathCreator.create(file.getParentFile().getAbsolutePath()));
             }
 
@@ -74,7 +74,7 @@ class ExternalFilePersistence implements FilePersistence {
         return FilePersistenceResult.newInstance(Status.SUCCESS, absoluteFilePath);
     }
 
-    private boolean createParentDirectoriesIfDoesNotExist(File outputFile) {
+    private boolean ensureParentDirectoriesExistFor(File outputFile) {
         boolean parentExists = outputFile.getParentFile().exists();
         if (parentExists) {
             return true;
