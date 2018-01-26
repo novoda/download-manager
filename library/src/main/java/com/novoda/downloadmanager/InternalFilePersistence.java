@@ -16,7 +16,7 @@ class InternalFilePersistence implements FilePersistence {
     private Context context;
 
     @Nullable
-    private FileOutputStream file;
+    private FileOutputStream fileOutputStream;
     @Nullable
     private FileName fileName;
 
@@ -26,7 +26,12 @@ class InternalFilePersistence implements FilePersistence {
     }
 
     @Override
-    public FilePersistenceResult create(FileName fileName, FileSize fileSize) {
+    public FilePath basePath() {
+        return FilePathCreator.create(context.getFilesDir().getAbsolutePath(), "/");
+    }
+
+    @Override
+    public FilePersistenceResult create(FilePath absoluteFilePath, FileSize fileSize) {
         if (fileSize.isTotalSizeUnknown()) {
             return FilePersistenceResult.newInstance(Status.ERROR_UNKNOWN_TOTAL_FILE_SIZE);
         }
@@ -36,24 +41,40 @@ class InternalFilePersistence implements FilePersistence {
             return FilePersistenceResult.newInstance(Status.ERROR_INSUFFICIENT_SPACE);
         }
 
-        File internalFileDir = context.getFilesDir();
-
-        String absolutePath = new File(internalFileDir, fileName.name()).getAbsolutePath();
-        FilePath filePath = FilePathCreator.create(absolutePath);
-        return create(filePath);
+        return create(absoluteFilePath);
     }
 
-    @Override
-    public FilePersistenceResult create(FilePath filePath) {
+    private FilePersistenceResult create(FilePath absoluteFilePath) {
+        if (absoluteFilePath.isUnknown()) {
+            return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, absoluteFilePath);
+        }
+
         try {
-            file = context.openFileOutput(getLocalNameFrom(filePath), Context.MODE_APPEND);
+            File outputFile = new File(absoluteFilePath.path());
+            boolean parentDirectoriesExist = ensureParentDirectoriesExistFor(outputFile);
+
+            if (!parentDirectoriesExist) {
+                return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, absoluteFilePath);
+            }
+
+            fileOutputStream = new FileOutputStream(outputFile, true);
         } catch (FileNotFoundException e) {
             Log.e(e, "File could not be opened");
             return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE);
         }
 
-        fileName = LiteFileName.from(getLocalNameFrom(filePath));
-        return FilePersistenceResult.newInstance(Status.SUCCESS, filePath);
+        fileName = LiteFileName.from(getLocalNameFrom(absoluteFilePath));
+        return FilePersistenceResult.newInstance(Status.SUCCESS, absoluteFilePath);
+    }
+
+    private boolean ensureParentDirectoriesExistFor(File outputFile) {
+        boolean parentExists = outputFile.getParentFile().exists();
+        if (parentExists) {
+            return true;
+        }
+
+        Log.w(String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
+        return outputFile.getParentFile().mkdirs();
     }
 
     private String getLocalNameFrom(FilePath filePath) {
@@ -62,13 +83,13 @@ class InternalFilePersistence implements FilePersistence {
 
     @Override
     public boolean write(byte[] buffer, int offset, int numberOfBytesToWrite) {
-        if (file == null) {
+        if (fileOutputStream == null) {
             Log.e("Cannot write, you must create the file first");
             return false;
         }
 
         try {
-            file.write(buffer, offset, numberOfBytesToWrite);
+            fileOutputStream.write(buffer, offset, numberOfBytesToWrite);
             return true;
         } catch (IOException e) {
             Log.e(e, "Exception while writing to internal physical storage");
@@ -88,13 +109,13 @@ class InternalFilePersistence implements FilePersistence {
 
     @Override
     public long getCurrentSize() {
-        if (file == null) {
+        if (fileOutputStream == null) {
             Log.e("Cannot get the current file size, you must create the file first");
             return 0;
         }
 
         try {
-            return file.getChannel().size();
+            return fileOutputStream.getChannel().size();
         } catch (IOException e) {
             Log.e(e, "Error requesting file size, make sure you create one first");
             return 0;
@@ -123,12 +144,12 @@ class InternalFilePersistence implements FilePersistence {
 
     @Override
     public void close() {
-        if (file == null) {
+        if (fileOutputStream == null) {
             return;
         }
 
         try {
-            file.close();
+            fileOutputStream.close();
         } catch (IOException e) {
             Log.e(e, "Failed to close: " + fileName);
         }

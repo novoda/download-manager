@@ -31,7 +31,12 @@ class ExternalFilePersistence implements FilePersistence {
     }
 
     @Override
-    public FilePersistenceResult create(FileName fileName, FileSize fileSize) {
+    public FilePath basePath() {
+        return FilePathCreator.create(getExternalFileDirWithBiggerAvailableSpace().getAbsolutePath(), "/");
+    }
+
+    @Override
+    public FilePersistenceResult create(FilePath absoluteFilePath, FileSize fileSize) {
         if (fileSize.isTotalSizeUnknown()) {
             return FilePersistenceResult.newInstance(Status.ERROR_UNKNOWN_TOTAL_FILE_SIZE);
         }
@@ -47,28 +52,39 @@ class ExternalFilePersistence implements FilePersistence {
             return FilePersistenceResult.newInstance(Status.ERROR_INSUFFICIENT_SPACE);
         }
 
-        String absolutePath = new File(externalFileDir, fileName.name()).getAbsolutePath();
-        FilePath filePath = FilePathCreator.create(absolutePath);
-        return create(filePath);
+        return create(absoluteFilePath);
     }
 
-    @Override
-    public FilePersistenceResult create(FilePath filePath) {
-        if (filePath.isUnknown()) {
-            return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, filePath);
+    private FilePersistenceResult create(FilePath absoluteFilePath) {
+        if (absoluteFilePath.isUnknown()) {
+            return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, absoluteFilePath);
         }
-
-        String absolutePath = filePath.path();
 
         try {
-            file = new File(absolutePath);
-            fileOutputStream = new FileOutputStream(absolutePath, APPEND);
+            file = new File(absoluteFilePath.path());
+            boolean parentDirectoriesExist = ensureParentDirectoriesExistFor(file);
+
+            if (!parentDirectoriesExist) {
+                return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, absoluteFilePath);
+            }
+
+            fileOutputStream = new FileOutputStream(file, APPEND);
         } catch (FileNotFoundException e) {
             Log.e(e, "File could not be opened");
-            return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, filePath);
+            return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE);
         }
 
-        return FilePersistenceResult.newInstance(Status.SUCCESS, filePath);
+        return FilePersistenceResult.newInstance(Status.SUCCESS, absoluteFilePath);
+    }
+
+    private boolean ensureParentDirectoriesExistFor(File outputFile) {
+        boolean parentExists = outputFile.getParentFile().exists();
+        if (parentExists) {
+            return true;
+        }
+
+        Log.w(String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
+        return outputFile.getParentFile().mkdirs();
     }
 
     private boolean isExternalStorageWritable() {

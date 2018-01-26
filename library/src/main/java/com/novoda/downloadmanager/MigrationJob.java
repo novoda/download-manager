@@ -106,7 +106,7 @@ class MigrationJob implements Runnable {
             String url = fileMetadata.uri();
 
             FileName fileName = LiteFileName.from(batch, url);
-            FilePath filePath = FilePathCreator.create(fileName.name());
+            FilePath filePath = FilePathCreator.create("", fileName.name());
             String rawDownloadFileId = batch.getTitle() + System.nanoTime();
             DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(rawDownloadFileId);
             DownloadsFilePersisted persistedFile = new LiteDownloadsFilePersisted(
@@ -184,10 +184,9 @@ class MigrationJob implements Runnable {
     }
 
     private void migrateV1FilesToV2Location(InternalFilePersistence internalFilePersistence, Migration migration) {
-        Batch batch = migration.batch();
         for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
-            FileName newFileName = LiteFileName.from(batch, fileMetadata.uri());
-            internalFilePersistence.create(newFileName, fileMetadata.fileSize());
+            FilePath filePath = FilePathCreator.create(internalFilePersistence.basePath().path(), fileMetadata.uri());
+            internalFilePersistence.create(filePath, fileMetadata.fileSize());
             FileInputStream inputStream = null;
             try {
                 // open the v1 file
