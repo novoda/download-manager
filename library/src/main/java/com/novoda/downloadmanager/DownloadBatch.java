@@ -67,6 +67,10 @@ class DownloadBatch {
             long currentBytesDownloaded = getBytesDownloadedFrom(fileBytesDownloadedMap);
             downloadBatchStatus.update(currentBytesDownloaded, totalBatchSizeBytes);
 
+            if (currentBytesDownloaded == totalBatchSizeBytes && totalBatchSizeBytes != ZERO_BYTES) {
+                downloadBatchStatus.markAsDownloaded(downloadsBatchPersistence);
+            }
+
             if (downloadFileStatus.isMarkedAsError()) {
                 downloadBatchStatus.markAsError(downloadFileStatus.error(), downloadsBatchPersistence);
             }
@@ -83,10 +87,6 @@ class DownloadBatch {
 
         if (networkError()) {
             DownloadsNetworkRecoveryCreator.getInstance().scheduleRecovery();
-        }
-
-        if (status == DOWNLOADED) {
-            downloadBatchStatus.markAsDownloaded(downloadsBatchPersistence);
         }
 
         callbackThrottle.stopUpdates();

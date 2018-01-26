@@ -41,10 +41,6 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
         this.bytesDownloaded = currentBytesDownloaded;
         this.totalBatchSizeBytes = totalBatchSizeBytes;
         this.percentageDownloaded = getPercentageFrom(bytesDownloaded, totalBatchSizeBytes);
-
-        if (this.bytesDownloaded == this.totalBatchSizeBytes && this.totalBatchSizeBytes != ZERO_BYTES) {
-            this.status = Status.DOWNLOADED;
-        }
     }
 
     private int getPercentageFrom(long bytesDownloaded, long totalFileSizeBytes) {
