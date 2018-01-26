@@ -103,7 +103,7 @@ class MigrationJob implements Runnable {
         downloadsPersistence.persistBatch(persistedBatch);
 
         for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
-            String url = fileMetadata.uri();
+            String url = fileMetadata.originalNetworkAddress();
 
             FileName fileName = LiteFileName.from(batch, url);
             FilePath filePath = FilePathCreator.create("", fileName.name());
@@ -185,7 +185,7 @@ class MigrationJob implements Runnable {
 
     private void migrateV1FilesToV2Location(InternalFilePersistence internalFilePersistence, Migration migration) {
         for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
-            FilePath filePath = FilePathCreator.create(internalFilePersistence.basePath().path(), fileMetadata.uri());
+            FilePath filePath = FilePathCreator.create(internalFilePersistence.basePath().path(), fileMetadata.originalNetworkAddress());
             internalFilePersistence.create(filePath, fileMetadata.fileSize());
             FileInputStream inputStream = null;
             try {
