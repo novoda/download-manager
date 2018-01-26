@@ -35,26 +35,31 @@ class MigrationExtractor {
             String batchTitle = batchesCursor.getString(TITLE_COLUMN);
             long downloadedDateTimeInMillis = batchesCursor.getLong(MODIFIED_TIMESTAMP_COLUMN);
 
-            Cursor downloadsCursor = database.rawQuery(DOWNLOADS_QUERY, batchId);
             Batch.Builder newBatchBuilder = new Batch.Builder(DownloadBatchIdCreator.createFrom(batchId), batchTitle);
-            List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
-
-            while (downloadsCursor.moveToNext()) {
-                String originalNetworkAddress = downloadsCursor.getString(NETWORK_ADDRESS_COLUMN);
-                String originalFileLocation = downloadsCursor.getString(FILE_LOCATION_COLUMN);
-                newBatchBuilder.addFile(originalNetworkAddress);
-
-                long rawFileSize = downloadsCursor.getLong(FILE_SIZE_COLUMN);
-                FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
-                Migration.FileMetadata fileMetadata = new Migration.FileMetadata(originalFileLocation, fileSize, originalNetworkAddress);
-                fileMetadataList.add(fileMetadata);
-            }
-            downloadsCursor.close();
+            List<Migration.FileMetadata> fileMetadataList = extractFileMetadataFrom(batchId, newBatchBuilder);
 
             Batch batch = newBatchBuilder.build();
             migrations.add(new Migration(batch, fileMetadataList, downloadedDateTimeInMillis));
         }
         batchesCursor.close();
         return migrations;
+    }
+
+    private List<Migration.FileMetadata> extractFileMetadataFrom(String batchId, Batch.Builder newBatchBuilder) {
+        Cursor downloadsCursor = database.rawQuery(DOWNLOADS_QUERY, batchId);
+        List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
+
+        while (downloadsCursor.moveToNext()) {
+            String originalNetworkAddress = downloadsCursor.getString(NETWORK_ADDRESS_COLUMN);
+            String originalFileLocation = downloadsCursor.getString(FILE_LOCATION_COLUMN);
+            newBatchBuilder.addFile(originalNetworkAddress);
+
+            long rawFileSize = downloadsCursor.getLong(FILE_SIZE_COLUMN);
+            FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
+            Migration.FileMetadata fileMetadata = new Migration.FileMetadata(originalFileLocation, fileSize, originalNetworkAddress);
+            fileMetadataList.add(fileMetadata);
+        }
+        downloadsCursor.close();
+        return fileMetadataList;
     }
 }
