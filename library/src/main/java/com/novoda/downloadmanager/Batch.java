@@ -58,11 +58,36 @@ public final class Batch {
 
     @Override
     public String toString() {
+        new BatchBuilder()
+                .addFile("foo").withFileIdentifier().done()
+
         return "Batch{"
                 + "downloadBatchId=" + downloadBatchId
                 + ", title='" + title + '\''
                 + ", networkAddressAndFileNameById=" + networkAddressAndFileNameById
                 + '}';
+    }
+
+    public static class BatchBuilder {
+
+        private final DownloadBatchId downloadBatchId;
+        private final String title;
+        private FileBuilder fileBuilder;
+
+        public BatchBuilder(DownloadBatchId downloadBatchId, String title) {
+            this.downloadBatchId = downloadBatchId;
+            this.title = title;
+        }
+
+        public FileBuilder addFile(String fileUrl) {
+            return new FileBuilder(downloadBatchId, fileUrl);
+        }
+
+        Batch build() {
+            fileBuilder.
+            return new Batch();
+        }
+
     }
 
     public static class Builder {
