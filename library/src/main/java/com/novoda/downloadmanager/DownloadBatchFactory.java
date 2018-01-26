@@ -17,20 +17,24 @@ final class DownloadBatchFactory {
                                      DownloadsFilePersistence downloadsFilePersistence,
                                      CallbackThrottle callbackThrottle) {
         DownloadBatchTitle downloadBatchTitle = DownloadBatchTitleCreator.createFrom(batch);
-        Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFileNameById = batch.networkAddressAndFileNameById();
-        List<DownloadFile> downloadFiles = new ArrayList<>(networkAddressAndFileNameById.size());
+        Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFilePathById = batch.networkAddressAndFilePathById();
+        List<DownloadFile> downloadFiles = new ArrayList<>(networkAddressAndFilePathById.size());
         DownloadBatchId downloadBatchId = batch.getDownloadBatchId();
         long downloadedDateTimeInMillis = System.currentTimeMillis();
 
-        for (Map.Entry<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFilePathByDownloadId : networkAddressAndFileNameById.entrySet()) {
+        for (Map.Entry<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFilePathByDownloadId : networkAddressAndFilePathById.entrySet()) {
             NetworkAddressAndFilePath networkAddressAndFilePath = networkAddressAndFilePathByDownloadId.getValue();
 
             InternalFileSize fileSize = InternalFileSizeCreator.unknownFileSize();
 
             String fileNetworkAddress = networkAddressAndFilePath.networkAddress();
-            FileName fileNameFromNetworkAddress = FileNameExtractor.extractFrom(fileNetworkAddress);
-            FilePath filePath = extractFilePathFrom(networkAddressAndFilePath, fileNameFromNetworkAddress);
-            FileName fileName = filePath == null ? fileNameFromNetworkAddress : FileNameExtractor.extractFrom(filePath.path());
+
+            FilePersistenceCreator filePersistenceCreator = fileOperations.filePersistenceCreator();
+            FilePersistence filePersistence = filePersistenceCreator.create();
+
+            String basePath = filePersistence.basePath().path();
+            FilePath filePath = FilePathCreator.create(basePath, relativePathFrom(networkAddressAndFilePath));
+            FileName fileName = FileNameExtractor.extractFrom(filePath.path());
 
             DownloadFileId downloadFileId = networkAddressAndFilePathByDownloadId.getKey();
             InternalDownloadFileStatus downloadFileStatus = new LiteDownloadFileStatus(
@@ -41,11 +45,9 @@ final class DownloadBatchFactory {
                     filePath
             );
 
-            FilePersistenceCreator filePersistenceCreator = fileOperations.filePersistenceCreator();
             FileDownloader fileDownloader = fileOperations.fileDownloader();
             FileSizeRequester fileSizeRequester = fileOperations.fileSizeRequester();
 
-            FilePersistence filePersistence = filePersistenceCreator.create();
             DownloadFile downloadFile = new DownloadFile(
                     downloadBatchId,
                     downloadFileId,
@@ -78,8 +80,10 @@ final class DownloadBatchFactory {
         );
     }
 
-    private static FilePath extractFilePathFrom(NetworkAddressAndFilePath networkAddressAndFilePath, FileName fileNameFromNetworkAddress) {
-        return networkAddressAndFilePath.filePath() == FilePathCreator.unknownFilePath()
-                ? FilePathCreator.create(fileNameFromNetworkAddress.name()) : networkAddressAndFilePath.filePath();
+    private static String relativePathFrom(NetworkAddressAndFilePath networkAddressAndFilePath) {
+        String relativePath = networkAddressAndFilePath.relativePathToStoreDownload();
+        String fileNameFromNetworkAddress = FileNameExtractor.extractFrom(networkAddressAndFilePath.networkAddress()).name();
+        return relativePath == null || relativePath.isEmpty() ? fileNameFromNetworkAddress : relativePath;
     }
+
 }

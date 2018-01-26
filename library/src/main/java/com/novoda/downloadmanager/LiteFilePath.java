@@ -19,6 +19,25 @@ class LiteFilePath implements FilePath {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        LiteFilePath that = (LiteFilePath) o;
+
+        return path != null ? path.equals(that.path) : that.path == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return path != null ? path.hashCode() : 0;
+    }
+
+    @Override
     public String toString() {
         return "LiteFilePath{"
                 + "path='" + path + '\''

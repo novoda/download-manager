@@ -41,7 +41,12 @@ class FilePersistenceFixtures {
             }
 
             @Override
-            public FilePersistenceResult create(FilePath filePath, FileSize fileSize) {
+            public FilePath basePath() {
+                return FilePathCreator.create("foo/bar", "/");
+            }
+
+            @Override
+            public FilePersistenceResult create(FilePath absoluteFilePath, FileSize fileSize) {
                 return filePersistenceResult;
             }
 

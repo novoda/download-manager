@@ -2,6 +2,7 @@ package com.novoda.downloadmanager;
 
 public final class FilePathCreator {
 
+    private static final String EMPTY = "";
     private static final String UNKNOWN = "unknown";
     private static final FilePath UNKNOWN_FILEPATH = new LiteFilePath(UNKNOWN);
 
@@ -13,7 +14,14 @@ public final class FilePathCreator {
         return UNKNOWN_FILEPATH;
     }
 
-    public static FilePath create(String rawPath) {
-        return new LiteFilePath(rawPath);
+    public static FilePath create(String basePath, String rawPath) {
+        String relativePath = removeSubstring(rawPath, basePath);
+        String absolutePath = basePath + relativePath;
+        return new LiteFilePath(absolutePath);
     }
+
+    private static String removeSubstring(String source, String subString) {
+        return source.replaceAll(subString, EMPTY);
+    }
+
 }

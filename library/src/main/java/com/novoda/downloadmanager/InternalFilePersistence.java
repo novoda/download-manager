@@ -26,7 +26,12 @@ class InternalFilePersistence implements FilePersistence {
     }
 
     @Override
-    public FilePersistenceResult create(FilePath filePath, FileSize fileSize) {
+    public FilePath basePath() {
+        return FilePathCreator.create(context.getFilesDir().getAbsolutePath(), "/");
+    }
+
+    @Override
+    public FilePersistenceResult create(FilePath absoluteFilePath, FileSize fileSize) {
         if (fileSize.isTotalSizeUnknown()) {
             return FilePersistenceResult.newInstance(Status.ERROR_UNKNOWN_TOTAL_FILE_SIZE);
         }
@@ -36,10 +41,6 @@ class InternalFilePersistence implements FilePersistence {
             return FilePersistenceResult.newInstance(Status.ERROR_INSUFFICIENT_SPACE);
         }
 
-        File internalFileDir = context.getFilesDir();
-
-        String absolutePath = new File(internalFileDir, filePath.path()).getAbsolutePath();
-        FilePath absoluteFilePath = FilePathCreator.create(absolutePath);
         return create(absoluteFilePath);
     }
 
@@ -50,10 +51,10 @@ class InternalFilePersistence implements FilePersistence {
 
         try {
             File outputFile = new File(absoluteFilePath.path());
-            boolean parentDirectoriesCreated = createParentDirectoriesIfDoesNotExist(outputFile);
+            boolean parentDirectoriesExist = ensureParentDirectoriesExistFor(outputFile);
 
-            if (!parentDirectoriesCreated) {
-                return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, FilePathCreator.create(outputFile.getParentFile().getAbsolutePath()));
+            if (!parentDirectoriesExist) {
+                return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, absoluteFilePath);
             }
 
             fileOutputStream = new FileOutputStream(outputFile, true);
@@ -66,7 +67,7 @@ class InternalFilePersistence implements FilePersistence {
         return FilePersistenceResult.newInstance(Status.SUCCESS, absoluteFilePath);
     }
 
-    private boolean createParentDirectoriesIfDoesNotExist(File outputFile) {
+    private boolean ensureParentDirectoriesExistFor(File outputFile) {
         boolean parentExists = outputFile.getParentFile().exists();
         if (parentExists) {
             return true;

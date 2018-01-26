@@ -20,7 +20,6 @@ import com.novoda.downloadmanager.DownloadFileId;
 import com.novoda.downloadmanager.DownloadFileIdCreator;
 import com.novoda.downloadmanager.DownloadMigrator;
 import com.novoda.downloadmanager.DownloadMigratorBuilder;
-import com.novoda.downloadmanager.FilePathCreator;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.LocalFilesDirectory;
 import com.novoda.downloadmanager.LocalFilesDirectoryFactory;
@@ -124,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final View.OnClickListener downloadBatchesOnClick = v -> {
         Batch batch = new Batch.Builder(BATCH_ID_1, "Made in chelsea")
-                .addFile(FILE_ID_1, FIVE_MB_FILE_URL, FilePathCreator.create("/foo/bar/10mb.zip"))
+                .addFile(FILE_ID_1, FIVE_MB_FILE_URL, "foo/bar/5mb.zip")
                 .addFile(TEN_MB_FILE_URL)
                 .build();
         liteDownloadManagerCommands.download(batch);

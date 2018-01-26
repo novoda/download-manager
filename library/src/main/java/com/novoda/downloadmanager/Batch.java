@@ -7,12 +7,12 @@ public final class Batch {
 
     private final DownloadBatchId downloadBatchId;
     private final String title;
-    private final Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFileNameById;
+    private final Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFilePathById;
 
-    Batch(DownloadBatchId downloadBatchId, String title, Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFileNameById) {
+    Batch(DownloadBatchId downloadBatchId, String title, Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFilePathById) {
         this.downloadBatchId = downloadBatchId;
         this.title = title;
-        this.networkAddressAndFileNameById = networkAddressAndFileNameById;
+        this.networkAddressAndFilePathById = networkAddressAndFilePathById;
     }
 
     DownloadBatchId getDownloadBatchId() {
@@ -23,8 +23,8 @@ public final class Batch {
         return title;
     }
 
-    Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFileNameById() {
-        return new HashMap<>(networkAddressAndFileNameById);
+    Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFilePathById() {
+        return new HashMap<>(networkAddressAndFilePathById);
     }
 
     @Override
@@ -44,15 +44,15 @@ public final class Batch {
         if (title != null ? !title.equals(batch.title) : batch.title != null) {
             return false;
         }
-        return networkAddressAndFileNameById != null
-                ? networkAddressAndFileNameById.equals(batch.networkAddressAndFileNameById) : batch.networkAddressAndFileNameById == null;
+        return networkAddressAndFilePathById != null
+                ? networkAddressAndFilePathById.equals(batch.networkAddressAndFilePathById) : batch.networkAddressAndFilePathById == null;
     }
 
     @Override
     public int hashCode() {
         int result = downloadBatchId != null ? downloadBatchId.hashCode() : 0;
         result = 31 * result + (title != null ? title.hashCode() : 0);
-        result = 31 * result + (networkAddressAndFileNameById != null ? networkAddressAndFileNameById.hashCode() : 0);
+        result = 31 * result + (networkAddressAndFilePathById != null ? networkAddressAndFilePathById.hashCode() : 0);
         return result;
     }
 
@@ -64,7 +64,7 @@ public final class Batch {
         return "Batch{"
                 + "downloadBatchId=" + downloadBatchId
                 + ", title='" + title + '\''
-                + ", networkAddressAndFileNameById=" + networkAddressAndFileNameById
+                + ", networkAddressAndFilePathById=" + networkAddressAndFilePathById
                 + '}';
     }
 
@@ -94,7 +94,7 @@ public final class Batch {
 
         private final DownloadBatchId downloadBatchId;
         private final String title;
-        private final Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFileNameById = new HashMap<>();
+        private final Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFilePathById = new HashMap<>();
 
         public Builder(DownloadBatchId downloadBatchId, String title) {
             this.downloadBatchId = downloadBatchId;
@@ -104,25 +104,21 @@ public final class Batch {
         public Builder addFile(String fileUrl) {
             String rawId = downloadBatchId.rawId() + fileUrl;
             DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(rawId);
-            NetworkAddressAndFilePath networkAddressAndFilePath = new NetworkAddressAndFilePath(fileUrl, FilePathCreator.unknownFilePath());
-            networkAddressAndFileNameById.put(downloadFileId, networkAddressAndFilePath);
-            return this;
+            return addFile(downloadFileId, fileUrl);
         }
 
         public Builder addFile(DownloadFileId downloadFileId, String fileUrl) {
-            NetworkAddressAndFilePath networkAddressAndFilePath = new NetworkAddressAndFilePath(fileUrl, FilePathCreator.unknownFilePath());
-            networkAddressAndFileNameById.put(downloadFileId, networkAddressAndFilePath);
-            return this;
+            return addFile(downloadFileId, fileUrl, "");
         }
 
-        public Builder addFile(DownloadFileId downloadFileId, String fileUrl, FilePath filePath) {
-            NetworkAddressAndFilePath networkAddressAndFilePath = new NetworkAddressAndFilePath(fileUrl, filePath);
-            networkAddressAndFileNameById.put(downloadFileId, networkAddressAndFilePath);
+        public Builder addFile(DownloadFileId downloadFileId, String fileUrl, String relativePathToStoreDownload) {
+            NetworkAddressAndFilePath networkAddressAndFilePath = new NetworkAddressAndFilePath(fileUrl, relativePathToStoreDownload);
+            networkAddressAndFilePathById.put(downloadFileId, networkAddressAndFilePath);
             return this;
         }
 
         public Batch build() {
-            return new Batch(downloadBatchId, title, networkAddressAndFileNameById);
+            return new Batch(downloadBatchId, title, networkAddressAndFilePathById);
         }
     }
 
