@@ -42,7 +42,7 @@ class FilePersistenceFixtures {
 
             @Override
             public FilePath basePath() {
-                return FilePathCreator.create("foo/bar");
+                return FilePathCreator.create("foo/bar", "/");
             }
 
             @Override
