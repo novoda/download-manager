@@ -15,7 +15,8 @@ public class FilePathExtractorTest {
 
         FilePathExtractor.DownloadFilePath filePath = FilePathExtractor.extractFrom(BASE_PATH, assetUrl);
 
-        assertThat(filePath).isEqualTo(new FilePathExtractor.DownloadFilePath(BASE_PATH, assetUrl, FILE_NAME));
+        String expectedAbsolutePath = "/data/data/com.novoda.downloadmanager.demo.simple/files/10MB.zip";
+        assertThat(filePath).isEqualTo(new FilePathExtractor.DownloadFilePath(expectedAbsolutePath, FILE_NAME));
     }
 
     @Test
@@ -24,16 +25,8 @@ public class FilePathExtractorTest {
 
         FilePathExtractor.DownloadFilePath filePath = FilePathExtractor.extractFrom(BASE_PATH, assetUrl);
 
-        assertThat(filePath).isEqualTo(new FilePathExtractor.DownloadFilePath(BASE_PATH, assetUrl, FILE_NAME));
-    }
-
-    @Test
-    public void returnsBasePathPlusRelativePath_whenRequestingAbsolutePath() {
-        String assetUrl = "foo/bar/10MB.zip";
-
-        FilePathExtractor.DownloadFilePath filePath = FilePathExtractor.extractFrom(BASE_PATH, assetUrl);
-
-        assertThat(filePath.absolutePath()).isEqualTo(BASE_PATH + "foo/bar/10MB.zip");
+        String expectedAbsolutePath = "/data/data/com.novoda.downloadmanager.demo.simple/files/foo/bar/10MB.zip";
+        assertThat(filePath).isEqualTo(new FilePathExtractor.DownloadFilePath(expectedAbsolutePath, FILE_NAME));
     }
 
     @Test
@@ -42,7 +35,8 @@ public class FilePathExtractorTest {
 
         FilePathExtractor.DownloadFilePath filePath = FilePathExtractor.extractFrom(BASE_PATH, assetUrl);
 
-        assertThat(filePath.absolutePath()).isEqualTo(BASE_PATH + "foo/bar/10MB.zip");
+        String expectedAbsolutePath = "/data/data/com.novoda.downloadmanager.demo.simple/files/foo/bar/10MB.zip";
+        assertThat(filePath).isEqualTo(new FilePathExtractor.DownloadFilePath(expectedAbsolutePath, FILE_NAME));
     }
 
 }

@@ -7,13 +7,14 @@ final class FilePathExtractor {
 
     static DownloadFilePath extractFrom(String basePath, String filePathToExtractFrom) {
         String relativePath = removeSubstring(filePathToExtractFrom, basePath);
-        String fileName = getFileName(filePathToExtractFrom);
-        return new DownloadFilePath(basePath, relativePath, LiteFileName.from(fileName));
+        FileName fileName = getFileName(filePathToExtractFrom);
+        String absolutePath = basePath + relativePath;
+        return new DownloadFilePath(absolutePath, fileName);
     }
 
-    private static String getFileName(String assetUri) {
+    private static FileName getFileName(String assetUri) {
         String[] subPaths = assetUri.split(PATH_SEPARATOR);
-        return subPaths.length == 0 ? assetUri : subPaths[subPaths.length - 1];
+        return LiteFileName.from(subPaths.length == 0 ? assetUri : subPaths[subPaths.length - 1]);
     }
 
     private static String removeSubstring(String source, String subString) {
@@ -22,22 +23,12 @@ final class FilePathExtractor {
 
     static class DownloadFilePath {
 
-        private final String basePath;
-        private final String relativePath;
+        private final String absolutePath;
         private final FileName fileName;
 
-        DownloadFilePath(String basePath, String relativePath, FileName fileName) {
-            this.basePath = basePath;
-            this.relativePath = relativePath;
+        DownloadFilePath(String absolutePath, FileName fileName) {
+            this.absolutePath = absolutePath;
             this.fileName = fileName;
-        }
-
-        public String basePath() {
-            return basePath;
-        }
-
-        public String relativePath() {
-            return relativePath;
         }
 
         public FileName fileName() {
@@ -45,7 +36,7 @@ final class FilePathExtractor {
         }
 
         public String absolutePath() {
-            return basePath + relativePath;
+            return absolutePath;
         }
 
         @Override
@@ -59,10 +50,7 @@ final class FilePathExtractor {
 
             DownloadFilePath that = (DownloadFilePath) o;
 
-            if (basePath != null ? !basePath.equals(that.basePath) : that.basePath != null) {
-                return false;
-            }
-            if (relativePath != null ? !relativePath.equals(that.relativePath) : that.relativePath != null) {
+            if (absolutePath != null ? !absolutePath.equals(that.absolutePath) : that.absolutePath != null) {
                 return false;
             }
             return fileName != null ? fileName.equals(that.fileName) : that.fileName == null;
@@ -70,8 +58,7 @@ final class FilePathExtractor {
 
         @Override
         public int hashCode() {
-            int result = basePath != null ? basePath.hashCode() : 0;
-            result = 31 * result + (relativePath != null ? relativePath.hashCode() : 0);
+            int result = absolutePath != null ? absolutePath.hashCode() : 0;
             result = 31 * result + (fileName != null ? fileName.hashCode() : 0);
             return result;
         }
@@ -79,8 +66,7 @@ final class FilePathExtractor {
         @Override
         public String toString() {
             return "DownloadFilePath{" +
-                    "basePath='" + basePath + '\'' +
-                    ", relativePath='" + relativePath + '\'' +
+                    "absolutePath='" + absolutePath + '\'' +
                     ", fileName=" + fileName +
                     '}';
         }
