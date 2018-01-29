@@ -67,7 +67,7 @@ class MigrationExtractor {
             while (downloadsCursor.moveToNext()) {
                 String originalNetworkAddress = downloadsCursor.getString(NETWORK_ADDRESS_COLUMN);
                 String originalFileLocation = downloadsCursor.getString(FILE_LOCATION_COLUMN);
-                newBatchBuilder.addFile(originalNetworkAddress);
+                newBatchBuilder.addFile(originalNetworkAddress).apply();
 
                 long rawFileSize = downloadsCursor.getLong(FILE_SIZE_COLUMN);
                 FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
