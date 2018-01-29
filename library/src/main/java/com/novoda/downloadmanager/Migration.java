@@ -74,14 +74,15 @@ class Migration {
     }
 
     static class FileMetadata {
+
         private final String originalFileLocation;
         private final FileSize fileSize;
-        private final String uri;
+        private final String originalNetworkAddress;
 
-        FileMetadata(String originalFileLocation, FileSize fileSize, String uri) {
+        FileMetadata(String originalFileLocation, FileSize fileSize, String originalNetworkAddress) {
             this.originalFileLocation = originalFileLocation;
             this.fileSize = fileSize;
-            this.uri = uri;
+            this.originalNetworkAddress = originalNetworkAddress;
         }
 
         String originalFileLocation() {
@@ -92,8 +93,8 @@ class Migration {
             return fileSize;
         }
 
-        String uri() {
-            return uri;
+        String originalNetworkAddress() {
+            return originalNetworkAddress;
         }
 
         @Override
@@ -113,14 +114,14 @@ class Migration {
             if (fileSize != null ? !fileSize.equals(that.fileSize) : that.fileSize != null) {
                 return false;
             }
-            return uri != null ? uri.equals(that.uri) : that.uri == null;
+            return originalNetworkAddress != null ? originalNetworkAddress.equals(that.originalNetworkAddress) : that.originalNetworkAddress == null;
         }
 
         @Override
         public int hashCode() {
             int result = originalFileLocation != null ? originalFileLocation.hashCode() : 0;
             result = 31 * result + (fileSize != null ? fileSize.hashCode() : 0);
-            result = 31 * result + (uri != null ? uri.hashCode() : 0);
+            result = 31 * result + (originalNetworkAddress != null ? originalNetworkAddress.hashCode() : 0);
             return result;
         }
 
@@ -128,7 +129,7 @@ class Migration {
         public String toString() {
             return "FileMetadata{" + "originalFileLocation='" + originalFileLocation + '\''
                     + ", fileSize=" + fileSize
-                    + ", uri='" + uri + '\''
+                    + ", originalNetworkAddress='" + originalNetworkAddress + '\''
                     + '}';
         }
     }
