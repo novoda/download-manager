@@ -147,7 +147,8 @@ class MigrationJob implements Runnable {
     private void migrateCompleteDownloads(InternalMigrationStatus migrationStatus,
                                           SqlDatabaseWrapper database,
                                           MigrationExtractor migrationExtractor,
-                                          DownloadsPersistence downloadsPersistence, String basePath) {
+                                          DownloadsPersistence downloadsPersistence,
+                                          String basePath) {
         List<Migration> migrations = migrationExtractor.extractMigrations();
         Log.d(TAG, "migrations are all EXTRACTED, time is " + System.nanoTime());
 
