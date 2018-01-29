@@ -29,7 +29,7 @@ public class BatchBuilderTest {
     @Test
     public void returnsBatch_whenOptionalParametersAreSupplied() {
         Batch batch = new Batch.Builder(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
-                .addFile("net_address").withFileName(FILE_NAME).withRelativePath(RELATIVE_PATH).apply()
+                .addFile("net_address").withDownloadFileId(DOWNLOAD_FILE_ID).withFileName(FILE_NAME).withRelativePath(RELATIVE_PATH).apply()
                 .build();
 
         File expectedFile = new File("net_address", Optional.of(DOWNLOAD_FILE_ID), Optional.of(FILE_NAME), Optional.of(RELATIVE_PATH));
