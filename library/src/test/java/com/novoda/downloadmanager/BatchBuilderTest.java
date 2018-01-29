@@ -16,7 +16,7 @@ public class BatchBuilderTest {
 
     @Test
     public void returnsBatch_whenOptionalParametersAreNotSupplied() {
-        Batch batch = new Batch.Builder(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
+        Batch batch = Batch.LiteBatchBuilder.newBatch(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
                 .addFile("net_address").apply()
                 .build();
 
@@ -28,7 +28,7 @@ public class BatchBuilderTest {
 
     @Test
     public void returnsBatch_whenOptionalParametersAreSupplied() {
-        Batch batch = new Batch.Builder(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
+        Batch batch = Batch.LiteBatchBuilder.newBatch(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
                 .addFile("net_address").withDownloadFileId(DOWNLOAD_FILE_ID).withFileName(FILE_NAME).withRelativePath(RELATIVE_PATH).apply()
                 .build();
 

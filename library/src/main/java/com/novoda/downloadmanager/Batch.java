@@ -9,8 +9,11 @@ public class Batch {
     private final String title;
     private final List<File> files;
 
-    Batch(DownloadBatchId downloadBatchId, String title, List<File> files) {
+    public static Builder with(DownloadBatchId downloadBatchId, String title) {
+        return new LiteBatchBuilder(downloadBatchId, title, new ArrayList<>());
+    }
 
+    Batch(DownloadBatchId downloadBatchId, String title, List<File> files) {
         this.downloadBatchId = downloadBatchId;
         this.title = title;
         this.files = files;
@@ -65,30 +68,43 @@ public class Batch {
                 + '}';
     }
 
-    public static class Builder {
+    public interface Builder {
+        File.Builder addFile(String networkAddress);
+
+        Batch build();
+    }
+
+    interface InternalBatchBuilder extends Builder {
+        InternalBatchBuilder withFile(File file);
+    }
+
+    static class LiteBatchBuilder implements InternalBatchBuilder {
 
         private final DownloadBatchId downloadBatchId;
         private final String title;
-        private List<File> files;
+        private final List<File> files;
 
-        public Builder(DownloadBatchId downloadBatchId, String title) {
+        private LiteBatchBuilder(DownloadBatchId downloadBatchId, String title, List<File> files) {
             this.downloadBatchId = downloadBatchId;
             this.title = title;
-            files = new ArrayList<>();
+            this.files = files;
         }
 
-        Builder withFile(File file) {
+        @Override
+        public LiteBatchBuilder withFile(File file) {
             files.add(file);
             return this;
         }
 
         private File.Builder fileBuilder;
 
+        @Override
         public File.Builder addFile(String networkAddress) {
             this.fileBuilder = File.newBuilder(networkAddress).withParentBuilder(this);
             return this.fileBuilder;
         }
 
+        @Override
         public Batch build() {
             return new Batch(downloadBatchId, title, files);
         }

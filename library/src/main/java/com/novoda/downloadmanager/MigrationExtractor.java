@@ -41,7 +41,7 @@ class MigrationExtractor {
                 String batchTitle = batchesCursor.getString(TITLE_COLUMN);
                 long downloadedDateTimeInMillis = batchesCursor.getLong(MODIFIED_TIMESTAMP_COLUMN);
 
-                Batch.Builder newBatchBuilder = new Batch.Builder(DownloadBatchIdCreator.createFrom(batchId), batchTitle);
+                Batch.Builder newBatchBuilder = Batch.with(DownloadBatchIdCreator.createFrom(batchId), batchTitle);
                 List<Migration.FileMetadata> fileMetadataList = extractFileMetadataFrom(batchId, newBatchBuilder);
 
                 Batch batch = newBatchBuilder.build();

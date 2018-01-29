@@ -14,7 +14,7 @@ public class File {
         this.relativePath = relativePath;
     }
 
-    static File.Builder newBuilder(String networkAddress) {
+    static Builder newBuilder(String networkAddress) {
         return new Builder(networkAddress);
     }
 
@@ -83,13 +83,13 @@ public class File {
         private Optional<FileName> fileName = Optional.absent();
         private Optional<String> relativePath = Optional.absent();
 
-        private Batch.Builder parentBuilder;
+        private Batch.InternalBatchBuilder parentBuilder;
 
         public Builder(String networkAddress) {
             this.networkAddress = networkAddress;
         }
 
-        Builder withParentBuilder(Batch.Builder parentBuilder) {
+        Builder withParentBuilder(Batch.InternalBatchBuilder parentBuilder) {
             this.parentBuilder = parentBuilder;
             return this;
         }

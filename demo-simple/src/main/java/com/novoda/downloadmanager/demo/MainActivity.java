@@ -121,13 +121,13 @@ public class MainActivity extends AppCompatActivity {
     private final View.OnClickListener startMigrationOnClick = v -> downloadMigrator.startMigration("downloads.db", migrationCallback);
 
     private final View.OnClickListener downloadBatchesOnClick = v -> {
-        Batch batch = new Batch.Builder(BATCH_ID_1, "Made in chelsea")
+        Batch batch = Batch.with(BATCH_ID_1, "Made in chelsea")
                 .addFile(FIVE_MB_FILE_URL).withDownloadFileId(FILE_ID_1).withRelativePath("foo/bar/5mb.zip").apply()
                 .addFile(TEN_MB_FILE_URL).apply()
                 .build();
         liteDownloadManagerCommands.download(batch);
 
-        batch = new Batch.Builder(BATCH_ID_2, "Hollyoaks")
+        batch = Batch.with(BATCH_ID_2, "Hollyoaks")
                 .addFile(TEN_MB_FILE_URL).apply()
                 .addFile(TWENTY_FILE_URL).apply()
                 .build();
