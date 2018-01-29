@@ -88,8 +88,8 @@ class MigrationJob implements Runnable {
     private void migrateV1DataToV2Database(DownloadsPersistence downloadsPersistence, Migration migration, String basePath) {
         Batch batch = migration.batch();
 
-        DownloadBatchId downloadBatchId = batch.getDownloadBatchId();
-        DownloadBatchTitle downloadBatchTitle = new LiteDownloadBatchTitle(batch.getTitle());
+        DownloadBatchId downloadBatchId = batch.downloadBatchId();
+        DownloadBatchTitle downloadBatchTitle = new LiteDownloadBatchTitle(batch.title());
         Status downloadBatchStatus = migration.hasDownloadedBatch() ? Status.DOWNLOADED : Status.QUEUED;
         long downloadedDateTimeInMillis = migration.downloadedDateTimeInMillis();
 
@@ -110,7 +110,7 @@ class MigrationJob implements Runnable {
             }
             FileName fileName = LiteFileName.from(batch, url);
 
-            String rawDownloadFileId = batch.getTitle() + System.nanoTime();
+            String rawDownloadFileId = batch.title() + System.nanoTime();
             DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(rawDownloadFileId);
             DownloadsFilePersisted persistedFile = new LiteDownloadsFilePersisted(
                     downloadBatchId,
@@ -128,8 +128,8 @@ class MigrationJob implements Runnable {
     // TODO: See https://github.com/novoda/download-manager/issues/270
     private void deleteFrom(SqlDatabaseWrapper database, Migration migration) {
         Batch batch = migration.batch();
-        Log.d(TAG, "about to delete the batch: " + batch.getDownloadBatchId().rawId() + ", time is " + System.nanoTime());
-        database.delete(TABLE_BATCHES, WHERE_CLAUSE_ID, batch.getDownloadBatchId().rawId());
+        Log.d(TAG, "about to delete the batch: " + batch.downloadBatchId().rawId() + ", time is " + System.nanoTime());
+        database.delete(TABLE_BATCHES, WHERE_CLAUSE_ID, batch.downloadBatchId().rawId());
         for (Migration.FileMetadata metadata : migration.getFileMetadata()) {
             if (hasValidFileLocation(metadata)) {
                 File file = new File(metadata.originalFileLocation());

@@ -7,7 +7,7 @@ final class DownloadBatchTitleCreator {
     }
 
     static DownloadBatchTitle createFrom(Batch batch) {
-        return new LiteDownloadBatchTitle(batch.getTitle());
+        return new LiteDownloadBatchTitle(batch.title());
     }
 
     static DownloadBatchTitle createFrom(String title) {

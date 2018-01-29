@@ -41,7 +41,7 @@ class MigrationExtractor {
                 String batchTitle = batchesCursor.getString(TITLE_COLUMN);
                 long downloadedDateTimeInMillis = batchesCursor.getLong(MODIFIED_TIMESTAMP_COLUMN);
 
-                Batch.Builder newBatchBuilder = new Batch.Builder(DownloadBatchIdCreator.createFrom(batchId), batchTitle);
+                Batch.Builder newBatchBuilder = Batch.with(DownloadBatchIdCreator.createFrom(batchId), batchTitle);
                 List<Migration.FileMetadata> fileMetadataList = extractFileMetadataFrom(batchId, newBatchBuilder);
 
                 Batch batch = newBatchBuilder.build();
@@ -67,7 +67,7 @@ class MigrationExtractor {
             while (downloadsCursor.moveToNext()) {
                 String originalNetworkAddress = downloadsCursor.getString(NETWORK_ADDRESS_COLUMN);
                 String originalFileLocation = downloadsCursor.getString(FILE_LOCATION_COLUMN);
-                newBatchBuilder.addFile(originalNetworkAddress);
+                newBatchBuilder.addFile(originalNetworkAddress).apply();
 
                 long rawFileSize = downloadsCursor.getLong(FILE_SIZE_COLUMN);
                 FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
