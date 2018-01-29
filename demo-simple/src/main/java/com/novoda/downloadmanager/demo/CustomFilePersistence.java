@@ -41,8 +41,8 @@ public class CustomFilePersistence implements FilePersistence {
     }
 
     @Override
-    public void delete() {
-        Log.v("delete");
+    public void delete(FilePath absoluteFilePath) {
+        Log.v("delete: " + absoluteFilePath);
     }
 
     @Override

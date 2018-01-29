@@ -56,7 +56,7 @@ class FilePersistenceFixtures {
             }
 
             @Override
-            public void delete() {
+            public void delete(FilePath absoluteFilePath) {
                 // do nothing.
             }
 

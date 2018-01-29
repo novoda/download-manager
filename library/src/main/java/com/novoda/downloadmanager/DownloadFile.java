@@ -100,7 +100,7 @@ class DownloadFile {
             public void onDownloadFinished() {
                 filePersistence.close();
                 if (downloadFileStatus.isMarkedForDeletion()) {
-                    filePersistence.delete();
+                    filePersistence.delete(filePath);
                 }
             }
         });
@@ -166,7 +166,7 @@ class DownloadFile {
             downloadFileStatus.markForDeletion();
             fileDownloader.stopDownloading();
         } else {
-            filePersistence.delete();
+            filePersistence.delete(filePath);
         }
     }
 

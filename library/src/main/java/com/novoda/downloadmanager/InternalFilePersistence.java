@@ -17,8 +17,6 @@ class InternalFilePersistence implements FilePersistence {
 
     @Nullable
     private FileOutputStream fileOutputStream;
-    @Nullable
-    private FileName fileName;
 
     @Override
     public void initialiseWith(Context context) {
@@ -63,7 +61,6 @@ class InternalFilePersistence implements FilePersistence {
             return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE);
         }
 
-        fileName = LiteFileName.from(getLocalNameFrom(absoluteFilePath));
         return FilePersistenceResult.newInstance(Status.SUCCESS, absoluteFilePath);
     }
 
@@ -75,10 +72,6 @@ class InternalFilePersistence implements FilePersistence {
 
         Log.w(String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
         return outputFile.getParentFile().mkdirs();
-    }
-
-    private String getLocalNameFrom(FilePath filePath) {
-        return new File(filePath.path()).getName();
     }
 
     @Override
@@ -98,13 +91,17 @@ class InternalFilePersistence implements FilePersistence {
     }
 
     @Override
-    public void delete() {
-        if (fileName == null) {
+    public void delete(FilePath absoluteFilePath) {
+        if (absoluteFilePath == null || absoluteFilePath.isUnknown()) {
             Log.w("Cannot delete, you must create the file first");
             return;
         }
 
-        context.deleteFile(fileName.name());
+        File fileToDelete = new File(absoluteFilePath.path());
+        boolean deleted = fileToDelete.delete();
+
+        String message = String.format("File or Directory: %s deleted: %s", absoluteFilePath.path(), deleted);
+        Log.d(getClass().getSimpleName(), message);
     }
 
     @Override
@@ -124,19 +121,20 @@ class InternalFilePersistence implements FilePersistence {
 
     @Override
     public long getCurrentSize(FilePath filePath) {
-        FileOutputStream file = null;
+        File file = new File(filePath.path());
+        FileOutputStream fileOutputStream = null;
         try {
-            file = context.openFileOutput(getLocalNameFrom(filePath), Context.MODE_APPEND);
-            return file.getChannel().size();
+            fileOutputStream = new FileOutputStream(file);
+            return fileOutputStream.getChannel().size();
         } catch (IOException e) {
-            Log.e(e, "Error requesting file size for " + fileName);
+            Log.e(e, "Error requesting file size for " + filePath.path());
             return 0;
         } finally {
-            if (file != null) {
+            if (fileOutputStream != null) {
                 try {
-                    file.close();
+                    fileOutputStream.close();
                 } catch (IOException e) {
-                    Log.e(e, "Error requesting file size for " + filePath);
+                    Log.e(e, "Error requesting file size for " + filePath.path());
                 }
             }
         }
@@ -151,7 +149,7 @@ class InternalFilePersistence implements FilePersistence {
         try {
             fileOutputStream.close();
         } catch (IOException e) {
-            Log.e(e, "Failed to close: " + fileName);
+            Log.e(e, "Failed to close.");
         }
     }
 

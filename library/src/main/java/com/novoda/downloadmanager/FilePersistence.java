@@ -12,7 +12,7 @@ public interface FilePersistence {
 
     boolean write(byte[] buffer, int offset, int numberOfBytesToWrite);
 
-    void delete();
+    void delete(FilePath absoluteFilePath);
 
     long getCurrentSize();
 
