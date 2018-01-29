@@ -22,8 +22,6 @@ class ExternalFilePersistence implements FilePersistence {
 
     @Nullable
     private FileOutputStream fileOutputStream;
-    @Nullable
-    private File file;
 
     @Override
     public void initialiseWith(Context context) {
@@ -61,7 +59,7 @@ class ExternalFilePersistence implements FilePersistence {
         }
 
         try {
-            file = new File(absoluteFilePath.path());
+            File file = new File(absoluteFilePath.path());
             boolean parentDirectoriesExist = ensureParentDirectoriesExistFor(file);
 
             if (!parentDirectoriesExist) {
@@ -129,15 +127,16 @@ class ExternalFilePersistence implements FilePersistence {
     }
 
     @Override
-    public void delete() {
-        if (file == null) {
-            Log.w("Cannot delete, you must create the file first");
+    public void delete(FilePath absoluteFilePath) {
+        if (absoluteFilePath == null || absoluteFilePath.isUnknown()) {
+            Log.w("Cannot delete, you must create the file first.");
             return;
         }
 
-        boolean deleted = file.delete();
+        File fileToDelete = new File(absoluteFilePath.path());
+        boolean deleted = fileToDelete.delete();
 
-        String message = String.format("File or Directory: %s deleted: %s", file.getPath(), deleted);
+        String message = String.format("File or Directory: %s deleted: %s", absoluteFilePath.path(), deleted);
         Log.d(getClass().getSimpleName(), message);
     }
 
