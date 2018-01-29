@@ -111,19 +111,19 @@ public class File {
 
         @Override
         public Builder withDownloadFileId(DownloadFileId downloadFileId) {
-            this.downloadFileId = Optional.of(downloadFileId);
+            this.downloadFileId = Optional.fromNullable(downloadFileId);
             return this;
         }
 
         @Override
         public Builder withFileName(FileName fileName) {
-            this.fileName = Optional.of(fileName);
+            this.fileName = Optional.fromNullable(fileName);
             return this;
         }
 
         @Override
         public Builder withRelativePath(String relativePath) {
-            this.relativePath = Optional.of(relativePath);
+            this.relativePath = Optional.fromNullable(relativePath);
             return this;
         }
 

@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-public final class Optional<T> {
+final class Optional<T> {
 
     @SuppressWarnings("unchecked")  // Type erasure has us covered here, we don't care
     private static final Optional ABSENT = new Optional(null);
@@ -8,18 +8,18 @@ public final class Optional<T> {
     private final T data;
 
     @SuppressWarnings("unchecked")  // Type erasure has us covered here, we don't care
-    public static <T> Optional<T> absent() {
+    static <T> Optional<T> absent() {
         return ABSENT;
     }
 
-    public static <T> Optional<T> fromNullable(T data) {
+    static <T> Optional<T> fromNullable(T data) {
         if (data == null) {
             return absent();
         }
         return new Optional<>(data);
     }
 
-    public static <T> Optional<T> of(T data) {
+    static <T> Optional<T> of(T data) {
         if (data == null) {
             throw new IllegalArgumentException("Data cannot be null. Use Optional.fromNullable(maybeNullData).");
         }
@@ -30,34 +30,34 @@ public final class Optional<T> {
         this.data = data;
     }
 
-    public boolean isPresent() {
+    boolean isPresent() {
         return data != null;
     }
 
-    public boolean isAbsent() {
+    boolean isAbsent() {
         return !isPresent();
     }
 
-    public T get() {
+    T get() {
         if (!isPresent()) {
             throw new IllegalStateException("You must check if data is present before using get()");
         }
         return data;
     }
 
-    public T or(T elseCase) {
+    T or(T elseCase) {
         return isPresent() ? get() : elseCase;
     }
 
-    public Optional<T> or(Optional<T> elseCase) {
+    Optional<T> or(Optional<T> elseCase) {
         return isPresent() ? this : elseCase;
     }
 
-    public Optional<T> or(Func0<Optional<T>> elseFunc) {
+    Optional<T> or(Func0<Optional<T>> elseFunc) {
         return isPresent() ? this : elseFunc.call();
     }
 
-    public interface Func0<V> {
+    interface Func0<V> {
 
         V call();
     }
