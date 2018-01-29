@@ -19,10 +19,10 @@ final class DownloadBatchFactory {
         DownloadBatchId downloadBatchId = batch.downloadBatchId();
         long downloadedDateTimeInMillis = System.currentTimeMillis();
 
-        List<DownloadFile> downloadFiles = new ArrayList<>(batch.files().size());
+        List<DownloadFile> downloadFiles = new ArrayList<>(batch.batchFiles().size());
 
-        for (File file : batch.files()) {
-            String networkAddress = file.networkAddress();
+        for (BatchFile batchFile : batch.batchFiles()) {
+            String networkAddress = batchFile.networkAddress();
 
             InternalFileSize fileSize = InternalFileSizeCreator.unknownFileSize();
 
@@ -30,10 +30,10 @@ final class DownloadBatchFactory {
             FilePersistence filePersistence = filePersistenceCreator.create();
 
             String basePath = filePersistence.basePath().path();
-            FilePath filePath = FilePathCreator.create(basePath, relativePathFrom(file));
+            FilePath filePath = FilePathCreator.create(basePath, relativePathFrom(batchFile));
             FileName fileName = FileNameExtractor.extractFrom(filePath.path());
 
-            DownloadFileId downloadFileId = downloadFileIdFrom(batch, file);
+            DownloadFileId downloadFileId = downloadFileIdFrom(batch, batchFile);
             InternalDownloadFileStatus downloadFileStatus = new LiteDownloadFileStatus(
                     downloadBatchId,
                     downloadFileId,
@@ -77,14 +77,14 @@ final class DownloadBatchFactory {
         );
     }
 
-    private static String relativePathFrom(File file) {
-        String fileNameFromNetworkAddress = FileNameExtractor.extractFrom(file.networkAddress()).name();
-        return file.relativePath().or(fileNameFromNetworkAddress);
+    private static String relativePathFrom(BatchFile batchFile) {
+        String fileNameFromNetworkAddress = FileNameExtractor.extractFrom(batchFile.networkAddress()).name();
+        return batchFile.relativePath().or(fileNameFromNetworkAddress);
     }
 
-    private static DownloadFileId downloadFileIdFrom(Batch batch, File file) {
-        String rawId = batch.downloadBatchId().rawId() + file.networkAddress();
-        return file.downloadFileId().or(DownloadFileIdCreator.createFrom(rawId));
+    private static DownloadFileId downloadFileIdFrom(Batch batch, BatchFile batchFile) {
+        String rawId = batch.downloadBatchId().rawId() + batchFile.networkAddress();
+        return batchFile.downloadFileId().or(DownloadFileIdCreator.createFrom(rawId));
     }
 
 }

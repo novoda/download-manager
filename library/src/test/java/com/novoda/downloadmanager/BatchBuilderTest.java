@@ -20,8 +20,8 @@ public class BatchBuilderTest {
                 .addFile("net_address").apply()
                 .build();
 
-        File expectedFile = new File("net_address", Optional.absent(), Optional.absent(), Optional.absent());
-        Batch expectedBatch = new Batch(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE, Collections.singletonList(expectedFile));
+        BatchFile expectedBatchFile = new BatchFile("net_address", Optional.absent(), Optional.absent(), Optional.absent());
+        Batch expectedBatch = new Batch(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE, Collections.singletonList(expectedBatchFile));
 
         assertThat(batch).isEqualTo(expectedBatch);
     }
@@ -32,8 +32,8 @@ public class BatchBuilderTest {
                 .addFile("net_address").withDownloadFileId(DOWNLOAD_FILE_ID).withFileName(FILE_NAME).withRelativePath(RELATIVE_PATH).apply()
                 .build();
 
-        File expectedFile = new File("net_address", Optional.of(DOWNLOAD_FILE_ID), Optional.of(FILE_NAME), Optional.of(RELATIVE_PATH));
-        Batch expectedBatch = new Batch(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE, Collections.singletonList(expectedFile));
+        BatchFile expectedBatchFile = new BatchFile("net_address", Optional.of(DOWNLOAD_FILE_ID), Optional.of(FILE_NAME), Optional.of(RELATIVE_PATH));
+        Batch expectedBatch = new Batch(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE, Collections.singletonList(expectedBatchFile));
 
         assertThat(batch).isEqualTo(expectedBatch);
     }

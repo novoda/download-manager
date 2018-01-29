@@ -1,13 +1,13 @@
 package com.novoda.downloadmanager;
 
-public class File {
+public class BatchFile {
 
     private final String networkAddress;
     private final Optional<DownloadFileId> downloadFileId;
     private final Optional<FileName> fileName;
     private final Optional<String> relativePath;
 
-    File(String networkAddress, Optional<DownloadFileId> downloadFileId, Optional<FileName> fileName, Optional<String> relativePath) {
+    BatchFile(String networkAddress, Optional<DownloadFileId> downloadFileId, Optional<FileName> fileName, Optional<String> relativePath) {
         this.networkAddress = networkAddress;
         this.downloadFileId = downloadFileId;
         this.fileName = fileName;
@@ -43,18 +43,18 @@ public class File {
             return false;
         }
 
-        File file = (File) o;
+        BatchFile batchFile = (BatchFile) o;
 
-        if (networkAddress != null ? !networkAddress.equals(file.networkAddress) : file.networkAddress != null) {
+        if (networkAddress != null ? !networkAddress.equals(batchFile.networkAddress) : batchFile.networkAddress != null) {
             return false;
         }
-        if (downloadFileId != null ? !downloadFileId.equals(file.downloadFileId) : file.downloadFileId != null) {
+        if (downloadFileId != null ? !downloadFileId.equals(batchFile.downloadFileId) : batchFile.downloadFileId != null) {
             return false;
         }
-        if (fileName != null ? !fileName.equals(file.fileName) : file.fileName != null) {
+        if (fileName != null ? !fileName.equals(batchFile.fileName) : batchFile.fileName != null) {
             return false;
         }
-        return relativePath != null ? relativePath.equals(file.relativePath) : file.relativePath == null;
+        return relativePath != null ? relativePath.equals(batchFile.relativePath) : batchFile.relativePath == null;
     }
 
     @Override
@@ -68,7 +68,7 @@ public class File {
 
     @Override
     public String toString() {
-        return "File{"
+        return "BatchFile{"
                 + "networkAddress='" + networkAddress + '\''
                 + ", downloadFileId=" + downloadFileId
                 + ", fileName=" + fileName
@@ -129,7 +129,7 @@ public class File {
 
         @Override
         public Batch.Builder apply() {
-            parentBuilder.withFile(new File(networkAddress, downloadFileId, fileName, relativePath));
+            parentBuilder.withFile(new BatchFile(networkAddress, downloadFileId, fileName, relativePath));
             return parentBuilder;
         }
 
