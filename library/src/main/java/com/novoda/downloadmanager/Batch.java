@@ -1,30 +1,31 @@
 package com.novoda.downloadmanager;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
-public final class Batch {
+public class Batch {
 
     private final DownloadBatchId downloadBatchId;
     private final String title;
-    private final Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFilePathById;
+    private final List<File> files;
 
-    Batch(DownloadBatchId downloadBatchId, String title, Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFilePathById) {
+    Batch(DownloadBatchId downloadBatchId, String title, List<File> files) {
+
         this.downloadBatchId = downloadBatchId;
         this.title = title;
-        this.networkAddressAndFilePathById = networkAddressAndFilePathById;
+        this.files = files;
     }
 
-    DownloadBatchId getDownloadBatchId() {
+    public DownloadBatchId downloadBatchId() {
         return downloadBatchId;
     }
 
-    String getTitle() {
+    public String title() {
         return title;
     }
 
-    Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFilePathById() {
-        return new HashMap<>(networkAddressAndFilePathById);
+    public List<File> files() {
+        return files;
     }
 
     @Override
@@ -44,15 +45,14 @@ public final class Batch {
         if (title != null ? !title.equals(batch.title) : batch.title != null) {
             return false;
         }
-        return networkAddressAndFilePathById != null
-                ? networkAddressAndFilePathById.equals(batch.networkAddressAndFilePathById) : batch.networkAddressAndFilePathById == null;
+        return files != null ? files.equals(batch.files) : batch.files == null;
     }
 
     @Override
     public int hashCode() {
         int result = downloadBatchId != null ? downloadBatchId.hashCode() : 0;
         result = 31 * result + (title != null ? title.hashCode() : 0);
-        result = 31 * result + (networkAddressAndFilePathById != null ? networkAddressAndFilePathById.hashCode() : 0);
+        result = 31 * result + (files != null ? files.hashCode() : 0);
         return result;
     }
 
@@ -61,7 +61,7 @@ public final class Batch {
         return "Batch{"
                 + "downloadBatchId=" + downloadBatchId
                 + ", title='" + title + '\''
-                + ", networkAddressAndFilePathById=" + networkAddressAndFilePathById
+                + ", files=" + files
                 + '}';
     }
 
@@ -69,32 +69,30 @@ public final class Batch {
 
         private final DownloadBatchId downloadBatchId;
         private final String title;
-        private final Map<DownloadFileId, NetworkAddressAndFilePath> networkAddressAndFilePathById = new HashMap<>();
+        private List<File> files;
 
         public Builder(DownloadBatchId downloadBatchId, String title) {
             this.downloadBatchId = downloadBatchId;
             this.title = title;
+            files = new ArrayList<>();
         }
 
-        public Builder addFile(String fileUrl) {
-            String rawId = downloadBatchId.rawId() + fileUrl;
-            DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(rawId);
-            return addFile(downloadFileId, fileUrl);
-        }
-
-        public Builder addFile(DownloadFileId downloadFileId, String fileUrl) {
-            return addFile(downloadFileId, fileUrl, "");
-        }
-
-        public Builder addFile(DownloadFileId downloadFileId, String fileUrl, String relativePathToStoreDownload) {
-            NetworkAddressAndFilePath networkAddressAndFilePath = new NetworkAddressAndFilePath(fileUrl, relativePathToStoreDownload);
-            networkAddressAndFilePathById.put(downloadFileId, networkAddressAndFilePath);
+        Builder withFile(File file) {
+            files.add(file);
             return this;
         }
 
-        public Batch build() {
-            return new Batch(downloadBatchId, title, networkAddressAndFilePathById);
+        private File.Builder fileBuilder;
+
+        public File.Builder addFile(String networkAddress) {
+            this.fileBuilder = File.newBuilder(networkAddress).withParentBuilder(this);
+            return this.fileBuilder;
         }
+
+        public Batch build() {
+            return new Batch(downloadBatchId, title, files);
+        }
+
     }
 
 }

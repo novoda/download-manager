@@ -38,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
     private static final DownloadBatchId BATCH_ID_1 = DownloadBatchIdCreator.createFrom("batch_id_1");
     private static final DownloadBatchId BATCH_ID_2 = DownloadBatchIdCreator.createFrom("batch_id_2");
     private static final DownloadFileId FILE_ID_1 = DownloadFileIdCreator.createFrom("file_id_1");
-    private static final DownloadFileId FILE_ID_2 = DownloadFileIdCreator.createFrom("file_id_2");
     private static final String FIVE_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/5MB.zip";
     private static final String TEN_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/10MB.zip";
     private static final String TWENTY_FILE_URL = "http://ipv4.download.thinkbroadband.com/20MB.zip";
@@ -123,14 +122,14 @@ public class MainActivity extends AppCompatActivity {
 
     private final View.OnClickListener downloadBatchesOnClick = v -> {
         Batch batch = new Batch.Builder(BATCH_ID_1, "Made in chelsea")
-                .addFile(FILE_ID_1, FIVE_MB_FILE_URL, "foo/bar/5mb.zip")
-                .addFile(TEN_MB_FILE_URL)
+                .addFile(FIVE_MB_FILE_URL).withDownloadFileId(FILE_ID_1).withRelativePath("foo/bar/5mb.zip").apply()
+                .addFile(TEN_MB_FILE_URL).apply()
                 .build();
         liteDownloadManagerCommands.download(batch);
 
         batch = new Batch.Builder(BATCH_ID_2, "Hollyoaks")
-                .addFile(FILE_ID_2, TEN_MB_FILE_URL)
-                .addFile(TWENTY_FILE_URL)
+                .addFile(TEN_MB_FILE_URL).apply()
+                .addFile(TWENTY_FILE_URL).apply()
                 .build();
         liteDownloadManagerCommands.download(batch);
     };

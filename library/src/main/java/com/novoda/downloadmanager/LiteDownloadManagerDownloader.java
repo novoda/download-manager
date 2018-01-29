@@ -46,7 +46,7 @@ class LiteDownloadManagerDownloader {
     }
 
     public void download(Batch batch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
-        DownloadBatch runningDownloadBatch = downloadBatchMap.get(batch.getDownloadBatchId());
+        DownloadBatch runningDownloadBatch = downloadBatchMap.get(batch.downloadBatchId());
         if (runningDownloadBatch != null) {
             return;
         }
