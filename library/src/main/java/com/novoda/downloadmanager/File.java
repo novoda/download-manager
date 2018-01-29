@@ -14,8 +14,8 @@ public class File {
         this.relativePath = relativePath;
     }
 
-    static Builder newBuilder(String networkAddress) {
-        return new Builder(networkAddress);
+    static InternalBuilder with(String networkAddress) {
+        return new LiteFileBuilder(networkAddress);
     }
 
     public String networkAddress() {
@@ -76,39 +76,58 @@ public class File {
                 + '}';
     }
 
-    public static class Builder {
+    public interface Builder {
+        Builder withDownloadFileId(DownloadFileId downloadFileId);
+
+        Builder withFileName(FileName fileName);
+
+        Builder withRelativePath(String relativePath);
+
+        Batch.Builder apply();
+    }
+
+    interface InternalBuilder extends Builder {
+        Builder withParentBuilder(Batch.InternalBuilder parentBuilder);
+    }
+
+    private static class LiteFileBuilder implements InternalBuilder {
 
         private final String networkAddress;
         private Optional<DownloadFileId> downloadFileId = Optional.absent();
         private Optional<FileName> fileName = Optional.absent();
         private Optional<String> relativePath = Optional.absent();
 
-        private Batch.InternalBatchBuilder parentBuilder;
+        private Batch.InternalBuilder parentBuilder;
 
-        public Builder(String networkAddress) {
+        private LiteFileBuilder(String networkAddress) {
             this.networkAddress = networkAddress;
         }
 
-        Builder withParentBuilder(Batch.InternalBatchBuilder parentBuilder) {
+        @Override
+        public Builder withParentBuilder(Batch.InternalBuilder parentBuilder) {
             this.parentBuilder = parentBuilder;
             return this;
         }
 
+        @Override
         public Builder withDownloadFileId(DownloadFileId downloadFileId) {
             this.downloadFileId = Optional.of(downloadFileId);
             return this;
         }
 
+        @Override
         public Builder withFileName(FileName fileName) {
             this.fileName = Optional.of(fileName);
             return this;
         }
 
+        @Override
         public Builder withRelativePath(String relativePath) {
             this.relativePath = Optional.of(relativePath);
             return this;
         }
 
+        @Override
         public Batch.Builder apply() {
             parentBuilder.withFile(new File(networkAddress, downloadFileId, fileName, relativePath));
             return parentBuilder;

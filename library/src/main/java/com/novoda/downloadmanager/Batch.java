@@ -74,11 +74,11 @@ public class Batch {
         Batch build();
     }
 
-    interface InternalBatchBuilder extends Builder {
-        InternalBatchBuilder withFile(File file);
+    interface InternalBuilder extends Builder {
+        void withFile(File file);
     }
 
-    static class LiteBatchBuilder implements InternalBatchBuilder {
+    private static class LiteBatchBuilder implements InternalBuilder {
 
         private final DownloadBatchId downloadBatchId;
         private final String title;
@@ -91,16 +91,15 @@ public class Batch {
         }
 
         @Override
-        public LiteBatchBuilder withFile(File file) {
+        public void withFile(File file) {
             files.add(file);
-            return this;
         }
 
         private File.Builder fileBuilder;
 
         @Override
         public File.Builder addFile(String networkAddress) {
-            this.fileBuilder = File.newBuilder(networkAddress).withParentBuilder(this);
+            this.fileBuilder = File.with(networkAddress).withParentBuilder(this);
             return this.fileBuilder;
         }
 
