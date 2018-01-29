@@ -35,7 +35,7 @@ public class DownloadManagerTest {
     private static final InternalDownloadBatchStatus ADDITIONAL_BATCH_STATUS = anInternalDownloadsBatchStatus().build();
     private static final DownloadBatchId DOWNLOAD_BATCH_ID = aDownloadBatchId().withRawDownloadBatchId("id01").build();
     private static final DownloadBatchId ADDITIONAL_DOWNLOAD_BATCH_ID = aDownloadBatchId().withRawDownloadBatchId("id02").build();
-    private static final Batch BATCH = new Batch.LiteBatchBuilder(DOWNLOAD_BATCH_ID, "title").build();
+    private static final Batch BATCH = Batch.with(DOWNLOAD_BATCH_ID, "title").build();
     private static final DownloadFileId DOWNLOAD_FILE_ID = aDownloadFileId().withRawDownloadFileId("file_id_01").build();
     private static final DownloadFileStatus DOWNLOAD_FILE_STATUS = aDownloadFileStatus().withDownloadFileId(DOWNLOAD_FILE_ID).build();
 

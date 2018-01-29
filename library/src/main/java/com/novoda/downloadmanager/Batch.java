@@ -78,13 +78,13 @@ public class Batch {
         void withFile(File file);
     }
 
-    private static class LiteBatchBuilder implements InternalBuilder {
+    private static final class LiteBatchBuilder implements InternalBuilder {
 
         private final DownloadBatchId downloadBatchId;
         private final String title;
         private final List<File> files;
 
-        private LiteBatchBuilder(DownloadBatchId downloadBatchId, String title, List<File> files) {
+        LiteBatchBuilder(DownloadBatchId downloadBatchId, String title, List<File> files) {
             this.downloadBatchId = downloadBatchId;
             this.title = title;
             this.files = files;

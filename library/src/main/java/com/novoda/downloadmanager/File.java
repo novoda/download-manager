@@ -90,7 +90,7 @@ public class File {
         Builder withParentBuilder(Batch.InternalBuilder parentBuilder);
     }
 
-    private static class LiteFileBuilder implements InternalBuilder {
+    private static final class LiteFileBuilder implements InternalBuilder {
 
         private final String networkAddress;
         private Optional<DownloadFileId> downloadFileId = Optional.absent();
@@ -99,7 +99,7 @@ public class File {
 
         private Batch.InternalBuilder parentBuilder;
 
-        private LiteFileBuilder(String networkAddress) {
+        LiteFileBuilder(String networkAddress) {
             this.networkAddress = networkAddress;
         }
 
