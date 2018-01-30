@@ -47,7 +47,7 @@ class DownloadFile {
     }
 
     void download(final Callback callback) {
-        moveStatusToDownloadingIfQueuedOrError();
+        downloadFileStatus.markAsDownloading();
 
         callback.onUpdate(downloadFileStatus);
 
@@ -144,12 +144,6 @@ class DownloadFile {
     private void updateAndFeedbackWithStatus(Error error, Callback callback) {
         downloadFileStatus.markAsError(error);
         callback.onUpdate(downloadFileStatus);
-    }
-
-    private void moveStatusToDownloadingIfQueuedOrError() {
-        if (downloadFileStatus.isMarkedAsQueued() || downloadFileStatus.isMarkedAsError()) {
-            downloadFileStatus.markAsDownloading();
-        }
     }
 
     void pause() {
