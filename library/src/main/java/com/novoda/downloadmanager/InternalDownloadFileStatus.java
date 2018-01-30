@@ -1,7 +1,5 @@
 package com.novoda.downloadmanager;
 
-import android.support.annotation.Nullable;
-
 interface InternalDownloadFileStatus extends DownloadFileStatus {
 
     void update(FileSize fileSize, FilePath localFilePath);
@@ -24,7 +22,6 @@ interface InternalDownloadFileStatus extends DownloadFileStatus {
 
     void markAsError(DownloadError.Error error);
 
-    @Nullable
     Optional<DownloadError> error();
 
 }
