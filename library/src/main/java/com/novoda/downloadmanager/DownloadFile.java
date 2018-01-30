@@ -47,9 +47,7 @@ class DownloadFile {
     }
 
     void download(final Callback callback) {
-        callback.onUpdate(downloadFileStatus);
-
-        moveStatusToDownloadingIfQueued();
+        moveStatusToDownloadingIfQueuedOrError();
 
         fileSize = requestTotalFileSizeIfNecessary(fileSize);
 
@@ -67,6 +65,8 @@ class DownloadFile {
 
         filePath = result.filePath();
         fileSize.setCurrentSize(filePersistence.getCurrentSize());
+
+        callback.onUpdate(downloadFileStatus);
 
         persistSync();
 
@@ -146,8 +146,8 @@ class DownloadFile {
         callback.onUpdate(downloadFileStatus);
     }
 
-    private void moveStatusToDownloadingIfQueued() {
-        if (downloadFileStatus.isMarkedAsQueued()) {
+    private void moveStatusToDownloadingIfQueuedOrError() {
+        if (downloadFileStatus.isMarkedAsQueued() || downloadFileStatus.isMarkedAsError()) {
             downloadFileStatus.markAsDownloading();
         }
     }

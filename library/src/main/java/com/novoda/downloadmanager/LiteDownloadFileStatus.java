@@ -86,7 +86,7 @@ class LiteDownloadFileStatus implements InternalDownloadFileStatus {
 
     @Override
     public boolean isMarkedAsError() {
-        return status == Status.ERROR && downloadError != null;
+        return status == Status.ERROR;
     }
 
     @Override
