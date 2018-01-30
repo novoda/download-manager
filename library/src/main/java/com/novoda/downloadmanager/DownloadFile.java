@@ -49,6 +49,8 @@ class DownloadFile {
     void download(final Callback callback) {
         moveStatusToDownloadingIfQueuedOrError();
 
+        callback.onUpdate(downloadFileStatus);
+
         fileSize = requestTotalFileSizeIfNecessary(fileSize);
 
         if (fileSize.isTotalSizeUnknown()) {
@@ -65,8 +67,6 @@ class DownloadFile {
 
         filePath = result.filePath();
         fileSize.setCurrentSize(filePersistence.getCurrentSize());
-
-        callback.onUpdate(downloadFileStatus);
 
         persistSync();
 
