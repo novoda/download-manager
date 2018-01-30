@@ -142,13 +142,8 @@ class ExternalFilePersistence implements FilePersistence {
 
     @Override
     public long getCurrentSize(FilePath filePath) {
-        try {
-            File file = new File(filePath.path());
-            return file.length();
-        } catch (NullPointerException e) {
-            Log.e(e, "Error requesting file size for " + filePath.path());
-            return 0;
-        }
+        File file = new File(filePath.path());
+        return file.length();
     }
 
     @Override
