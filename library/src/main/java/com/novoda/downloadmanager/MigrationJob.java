@@ -5,8 +5,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +14,6 @@ class MigrationJob implements Runnable {
 
     private static final String TAG = "V1 to V2 migrator";
 
-    private static final int RANDOMLY_CHOSEN_BUFFER_SIZE_THAT_SEEMS_TO_WORK = 4096;
     private static final String TABLE_BATCHES = "batches";
     private static final String WHERE_CLAUSE_ID = "_id = ?";
 
@@ -57,8 +54,9 @@ class MigrationJob implements Runnable {
 
         Log.d(TAG, "about to extract migrations, time is " + System.nanoTime());
 
-        migratePartialDownloads(database, partialDownloadMigrationExtractor, downloadsPersistence);
-        migrateCompleteDownloads(migrationStatus, database, migrationExtractor, downloadsPersistence, internalFilePersistence);
+        String basePath = internalFilePersistence.basePath().path();
+        migratePartialDownloads(database, partialDownloadMigrationExtractor, downloadsPersistence, basePath);
+        migrateCompleteDownloads(migrationStatus, database, migrationExtractor, downloadsPersistence, basePath);
     }
 
     private void onUpdate(MigrationStatus migrationStatus) {
@@ -69,13 +67,14 @@ class MigrationJob implements Runnable {
 
     private void migratePartialDownloads(SqlDatabaseWrapper database,
                                          PartialDownloadMigrationExtractor partialDownloadMigrationExtractor,
-                                         DownloadsPersistence downloadsPersistence) {
+                                         DownloadsPersistence downloadsPersistence,
+                                         String basePath) {
         List<Migration> partialMigrations = partialDownloadMigrationExtractor.extractMigrations();
         for (Migration partialMigration : partialMigrations) {
             downloadsPersistence.startTransaction();
             database.startTransaction();
 
-            migrateV1DataToV2Database(downloadsPersistence, partialMigration);
+            migrateV1DataToV2Database(downloadsPersistence, partialMigration, basePath);
             deleteFrom(database, partialMigration);
 
             downloadsPersistence.transactionSuccess();
@@ -86,11 +85,11 @@ class MigrationJob implements Runnable {
         Log.d(TAG, "partial migrations are all EXTRACTED, time is " + System.nanoTime());
     }
 
-    private void migrateV1DataToV2Database(DownloadsPersistence downloadsPersistence, Migration migration) {
+    private void migrateV1DataToV2Database(DownloadsPersistence downloadsPersistence, Migration migration, String basePath) {
         Batch batch = migration.batch();
 
-        DownloadBatchId downloadBatchId = batch.getDownloadBatchId();
-        DownloadBatchTitle downloadBatchTitle = new LiteDownloadBatchTitle(batch.getTitle());
+        DownloadBatchId downloadBatchId = batch.downloadBatchId();
+        DownloadBatchTitle downloadBatchTitle = new LiteDownloadBatchTitle(batch.title());
         Status downloadBatchStatus = migration.hasDownloadedBatch() ? Status.DOWNLOADED : Status.QUEUED;
         long downloadedDateTimeInMillis = migration.downloadedDateTimeInMillis();
 
@@ -103,11 +102,15 @@ class MigrationJob implements Runnable {
         downloadsPersistence.persistBatch(persistedBatch);
 
         for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
-            String url = fileMetadata.uri();
+            String url = fileMetadata.originalNetworkAddress();
 
+            FilePath filePath = new LiteFilePath(fileMetadata.originalFileLocation());
+            if (filePath.path() == null || filePath.path().isEmpty()) {
+                filePath = FilePathCreator.create(basePath, FileNameExtractor.extractFrom(url).name());
+            }
             FileName fileName = LiteFileName.from(batch, url);
-            FilePath filePath = FilePathCreator.create(fileName.name());
-            String rawDownloadFileId = batch.getTitle() + System.nanoTime();
+
+            String rawDownloadFileId = batch.title() + System.nanoTime();
             DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(rawDownloadFileId);
             DownloadsFilePersisted persistedFile = new LiteDownloadsFilePersisted(
                     downloadBatchId,
@@ -125,8 +128,8 @@ class MigrationJob implements Runnable {
     // TODO: See https://github.com/novoda/download-manager/issues/270
     private void deleteFrom(SqlDatabaseWrapper database, Migration migration) {
         Batch batch = migration.batch();
-        Log.d(TAG, "about to delete the batch: " + batch.getDownloadBatchId().rawId() + ", time is " + System.nanoTime());
-        database.delete(TABLE_BATCHES, WHERE_CLAUSE_ID, batch.getDownloadBatchId().rawId());
+        Log.d(TAG, "about to delete the batch: " + batch.downloadBatchId().rawId() + ", time is " + System.nanoTime());
+        database.delete(TABLE_BATCHES, WHERE_CLAUSE_ID, batch.downloadBatchId().rawId());
         for (Migration.FileMetadata metadata : migration.getFileMetadata()) {
             if (hasValidFileLocation(metadata)) {
                 File file = new File(metadata.originalFileLocation());
@@ -145,7 +148,7 @@ class MigrationJob implements Runnable {
                                           SqlDatabaseWrapper database,
                                           MigrationExtractor migrationExtractor,
                                           DownloadsPersistence downloadsPersistence,
-                                          InternalFilePersistence internalFilePersistence) {
+                                          String basePath) {
         List<Migration> migrations = migrationExtractor.extractMigrations();
         Log.d(TAG, "migrations are all EXTRACTED, time is " + System.nanoTime());
 
@@ -161,8 +164,7 @@ class MigrationJob implements Runnable {
             downloadsPersistence.startTransaction();
             database.startTransaction();
 
-            migrateV1FilesToV2Location(internalFilePersistence, migration);
-            migrateV1DataToV2Database(downloadsPersistence, migration);
+            migrateV1DataToV2Database(downloadsPersistence, migration, basePath);
             deleteFrom(database, migration);
 
             downloadsPersistence.transactionSuccess();
@@ -181,42 +183,6 @@ class MigrationJob implements Runnable {
         database.deleteDatabase();
         migrationStatus.markAsComplete();
         onUpdate(migrationStatus);
-    }
-
-    private void migrateV1FilesToV2Location(InternalFilePersistence internalFilePersistence, Migration migration) {
-        Batch batch = migration.batch();
-        for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
-            FileName newFileName = LiteFileName.from(batch, fileMetadata.uri());
-            internalFilePersistence.create(newFileName, fileMetadata.fileSize());
-            FileInputStream inputStream = null;
-            try {
-                // open the v1 file
-                inputStream = new FileInputStream(new File(fileMetadata.originalFileLocation()));
-                byte[] bytes = new byte[RANDOMLY_CHOSEN_BUFFER_SIZE_THAT_SEEMS_TO_WORK];
-
-                // read the v1 file
-                int readLast = 0;
-                while (readLast != -1) {
-                    readLast = inputStream.read(bytes);
-                    if (readLast != 0 && readLast != -1) {
-                        // write the v1 file to the v2 location
-                        internalFilePersistence.write(bytes, 0, readLast);
-                        bytes = new byte[RANDOMLY_CHOSEN_BUFFER_SIZE_THAT_SEEMS_TO_WORK];
-                    }
-                }
-            } catch (IOException e) {
-                Log.e(getClass().getSimpleName(), e.getMessage());
-            } finally {
-                try {
-                    internalFilePersistence.close();
-                    if (inputStream != null) {
-                        inputStream.close();
-                    }
-                } catch (IOException e) {
-                    Log.e(getClass().getSimpleName(), e.getMessage());
-                }
-            }
-        }
     }
 
 }

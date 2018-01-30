@@ -58,7 +58,7 @@ class DownloadFile {
             return;
         }
 
-        FilePersistenceResult result = createFile();
+        FilePersistenceResult result = filePersistence.create(filePath, fileSize);
         if (result.isMarkedAsError()) {
             Error error = convertError(result.status());
             updateAndFeedbackWithStatus(error, callback);
@@ -100,19 +100,10 @@ class DownloadFile {
             public void onDownloadFinished() {
                 filePersistence.close();
                 if (downloadFileStatus.isMarkedForDeletion()) {
-                    filePersistence.delete();
+                    filePersistence.delete(filePath);
                 }
             }
         });
-    }
-
-    private FilePersistenceResult createFile() {
-        if (filePath.isUnknown()) {
-            return filePersistence.create(fileName, fileSize);
-
-        } else {
-            return filePersistence.create(filePath);
-        }
     }
 
     private Error convertError(FilePersistenceResult.Status status) {
@@ -175,7 +166,7 @@ class DownloadFile {
             downloadFileStatus.markForDeletion();
             fileDownloader.stopDownloading();
         } else {
-            filePersistence.delete();
+            filePersistence.delete(filePath);
         }
     }
 

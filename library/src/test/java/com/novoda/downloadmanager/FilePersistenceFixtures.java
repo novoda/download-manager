@@ -41,12 +41,12 @@ class FilePersistenceFixtures {
             }
 
             @Override
-            public FilePersistenceResult create(FileName fileName, FileSize fileSize) {
-                return filePersistenceResult;
+            public FilePath basePath() {
+                return FilePathCreator.create("foo/bar", "/");
             }
 
             @Override
-            public FilePersistenceResult create(FilePath filePath) {
+            public FilePersistenceResult create(FilePath absoluteFilePath, FileSize fileSize) {
                 return filePersistenceResult;
             }
 
@@ -56,7 +56,7 @@ class FilePersistenceFixtures {
             }
 
             @Override
-            public void delete() {
+            public void delete(FilePath absoluteFilePath) {
                 // do nothing.
             }
 

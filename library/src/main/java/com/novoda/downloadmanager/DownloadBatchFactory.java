@@ -3,7 +3,6 @@ package com.novoda.downloadmanager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 final class DownloadBatchFactory {
 
@@ -18,15 +17,24 @@ final class DownloadBatchFactory {
                                      CallbackThrottle callbackThrottle,
                                      DownloadConnectionAllowedChecker downloadConnectionAllowedChecker) {
         DownloadBatchTitle downloadBatchTitle = DownloadBatchTitleCreator.createFrom(batch);
-        Map<DownloadFileId, String> fileUrls = batch.getFileUrls();
-        List<DownloadFile> downloadFiles = new ArrayList<>(fileUrls.size());
-        DownloadBatchId downloadBatchId = batch.getDownloadBatchId();
+        DownloadBatchId downloadBatchId = batch.downloadBatchId();
         long downloadedDateTimeInMillis = System.currentTimeMillis();
 
-        for (Map.Entry<DownloadFileId, String> urlByDownloadId : fileUrls.entrySet()) {
+        List<DownloadFile> downloadFiles = new ArrayList<>(batch.batchFiles().size());
+
+        for (BatchFile batchFile : batch.batchFiles()) {
+            String networkAddress = batchFile.networkAddress();
+
             InternalFileSize fileSize = InternalFileSizeCreator.unknownFileSize();
-            FilePath filePath = FilePathCreator.unknownFilePath();
-            DownloadFileId downloadFileId = urlByDownloadId.getKey();
+
+            FilePersistenceCreator filePersistenceCreator = fileOperations.filePersistenceCreator();
+            FilePersistence filePersistence = filePersistenceCreator.create();
+
+            String basePath = filePersistence.basePath().path();
+            FilePath filePath = FilePathCreator.create(basePath, relativePathFrom(batchFile));
+            FileName fileName = FileNameExtractor.extractFrom(filePath.path());
+
+            DownloadFileId downloadFileId = downloadFileIdFrom(batch, batchFile);
             InternalDownloadFileStatus downloadFileStatus = new LiteDownloadFileStatus(
                     downloadBatchId,
                     downloadFileId,
@@ -34,18 +42,14 @@ final class DownloadBatchFactory {
                     fileSize,
                     filePath
             );
-            String fileUrl = urlByDownloadId.getValue();
-            FileName fileName = LiteFileName.from(batch, fileUrl);
 
-            FilePersistenceCreator filePersistenceCreator = fileOperations.filePersistenceCreator();
             FileDownloader fileDownloader = fileOperations.fileDownloader();
             FileSizeRequester fileSizeRequester = fileOperations.fileSizeRequester();
 
-            FilePersistence filePersistence = filePersistenceCreator.create();
             DownloadFile downloadFile = new DownloadFile(
                     downloadBatchId,
                     downloadFileId,
-                    fileUrl,
+                    networkAddress,
                     downloadFileStatus,
                     fileName,
                     filePath,
@@ -74,4 +78,15 @@ final class DownloadBatchFactory {
                 downloadConnectionAllowedChecker
         );
     }
+
+    private static String relativePathFrom(BatchFile batchFile) {
+        String fileNameFromNetworkAddress = FileNameExtractor.extractFrom(batchFile.networkAddress()).name();
+        return batchFile.relativePath().or(fileNameFromNetworkAddress);
+    }
+
+    private static DownloadFileId downloadFileIdFrom(Batch batch, BatchFile batchFile) {
+        String rawId = batch.downloadBatchId().rawId() + batchFile.networkAddress();
+        return batchFile.downloadFileId().or(DownloadFileIdCreator.createFrom(rawId));
+    }
+
 }

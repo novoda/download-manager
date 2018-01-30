@@ -2,8 +2,8 @@ package com.novoda.downloadmanager.demo;
 
 import android.content.Context;
 
-import com.novoda.downloadmanager.FileName;
 import com.novoda.downloadmanager.FilePath;
+import com.novoda.downloadmanager.FilePathCreator;
 import com.novoda.downloadmanager.FilePersistence;
 import com.novoda.downloadmanager.FilePersistenceResult;
 import com.novoda.downloadmanager.FilePersistenceType;
@@ -21,14 +21,15 @@ public class CustomFilePersistence implements FilePersistence {
     }
 
     @Override
-    public FilePersistenceResult create(FileName fileName, FileSize fileSize) {
-        Log.v("create " + fileName.toString() + ", " + fileSize.toString());
-        return FilePersistenceResult.newInstance(FilePersistenceResult.Status.SUCCESS);
+    public FilePath basePath() {
+        FilePath filePath = FilePathCreator.unknownFilePath();
+        Log.v("basePath " + filePath.toString());
+        return filePath;
     }
 
     @Override
-    public FilePersistenceResult create(FilePath filePath) {
-        Log.v("create " + filePath.toString());
+    public FilePersistenceResult create(FilePath absoluteFilePath, FileSize fileSize) {
+        Log.v("create " + absoluteFilePath.toString() + ", " + fileSize.toString());
         return FilePersistenceResult.newInstance(FilePersistenceResult.Status.SUCCESS);
     }
 
@@ -40,8 +41,8 @@ public class CustomFilePersistence implements FilePersistence {
     }
 
     @Override
-    public void delete() {
-        Log.v("delete");
+    public void delete(FilePath absoluteFilePath) {
+        Log.v("delete: " + absoluteFilePath);
     }
 
     @Override
