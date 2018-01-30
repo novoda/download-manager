@@ -25,6 +25,6 @@ interface InternalDownloadFileStatus extends DownloadFileStatus {
     void markAsError(DownloadError.Error error);
 
     @Nullable
-    DownloadError error();
+    Optional<DownloadError> error();
 
 }
