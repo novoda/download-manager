@@ -141,21 +141,6 @@ class ExternalFilePersistence implements FilePersistence {
     }
 
     @Override
-    public long getCurrentSize() {
-        if (fileOutputStream == null) {
-            Log.e("Cannot get the current file size, you must create the file first");
-            return 0;
-        }
-
-        try {
-            return fileOutputStream.getChannel().size();
-        } catch (IOException e) {
-            Log.e(e, "Error requesting file size, make sure you create one first");
-            return 0;
-        }
-    }
-
-    @Override
     public long getCurrentSize(FilePath filePath) {
         try {
             FileOutputStream file = new FileOutputStream(filePath.path(), APPEND);

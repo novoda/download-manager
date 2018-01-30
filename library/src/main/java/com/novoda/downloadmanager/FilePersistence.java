@@ -14,8 +14,6 @@ public interface FilePersistence {
 
     void delete(FilePath absoluteFilePath);
 
-    long getCurrentSize();
-
     long getCurrentSize(FilePath filePath);
 
     void close();
