@@ -1,7 +1,5 @@
 package com.novoda.downloadmanager;
 
-import android.support.annotation.Nullable;
-
 class InternalDownloadBatchStatusFixtures {
 
     private DownloadBatchTitle downloadBatchTitle = DownloadBatchTitleFixtures.aDownloadBatchTitle().build();
@@ -95,7 +93,6 @@ class InternalDownloadBatchStatusFixtures {
                 return downloadedDateTimeInMillis;
             }
 
-            @Nullable
             @Override
             public DownloadError.Error getDownloadErrorType() {
                 return downloadErrorType;
@@ -130,9 +127,9 @@ class InternalDownloadBatchStatusFixtures {
             }
 
             @Override
-            public void markAsError(DownloadError downloadError, DownloadsBatchStatusPersistence persistence) {
+            public void markAsError(Optional<DownloadError> downloadError, DownloadsBatchStatusPersistence persistence) {
                 status = Status.ERROR;
-                downloadErrorType = downloadError.error();
+                downloadErrorType = downloadError.get().error();
                 persistence.updateStatusAsync(downloadBatchId, status);
             }
 

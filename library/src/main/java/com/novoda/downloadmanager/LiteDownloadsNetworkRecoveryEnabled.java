@@ -1,10 +1,10 @@
 package com.novoda.downloadmanager;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
+import com.novoda.notils.logger.simple.Log;
 
 import java.util.concurrent.TimeUnit;
 
@@ -34,7 +34,7 @@ class LiteDownloadsNetworkRecoveryEnabled implements DownloadsNetworkRecovery {
                 builder.setRequiredNetworkType(JobRequest.NetworkType.METERED);
                 break;
             default:
-                Log.w(getClass().getSimpleName(), "Unknown ConnectionType: " + connectionType);
+                Log.w("Unknown ConnectionType: " + connectionType);
                 break;
         }
 
@@ -42,6 +42,7 @@ class LiteDownloadsNetworkRecoveryEnabled implements DownloadsNetworkRecovery {
         JobManager jobManager = JobManager.instance();
 
         jobManager.schedule(jobRequest);
+        Log.v("Scheduling Network Recovery.");
     }
 
     @Override
