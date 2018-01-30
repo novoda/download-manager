@@ -19,6 +19,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
     private final FileOperations fileOperations;
     private final DownloadsBatchPersistence downloadsBatchPersistence;
     private final LiteDownloadManagerDownloader downloader;
+    private final DownloadConnectionAllowedChecker downloadConnectionAllowedChecker;
 
     private DownloadService downloadService;
 
@@ -31,7 +32,8 @@ class DownloadManager implements LiteDownloadManagerCommands {
                     List<DownloadBatchStatusCallback> callbacks,
                     FileOperations fileOperations,
                     DownloadsBatchPersistence downloadsBatchPersistence,
-                    LiteDownloadManagerDownloader downloader) {
+                    LiteDownloadManagerDownloader downloader,
+                    DownloadConnectionAllowedChecker downloadConnectionAllowedChecker) {
         this.waitForDownloadService = waitForDownloadService;
         this.executor = executor;
         this.callbackHandler = callbackHandler;
@@ -40,6 +42,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
         this.fileOperations = fileOperations;
         this.downloadsBatchPersistence = downloadsBatchPersistence;
         this.downloader = downloader;
+        this.downloadConnectionAllowedChecker = downloadConnectionAllowedChecker;
     }
 
     void initialise(DownloadService downloadService) {
@@ -179,6 +182,12 @@ class DownloadManager implements LiteDownloadManagerCommands {
                     callbackHandler.post(() -> callback.onReceived(downloadFileStatus));
                     return null;
                 }));
+    }
+
+    @Override
+    public void updateAllowedConnectionType(ConnectionType allowedConnectionType) {
+        downloadConnectionAllowedChecker.updateAllowedConnectionType(allowedConnectionType);
+        submitAllStoredDownloads(() -> {});
     }
 
 }

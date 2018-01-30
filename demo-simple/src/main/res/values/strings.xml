@@ -6,6 +6,7 @@
   <string name="migrate">Migrate</string>
   <string name="pause">Pause</string>
   <string name="resume">Resume</string>
+  <string name="download_only_over_wifi">Download only over WiFi</string>
   <string name="start_downloading">Start downloading</string>
   <string name="delete_all">Delete all</string>
   <string name="log_file_directory">Log File Directory</string>

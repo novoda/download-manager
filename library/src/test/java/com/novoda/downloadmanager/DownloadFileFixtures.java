@@ -94,7 +94,8 @@ class DownloadFileFixtures {
                 fileDownloader,
                 fileSizeRequester,
                 filePersistence,
-                downloadsFilePersistence
+                downloadsFilePersistence,
+                downloadConnectionAllowedChecker
         );
     }
 }

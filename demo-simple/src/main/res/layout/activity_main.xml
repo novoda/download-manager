@@ -106,6 +106,13 @@
 
   </LinearLayout>
 
+  <CheckBox
+    android:id="@+id/check_wifi_only"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:checked="true"
+    android:text="@string/download_only_over_wifi" />
+
   <Button
     android:id="@+id/button_start_downloading"
     android:layout_width="wrap_content"

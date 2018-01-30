@@ -7,11 +7,13 @@ import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.novoda.downloadmanager.AllBatchStatusesCallback;
 import com.novoda.downloadmanager.Batch;
+import com.novoda.downloadmanager.ConnectionType;
 import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchStatus;
@@ -41,7 +43,8 @@ public class MainActivity extends AppCompatActivity {
     private static final DownloadFileId FILE_ID_2 = DownloadFileIdCreator.createFrom("file_id_2");
     private static final String FIVE_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/5MB.zip";
     private static final String TEN_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/10MB.zip";
-    private static final String TWENTY_FILE_URL = "http://ipv4.download.thinkbroadband.com/20MB.zip";
+    private static final String TWENTY_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/20MB.zip";
+    private static final String FIFTHY_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/50MB.zip";
 
     private TextView databaseCloningUpdates;
     private TextView databaseMigrationUpdates;
@@ -75,6 +78,16 @@ public class MainActivity extends AppCompatActivity {
 
         textViewBatch1 = findViewById(R.id.batch_1);
         textViewBatch2 = findViewById(R.id.batch_2);
+
+        CheckBox checkWifiOnly = findViewById(R.id.check_wifi_only);
+        checkWifiOnly.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            LiteDownloadManagerCommands downloadManagerCommands = ((DemoApplication) getApplication()).getLiteDownloadManagerCommands();
+            if (isChecked) {
+                downloadManagerCommands.updateAllowedConnectionType(ConnectionType.UNMETERED);
+            } else {
+                downloadManagerCommands.updateAllowedConnectionType(ConnectionType.ALL);
+            }
+        });
 
         versionOneDatabaseCloner = DatabaseClonerFactory.databaseCloner(this, cloneCallback);
 
@@ -125,14 +138,15 @@ public class MainActivity extends AppCompatActivity {
         Batch batch = new Batch.Builder(BATCH_ID_1, "Made in chelsea")
                 .addFile(FILE_ID_1, FIVE_MB_FILE_URL)
                 .addFile(TEN_MB_FILE_URL)
+                .addFile(FIFTHY_MB_FILE_URL)
                 .build();
         liteDownloadManagerCommands.download(batch);
 
-        batch = new Batch.Builder(BATCH_ID_2, "Hollyoaks")
-                .addFile(FILE_ID_2, TEN_MB_FILE_URL)
-                .addFile(TWENTY_FILE_URL)
-                .build();
-        liteDownloadManagerCommands.download(batch);
+//        batch = new Batch.Builder(BATCH_ID_2, "Hollyoaks")
+//                .addFile(FILE_ID_2, TEN_MB_FILE_URL)
+//                .addFile(TWENTY_MB_FILE_URL)
+//                .build();
+//        liteDownloadManagerCommands.download(batch);
     };
 
     private final View.OnClickListener deleteAllOnClick = v -> {

@@ -75,7 +75,8 @@ public class DownloadManagerTest {
                 downloadBatchCallbacks,
                 fileOperations,
                 downloadsBatchPersistence,
-                downloadManagerDownloader
+                downloadManagerDownloader,
+                downloadConnectionAllowedChecker
         );
 
         setupDownloadBatchesResponse();

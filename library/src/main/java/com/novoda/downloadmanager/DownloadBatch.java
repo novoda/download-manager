@@ -23,6 +23,7 @@ class DownloadBatch {
     private final List<DownloadFile> downloadFiles;
     private final DownloadsBatchPersistence downloadsBatchPersistence;
     private final CallbackThrottle callbackThrottle;
+    private final DownloadConnectionAllowedChecker downloadConnectionAllowedChecker;
 
     private long totalBatchSizeBytes;
     private DownloadBatchStatusCallback callback;
@@ -31,12 +32,14 @@ class DownloadBatch {
                   List<DownloadFile> downloadFiles,
                   Map<DownloadFileId, Long> fileBytesDownloadedMap,
                   DownloadsBatchPersistence downloadsBatchPersistence,
-                  CallbackThrottle callbackThrottle) {
+                  CallbackThrottle callbackThrottle,
+                  DownloadConnectionAllowedChecker downloadConnectionAllowedChecker) {
         this.downloadFiles = downloadFiles;
         this.fileBytesDownloadedMap = fileBytesDownloadedMap;
         this.downloadBatchStatus = internalDownloadBatchStatus;
         this.downloadsBatchPersistence = downloadsBatchPersistence;
         this.callbackThrottle = callbackThrottle;
+        this.downloadConnectionAllowedChecker = downloadConnectionAllowedChecker;
     }
 
     void setCallback(DownloadBatchStatusCallback callback) {
@@ -47,6 +50,13 @@ class DownloadBatch {
     void download() {
         DownloadBatchStatus.Status status = downloadBatchStatus.status();
         if (status == PAUSED || status == DELETION || status == DOWNLOADED) {
+            return;
+        }
+
+        if(!downloadConnectionAllowedChecker.isAllowedToDownload()) {
+            downloadBatchStatus.markAsError(new DownloadError(DownloadError.Error.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE), downloadsBatchPersistence);
+            notifyCallback(downloadBatchStatus);
+            DownloadsNetworkRecoveryCreator.getInstance().scheduleRecovery();
             return;
         }
 

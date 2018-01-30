@@ -15,6 +15,7 @@ import android.support.annotation.DrawableRes;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
+import com.novoda.merlin.MerlinsBeard;
 import com.novoda.notils.logger.simple.Log;
 import com.squareup.okhttp.OkHttpClient;
 
@@ -151,8 +152,8 @@ public final class DownloadManagerBuilder {
         return this;
     }
 
-    public DownloadManagerBuilder withAllowedConnectionType(ConnectionType connectionTypeNotAllowed) {
-        this.connectionTypeAllowed = connectionTypeNotAllowed;
+    public DownloadManagerBuilder withAllowedConnectionType(ConnectionType connectionTypeAllowed) {
+        this.connectionTypeAllowed = connectionTypeAllowed;
         return this;
     }
 
@@ -217,11 +218,14 @@ public final class DownloadManagerBuilder {
 
         Executor executor = Executors.newSingleThreadExecutor();
         DownloadsFilePersistence downloadsFilePersistence = new DownloadsFilePersistence(downloadsPersistence);
+        MerlinsBeard merlinsBeard = MerlinsBeard.from(applicationContext);
+        DownloadConnectionAllowedChecker downloadConnectionAllowedChecker = new DownloadConnectionAllowedChecker(merlinsBeard, connectionTypeAllowed);
         DownloadsBatchPersistence downloadsBatchPersistence = new DownloadsBatchPersistence(
                 executor,
                 downloadsFilePersistence,
                 downloadsPersistence,
-                callbackThrottleCreator
+                callbackThrottleCreator,
+                downloadConnectionAllowedChecker
         );
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -240,6 +244,7 @@ public final class DownloadManagerBuilder {
                 downloadsBatchPersistence,
                 downloadsFilePersistence,
                 notificationDispatcher,
+                downloadConnectionAllowedChecker,
                 callbacks,
                 callbackThrottleCreator
         );
@@ -252,7 +257,8 @@ public final class DownloadManagerBuilder {
                 callbacks,
                 fileOperations,
                 downloadsBatchPersistence,
-                downloader
+                downloader,
+                downloadConnectionAllowedChecker
         );
 
         return downloadManager;
