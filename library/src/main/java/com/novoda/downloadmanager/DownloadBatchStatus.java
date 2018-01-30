@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager;
 
+import android.support.annotation.Nullable;
+
 import java.security.InvalidParameterException;
 
 public interface DownloadBatchStatus {
@@ -42,5 +44,9 @@ public interface DownloadBatchStatus {
 
     long downloadedDateTimeInMillis();
 
+    /**
+     * @return null if {@link DownloadBatchStatus#status()} is not {@link Status#ERROR}.
+     */
+    @Nullable
     DownloadError.Error getDownloadErrorType();
 }
