@@ -105,39 +105,9 @@ class InternalFilePersistence implements FilePersistence {
     }
 
     @Override
-    public long getCurrentSize() {
-        if (fileOutputStream == null) {
-            Log.e("Cannot get the current file size, you must create the file first");
-            return 0;
-        }
-
-        try {
-            return fileOutputStream.getChannel().size();
-        } catch (IOException e) {
-            Log.e(e, "Error requesting file size, make sure you create one first");
-            return 0;
-        }
-    }
-
-    @Override
     public long getCurrentSize(FilePath filePath) {
         File file = new File(filePath.path());
-        FileOutputStream fileOutputStream = null;
-        try {
-            fileOutputStream = new FileOutputStream(file);
-            return fileOutputStream.getChannel().size();
-        } catch (IOException e) {
-            Log.e(e, "Error requesting file size for " + filePath.path());
-            return 0;
-        } finally {
-            if (fileOutputStream != null) {
-                try {
-                    fileOutputStream.close();
-                } catch (IOException e) {
-                    Log.e(e, "Error requesting file size for " + filePath.path());
-                }
-            }
-        }
+        return file.length();
     }
 
     @Override

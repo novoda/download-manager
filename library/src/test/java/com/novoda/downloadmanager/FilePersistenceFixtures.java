@@ -61,11 +61,6 @@ class FilePersistenceFixtures {
             }
 
             @Override
-            public long getCurrentSize() {
-                return currentSize;
-            }
-
-            @Override
             public long getCurrentSize(FilePath filePath) {
                 return currentSize;
             }

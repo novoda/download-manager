@@ -66,7 +66,7 @@ class DownloadFile {
         }
 
         filePath = result.filePath();
-        fileSize.setCurrentSize(filePersistence.getCurrentSize());
+        fileSize.setCurrentSize(filePersistence.getCurrentSize(filePath));
 
         persistSync();
 
