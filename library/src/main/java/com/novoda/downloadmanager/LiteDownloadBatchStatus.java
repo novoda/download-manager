@@ -16,8 +16,7 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     private int percentageDownloaded;
     private Status status;
 
-    @Nullable
-    private DownloadError downloadError;
+    private Optional<DownloadError> downloadError = Optional.absent();
 
     LiteDownloadBatchStatus(DownloadBatchId downloadBatchId, DownloadBatchTitle downloadBatchTitle, long downloadedDateTimeInMillis, Status status) {
         this.downloadBatchTitle = downloadBatchTitle;
@@ -100,7 +99,7 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     }
 
     @Override
-    public void markAsError(DownloadError downloadError, DownloadsBatchStatusPersistence persistence) {
+    public void markAsError(Optional<DownloadError> downloadError, DownloadsBatchStatusPersistence persistence) {
         this.status = Status.ERROR;
         this.downloadError = downloadError;
         updateStatus(status, persistence);
@@ -119,8 +118,8 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     @Nullable
     @Override
     public DownloadError.Error getDownloadErrorType() {
-        if (downloadError != null) {
-            return downloadError.error();
+        if (downloadError.isPresent()) {
+            return downloadError.get().error();
         } else {
             return null;
         }

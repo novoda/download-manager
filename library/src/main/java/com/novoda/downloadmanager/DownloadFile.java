@@ -47,9 +47,9 @@ class DownloadFile {
     }
 
     void download(final Callback callback) {
-        callback.onUpdate(downloadFileStatus);
+        downloadFileStatus.markAsDownloading();
 
-        moveStatusToDownloadingIfQueued();
+        callback.onUpdate(downloadFileStatus);
 
         fileSize = requestTotalFileSizeIfNecessary(fileSize);
 
@@ -144,12 +144,6 @@ class DownloadFile {
     private void updateAndFeedbackWithStatus(Error error, Callback callback) {
         downloadFileStatus.markAsError(error);
         callback.onUpdate(downloadFileStatus);
-    }
-
-    private void moveStatusToDownloadingIfQueued() {
-        if (downloadFileStatus.isMarkedAsQueued()) {
-            downloadFileStatus.markAsDownloading();
-        }
     }
 
     void pause() {

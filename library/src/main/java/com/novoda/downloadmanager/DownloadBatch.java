@@ -46,7 +46,7 @@ class DownloadBatch {
 
     void download() {
         DownloadBatchStatus.Status status = downloadBatchStatus.status();
-        if (status == PAUSED || status == DELETION || status == DOWNLOADED) {
+        if (status == PAUSED || status == DELETION) {
             return;
         }
 
@@ -56,7 +56,7 @@ class DownloadBatch {
         totalBatchSizeBytes = getTotalSize(downloadFiles);
 
         if (totalBatchSizeBytes <= ZERO_BYTES) {
-            DownloadError downloadError = new DownloadError(DownloadError.Error.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE);
+            Optional<DownloadError> downloadError = Optional.of(new DownloadError(DownloadError.Error.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE));
             downloadBatchStatus.markAsError(downloadError, downloadsBatchPersistence);
             notifyCallback(downloadBatchStatus);
             return;
