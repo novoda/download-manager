@@ -19,6 +19,4 @@ interface InternalDownloadBatchStatus extends DownloadBatchStatus {
     void markNotificationAsSeen(DownloadsNotificationSeenPersistence persistence);
 
     void markNotificationAsNotSeen(DownloadsNotificationSeenPersistence persistence);
-
-    boolean notificationSeen();
 }
