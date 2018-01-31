@@ -46,7 +46,7 @@ class LiteDownloadsNetworkRecoveryEnabled implements DownloadsNetworkRecovery {
     }
 
     @Override
-    public void updateAllowedConnection(ConnectionType allowedConnectionType) {
+    public void updateAllowedConnectionType(ConnectionType allowedConnectionType) {
         connectionType = allowedConnectionType;
     }
 }

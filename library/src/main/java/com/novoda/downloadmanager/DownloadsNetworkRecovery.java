@@ -4,7 +4,7 @@ interface DownloadsNetworkRecovery {
 
     void scheduleRecovery();
 
-    void updateAllowedConnection(ConnectionType allowedConnectionType);
+    void updateAllowedConnectionType(ConnectionType allowedConnectionType);
 
     DownloadsNetworkRecovery DISABLED = new DownloadsNetworkRecovery() {
         @Override
@@ -13,7 +13,7 @@ interface DownloadsNetworkRecovery {
         }
 
         @Override
-        public void updateAllowedConnection(ConnectionType allowedConnectionType) {
+        public void updateAllowedConnectionType(ConnectionType allowedConnectionType) {
             // do-nothing
         }
     };
