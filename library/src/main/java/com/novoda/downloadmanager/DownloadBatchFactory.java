@@ -14,7 +14,8 @@ final class DownloadBatchFactory {
                                      FileOperations fileOperations,
                                      DownloadsBatchPersistence downloadsBatchPersistence,
                                      DownloadsFilePersistence downloadsFilePersistence,
-                                     CallbackThrottle callbackThrottle) {
+                                     CallbackThrottle callbackThrottle,
+                                     ConnectionChecker connectionChecker) {
         DownloadBatchTitle downloadBatchTitle = DownloadBatchTitleCreator.createFrom(batch);
         DownloadBatchId downloadBatchId = batch.downloadBatchId();
         long downloadedDateTimeInMillis = System.currentTimeMillis();
@@ -73,7 +74,8 @@ final class DownloadBatchFactory {
                 downloadFiles,
                 new HashMap<>(),
                 downloadsBatchPersistence,
-                callbackThrottle
+                callbackThrottle,
+                connectionChecker
         );
     }
 

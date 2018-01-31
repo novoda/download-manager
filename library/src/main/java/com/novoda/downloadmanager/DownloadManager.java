@@ -4,6 +4,8 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 
+import com.novoda.notils.logger.simple.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +21,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
     private final FileOperations fileOperations;
     private final DownloadsBatchPersistence downloadsBatchPersistence;
     private final LiteDownloadManagerDownloader downloader;
+    private final ConnectionChecker connectionChecker;
 
     private DownloadService downloadService;
 
@@ -31,7 +34,8 @@ class DownloadManager implements LiteDownloadManagerCommands {
                     List<DownloadBatchStatusCallback> callbacks,
                     FileOperations fileOperations,
                     DownloadsBatchPersistence downloadsBatchPersistence,
-                    LiteDownloadManagerDownloader downloader) {
+                    LiteDownloadManagerDownloader downloader,
+                    ConnectionChecker connectionChecker) {
         this.waitForDownloadService = waitForDownloadService;
         this.executor = executor;
         this.callbackHandler = callbackHandler;
@@ -40,6 +44,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
         this.fileOperations = fileOperations;
         this.downloadsBatchPersistence = downloadsBatchPersistence;
         this.downloader = downloader;
+        this.connectionChecker = connectionChecker;
     }
 
     void initialise(DownloadService downloadService) {
@@ -179,6 +184,16 @@ class DownloadManager implements LiteDownloadManagerCommands {
                     callbackHandler.post(() -> callback.onReceived(downloadFileStatus));
                     return null;
                 }));
+    }
+
+    @Override
+    public void updateAllowedConnectionType(ConnectionType allowedConnectionType) {
+        if (allowedConnectionType == null) {
+            throw new IllegalArgumentException("Allowed connection type cannot be null");
+        }
+        connectionChecker.updateAllowedConnectionType(allowedConnectionType);
+        DownloadsNetworkRecoveryCreator.getInstance().updateAllowedConnectionType(allowedConnectionType);
+        submitAllStoredDownloads(() -> Log.v("Allowed connectionType updated to " + allowedConnectionType + ". All jobs submitted"));
     }
 
 }

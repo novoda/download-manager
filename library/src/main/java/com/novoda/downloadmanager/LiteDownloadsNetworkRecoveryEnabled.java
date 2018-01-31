@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 class LiteDownloadsNetworkRecoveryEnabled implements DownloadsNetworkRecovery {
 
-    private final ConnectionType connectionType;
+    private ConnectionType connectionType;
 
     LiteDownloadsNetworkRecoveryEnabled(Context context, DownloadManager downloadManager, ConnectionType connectionType) {
         this.connectionType = connectionType;
@@ -43,5 +43,10 @@ class LiteDownloadsNetworkRecoveryEnabled implements DownloadsNetworkRecovery {
 
         jobManager.schedule(jobRequest);
         Log.v("Scheduling Network Recovery.");
+    }
+
+    @Override
+    public void updateAllowedConnectionType(ConnectionType allowedConnectionType) {
+        connectionType = allowedConnectionType;
     }
 }

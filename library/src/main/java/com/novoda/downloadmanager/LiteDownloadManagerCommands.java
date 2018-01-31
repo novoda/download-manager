@@ -31,4 +31,6 @@ public interface LiteDownloadManagerCommands {
     DownloadFileStatus getDownloadStatusWithMatching(DownloadFileId downloadFileId);
 
     void getDownloadStatusWithMatching(DownloadFileId downloadFileId, DownloadFileStatusCallback callback);
+
+    void updateAllowedConnectionType(ConnectionType allowedConnectionType);
 }
