@@ -6,6 +6,8 @@ import java.util.List;
 
 final class DownloadBatchFactory {
 
+    private static final boolean NOTIFICATION_NOT_SEEN = false;
+
     private DownloadBatchFactory() {
         // non instantiable factory class
     }
@@ -66,7 +68,8 @@ final class DownloadBatchFactory {
                 downloadBatchId,
                 downloadBatchTitle,
                 downloadedDateTimeInMillis,
-                DownloadBatchStatus.Status.QUEUED
+                DownloadBatchStatus.Status.QUEUED,
+                NOTIFICATION_NOT_SEEN
         );
 
         return new DownloadBatch(

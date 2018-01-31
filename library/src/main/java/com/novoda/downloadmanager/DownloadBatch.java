@@ -204,7 +204,7 @@ class DownloadBatch {
                 downloadBatchStatus.status(),
                 downloadFiles,
                 downloadBatchStatus.downloadedDateTimeInMillis(),
-                false
+                downloadBatchStatus.notificationSeen()
         );
     }
 }

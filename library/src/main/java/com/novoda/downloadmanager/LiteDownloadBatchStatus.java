@@ -15,14 +15,20 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     private long totalBatchSizeBytes;
     private int percentageDownloaded;
     private Status status;
+    private boolean notificationSeen;
 
     private Optional<DownloadError> downloadError = Optional.absent();
 
-    LiteDownloadBatchStatus(DownloadBatchId downloadBatchId, DownloadBatchTitle downloadBatchTitle, long downloadedDateTimeInMillis, Status status) {
+    LiteDownloadBatchStatus(DownloadBatchId downloadBatchId,
+                            DownloadBatchTitle downloadBatchTitle,
+                            long downloadedDateTimeInMillis,
+                            Status status,
+                            boolean notificationSeen) {
         this.downloadBatchTitle = downloadBatchTitle;
         this.downloadBatchId = downloadBatchId;
         this.downloadedDateTimeInMillis = downloadedDateTimeInMillis;
         this.status = status;
+        this.notificationSeen = notificationSeen;
     }
 
     @Override
@@ -123,5 +129,10 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public boolean notificationSeen() {
+        return notificationSeen;
     }
 }

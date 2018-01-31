@@ -15,4 +15,6 @@ interface InternalDownloadBatchStatus extends DownloadBatchStatus {
     void markAsError(Optional<DownloadError> downloadError, DownloadsBatchStatusPersistence persistence);
 
     void markAsDownloaded(DownloadsBatchStatusPersistence persistence);
+
+    boolean notificationSeen();
 }

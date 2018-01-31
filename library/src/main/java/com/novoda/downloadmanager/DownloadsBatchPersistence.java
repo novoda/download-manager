@@ -66,11 +66,13 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence {
                 DownloadBatchId downloadBatchId = batchPersisted.downloadBatchId();
                 DownloadBatchTitle downloadBatchTitle = batchPersisted.downloadBatchTitle();
                 long downloadedDateTimeInMillis = batchPersisted.downloadedDateTimeInMillis();
+                boolean notificationSeen = batchPersisted.notificationSeen();
                 InternalDownloadBatchStatus liteDownloadBatchStatus = new LiteDownloadBatchStatus(
                         downloadBatchId,
                         downloadBatchTitle,
                         downloadedDateTimeInMillis,
-                        status
+                        status,
+                        notificationSeen
                 );
 
                 List<DownloadFile> downloadFiles = downloadsFilePersistence.loadSync(
