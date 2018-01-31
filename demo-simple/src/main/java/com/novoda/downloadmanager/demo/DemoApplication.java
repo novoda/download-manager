@@ -5,7 +5,6 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.facebook.stetho.Stetho;
-import com.novoda.downloadmanager.ConnectionType;
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 
@@ -25,7 +24,6 @@ public class DemoApplication extends Application {
 
         liteDownloadManagerCommands = DownloadManagerBuilder
                 .newInstance(this, handler, R.mipmap.ic_launcher_round)
-                .withAllowedConnectionType(ConnectionType.UNMETERED)
                 .build();
     }
 
