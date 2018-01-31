@@ -2,6 +2,8 @@ package com.novoda.downloadmanager;
 
 import android.os.Handler;
 
+import com.novoda.notils.logger.simple.Log;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -38,6 +40,7 @@ public class DownloadManagerTest {
     private static final Batch BATCH = Batch.with(DOWNLOAD_BATCH_ID, "title").build();
     private static final DownloadFileId DOWNLOAD_FILE_ID = aDownloadFileId().withRawDownloadFileId("file_id_01").build();
     private static final DownloadFileStatus DOWNLOAD_FILE_STATUS = aDownloadFileStatus().withDownloadFileId(DOWNLOAD_FILE_ID).build();
+    private static final ConnectionType ANY_CONNECTION_TYPE = ConnectionType.METERED;
 
     private final AllStoredDownloadsSubmittedCallback allStoredDownloadsSubmittedCallback = mock(AllStoredDownloadsSubmittedCallback.class);
     private final AllBatchStatusesCallback allBatchStatusesCallback = mock(AllBatchStatusesCallback.class);
@@ -83,6 +86,7 @@ public class DownloadManagerTest {
         setupDownloadBatchesResponse();
         setupDownloadBatchStatusesResponse();
         setupDownloadStatusResponse();
+        setupNetworkRecoveryCreator();
 
         given(downloadBatch.status()).willReturn(BATCH_STATUS);
         given(additionalDownloadBatch.downloadFileStatusWith(DOWNLOAD_FILE_ID)).willReturn(DOWNLOAD_FILE_STATUS);
@@ -119,6 +123,11 @@ public class DownloadManagerTest {
             downloadFileStatus = invocation.getArgument(0);
             return null;
         }).given(downloadFileStatusCallback).onReceived(any(DownloadFileStatus.class));
+    }
+
+    private void setupNetworkRecoveryCreator() {
+        Log.setShowLogs(false);
+        DownloadsNetworkRecoveryCreator.createDisabled();
     }
 
     @Test
@@ -326,6 +335,18 @@ public class DownloadManagerTest {
         DownloadFileStatus fileStatus = downloadManager.getDownloadStatusWithMatching(DOWNLOAD_FILE_ID);
 
         assertThat(fileStatus).isEqualTo(DOWNLOAD_FILE_STATUS);
+    }
+
+    @Test
+    public void updateAllowedConnectionTypeInConnectionChecker_whenUpdatedInDownloadManager() {
+        downloadManager.updateAllowedConnectionType(ANY_CONNECTION_TYPE);
+
+        verify(connectionChecker).updateAllowedConnectionType(ANY_CONNECTION_TYPE);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throwException_whenUpdatedWithNullConnectionType() {
+        downloadManager.updateAllowedConnectionType(null);
     }
 
     private void notifyLockOnAnotherThread() {
