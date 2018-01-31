@@ -188,7 +188,9 @@ class DownloadManager implements LiteDownloadManagerCommands {
     public void updateAllowedConnectionType(ConnectionType allowedConnectionType) {
         downloadConnectionAllowedChecker.updateAllowedConnectionType(allowedConnectionType);
         DownloadsNetworkRecoveryCreator.getInstance().updateAllowedConnection(allowedConnectionType);
-        submitAllStoredDownloads(() -> {});
+        submitAllStoredDownloads(() -> {
+            // no-op
+        });
     }
 
 }

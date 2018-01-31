@@ -53,7 +53,7 @@ class DownloadBatch {
             return;
         }
 
-        if(!downloadConnectionAllowedChecker.isAllowedToDownload()) {
+        if (!downloadConnectionAllowedChecker.isAllowedToDownload()) {
             downloadBatchStatus.markAsError(Optional.of(new DownloadError(DownloadError.Error.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE)), downloadsBatchPersistence);
             notifyCallback(downloadBatchStatus);
             DownloadsNetworkRecoveryCreator.getInstance().scheduleRecovery();
