@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -79,14 +80,7 @@ public class MainActivity extends AppCompatActivity {
         textViewBatch2 = findViewById(R.id.batch_2);
 
         CheckBox checkWifiOnly = findViewById(R.id.check_wifi_only);
-        checkWifiOnly.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            LiteDownloadManagerCommands downloadManagerCommands = ((DemoApplication) getApplication()).getLiteDownloadManagerCommands();
-            if (isChecked) {
-                downloadManagerCommands.updateAllowedConnectionType(ConnectionType.UNMETERED);
-            } else {
-                downloadManagerCommands.updateAllowedConnectionType(ConnectionType.ALL);
-            }
-        });
+        checkWifiOnly.setOnCheckedChangeListener(wifiOnlyOnCheckedChange);
 
         versionOneDatabaseCloner = DatabaseClonerFactory.databaseCloner(this, cloneCallback);
 
@@ -123,6 +117,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private final VersionOneDatabaseCloner.CloneCallback cloneCallback = updateMessage -> databaseCloningUpdates.setText(updateMessage);
+
+    private final CompoundButton.OnCheckedChangeListener wifiOnlyOnCheckedChange = (buttonView, isChecked) -> {
+        LiteDownloadManagerCommands downloadManagerCommands = ((DemoApplication) getApplication()).getLiteDownloadManagerCommands();
+        if (isChecked) {
+            downloadManagerCommands.updateAllowedConnectionType(ConnectionType.UNMETERED);
+        } else {
+            downloadManagerCommands.updateAllowedConnectionType(ConnectionType.ALL);
+        }
+    };
 
     private final View.OnClickListener createDatabaseOnClick = v -> {
         String selectedFileSize = (String) downloadFileSizeSpinner.getSelectedItem();
