@@ -47,7 +47,7 @@ class DownloadFile {
     }
 
     void download(final Callback callback) {
-        moveStatusToDownloadingIfQueuedOrError();
+        downloadFileStatus.markAsDownloading();
 
         callback.onUpdate(downloadFileStatus);
 
@@ -66,7 +66,7 @@ class DownloadFile {
         }
 
         filePath = result.filePath();
-        fileSize.setCurrentSize(filePersistence.getCurrentSize());
+        fileSize.setCurrentSize(filePersistence.getCurrentSize(filePath));
 
         persistSync();
 
@@ -144,12 +144,6 @@ class DownloadFile {
     private void updateAndFeedbackWithStatus(Error error, Callback callback) {
         downloadFileStatus.markAsError(error);
         callback.onUpdate(downloadFileStatus);
-    }
-
-    private void moveStatusToDownloadingIfQueuedOrError() {
-        if (downloadFileStatus.isMarkedAsQueued() || downloadFileStatus.isMarkedAsError()) {
-            downloadFileStatus.markAsDownloading();
-        }
     }
 
     void pause() {

@@ -49,7 +49,7 @@ class DownloadBatch {
 
     void download() {
         DownloadBatchStatus.Status status = downloadBatchStatus.status();
-        if (status == PAUSED || status == DELETION || status == DOWNLOADED) {
+        if (status == PAUSED || status == DELETION) {
             return;
         }
 

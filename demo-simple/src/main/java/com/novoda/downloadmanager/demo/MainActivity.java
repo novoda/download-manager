@@ -140,11 +140,11 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         liteDownloadManagerCommands.download(batch);
 
-//        batch = Batch.with(BATCH_ID_2, "Hollyoaks")
-//                .addFile(TEN_MB_FILE_URL).apply()
-//                .addFile(TWENTY_MB_FILE_URL).apply()
-//                .build();
-//        liteDownloadManagerCommands.download(batch);
+        batch = Batch.with(BATCH_ID_2, "Hollyoaks")
+                .addFile(TEN_MB_FILE_URL).apply()
+                .addFile(TWENTY_MB_FILE_URL).apply()
+                .build();
+        liteDownloadManagerCommands.download(batch);
     };
 
     private final View.OnClickListener deleteAllOnClick = v -> {
