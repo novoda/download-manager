@@ -44,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String FIVE_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/5MB.zip";
     private static final String TEN_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/10MB.zip";
     private static final String TWENTY_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/20MB.zip";
-    private static final String FIFTHY_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/50MB.zip";
 
     private TextView databaseCloningUpdates;
     private TextView databaseMigrationUpdates;
@@ -79,9 +78,6 @@ public class MainActivity extends AppCompatActivity {
         textViewBatch1 = findViewById(R.id.batch_1);
         textViewBatch2 = findViewById(R.id.batch_2);
 
-        CheckBox checkWifiOnly = findViewById(R.id.check_wifi_only);
-        checkWifiOnly.setOnCheckedChangeListener(wifiOnlyOnCheckedChange);
-
         versionOneDatabaseCloner = DatabaseClonerFactory.databaseCloner(this, cloneCallback);
 
         downloadFileSizeSpinner = findViewById(R.id.database_download_file_size);
@@ -95,6 +91,9 @@ public class MainActivity extends AppCompatActivity {
         databaseMigrationUpdates = findViewById(R.id.database_migration_updates);
         View buttonMigrate = findViewById(R.id.button_migrate);
         buttonMigrate.setOnClickListener(startMigrationOnClick);
+
+        CheckBox checkWifiOnly = findViewById(R.id.check_wifi_only);
+        checkWifiOnly.setOnCheckedChangeListener(wifiOnlyOnCheckedChange);
 
         View buttonDownload = findViewById(R.id.button_start_downloading);
         buttonDownload.setOnClickListener(downloadBatchesOnClick);
@@ -118,14 +117,6 @@ public class MainActivity extends AppCompatActivity {
 
     private final VersionOneDatabaseCloner.CloneCallback cloneCallback = updateMessage -> databaseCloningUpdates.setText(updateMessage);
 
-    private final CompoundButton.OnCheckedChangeListener wifiOnlyOnCheckedChange = (buttonView, isChecked) -> {
-        LiteDownloadManagerCommands downloadManagerCommands = ((DemoApplication) getApplication()).getLiteDownloadManagerCommands();
-        if (isChecked) {
-            downloadManagerCommands.updateAllowedConnectionType(ConnectionType.UNMETERED);
-        } else {
-            downloadManagerCommands.updateAllowedConnectionType(ConnectionType.ALL);
-        }
-    };
 
     private final View.OnClickListener createDatabaseOnClick = v -> {
         String selectedFileSize = (String) downloadFileSizeSpinner.getSelectedItem();
@@ -135,6 +126,15 @@ public class MainActivity extends AppCompatActivity {
     private final MigrationCallback migrationCallback = migrationStatus -> databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());
 
     private final View.OnClickListener startMigrationOnClick = v -> downloadMigrator.startMigration("downloads.db", migrationCallback);
+
+    private final CompoundButton.OnCheckedChangeListener wifiOnlyOnCheckedChange = (buttonView, isChecked) -> {
+        LiteDownloadManagerCommands downloadManagerCommands = ((DemoApplication) getApplication()).getLiteDownloadManagerCommands();
+        if (isChecked) {
+            downloadManagerCommands.updateAllowedConnectionType(ConnectionType.UNMETERED);
+        } else {
+            downloadManagerCommands.updateAllowedConnectionType(ConnectionType.ALL);
+        }
+    };
 
     private final View.OnClickListener downloadBatchesOnClick = v -> {
         Batch batch = Batch.with(BATCH_ID_1, "Made in chelsea")
