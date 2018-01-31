@@ -6,15 +6,18 @@ class LiteDownloadsBatchPersisted implements DownloadsBatchPersisted {
     private final DownloadBatchId downloadBatchId;
     private final DownloadBatchStatus.Status status;
     private final long downloadedDateTimeInMillis;
+    private final boolean notificationSeen;
 
     LiteDownloadsBatchPersisted(DownloadBatchTitle downloadBatchTitle,
                                 DownloadBatchId downloadBatchId,
                                 DownloadBatchStatus.Status status,
-                                long downloadedDateTimeInMillis) {
+                                long downloadedDateTimeInMillis,
+                                boolean notificationSeen) {
         this.downloadBatchTitle = downloadBatchTitle;
         this.downloadBatchId = downloadBatchId;
         this.status = status;
         this.downloadedDateTimeInMillis = downloadedDateTimeInMillis;
+        this.notificationSeen = notificationSeen;
     }
 
     @Override
@@ -35,5 +38,10 @@ class LiteDownloadsBatchPersisted implements DownloadsBatchPersisted {
     @Override
     public long downloadedDateTimeInMillis() {
         return downloadedDateTimeInMillis;
+    }
+
+    @Override
+    public boolean notificationSeen() {
+        return notificationSeen;
     }
 }

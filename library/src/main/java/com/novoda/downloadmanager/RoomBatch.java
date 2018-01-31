@@ -23,4 +23,7 @@ class RoomBatch {
 
     @ColumnInfo(name = "batch_downloaded_date_time_in_millis")
     public long downloadedDateTimeInMillis;
+
+    @ColumnInfo(name = "notification_seen")
+    public boolean notificationSeen;
 }

@@ -97,7 +97,8 @@ class MigrationJob implements Runnable {
                 downloadBatchTitle,
                 downloadBatchId,
                 downloadBatchStatus,
-                downloadedDateTimeInMillis
+                downloadedDateTimeInMillis,
+                false
         );
         downloadsPersistence.persistBatch(persistedBatch);
 

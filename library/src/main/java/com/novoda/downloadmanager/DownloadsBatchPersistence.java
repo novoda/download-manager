@@ -30,7 +30,8 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence {
                       DownloadBatchId downloadBatchId,
                       DownloadBatchStatus.Status status,
                       List<DownloadFile> downloadFiles,
-                      long downloadedDateTimeInMillis) {
+                      long downloadedDateTimeInMillis,
+                      boolean notificationSeen) {
         executor.execute(() -> {
             downloadsPersistence.startTransaction();
 
@@ -39,7 +40,8 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence {
                         downloadBatchTitle,
                         downloadBatchId,
                         status,
-                        downloadedDateTimeInMillis
+                        downloadedDateTimeInMillis,
+                        notificationSeen
                 );
                 downloadsPersistence.persistBatch(batchPersisted);
 
