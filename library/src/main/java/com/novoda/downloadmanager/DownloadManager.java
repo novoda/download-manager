@@ -4,6 +4,8 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 
+import com.novoda.notils.logger.simple.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -188,9 +190,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
     public void updateAllowedConnectionType(ConnectionType allowedConnectionType) {
         downloadConnectionAllowedChecker.updateAllowedConnectionType(allowedConnectionType);
         DownloadsNetworkRecoveryCreator.getInstance().updateAllowedConnection(allowedConnectionType);
-        submitAllStoredDownloads(() -> {
-            // no-op
-        });
+        submitAllStoredDownloads(() -> Log.v("Allowed connectionType updated to " + allowedConnectionType + ". All jobs submitted"));
     }
 
 }
