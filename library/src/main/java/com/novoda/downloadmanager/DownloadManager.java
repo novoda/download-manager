@@ -189,7 +189,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
     @Override
     public void updateAllowedConnectionType(ConnectionType allowedConnectionType) {
         if (allowedConnectionType == null) {
-            throw new NullPointerException("Allowed connection type cannot be null");
+            throw new IllegalArgumentException("Allowed connection type cannot be null");
         }
         downloadConnectionAllowedChecker.updateAllowedConnectionType(allowedConnectionType);
         DownloadsNetworkRecoveryCreator.getInstance().updateAllowedConnection(allowedConnectionType);
