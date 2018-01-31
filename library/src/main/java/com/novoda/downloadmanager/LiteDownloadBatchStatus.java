@@ -102,6 +102,7 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     @Override
     public void markForDeletion() {
         status = Status.DELETION;
+        notificationSeen = false;
     }
 
     @Override
