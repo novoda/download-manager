@@ -10,12 +10,16 @@ class NotificationDispatcher {
 
     private final Object waitForDownloadService;
     private final NotificationCreator<DownloadBatchStatus> notificationCreator;
+    private final DownloadsNotificationSeenPersistence notificationSeenPersistence;
 
     private DownloadService downloadService;
 
-    NotificationDispatcher(Object waitForDownloadService, NotificationCreator<DownloadBatchStatus> notificationCreator) {
+    NotificationDispatcher(Object waitForDownloadService,
+                           NotificationCreator<DownloadBatchStatus> notificationCreator,
+                           DownloadsNotificationSeenPersistence notificationSeenPersistence) {
         this.waitForDownloadService = waitForDownloadService;
         this.notificationCreator = notificationCreator;
+        this.notificationSeenPersistence = notificationSeenPersistence;
     }
 
     @WorkerThread
