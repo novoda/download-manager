@@ -52,7 +52,7 @@ public class DownloadManagerTest {
     private final FileOperations fileOperations = mock(FileOperations.class);
     private final DownloadsBatchPersistence downloadsBatchPersistence = mock(DownloadsBatchPersistence.class);
     private final LiteDownloadManagerDownloader downloadManagerDownloader = mock(LiteDownloadManagerDownloader.class);
-    private DownloadConnectionAllowedChecker downloadConnectionAllowedChecker = mock(DownloadConnectionAllowedChecker.class);
+    private final ConnectionChecker connectionChecker = mock(ConnectionChecker.class);
 
     private DownloadManager downloadManager;
     private Map<DownloadBatchId, DownloadBatch> downloadBatches = new HashMap<>();
@@ -77,7 +77,7 @@ public class DownloadManagerTest {
                 fileOperations,
                 downloadsBatchPersistence,
                 downloadManagerDownloader,
-                downloadConnectionAllowedChecker
+                connectionChecker
         );
 
         setupDownloadBatchesResponse();

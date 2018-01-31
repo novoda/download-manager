@@ -19,7 +19,7 @@ class LiteDownloadManagerDownloader {
     private final DownloadsFilePersistence downloadsFilePersistence;
     private final NotificationDispatcher notificationDispatcher;
     private final List<DownloadBatchStatusCallback> callbacks;
-    private final DownloadConnectionAllowedChecker downloadConnectionAllowedChecker;
+    private final ConnectionChecker connectionChecker;
 
     private final CallbackThrottleCreator callbackThrottleCreator;
 
@@ -34,7 +34,7 @@ class LiteDownloadManagerDownloader {
                                   DownloadsBatchPersistence downloadsBatchPersistence,
                                   DownloadsFilePersistence downloadsFilePersistence,
                                   NotificationDispatcher notificationDispatcher,
-                                  DownloadConnectionAllowedChecker downloadConnectionAllowedChecker,
+                                  ConnectionChecker connectionChecker,
                                   List<DownloadBatchStatusCallback> callbacks,
                                   CallbackThrottleCreator callbackThrottleCreator) {
         this.waitForDownloadService = waitForDownloadService;
@@ -44,7 +44,7 @@ class LiteDownloadManagerDownloader {
         this.downloadsBatchPersistence = downloadsBatchPersistence;
         this.downloadsFilePersistence = downloadsFilePersistence;
         this.notificationDispatcher = notificationDispatcher;
-        this.downloadConnectionAllowedChecker = downloadConnectionAllowedChecker;
+        this.connectionChecker = connectionChecker;
         this.callbacks = callbacks;
         this.callbackThrottleCreator = callbackThrottleCreator;
     }
@@ -63,7 +63,7 @@ class LiteDownloadManagerDownloader {
                 downloadsBatchPersistence,
                 downloadsFilePersistence,
                 callbackThrottle,
-                downloadConnectionAllowedChecker
+                connectionChecker
         );
 
         downloadBatch.persist();

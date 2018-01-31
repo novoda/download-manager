@@ -21,7 +21,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
     private final FileOperations fileOperations;
     private final DownloadsBatchPersistence downloadsBatchPersistence;
     private final LiteDownloadManagerDownloader downloader;
-    private final DownloadConnectionAllowedChecker downloadConnectionAllowedChecker;
+    private final ConnectionChecker connectionChecker;
 
     private DownloadService downloadService;
 
@@ -35,7 +35,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
                     FileOperations fileOperations,
                     DownloadsBatchPersistence downloadsBatchPersistence,
                     LiteDownloadManagerDownloader downloader,
-                    DownloadConnectionAllowedChecker downloadConnectionAllowedChecker) {
+                    ConnectionChecker connectionChecker) {
         this.waitForDownloadService = waitForDownloadService;
         this.executor = executor;
         this.callbackHandler = callbackHandler;
@@ -44,7 +44,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
         this.fileOperations = fileOperations;
         this.downloadsBatchPersistence = downloadsBatchPersistence;
         this.downloader = downloader;
-        this.downloadConnectionAllowedChecker = downloadConnectionAllowedChecker;
+        this.connectionChecker = connectionChecker;
     }
 
     void initialise(DownloadService downloadService) {
@@ -191,7 +191,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
         if (allowedConnectionType == null) {
             throw new IllegalArgumentException("Allowed connection type cannot be null");
         }
-        downloadConnectionAllowedChecker.updateAllowedConnectionType(allowedConnectionType);
+        connectionChecker.updateAllowedConnectionType(allowedConnectionType);
         DownloadsNetworkRecoveryCreator.getInstance().updateAllowedConnection(allowedConnectionType);
         submitAllStoredDownloads(() -> Log.v("Allowed connectionType updated to " + allowedConnectionType + ". All jobs submitted"));
     }

@@ -219,13 +219,13 @@ public final class DownloadManagerBuilder {
         Executor executor = Executors.newSingleThreadExecutor();
         DownloadsFilePersistence downloadsFilePersistence = new DownloadsFilePersistence(downloadsPersistence);
         MerlinsBeard merlinsBeard = MerlinsBeard.from(applicationContext);
-        DownloadConnectionAllowedChecker downloadConnectionAllowedChecker = new DownloadConnectionAllowedChecker(merlinsBeard, connectionTypeAllowed);
+        ConnectionChecker connectionChecker = new ConnectionChecker(merlinsBeard, connectionTypeAllowed);
         DownloadsBatchPersistence downloadsBatchPersistence = new DownloadsBatchPersistence(
                 executor,
                 downloadsFilePersistence,
                 downloadsPersistence,
                 callbackThrottleCreator,
-                downloadConnectionAllowedChecker
+                connectionChecker
         );
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -244,7 +244,7 @@ public final class DownloadManagerBuilder {
                 downloadsBatchPersistence,
                 downloadsFilePersistence,
                 notificationDispatcher,
-                downloadConnectionAllowedChecker,
+                connectionChecker,
                 callbacks,
                 callbackThrottleCreator
         );
@@ -258,7 +258,7 @@ public final class DownloadManagerBuilder {
                 fileOperations,
                 downloadsBatchPersistence,
                 downloader,
-                downloadConnectionAllowedChecker
+                connectionChecker
         );
 
         return downloadManager;

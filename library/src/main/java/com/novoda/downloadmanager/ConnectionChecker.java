@@ -2,12 +2,12 @@ package com.novoda.downloadmanager;
 
 import com.novoda.merlin.MerlinsBeard;
 
-class DownloadConnectionAllowedChecker {
+class ConnectionChecker {
 
     private final MerlinsBeard merlinsBeard;
     private ConnectionType allowedConnectionType;
 
-    DownloadConnectionAllowedChecker(MerlinsBeard merlinsBeard, ConnectionType allowedConnectionType) {
+    ConnectionChecker(MerlinsBeard merlinsBeard, ConnectionType allowedConnectionType) {
         this.merlinsBeard = merlinsBeard;
         this.allowedConnectionType = allowedConnectionType;
     }
