@@ -2,12 +2,15 @@ package com.novoda.downloadmanager;
 
 import android.support.annotation.WorkerThread;
 
+import com.novoda.notils.logger.simple.Log;
+
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETION;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 
 class NotificationDispatcher {
 
+    private static final boolean NOTIFICATION_SEEN = true;
     private final Object waitForDownloadService;
     private final NotificationCreator<DownloadBatchStatus> notificationCreator;
     private final DownloadsNotificationSeenPersistence notificationSeenPersistence;
@@ -33,7 +36,15 @@ class NotificationDispatcher {
             NotificationInformation notificationInformation = notificationCreator.createNotification(downloadBatchStatus);
             DownloadBatchStatus.Status status = downloadBatchStatus.status();
 
-            if (status == DOWNLOADED || status == DELETION || status == ERROR) {
+            if (downloadBatchStatus.notificationSeen()) {
+                Log.v("DownloadBatchStatus: ", downloadBatchStatus.getDownloadBatchId(), " notification has already been seen.");
+                return null;
+            }
+
+            if (status == DOWNLOADED) {
+                notificationSeenPersistence.updateNotificationSeenAsync(downloadBatchStatus.getDownloadBatchId(), NOTIFICATION_SEEN);
+                downloadService.stackNotification(notificationInformation);
+            } else if (status == DELETION || status == ERROR) {
                 downloadService.stackNotification(notificationInformation);
             } else {
                 downloadService.updateNotification(notificationInformation);
