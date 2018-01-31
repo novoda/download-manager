@@ -73,4 +73,9 @@ class FakeDownloadsPersistence implements DownloadsPersistence {
     public void update(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status) {
 
     }
+
+    @Override
+    public void update(DownloadBatchId downloadBatchId, boolean notificationSeen) {
+
+    }
 }

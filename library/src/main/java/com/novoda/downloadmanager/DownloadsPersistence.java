@@ -24,4 +24,6 @@ public interface DownloadsPersistence {
 
     void update(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status);
 
+    void update(DownloadBatchId downloadBatchId, boolean notificationSeen);
+
 }

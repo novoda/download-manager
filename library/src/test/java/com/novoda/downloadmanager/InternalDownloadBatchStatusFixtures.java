@@ -146,6 +146,18 @@ class InternalDownloadBatchStatusFixtures {
             }
 
             @Override
+            public void markNotificationAsSeen(DownloadsNotificationSeenPersistence persistence) {
+                notificationSeen = true;
+                persistence.updateNotificationSeenAsync(downloadBatchId, notificationSeen());
+            }
+
+            @Override
+            public void markNotificationAsNotSeen(DownloadsNotificationSeenPersistence persistence) {
+                notificationSeen = false;
+                persistence.updateNotificationSeenAsync(downloadBatchId, notificationSeen());
+            }
+
+            @Override
             public boolean notificationSeen() {
                 return notificationSeen;
             }

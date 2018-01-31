@@ -120,4 +120,11 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
         roomBatch.status = status.toRawValue();
         database.roomBatchDao().update(roomBatch);
     }
+
+    @Override
+    public void update(DownloadBatchId downloadBatchId, boolean notificationSeen) {
+        RoomBatch roomBatch = database.roomBatchDao().load(downloadBatchId.rawId());
+        roomBatch.notificationSeen = notificationSeen;
+        database.roomBatchDao().update(roomBatch);
+    }
 }

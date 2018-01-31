@@ -117,6 +117,16 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
         updateStatus(status, persistence);
     }
 
+    @Override
+    public void markNotificationAsSeen(DownloadsNotificationSeenPersistence persistence) {
+        persistence.updateNotificationSeenAsync(downloadBatchId, true);
+    }
+
+    @Override
+    public void markNotificationAsNotSeen(DownloadsNotificationSeenPersistence persistence) {
+        persistence.updateNotificationSeenAsync(downloadBatchId, false);
+    }
+
     private void updateStatus(Status status, DownloadsBatchStatusPersistence persistence) {
         persistence.updateStatusAsync(downloadBatchId, status);
     }
