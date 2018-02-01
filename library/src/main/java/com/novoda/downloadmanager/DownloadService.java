@@ -8,7 +8,7 @@ interface DownloadService {
 
     void stackNotification(NotificationInformation notificationInformation);
 
-    void stackNotificationNotDismissable(NotificationInformation notificationInformation);
+    void stackNotificationNotDismissible(NotificationInformation notificationInformation);
 
     void dismissStackedNotification(NotificationInformation notificationInformation);
 }

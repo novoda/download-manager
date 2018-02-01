@@ -47,7 +47,7 @@ class NotificationDispatcher {
                 notificationSeenPersistence.updateNotificationSeenAsync(downloadBatchStatus.getDownloadBatchId(), NOTIFICATION_SEEN);
                 downloadService.stackNotification(notificationInformation);
             } else if (status == PAUSED) {
-                downloadService.stackNotificationNotDismissable(notificationInformation);
+                downloadService.stackNotificationNotDismissible(notificationInformation);
             } else if (status == DELETION || status == ERROR) {
                 downloadService.stackNotification(notificationInformation);
             } else {

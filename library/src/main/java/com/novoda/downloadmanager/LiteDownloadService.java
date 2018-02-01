@@ -70,7 +70,7 @@ public class LiteDownloadService extends Service implements DownloadService {
     }
 
     @Override
-    public void stackNotificationNotDismissable(NotificationInformation notificationInformation) {
+    public void stackNotificationNotDismissible(NotificationInformation notificationInformation) {
         stopForeground(true);
         Notification notification = notificationInformation.getNotification();
         notification.flags |= Notification.FLAG_ONGOING_EVENT;
