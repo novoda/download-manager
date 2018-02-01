@@ -1,6 +1,10 @@
 <resources>
   <string name="download_notification_channel_name">download-manager</string>
-  <string name="download_notification_channel_description">Download Manager Notification Service</string>
-  <string name="migration_notification_channel_name">download-manager-migration</string>
-  <string name="migration_notification_channel_description">Download Manager Migration Notification Service</string>
+  <string name="download_notification_channel_description">Download notifications</string>
+
+  <string name="download_notification_content_deleted">Deleted</string>
+  <string name="download_notification_content_error">Error: %s</string>
+  <string name="download_notification_content_progress">%d%% downloaded</string>
+
+  <string name="migration_notification_content_progress">%d%% migrated</string>
 </resources>
