@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence {
+class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, DownloadsNotificationSeenPersistence {
 
     private final Executor executor;
     private final DownloadsFilePersistence downloadsFilePersistence;
@@ -30,7 +30,8 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence {
                       DownloadBatchId downloadBatchId,
                       DownloadBatchStatus.Status status,
                       List<DownloadFile> downloadFiles,
-                      long downloadedDateTimeInMillis) {
+                      long downloadedDateTimeInMillis,
+                      boolean notificationSeen) {
         executor.execute(() -> {
             downloadsPersistence.startTransaction();
 
@@ -39,7 +40,8 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence {
                         downloadBatchTitle,
                         downloadBatchId,
                         status,
-                        downloadedDateTimeInMillis
+                        downloadedDateTimeInMillis,
+                        notificationSeen
                 );
                 downloadsPersistence.persistBatch(batchPersisted);
 
@@ -64,11 +66,13 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence {
                 DownloadBatchId downloadBatchId = batchPersisted.downloadBatchId();
                 DownloadBatchTitle downloadBatchTitle = batchPersisted.downloadBatchTitle();
                 long downloadedDateTimeInMillis = batchPersisted.downloadedDateTimeInMillis();
+                boolean notificationSeen = batchPersisted.notificationSeen();
                 InternalDownloadBatchStatus liteDownloadBatchStatus = new LiteDownloadBatchStatus(
                         downloadBatchId,
                         downloadBatchTitle,
                         downloadedDateTimeInMillis,
-                        status
+                        status,
+                        notificationSeen
                 );
 
                 List<DownloadFile> downloadFiles = downloadsFilePersistence.loadSync(
@@ -126,6 +130,19 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence {
             downloadsPersistence.startTransaction();
             try {
                 downloadsPersistence.update(downloadBatchId, status);
+                downloadsPersistence.transactionSuccess();
+            } finally {
+                downloadsPersistence.endTransaction();
+            }
+        });
+    }
+
+    @Override
+    public void updateNotificationSeenAsync(final DownloadBatchId downloadBatchId, final boolean notificationSeen) {
+        executor.execute(() -> {
+            downloadsPersistence.startTransaction();
+            try {
+                downloadsPersistence.update(downloadBatchId, notificationSeen);
                 downloadsPersistence.transactionSuccess();
             } finally {
                 downloadsPersistence.endTransaction();

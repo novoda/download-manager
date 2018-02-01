@@ -203,7 +203,8 @@ class DownloadBatch {
                 downloadBatchStatus.getDownloadBatchId(),
                 downloadBatchStatus.status(),
                 downloadFiles,
-                downloadBatchStatus.downloadedDateTimeInMillis()
+                downloadBatchStatus.downloadedDateTimeInMillis(),
+                downloadBatchStatus.notificationSeen()
         );
     }
 }

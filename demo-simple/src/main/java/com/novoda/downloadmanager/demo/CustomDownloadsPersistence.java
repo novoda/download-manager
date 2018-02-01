@@ -1,11 +1,11 @@
 package com.novoda.downloadmanager.demo;
 
-import com.novoda.notils.logger.simple.Log;
 import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.DownloadsBatchPersisted;
 import com.novoda.downloadmanager.DownloadsFilePersisted;
 import com.novoda.downloadmanager.DownloadsPersistence;
+import com.novoda.notils.logger.simple.Log;
 
 import java.util.Collections;
 import java.util.List;
@@ -63,5 +63,10 @@ public class CustomDownloadsPersistence implements DownloadsPersistence {
     @Override
     public void update(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status) {
         Log.v("update batch id: " + downloadBatchId.rawId() + " with status: " + status);
+    }
+
+    @Override
+    public void update(DownloadBatchId downloadBatchId, boolean notificationSeen) {
+        Log.v("update batch id: " + downloadBatchId.rawId() + " with notificationSeen: " + notificationSeen);
     }
 }

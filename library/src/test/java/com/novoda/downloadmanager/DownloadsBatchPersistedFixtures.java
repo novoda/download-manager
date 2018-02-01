@@ -7,6 +7,7 @@ final class DownloadsBatchPersistedFixtures {
     private DownloadBatchStatus.Status downloadBatchStatus = DownloadBatchStatus.Status.DOWNLOADED;
     private DownloadBatchTitle downloadBatchTitle = new LiteDownloadBatchTitle("title");
     private long downloadedDateTimeInMillis = 123456789L;
+    private boolean notificationSeen = false;
 
     static DownloadsBatchPersistedFixtures aDownloadsBatchPersisted() {
         return new DownloadsBatchPersistedFixtures();
@@ -41,6 +42,11 @@ final class DownloadsBatchPersistedFixtures {
         return this;
     }
 
+    DownloadsBatchPersistedFixtures withNotificationSeen(boolean notificationSeen) {
+        this.notificationSeen = notificationSeen;
+        return this;
+    }
+
     DownloadsBatchPersisted build() {
         return new DownloadsBatchPersisted() {
             @Override
@@ -61,6 +67,11 @@ final class DownloadsBatchPersistedFixtures {
             @Override
             public long downloadedDateTimeInMillis() {
                 return downloadedDateTimeInMillis;
+            }
+
+            @Override
+            public boolean notificationSeen() {
+                return notificationSeen;
             }
         };
     }

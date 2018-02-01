@@ -9,4 +9,6 @@ public interface DownloadsBatchPersisted {
     DownloadBatchTitle downloadBatchTitle();
 
     long downloadedDateTimeInMillis();
+
+    boolean notificationSeen();
 }

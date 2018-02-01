@@ -49,4 +49,6 @@ public interface DownloadBatchStatus {
      */
     @Nullable
     DownloadError.Error getDownloadErrorType();
+
+    boolean notificationSeen();
 }

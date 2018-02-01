@@ -16,6 +16,7 @@ class MigrationJob implements Runnable {
 
     private static final String TABLE_BATCHES = "batches";
     private static final String WHERE_CLAUSE_ID = "_id = ?";
+    private static final boolean NOTIFICATION_NOT_SEEN = false;
 
     private final Context context;
     private final File databasePath;
@@ -97,7 +98,8 @@ class MigrationJob implements Runnable {
                 downloadBatchTitle,
                 downloadBatchId,
                 downloadBatchStatus,
-                downloadedDateTimeInMillis
+                downloadedDateTimeInMillis,
+                NOTIFICATION_NOT_SEEN
         );
         downloadsPersistence.persistBatch(persistedBatch);
 

@@ -10,6 +10,7 @@ class InternalDownloadBatchStatusFixtures {
     private DownloadBatchStatus.Status status = DownloadBatchStatus.Status.QUEUED;
     private DownloadError.Error downloadErrorType = null;
     private long downloadedDateTimeInMillis = 123456789L;
+    private boolean notificationSeen = false;
 
     static InternalDownloadBatchStatusFixtures anInternalDownloadsBatchStatus() {
         return new InternalDownloadBatchStatusFixtures();
@@ -52,6 +53,11 @@ class InternalDownloadBatchStatusFixtures {
 
     InternalDownloadBatchStatusFixtures withDownloadErrorType(DownloadError.Error downloadErrorType) {
         this.downloadErrorType = downloadErrorType;
+        return this;
+    }
+
+    InternalDownloadBatchStatusFixtures withNotificationSeen(boolean notificationSeen) {
+        this.notificationSeen = notificationSeen;
         return this;
     }
 
@@ -137,6 +143,11 @@ class InternalDownloadBatchStatusFixtures {
             public void markAsDownloaded(DownloadsBatchStatusPersistence persistence) {
                 status = Status.DOWNLOADED;
                 persistence.updateStatusAsync(downloadBatchId, status);
+            }
+
+            @Override
+            public boolean notificationSeen() {
+                return notificationSeen;
             }
         };
     }

@@ -16,22 +16,22 @@ class FakeDownloadsPersistence implements DownloadsPersistence {
 
     @Override
     public void startTransaction() {
-
+        // no-op.
     }
 
     @Override
     public void endTransaction() {
-
+        // no-op.
     }
 
     @Override
     public void transactionSuccess() {
-
+        // no-op.
     }
 
     @Override
     public void persistBatch(DownloadsBatchPersisted batchPersisted) {
-
+        // no-op.
     }
 
     @Override
@@ -42,7 +42,7 @@ class FakeDownloadsPersistence implements DownloadsPersistence {
 
     @Override
     public void persistFile(DownloadsFilePersisted filePersisted) {
-
+        // no-op.
     }
 
     @Override
@@ -66,11 +66,16 @@ class FakeDownloadsPersistence implements DownloadsPersistence {
 
     @Override
     public void delete(DownloadBatchId downloadBatchId) {
-
+        // no-op.
     }
 
     @Override
     public void update(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status) {
+        // no-op.
+    }
 
+    @Override
+    public void update(DownloadBatchId downloadBatchId, boolean notificationSeen) {
+        // no-op.
     }
 }
