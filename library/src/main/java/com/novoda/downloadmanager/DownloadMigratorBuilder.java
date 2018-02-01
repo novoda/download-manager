@@ -21,7 +21,7 @@ public final class DownloadMigratorBuilder {
 
         String channelId = resources.getString(R.string.download_notification_channel_name);
         String channelDescription = resources.getString(R.string.download_notification_channel_description);
-        NotificationCustomizer<MigrationStatus> customizer = new MigrationNotificationCustomizer();
+        NotificationCustomizer<MigrationStatus> customizer = new MigrationNotificationCustomizer(context.getResources());
         NotificationCreator<MigrationStatus> defaultNotificationCreator = new NotificationCreator<>(
                 applicationContext,
                 channelId,
@@ -54,10 +54,16 @@ public final class DownloadMigratorBuilder {
     private static class MigrationNotificationCustomizer implements NotificationCustomizer<MigrationStatus> {
         private static final int MAX_PROGRESS = 100;
 
+        private final Resources resources;
+
+        MigrationNotificationCustomizer(Resources resources) {
+            this.resources = resources;
+        }
+
         @Override
         public Notification customNotificationFrom(NotificationCompat.Builder builder, MigrationStatus payload) {
             String title = payload.status().toRawValue();
-            String content = payload.percentageMigrated() + "% migrated";
+            String content = resources.getString(R.string.migration_notification_content_progress, payload.percentageMigrated());
             return builder
                     .setProgress(MAX_PROGRESS, payload.percentageMigrated(), false)
                     .setSmallIcon(android.R.drawable.ic_menu_gallery)

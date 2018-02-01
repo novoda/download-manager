@@ -8,6 +8,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -70,7 +71,10 @@ public final class DownloadManagerBuilder {
         FileSizeRequester fileSizeRequester = new NetworkFileSizeRequester(httpClient, requestCreator);
         FileDownloader fileDownloader = new NetworkFileDownloader(httpClient, requestCreator);
 
-        NotificationCustomizer<DownloadBatchStatus> notificationCustomizer = new DownloadNotificationCustomizer(notificationIcon);
+        NotificationCustomizer<DownloadBatchStatus> notificationCustomizer = new DownloadNotificationCustomizer(
+                context.getResources(),
+                notificationIcon
+        );
         NotificationCreator<DownloadBatchStatus> notificationCreator = new NotificationCreator<>(
                 context,
                 context.getResources().getString(R.string.download_notification_channel_name),
@@ -283,9 +287,11 @@ public final class DownloadManagerBuilder {
     private static class DownloadNotificationCustomizer implements NotificationCustomizer<DownloadBatchStatus> {
 
         private static final boolean NOT_INDETERMINATE = false;
+        private final Resources resources;
         private final int notificationIcon;
 
-        DownloadNotificationCustomizer(int notificationIcon) {
+        DownloadNotificationCustomizer(Resources resources, int notificationIcon) {
+            this.resources = resources;
             this.notificationIcon = notificationIcon;
         }
 
@@ -296,34 +302,34 @@ public final class DownloadManagerBuilder {
             builder.setSmallIcon(notificationIcon)
                     .setContentTitle(title);
 
-            if (payload.status() == DownloadBatchStatus.Status.DELETION) {
-                return createDeletedNotification(builder);
-            } else if (payload.status() == DownloadBatchStatus.Status.ERROR) {
-                return createErrorNotification(builder, payload);
-            } else {
-                return createProgressNotification(builder, payload);
+            switch (payload.status()) {
+                case DELETION:
+                    return createDeletedNotification(builder);
+                case ERROR:
+                    return createErrorNotification(builder, payload.getDownloadErrorType());
+                default:
+                    return createProgressNotification(builder, payload);
             }
         }
 
         private Notification createDeletedNotification(NotificationCompat.Builder builder) {
-            String content = "Deleted";
+            String content = resources.getString(R.string.download_notification_content_deleted);
             return builder
                     .setContentText(content)
                     .build();
         }
 
-        private Notification createErrorNotification(NotificationCompat.Builder builder, DownloadBatchStatus downloadBatchStatus) {
-            String content = "Error: " + downloadBatchStatus.getDownloadErrorType();
+        private Notification createErrorNotification(NotificationCompat.Builder builder, DownloadError.Error errorType) {
+            String content = resources.getString(R.string.download_notification_content_error, errorType);
             return builder
                     .setContentText(content)
                     .build();
         }
 
         private Notification createProgressNotification(NotificationCompat.Builder builder, DownloadBatchStatus payload) {
-            int percentageDownloaded = payload.percentageDownloaded();
             int bytesFileSize = (int) payload.bytesTotalSize();
             int bytesDownloaded = (int) payload.bytesDownloaded();
-            String content = percentageDownloaded + "% downloaded";
+            String content = resources.getString(R.string.download_notification_content_progress, payload.percentageDownloaded());
 
             return builder
                     .setProgress(bytesFileSize, bytesDownloaded, NOT_INDETERMINATE)
