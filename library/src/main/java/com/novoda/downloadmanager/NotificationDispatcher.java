@@ -7,6 +7,7 @@ import com.novoda.notils.logger.simple.Log;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETION;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
 
 class NotificationDispatcher {
 
@@ -45,6 +46,8 @@ class NotificationDispatcher {
             if (status == DOWNLOADED) {
                 notificationSeenPersistence.updateNotificationSeenAsync(downloadBatchStatus.getDownloadBatchId(), NOTIFICATION_SEEN);
                 downloadService.stackNotification(notificationInformation);
+            } else if (status == PAUSED) {
+                downloadService.stackNotificationNotDismissable(notificationInformation);
             } else if (status == DELETION || status == ERROR) {
                 downloadService.stackNotification(notificationInformation);
             } else {
