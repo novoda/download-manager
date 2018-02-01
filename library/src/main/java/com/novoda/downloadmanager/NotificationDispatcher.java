@@ -39,7 +39,7 @@ class NotificationDispatcher {
 
             downloadService.dismissStackedNotification(notificationInformation);
             if (downloadBatchStatus.notificationSeen()) {
-                Log.v("DownloadBatchStatus: ", downloadBatchStatus.getDownloadBatchId(), " notification has already been seen.");
+                Log.v("DownloadBatchStatus:", downloadBatchStatus.getDownloadBatchId(), "notification has already been seen.");
                 return null;
             }
 
