@@ -2,6 +2,7 @@ package com.novoda.downloadmanager;
 
 import android.app.Notification;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
@@ -16,9 +17,10 @@ public final class DownloadMigratorBuilder {
 
     public static DownloadMigratorBuilder newInstance(Context context) {
         Context applicationContext = context.getApplicationContext();
+        Resources resources = context.getResources();
 
-        String channelId = context.getResources().getString(R.string.migration_notification_channel_name);
-        String channelDescription = context.getResources().getString(R.string.migration_notification_channel_description);
+        String channelId = resources.getString(R.string.download_notification_channel_name);
+        String channelDescription = resources.getString(R.string.download_notification_channel_description);
         NotificationCustomizer<MigrationStatus> customizer = new MigrationNotificationCustomizer();
         NotificationCreator<MigrationStatus> defaultNotificationCreator = new NotificationCreator<>(
                 applicationContext,
