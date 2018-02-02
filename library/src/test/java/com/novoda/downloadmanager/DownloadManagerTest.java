@@ -24,12 +24,7 @@ import static com.novoda.downloadmanager.DownloadFileStatusFixtures.aDownloadFil
 import static com.novoda.downloadmanager.InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willAnswer;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.*;
 
 public class DownloadManagerTest {
 
@@ -53,10 +48,11 @@ public class DownloadManagerTest {
     private final DownloadBatch additionalDownloadBatch = mock(DownloadBatch.class);
     private final DownloadBatchStatusCallback downloadBatchCallback = mock(DownloadBatchStatusCallback.class);
     private final FileOperations fileOperations = mock(FileOperations.class);
+    private final FileDownloader fileDownloader = mock(FileDownloader.class);
     private final DownloadsBatchPersistence downloadsBatchPersistence = mock(DownloadsBatchPersistence.class);
     private final LiteDownloadManagerDownloader downloadManagerDownloader = mock(LiteDownloadManagerDownloader.class);
-    private final ConnectionChecker connectionChecker = mock(ConnectionChecker.class);
 
+    private final ConnectionChecker connectionChecker = mock(ConnectionChecker.class);
     private DownloadManager downloadManager;
     private Map<DownloadBatchId, DownloadBatch> downloadBatches = new HashMap<>();
     private List<DownloadBatchStatus> downloadBatchStatuses = new ArrayList<>();
@@ -87,6 +83,7 @@ public class DownloadManagerTest {
         setupDownloadBatchStatusesResponse();
         setupDownloadStatusResponse();
         setupNetworkRecoveryCreator();
+        setupFileOperations();
 
         given(downloadBatch.status()).willReturn(BATCH_STATUS);
         given(additionalDownloadBatch.downloadFileStatusWith(DOWNLOAD_FILE_ID)).willReturn(DOWNLOAD_FILE_STATUS);
@@ -128,6 +125,10 @@ public class DownloadManagerTest {
     private void setupNetworkRecoveryCreator() {
         Log.setShowLogs(false);
         DownloadsNetworkRecoveryCreator.createDisabled();
+    }
+
+    private void setupFileOperations() {
+        given(fileOperations.fileDownloader()).willReturn(fileDownloader);
     }
 
     @Test
@@ -342,6 +343,13 @@ public class DownloadManagerTest {
         downloadManager.updateAllowedConnectionType(ANY_CONNECTION_TYPE);
 
         verify(connectionChecker).updateAllowedConnectionType(ANY_CONNECTION_TYPE);
+    }
+
+    @Test
+    public void stopFileDownloader_whenUpdatedInDownloadManager() {
+        downloadManager.updateAllowedConnectionType(ANY_CONNECTION_TYPE);
+
+        verify(fileDownloader).stopDownloading();
     }
 
     @Test(expected = IllegalArgumentException.class)
