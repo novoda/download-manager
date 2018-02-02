@@ -41,6 +41,7 @@ class LiteDownloadsNetworkRecoveryEnabled implements DownloadsNetworkRecovery {
         JobRequest jobRequest = builder.build();
         JobManager jobManager = JobManager.instance();
 
+        jobManager.cancelAllForTag(LiteJobCreator.TAG);
         jobManager.schedule(jobRequest);
         Log.v("Scheduling Network Recovery.");
     }

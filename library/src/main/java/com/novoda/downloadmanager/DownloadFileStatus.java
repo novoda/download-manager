@@ -8,7 +8,8 @@ public interface DownloadFileStatus {
         DOWNLOADING,
         DELETION,
         ERROR,
-        DOWNLOADED
+        DOWNLOADED,
+        WAITING_FOR_NETWORK
     }
 
     DownloadBatchId downloadBatchId();

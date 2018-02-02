@@ -118,6 +118,12 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
         updateStatus(status, persistence);
     }
 
+    @Override
+    public void markAsWaitingForNetwork(DownloadsBatchPersistence persistence) {
+        this.status = Status.WAITING_FOR_NETWORK;
+        updateStatus(status, persistence);
+    }
+
     private void updateStatus(Status status, DownloadsBatchStatusPersistence persistence) {
         persistence.updateStatusAsync(downloadBatchId, status);
     }

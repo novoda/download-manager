@@ -78,7 +78,7 @@ class LiteDownloadFileStatus implements InternalDownloadFileStatus {
     }
 
     @Override
-    public void isMarkedAsPaused() {
+    public void markAsPaused() {
         status = Status.PAUSED;
     }
 
@@ -101,6 +101,16 @@ class LiteDownloadFileStatus implements InternalDownloadFileStatus {
     public void markAsError(DownloadError.Error error) {
         status = Status.ERROR;
         downloadError = Optional.of(new DownloadError(error));
+    }
+
+    @Override
+    public boolean isMarkedAsWaitingForNetwork() {
+        return status == Status.WAITING_FOR_NETWORK;
+    }
+
+    @Override
+    public void waitForNetwork() {
+        status = Status.WAITING_FOR_NETWORK;
     }
 
     @Override

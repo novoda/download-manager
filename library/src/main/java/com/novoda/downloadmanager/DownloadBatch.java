@@ -5,12 +5,7 @@ import android.support.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETION;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADING;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.QUEUED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.*;
 
 // This model knows how to interact with low level components.
 @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.StdCyclomaticComplexity", "PMD.ModifiedCyclomaticComplexity"})
@@ -53,15 +48,17 @@ class DownloadBatch {
             return;
         }
 
-        if (!connectionChecker.isAllowedToDownload()) {
-            downloadBatchStatus.markAsQueued(downloadsBatchPersistence);
+        if (!connectionChecker.isAllowedToDownload() && status != DOWNLOADED) {
+            downloadBatchStatus.markAsWaitingForNetwork(downloadsBatchPersistence);
             notifyCallback(downloadBatchStatus);
             DownloadsNetworkRecoveryCreator.getInstance().scheduleRecovery();
             return;
         }
 
-        downloadBatchStatus.markAsDownloading(downloadsBatchPersistence);
-        notifyCallback(downloadBatchStatus);
+        if (status != DOWNLOADED) {
+            downloadBatchStatus.markAsDownloading(downloadsBatchPersistence);
+            notifyCallback(downloadBatchStatus);
+        }
 
         totalBatchSizeBytes = getTotalSize(downloadFiles);
 
@@ -101,13 +98,19 @@ class DownloadBatch {
                 downloadBatchStatus.markAsError(downloadFileStatus.error(), downloadsBatchPersistence);
             }
 
+            if (downloadFileStatus.isMarkedAsWaitingForNetwork()) {
+                downloadBatchStatus.markAsWaitingForNetwork(downloadsBatchPersistence);
+            }
+
             callbackThrottle.update(downloadBatchStatus);
         }
     };
 
     private boolean networkError() {
         DownloadBatchStatus.Status status = downloadBatchStatus.status();
-        if (status == ERROR) {
+        if (status == WAITING_FOR_NETWORK) {
+            return true;
+        } else if (status == ERROR) {
             DownloadError.Error downloadErrorType = downloadBatchStatus.getDownloadErrorType();
             if (downloadErrorType == DownloadError.Error.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE) {
                 return true;
@@ -118,7 +121,7 @@ class DownloadBatch {
 
     private boolean batchCannotContinue() {
         DownloadBatchStatus.Status status = downloadBatchStatus.status();
-        return status == ERROR || status == DELETION || status == PAUSED;
+        return status == ERROR || status == DELETION || status == PAUSED || status == WAITING_FOR_NETWORK;
     }
 
     private long getBytesDownloadedFrom(Map<DownloadFileId, Long> fileBytesDownloadedMap) {
@@ -155,6 +158,17 @@ class DownloadBatch {
 
         for (DownloadFile downloadFile : downloadFiles) {
             downloadFile.pause();
+        }
+    }
+
+    void waitForNetwork() {
+        DownloadBatchStatus.Status status = downloadBatchStatus.status();
+        if (status != DOWNLOADING) {
+            return;
+        }
+
+        for (DownloadFile downloadFile : downloadFiles) {
+            downloadFile.waitForNetwork();
         }
     }
 
