@@ -346,10 +346,14 @@ public class DownloadManagerTest {
     }
 
     @Test
-    public void stopFileDownloader_whenUpdatedInDownloadManager() {
+    public void stopFileDownloader_whenUpdatedInDownloadManager_andConnectionTypeNotAllowed() {
+        given(connectionChecker.isAllowedToDownload()).willReturn(false);
+
         downloadManager.updateAllowedConnectionType(ANY_CONNECTION_TYPE);
 
-        verify(fileDownloader).stopDownloading();
+        for (DownloadBatch batch : downloadBatches.values()) {
+            verify(batch).waitForNetwork();
+        }
     }
 
     @Test(expected = IllegalArgumentException.class)

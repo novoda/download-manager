@@ -70,6 +70,11 @@ class DownloadBatch {
         }
 
         for (DownloadFile downloadFile : downloadFiles) {
+            if (!connectionChecker.isAllowedToDownload() && status != DOWNLOADED) {
+                downloadBatchStatus.markAsWaitingForNetwork(downloadsBatchPersistence);
+                notifyCallback(downloadBatchStatus);
+                break;
+            }
             downloadFile.download(fileDownloadCallback);
             if (batchCannotContinue()) {
                 break;
