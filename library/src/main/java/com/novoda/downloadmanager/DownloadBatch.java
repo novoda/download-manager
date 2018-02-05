@@ -5,7 +5,14 @@ import android.support.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.*;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADING;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.WAITING_FOR_NETWORK;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETION;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.QUEUED;
+
 
 // This model knows how to interact with low level components.
 @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.StdCyclomaticComplexity", "PMD.ModifiedCyclomaticComplexity"})
@@ -48,7 +55,7 @@ class DownloadBatch {
             return;
         }
 
-        if (!connectionChecker.isAllowedToDownload() && status != DOWNLOADED) {
+        if (connectionNotAllowedForDownload(status)) {
             downloadBatchStatus.markAsWaitingForNetwork(downloadsBatchPersistence);
             notifyCallback(downloadBatchStatus);
             DownloadsNetworkRecoveryCreator.getInstance().scheduleRecovery();
@@ -70,7 +77,7 @@ class DownloadBatch {
         }
 
         for (DownloadFile downloadFile : downloadFiles) {
-            if (!connectionChecker.isAllowedToDownload() && status != DOWNLOADED) {
+            if (connectionNotAllowedForDownload(status)) {
                 downloadBatchStatus.markAsWaitingForNetwork(downloadsBatchPersistence);
                 notifyCallback(downloadBatchStatus);
                 break;
@@ -86,6 +93,10 @@ class DownloadBatch {
         }
 
         callbackThrottle.stopUpdates();
+    }
+
+    private boolean connectionNotAllowedForDownload(DownloadBatchStatus.Status status) {
+        return !connectionChecker.isAllowedToDownload() && status != DOWNLOADED;
     }
 
     private final DownloadFile.Callback fileDownloadCallback = new DownloadFile.Callback() {
