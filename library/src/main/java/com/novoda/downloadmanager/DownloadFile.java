@@ -102,6 +102,9 @@ class DownloadFile {
                 if (downloadFileStatus.isMarkedForDeletion()) {
                     filePersistence.delete(filePath);
                 }
+                if (downloadFileStatus.isMarkedAsWaitingForNetwork()) {
+                    callback.onUpdate(downloadFileStatus);
+                }
             }
         });
     }
@@ -147,12 +150,17 @@ class DownloadFile {
     }
 
     void pause() {
-        downloadFileStatus.isMarkedAsPaused();
+        downloadFileStatus.markAsPaused();
         fileDownloader.stopDownloading();
     }
 
     void resume() {
         downloadFileStatus.markAsQueued();
+    }
+
+    void waitForNetwork() {
+        downloadFileStatus.waitForNetwork();
+        fileDownloader.stopDownloading();
     }
 
     void delete() {

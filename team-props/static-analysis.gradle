@@ -4,7 +4,7 @@ staticAnalysis {
     penalty {
         maxErrors = 0
 //      Need to address GH Issue #284 before reducing.
-        maxWarnings = 3
+        maxWarnings = 4
     }
 
     checkstyle {

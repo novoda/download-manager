@@ -146,6 +146,12 @@ class InternalDownloadBatchStatusFixtures {
             }
 
             @Override
+            public void markAsWaitingForNetwork(DownloadsBatchPersistence persistence) {
+                status = Status.WAITING_FOR_NETWORK;
+                persistence.updateStatusAsync(downloadBatchId, status);
+            }
+
+            @Override
             public boolean notificationSeen() {
                 return notificationSeen;
             }

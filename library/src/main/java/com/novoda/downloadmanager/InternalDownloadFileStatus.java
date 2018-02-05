@@ -12,7 +12,7 @@ interface InternalDownloadFileStatus extends DownloadFileStatus {
 
     void markAsDownloading();
 
-    void isMarkedAsPaused();
+    void markAsPaused();
 
     boolean isMarkedAsError();
 
@@ -22,6 +22,9 @@ interface InternalDownloadFileStatus extends DownloadFileStatus {
 
     void markAsError(DownloadError.Error error);
 
-    Optional<DownloadError> error();
+    boolean isMarkedAsWaitingForNetwork();
 
+    void waitForNetwork();
+
+    Optional<DownloadError> error();
 }
