@@ -194,12 +194,12 @@ class DownloadManager implements LiteDownloadManagerCommands {
         connectionChecker.updateAllowedConnectionType(allowedConnectionType);
         DownloadsNetworkRecoveryCreator.getInstance().updateAllowedConnectionType(allowedConnectionType);
 
-        if (!connectionChecker.isAllowedToDownload()) {
+        if (connectionChecker.isAllowedToDownload()) {
+            submitAllStoredDownloads(() -> Log.v("Allowed connectionType updated to " + allowedConnectionType + ". All jobs submitted"));
+        } else {
             for (DownloadBatch downloadBatch : downloadBatchMap.values()) {
                 downloadBatch.waitForNetwork();
             }
-        } else {
-            submitAllStoredDownloads(() -> Log.v("Allowed connectionType updated to " + allowedConnectionType + ". All jobs submitted"));
         }
     }
 
