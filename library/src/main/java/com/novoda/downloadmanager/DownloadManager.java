@@ -196,7 +196,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
 
         if (!connectionChecker.isAllowedToDownload()) {
             for (DownloadBatch downloadBatch : downloadBatchMap.values()) {
-                downloadBatch.waitForNetwork(); // TODO check what happens for the queued batches
+                downloadBatch.waitForNetwork();
             }
         } else {
             submitAllStoredDownloads(() -> Log.v("Allowed connectionType updated to " + allowedConnectionType + ". All jobs submitted"));
