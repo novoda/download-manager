@@ -7,8 +7,8 @@ import com.novoda.downloadmanager.notifications.CancelledNotificationCustomiser;
 import com.novoda.downloadmanager.notifications.CompleteNotificationCustomiser;
 import com.novoda.downloadmanager.notifications.DownloadingNotificationCustomiser;
 import com.novoda.downloadmanager.notifications.FailedNotificationCustomiser;
+import com.novoda.downloadmanager.notifications.NotificationChannelProvider;
 import com.novoda.downloadmanager.notifications.NotificationImageRetriever;
-import com.novoda.downloadmanager.notifications.NotificationInitialiser;
 import com.novoda.downloadmanager.notifications.QueuedNotificationCustomiser;
 
 public interface DownloadManagerModules {
@@ -27,7 +27,7 @@ public interface DownloadManagerModules {
 
     FailedNotificationCustomiser getFailedNotificationCustomiser();
 
-    NotificationInitialiser getNotificationInitialiser();
+    NotificationChannelProvider getNotificationChannelProvider();
 
     DestroyListener getDestroyListener();
 
@@ -42,7 +42,7 @@ public interface DownloadManagerModules {
         private FailedNotificationCustomiser failedCustomiser;
         private DownloadClientReadyChecker readyChecker;
         private NotificationImageRetriever imageRetriever;
-        private NotificationInitialiser notificationInitialiser;
+        private NotificationChannelProvider notificationChannelProvider;
         private DestroyListener destroyListener;
 
         public static Builder from(@NonNull Context context) {
@@ -88,8 +88,8 @@ public interface DownloadManagerModules {
             return this;
         }
 
-        public Builder withNotificationInitialiser(@NonNull NotificationInitialiser notificationInitialiser) {
-            this.notificationInitialiser = notificationInitialiser;
+        public Builder withNotificationChannelProvider(@NonNull NotificationChannelProvider notificationChannelProvider) {
+            this.notificationChannelProvider = notificationChannelProvider;
             return this;
         }
 
@@ -108,7 +108,7 @@ public interface DownloadManagerModules {
                     failedCustomiser,
                     readyChecker,
                     imageRetriever,
-                    notificationInitialiser,
+                    notificationChannelProvider,
                     destroyListener
             );
         }

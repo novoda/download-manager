@@ -11,8 +11,8 @@ import com.novoda.downloadmanager.notifications.EmptyCancelledNotificationCustom
 import com.novoda.downloadmanager.notifications.EmptyCompleteNotificationCustomiser;
 import com.novoda.downloadmanager.notifications.EmptyFailedNotificationCustomiser;
 import com.novoda.downloadmanager.notifications.FailedNotificationCustomiser;
+import com.novoda.downloadmanager.notifications.NotificationChannelProvider;
 import com.novoda.downloadmanager.notifications.NotificationImageRetriever;
-import com.novoda.downloadmanager.notifications.NotificationInitialiser;
 import com.novoda.downloadmanager.notifications.OkHttpNotificationImageRetriever;
 import com.novoda.downloadmanager.notifications.QueuedNotificationCustomiser;
 
@@ -34,7 +34,7 @@ class DefaultsDownloadManagerModules implements DownloadManagerModules {
     @Nullable
     private final NotificationImageRetriever imageRetriever;
     @Nullable
-    private final NotificationInitialiser notificationInitialiser;
+    private final NotificationChannelProvider notificationChannelProvider;
     @Nullable
     private final DestroyListener destroyListener;
 
@@ -50,7 +50,7 @@ class DefaultsDownloadManagerModules implements DownloadManagerModules {
                                           @Nullable FailedNotificationCustomiser failedCustomiser,
                                           @Nullable DownloadClientReadyChecker readyChecker,
                                           @Nullable NotificationImageRetriever imageRetriever,
-                                          @Nullable NotificationInitialiser notificationInitialiser,
+                                          @Nullable NotificationChannelProvider notificationChannelProvider,
                                           @Nullable DestroyListener destroyListener) {
         this.context = context;
         this.queuedCustomiser = queuedCustomiser;
@@ -60,7 +60,7 @@ class DefaultsDownloadManagerModules implements DownloadManagerModules {
         this.failedCustomiser = failedCustomiser;
         this.readyChecker = readyChecker;
         this.imageRetriever = imageRetriever;
-        this.notificationInitialiser = notificationInitialiser;
+        this.notificationChannelProvider = notificationChannelProvider;
         this.destroyListener = destroyListener;
     }
 
@@ -120,11 +120,11 @@ class DefaultsDownloadManagerModules implements DownloadManagerModules {
         return failedCustomiser;
     }
 
-    public NotificationInitialiser getNotificationInitialiser() {
-        if (notificationInitialiser == null) {
-            return new DefaultNotificationInitialiser();
+    public NotificationChannelProvider getNotificationChannelProvider() {
+        if (notificationChannelProvider == null) {
+            return new DefaultChannelProvider();
         }
-        return notificationInitialiser;
+        return notificationChannelProvider;
     }
 
     @Override

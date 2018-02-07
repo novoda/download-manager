@@ -1,14 +1,24 @@
-allprojects {
-    buildscript {
-        repositories {
-            jcenter()
-        }
+buildscript {
+    ext.target_version = 27
+    ext.min_version = 21
+    ext.support_version = '27.0.2'
+    ext.plugin_version = "3.0.1"
+    repositories {
+        google()
+        jcenter()
     }
+    dependencies {
+        classpath "com.android.tools.build:gradle:$plugin_version"
+    }
+}
 
+allprojects {
     repositories {
         jcenter()
-        maven {
-            url 'https://maven.google.com'
-        }
+        google()
     }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }

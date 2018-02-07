@@ -38,7 +38,6 @@ class DownloadJob extends Job {
                 .setRequiresDeviceIdle(false)
                 .setRequirementsEnforced(true)
                 .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
-                .setPersisted(true)
                 .build()
                 .schedule();
     }

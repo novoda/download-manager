@@ -3,12 +3,13 @@ package com.novoda.downloadmanager.notifications;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.io.InputStream;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 // TODO make this package - when everything notification-like is moved to /notifications/
 public class OkHttpNotificationImageRetriever implements NotificationImageRetriever {
