@@ -24,7 +24,7 @@ public class DownloadNotifierFactory {
                 createNotificationCustomiser(modules),
                 statusTranslator,
                 downloadMarshaller,
-                modules.getNotificationInitialiser()
+                modules.getNotificationChannelProvider()
         );
 
         return new SynchronisedDownloadNotifier(context, notificationDisplayer);
