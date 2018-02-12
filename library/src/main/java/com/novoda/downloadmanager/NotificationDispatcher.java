@@ -37,11 +37,11 @@ class NotificationDispatcher {
             NotificationInformation notificationInformation = notificationCreator.createNotification(downloadBatchStatus);
             DownloadBatchStatus.Status status = downloadBatchStatus.status();
 
-            downloadService.dismissStackedNotification(notificationInformation);
             if (downloadBatchStatus.notificationSeen()) {
                 Log.v("DownloadBatchStatus:", downloadBatchStatus.getDownloadBatchId(), "notification has already been seen.");
                 return null;
             }
+            downloadService.dismissStackedNotification(notificationInformation);
 
             if (status == DOWNLOADED) {
                 notificationSeenPersistence.updateNotificationSeenAsync(downloadBatchStatus.getDownloadBatchId(), NOTIFICATION_SEEN);
