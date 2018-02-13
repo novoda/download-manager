@@ -1,10 +1,13 @@
 package com.novoda.downloadmanager;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
@@ -13,42 +16,61 @@ public final class DownloadMigratorBuilder {
     private final Context applicationContext;
     private final Handler handler;
 
+    private NotificationChannelProvider notificationChannelProvider;
     private NotificationCreator<MigrationStatus> notificationCreator;
 
     public static DownloadMigratorBuilder newInstance(Context context) {
         Context applicationContext = context.getApplicationContext();
         Resources resources = context.getResources();
 
-        String channelId = resources.getString(R.string.download_notification_channel_name);
-        String channelDescription = resources.getString(R.string.download_notification_channel_description);
+        DefaultNotificationChannelProvider notificationChannelProvider = new DefaultNotificationChannelProvider(
+                resources.getString(R.string.download_notification_channel_name),
+                resources.getString(R.string.download_notification_channel_description),
+                NotificationManagerCompat.IMPORTANCE_LOW
+        );
         NotificationCustomizer<MigrationStatus> customizer = new MigrationNotificationCustomizer(context.getResources());
-        NotificationCreator<MigrationStatus> defaultNotificationCreator = NotificationCreator.create(
+        NotificationCreator<MigrationStatus> defaultNotificationCreator = new NotificationCreator<>(
                 applicationContext,
-                channelId,
-                channelDescription,
-                NotificationManagerCompat.IMPORTANCE_LOW,
+                notificationChannelProvider.channelId(),
                 customizer
         );
 
         Handler handler = new Handler(Looper.getMainLooper());
-        return new DownloadMigratorBuilder(applicationContext, handler, defaultNotificationCreator);
+        return new DownloadMigratorBuilder(applicationContext, handler, notificationChannelProvider, defaultNotificationCreator);
     }
 
     private DownloadMigratorBuilder(Context applicationContext,
                                     Handler handler,
+                                    NotificationChannelProvider notificationChannelProvider,
                                     NotificationCreator<MigrationStatus> notificationCreator) {
         this.applicationContext = applicationContext;
         this.handler = handler;
+        this.notificationChannelProvider = notificationChannelProvider;
         this.notificationCreator = notificationCreator;
     }
 
-    public DownloadMigratorBuilder withNotification(NotificationCreator<MigrationStatus> notificationCreator) {
-        this.notificationCreator = notificationCreator;
+    @RequiresApi(Build.VERSION_CODES.O)
+    public DownloadMigratorBuilder withNotificationChannel(NotificationChannel notificationChannel) {
+        this.notificationChannelProvider = new OreoNotificationChannelProvider(notificationChannel);
+        return this;
+    }
+
+    public DownloadMigratorBuilder withNotificationChannel(String channelId, String name, @Importance int importance) {
+        this.notificationChannelProvider = new DefaultNotificationChannelProvider(channelId, name, importance);
+        return this;
+    }
+
+    public DownloadMigratorBuilder withNotification(NotificationCustomizer<MigrationStatus> notificationCustomizer) {
+        return withNotification(applicationContext.getResources().getString(R.string.download_notification_channel_name), notificationCustomizer);
+    }
+
+    public DownloadMigratorBuilder withNotification(String channelId, NotificationCustomizer<MigrationStatus> notificationCustomizer) {
+        this.notificationCreator = new NotificationCreator<>(applicationContext, channelId, notificationCustomizer);
         return this;
     }
 
     public DownloadMigrator build() {
-        return new LiteDownloadMigrator(applicationContext, handler, notificationCreator);
+        return new LiteDownloadMigrator(applicationContext, handler, notificationChannelProvider, notificationCreator);
     }
 
     private static class MigrationNotificationCustomizer implements NotificationCustomizer<MigrationStatus> {

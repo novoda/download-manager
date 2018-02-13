@@ -1,7 +1,6 @@
 package com.novoda.downloadmanager;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
@@ -24,6 +23,7 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
 
     private IBinder binder;
     private NotificationManager notificationManager;
+    private NotificationChannelProvider notificationChannelProvider;
     private NotificationCreator<MigrationStatus> notificationCreator;
 
     @Override
@@ -49,6 +49,11 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
     }
 
     @Override
+    public void setNotificationChannelProvider(NotificationChannelProvider notificationChannelProvider) {
+        this.notificationChannelProvider = notificationChannelProvider;
+    }
+
+    @Override
     public void setNotificationCreator(NotificationCreator<MigrationStatus> notificationCreator) {
         this.notificationCreator = notificationCreator;
     }
@@ -64,8 +69,7 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel notificationChannel = notificationCreator.createNotificationChannel();
-            notificationManager.createNotificationChannel(notificationChannel);
+            notificationChannelProvider.registerNotificationChannel(getApplicationContext());
         }
     }
 
