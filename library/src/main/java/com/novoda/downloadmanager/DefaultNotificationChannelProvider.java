@@ -22,7 +22,9 @@ class DefaultNotificationChannelProvider implements NotificationChannelProvider 
     @RequiresApi(Build.VERSION_CODES.O)
     public void registerNotificationChannel(Context context) {
         NotificationChannel notificationChannel = new NotificationChannel(channelId, name, importance);
-        notificationManager(context).createNotificationChannel(notificationChannel);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        //noinspection ConstantConditions
+        notificationManager.createNotificationChannel(notificationChannel);
     }
 
     @Override
@@ -30,7 +32,4 @@ class DefaultNotificationChannelProvider implements NotificationChannelProvider 
         return channelId;
     }
 
-    private static NotificationManager notificationManager(Context context) {
-        return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-    }
 }

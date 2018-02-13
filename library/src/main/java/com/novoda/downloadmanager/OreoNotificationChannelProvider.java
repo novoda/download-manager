@@ -17,7 +17,9 @@ class OreoNotificationChannelProvider implements NotificationChannelProvider {
 
     @Override
     public void registerNotificationChannel(Context context) {
-        notificationManager(context).createNotificationChannel(notificationChannel);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        //noinspection ConstantConditions
+        notificationManager.createNotificationChannel(notificationChannel);
     }
 
     @Override
@@ -25,7 +27,4 @@ class OreoNotificationChannelProvider implements NotificationChannelProvider {
         return notificationChannel.getId();
     }
 
-    private static NotificationManager notificationManager(Context context) {
-        return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-    }
 }
