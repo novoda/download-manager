@@ -7,25 +7,31 @@ import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 
-public class NotificationCreator<T> {
+public abstract class NotificationCreator<T> {
 
     private final Context applicationContext;
     private final String channelId;
-    private final String userFacingChannelDescription;
     private final NotificationCustomizer<T> notificationCustomizer;
-    @Importance
-    private final int importance;
 
-    public NotificationCreator(Context context,
-                               String channelId,
-                               String userFacingChannelDescription,
-                               @Importance int importance,
-                               NotificationCustomizer<T> customizer) {
+    public static <T> NotificationCreator<T> create(Context context,
+                                             String channelId,
+                                             String userFacingChannelDescription,
+                                             @Importance int importance,
+                                             NotificationCustomizer<T> customizer) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(channelId, userFacingChannelDescription, importance);
+            return new NotificationCreatorOreo<>(context, channelId, customizer, channel);
+        } else {
+            return new NotificationCreatorDefault<>(context, channelId, customizer);
+        }
+    }
+
+    NotificationCreator(Context context,
+                        String channelId,
+                        NotificationCustomizer<T> customizer) {
         this.applicationContext = context.getApplicationContext();
         this.channelId = channelId;
-        this.userFacingChannelDescription = userFacingChannelDescription;
         this.notificationCustomizer = customizer;
-        this.importance = importance;
     }
 
     NotificationInformation createNotification(final T notificationPayload) {
@@ -48,7 +54,5 @@ public class NotificationCreator<T> {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    NotificationChannel createNotificationChannel() {
-        return new NotificationChannel(channelId, userFacingChannelDescription, importance);
-    }
+    abstract NotificationChannel createNotificationChannel();
 }

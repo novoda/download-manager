@@ -22,7 +22,7 @@ public final class DownloadMigratorBuilder {
         String channelId = resources.getString(R.string.download_notification_channel_name);
         String channelDescription = resources.getString(R.string.download_notification_channel_description);
         NotificationCustomizer<MigrationStatus> customizer = new MigrationNotificationCustomizer(context.getResources());
-        NotificationCreator<MigrationStatus> defaultNotificationCreator = new NotificationCreator<>(
+        NotificationCreator<MigrationStatus> defaultNotificationCreator = NotificationCreator.create(
                 applicationContext,
                 channelId,
                 channelDescription,

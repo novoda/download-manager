@@ -75,7 +75,7 @@ public final class DownloadManagerBuilder {
                 context.getResources(),
                 notificationIcon
         );
-        NotificationCreator<DownloadBatchStatus> notificationCreator = new NotificationCreator<>(
+        NotificationCreator<DownloadBatchStatus> notificationCreator = NotificationCreator.create(
                 context,
                 context.getResources().getString(R.string.download_notification_channel_name),
                 context.getResources().getString(R.string.download_notification_channel_description),

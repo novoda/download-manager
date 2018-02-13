@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
         NotificationCustomizer<MigrationStatus> notificationCustomizer = new MigrationNotificationCustomizer();
 
-        NotificationCreator<MigrationStatus> notificationCreator = new NotificationCreator<>(
+        NotificationCreator<MigrationStatus> notificationCreator = NotificationCreator.create(
                 this,
                 "chocolate",
                 "Migration notifications",
