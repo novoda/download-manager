@@ -11,7 +11,7 @@ public interface DownloadBatchStatus {
         DOWNLOADING,
         PAUSED,
         ERROR,
-        DELETION,
+        DELETED,
         DOWNLOADED,
         WAITING_FOR_NETWORK;
 

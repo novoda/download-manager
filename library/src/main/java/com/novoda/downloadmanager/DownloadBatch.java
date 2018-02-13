@@ -5,7 +5,7 @@ import android.support.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETION;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADING;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
@@ -50,7 +50,7 @@ class DownloadBatch {
 
     void download() {
         DownloadBatchStatus.Status status = downloadBatchStatus.status();
-        if (status == PAUSED || status == DELETION) {
+        if (status == PAUSED || status == DELETED) {
             return;
         }
 
@@ -136,7 +136,7 @@ class DownloadBatch {
 
     private boolean batchCannotContinue() {
         DownloadBatchStatus.Status status = downloadBatchStatus.status();
-        return status == ERROR || status == DELETION || status == PAUSED || status == WAITING_FOR_NETWORK;
+        return status == ERROR || status == DELETED || status == PAUSED || status == WAITING_FOR_NETWORK;
     }
 
     private long getBytesDownloadedFrom(Map<DownloadFileId, Long> fileBytesDownloadedMap) {
@@ -201,7 +201,7 @@ class DownloadBatch {
 
     void delete() {
         downloadsBatchPersistence.deleteAsync(downloadBatchStatus.getDownloadBatchId());
-        downloadBatchStatus.markForDeletion();
+        downloadBatchStatus.markAsDeleted();
         notifyCallback(downloadBatchStatus);
         for (DownloadFile downloadFile : downloadFiles) {
             downloadFile.delete();

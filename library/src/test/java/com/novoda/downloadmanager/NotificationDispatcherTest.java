@@ -22,7 +22,7 @@ public class NotificationDispatcherTest {
     private static final DownloadBatchStatus DOWNLOADING_BATCH_STATUS = InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.DOWNLOADING).build();
     private static final DownloadBatchStatus PAUSED_BATCH_STATUS = InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.PAUSED).build();
     private static final DownloadBatchStatus ERROR_BATCH_STATUS = InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.ERROR).build();
-    private static final DownloadBatchStatus DELETION_BATCH_STATUS = InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.DELETION).build();
+    private static final DownloadBatchStatus DELETED_BATCH_STATUS = InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.DELETED).build();
     private static final DownloadBatchStatus DOWNLOADED_BATCH_STATUS = InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.DOWNLOADED).build();
 
     private final NotificationInformation notificationInformation = mock(NotificationInformation.class);
@@ -57,8 +57,8 @@ public class NotificationDispatcherTest {
     }
 
     @Test
-    public void stacksNotification_whenStatusIsDeletion() {
-        notificationDispatcher.updateNotification(DELETION_BATCH_STATUS);
+    public void stacksNotification_whenStatusIsDeleted() {
+        notificationDispatcher.updateNotification(DELETED_BATCH_STATUS);
 
         verify(downloadService).stackNotification(notificationInformation);
     }
@@ -79,7 +79,7 @@ public class NotificationDispatcherTest {
 
     @Test
     public void dismissesStackedNotification_whenUpdatingNotification() {
-        List<DownloadBatchStatus> allDownloadBatchStatuses = Arrays.asList(QUEUED_BATCH_STATUS, DOWNLOADING_BATCH_STATUS, PAUSED_BATCH_STATUS, ERROR_BATCH_STATUS, DELETION_BATCH_STATUS, DOWNLOADED_BATCH_STATUS);
+        List<DownloadBatchStatus> allDownloadBatchStatuses = Arrays.asList(QUEUED_BATCH_STATUS, DOWNLOADING_BATCH_STATUS, PAUSED_BATCH_STATUS, ERROR_BATCH_STATUS, DELETED_BATCH_STATUS, DOWNLOADED_BATCH_STATUS);
 
         for (DownloadBatchStatus downloadBatchStatus : allDownloadBatchStatuses) {
             notificationDispatcher.updateNotification(downloadBatchStatus);
@@ -90,7 +90,7 @@ public class NotificationDispatcherTest {
 
     @Test
     public void doesNotUpdateNotificationSeen_whenDownloadBatchStatusIsAnythingButDownloaded() {
-        List<DownloadBatchStatus> allStatusesMinusDownloaded = Arrays.asList(QUEUED_BATCH_STATUS, DOWNLOADING_BATCH_STATUS, PAUSED_BATCH_STATUS, ERROR_BATCH_STATUS, DELETION_BATCH_STATUS);
+        List<DownloadBatchStatus> allStatusesMinusDownloaded = Arrays.asList(QUEUED_BATCH_STATUS, DOWNLOADING_BATCH_STATUS, PAUSED_BATCH_STATUS, ERROR_BATCH_STATUS, DELETED_BATCH_STATUS);
 
         for (DownloadBatchStatus downloadBatchStatus : allStatusesMinusDownloaded) {
             notificationDispatcher.updateNotification(downloadBatchStatus);

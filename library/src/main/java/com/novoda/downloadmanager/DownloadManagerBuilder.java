@@ -321,7 +321,7 @@ public final class DownloadManagerBuilder {
                     .setContentTitle(title);
 
             switch (payload.status()) {
-                case DELETION:
+                case DELETED:
                     return createDeletedNotification(builder);
                 case ERROR:
                     return createErrorNotification(builder, payload.getDownloadErrorType());

@@ -68,8 +68,8 @@ class LiteDownloadFileStatus implements InternalDownloadFileStatus {
     }
 
     @Override
-    public boolean isMarkedForDeletion() {
-        return status == Status.DELETION;
+    public boolean isMarkedAsDeleted() {
+        return status == Status.DELETED;
     }
 
     @Override
@@ -93,8 +93,8 @@ class LiteDownloadFileStatus implements InternalDownloadFileStatus {
     }
 
     @Override
-    public void markForDeletion() {
-        status = Status.DELETION;
+    public void markAsDeleted() {
+        status = Status.DELETED;
     }
 
     @Override

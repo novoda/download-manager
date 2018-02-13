@@ -8,7 +8,7 @@ interface InternalDownloadFileStatus extends DownloadFileStatus {
 
     boolean isMarkedAsQueued();
 
-    boolean isMarkedForDeletion();
+    boolean isMarkedAsDeleted();
 
     void markAsDownloading();
 
@@ -18,7 +18,7 @@ interface InternalDownloadFileStatus extends DownloadFileStatus {
 
     void markAsQueued();
 
-    void markForDeletion();
+    void markAsDeleted();
 
     void markAsError(DownloadError.Error error);
 
