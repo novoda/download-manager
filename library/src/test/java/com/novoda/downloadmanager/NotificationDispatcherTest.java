@@ -7,8 +7,6 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InOrder;
-import org.mockito.Mockito;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -114,9 +112,7 @@ public class NotificationDispatcherTest {
 
         notificationDispatcher.updateNotification(notificationSeenStatus);
 
-        InOrder inOrder = Mockito.inOrder(downloadService);
-        inOrder.verify(downloadService).dismissStackedNotification(any(NotificationInformation.class));
-        inOrder.verifyNoMoreInteractions();
+        verifyZeroInteractions(downloadService);
     }
 
     @Test(timeout = 500)
