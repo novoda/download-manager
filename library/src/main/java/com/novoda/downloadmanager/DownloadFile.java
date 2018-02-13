@@ -99,7 +99,7 @@ class DownloadFile {
             @Override
             public void onDownloadFinished() {
                 filePersistence.close();
-                if (downloadFileStatus.isMarkedForDeletion()) {
+                if (downloadFileStatus.isMarkedAsDeleted()) {
                     filePersistence.delete(filePath);
                 }
                 if (downloadFileStatus.isMarkedAsWaitingForNetwork()) {
@@ -165,7 +165,7 @@ class DownloadFile {
 
     void delete() {
         if (downloadFileStatus.isMarkedAsDownloading()) {
-            downloadFileStatus.markForDeletion();
+            downloadFileStatus.markAsDeleted();
             fileDownloader.stopDownloading();
         } else {
             filePersistence.delete(filePath);

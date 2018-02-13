@@ -94,7 +94,7 @@ class DownloadsFilePersistence {
             case ERROR:
                 return InternalDownloadFileStatus.Status.ERROR;
             case DELETED:
-                return InternalDownloadFileStatus.Status.DELETION;
+                return InternalDownloadFileStatus.Status.DELETED;
             case DOWNLOADED:
                 return InternalDownloadFileStatus.Status.DOWNLOADED;
             case WAITING_FOR_NETWORK:

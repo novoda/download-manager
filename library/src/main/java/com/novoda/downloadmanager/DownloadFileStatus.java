@@ -6,7 +6,7 @@ public interface DownloadFileStatus {
         PAUSED,
         QUEUED,
         DOWNLOADING,
-        DELETION,
+        DELETED,
         ERROR,
         DOWNLOADED,
         WAITING_FOR_NETWORK
