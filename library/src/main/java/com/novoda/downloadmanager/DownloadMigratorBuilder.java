@@ -31,8 +31,8 @@ public final class DownloadMigratorBuilder {
         NotificationCustomizer<MigrationStatus> customizer = new MigrationNotificationCustomizer(context.getResources());
         NotificationCreator<MigrationStatus> defaultNotificationCreator = new NotificationCreator<>(
                 applicationContext,
-                notificationChannelProvider.channelId(),
-                customizer
+                customizer,
+                notificationChannelProvider
         );
 
         Handler handler = new Handler(Looper.getMainLooper());
@@ -52,27 +52,22 @@ public final class DownloadMigratorBuilder {
     @RequiresApi(Build.VERSION_CODES.O)
     public DownloadMigratorBuilder withNotificationChannel(NotificationChannel notificationChannel) {
         this.notificationChannelProvider = new OreoNotificationChannelProvider(notificationChannel);
+        this.notificationCreator.setNotificationChannelProvider(notificationChannelProvider);
         return this;
     }
 
     public DownloadMigratorBuilder withNotificationChannel(String channelId, String name, @Importance int importance) {
         this.notificationChannelProvider = new DefaultNotificationChannelProvider(channelId, name, importance);
+        this.notificationCreator.setNotificationChannelProvider(notificationChannelProvider);
         return this;
     }
 
     public DownloadMigratorBuilder withNotification(NotificationCustomizer<MigrationStatus> notificationCustomizer) {
-        return withNotification(applicationContext.getResources().getString(R.string.download_notification_channel_name), notificationCustomizer);
-    }
-
-    public DownloadMigratorBuilder withNotification(String channelId, NotificationCustomizer<MigrationStatus> notificationCustomizer) {
-        this.notificationCreator = new NotificationCreator<>(applicationContext, channelId, notificationCustomizer);
+        this.notificationCreator = new NotificationCreator<>(applicationContext, notificationCustomizer, notificationChannelProvider);
         return this;
     }
 
     public DownloadMigrator build() {
-        if (!notificationChannelProvider.channelId().equals(notificationCreator.channelId())) {
-            throw new IllegalArgumentException("Please ensure to pass the same Notification channelId when calling withNotification");
-        }
         return new LiteDownloadMigrator(applicationContext, handler, notificationChannelProvider, notificationCreator);
     }
 

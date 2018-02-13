@@ -7,13 +7,17 @@ import android.support.v4.app.NotificationCompat;
 class NotificationCreator<T> {
 
     private final Context applicationContext;
-    private final String channelId;
     private final NotificationCustomizer<T> notificationCustomizer;
+    private NotificationChannelProvider notificationChannelProvider;
 
-    NotificationCreator(Context context, String channelId, NotificationCustomizer<T> customizer) {
+    NotificationCreator(Context context, NotificationCustomizer<T> customizer, NotificationChannelProvider notificationChannelProvider) {
         this.applicationContext = context.getApplicationContext();
-        this.channelId = channelId;
         this.notificationCustomizer = customizer;
+        this.notificationChannelProvider = notificationChannelProvider;
+    }
+
+    void setNotificationChannelProvider(NotificationChannelProvider notificationChannelProvider) {
+        this.notificationChannelProvider = notificationChannelProvider;
     }
 
     NotificationInformation createNotification(final T notificationPayload) {
@@ -29,13 +33,9 @@ class NotificationCreator<T> {
 
             @Override
             public Notification getNotification() {
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(applicationContext, channelId);
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(applicationContext, notificationChannelProvider.channelId());
                 return notificationCustomizer.customNotificationFrom(builder, notificationPayload);
             }
         };
-    }
-
-    String channelId() {
-        return channelId;
     }
 }

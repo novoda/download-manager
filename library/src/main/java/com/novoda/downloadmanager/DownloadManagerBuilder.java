@@ -83,8 +83,8 @@ public final class DownloadManagerBuilder {
         );
         NotificationCreator<DownloadBatchStatus> notificationCreator = new NotificationCreator<>(
                 context,
-                notificationChannelProvider.channelId(),
-                notificationCustomizer
+                notificationCustomizer,
+                notificationChannelProvider
         );
 
         ConnectionType connectionTypeAllowed = ConnectionType.ALL;
@@ -161,20 +161,18 @@ public final class DownloadManagerBuilder {
     @RequiresApi(Build.VERSION_CODES.O)
     public DownloadManagerBuilder withNotificationChannel(NotificationChannel notificationChannel) {
         this.notificationChannelProvider = new OreoNotificationChannelProvider(notificationChannel);
+        this.notificationCreator.setNotificationChannelProvider(notificationChannelProvider);
         return this;
     }
 
     public DownloadManagerBuilder withNotificationChannel(String channelId, String name, @Importance int importance) {
         this.notificationChannelProvider = new DefaultNotificationChannelProvider(channelId, name, importance);
+        this.notificationCreator.setNotificationChannelProvider(notificationChannelProvider);
         return this;
     }
 
     public DownloadManagerBuilder withNotification(NotificationCustomizer<DownloadBatchStatus> notificationCustomizer) {
-        return withNotification(applicationContext.getResources().getString(R.string.download_notification_channel_name), notificationCustomizer);
-    }
-
-    public DownloadManagerBuilder withNotification(String channelId, NotificationCustomizer<DownloadBatchStatus> notificationCustomizer) {
-        this.notificationCreator = new NotificationCreator<>(applicationContext, channelId, notificationCustomizer);
+        this.notificationCreator = new NotificationCreator<>(applicationContext, notificationCustomizer, notificationChannelProvider);
         return this;
     }
 
@@ -207,9 +205,6 @@ public final class DownloadManagerBuilder {
     }
 
     public DownloadManager build() {
-        if (!notificationChannelProvider.channelId().equals(notificationCreator.channelId())) {
-            throw new IllegalArgumentException("Please ensure to pass the same Notification channelId when calling withNotification");
-        }
         Intent intent = new Intent(applicationContext, LiteDownloadService.class);
         ServiceConnection serviceConnection = new ServiceConnection() {
             @Override
