@@ -17,7 +17,6 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
 import com.novoda.merlin.MerlinsBeard;
-import com.novoda.notils.exception.DeveloperError;
 import com.novoda.notils.logger.simple.Log;
 import com.squareup.okhttp.OkHttpClient;
 
@@ -209,7 +208,7 @@ public final class DownloadManagerBuilder {
 
     public DownloadManager build() {
         if (!notificationChannelProvider.channelId().equals(notificationCreator.channelId())) {
-            throw new DeveloperError("Please ensure to pass same Notification channelId when withNotification methods are used.");
+            throw new IllegalArgumentException("Please ensure to pass the same Notification channelId when calling withNotification");
         }
         Intent intent = new Intent(applicationContext, LiteDownloadService.class);
         ServiceConnection serviceConnection = new ServiceConnection() {

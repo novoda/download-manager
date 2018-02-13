@@ -70,6 +70,9 @@ public final class DownloadMigratorBuilder {
     }
 
     public DownloadMigrator build() {
+        if (!notificationChannelProvider.channelId().equals(notificationCreator.channelId())) {
+            throw new IllegalArgumentException("Please ensure to pass the same Notification channelId when calling withNotification");
+        }
         return new LiteDownloadMigrator(applicationContext, handler, notificationChannelProvider, notificationCreator);
     }
 
