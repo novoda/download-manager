@@ -1,31 +1,23 @@
 package com.novoda.downloadmanager;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.content.Context;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 
-public class NotificationCreator<T> {
+class NotificationCreator<T> {
 
     private final Context applicationContext;
-    private final String channelId;
-    private final String userFacingChannelDescription;
     private final NotificationCustomizer<T> notificationCustomizer;
-    @Importance
-    private final int importance;
+    private NotificationChannelProvider notificationChannelProvider;
 
-    public NotificationCreator(Context context,
-                               String channelId,
-                               String userFacingChannelDescription,
-                               @Importance int importance,
-                               NotificationCustomizer<T> customizer) {
+    NotificationCreator(Context context, NotificationCustomizer<T> customizer, NotificationChannelProvider notificationChannelProvider) {
         this.applicationContext = context.getApplicationContext();
-        this.channelId = channelId;
-        this.userFacingChannelDescription = userFacingChannelDescription;
         this.notificationCustomizer = customizer;
-        this.importance = importance;
+        this.notificationChannelProvider = notificationChannelProvider;
+    }
+
+    void setNotificationChannelProvider(NotificationChannelProvider notificationChannelProvider) {
+        this.notificationChannelProvider = notificationChannelProvider;
     }
 
     NotificationInformation createNotification(final T notificationPayload) {
@@ -41,14 +33,9 @@ public class NotificationCreator<T> {
 
             @Override
             public Notification getNotification() {
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(applicationContext, channelId);
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(applicationContext, notificationChannelProvider.channelId());
                 return notificationCustomizer.customNotificationFrom(builder, notificationPayload);
             }
         };
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    NotificationChannel createNotificationChannel() {
-        return new NotificationChannel(channelId, userFacingChannelDescription, importance);
     }
 }

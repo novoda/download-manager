@@ -2,7 +2,6 @@ package com.novoda.downloadmanager;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -13,6 +12,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
@@ -42,6 +42,7 @@ public final class DownloadManagerBuilder {
     private DownloadService downloadService;
     private DownloadManager downloadManager;
     private NotificationCreator<DownloadBatchStatus> notificationCreator;
+    private NotificationChannelProvider notificationChannelProvider;
     private ConnectionType connectionTypeAllowed;
     private boolean allowNetworkRecovery;
     private Class<? extends CallbackThrottle> customCallbackThrottle;
@@ -71,16 +72,19 @@ public final class DownloadManagerBuilder {
         FileSizeRequester fileSizeRequester = new NetworkFileSizeRequester(httpClient, requestCreator);
         FileDownloader fileDownloader = new NetworkFileDownloader(httpClient, requestCreator);
 
+        NotificationChannelProvider notificationChannelProvider = new DefaultNotificationChannelProvider(
+                context.getResources().getString(R.string.download_notification_channel_name),
+                context.getResources().getString(R.string.download_notification_channel_description),
+                NotificationManagerCompat.IMPORTANCE_LOW
+        );
         NotificationCustomizer<DownloadBatchStatus> notificationCustomizer = new DownloadNotificationCustomizer(
                 context.getResources(),
                 notificationIcon
         );
         NotificationCreator<DownloadBatchStatus> notificationCreator = new NotificationCreator<>(
                 context,
-                context.getResources().getString(R.string.download_notification_channel_name),
-                context.getResources().getString(R.string.download_notification_channel_description),
-                NotificationManagerCompat.IMPORTANCE_LOW,
-                notificationCustomizer
+                notificationCustomizer,
+                notificationChannelProvider
         );
 
         ConnectionType connectionTypeAllowed = ConnectionType.ALL;
@@ -95,6 +99,7 @@ public final class DownloadManagerBuilder {
                 downloadsPersistence,
                 fileSizeRequester,
                 fileDownloader,
+                notificationChannelProvider,
                 notificationCreator,
                 connectionTypeAllowed,
                 allowNetworkRecovery,
@@ -109,6 +114,7 @@ public final class DownloadManagerBuilder {
                                    DownloadsPersistence downloadsPersistence,
                                    FileSizeRequester fileSizeRequester,
                                    FileDownloader fileDownloader,
+                                   NotificationChannelProvider notificationChannelProvider,
                                    NotificationCreator<DownloadBatchStatus> notificationCreator,
                                    ConnectionType connectionTypeAllowed,
                                    boolean allowNetworkRecovery,
@@ -119,6 +125,7 @@ public final class DownloadManagerBuilder {
         this.downloadsPersistence = downloadsPersistence;
         this.fileSizeRequester = fileSizeRequester;
         this.fileDownloader = fileDownloader;
+        this.notificationChannelProvider = notificationChannelProvider;
         this.notificationCreator = notificationCreator;
         this.connectionTypeAllowed = connectionTypeAllowed;
         this.allowNetworkRecovery = allowNetworkRecovery;
@@ -151,8 +158,21 @@ public final class DownloadManagerBuilder {
         return this;
     }
 
-    public DownloadManagerBuilder withNotification(NotificationCreator<DownloadBatchStatus> notificationCreator) {
-        this.notificationCreator = notificationCreator;
+    @RequiresApi(Build.VERSION_CODES.O)
+    public DownloadManagerBuilder withNotificationChannel(NotificationChannel notificationChannel) {
+        this.notificationChannelProvider = new OreoNotificationChannelProvider(notificationChannel);
+        this.notificationCreator.setNotificationChannelProvider(notificationChannelProvider);
+        return this;
+    }
+
+    public DownloadManagerBuilder withNotificationChannel(String channelId, String name, @Importance int importance) {
+        this.notificationChannelProvider = new DefaultNotificationChannelProvider(channelId, name, importance);
+        this.notificationCreator.setNotificationChannelProvider(notificationChannelProvider);
+        return this;
+    }
+
+    public DownloadManagerBuilder withNotification(NotificationCustomizer<DownloadBatchStatus> notificationCustomizer) {
+        this.notificationCreator = new NotificationCreator<>(applicationContext, notificationCustomizer, notificationChannelProvider);
         return this;
     }
 
@@ -233,9 +253,7 @@ public final class DownloadManagerBuilder {
         );
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel notificationChannel = notificationCreator.createNotificationChannel();
-            NotificationManager notificationManager = (NotificationManager) applicationContext.getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.createNotificationChannel(notificationChannel);
+            notificationChannelProvider.registerNotificationChannel(applicationContext);
         }
 
         NotificationDispatcher notificationDispatcher = new NotificationDispatcher(LOCK, notificationCreator, downloadsBatchPersistence);
