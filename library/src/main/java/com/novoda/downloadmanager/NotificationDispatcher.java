@@ -4,7 +4,7 @@ import android.support.annotation.WorkerThread;
 
 import com.novoda.notils.logger.simple.Log;
 
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETION;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
@@ -48,7 +48,7 @@ class NotificationDispatcher {
                 downloadService.stackNotification(notificationInformation);
             } else if (status == PAUSED) {
                 downloadService.stackNotificationNotDismissible(notificationInformation);
-            } else if (status == DELETION || status == ERROR) {
+            } else if (status == DELETED || status == ERROR) {
                 downloadService.stackNotification(notificationInformation);
             } else {
                 downloadService.updateNotification(notificationInformation);

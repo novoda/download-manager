@@ -24,7 +24,7 @@ public class NotificationDispatcherTest {
     private static final DownloadBatchStatus DOWNLOADING_BATCH_STATUS = InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.DOWNLOADING).build();
     private static final DownloadBatchStatus PAUSED_BATCH_STATUS = InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.PAUSED).build();
     private static final DownloadBatchStatus ERROR_BATCH_STATUS = InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.ERROR).build();
-    private static final DownloadBatchStatus DELETION_BATCH_STATUS = InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.DELETION).build();
+    private static final DownloadBatchStatus DELETION_BATCH_STATUS = InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.DELETED).build();
     private static final DownloadBatchStatus DOWNLOADED_BATCH_STATUS = InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.DOWNLOADED).build();
 
     private final NotificationInformation notificationInformation = mock(NotificationInformation.class);
