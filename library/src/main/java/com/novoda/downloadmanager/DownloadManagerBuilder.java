@@ -314,6 +314,14 @@ public final class DownloadManagerBuilder {
         }
 
         @Override
+        public boolean isStackableNotification(DownloadBatchStatus payload) {
+            DownloadBatchStatus.Status status = payload.status();
+            return status == DownloadBatchStatus.Status.DELETED
+                    || status == DownloadBatchStatus.Status.DOWNLOADED
+                    || status == DownloadBatchStatus.Status.ERROR;
+        }
+
+        @Override
         public Notification customNotificationFrom(NotificationCompat.Builder builder, DownloadBatchStatus payload) {
             DownloadBatchTitle downloadBatchTitle = payload.getDownloadBatchTitle();
             String title = downloadBatchTitle.asString();

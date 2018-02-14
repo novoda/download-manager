@@ -7,4 +7,6 @@ interface NotificationInformation {
     int getId();
 
     Notification getNotification();
+
+    boolean isStackable();
 }

@@ -81,6 +81,11 @@ public final class DownloadMigratorBuilder {
         }
 
         @Override
+        public boolean isStackableNotification(MigrationStatus payload) {
+            return false;
+        }
+
+        @Override
         public Notification customNotificationFrom(NotificationCompat.Builder builder, MigrationStatus payload) {
             String title = payload.status().toRawValue();
             String content = resources.getString(R.string.migration_notification_content_progress, payload.percentageMigrated());

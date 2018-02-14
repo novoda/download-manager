@@ -36,6 +36,11 @@ class NotificationCreator<T> {
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(applicationContext, notificationChannelProvider.channelId());
                 return notificationCustomizer.customNotificationFrom(builder, notificationPayload);
             }
+
+            @Override
+            public boolean isStackable() {
+                return notificationCustomizer.isStackableNotification(notificationPayload);
+            }
         };
     }
 }

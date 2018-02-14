@@ -210,6 +210,11 @@ public class MainActivity extends AppCompatActivity {
 
     private static class MigrationNotificationCustomizer implements NotificationCustomizer<MigrationStatus> {
         @Override
+        public boolean isStackableNotification(MigrationStatus payload) {
+            return false;
+        }
+
+        @Override
         public Notification customNotificationFrom(NotificationCompat.Builder builder, MigrationStatus payload) {
             return builder
                     .setProgress(payload.totalNumberOfBatchesToMigrate(), payload.numberOfMigratedBatches(), false)
