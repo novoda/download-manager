@@ -5,8 +5,6 @@ import android.support.annotation.WorkerThread;
 import com.novoda.notils.logger.simple.Log;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
-import static com.novoda.downloadmanager.NotificationCustomizer.NotificationStackState.STACK_NOTIFICATION_DISMISSIBLE;
-import static com.novoda.downloadmanager.NotificationCustomizer.NotificationStackState.STACK_NOTIFICATION_NOT_DISMISSIBLE;
 
 class NotificationDispatcher {
 
@@ -46,12 +44,23 @@ class NotificationDispatcher {
                 notificationSeenPersistence.updateNotificationSeenAsync(downloadBatchStatus.getDownloadBatchId(), NOTIFICATION_SEEN);
             }
 
-            if (notificationInformation.notificationStackState() == STACK_NOTIFICATION_DISMISSIBLE) {
-                downloadService.stackNotification(notificationInformation);
-            } else if (notificationInformation.notificationStackState() == STACK_NOTIFICATION_NOT_DISMISSIBLE) {
-                downloadService.stackNotificationNotDismissible(notificationInformation);
-            } else {
-                downloadService.updateNotification(notificationInformation);
+            switch (notificationInformation.notificationStackState()) {
+                case SINGLE_PERSISTENT_NOTIFICATION:
+                    downloadService.updateNotification(notificationInformation);
+                    break;
+                case STACK_NOTIFICATION_NOT_DISMISSIBLE:
+                    downloadService.stackNotificationNotDismissible(notificationInformation);
+                    break;
+                case STACK_NOTIFICATION_DISMISSIBLE:
+                    downloadService.stackNotification(notificationInformation);
+                    break;
+                default:
+                    String message = String.format(
+                            "%s: %s is not supported.",
+                            NotificationCustomizer.NotificationStackState.class.getSimpleName(),
+                            notificationInformation.notificationStackState()
+                    );
+                    throw new IllegalArgumentException(message);
             }
 
             return null;

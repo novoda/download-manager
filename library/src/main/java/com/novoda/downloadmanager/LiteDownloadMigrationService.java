@@ -14,8 +14,6 @@ import android.util.Log;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.novoda.downloadmanager.NotificationCustomizer.NotificationStackState.STACK_NOTIFICATION_DISMISSIBLE;
-
 public class LiteDownloadMigrationService extends Service implements DownloadMigrationService {
 
     private static final String TAG = "MigrationService";
@@ -78,10 +76,21 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
         public void onUpdate(MigrationStatus migrationStatus) {
             NotificationInformation notification = notificationCreator.createNotification(migrationStatus);
 
-            if (notification.notificationStackState() == STACK_NOTIFICATION_DISMISSIBLE) {
-                stackNotification(notification);
-            } else {
-                updateNotification(notification);
+            switch (notification.notificationStackState()) {
+                case SINGLE_PERSISTENT_NOTIFICATION:
+                    updateNotification(notification);
+                    break;
+                case STACK_NOTIFICATION_DISMISSIBLE:
+                    stackNotification(notification);
+                    break;
+                case STACK_NOTIFICATION_NOT_DISMISSIBLE:
+                default:
+                    String message = String.format(
+                            "%s: %s is not supported.",
+                            NotificationCustomizer.NotificationStackState.class.getSimpleName(),
+                            notification.notificationStackState()
+                    );
+                    throw new IllegalArgumentException(message);
             }
         }
 
