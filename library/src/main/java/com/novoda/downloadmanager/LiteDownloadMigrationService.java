@@ -14,6 +14,8 @@ import android.util.Log;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.novoda.downloadmanager.NotificationCustomizer.NotificationStackState.STACK_NOTIFICATION_DISMISSIBLE;
+
 public class LiteDownloadMigrationService extends Service implements DownloadMigrationService {
 
     private static final String TAG = "MigrationService";
@@ -76,7 +78,7 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
         public void onUpdate(MigrationStatus migrationStatus) {
             NotificationInformation notification = notificationCreator.createNotification(migrationStatus);
 
-            if (notification.isStackable()) {
+            if (notification.notificationStackState() == STACK_NOTIFICATION_DISMISSIBLE) {
                 stackNotification(notification);
             } else {
                 updateNotification(notification);

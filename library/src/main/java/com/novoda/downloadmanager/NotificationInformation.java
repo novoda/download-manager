@@ -8,5 +8,5 @@ interface NotificationInformation {
 
     Notification getNotification();
 
-    boolean isStackable();
+    NotificationCustomizer.NotificationStackState notificationStackState();
 }

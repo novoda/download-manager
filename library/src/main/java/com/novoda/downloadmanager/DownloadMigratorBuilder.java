@@ -81,9 +81,14 @@ public final class DownloadMigratorBuilder {
         }
 
         @Override
-        public boolean isStackableNotification(MigrationStatus payload) {
+        public NotificationStackState notificationStackState(MigrationStatus payload) {
             MigrationStatus.Status status = payload.status();
-            return status == MigrationStatus.Status.COMPLETE || status == MigrationStatus.Status.DB_NOT_PRESENT;
+
+            if (status == MigrationStatus.Status.COMPLETE || status == MigrationStatus.Status.DB_NOT_PRESENT) {
+                return NotificationStackState.STACK_NOTIFICATION_DISMISSIBLE;
+            } else {
+                return NotificationStackState.SINGLE_PERSISTENT_NOTIFICATION;
+            }
         }
 
         @Override

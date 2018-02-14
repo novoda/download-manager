@@ -38,8 +38,8 @@ class NotificationCreator<T> {
             }
 
             @Override
-            public boolean isStackable() {
-                return notificationCustomizer.isStackableNotification(notificationPayload);
+            public NotificationCustomizer.NotificationStackState notificationStackState() {
+                return notificationCustomizer.notificationStackState(notificationPayload);
             }
         };
     }

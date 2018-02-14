@@ -27,6 +27,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
+
 public final class DownloadManagerBuilder {
 
     private static final Object LOCK = new Object();
@@ -314,11 +319,15 @@ public final class DownloadManagerBuilder {
         }
 
         @Override
-        public boolean isStackableNotification(DownloadBatchStatus payload) {
+        public NotificationStackState notificationStackState(DownloadBatchStatus payload) {
             DownloadBatchStatus.Status status = payload.status();
-            return status == DownloadBatchStatus.Status.DELETED
-                    || status == DownloadBatchStatus.Status.DOWNLOADED
-                    || status == DownloadBatchStatus.Status.ERROR;
+            if (status == DOWNLOADED || status == DELETED || status == ERROR) {
+                return NotificationStackState.STACK_NOTIFICATION_DISMISSIBLE;
+            } else if (status == PAUSED) {
+                return NotificationStackState.STACK_NOTIFICATION_NOT_DISMISSIBLE;
+            } else {
+                return NotificationStackState.SINGLE_PERSISTENT_NOTIFICATION;
+            }
         }
 
         @Override
