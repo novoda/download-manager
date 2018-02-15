@@ -17,11 +17,11 @@ class NotificationDispatcher<T> {
 
     @WorkerThread
     void updateNotification(T payload) {
-        WaitForDownloadService.<Void>waitFor(downloadService, waitForDownloadService)
+        Wait.<Void>waitFor(downloadService, waitForDownloadService)
                 .thenPerform(executeUpdateNotification(payload));
     }
 
-    private WaitForDownloadService.ThenPerform.Action<Void> executeUpdateNotification(T downloadBatchStatus) {
+    private Wait.ThenPerform.Action<Void> executeUpdateNotification(T downloadBatchStatus) {
         return () -> {
             NotificationInformation notificationInformation = notificationCreator.createNotification(downloadBatchStatus);
 

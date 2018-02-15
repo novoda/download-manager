@@ -72,11 +72,11 @@ class LiteDownloadManagerDownloader {
 
     public void download(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         downloadBatchMap.put(downloadBatch.getId(), downloadBatch);
-        executor.submit(() -> WaitForDownloadService.<Void>waitFor(downloadService, waitForDownloadService)
+        executor.submit(() -> Wait.<Void>waitFor(downloadService, waitForDownloadService)
                 .thenPerform(executeDownload(downloadBatch)));
     }
 
-    private WaitForDownloadService.ThenPerform.Action<Void> executeDownload(DownloadBatch downloadBatch) {
+    private Wait.ThenPerform.Action<Void> executeDownload(DownloadBatch downloadBatch) {
         return () -> {
             InternalDownloadBatchStatus downloadBatchStatus = downloadBatch.status();
             updateStatusToQueuedIfNeeded(downloadBatchStatus);

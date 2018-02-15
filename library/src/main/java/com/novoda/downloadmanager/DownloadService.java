@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-interface DownloadService {
+interface DownloadService extends ToWaitFor {
 
     void download(DownloadBatch downloadBatch, DownloadBatchStatusCallback callback);
 
