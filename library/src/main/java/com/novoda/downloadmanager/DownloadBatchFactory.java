@@ -84,7 +84,11 @@ final class DownloadBatchFactory {
     }
 
     private static String prependBatchIdTo(String filePath, DownloadBatchId downloadBatchId) {
-        return downloadBatchId.rawId() + File.separatorChar + filePath;
+        return sanitizeBatchIdPath(downloadBatchId.rawId()) + File.separatorChar + filePath;
+    }
+
+    private static String sanitizeBatchIdPath(String batchIdPath) {
+        return batchIdPath.replaceAll("[:\\\\/*?|<>]", "_");
     }
 
     private static String relativePathFrom(BatchFile batchFile) {
