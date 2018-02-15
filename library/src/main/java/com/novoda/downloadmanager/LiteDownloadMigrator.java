@@ -8,42 +8,42 @@ import java.util.concurrent.ExecutorService;
 
 class LiteDownloadMigrator implements DownloadMigrator {
 
-    private final File databaseFile;
     private final Object waitForMigrationService;
     private final ExecutorService executor;
     private final Handler callbackHandler;
+    private final MigrationCallback migrationCallback;
 
     private DownloadMigrationService migrationService;
 
     private final Context applicationContext;
 
     LiteDownloadMigrator(Context context,
-                         File databaseFile,
                          Object waitForMigrationService,
                          ExecutorService executor,
-                         Handler callbackHandler) {
+                         Handler callbackHandler,
+                         MigrationCallback migrationCallback) {
         this.applicationContext = context.getApplicationContext();
-        this.databaseFile = databaseFile;
         this.waitForMigrationService = waitForMigrationService;
         this.executor = executor;
         this.callbackHandler = callbackHandler;
+        this.migrationCallback = migrationCallback;
     }
 
     void initialise(DownloadMigrationService migrationService) {
         this.migrationService = migrationService;
-        // migrationJob.setDownloadService.
+
         synchronized (waitForMigrationService) {
             waitForMigrationService.notifyAll();
         }
     }
 
     @Override
-    public void startMigration() {
+    public void startMigration(File databaseFile) {
         executor.submit(() -> Wait.<Void>waitFor(migrationService, waitForMigrationService)
-                .thenPerform(executeMigration()));
+                .thenPerform(executeMigrationFor(databaseFile)));
     }
 
-    private Wait.ThenPerform.Action<Void> executeMigration() {
+    private Wait.ThenPerform.Action<Void> executeMigrationFor(File databaseFile) {
         return () -> {
             migrationService.startMigration(new MigrationJob(applicationContext, databaseFile), migrationCallback());
             return null;
@@ -52,7 +52,8 @@ class LiteDownloadMigrator implements DownloadMigrator {
 
     private MigrationCallback migrationCallback() {
         return migrationStatus -> callbackHandler.post(() -> {
-            // Pass back to main activity and notification dispatcher.
+            migrationCallback.onUpdate(migrationStatus);
+            // Call notification dispatcher.
         });
     }
 

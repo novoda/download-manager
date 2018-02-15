@@ -15,7 +15,8 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
-import java.io.File;
+import com.novoda.notils.logger.simple.Log;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -31,7 +32,7 @@ public final class DownloadMigratorBuilder {
     private NotificationCreator<MigrationStatus> notificationCreator;
     private DownloadMigrationService migrationService;
     private LiteDownloadMigrator downloadMigrator;
-    private File databaseFile;
+    private MigrationCallback migrationCallback;
 
     public static DownloadMigratorBuilder newInstance(Context context) {
         Context applicationContext = context.getApplicationContext();
@@ -49,20 +50,27 @@ public final class DownloadMigratorBuilder {
                 notificationChannelProvider
         );
         Handler handler = new Handler(Looper.getMainLooper());
-        File databaseFile = context.getDatabasePath("downloads.db");
-        return new DownloadMigratorBuilder(applicationContext, handler, notificationChannelProvider, defaultNotificationCreator, databaseFile);
+        MigrationCallback migrationCallback = (status) -> {
+            Log.v(status.toString());
+        };
+        return new DownloadMigratorBuilder(applicationContext, handler, notificationChannelProvider, defaultNotificationCreator, migrationCallback);
     }
 
     private DownloadMigratorBuilder(Context applicationContext,
                                     Handler handler,
                                     NotificationChannelProvider notificationChannelProvider,
                                     NotificationCreator<MigrationStatus> notificationCreator,
-                                    File databaseFile) {
+                                    MigrationCallback migrationCallback) {
         this.applicationContext = applicationContext;
         this.handler = handler;
         this.notificationChannelProvider = notificationChannelProvider;
         this.notificationCreator = notificationCreator;
-        this.databaseFile = databaseFile;
+        this.migrationCallback = migrationCallback;
+    }
+
+    public DownloadMigratorBuilder withMigrationCallback(MigrationCallback migrationCallback) {
+        this.migrationCallback = migrationCallback;
+        return this;
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -83,18 +91,12 @@ public final class DownloadMigratorBuilder {
         return this;
     }
 
-    public DownloadMigratorBuilder withV1DatabaseFile(File databaseFile) {
-        this.databaseFile = databaseFile;
-        return this;
-    }
-
     public DownloadMigrator build() {
         ServiceConnection serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder binder) {
                 migrationService = ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) binder).getService();
                 downloadMigrator.initialise(migrationService);
-                downloadMigrator.startMigration();
             }
 
             @Override
@@ -106,7 +108,7 @@ public final class DownloadMigratorBuilder {
         Intent serviceIntent = new Intent(applicationContext, LiteDownloadMigrationService.class);
         applicationContext.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
 
-        downloadMigrator = new LiteDownloadMigrator(applicationContext, databaseFile, LOCK, EXECUTOR, handler);
+        downloadMigrator = new LiteDownloadMigrator(applicationContext, LOCK, EXECUTOR, handler, migrationCallback);
         return downloadMigrator;
     }
 
