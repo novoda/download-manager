@@ -76,12 +76,11 @@ class LiteDownloadManagerDownloader {
                 .thenPerform(executeDownload(downloadBatch)));
     }
 
-    private Wait.ThenPerform.Action<Void> executeDownload(DownloadBatch downloadBatch) {
+    private Runnable executeDownload(DownloadBatch downloadBatch) {
         return () -> {
             InternalDownloadBatchStatus downloadBatchStatus = downloadBatch.status();
             updateStatusToQueuedIfNeeded(downloadBatchStatus);
             downloadService.download(downloadBatch, downloadBatchCallback());
-            return null;
         };
     }
 

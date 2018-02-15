@@ -148,11 +148,10 @@ class DownloadManager implements LiteDownloadManagerCommands {
 
     @Override
     public void getAllDownloadBatchStatuses(AllBatchStatusesCallback callback) {
-        executor.submit((Runnable) () -> Wait.<Void>waitFor(downloadService, waitForDownloadService)
+        executor.submit(() -> Wait.<Void>waitFor(downloadService, waitForDownloadService)
                 .thenPerform(() -> {
                     List<DownloadBatchStatus> downloadBatchStatuses = executeGetAllDownloadBatchStatuses();
                     callbackHandler.post(() -> callback.onReceived(downloadBatchStatuses));
-                    return null;
                 }));
     }
 
@@ -178,11 +177,10 @@ class DownloadManager implements LiteDownloadManagerCommands {
 
     @Override
     public void getDownloadStatusWithMatching(DownloadFileId downloadFileId, DownloadFileStatusCallback callback) {
-        executor.submit((Runnable) () -> Wait.<Void>waitFor(downloadService, waitForDownloadService)
+        executor.submit(() -> Wait.<Void>waitFor(downloadService, waitForDownloadService)
                 .thenPerform(() -> {
                     DownloadFileStatus downloadFileStatus = executeGetDownloadStatusWithMatching(downloadFileId);
                     callbackHandler.post(() -> callback.onReceived(downloadFileStatus));
-                    return null;
                 }));
     }
 

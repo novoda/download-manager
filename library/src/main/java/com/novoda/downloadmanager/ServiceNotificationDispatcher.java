@@ -28,7 +28,7 @@ class ServiceNotificationDispatcher<T> {
                 .thenPerform(executeUpdateNotification(payload));
     }
 
-    private Wait.ThenPerform.Action<Void> executeUpdateNotification(T payload) {
+    private Runnable executeUpdateNotification(T payload) {
         return () -> {
             NotificationInformation notificationInformation = notificationCreator.createNotification(payload);
 
@@ -52,8 +52,6 @@ class ServiceNotificationDispatcher<T> {
                     );
                     throw new IllegalArgumentException(message);
             }
-
-            return null;
         };
     }
 
