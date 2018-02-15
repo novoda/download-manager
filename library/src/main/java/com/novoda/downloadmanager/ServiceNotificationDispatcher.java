@@ -1,7 +1,6 @@
 package com.novoda.downloadmanager;
 
 import android.app.Notification;
-import android.app.Service;
 import android.support.annotation.WorkerThread;
 
 class ServiceNotificationDispatcher<T> {
@@ -12,7 +11,7 @@ class ServiceNotificationDispatcher<T> {
     private final NotificationCreator<T> notificationCreator;
     private final NotificationManager notificationManager;
 
-    private Service service;
+    private DownloadManagerService service;
 
     ServiceNotificationDispatcher(Object waitForDownloadService,
                                   NotificationCreator<T> notificationCreator,
@@ -58,17 +57,17 @@ class ServiceNotificationDispatcher<T> {
     }
 
     private void updateNotification(NotificationInformation notificationInformation) {
-        service.startForeground(notificationInformation.getId(), notificationInformation.getNotification());
+        service.start(notificationInformation.getId(), notificationInformation.getNotification());
     }
 
     private void stackNotification(NotificationInformation notificationInformation) {
-        service.stopForeground(true);
+        service.stop(true);
         Notification notification = notificationInformation.getNotification();
         notificationManager.notify(NOTIFICATION_TAG, notificationInformation.getId(), notification);
     }
 
     private void stackNotificationNotDismissible(NotificationInformation notificationInformation) {
-        service.stopForeground(true);
+        service.stop(true);
         Notification notification = notificationInformation.getNotification();
         notification.flags |= Notification.FLAG_ONGOING_EVENT;
         notificationManager.notify(NOTIFICATION_TAG, notificationInformation.getId(), notification);
@@ -78,7 +77,7 @@ class ServiceNotificationDispatcher<T> {
         notificationManager.cancel(NOTIFICATION_TAG, notificationInformation.getId());
     }
 
-    void setService(Service service) {
+    void setService(DownloadManagerService service) {
         this.service = service;
     }
 }

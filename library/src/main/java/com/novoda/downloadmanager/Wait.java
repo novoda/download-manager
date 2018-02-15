@@ -10,7 +10,7 @@ final class Wait {
         // Uses static factory method.
     }
 
-    static <T> ThenPerform<T> waitFor(@Nullable Object instanceToWaitFor, Object lock) {
+    static <T> ThenPerform<T> waitFor(@Nullable ToWaitFor instanceToWaitFor, Object lock) {
         return new ThenPerform<>(instanceToWaitFor, lock);
     }
 
@@ -20,10 +20,10 @@ final class Wait {
             T performAction();
         }
 
-        private final Object instanceToWaitFor;
+        private final ToWaitFor instanceToWaitFor;
         private final Object lock;
 
-        ThenPerform(Object instanceToWaitFor, Object lock) {
+        ThenPerform(ToWaitFor instanceToWaitFor, Object lock) {
             this.instanceToWaitFor = instanceToWaitFor;
             this.lock = lock;
         }

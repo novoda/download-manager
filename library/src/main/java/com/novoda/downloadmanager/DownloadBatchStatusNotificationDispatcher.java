@@ -1,7 +1,5 @@
 package com.novoda.downloadmanager;
 
-import android.app.Service;
-
 import com.novoda.notils.logger.simple.Log;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
@@ -32,15 +30,6 @@ class DownloadBatchStatusNotificationDispatcher {
     }
 
     void setDownloadService(DownloadService downloadService) {
-        if (downloadService instanceof Service) {
-            notificationDispatcher.setService((Service) downloadService);
-        } else {
-            String message = String.format(
-                    "Parameter: %s does not resolve to %s",
-                    downloadService.getClass().getSimpleName(),
-                    Service.class.getSimpleName()
-            );
-            throw new IllegalArgumentException(message);
-        }
+        notificationDispatcher.setService(downloadService);
     }
 }

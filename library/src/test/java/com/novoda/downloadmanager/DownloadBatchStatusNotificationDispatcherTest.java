@@ -1,7 +1,5 @@
 package com.novoda.downloadmanager;
 
-import android.app.Service;
-
 import com.novoda.notils.logger.simple.Log;
 
 import org.junit.Before;
@@ -58,14 +56,7 @@ public class DownloadBatchStatusNotificationDispatcherTest {
 
         downloadBatchStatusNotificationDispatcher.setDownloadService(downloadService);
 
-        verify(notificationDispatcher).setService((Service) downloadService);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throwsIllegalArgument_whenNotResolvingToAndroidService() {
-        DownloadService downloadService = mock(DownloadService.class);
-
-        downloadBatchStatusNotificationDispatcher.setDownloadService(downloadService);
+        verify(notificationDispatcher).setService(downloadService);
     }
 
 }

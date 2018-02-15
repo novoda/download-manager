@@ -1,5 +1,6 @@
 package com.novoda.downloadmanager;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
@@ -25,6 +26,16 @@ public class LiteDownloadService extends Service implements DownloadService {
         super.onCreate();
         executor = Executors.newSingleThreadExecutor();
         binder = new DownloadServiceBinder();
+    }
+
+    @Override
+    public void start(int id, Notification notification) {
+        startForeground(id, notification);
+    }
+
+    @Override
+    public void stop(boolean removeNotification) {
+        stopForeground(removeNotification);
     }
 
     class DownloadServiceBinder extends Binder {

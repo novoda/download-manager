@@ -1,7 +1,6 @@
 package com.novoda.downloadmanager;
 
 import android.app.Notification;
-import android.app.Service;
 
 import com.novoda.notils.logger.simple.Log;
 
@@ -35,7 +34,7 @@ public class ServiceNotificationDispatcherTest {
     private final Object lock = spy(new Object());
     private final NotificationCreator<DownloadBatchStatus> notificationCreator = mock(NotificationCreator.class);
     private final NotificationManager notificationManager = mock(NotificationManager.class);
-    private final Service downloadService = mock(Service.class);
+    private final DownloadManagerService downloadService = mock(DownloadManagerService.class);
 
     private ServiceNotificationDispatcher<DownloadBatchStatus> notificationDispatcher;
 
@@ -54,7 +53,7 @@ public class ServiceNotificationDispatcherTest {
 
         notificationDispatcher.updateNotification(DOWNLOAD_BATCH_STATUS);
 
-        verify(downloadService).startForeground(SINGLE_PERSISTENT_NOTIFICATION_INFORMATION.getId(), SINGLE_PERSISTENT_NOTIFICATION_INFORMATION.getNotification());
+        verify(downloadService).start(SINGLE_PERSISTENT_NOTIFICATION_INFORMATION.getId(), SINGLE_PERSISTENT_NOTIFICATION_INFORMATION.getNotification());
     }
 
     @Test
@@ -64,7 +63,7 @@ public class ServiceNotificationDispatcherTest {
         notificationDispatcher.updateNotification(DOWNLOAD_BATCH_STATUS);
 
         InOrder inOrder = inOrder(downloadService, notificationManager);
-        inOrder.verify(downloadService).stopForeground(true);
+        inOrder.verify(downloadService).stop(true);
         inOrder.verify(notificationManager).notify(NOTIFICATION_TAG, STACKABLE_DISMISSIBLE_NOTIFICATION_INFORMATION.getId(), STACKABLE_DISMISSIBLE_NOTIFICATION_INFORMATION.getNotification());
         inOrder.verifyNoMoreInteractions();
     }
@@ -76,7 +75,7 @@ public class ServiceNotificationDispatcherTest {
         notificationDispatcher.updateNotification(DOWNLOAD_BATCH_STATUS);
 
         InOrder inOrder = inOrder(downloadService, notificationManager);
-        inOrder.verify(downloadService).stopForeground(true);
+        inOrder.verify(downloadService).stop(true);
         inOrder.verify(notificationManager).notify(NOTIFICATION_TAG, STACKABLE_NON_DISMISSIBLE_NOTIFICATION_INFORMATION.getId(), STACKABLE_NON_DISMISSIBLE_NOTIFICATION_INFORMATION.getNotification());
         inOrder.verifyNoMoreInteractions();
     }
