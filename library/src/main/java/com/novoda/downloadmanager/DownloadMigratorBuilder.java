@@ -2,22 +2,33 @@ package com.novoda.downloadmanager;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
+import java.io.File;
+
 public final class DownloadMigratorBuilder {
+
+    private static final Object LOCK = new Object();
 
     private final Context applicationContext;
     private final Handler handler;
 
     private NotificationChannelProvider notificationChannelProvider;
     private NotificationCreator<MigrationStatus> notificationCreator;
+    private DownloadMigrationService migrationService;
+    private LiteDownloadMigrator downloadMigrator;
+    private File databaseFile;
 
     public static DownloadMigratorBuilder newInstance(Context context) {
         Context applicationContext = context.getApplicationContext();
@@ -34,19 +45,21 @@ public final class DownloadMigratorBuilder {
                 customizer,
                 notificationChannelProvider
         );
-
         Handler handler = new Handler(Looper.getMainLooper());
-        return new DownloadMigratorBuilder(applicationContext, handler, notificationChannelProvider, defaultNotificationCreator);
+        File databaseFile = context.getDatabasePath("downloads.db");
+        return new DownloadMigratorBuilder(applicationContext, handler, notificationChannelProvider, defaultNotificationCreator, databaseFile);
     }
 
     private DownloadMigratorBuilder(Context applicationContext,
                                     Handler handler,
                                     NotificationChannelProvider notificationChannelProvider,
-                                    NotificationCreator<MigrationStatus> notificationCreator) {
+                                    NotificationCreator<MigrationStatus> notificationCreator,
+                                    File databaseFile) {
         this.applicationContext = applicationContext;
         this.handler = handler;
         this.notificationChannelProvider = notificationChannelProvider;
         this.notificationCreator = notificationCreator;
+        this.databaseFile = databaseFile;
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -67,8 +80,31 @@ public final class DownloadMigratorBuilder {
         return this;
     }
 
+    public DownloadMigratorBuilder withV1DatabaseFile(File databaseFile) {
+        this.databaseFile = databaseFile;
+        return this;
+    }
+
     public DownloadMigrator build() {
-        return new LiteDownloadMigrator(applicationContext, handler, notificationChannelProvider, notificationCreator);
+        ServiceConnection serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder binder) {
+                migrationService = ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) binder).getService();
+                downloadMigrator.initialise(migrationService);
+                downloadMigrator.startMigration();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                // do nothing.
+            }
+        };
+
+        Intent serviceIntent = new Intent(applicationContext, LiteDownloadMigrationService.class);
+        applicationContext.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+
+        downloadMigrator = new LiteDownloadMigrator(applicationContext, databaseFile, LOCK);
+        return downloadMigrator;
     }
 
     private static class MigrationNotificationCustomizer implements NotificationCustomizer<MigrationStatus> {

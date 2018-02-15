@@ -1,53 +1,40 @@
 package com.novoda.downloadmanager;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.Handler;
-import android.os.IBinder;
+
+import java.io.File;
 
 class LiteDownloadMigrator implements DownloadMigrator {
 
-    private final Context applicationContext;
-    private final Handler handler;
-    private final NotificationChannelProvider notificationChannelProvider;
-    private final NotificationCreator<MigrationStatus> notificationCreator;
+    private final File databaseFile;
+    private final Object waitForMigrationService;
 
-    LiteDownloadMigrator(Context context,
-                         Handler handler,
-                         NotificationChannelProvider notificationChannelProvider,
-                         NotificationCreator<MigrationStatus> notificationCreator) {
+    private DownloadMigrationService migrationService;
+
+    private final Context applicationContext;
+
+    LiteDownloadMigrator(Context context, File databaseFile, Object waitForMigrationService) {
         this.applicationContext = context.getApplicationContext();
-        this.handler = handler;
-        this.notificationChannelProvider = notificationChannelProvider;
-        this.notificationCreator = notificationCreator;
+        this.databaseFile = databaseFile;
+        this.waitForMigrationService = waitForMigrationService;
+    }
+
+    void initialise(DownloadMigrationService migrationService) {
+        this.migrationService = migrationService;
+        // migrationJob.setDownloadService.
+        synchronized (waitForMigrationService) {
+            waitForMigrationService.notifyAll();
+        }
     }
 
     @Override
-    public void startMigration(final String databaseFilename, final MigrationCallback migrationCallback) {
-        ServiceConnection serviceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder binder) {
-                DownloadMigrationService migrationService = ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) binder).getService();
-                migrationService.setNotificationChannelProvider(notificationChannelProvider);
-                migrationService.setNotificationCreator(notificationCreator);
-
-                MigrationCallback mainThreadReportingMigrationCallback = migrationStatus -> handler.post(
-                        () -> migrationCallback.onUpdate(migrationStatus)
-                );
-
-                migrationService.startMigration(databaseFilename, mainThreadReportingMigrationCallback);
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                // do nothing.
-            }
-        };
-        Intent serviceIntent = new Intent(applicationContext, LiteDownloadMigrationService.class);
-        applicationContext.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-        applicationContext.startService(serviceIntent);
+    public void startMigration() {
+        Wait.waitFor(migrationService, waitForMigrationService)
+                .thenPerform(() -> {
+                    // Pass db and callback? This can forward to UI or NotificationDispatcher.
+                    migrationService.startMigration(new MigrationJob(applicationContext, databaseFile));
+                    return null;
+                });
     }
 
 }
