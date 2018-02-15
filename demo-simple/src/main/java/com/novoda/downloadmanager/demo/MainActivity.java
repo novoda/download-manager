@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
                         NotificationManagerCompat.IMPORTANCE_DEFAULT
                 )
                 .withNotification(notificationCustomizer)
+                .withMigrationCallback(migrationCallback)
                 .build();
 
         textViewBatch1 = findViewById(R.id.batch_1);
