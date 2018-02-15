@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager;
 
 import android.app.Notification;
+import android.support.v4.app.NotificationManagerCompat;
 
 import com.novoda.notils.logger.simple.Log;
 
@@ -33,7 +34,7 @@ public class ServiceNotificationDispatcherTest {
 
     private final Object lock = spy(new Object());
     private final NotificationCreator<DownloadBatchStatus> notificationCreator = mock(NotificationCreator.class);
-    private final NotificationManager notificationManager = mock(NotificationManager.class);
+    private final NotificationManagerCompat notificationManager = mock(NotificationManagerCompat.class);
     private final DownloadManagerService downloadService = mock(DownloadManagerService.class);
 
     private ServiceNotificationDispatcher<DownloadBatchStatus> notificationDispatcher;

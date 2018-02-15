@@ -261,8 +261,7 @@ public final class DownloadManagerBuilder {
             notificationChannelProvider.registerNotificationChannel(applicationContext);
         }
 
-        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(applicationContext);
-        NotificationManager notificationManager = new NotificationManager(notificationManagerCompat);
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(applicationContext);
         ServiceNotificationDispatcher<DownloadBatchStatus> notificationDispatcher = new ServiceNotificationDispatcher<>(
                 LOCK,
                 notificationCreator,

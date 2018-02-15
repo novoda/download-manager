@@ -2,6 +2,7 @@ package com.novoda.downloadmanager;
 
 import android.app.Notification;
 import android.support.annotation.WorkerThread;
+import android.support.v4.app.NotificationManagerCompat;
 
 class ServiceNotificationDispatcher<T> {
 
@@ -9,13 +10,13 @@ class ServiceNotificationDispatcher<T> {
 
     private final Object waitForDownloadService;
     private final NotificationCreator<T> notificationCreator;
-    private final NotificationManager notificationManager;
+    private final NotificationManagerCompat notificationManager;
 
     private DownloadManagerService service;
 
     ServiceNotificationDispatcher(Object waitForDownloadService,
                                   NotificationCreator<T> notificationCreator,
-                                  NotificationManager notificationManager) {
+                                  NotificationManagerCompat notificationManager) {
         this.waitForDownloadService = waitForDownloadService;
         this.notificationCreator = notificationCreator;
         this.notificationManager = notificationManager;
