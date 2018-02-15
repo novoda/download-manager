@@ -1,14 +1,7 @@
 package com.novoda.downloadmanager;
 
-interface DownloadService {
+interface DownloadService extends DownloadManagerService {
 
     void download(DownloadBatch downloadBatch, DownloadBatchStatusCallback callback);
-
-    void updateNotification(NotificationInformation notificationInformation);
-
-    void stackNotification(NotificationInformation notificationInformation);
-
-    void stackNotificationNotDismissible(NotificationInformation notificationInformation);
-
-    void dismissStackedNotification(NotificationInformation notificationInformation);
 }
+

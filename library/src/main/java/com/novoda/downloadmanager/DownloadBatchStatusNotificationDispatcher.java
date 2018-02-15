@@ -8,10 +8,10 @@ class DownloadBatchStatusNotificationDispatcher {
 
     private static final boolean NOTIFICATION_SEEN = true;
     private final DownloadsNotificationSeenPersistence notificationSeenPersistence;
-    private final NotificationDispatcher<DownloadBatchStatus> notificationDispatcher;
+    private final ServiceNotificationDispatcher<DownloadBatchStatus> notificationDispatcher;
 
     DownloadBatchStatusNotificationDispatcher(DownloadsNotificationSeenPersistence notificationSeenPersistence,
-                                              NotificationDispatcher<DownloadBatchStatus> notificationDispatcher) {
+                                              ServiceNotificationDispatcher<DownloadBatchStatus> notificationDispatcher) {
         this.notificationSeenPersistence = notificationSeenPersistence;
         this.notificationDispatcher = notificationDispatcher;
     }
@@ -30,6 +30,6 @@ class DownloadBatchStatusNotificationDispatcher {
     }
 
     void setDownloadService(DownloadService downloadService) {
-        notificationDispatcher.setDownloadService(downloadService);
+        notificationDispatcher.setService(downloadService);
     }
 }
