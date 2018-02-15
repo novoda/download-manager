@@ -261,7 +261,11 @@ public final class DownloadManagerBuilder {
             notificationChannelProvider.registerNotificationChannel(applicationContext);
         }
 
-        DownloadBatchStatusNotificationDispatcher notificationDispatcher = new DownloadBatchStatusNotificationDispatcher(LOCK, notificationCreator, downloadsBatchPersistence);
+        NotificationDispatcher<DownloadBatchStatus> notificationDispatcher = new NotificationDispatcher<>(LOCK, notificationCreator);
+        DownloadBatchStatusNotificationDispatcher batchStatusNotificationDispatcher = new DownloadBatchStatusNotificationDispatcher(
+                downloadsBatchPersistence,
+                notificationDispatcher
+        );
 
         LiteDownloadManagerDownloader downloader = new LiteDownloadManagerDownloader(
                 LOCK,
@@ -270,7 +274,7 @@ public final class DownloadManagerBuilder {
                 fileOperations,
                 downloadsBatchPersistence,
                 downloadsFilePersistence,
-                notificationDispatcher,
+                batchStatusNotificationDispatcher,
                 connectionChecker,
                 callbacks,
                 callbackThrottleCreator
