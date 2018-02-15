@@ -2,47 +2,30 @@ package com.novoda.downloadmanager;
 
 import android.support.annotation.WorkerThread;
 
-import com.novoda.notils.logger.simple.Log;
+class NotificationDispatcher<T> {
 
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
-
-class NotificationDispatcher {
-
-    private static final boolean NOTIFICATION_SEEN = true;
     private final Object waitForDownloadService;
-    private final NotificationCreator<DownloadBatchStatus> notificationCreator;
-    private final DownloadsNotificationSeenPersistence notificationSeenPersistence;
+    private final NotificationCreator<T> notificationCreator;
 
     private DownloadService downloadService;
 
     NotificationDispatcher(Object waitForDownloadService,
-                           NotificationCreator<DownloadBatchStatus> notificationCreator,
-                           DownloadsNotificationSeenPersistence notificationSeenPersistence) {
+                           NotificationCreator<T> notificationCreator) {
         this.waitForDownloadService = waitForDownloadService;
         this.notificationCreator = notificationCreator;
-        this.notificationSeenPersistence = notificationSeenPersistence;
     }
 
     @WorkerThread
-    void updateNotification(DownloadBatchStatus downloadBatchStatus) {
+    void updateNotification(T payload) {
         WaitForDownloadService.<Void>waitFor(downloadService, waitForDownloadService)
-                .thenPerform(executeUpdateNotification(downloadBatchStatus));
+                .thenPerform(executeUpdateNotification(payload));
     }
 
-    private WaitForDownloadService.ThenPerform.Action<Void> executeUpdateNotification(DownloadBatchStatus downloadBatchStatus) {
+    private WaitForDownloadService.ThenPerform.Action<Void> executeUpdateNotification(T downloadBatchStatus) {
         return () -> {
             NotificationInformation notificationInformation = notificationCreator.createNotification(downloadBatchStatus);
-            DownloadBatchStatus.Status status = downloadBatchStatus.status();
 
-            if (downloadBatchStatus.notificationSeen()) {
-                Log.v("DownloadBatchStatus:", downloadBatchStatus.getDownloadBatchId(), "notification has already been seen.");
-                return null;
-            }
             downloadService.dismissStackedNotification(notificationInformation);
-
-            if (status == DOWNLOADED) {
-                notificationSeenPersistence.updateNotificationSeenAsync(downloadBatchStatus.getDownloadBatchId(), NOTIFICATION_SEEN);
-            }
 
             switch (notificationInformation.notificationStackState()) {
                 case SINGLE_PERSISTENT_NOTIFICATION:

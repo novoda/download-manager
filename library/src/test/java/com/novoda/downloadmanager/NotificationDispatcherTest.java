@@ -19,7 +19,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 public class NotificationDispatcherTest {
 
@@ -36,17 +35,16 @@ public class NotificationDispatcherTest {
 
     private final Object lock = spy(new Object());
     private final NotificationCreator<DownloadBatchStatus> notificationCreator = mock(NotificationCreator.class);
-    private final DownloadsNotificationSeenPersistence persistence = mock(DownloadsNotificationSeenPersistence.class);
     private final DownloadService downloadService = mock(DownloadService.class);
 
-    private NotificationDispatcher notificationDispatcher;
+    private NotificationDispatcher<DownloadBatchStatus> notificationDispatcher;
 
     @Before
     public void setUp() {
         Log.setShowLogs(false);
         given(notificationCreator.createNotification(any(DownloadBatchStatus.class))).willReturn(SINGLE_PERSISTENT_NOTIFICATION_INFORMATION);
 
-        notificationDispatcher = new NotificationDispatcher(lock, notificationCreator, persistence);
+        notificationDispatcher = new NotificationDispatcher<>(lock, notificationCreator);
         notificationDispatcher.setDownloadService(downloadService);
     }
 
@@ -86,33 +84,6 @@ public class NotificationDispatcherTest {
             verify(downloadService).dismissStackedNotification(SINGLE_PERSISTENT_NOTIFICATION_INFORMATION);
             reset(downloadService);
         }
-    }
-
-    @Test
-    public void doesNotUpdateNotificationSeen_whenDownloadBatchStatusIsAnythingButDownloaded() {
-        List<DownloadBatchStatus> allStatusesMinusDownloaded = Arrays.asList(QUEUED_BATCH_STATUS, DOWNLOADING_BATCH_STATUS, PAUSED_BATCH_STATUS, ERROR_BATCH_STATUS, DELETED_BATCH_STATUS);
-
-        for (DownloadBatchStatus downloadBatchStatus : allStatusesMinusDownloaded) {
-            notificationDispatcher.updateNotification(downloadBatchStatus);
-        }
-
-        verifyZeroInteractions(persistence);
-    }
-
-    @Test
-    public void updatesNotificationSeen_whenStatusIsDownloaded() {
-        notificationDispatcher.updateNotification(DOWNLOADED_BATCH_STATUS);
-
-        verify(persistence).updateNotificationSeenAsync(DOWNLOADED_BATCH_STATUS.getDownloadBatchId(), true);
-    }
-
-    @Test
-    public void doesNotUpdateNotifications_whenNotificationHasBeenSeen() {
-        InternalDownloadBatchStatus notificationSeenStatus = anInternalDownloadsBatchStatus().withNotificationSeen(true).build();
-
-        notificationDispatcher.updateNotification(notificationSeenStatus);
-
-        verifyZeroInteractions(downloadService);
     }
 
     @Test(timeout = 500)

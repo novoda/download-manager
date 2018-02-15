@@ -17,7 +17,7 @@ class LiteDownloadManagerDownloader {
     private final FileOperations fileOperations;
     private final DownloadsBatchPersistence downloadsBatchPersistence;
     private final DownloadsFilePersistence downloadsFilePersistence;
-    private final NotificationDispatcher notificationDispatcher;
+    private final DownloadBatchStatusNotificationDispatcher notificationDispatcher;
     private final List<DownloadBatchStatusCallback> callbacks;
     private final ConnectionChecker connectionChecker;
 
@@ -33,7 +33,7 @@ class LiteDownloadManagerDownloader {
                                   FileOperations fileOperations,
                                   DownloadsBatchPersistence downloadsBatchPersistence,
                                   DownloadsFilePersistence downloadsFilePersistence,
-                                  NotificationDispatcher notificationDispatcher,
+                                  DownloadBatchStatusNotificationDispatcher notificationDispatcher,
                                   ConnectionChecker connectionChecker,
                                   List<DownloadBatchStatusCallback> callbacks,
                                   CallbackThrottleCreator callbackThrottleCreator) {
