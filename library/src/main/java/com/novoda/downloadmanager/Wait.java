@@ -4,8 +4,6 @@ import android.support.annotation.Nullable;
 
 import com.novoda.notils.logger.simple.Log;
 
-import java.util.concurrent.Callable;
-
 final class Wait {
 
     private Wait() {
@@ -18,6 +16,10 @@ final class Wait {
 
     static class ThenPerform<T> {
 
+        interface Action<T> {
+            T performAction();
+        }
+
         private final Object instanceToWaitFor;
         private final Object lock;
 
@@ -26,24 +28,11 @@ final class Wait {
             this.lock = lock;
         }
 
-        T thenPerform(Callable<T> callable) {
+        T thenPerform(Action<T> action) {
             if (instanceToWaitFor == null) {
                 waitForLock();
             }
-
-            try {
-                return callable.call();
-            } catch (Exception e) {
-                throw new IllegalStateException("Cannot compute Callable result.", e);
-            }
-        }
-
-        void thenPerform(Runnable runnable) {
-            if (instanceToWaitFor == null) {
-                waitForLock();
-            }
-
-            runnable.run();
+            return action.performAction();
         }
 
         private void waitForLock() {
