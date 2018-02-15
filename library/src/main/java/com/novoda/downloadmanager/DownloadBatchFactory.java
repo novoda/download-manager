@@ -1,5 +1,6 @@
 package com.novoda.downloadmanager;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -83,7 +84,7 @@ final class DownloadBatchFactory {
     }
 
     private static String prependBatchIdTo(String filePath, DownloadBatchId downloadBatchId) {
-        return filePath;
+        return sanitizeBatchIdPath(downloadBatchId.rawId()) + File.separatorChar + filePath;
     }
 
     private static String sanitizeBatchIdPath(String batchIdPath) {
