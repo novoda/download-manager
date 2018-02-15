@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager;
 
+import android.app.Service;
+
 import com.novoda.notils.logger.simple.Log;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
@@ -8,10 +10,10 @@ class DownloadBatchStatusNotificationDispatcher {
 
     private static final boolean NOTIFICATION_SEEN = true;
     private final DownloadsNotificationSeenPersistence notificationSeenPersistence;
-    private final NotificationDispatcher<DownloadBatchStatus> notificationDispatcher;
+    private final ServiceNotificationDispatcher<DownloadBatchStatus> notificationDispatcher;
 
     DownloadBatchStatusNotificationDispatcher(DownloadsNotificationSeenPersistence notificationSeenPersistence,
-                                              NotificationDispatcher<DownloadBatchStatus> notificationDispatcher) {
+                                              ServiceNotificationDispatcher<DownloadBatchStatus> notificationDispatcher) {
         this.notificationSeenPersistence = notificationSeenPersistence;
         this.notificationDispatcher = notificationDispatcher;
     }
@@ -30,6 +32,15 @@ class DownloadBatchStatusNotificationDispatcher {
     }
 
     void setDownloadService(DownloadService downloadService) {
-        notificationDispatcher.setDownloadService(downloadService);
+        if (downloadService instanceof Service) {
+            notificationDispatcher.setService((Service) downloadService);
+        } else {
+            String message = String.format(
+                    "Parameter: %s does not resolve to %s",
+                    downloadService.getClass().getSimpleName(),
+                    Service.class.getSimpleName()
+            );
+            throw new IllegalArgumentException(message);
+        }
     }
 }

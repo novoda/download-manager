@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager;
 
+import android.app.Service;
+
 import com.novoda.notils.logger.simple.Log;
 
 import org.junit.Before;
@@ -12,7 +14,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 public class DownloadBatchStatusNotificationDispatcherTest {
 
-    private final NotificationDispatcher<DownloadBatchStatus> notificationDispatcher = mock(NotificationDispatcher.class);
+    private final ServiceNotificationDispatcher<DownloadBatchStatus> notificationDispatcher = mock(ServiceNotificationDispatcher.class);
     private final DownloadsNotificationSeenPersistence persistence = mock(DownloadsNotificationSeenPersistence.class);
 
     private DownloadBatchStatusNotificationDispatcher downloadBatchStatusNotificationDispatcher;
@@ -52,11 +54,18 @@ public class DownloadBatchStatusNotificationDispatcherTest {
 
     @Test
     public void setsDownloadServiceOnNotificationDispatcher() {
-        DownloadService downloadService = mock(DownloadService.class);
+        DownloadService downloadService = mock(LiteDownloadService.class);
 
         downloadBatchStatusNotificationDispatcher.setDownloadService(downloadService);
 
-        verify(notificationDispatcher).setDownloadService(downloadService);
+        verify(notificationDispatcher).setService((Service) downloadService);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throwsIllegalArgument_whenNotResolvingToAndroidService() {
+        DownloadService downloadService = mock(DownloadService.class);
+
+        downloadBatchStatusNotificationDispatcher.setDownloadService(downloadService);
     }
 
 }

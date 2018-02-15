@@ -10,8 +10,8 @@ final class Wait {
         // Uses static factory method.
     }
 
-    static <T> ThenPerform<T> waitFor(@Nullable ToWaitFor instance, Object lock) {
-        return new ThenPerform<>(instance, lock);
+    static <T> ThenPerform<T> waitFor(@Nullable Object instanceToWaitFor, Object lock) {
+        return new ThenPerform<>(instanceToWaitFor, lock);
     }
 
     static class ThenPerform<T> {
@@ -20,16 +20,16 @@ final class Wait {
             T performAction();
         }
 
-        private final ToWaitFor instance;
+        private final Object instanceToWaitFor;
         private final Object lock;
 
-        ThenPerform(ToWaitFor instance, Object lock) {
-            this.instance = instance;
+        ThenPerform(Object instanceToWaitFor, Object lock) {
+            this.instanceToWaitFor = instanceToWaitFor;
             this.lock = lock;
         }
 
         T thenPerform(Action<T> action) {
-            if (instance == null) {
+            if (instanceToWaitFor == null) {
                 waitForLock();
             }
             return action.performAction();
@@ -38,12 +38,12 @@ final class Wait {
         private void waitForLock() {
             try {
                 synchronized (lock) {
-                    if (instance == null) {
+                    if (instanceToWaitFor == null) {
                         lock.wait();
                     }
                 }
             } catch (InterruptedException e) {
-                Log.e(e, "Interrupted waiting for :", lock.getClass().getSimpleName());
+                Log.e(e, "Interrupted waiting for instance.");
             }
         }
 
