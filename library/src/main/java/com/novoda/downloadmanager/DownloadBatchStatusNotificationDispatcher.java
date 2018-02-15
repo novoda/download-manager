@@ -6,7 +6,7 @@ import com.novoda.notils.logger.simple.Log;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
 
-class NotificationDispatcher {
+class DownloadBatchStatusNotificationDispatcher {
 
     private static final boolean NOTIFICATION_SEEN = true;
     private final Object waitForDownloadService;
@@ -15,9 +15,9 @@ class NotificationDispatcher {
 
     private DownloadService downloadService;
 
-    NotificationDispatcher(Object waitForDownloadService,
-                           NotificationCreator<DownloadBatchStatus> notificationCreator,
-                           DownloadsNotificationSeenPersistence notificationSeenPersistence) {
+    DownloadBatchStatusNotificationDispatcher(Object waitForDownloadService,
+                                              NotificationCreator<DownloadBatchStatus> notificationCreator,
+                                              DownloadsNotificationSeenPersistence notificationSeenPersistence) {
         this.waitForDownloadService = waitForDownloadService;
         this.notificationCreator = notificationCreator;
         this.notificationSeenPersistence = notificationSeenPersistence;

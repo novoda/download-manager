@@ -21,7 +21,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
-public class NotificationDispatcherTest {
+public class DownloadBatchStatusNotificationDispatcherTest {
 
     private static final DownloadBatchStatus QUEUED_BATCH_STATUS = anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.QUEUED).build();
     private static final DownloadBatchStatus DOWNLOADING_BATCH_STATUS = anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.DOWNLOADING).build();
@@ -39,14 +39,14 @@ public class NotificationDispatcherTest {
     private final DownloadsNotificationSeenPersistence persistence = mock(DownloadsNotificationSeenPersistence.class);
     private final DownloadService downloadService = mock(DownloadService.class);
 
-    private NotificationDispatcher notificationDispatcher;
+    private DownloadBatchStatusNotificationDispatcher notificationDispatcher;
 
     @Before
     public void setUp() {
         Log.setShowLogs(false);
         given(notificationCreator.createNotification(any(DownloadBatchStatus.class))).willReturn(SINGLE_PERSISTENT_NOTIFICATION_INFORMATION);
 
-        notificationDispatcher = new NotificationDispatcher(lock, notificationCreator, persistence);
+        notificationDispatcher = new DownloadBatchStatusNotificationDispatcher(lock, notificationCreator, persistence);
         notificationDispatcher.setDownloadService(downloadService);
     }
 

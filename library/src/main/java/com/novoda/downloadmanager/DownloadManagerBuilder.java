@@ -261,7 +261,7 @@ public final class DownloadManagerBuilder {
             notificationChannelProvider.registerNotificationChannel(applicationContext);
         }
 
-        NotificationDispatcher notificationDispatcher = new NotificationDispatcher(LOCK, notificationCreator, downloadsBatchPersistence);
+        DownloadBatchStatusNotificationDispatcher notificationDispatcher = new DownloadBatchStatusNotificationDispatcher(LOCK, notificationCreator, downloadsBatchPersistence);
 
         LiteDownloadManagerDownloader downloader = new LiteDownloadManagerDownloader(
                 LOCK,
