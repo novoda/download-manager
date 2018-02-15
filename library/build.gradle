@@ -42,8 +42,8 @@ dependencies {
     implementation 'android.arch.persistence.room:runtime:1.0.0'
     implementation 'com.evernote:android-job:1.2.0-alpha3'
     testImplementation 'junit:junit:4.12'
-    testImplementation 'org.mockito:mockito-core:2.13.0'
-    testImplementation 'com.google.truth:truth:0.36'
+    testImplementation 'org.mockito:mockito-core:2.15.0'
+    testImplementation 'com.google.truth:truth:0.39'
 }
 
 publish {

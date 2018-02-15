@@ -81,6 +81,17 @@ public final class DownloadMigratorBuilder {
         }
 
         @Override
+        public NotificationStackState notificationStackState(MigrationStatus payload) {
+            MigrationStatus.Status status = payload.status();
+
+            if (status == MigrationStatus.Status.COMPLETE || status == MigrationStatus.Status.DB_NOT_PRESENT) {
+                return NotificationStackState.STACK_NOTIFICATION_DISMISSIBLE;
+            } else {
+                return NotificationStackState.SINGLE_PERSISTENT_NOTIFICATION;
+            }
+        }
+
+        @Override
         public Notification customNotificationFrom(NotificationCompat.Builder builder, MigrationStatus payload) {
             String title = payload.status().toRawValue();
             String content = resources.getString(R.string.migration_notification_content_progress, payload.percentageMigrated());

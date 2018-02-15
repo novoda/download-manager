@@ -4,10 +4,7 @@ import android.support.annotation.WorkerThread;
 
 import com.novoda.notils.logger.simple.Log;
 
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
 
 class NotificationDispatcher {
 
@@ -45,13 +42,25 @@ class NotificationDispatcher {
 
             if (status == DOWNLOADED) {
                 notificationSeenPersistence.updateNotificationSeenAsync(downloadBatchStatus.getDownloadBatchId(), NOTIFICATION_SEEN);
-                downloadService.stackNotification(notificationInformation);
-            } else if (status == PAUSED) {
-                downloadService.stackNotificationNotDismissible(notificationInformation);
-            } else if (status == DELETED || status == ERROR) {
-                downloadService.stackNotification(notificationInformation);
-            } else {
-                downloadService.updateNotification(notificationInformation);
+            }
+
+            switch (notificationInformation.notificationStackState()) {
+                case SINGLE_PERSISTENT_NOTIFICATION:
+                    downloadService.updateNotification(notificationInformation);
+                    break;
+                case STACK_NOTIFICATION_NOT_DISMISSIBLE:
+                    downloadService.stackNotificationNotDismissible(notificationInformation);
+                    break;
+                case STACK_NOTIFICATION_DISMISSIBLE:
+                    downloadService.stackNotification(notificationInformation);
+                    break;
+                default:
+                    String message = String.format(
+                            "%s: %s is not supported.",
+                            NotificationCustomizer.NotificationStackState.class.getSimpleName(),
+                            notificationInformation.notificationStackState()
+                    );
+                    throw new IllegalArgumentException(message);
             }
 
             return null;

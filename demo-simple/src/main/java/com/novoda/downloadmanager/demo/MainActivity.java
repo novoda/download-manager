@@ -210,6 +210,17 @@ public class MainActivity extends AppCompatActivity {
 
     private static class MigrationNotificationCustomizer implements NotificationCustomizer<MigrationStatus> {
         @Override
+        public NotificationStackState notificationStackState(MigrationStatus payload) {
+            MigrationStatus.Status status = payload.status();
+
+            if (status == MigrationStatus.Status.COMPLETE || status == MigrationStatus.Status.DB_NOT_PRESENT) {
+                return NotificationStackState.STACK_NOTIFICATION_DISMISSIBLE;
+            } else {
+                return NotificationStackState.SINGLE_PERSISTENT_NOTIFICATION;
+            }
+        }
+
+        @Override
         public Notification customNotificationFrom(NotificationCompat.Builder builder, MigrationStatus payload) {
             return builder
                     .setProgress(payload.totalNumberOfBatchesToMigrate(), payload.numberOfMigratedBatches(), false)

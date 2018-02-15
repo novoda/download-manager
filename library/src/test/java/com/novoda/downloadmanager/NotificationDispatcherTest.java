@@ -8,6 +8,11 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import static com.novoda.downloadmanager.InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus;
+import static com.novoda.downloadmanager.NotificationCustomizer.NotificationStackState.SINGLE_PERSISTENT_NOTIFICATION;
+import static com.novoda.downloadmanager.NotificationCustomizer.NotificationStackState.STACK_NOTIFICATION_DISMISSIBLE;
+import static com.novoda.downloadmanager.NotificationCustomizer.NotificationStackState.STACK_NOTIFICATION_NOT_DISMISSIBLE;
+import static com.novoda.downloadmanager.NotificationInformationFixtures.notificationInformation;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -18,14 +23,17 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 public class NotificationDispatcherTest {
 
-    private static final DownloadBatchStatus QUEUED_BATCH_STATUS = InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.QUEUED).build();
-    private static final DownloadBatchStatus DOWNLOADING_BATCH_STATUS = InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.DOWNLOADING).build();
-    private static final DownloadBatchStatus PAUSED_BATCH_STATUS = InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.PAUSED).build();
-    private static final DownloadBatchStatus ERROR_BATCH_STATUS = InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.ERROR).build();
-    private static final DownloadBatchStatus DELETED_BATCH_STATUS = InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.DELETED).build();
-    private static final DownloadBatchStatus DOWNLOADED_BATCH_STATUS = InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.DOWNLOADED).build();
+    private static final DownloadBatchStatus QUEUED_BATCH_STATUS = anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.QUEUED).build();
+    private static final DownloadBatchStatus DOWNLOADING_BATCH_STATUS = anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.DOWNLOADING).build();
+    private static final DownloadBatchStatus PAUSED_BATCH_STATUS = anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.PAUSED).build();
+    private static final DownloadBatchStatus ERROR_BATCH_STATUS = anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.ERROR).build();
+    private static final DownloadBatchStatus DELETED_BATCH_STATUS = anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.DELETED).build();
+    private static final DownloadBatchStatus DOWNLOADED_BATCH_STATUS = anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.DOWNLOADED).build();
 
-    private final NotificationInformation notificationInformation = mock(NotificationInformation.class);
+    private static final NotificationInformation STACKABLE_DISMISSIBLE_NOTIFICATION_INFORMATION = notificationInformation().withNotificationStackState(STACK_NOTIFICATION_DISMISSIBLE).build();
+    private static final NotificationInformation STACKABLE_NON_DISMISSIBLE_NOTIFICATION_INFORMATION = notificationInformation().withNotificationStackState(STACK_NOTIFICATION_NOT_DISMISSIBLE).build();
+    private static final NotificationInformation SINGLE_PERSISTENT_NOTIFICATION_INFORMATION = notificationInformation().withNotificationStackState(SINGLE_PERSISTENT_NOTIFICATION).build();
+
     private final Object lock = spy(new Object());
     private final NotificationCreator<DownloadBatchStatus> notificationCreator = mock(NotificationCreator.class);
     private final DownloadsNotificationSeenPersistence persistence = mock(DownloadsNotificationSeenPersistence.class);
@@ -36,45 +44,37 @@ public class NotificationDispatcherTest {
     @Before
     public void setUp() {
         Log.setShowLogs(false);
+        given(notificationCreator.createNotification(any(DownloadBatchStatus.class))).willReturn(SINGLE_PERSISTENT_NOTIFICATION_INFORMATION);
+
         notificationDispatcher = new NotificationDispatcher(lock, notificationCreator, persistence);
         notificationDispatcher.setDownloadService(downloadService);
-
-        given(notificationCreator.createNotification(any(DownloadBatchStatus.class))).willReturn(notificationInformation);
     }
 
     @Test
-    public void stacksNotification_whenStatusIsDownloaded() {
-        notificationDispatcher.updateNotification(DOWNLOADED_BATCH_STATUS);
+    public void showsSinglePersistentNotification() {
+        given(notificationCreator.createNotification(QUEUED_BATCH_STATUS)).willReturn(SINGLE_PERSISTENT_NOTIFICATION_INFORMATION);
 
-        verify(downloadService).stackNotification(notificationInformation);
+        notificationDispatcher.updateNotification(QUEUED_BATCH_STATUS);
+
+        verify(downloadService).updateNotification(SINGLE_PERSISTENT_NOTIFICATION_INFORMATION);
     }
 
     @Test
-    public void stacksNonDismissibleNotification_whenStatusIsPaused() {
-        notificationDispatcher.updateNotification(PAUSED_BATCH_STATUS);
+    public void stacksNonDismissibleNotification() {
+        given(notificationCreator.createNotification(QUEUED_BATCH_STATUS)).willReturn(STACKABLE_NON_DISMISSIBLE_NOTIFICATION_INFORMATION);
 
-        verify(downloadService).stackNotificationNotDismissible(notificationInformation);
+        notificationDispatcher.updateNotification(QUEUED_BATCH_STATUS);
+
+        verify(downloadService).stackNotificationNotDismissible(STACKABLE_NON_DISMISSIBLE_NOTIFICATION_INFORMATION);
     }
 
     @Test
-    public void stacksNotification_whenStatusIsDeleted() {
-        notificationDispatcher.updateNotification(DELETED_BATCH_STATUS);
+    public void stacksDismissibleNotification() {
+        given(notificationCreator.createNotification(QUEUED_BATCH_STATUS)).willReturn(STACKABLE_DISMISSIBLE_NOTIFICATION_INFORMATION);
 
-        verify(downloadService).stackNotification(notificationInformation);
-    }
+        notificationDispatcher.updateNotification(QUEUED_BATCH_STATUS);
 
-    @Test
-    public void stacksNotification_whenStatusIsError() {
-        notificationDispatcher.updateNotification(ERROR_BATCH_STATUS);
-
-        verify(downloadService).stackNotification(notificationInformation);
-    }
-
-    @Test
-    public void updatesNotification_whenStatusIsDownloading() {
-        notificationDispatcher.updateNotification(DOWNLOADING_BATCH_STATUS);
-
-        verify(downloadService).updateNotification(notificationInformation);
+        verify(downloadService).stackNotification(STACKABLE_DISMISSIBLE_NOTIFICATION_INFORMATION);
     }
 
     @Test
@@ -83,7 +83,7 @@ public class NotificationDispatcherTest {
 
         for (DownloadBatchStatus downloadBatchStatus : allDownloadBatchStatuses) {
             notificationDispatcher.updateNotification(downloadBatchStatus);
-            verify(downloadService).dismissStackedNotification(notificationInformation);
+            verify(downloadService).dismissStackedNotification(SINGLE_PERSISTENT_NOTIFICATION_INFORMATION);
             reset(downloadService);
         }
     }
@@ -108,7 +108,7 @@ public class NotificationDispatcherTest {
 
     @Test
     public void doesNotUpdateNotifications_whenNotificationHasBeenSeen() {
-        InternalDownloadBatchStatus notificationSeenStatus = InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus().withNotificationSeen(true).build();
+        InternalDownloadBatchStatus notificationSeenStatus = anInternalDownloadsBatchStatus().withNotificationSeen(true).build();
 
         notificationDispatcher.updateNotification(notificationSeenStatus);
 

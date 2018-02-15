@@ -7,4 +7,6 @@ interface NotificationInformation {
     int getId();
 
     Notification getNotification();
+
+    NotificationCustomizer.NotificationStackState notificationStackState();
 }
