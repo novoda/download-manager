@@ -55,7 +55,9 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
     }
 
     @Override
-    public void startMigration(MigrationJob migrationJob) {
+    public void startMigration(MigrationJob migrationJob, MigrationCallback migrationCallback) {
+        migrationJob.addCallback(migrationCallback);
+
         executor.execute(() -> {
             acquireCpuWakeLock();
             migrationJob.run();

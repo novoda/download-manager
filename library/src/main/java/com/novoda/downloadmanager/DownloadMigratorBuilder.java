@@ -16,10 +16,13 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
 import java.io.File;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public final class DownloadMigratorBuilder {
 
     private static final Object LOCK = new Object();
+    private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
 
     private final Context applicationContext;
     private final Handler handler;
@@ -103,7 +106,7 @@ public final class DownloadMigratorBuilder {
         Intent serviceIntent = new Intent(applicationContext, LiteDownloadMigrationService.class);
         applicationContext.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
 
-        downloadMigrator = new LiteDownloadMigrator(applicationContext, databaseFile, LOCK);
+        downloadMigrator = new LiteDownloadMigrator(applicationContext, databaseFile, LOCK, EXECUTOR, handler);
         return downloadMigrator;
     }
 
