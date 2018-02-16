@@ -12,6 +12,7 @@ class LiteDownloadMigrator implements DownloadMigrator {
     private final ExecutorService executor;
     private final Handler callbackHandler;
     private final MigrationCallback migrationCallback;
+    private final ServiceNotificationDispatcher<MigrationStatus> notificationDispatcher;
 
     private DownloadMigrationService migrationService;
 
@@ -21,16 +22,19 @@ class LiteDownloadMigrator implements DownloadMigrator {
                          Object waitForMigrationService,
                          ExecutorService executor,
                          Handler callbackHandler,
-                         MigrationCallback migrationCallback) {
+                         MigrationCallback migrationCallback,
+                         ServiceNotificationDispatcher<MigrationStatus> notificationDispatcher) {
         this.applicationContext = context.getApplicationContext();
         this.waitForMigrationService = waitForMigrationService;
         this.executor = executor;
         this.callbackHandler = callbackHandler;
         this.migrationCallback = migrationCallback;
+        this.notificationDispatcher = notificationDispatcher;
     }
 
     void initialise(DownloadMigrationService migrationService) {
         this.migrationService = migrationService;
+        notificationDispatcher.setService(migrationService);
 
         synchronized (waitForMigrationService) {
             waitForMigrationService.notifyAll();
@@ -53,7 +57,7 @@ class LiteDownloadMigrator implements DownloadMigrator {
     private MigrationCallback migrationCallback() {
         return migrationStatus -> callbackHandler.post(() -> {
             migrationCallback.onUpdate(migrationStatus);
-            // Call notification dispatcher.
+            notificationDispatcher.updateNotification(migrationStatus);
         });
     }
 
