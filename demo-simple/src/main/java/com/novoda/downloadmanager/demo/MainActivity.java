@@ -214,8 +214,10 @@ public class MainActivity extends AppCompatActivity {
         public NotificationStackState notificationStackState(MigrationStatus payload) {
             MigrationStatus.Status status = payload.status();
 
-            if (status == MigrationStatus.Status.COMPLETE || status == MigrationStatus.Status.DB_NOT_PRESENT) {
+            if (status == MigrationStatus.Status.COMPLETE) {
                 return NotificationStackState.STACK_NOTIFICATION_DISMISSIBLE;
+            } else if (status == MigrationStatus.Status.DB_NOT_PRESENT) {
+                return NotificationStackState.HIDDEN_NOTIFICATION;
             } else {
                 return NotificationStackState.SINGLE_PERSISTENT_NOTIFICATION;
             }
