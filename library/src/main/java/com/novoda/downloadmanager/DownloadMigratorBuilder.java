@@ -30,7 +30,6 @@ public final class DownloadMigratorBuilder {
 
     private NotificationChannelProvider notificationChannelProvider;
     private NotificationCreator<MigrationStatus> notificationCreator;
-    private DownloadMigrationService migrationService;
     private LiteDownloadMigrator downloadMigrator;
     private MigrationCallback migrationCallback;
 
@@ -95,7 +94,7 @@ public final class DownloadMigratorBuilder {
         ServiceConnection serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder binder) {
-                migrationService = ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) binder).getService();
+                DownloadMigrationService migrationService = ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) binder).getService();
                 downloadMigrator.initialise(migrationService);
             }
 
