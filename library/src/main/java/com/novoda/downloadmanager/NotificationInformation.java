@@ -8,5 +8,5 @@ interface NotificationInformation {
 
     Notification getNotification();
 
-    NotificationCustomizer.NotificationStackState notificationStackState();
+    NotificationCustomizer.NotificationDisplayState notificationDisplayState();
 }
