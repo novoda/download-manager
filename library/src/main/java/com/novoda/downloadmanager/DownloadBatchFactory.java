@@ -1,5 +1,6 @@
 package com.novoda.downloadmanager;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +34,7 @@ final class DownloadBatchFactory {
             FilePersistence filePersistence = filePersistenceCreator.create();
 
             String basePath = filePersistence.basePath().path();
-            FilePath filePath = FilePathCreator.create(basePath, relativePathFrom(batchFile));
+            FilePath filePath = FilePathCreator.create(basePath, prependBatchIdTo(relativePathFrom(batchFile), downloadBatchId));
             FileName fileName = FileNameExtractor.extractFrom(filePath.path());
 
             DownloadFileId downloadFileId = downloadFileIdFrom(batch, batchFile);
@@ -80,6 +81,14 @@ final class DownloadBatchFactory {
                 callbackThrottle,
                 connectionChecker
         );
+    }
+
+    private static String prependBatchIdTo(String filePath, DownloadBatchId downloadBatchId) {
+        return sanitizeBatchIdPath(downloadBatchId.rawId()) + File.separatorChar + filePath;
+    }
+
+    private static String sanitizeBatchIdPath(String batchIdPath) {
+        return batchIdPath.replaceAll("[:\\\\/*?|<>]", "_");
     }
 
     private static String relativePathFrom(BatchFile batchFile) {

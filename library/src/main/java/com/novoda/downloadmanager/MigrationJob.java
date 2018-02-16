@@ -77,6 +77,7 @@ class MigrationJob implements Runnable {
 
             migrateV1DataToV2Database(downloadsPersistence, partialMigration, basePath);
             deleteFrom(database, partialMigration);
+            deleteFiles(partialMigration);
 
             downloadsPersistence.transactionSuccess();
             downloadsPersistence.endTransaction();
@@ -128,10 +129,7 @@ class MigrationJob implements Runnable {
     }
 
     // TODO: See https://github.com/novoda/download-manager/issues/270
-    private void deleteFrom(SqlDatabaseWrapper database, Migration migration) {
-        Batch batch = migration.batch();
-        Log.d(TAG, "about to delete the batch: " + batch.downloadBatchId().rawId() + ", time is " + System.nanoTime());
-        database.delete(TABLE_BATCHES, WHERE_CLAUSE_ID, batch.downloadBatchId().rawId());
+    private void deleteFiles(Migration migration) {
         for (Migration.FileMetadata metadata : migration.getFileMetadata()) {
             if (hasValidFileLocation(metadata)) {
                 File file = new File(metadata.originalFileLocation());
@@ -185,6 +183,12 @@ class MigrationJob implements Runnable {
         database.deleteDatabase();
         migrationStatus.markAsComplete();
         onUpdate(migrationStatus);
+    }
+
+    private void deleteFrom(SqlDatabaseWrapper database, Migration migration) {
+        Batch batch = migration.batch();
+        Log.d(TAG, "about to delete the batch: " + batch.downloadBatchId().rawId() + ", time is " + System.nanoTime());
+        database.delete(TABLE_BATCHES, WHERE_CLAUSE_ID, batch.downloadBatchId().rawId());
     }
 
 }

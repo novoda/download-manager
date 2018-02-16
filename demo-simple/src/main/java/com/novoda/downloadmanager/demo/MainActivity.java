@@ -24,12 +24,12 @@ import com.novoda.downloadmanager.DownloadFileIdCreator;
 import com.novoda.downloadmanager.DownloadMigrator;
 import com.novoda.downloadmanager.DownloadMigratorBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
-import com.novoda.downloadmanager.LocalFilesDirectory;
-import com.novoda.downloadmanager.LocalFilesDirectoryFactory;
 import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
 import com.novoda.downloadmanager.NotificationCustomizer;
 import com.novoda.notils.logger.simple.Log;
+
+import java.io.File;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 
@@ -151,11 +151,19 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private final View.OnClickListener logFileDirectoryOnClick = v -> {
-        LocalFilesDirectory localFilesDirectory = LocalFilesDirectoryFactory.create(getApplicationContext());
-        for (String fileName : localFilesDirectory.contents()) {
-            Log.d("LogFileDirectory", fileName);
-        }
+        File[] files = getFilesDir().listFiles();
+        logAllFiles(files);
     };
+
+    private void logAllFiles(File[] files) {
+        for (File file : files) {
+            if (file.isDirectory()) {
+                logAllFiles(file.listFiles());
+            } else {
+                Log.d("LogFileDirectory", file.getAbsolutePath());
+            }
+        }
+    }
 
     private final View.OnClickListener logDownloadFileStatusOnClick = v -> liteDownloadManagerCommands.getDownloadStatusWithMatching(
             FILE_ID_1,
