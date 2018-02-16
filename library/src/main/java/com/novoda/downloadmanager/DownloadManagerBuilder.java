@@ -330,10 +330,8 @@ public final class DownloadManagerBuilder {
         @Override
         public NotificationStackState notificationStackState(DownloadBatchStatus payload) {
             DownloadBatchStatus.Status status = payload.status();
-            if (status == DOWNLOADED || status == DELETED || status == ERROR) {
+            if (status == DOWNLOADED || status == DELETED || status == ERROR || status == PAUSED) {
                 return NotificationStackState.STACK_NOTIFICATION_DISMISSIBLE;
-            } else if (status == PAUSED) {
-                return NotificationStackState.STACK_NOTIFICATION_NOT_DISMISSIBLE;
             } else {
                 return NotificationStackState.SINGLE_PERSISTENT_NOTIFICATION;
             }

@@ -12,6 +12,7 @@ public interface NotificationCustomizer<T> {
     enum NotificationStackState {
         SINGLE_PERSISTENT_NOTIFICATION,
         STACK_NOTIFICATION_NOT_DISMISSIBLE,
-        STACK_NOTIFICATION_DISMISSIBLE
+        STACK_NOTIFICATION_DISMISSIBLE,
+        HIDDEN_NOTIFICATION
     }
 }

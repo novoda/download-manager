@@ -4,6 +4,8 @@ import android.app.Notification;
 import android.support.annotation.WorkerThread;
 import android.support.v4.app.NotificationManagerCompat;
 
+import com.novoda.notils.logger.simple.Log;
+
 class ServiceNotificationDispatcher<T> {
 
     private static final String NOTIFICATION_TAG = "download-manager";
@@ -43,6 +45,9 @@ class ServiceNotificationDispatcher<T> {
                     break;
                 case STACK_NOTIFICATION_DISMISSIBLE:
                     stackNotification(notificationInformation);
+                    break;
+                case HIDDEN_NOTIFICATION:
+                    Log.d("Notification not required, hiding.");
                     break;
                 default:
                     String message = String.format(
