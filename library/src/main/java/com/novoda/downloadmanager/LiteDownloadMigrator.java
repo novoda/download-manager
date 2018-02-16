@@ -1,53 +1,64 @@
 package com.novoda.downloadmanager;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Handler;
-import android.os.IBinder;
+
+import java.io.File;
+import java.util.concurrent.ExecutorService;
 
 class LiteDownloadMigrator implements DownloadMigrator {
 
+    private final Object waitForMigrationService;
+    private final ExecutorService executor;
+    private final Handler callbackHandler;
+    private final MigrationCallback migrationCallback;
+    private final ServiceNotificationDispatcher<MigrationStatus> notificationDispatcher;
+
+    private DownloadMigrationService migrationService;
+
     private final Context applicationContext;
-    private final Handler handler;
-    private final NotificationChannelProvider notificationChannelProvider;
-    private final NotificationCreator<MigrationStatus> notificationCreator;
 
     LiteDownloadMigrator(Context context,
-                         Handler handler,
-                         NotificationChannelProvider notificationChannelProvider,
-                         NotificationCreator<MigrationStatus> notificationCreator) {
+                         Object waitForMigrationService,
+                         ExecutorService executor,
+                         Handler callbackHandler,
+                         MigrationCallback migrationCallback,
+                         ServiceNotificationDispatcher<MigrationStatus> notificationDispatcher) {
         this.applicationContext = context.getApplicationContext();
-        this.handler = handler;
-        this.notificationChannelProvider = notificationChannelProvider;
-        this.notificationCreator = notificationCreator;
+        this.waitForMigrationService = waitForMigrationService;
+        this.executor = executor;
+        this.callbackHandler = callbackHandler;
+        this.migrationCallback = migrationCallback;
+        this.notificationDispatcher = notificationDispatcher;
+    }
+
+    void initialise(DownloadMigrationService migrationService) {
+        this.migrationService = migrationService;
+        notificationDispatcher.setService(migrationService);
+
+        synchronized (waitForMigrationService) {
+            waitForMigrationService.notifyAll();
+        }
     }
 
     @Override
-    public void startMigration(final String databaseFilename, final MigrationCallback migrationCallback) {
-        ServiceConnection serviceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder binder) {
-                DownloadMigrationService migrationService = ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) binder).getService();
-                migrationService.setNotificationChannelProvider(notificationChannelProvider);
-                migrationService.setNotificationCreator(notificationCreator);
+    public void startMigration(File databaseFile) {
+        executor.submit(() -> Wait.<Void>waitFor(migrationService, waitForMigrationService)
+                .thenPerform(executeMigrationFor(databaseFile)));
+    }
 
-                MigrationCallback mainThreadReportingMigrationCallback = migrationStatus -> handler.post(
-                        () -> migrationCallback.onUpdate(migrationStatus)
-                );
-
-                migrationService.startMigration(databaseFilename, mainThreadReportingMigrationCallback);
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                // do nothing.
-            }
+    private Wait.ThenPerform.Action<Void> executeMigrationFor(File databaseFile) {
+        return () -> {
+            migrationService.startMigration(new MigrationJob(applicationContext, databaseFile), migrationCallback());
+            return null;
         };
-        Intent serviceIntent = new Intent(applicationContext, LiteDownloadMigrationService.class);
-        applicationContext.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-        applicationContext.startService(serviceIntent);
+    }
+
+    private MigrationCallback migrationCallback() {
+        return migrationStatus -> callbackHandler.post(() -> {
+            migrationCallback.onUpdate(migrationStatus);
+            notificationDispatcher.updateNotification(migrationStatus);
+        });
     }
 
 }

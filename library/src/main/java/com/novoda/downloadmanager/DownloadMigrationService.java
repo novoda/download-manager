@@ -1,10 +1,6 @@
 package com.novoda.downloadmanager;
 
-interface DownloadMigrationService {
+interface DownloadMigrationService extends DownloadManagerService {
 
-    void setNotificationChannelProvider(NotificationChannelProvider notificationChannelProvider);
-
-    void setNotificationCreator(NotificationCreator<MigrationStatus> notificationCreator);
-
-    void startMigration(String databaseFilename, MigrationCallback migrationCallback);
+    void startMigration(MigrationJob migrationJob, MigrationCallback migrationCallback);
 }

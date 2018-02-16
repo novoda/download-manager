@@ -1,7 +1,9 @@
 package com.novoda.downloadmanager;
 
+import java.io.File;
+
 public interface DownloadMigrator {
 
-    void startMigration(String databaseFilename, MigrationCallback migrationCallback);
+    void startMigration(File databaseFile);
 
 }

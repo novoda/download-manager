@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
                         NotificationManagerCompat.IMPORTANCE_DEFAULT
                 )
                 .withNotification(notificationCustomizer)
+                .withMigrationCallback(migrationCallback)
                 .build();
 
         textViewBatch1 = findViewById(R.id.batch_1);
@@ -120,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final MigrationCallback migrationCallback = migrationStatus -> databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());
 
-    private final View.OnClickListener startMigrationOnClick = v -> downloadMigrator.startMigration("downloads.db", migrationCallback);
+    private final View.OnClickListener startMigrationOnClick = v -> downloadMigrator.startMigration(getDatabasePath("downloads.db"));
 
     private final CompoundButton.OnCheckedChangeListener wifiOnlyOnCheckedChange = (buttonView, isChecked) -> {
         LiteDownloadManagerCommands downloadManagerCommands = ((DemoApplication) getApplication()).getLiteDownloadManagerCommands();
