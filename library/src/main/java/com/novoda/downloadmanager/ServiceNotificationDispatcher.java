@@ -36,7 +36,7 @@ class ServiceNotificationDispatcher<T> {
 
             dismissStackedNotification(notificationInformation);
 
-            switch (notificationInformation.notificationStackState()) {
+            switch (notificationInformation.notificationDisplayState()) {
                 case SINGLE_PERSISTENT_NOTIFICATION:
                     updateNotification(notificationInformation);
                     break;
@@ -52,8 +52,8 @@ class ServiceNotificationDispatcher<T> {
                 default:
                     String message = String.format(
                             "%s: %s is not supported.",
-                            NotificationCustomizer.NotificationStackState.class.getSimpleName(),
-                            notificationInformation.notificationStackState()
+                            NotificationCustomizer.NotificationDisplayState.class.getSimpleName(),
+                            notificationInformation.notificationDisplayState()
                     );
                     throw new IllegalArgumentException(message);
             }

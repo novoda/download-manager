@@ -11,9 +11,10 @@ import org.mockito.InOrder;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.novoda.downloadmanager.InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus;
-import static com.novoda.downloadmanager.NotificationCustomizer.NotificationStackState.SINGLE_PERSISTENT_NOTIFICATION;
-import static com.novoda.downloadmanager.NotificationCustomizer.NotificationStackState.STACK_NOTIFICATION_DISMISSIBLE;
-import static com.novoda.downloadmanager.NotificationCustomizer.NotificationStackState.STACK_NOTIFICATION_NOT_DISMISSIBLE;
+import static com.novoda.downloadmanager.NotificationCustomizer.NotificationDisplayState.HIDDEN_NOTIFICATION;
+import static com.novoda.downloadmanager.NotificationCustomizer.NotificationDisplayState.SINGLE_PERSISTENT_NOTIFICATION;
+import static com.novoda.downloadmanager.NotificationCustomizer.NotificationDisplayState.STACK_NOTIFICATION_DISMISSIBLE;
+import static com.novoda.downloadmanager.NotificationCustomizer.NotificationDisplayState.STACK_NOTIFICATION_NOT_DISMISSIBLE;
 import static com.novoda.downloadmanager.NotificationInformationFixtures.notificationInformation;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -28,9 +29,10 @@ public class ServiceNotificationDispatcherTest {
 
     private static final DownloadBatchStatus DOWNLOAD_BATCH_STATUS = anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.QUEUED).build();
 
-    private static final NotificationInformation STACKABLE_DISMISSIBLE_NOTIFICATION_INFORMATION = notificationInformation().withNotificationStackState(STACK_NOTIFICATION_DISMISSIBLE).build();
-    private static final NotificationInformation STACKABLE_NON_DISMISSIBLE_NOTIFICATION_INFORMATION = notificationInformation().withNotificationStackState(STACK_NOTIFICATION_NOT_DISMISSIBLE).build();
-    private static final NotificationInformation SINGLE_PERSISTENT_NOTIFICATION_INFORMATION = notificationInformation().withNotificationStackState(SINGLE_PERSISTENT_NOTIFICATION).build();
+    private static final NotificationInformation STACKABLE_DISMISSIBLE_NOTIFICATION_INFORMATION = notificationInformation().withNotificationDisplayState(STACK_NOTIFICATION_DISMISSIBLE).build();
+    private static final NotificationInformation STACKABLE_NON_DISMISSIBLE_NOTIFICATION_INFORMATION = notificationInformation().withNotificationDisplayState(STACK_NOTIFICATION_NOT_DISMISSIBLE).build();
+    private static final NotificationInformation SINGLE_PERSISTENT_NOTIFICATION_INFORMATION = notificationInformation().withNotificationDisplayState(SINGLE_PERSISTENT_NOTIFICATION).build();
+    private static final NotificationInformation HIDDEN_NOTIFICATION_INFORMATION = notificationInformation().withNotificationDisplayState(HIDDEN_NOTIFICATION).build();
 
     private final Object lock = spy(new Object());
     private final NotificationCreator<DownloadBatchStatus> notificationCreator = mock(NotificationCreator.class);
@@ -95,6 +97,17 @@ public class ServiceNotificationDispatcherTest {
         notificationDispatcher.updateNotification(DOWNLOAD_BATCH_STATUS);
 
         verify(notificationManager).cancel(NOTIFICATION_TAG, SINGLE_PERSISTENT_NOTIFICATION_INFORMATION.getId());
+    }
+
+    @Test
+    public void doesNothing_whenNotificationIsHidden() {
+        given(notificationCreator.createNotification(DOWNLOAD_BATCH_STATUS)).willReturn(HIDDEN_NOTIFICATION_INFORMATION);
+
+        notificationDispatcher.updateNotification(DOWNLOAD_BATCH_STATUS);
+
+        InOrder inOrder = inOrder(downloadService, notificationManager);
+        inOrder.verify(notificationManager).cancel(NOTIFICATION_TAG, HIDDEN_NOTIFICATION_INFORMATION.getId());
+        inOrder.verifyNoMoreInteractions();
     }
 
     @Test(timeout = 500)

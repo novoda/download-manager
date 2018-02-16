@@ -38,8 +38,8 @@ class NotificationCreator<T> {
             }
 
             @Override
-            public NotificationCustomizer.NotificationStackState notificationStackState() {
-                return notificationCustomizer.notificationStackState(notificationPayload);
+            public NotificationCustomizer.NotificationDisplayState notificationDisplayState() {
+                return notificationCustomizer.notificationDisplayState(notificationPayload);
             }
         };
     }

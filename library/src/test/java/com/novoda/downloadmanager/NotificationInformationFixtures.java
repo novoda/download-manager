@@ -2,14 +2,14 @@ package com.novoda.downloadmanager;
 
 import android.app.Notification;
 
-import static com.novoda.downloadmanager.NotificationCustomizer.NotificationStackState.SINGLE_PERSISTENT_NOTIFICATION;
+import static com.novoda.downloadmanager.NotificationCustomizer.NotificationDisplayState.SINGLE_PERSISTENT_NOTIFICATION;
 import static org.mockito.Mockito.mock;
 
 class NotificationInformationFixtures {
 
     private int id = 0;
     private Notification notification = mock(Notification.class);
-    private NotificationCustomizer.NotificationStackState notificationStackState = SINGLE_PERSISTENT_NOTIFICATION;
+    private NotificationCustomizer.NotificationDisplayState notificationDisplayState = SINGLE_PERSISTENT_NOTIFICATION;
 
     static NotificationInformationFixtures notificationInformation() {
         return new NotificationInformationFixtures();
@@ -25,8 +25,8 @@ class NotificationInformationFixtures {
         return this;
     }
 
-    NotificationInformationFixtures withNotificationStackState(NotificationCustomizer.NotificationStackState notificationStackState) {
-        this.notificationStackState = notificationStackState;
+    NotificationInformationFixtures withNotificationDisplayState(NotificationCustomizer.NotificationDisplayState notificationDisplayState) {
+        this.notificationDisplayState = notificationDisplayState;
         return this;
     }
 
@@ -43,8 +43,8 @@ class NotificationInformationFixtures {
             }
 
             @Override
-            public NotificationCustomizer.NotificationStackState notificationStackState() {
-                return notificationStackState;
+            public NotificationCustomizer.NotificationDisplayState notificationDisplayState() {
+                return notificationDisplayState;
             }
         };
     }

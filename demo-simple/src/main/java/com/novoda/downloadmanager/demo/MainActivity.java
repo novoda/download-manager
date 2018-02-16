@@ -211,15 +211,15 @@ public class MainActivity extends AppCompatActivity {
 
     private static class MigrationNotificationCustomizer implements NotificationCustomizer<MigrationStatus> {
         @Override
-        public NotificationStackState notificationStackState(MigrationStatus payload) {
+        public NotificationDisplayState notificationDisplayState(MigrationStatus payload) {
             MigrationStatus.Status status = payload.status();
 
             if (status == MigrationStatus.Status.COMPLETE) {
-                return NotificationStackState.STACK_NOTIFICATION_DISMISSIBLE;
+                return NotificationDisplayState.STACK_NOTIFICATION_DISMISSIBLE;
             } else if (status == MigrationStatus.Status.DB_NOT_PRESENT) {
-                return NotificationStackState.HIDDEN_NOTIFICATION;
+                return NotificationDisplayState.HIDDEN_NOTIFICATION;
             } else {
-                return NotificationStackState.SINGLE_PERSISTENT_NOTIFICATION;
+                return NotificationDisplayState.SINGLE_PERSISTENT_NOTIFICATION;
             }
         }
 
