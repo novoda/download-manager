@@ -61,7 +61,7 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
         executor.execute(() -> {
             acquireCpuWakeLock();
             migrationJob.run();
-            releaseCpuWakeLock();
+            releaseHeldCpuWakeLock();
         });
     }
 
@@ -73,8 +73,10 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
         }
     }
 
-    private void releaseCpuWakeLock() {
-        wakeLock.release();
+    private void releaseHeldCpuWakeLock() {
+        if (wakeLock.isHeld()) {
+            wakeLock.release();
+        }
     }
 
     @Override
