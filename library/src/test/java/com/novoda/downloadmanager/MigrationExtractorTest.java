@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -22,7 +23,7 @@ public class MigrationExtractorTest {
             + "batches INNER JOIN DownloadsByBatch ON DownloadsByBatch.batch_id = batches._id "
             + "WHERE DownloadsByBatch.batch_total_bytes = DownloadsByBatch.batch_current_bytes GROUP BY batches._id";
 
-    private static final String DOWNLOADS_QUERY = "SELECT uri, _data, total_bytes FROM Downloads WHERE batch_id = ?";
+    private static final String DOWNLOADS_QUERY = "SELECT uri, _data FROM Downloads WHERE batch_id = ?";
 
     private static final StubCursor BATCHES_CURSOR = new StubCursor.Builder()
             .with("_id", "1", "2")
@@ -33,23 +34,22 @@ public class MigrationExtractorTest {
     private static final Cursor BATCH_ONE_DOWNLOADS_CURSOR = new StubCursor.Builder()
             .with("uri", "uri_1", "uri_2")
             .with("_data", "data_1", "data_2")
-            .with("total_bytes", "1000", "2000")
             .build();
 
     private static final Cursor BATCH_TWO_DOWNLOADS_CURSOR = new StubCursor.Builder()
             .with("uri", "uri_3", "uri_4")
             .with("_data", "data_3", "data_4")
-            .with("total_bytes", "500", "750")
             .build();
 
     private final SqlDatabaseWrapper database = mock(SqlDatabaseWrapper.class);
+    private final InternalFilePersistence internalFilePersistence = mock(InternalFilePersistence.class);
 
     private MigrationExtractor migrationExtractor;
 
     @Before
     public void setUp() {
         Log.setShowLogs(false);
-        migrationExtractor = new MigrationExtractor(database);
+        migrationExtractor = new MigrationExtractor(database, internalFilePersistence);
     }
 
     @Test
@@ -57,6 +57,11 @@ public class MigrationExtractorTest {
         given(database.rawQuery(BATCHES_QUERY)).willReturn(BATCHES_CURSOR);
         given(database.rawQuery(eq(DOWNLOADS_QUERY), eq("1"))).willReturn(BATCH_ONE_DOWNLOADS_CURSOR);
         given(database.rawQuery(eq(DOWNLOADS_QUERY), eq("2"))).willReturn(BATCH_TWO_DOWNLOADS_CURSOR);
+        given(internalFilePersistence.getCurrentSize(any(FilePath.class)))
+                .willReturn(1000L)
+                .willReturn(2000L)
+                .willReturn(500L)
+                .willReturn(750L);
 
         List<Migration> migrations = migrationExtractor.extractMigrations();
 
