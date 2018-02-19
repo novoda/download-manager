@@ -16,7 +16,7 @@ class MigrationJob implements Runnable {
 
     private static final String TABLE_BATCHES = "batches";
     private static final String WHERE_CLAUSE_ID = "_id = ?";
-    private static final boolean NOTIFICATION_NOT_SEEN = false;
+    private static final boolean NOTIFICATION_SEEN = true;
 
     private final Context context;
     private final File databasePath;
@@ -41,11 +41,11 @@ class MigrationJob implements Runnable {
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
 
-        PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database);
-        MigrationExtractor migrationExtractor = new MigrationExtractor(database);
-        DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
         InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
         internalFilePersistence.initialiseWith(context);
+        PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database);
+        MigrationExtractor migrationExtractor = new MigrationExtractor(database, internalFilePersistence);
+        DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
         LocalFilesDirectory localFilesDirectory = new AndroidLocalFilesDirectory(context);
         UnlinkedDataRemover unlinkedDataRemover = new UnlinkedDataRemover(downloadsPersistence, localFilesDirectory);
 
@@ -100,7 +100,7 @@ class MigrationJob implements Runnable {
                 downloadBatchId,
                 downloadBatchStatus,
                 downloadedDateTimeInMillis,
-                NOTIFICATION_NOT_SEEN
+                NOTIFICATION_SEEN
         );
         downloadsPersistence.persistBatch(persistedBatch);
 
