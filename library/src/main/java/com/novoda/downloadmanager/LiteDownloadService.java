@@ -59,7 +59,7 @@ public class LiteDownloadService extends Service implements DownloadService {
         executor.execute(() -> {
             acquireCpuWakeLock();
             downloadBatch.download();
-            releaseCpuWakeLock();
+            releaseHeldCpuWakeLock();
         });
     }
 
@@ -71,8 +71,10 @@ public class LiteDownloadService extends Service implements DownloadService {
         }
     }
 
-    private void releaseCpuWakeLock() {
-        wakeLock.release();
+    private void releaseHeldCpuWakeLock() {
+        if (wakeLock.isHeld()) {
+            wakeLock.release();
+        }
     }
 
     @Override
