@@ -55,9 +55,7 @@ class DownloadBatch {
         }
 
         if (connectionNotAllowedForDownload(status)) {
-            downloadBatchStatus.markAsWaitingForNetwork(downloadsBatchPersistence);
-            notifyCallback(downloadBatchStatus);
-            DownloadsNetworkRecoveryCreator.getInstance().scheduleRecovery();
+            processNetworkError();
             return;
         }
 
@@ -69,9 +67,7 @@ class DownloadBatch {
         totalBatchSizeBytes = getTotalSize(downloadFiles);
 
         if (totalBatchSizeBytes <= ZERO_BYTES) {
-            Optional<DownloadError> downloadError = Optional.of(new DownloadError(DownloadError.Error.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE));
-            downloadBatchStatus.markAsError(downloadError, downloadsBatchPersistence);
-            notifyCallback(downloadBatchStatus);
+            processNetworkError();
             return;
         }
 
@@ -88,10 +84,16 @@ class DownloadBatch {
         }
 
         if (networkError()) {
-            DownloadsNetworkRecoveryCreator.getInstance().scheduleRecovery();
+            processNetworkError();
         }
 
         callbackThrottle.stopUpdates();
+    }
+
+    private void processNetworkError() {
+        downloadBatchStatus.markAsWaitingForNetwork(downloadsBatchPersistence);
+        notifyCallback(downloadBatchStatus);
+        DownloadsNetworkRecoveryCreator.getInstance().scheduleRecovery();
     }
 
     private boolean connectionNotAllowedForDownload(DownloadBatchStatus.Status status) {
