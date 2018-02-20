@@ -41,7 +41,8 @@ class MigrationJob implements Runnable {
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
 
-        InternalFilePersistence internalFilePersistence = new InternalFilePersistence();
+        InternalFilePersistence internalFilePersistence =
+                (InternalFilePersistence) FilePersistenceCreator.newInternalFilePersistenceCreator(context).create();
         internalFilePersistence.initialiseWith(context);
         PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database);
         MigrationExtractor migrationExtractor = new MigrationExtractor(database, internalFilePersistence);
