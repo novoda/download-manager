@@ -41,11 +41,10 @@ class MigrationJob implements Runnable {
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
 
-        InternalFilePersistence internalFilePersistence =
-                (InternalFilePersistence) FilePersistenceCreator.newInternalFilePersistenceCreator(context).create();
-        internalFilePersistence.initialiseWith(context);
+        FilePersistence filePersistence = FilePersistenceCreator.newInternalFilePersistenceCreator(context).create();
+        filePersistence.initialiseWith(context);
         PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database);
-        MigrationExtractor migrationExtractor = new MigrationExtractor(database, internalFilePersistence);
+        MigrationExtractor migrationExtractor = new MigrationExtractor(database, filePersistence);
         DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
         LocalFilesDirectory localFilesDirectory = new AndroidLocalFilesDirectory(context);
         UnlinkedDataRemover unlinkedDataRemover = new UnlinkedDataRemover(downloadsPersistence, localFilesDirectory);
@@ -56,7 +55,7 @@ class MigrationJob implements Runnable {
 
         Log.d(TAG, "about to extract migrations, time is " + System.nanoTime());
 
-        String basePath = internalFilePersistence.basePath().path();
+        String basePath = filePersistence.basePath().path();
         migratePartialDownloads(database, partialDownloadMigrationExtractor, downloadsPersistence, basePath);
         migrateCompleteDownloads(migrationStatus, database, migrationExtractor, downloadsPersistence, basePath);
     }

@@ -20,11 +20,11 @@ class MigrationExtractor {
     private static final int FILE_LOCATION_COLUMN = 1;
 
     private final SqlDatabaseWrapper database;
-    private final InternalFilePersistence internalFilePersistence;
+    private final FilePersistence filePersistence;
 
-    MigrationExtractor(SqlDatabaseWrapper database, InternalFilePersistence internalFilePersistence) {
+    MigrationExtractor(SqlDatabaseWrapper database, FilePersistence filePersistence) {
         this.database = database;
-        this.internalFilePersistence = internalFilePersistence;
+        this.filePersistence = filePersistence;
     }
 
     List<Migration> extractMigrations() {
@@ -71,7 +71,7 @@ class MigrationExtractor {
                 newBatchBuilder.addFile(originalNetworkAddress).apply();
 
                 FilePath filePath = new LiteFilePath(originalFileLocation);
-                long rawFileSize = internalFilePersistence.getCurrentSize(filePath);
+                long rawFileSize = filePersistence.getCurrentSize(filePath);
                 FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
                 Migration.FileMetadata fileMetadata = new Migration.FileMetadata(originalFileLocation, fileSize, originalNetworkAddress);
                 fileMetadataList.add(fileMetadata);
