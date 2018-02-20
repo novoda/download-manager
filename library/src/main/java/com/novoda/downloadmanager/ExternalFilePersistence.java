@@ -30,7 +30,7 @@ class ExternalFilePersistence implements FilePersistence {
 
     @Override
     public FilePath basePath() {
-        return FilePathCreator.create(getExternalFileDirWithBiggerAvailableSpace().getAbsolutePath(), "/");
+        return FilePathCreator.create(getExternalFileDirWithBiggerAvailableSpace().getAbsolutePath(), "/downloads/");
     }
 
     @Override

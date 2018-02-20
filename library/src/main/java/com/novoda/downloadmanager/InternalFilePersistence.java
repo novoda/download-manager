@@ -25,7 +25,7 @@ class InternalFilePersistence implements FilePersistence {
 
     @Override
     public FilePath basePath() {
-        return FilePathCreator.create(context.getFilesDir().getAbsolutePath(), "/");
+        return FilePathCreator.create(context.getFilesDir().getAbsolutePath(), "/downloads/");
     }
 
     @Override
