@@ -15,6 +15,7 @@ import java.io.IOException;
 
 class ExternalFilePersistence implements FilePersistence {
 
+    private static final String DOWNLOADS_DIR = "/downloads/";
     private static final String UNDEFINED_DIRECTORY_TYPE = null;
     private static final boolean APPEND = true;
 
@@ -30,7 +31,7 @@ class ExternalFilePersistence implements FilePersistence {
 
     @Override
     public FilePath basePath() {
-        return FilePathCreator.create(getExternalFileDirWithBiggerAvailableSpace().getAbsolutePath(), "/");
+        return FilePathCreator.create(getExternalFileDirWithBiggerAvailableSpace().getAbsolutePath(), DOWNLOADS_DIR);
     }
 
     @Override

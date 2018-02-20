@@ -6,6 +6,7 @@ import android.support.annotation.WorkerThread;
 
 import com.novoda.notils.logger.simple.Log;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -201,6 +202,13 @@ class DownloadManager implements LiteDownloadManagerCommands {
                 downloadBatch.waitForNetwork();
             }
         }
+    }
+
+    @Override
+    public File getDownloadsDir() {
+        FilePersistence filePersistence = fileOperations.filePersistenceCreator().create();
+        FilePath filePath = filePersistence.basePath();
+        return new File(filePath.path());
     }
 
 }

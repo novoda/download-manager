@@ -3,6 +3,7 @@ package com.novoda.downloadmanager;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 
+import java.io.File;
 import java.util.List;
 
 public interface LiteDownloadManagerCommands {
@@ -33,4 +34,6 @@ public interface LiteDownloadManagerCommands {
     void getDownloadStatusWithMatching(DownloadFileId downloadFileId, DownloadFileStatusCallback callback);
 
     void updateAllowedConnectionType(ConnectionType allowedConnectionType);
+
+    File getDownloadsDir();
 }

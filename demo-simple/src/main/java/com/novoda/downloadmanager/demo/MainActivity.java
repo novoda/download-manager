@@ -152,8 +152,12 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private final View.OnClickListener logFileDirectoryOnClick = v -> {
-        File[] files = getFilesDir().listFiles();
-        logAllFiles(files);
+        LiteDownloadManagerCommands downloadManagerCommands = ((DemoApplication) getApplication()).getLiteDownloadManagerCommands();
+        File downloadsDir = downloadManagerCommands.getDownloadsDir();
+        Log.d("LogFileDirectory", "Downloads dir:", downloadsDir.getAbsolutePath());
+        if (downloadsDir.exists()) {
+            logAllFiles(downloadsDir.listFiles());
+        }
     };
 
     private void logAllFiles(File[] files) {
