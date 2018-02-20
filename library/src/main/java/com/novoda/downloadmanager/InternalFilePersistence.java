@@ -13,6 +13,8 @@ import java.io.IOException;
 
 class InternalFilePersistence implements FilePersistence {
 
+    private static final String DOWNLOADS_DIR = "/downloads/";
+
     private Context context;
 
     @Nullable
@@ -25,7 +27,7 @@ class InternalFilePersistence implements FilePersistence {
 
     @Override
     public FilePath basePath() {
-        return FilePathCreator.create(context.getFilesDir().getAbsolutePath(), "/downloads/");
+        return FilePathCreator.create(context.getFilesDir().getAbsolutePath(), DOWNLOADS_DIR);
     }
 
     @Override
