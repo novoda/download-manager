@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
@@ -272,6 +273,8 @@ public final class DownloadManagerBuilder {
                 notificationDispatcher
         );
 
+        Semaphore semaphore = new Semaphore(1);
+
         LiteDownloadManagerDownloader downloader = new LiteDownloadManagerDownloader(
                 LOCK,
                 EXECUTOR,
@@ -282,7 +285,8 @@ public final class DownloadManagerBuilder {
                 batchStatusNotificationDispatcher,
                 connectionChecker,
                 callbacks,
-                callbackThrottleCreator
+                callbackThrottleCreator,
+                semaphore
         );
 
         downloadManager = new DownloadManager(
@@ -294,7 +298,8 @@ public final class DownloadManagerBuilder {
                 fileOperations,
                 downloadsBatchPersistence,
                 downloader,
-                connectionChecker
+                connectionChecker,
+                semaphore
         );
 
         return downloadManager;

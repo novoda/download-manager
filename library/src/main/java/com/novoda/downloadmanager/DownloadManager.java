@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Semaphore;
 
 class DownloadManager implements LiteDownloadManagerCommands {
 
@@ -23,6 +24,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
     private final DownloadsBatchPersistence downloadsBatchPersistence;
     private final LiteDownloadManagerDownloader downloader;
     private final ConnectionChecker connectionChecker;
+    private final Semaphore semaphore;
 
     private DownloadService downloadService;
 
@@ -36,7 +38,8 @@ class DownloadManager implements LiteDownloadManagerCommands {
                     FileOperations fileOperations,
                     DownloadsBatchPersistence downloadsBatchPersistence,
                     LiteDownloadManagerDownloader downloader,
-                    ConnectionChecker connectionChecker) {
+                    ConnectionChecker connectionChecker,
+                    Semaphore semaphore) {
         this.waitForDownloadService = waitForDownloadService;
         this.executor = executor;
         this.callbackHandler = callbackHandler;
@@ -46,6 +49,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
         this.downloadsBatchPersistence = downloadsBatchPersistence;
         this.downloader = downloader;
         this.connectionChecker = connectionChecker;
+        this.semaphore = semaphore;
     }
 
     void initialise(DownloadService downloadService) {
@@ -114,13 +118,25 @@ class DownloadManager implements LiteDownloadManagerCommands {
 
     @Override
     public void addDownloadBatchCallback(DownloadBatchStatusCallback downloadBatchCallback) {
-        callbacks.add(downloadBatchCallback);
+        try {
+            semaphore.acquire();
+            callbacks.add(downloadBatchCallback);
+            semaphore.release();
+        } catch (InterruptedException e) {
+            Log.e(e, "Interrupted whilst awaiting to acquire permit.");
+        }
     }
 
     @Override
     public void removeDownloadBatchCallback(DownloadBatchStatusCallback downloadBatchCallback) {
-        if (callbacks.contains(downloadBatchCallback)) {
-            callbacks.remove(downloadBatchCallback);
+        try {
+            semaphore.acquire();
+            if (callbacks.contains(downloadBatchCallback)) {
+                callbacks.remove(downloadBatchCallback);
+            }
+            semaphore.release();
+        } catch (InterruptedException e) {
+            Log.e(e, "Interrupted whilst awaiting to acquire permit.");
         }
     }
 

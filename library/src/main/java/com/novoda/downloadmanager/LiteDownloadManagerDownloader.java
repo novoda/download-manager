@@ -2,9 +2,12 @@ package com.novoda.downloadmanager;
 
 import android.os.Handler;
 
+import com.novoda.notils.logger.simple.Log;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Semaphore;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
@@ -22,6 +25,7 @@ class LiteDownloadManagerDownloader {
     private final ConnectionChecker connectionChecker;
 
     private final CallbackThrottleCreator callbackThrottleCreator;
+    private final Semaphore semaphore;
 
     private DownloadService downloadService;
 
@@ -36,7 +40,8 @@ class LiteDownloadManagerDownloader {
                                   DownloadBatchStatusNotificationDispatcher notificationDispatcher,
                                   ConnectionChecker connectionChecker,
                                   List<DownloadBatchStatusCallback> callbacks,
-                                  CallbackThrottleCreator callbackThrottleCreator) {
+                                  CallbackThrottleCreator callbackThrottleCreator,
+                                  Semaphore semaphore) {
         this.waitForDownloadService = waitForDownloadService;
         this.executor = executor;
         this.callbackHandler = callbackHandler;
@@ -47,6 +52,7 @@ class LiteDownloadManagerDownloader {
         this.connectionChecker = connectionChecker;
         this.callbacks = callbacks;
         this.callbackThrottleCreator = callbackThrottleCreator;
+        this.semaphore = semaphore;
     }
 
     public void download(Batch batch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
@@ -93,10 +99,16 @@ class LiteDownloadManagerDownloader {
 
     private DownloadBatchStatusCallback downloadBatchCallback() {
         return downloadBatchStatus -> callbackHandler.post(() -> {
-            for (DownloadBatchStatusCallback callback : callbacks) {
-                callback.onUpdate(downloadBatchStatus);
+            try {
+                semaphore.acquire();
+                for (DownloadBatchStatusCallback callback : callbacks) {
+                    callback.onUpdate(downloadBatchStatus);
+                }
+                notificationDispatcher.updateNotification(downloadBatchStatus);
+                semaphore.release();
+            } catch (InterruptedException e) {
+                Log.e(e, "Interrupted whilst awaiting to acquire permit.");
             }
-            notificationDispatcher.updateNotification(downloadBatchStatus);
         });
     }
 
