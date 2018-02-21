@@ -73,13 +73,6 @@ class DownloadManager implements LiteDownloadManagerCommands {
 
     @Override
     public void download(Batch batch) {
-        // if device is connected to the internet
-        // and the type of the connection is allowed
-        // then start immediately
-        // else, schedule a job with window 1ms-1day
-
-        // if the job fails because of network issues, then schedule a job with window 1ms-1day
-
         downloader.download(batch, downloadBatchMap);
     }
 
