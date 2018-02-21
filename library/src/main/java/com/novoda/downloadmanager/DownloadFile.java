@@ -46,7 +46,7 @@ class DownloadFile {
         this.downloadsFilePersistence = downloadsFilePersistence;
     }
 
-    void download(final Callback callback) {
+    void download(Callback callback) {
         downloadFileStatus.markAsDownloading();
 
         callback.onUpdate(downloadFileStatus);
@@ -58,14 +58,6 @@ class DownloadFile {
             return;
         }
 
-        FilePersistenceResult result = filePersistence.create(filePath, fileSize);
-        if (result.isMarkedAsError()) {
-            Error error = convertError(result.status());
-            updateAndFeedbackWithStatus(error, callback);
-            return;
-        }
-
-        filePath = result.filePath();
         fileSize.setCurrentSize(filePersistence.getCurrentSize(filePath));
 
         persistSync();
@@ -73,6 +65,13 @@ class DownloadFile {
         if (fileSize.currentSize() == fileSize.totalSize()) {
             downloadFileStatus.update(fileSize, filePath);
             callback.onUpdate(downloadFileStatus);
+            return;
+        }
+
+        FilePersistenceResult result = filePersistence.create(filePath, fileSize);
+        if (result != FilePersistenceResult.SUCCESS) {
+            Error error = convertError(result);
+            updateAndFeedbackWithStatus(error, callback);
             return;
         }
 
@@ -109,7 +108,7 @@ class DownloadFile {
         });
     }
 
-    private Error convertError(FilePersistenceResult.Status status) {
+    private Error convertError(FilePersistenceResult status) {
         switch (status) {
             case SUCCESS:
                 Log.e("Cannot convert success status to any DownloadError type");

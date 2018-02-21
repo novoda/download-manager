@@ -3,7 +3,6 @@ package com.novoda.downloadmanager;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
-import com.novoda.downloadmanager.FilePersistenceResult.Status;
 import com.novoda.notils.logger.simple.Log;
 
 import java.io.File;
@@ -33,12 +32,12 @@ class InternalFilePersistence implements FilePersistence {
     @Override
     public FilePersistenceResult create(FilePath absoluteFilePath, FileSize fileSize) {
         if (fileSize.isTotalSizeUnknown()) {
-            return FilePersistenceResult.newInstance(Status.ERROR_UNKNOWN_TOTAL_FILE_SIZE);
+            return FilePersistenceResult.ERROR_UNKNOWN_TOTAL_FILE_SIZE;
         }
 
         long usableSpace = context.getFilesDir().getUsableSpace();
         if (usableSpace < fileSize.totalSize()) {
-            return FilePersistenceResult.newInstance(Status.ERROR_INSUFFICIENT_SPACE);
+            return FilePersistenceResult.ERROR_INSUFFICIENT_SPACE;
         }
 
         return create(absoluteFilePath);
@@ -46,7 +45,7 @@ class InternalFilePersistence implements FilePersistence {
 
     private FilePersistenceResult create(FilePath absoluteFilePath) {
         if (absoluteFilePath.isUnknown()) {
-            return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, absoluteFilePath);
+            return FilePersistenceResult.ERROR_OPENING_FILE;
         }
 
         try {
@@ -54,16 +53,16 @@ class InternalFilePersistence implements FilePersistence {
             boolean parentDirectoriesExist = ensureParentDirectoriesExistFor(outputFile);
 
             if (!parentDirectoriesExist) {
-                return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE, absoluteFilePath);
+                return FilePersistenceResult.ERROR_OPENING_FILE;
             }
 
             fileOutputStream = new FileOutputStream(outputFile, true);
         } catch (FileNotFoundException e) {
             Log.e(e, "File could not be opened");
-            return FilePersistenceResult.newInstance(Status.ERROR_OPENING_FILE);
+            return FilePersistenceResult.ERROR_OPENING_FILE;
         }
 
-        return FilePersistenceResult.newInstance(Status.SUCCESS, absoluteFilePath);
+        return FilePersistenceResult.SUCCESS;
     }
 
     private boolean ensureParentDirectoriesExistFor(File outputFile) {
