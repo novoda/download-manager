@@ -48,14 +48,15 @@ class NetworkFileDownloader implements FileDownloader {
 
     private void processResponse(Callback callback, HttpClient.NetworkResponse response, int responseCode) throws IOException {
         if (isValid(responseCode)) {
-            InputStream in = response.openByteStream();
             byte[] buffer = new byte[BUFFER_SIZE];
             int readLast = 0;
-            while (canDownload && readLast != -1) {
-                readLast = in.read(buffer);
+            try (InputStream in = response.openByteStream()) {
+                while (canDownload && readLast != -1) {
+                    readLast = in.read(buffer);
 
-                if (readLast != 0 && readLast != -1) {
-                    callback.onBytesRead(buffer, readLast);
+                    if (readLast != 0 && readLast != -1) {
+                        callback.onBytesRead(buffer, readLast);
+                    }
                 }
             }
         } else {
