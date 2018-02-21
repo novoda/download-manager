@@ -21,9 +21,7 @@ import com.novoda.notils.logger.simple.Log;
 import com.squareup.okhttp.OkHttpClient;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -238,7 +236,7 @@ public final class DownloadManagerBuilder {
         applicationContext.bindService(intent, serviceConnection, Service.BIND_AUTO_CREATE);
 
         FileOperations fileOperations = new FileOperations(filePersistenceCreator, fileSizeRequester, fileDownloader);
-        List<DownloadBatchStatusCallback> callbacks = Collections.synchronizedList(new ArrayList<>());
+        ArrayList<DownloadBatchStatusCallback> callbacks = new ArrayList<>();
 
         CallbackThrottleCreator callbackThrottleCreator = getCallbackThrottleCreator(
                 callbackThrottleCreatorType,
@@ -291,7 +289,7 @@ public final class DownloadManagerBuilder {
                 LOCK,
                 EXECUTOR,
                 callbackHandler,
-                Collections.synchronizedMap(new HashMap<>()),
+                new HashMap<>(),
                 callbacks,
                 fileOperations,
                 downloadsBatchPersistence,
