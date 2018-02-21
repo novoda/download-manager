@@ -2,12 +2,9 @@ package com.novoda.downloadmanager;
 
 import android.os.Handler;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Semaphore;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
@@ -15,6 +12,7 @@ import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
 class LiteDownloadManagerDownloader {
 
     private final Object waitForDownloadService;
+    private final Object waitForDownloadBatchStatusCallback;
     private final ExecutorService executor;
     private final Handler callbackHandler;
     private final FileOperations fileOperations;
@@ -25,13 +23,13 @@ class LiteDownloadManagerDownloader {
     private final ConnectionChecker connectionChecker;
 
     private final CallbackThrottleCreator callbackThrottleCreator;
-    private final Semaphore semaphore;
 
     private DownloadService downloadService;
 
     @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
 // Can't group anymore these are customisable options.
     LiteDownloadManagerDownloader(Object waitForDownloadService,
+                                  Object waitForDownloadBatchStatusCallback,
                                   ExecutorService executor,
                                   Handler callbackHandler,
                                   FileOperations fileOperations,
@@ -40,9 +38,9 @@ class LiteDownloadManagerDownloader {
                                   DownloadBatchStatusNotificationDispatcher notificationDispatcher,
                                   ConnectionChecker connectionChecker,
                                   List<DownloadBatchStatusCallback> callbacks,
-                                  CallbackThrottleCreator callbackThrottleCreator,
-                                  Semaphore semaphore) {
+                                  CallbackThrottleCreator callbackThrottleCreator) {
         this.waitForDownloadService = waitForDownloadService;
+        this.waitForDownloadBatchStatusCallback = waitForDownloadBatchStatusCallback;
         this.executor = executor;
         this.callbackHandler = callbackHandler;
         this.fileOperations = fileOperations;
@@ -52,7 +50,6 @@ class LiteDownloadManagerDownloader {
         this.connectionChecker = connectionChecker;
         this.callbacks = callbacks;
         this.callbackThrottleCreator = callbackThrottleCreator;
-        this.semaphore = semaphore;
     }
 
     public void download(Batch batch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
@@ -99,15 +96,11 @@ class LiteDownloadManagerDownloader {
 
     private DownloadBatchStatusCallback downloadBatchCallback() {
         return downloadBatchStatus -> callbackHandler.post(() -> {
-            try {
-                semaphore.acquire();
+            synchronized (waitForDownloadBatchStatusCallback) {
                 for (DownloadBatchStatusCallback callback : callbacks) {
                     callback.onUpdate(downloadBatchStatus);
                 }
                 notificationDispatcher.updateNotification(downloadBatchStatus);
-                semaphore.release();
-            } catch (InterruptedException e) {
-                Log.e(e, "Interrupted whilst awaiting to acquire permit.");
             }
         });
     }

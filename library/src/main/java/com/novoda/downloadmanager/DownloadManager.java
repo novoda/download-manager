@@ -11,11 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Semaphore;
 
 class DownloadManager implements LiteDownloadManagerCommands {
 
     private final Object waitForDownloadService;
+    private final Object waitForDownloadBatchStatusCallback;
     private final ExecutorService executor;
     private final Handler callbackHandler;
     private final Map<DownloadBatchId, DownloadBatch> downloadBatchMap;
@@ -24,13 +24,13 @@ class DownloadManager implements LiteDownloadManagerCommands {
     private final DownloadsBatchPersistence downloadsBatchPersistence;
     private final LiteDownloadManagerDownloader downloader;
     private final ConnectionChecker connectionChecker;
-    private final Semaphore semaphore;
 
     private DownloadService downloadService;
 
     // DownloadManager is a complex object.
     @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
     DownloadManager(Object waitForDownloadService,
+                    Object waitForDownloadBatchStatusCallback,
                     ExecutorService executor,
                     Handler callbackHandler,
                     Map<DownloadBatchId, DownloadBatch> downloadBatchMap,
@@ -38,9 +38,9 @@ class DownloadManager implements LiteDownloadManagerCommands {
                     FileOperations fileOperations,
                     DownloadsBatchPersistence downloadsBatchPersistence,
                     LiteDownloadManagerDownloader downloader,
-                    ConnectionChecker connectionChecker,
-                    Semaphore semaphore) {
+                    ConnectionChecker connectionChecker) {
         this.waitForDownloadService = waitForDownloadService;
+        this.waitForDownloadBatchStatusCallback = waitForDownloadBatchStatusCallback;
         this.executor = executor;
         this.callbackHandler = callbackHandler;
         this.downloadBatchMap = downloadBatchMap;
@@ -49,7 +49,6 @@ class DownloadManager implements LiteDownloadManagerCommands {
         this.downloadsBatchPersistence = downloadsBatchPersistence;
         this.downloader = downloader;
         this.connectionChecker = connectionChecker;
-        this.semaphore = semaphore;
     }
 
     void initialise(DownloadService downloadService) {
@@ -118,25 +117,17 @@ class DownloadManager implements LiteDownloadManagerCommands {
 
     @Override
     public void addDownloadBatchCallback(DownloadBatchStatusCallback downloadBatchCallback) {
-        try {
-            semaphore.acquire();
+        synchronized (waitForDownloadBatchStatusCallback) {
             callbacks.add(downloadBatchCallback);
-            semaphore.release();
-        } catch (InterruptedException e) {
-            Log.e(e, "Interrupted whilst awaiting to acquire permit.");
         }
     }
 
     @Override
     public void removeDownloadBatchCallback(DownloadBatchStatusCallback downloadBatchCallback) {
-        try {
-            semaphore.acquire();
+        synchronized (waitForDownloadBatchStatusCallback) {
             if (callbacks.contains(downloadBatchCallback)) {
                 callbacks.remove(downloadBatchCallback);
             }
-            semaphore.release();
-        } catch (InterruptedException e) {
-            Log.e(e, "Interrupted whilst awaiting to acquire permit.");
         }
     }
 

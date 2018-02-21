@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
@@ -35,7 +34,8 @@ import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
 
 public final class DownloadManagerBuilder {
 
-    private static final Object LOCK = new Object();
+    private static final Object SERVICE_LOCK = new Object();
+    private static final Object CALLBACK_LOCK = new Object();
     private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
     private static final int TIMEOUT = 5;
 
@@ -264,7 +264,7 @@ public final class DownloadManagerBuilder {
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(applicationContext);
         ServiceNotificationDispatcher<DownloadBatchStatus> notificationDispatcher = new ServiceNotificationDispatcher<>(
-                LOCK,
+                SERVICE_LOCK,
                 notificationCreator,
                 notificationManager
         );
@@ -273,10 +273,9 @@ public final class DownloadManagerBuilder {
                 notificationDispatcher
         );
 
-        Semaphore semaphore = new Semaphore(1);
-
         LiteDownloadManagerDownloader downloader = new LiteDownloadManagerDownloader(
-                LOCK,
+                SERVICE_LOCK,
+                CALLBACK_LOCK,
                 EXECUTOR,
                 callbackHandler,
                 fileOperations,
@@ -285,12 +284,12 @@ public final class DownloadManagerBuilder {
                 batchStatusNotificationDispatcher,
                 connectionChecker,
                 callbacks,
-                callbackThrottleCreator,
-                semaphore
+                callbackThrottleCreator
         );
 
         downloadManager = new DownloadManager(
-                LOCK,
+                SERVICE_LOCK,
+                CALLBACK_LOCK,
                 EXECUTOR,
                 callbackHandler,
                 new HashMap<>(),
@@ -298,8 +297,7 @@ public final class DownloadManagerBuilder {
                 fileOperations,
                 downloadsBatchPersistence,
                 downloader,
-                connectionChecker,
-                semaphore
+                connectionChecker
         );
 
         return downloadManager;
