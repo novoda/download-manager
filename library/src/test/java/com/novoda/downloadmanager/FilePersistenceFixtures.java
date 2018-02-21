@@ -4,7 +4,7 @@ import android.content.Context;
 
 class FilePersistenceFixtures {
 
-    private FilePersistenceResult filePersistenceResult = FilePersistenceResult.newInstance(FilePersistenceResult.Status.SUCCESS);
+    private FilePersistenceResult filePersistenceResult = FilePersistenceResult.SUCCESS;
     private boolean writeResult = true;
     private long currentSize = 100;
     private FilePersistenceType filePersistenceType = FilePersistenceType.INTERNAL;
