@@ -34,7 +34,8 @@ import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
 
 public final class DownloadManagerBuilder {
 
-    private static final Object LOCK = new Object();
+    private static final Object SERVICE_LOCK = new Object();
+    private static final Object CALLBACK_LOCK = new Object();
     private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
     private static final int TIMEOUT = 5;
 
@@ -263,7 +264,7 @@ public final class DownloadManagerBuilder {
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(applicationContext);
         ServiceNotificationDispatcher<DownloadBatchStatus> notificationDispatcher = new ServiceNotificationDispatcher<>(
-                LOCK,
+                SERVICE_LOCK,
                 notificationCreator,
                 notificationManager
         );
@@ -273,7 +274,8 @@ public final class DownloadManagerBuilder {
         );
 
         LiteDownloadManagerDownloader downloader = new LiteDownloadManagerDownloader(
-                LOCK,
+                SERVICE_LOCK,
+                CALLBACK_LOCK,
                 EXECUTOR,
                 callbackHandler,
                 fileOperations,
@@ -286,7 +288,8 @@ public final class DownloadManagerBuilder {
         );
 
         downloadManager = new DownloadManager(
-                LOCK,
+                SERVICE_LOCK,
+                CALLBACK_LOCK,
                 EXECUTOR,
                 callbackHandler,
                 new HashMap<>(),

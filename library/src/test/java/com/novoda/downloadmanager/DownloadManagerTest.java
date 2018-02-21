@@ -24,7 +24,12 @@ import static com.novoda.downloadmanager.DownloadFileStatusFixtures.aDownloadFil
 import static com.novoda.downloadmanager.InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willAnswer;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 public class DownloadManagerTest {
 
@@ -41,7 +46,8 @@ public class DownloadManagerTest {
     private final AllBatchStatusesCallback allBatchStatusesCallback = mock(AllBatchStatusesCallback.class);
     private final DownloadFileStatusCallback downloadFileStatusCallback = mock(DownloadFileStatusCallback.class);
     private final DownloadService downloadService = mock(DownloadService.class);
-    private final Object lock = spy(new Object());
+    private final Object serviceLock = spy(new Object());
+    private final Object callbackLock = spy(new Object());
     private final ExecutorService executorService = mock(ExecutorService.class);
     private final Handler handler = mock(Handler.class);
     private final DownloadBatch downloadBatch = mock(DownloadBatch.class);
@@ -51,8 +57,8 @@ public class DownloadManagerTest {
     private final FileDownloader fileDownloader = mock(FileDownloader.class);
     private final DownloadsBatchPersistence downloadsBatchPersistence = mock(DownloadsBatchPersistence.class);
     private final LiteDownloadManagerDownloader downloadManagerDownloader = mock(LiteDownloadManagerDownloader.class);
-
     private final ConnectionChecker connectionChecker = mock(ConnectionChecker.class);
+
     private DownloadManager downloadManager;
     private Map<DownloadBatchId, DownloadBatch> downloadBatches = new HashMap<>();
     private List<DownloadBatchStatus> downloadBatchStatuses = new ArrayList<>();
@@ -68,7 +74,8 @@ public class DownloadManagerTest {
         downloadBatchCallbacks.add(downloadBatchCallback);
 
         downloadManager = new DownloadManager(
-                lock,
+                serviceLock,
+                callbackLock,
                 executorService,
                 handler,
                 downloadBatches,
@@ -140,10 +147,10 @@ public class DownloadManagerTest {
 
     @Test(timeout = 500)
     public void notifyAll_whenInitialising() throws InterruptedException {
-        synchronized (lock) {
+        synchronized (serviceLock) {
             Executors.newSingleThreadExecutor().submit(() -> downloadManager.initialise(downloadService));
 
-            lock.wait();
+            serviceLock.wait();
         }
     }
 
@@ -370,8 +377,8 @@ public class DownloadManagerTest {
                         e.printStackTrace();
                     }
 
-                    synchronized (lock) {
-                        lock.notifyAll();
+                    synchronized (serviceLock) {
+                        serviceLock.notifyAll();
                     }
                 });
     }

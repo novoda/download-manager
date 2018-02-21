@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 class DownloadManager implements LiteDownloadManagerCommands {
 
     private final Object waitForDownloadService;
+    private final Object waitForDownloadBatchStatusCallback;
     private final ExecutorService executor;
     private final Handler callbackHandler;
     private final Map<DownloadBatchId, DownloadBatch> downloadBatchMap;
@@ -29,6 +30,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
     // DownloadManager is a complex object.
     @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
     DownloadManager(Object waitForDownloadService,
+                    Object waitForDownloadBatchStatusCallback,
                     ExecutorService executor,
                     Handler callbackHandler,
                     Map<DownloadBatchId, DownloadBatch> downloadBatchMap,
@@ -38,6 +40,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
                     LiteDownloadManagerDownloader downloader,
                     ConnectionChecker connectionChecker) {
         this.waitForDownloadService = waitForDownloadService;
+        this.waitForDownloadBatchStatusCallback = waitForDownloadBatchStatusCallback;
         this.executor = executor;
         this.callbackHandler = callbackHandler;
         this.downloadBatchMap = downloadBatchMap;
@@ -73,13 +76,6 @@ class DownloadManager implements LiteDownloadManagerCommands {
 
     @Override
     public void download(Batch batch) {
-        // if device is connected to the internet
-        // and the type of the connection is allowed
-        // then start immediately
-        // else, schedule a job with window 1ms-1day
-
-        // if the job fails because of network issues, then schedule a job with window 1ms-1day
-
         downloader.download(batch, downloadBatchMap);
     }
 
@@ -121,13 +117,17 @@ class DownloadManager implements LiteDownloadManagerCommands {
 
     @Override
     public void addDownloadBatchCallback(DownloadBatchStatusCallback downloadBatchCallback) {
-        callbacks.add(downloadBatchCallback);
+        synchronized (waitForDownloadBatchStatusCallback) {
+            callbacks.add(downloadBatchCallback);
+        }
     }
 
     @Override
     public void removeDownloadBatchCallback(DownloadBatchStatusCallback downloadBatchCallback) {
-        if (callbacks.contains(downloadBatchCallback)) {
-            callbacks.remove(downloadBatchCallback);
+        synchronized (waitForDownloadBatchStatusCallback) {
+            if (callbacks.contains(downloadBatchCallback)) {
+                callbacks.remove(downloadBatchCallback);
+            }
         }
     }
 
