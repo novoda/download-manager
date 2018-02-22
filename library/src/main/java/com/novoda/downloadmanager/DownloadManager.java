@@ -15,7 +15,6 @@ import java.util.concurrent.ExecutorService;
 class DownloadManager implements LiteDownloadManagerCommands {
 
     private final Object waitForDownloadService;
-    private final Object waitForDownloadBatchStatusCallback;
     private final ExecutorService executor;
     private final Handler callbackHandler;
     private final Map<DownloadBatchId, DownloadBatch> downloadBatchMap;
@@ -30,7 +29,6 @@ class DownloadManager implements LiteDownloadManagerCommands {
     // DownloadManager is a complex object.
     @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
     DownloadManager(Object waitForDownloadService,
-                    Object waitForDownloadBatchStatusCallback,
                     ExecutorService executor,
                     Handler callbackHandler,
                     Map<DownloadBatchId, DownloadBatch> downloadBatchMap,
@@ -40,7 +38,6 @@ class DownloadManager implements LiteDownloadManagerCommands {
                     LiteDownloadManagerDownloader downloader,
                     ConnectionChecker connectionChecker) {
         this.waitForDownloadService = waitForDownloadService;
-        this.waitForDownloadBatchStatusCallback = waitForDownloadBatchStatusCallback;
         this.executor = executor;
         this.callbackHandler = callbackHandler;
         this.downloadBatchMap = downloadBatchMap;
@@ -117,17 +114,13 @@ class DownloadManager implements LiteDownloadManagerCommands {
 
     @Override
     public void addDownloadBatchCallback(DownloadBatchStatusCallback downloadBatchCallback) {
-        synchronized (waitForDownloadBatchStatusCallback) {
-            callbacks.add(downloadBatchCallback);
-        }
+        callbacks.add(downloadBatchCallback);
     }
 
     @Override
     public void removeDownloadBatchCallback(DownloadBatchStatusCallback downloadBatchCallback) {
-        synchronized (waitForDownloadBatchStatusCallback) {
-            if (callbacks.contains(downloadBatchCallback)) {
-                callbacks.remove(downloadBatchCallback);
-            }
+        if (callbacks.contains(downloadBatchCallback)) {
+            callbacks.remove(downloadBatchCallback);
         }
     }
 

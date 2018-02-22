@@ -20,8 +20,9 @@ import com.novoda.merlin.MerlinsBeard;
 import com.novoda.notils.logger.simple.Log;
 import com.squareup.okhttp.OkHttpClient;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -35,7 +36,6 @@ import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
 public final class DownloadManagerBuilder {
 
     private static final Object SERVICE_LOCK = new Object();
-    private static final Object CALLBACK_LOCK = new Object();
     private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
     private static final int TIMEOUT = 5;
 
@@ -237,7 +237,7 @@ public final class DownloadManagerBuilder {
         applicationContext.bindService(intent, serviceConnection, Service.BIND_AUTO_CREATE);
 
         FileOperations fileOperations = new FileOperations(filePersistenceCreator, fileSizeRequester, fileDownloader);
-        ArrayList<DownloadBatchStatusCallback> callbacks = new ArrayList<>();
+        List<DownloadBatchStatusCallback> callbacks = new CopyOnWriteArrayList<>();
 
         CallbackThrottleCreator callbackThrottleCreator = getCallbackThrottleCreator(
                 callbackThrottleCreatorType,
@@ -275,7 +275,6 @@ public final class DownloadManagerBuilder {
 
         LiteDownloadManagerDownloader downloader = new LiteDownloadManagerDownloader(
                 SERVICE_LOCK,
-                CALLBACK_LOCK,
                 EXECUTOR,
                 callbackHandler,
                 fileOperations,
@@ -289,7 +288,6 @@ public final class DownloadManagerBuilder {
 
         downloadManager = new DownloadManager(
                 SERVICE_LOCK,
-                CALLBACK_LOCK,
                 EXECUTOR,
                 callbackHandler,
                 new HashMap<>(),
