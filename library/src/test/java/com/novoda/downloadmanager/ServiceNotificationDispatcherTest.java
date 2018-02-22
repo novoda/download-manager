@@ -100,14 +100,12 @@ public class ServiceNotificationDispatcherTest {
     }
 
     @Test
-    public void doesNothing_whenNotificationIsHidden() {
+    public void stopsService_whenNotificationIsHidden() {
         given(notificationCreator.createNotification(DOWNLOAD_BATCH_STATUS)).willReturn(HIDDEN_NOTIFICATION_INFORMATION);
 
         notificationDispatcher.updateNotification(DOWNLOAD_BATCH_STATUS);
 
-        InOrder inOrder = inOrder(downloadService, notificationManager);
-        inOrder.verify(notificationManager).cancel(NOTIFICATION_TAG, HIDDEN_NOTIFICATION_INFORMATION.getId());
-        inOrder.verifyNoMoreInteractions();
+        verify(downloadService).stop(true);
     }
 
     @Test(timeout = 500)
