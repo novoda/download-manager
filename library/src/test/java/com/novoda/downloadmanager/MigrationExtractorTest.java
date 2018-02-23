@@ -23,7 +23,7 @@ public class MigrationExtractorTest {
             + "batches INNER JOIN DownloadsByBatch ON DownloadsByBatch.batch_id = batches._id "
             + "WHERE DownloadsByBatch.batch_total_bytes = DownloadsByBatch.batch_current_bytes GROUP BY batches._id";
 
-    private static final String DOWNLOADS_QUERY = "SELECT uri, _data FROM Downloads WHERE batch_id = ?";
+    private static final String DOWNLOADS_QUERY = "SELECT uri, _data, notificationextras FROM Downloads WHERE batch_id = ?";
 
     private static final StubCursor BATCHES_CURSOR = new StubCursor.Builder()
             .with("_id", "1", "2")
@@ -34,11 +34,13 @@ public class MigrationExtractorTest {
     private static final Cursor BATCH_ONE_DOWNLOADS_CURSOR = new StubCursor.Builder()
             .with("uri", "uri_1", "uri_2")
             .with("_data", "data_1", "data_2")
+            .with("notificationextras", "file_1", "file_2")
             .build();
 
     private static final Cursor BATCH_TWO_DOWNLOADS_CURSOR = new StubCursor.Builder()
             .with("uri", "uri_3", "uri_4")
             .with("_data", "data_3", "data_4")
+            .with("notificationextras", "file_3", "file_4")
             .build();
 
     private final SqlDatabaseWrapper database = mock(SqlDatabaseWrapper.class);
@@ -77,8 +79,8 @@ public class MigrationExtractorTest {
                 .build();
 
         List<Migration.FileMetadata> firstFileMetadata = new ArrayList<>();
-        firstFileMetadata.add(new Migration.FileMetadata("data_1", new LiteFileSize(1000, 1000), firstUri));
-        firstFileMetadata.add(new Migration.FileMetadata("data_2", new LiteFileSize(2000, 2000), secondUri));
+        firstFileMetadata.add(new Migration.FileMetadata("file_1", "data_1", new LiteFileSize(1000, 1000), firstUri));
+        firstFileMetadata.add(new Migration.FileMetadata("file_2", "data_2", new LiteFileSize(2000, 2000), secondUri));
 
         String thirdUri = "uri_3";
         String fourthUri = "uri_4";
@@ -88,8 +90,8 @@ public class MigrationExtractorTest {
                 .build();
 
         List<Migration.FileMetadata> secondFileMetadata = new ArrayList<>();
-        secondFileMetadata.add(new Migration.FileMetadata("data_3", new LiteFileSize(500, 500), thirdUri));
-        secondFileMetadata.add(new Migration.FileMetadata("data_4", new LiteFileSize(750, 750), fourthUri));
+        secondFileMetadata.add(new Migration.FileMetadata("file_3", "data_3", new LiteFileSize(500, 500), thirdUri));
+        secondFileMetadata.add(new Migration.FileMetadata("file_4", "data_4", new LiteFileSize(750, 750), fourthUri));
 
         return Arrays.asList(
                 new Migration(firstBatch, firstFileMetadata, 12345),

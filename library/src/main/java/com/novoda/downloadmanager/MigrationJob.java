@@ -113,8 +113,9 @@ class MigrationJob implements Runnable {
             }
             FileName fileName = LiteFileName.from(batch, url);
 
-            String rawDownloadFileId = batch.title() + System.nanoTime();
+            String rawDownloadFileId = rawFileIdFrom(batch, fileMetadata);
             DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(rawDownloadFileId);
+
             DownloadsFilePersisted persistedFile = new LiteDownloadsFilePersisted(
                     downloadBatchId,
                     downloadFileId,
@@ -125,6 +126,14 @@ class MigrationJob implements Runnable {
                     FilePersistenceType.INTERNAL
             );
             downloadsPersistence.persistFile(persistedFile);
+        }
+    }
+
+    private String rawFileIdFrom(Batch batch, Migration.FileMetadata fileMetadata) {
+        if (fileMetadata.fileId() == null || fileMetadata.fileId().isEmpty()) {
+            return batch.title() + System.nanoTime();
+        } else {
+            return fileMetadata.fileId();
         }
     }
 

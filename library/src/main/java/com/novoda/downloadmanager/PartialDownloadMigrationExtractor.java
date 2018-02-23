@@ -14,11 +14,12 @@ class PartialDownloadMigrationExtractor {
     private static final int TITLE_COLUMN = 1;
     private static final int MODIFIED_TIMESTAMP_COLUMN = 2;
 
-    private static final String DOWNLOADS_QUERY = "SELECT uri, _data, current_bytes, total_bytes FROM Downloads WHERE batch_id = ?";
+    private static final String DOWNLOADS_QUERY = "SELECT uri, _data, current_bytes, total_bytes, notificationextras FROM Downloads WHERE batch_id = ?";
     private static final int URI_COLUMN = 0;
     private static final int FILE_NAME_COLUMN = 1;
     private static final int CURRENT_FILE_SIZE_COLUMN = 2;
     private static final int TOTAL_FILE_SIZE_COLUMN = 3;
+    private static final int FILE_ID_COLUMN = 4;
 
     private final SqlDatabaseWrapper database;
 
@@ -41,6 +42,7 @@ class PartialDownloadMigrationExtractor {
             List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
 
             while (downloadsCursor.moveToNext()) {
+                String originalFileId = downloadsCursor.getString(FILE_ID_COLUMN);
                 String uri = downloadsCursor.getString(URI_COLUMN);
                 String originalFileName = downloadsCursor.getString(FILE_NAME_COLUMN);
 
@@ -53,7 +55,7 @@ class PartialDownloadMigrationExtractor {
 
                 long totalRawFileSize = downloadsCursor.getLong(TOTAL_FILE_SIZE_COLUMN);
                 FileSize fileSize = new LiteFileSize(currentRawFileSize, totalRawFileSize);
-                Migration.FileMetadata fileMetadata = new Migration.FileMetadata(originalFileName, fileSize, uri);
+                Migration.FileMetadata fileMetadata = new Migration.FileMetadata(originalFileId, originalFileName, fileSize, uri);
                 fileMetadataList.add(fileMetadata);
             }
             downloadsCursor.close();
