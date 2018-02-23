@@ -15,9 +15,10 @@ class MigrationExtractor {
     private static final int TITLE_COLUMN = 1;
     private static final int MODIFIED_TIMESTAMP_COLUMN = 2;
 
-    private static final String DOWNLOADS_QUERY = "SELECT uri, _data FROM Downloads WHERE batch_id = ?";
+    private static final String DOWNLOADS_QUERY = "SELECT uri, _data, notificationextras FROM Downloads WHERE batch_id = ?";
     private static final int NETWORK_ADDRESS_COLUMN = 0;
     private static final int FILE_LOCATION_COLUMN = 1;
+    private static final int FILE_ID_COLUMN = 2;
 
     private final SqlDatabaseWrapper database;
     private final FilePersistence filePersistence;
@@ -66,6 +67,7 @@ class MigrationExtractor {
             List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
 
             while (downloadsCursor.moveToNext()) {
+                String originalFileId = downloadsCursor.getString(FILE_ID_COLUMN);
                 String originalNetworkAddress = downloadsCursor.getString(NETWORK_ADDRESS_COLUMN);
                 String originalFileLocation = downloadsCursor.getString(FILE_LOCATION_COLUMN);
                 newBatchBuilder.addFile(originalNetworkAddress).apply();
@@ -73,7 +75,12 @@ class MigrationExtractor {
                 FilePath filePath = new LiteFilePath(originalFileLocation);
                 long rawFileSize = filePersistence.getCurrentSize(filePath);
                 FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
-                Migration.FileMetadata fileMetadata = new Migration.FileMetadata(originalFileLocation, fileSize, originalNetworkAddress);
+                Migration.FileMetadata fileMetadata = new Migration.FileMetadata(
+                        originalFileId,
+                        originalFileLocation,
+                        fileSize,
+                        originalNetworkAddress
+                );
                 fileMetadataList.add(fileMetadata);
             }
             return fileMetadataList;

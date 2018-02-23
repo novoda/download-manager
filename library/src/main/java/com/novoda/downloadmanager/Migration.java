@@ -75,14 +75,20 @@ class Migration {
 
     static class FileMetadata {
 
+        private final String fileId;
         private final String originalFileLocation;
         private final FileSize fileSize;
         private final String originalNetworkAddress;
 
-        FileMetadata(String originalFileLocation, FileSize fileSize, String originalNetworkAddress) {
+        FileMetadata(String fileId, String originalFileLocation, FileSize fileSize, String originalNetworkAddress) {
+            this.fileId = fileId;
             this.originalFileLocation = originalFileLocation;
             this.fileSize = fileSize;
             this.originalNetworkAddress = originalNetworkAddress;
+        }
+
+        String fileId() {
+            return fileId;
         }
 
         String originalFileLocation() {
@@ -108,6 +114,9 @@ class Migration {
 
             FileMetadata that = (FileMetadata) o;
 
+            if (fileId != null ? !fileId.equals(that.fileId) : that.fileId != null) {
+                return false;
+            }
             if (originalFileLocation != null ? !originalFileLocation.equals(that.originalFileLocation) : that.originalFileLocation != null) {
                 return false;
             }
@@ -119,7 +128,8 @@ class Migration {
 
         @Override
         public int hashCode() {
-            int result = originalFileLocation != null ? originalFileLocation.hashCode() : 0;
+            int result = fileId != null ? fileId.hashCode() : 0;
+            result = 31 * result + (originalFileLocation != null ? originalFileLocation.hashCode() : 0);
             result = 31 * result + (fileSize != null ? fileSize.hashCode() : 0);
             result = 31 * result + (originalNetworkAddress != null ? originalNetworkAddress.hashCode() : 0);
             return result;
@@ -127,7 +137,9 @@ class Migration {
 
         @Override
         public String toString() {
-            return "FileMetadata{" + "originalFileLocation='" + originalFileLocation + '\''
+            return "FileMetadata{"
+                    + "fileId='" + fileId + '\''
+                    + ", originalFileLocation='" + originalFileLocation + '\''
                     + ", fileSize=" + fileSize
                     + ", originalNetworkAddress='" + originalNetworkAddress + '\''
                     + '}';
