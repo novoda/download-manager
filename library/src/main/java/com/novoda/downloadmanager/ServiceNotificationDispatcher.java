@@ -4,8 +4,6 @@ import android.app.Notification;
 import android.support.annotation.WorkerThread;
 import android.support.v4.app.NotificationManagerCompat;
 
-import com.novoda.notils.logger.simple.Log;
-
 class ServiceNotificationDispatcher<T> {
 
     private static final String NOTIFICATION_TAG = "download-manager";
@@ -15,6 +13,7 @@ class ServiceNotificationDispatcher<T> {
     private final NotificationManagerCompat notificationManager;
 
     private DownloadManagerService service;
+    private int persistentNotificationId;
 
     ServiceNotificationDispatcher(Object waitForDownloadService,
                                   NotificationCreator<T> notificationCreator,
@@ -38,7 +37,7 @@ class ServiceNotificationDispatcher<T> {
 
             switch (notificationInformation.notificationDisplayState()) {
                 case SINGLE_PERSISTENT_NOTIFICATION:
-                    updateNotification(notificationInformation);
+                    updatePersistentNotification(notificationInformation);
                     break;
                 case STACK_NOTIFICATION_NOT_DISMISSIBLE:
                     stackNotificationNotDismissible(notificationInformation);
@@ -47,7 +46,7 @@ class ServiceNotificationDispatcher<T> {
                     stackNotification(notificationInformation);
                     break;
                 case HIDDEN_NOTIFICATION:
-                    Log.d("Notification not required, hiding.");
+                    dismissPersistentIfCurrent(notificationInformation);
                     break;
                 default:
                     String message = String.format(
@@ -62,25 +61,32 @@ class ServiceNotificationDispatcher<T> {
         };
     }
 
-    private void updateNotification(NotificationInformation notificationInformation) {
+    private void dismissStackedNotification(NotificationInformation notificationInformation) {
+        notificationManager.cancel(NOTIFICATION_TAG, notificationInformation.getId());
+    }
+
+    private void updatePersistentNotification(NotificationInformation notificationInformation) {
+        persistentNotificationId = notificationInformation.getId();
         service.start(notificationInformation.getId(), notificationInformation.getNotification());
     }
 
     private void stackNotification(NotificationInformation notificationInformation) {
-        service.stop(true);
+        dismissPersistentIfCurrent(notificationInformation);
         Notification notification = notificationInformation.getNotification();
         notificationManager.notify(NOTIFICATION_TAG, notificationInformation.getId(), notification);
     }
 
     private void stackNotificationNotDismissible(NotificationInformation notificationInformation) {
-        service.stop(true);
+        dismissPersistentIfCurrent(notificationInformation);
         Notification notification = notificationInformation.getNotification();
         notification.flags |= Notification.FLAG_ONGOING_EVENT;
         notificationManager.notify(NOTIFICATION_TAG, notificationInformation.getId(), notification);
     }
 
-    private void dismissStackedNotification(NotificationInformation notificationInformation) {
-        notificationManager.cancel(NOTIFICATION_TAG, notificationInformation.getId());
+    private void dismissPersistentIfCurrent(NotificationInformation notificationInformation) {
+        if (persistentNotificationId == notificationInformation.getId()) {
+            service.stop(true);
+        }
     }
 
     void setService(DownloadManagerService service) {
