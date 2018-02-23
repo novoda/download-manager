@@ -119,7 +119,12 @@ public class MainActivity extends AppCompatActivity {
         versionOneDatabaseCloner.cloneDatabaseWithDownloadSize(selectedFileSize);
     };
 
-    private final MigrationCallback migrationCallback = migrationStatus -> databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());
+    private final MigrationCallback migrationCallback = migrationStatus -> {
+        if (migrationStatus.status() == MigrationStatus.Status.COMPLETE) {
+            liteDownloadManagerCommands.submitAllStoredDownloads(() -> Log.d("Migration completed, submitting all downloads"));
+        }
+        databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());
+    };
 
     private final View.OnClickListener startMigrationOnClick = v -> downloadMigrator.startMigration(getDatabasePath("downloads.db"));
 
