@@ -13,6 +13,7 @@ class ServiceNotificationDispatcher<T> {
     private final NotificationManagerCompat notificationManager;
 
     private DownloadManagerService service;
+    private int persistentNotificationId;
 
     ServiceNotificationDispatcher(Object waitForDownloadService,
                                   NotificationCreator<T> notificationCreator,
@@ -45,7 +46,7 @@ class ServiceNotificationDispatcher<T> {
                     stackNotification(notificationInformation);
                     break;
                 case HIDDEN_NOTIFICATION:
-                    service.stop(true);
+                    dismissPersistentIfCurrent(notificationInformation);
                     break;
                 default:
                     String message = String.format(
@@ -60,25 +61,32 @@ class ServiceNotificationDispatcher<T> {
         };
     }
 
+    private void dismissStackedNotification(NotificationInformation notificationInformation) {
+        notificationManager.cancel(NOTIFICATION_TAG, notificationInformation.getId());
+    }
+
     private void updateNotification(NotificationInformation notificationInformation) {
+        persistentNotificationId = notificationInformation.getId();
         service.start(notificationInformation.getId(), notificationInformation.getNotification());
     }
 
     private void stackNotification(NotificationInformation notificationInformation) {
-        service.stop(true);
+        dismissPersistentIfCurrent(notificationInformation);
         Notification notification = notificationInformation.getNotification();
         notificationManager.notify(NOTIFICATION_TAG, notificationInformation.getId(), notification);
     }
 
     private void stackNotificationNotDismissible(NotificationInformation notificationInformation) {
-        service.stop(true);
+        dismissPersistentIfCurrent(notificationInformation);
         Notification notification = notificationInformation.getNotification();
         notification.flags |= Notification.FLAG_ONGOING_EVENT;
         notificationManager.notify(NOTIFICATION_TAG, notificationInformation.getId(), notification);
     }
 
-    private void dismissStackedNotification(NotificationInformation notificationInformation) {
-        notificationManager.cancel(NOTIFICATION_TAG, notificationInformation.getId());
+    private void dismissPersistentIfCurrent(NotificationInformation notificationInformation) {
+        if (persistentNotificationId == notificationInformation.getId()) {
+            service.stop(true);
+        }
     }
 
     void setService(DownloadManagerService service) {

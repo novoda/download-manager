@@ -11,28 +11,18 @@ import org.mockito.InOrder;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.novoda.downloadmanager.InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus;
-import static com.novoda.downloadmanager.NotificationCustomizer.NotificationDisplayState.HIDDEN_NOTIFICATION;
-import static com.novoda.downloadmanager.NotificationCustomizer.NotificationDisplayState.SINGLE_PERSISTENT_NOTIFICATION;
-import static com.novoda.downloadmanager.NotificationCustomizer.NotificationDisplayState.STACK_NOTIFICATION_DISMISSIBLE;
-import static com.novoda.downloadmanager.NotificationCustomizer.NotificationDisplayState.STACK_NOTIFICATION_NOT_DISMISSIBLE;
+import static com.novoda.downloadmanager.NotificationCustomizer.NotificationDisplayState.*;
 import static com.novoda.downloadmanager.NotificationInformationFixtures.notificationInformation;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class ServiceNotificationDispatcherTest {
 
     private static final String NOTIFICATION_TAG = "download-manager";
 
     private static final DownloadBatchStatus DOWNLOAD_BATCH_STATUS = anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.QUEUED).build();
-
-    private static final NotificationInformation STACKABLE_DISMISSIBLE_NOTIFICATION_INFORMATION = notificationInformation().withNotificationDisplayState(STACK_NOTIFICATION_DISMISSIBLE).build();
-    private static final NotificationInformation STACKABLE_NON_DISMISSIBLE_NOTIFICATION_INFORMATION = notificationInformation().withNotificationDisplayState(STACK_NOTIFICATION_NOT_DISMISSIBLE).build();
-    private static final NotificationInformation SINGLE_PERSISTENT_NOTIFICATION_INFORMATION = notificationInformation().withNotificationDisplayState(SINGLE_PERSISTENT_NOTIFICATION).build();
-    private static final NotificationInformation HIDDEN_NOTIFICATION_INFORMATION = notificationInformation().withNotificationDisplayState(HIDDEN_NOTIFICATION).build();
+    private static final DownloadBatchStatus ANOTHER_DOWNLOAD_BATCH_STATUS = anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.QUEUED).build();
 
     private final Object lock = spy(new Object());
     private final NotificationCreator<DownloadBatchStatus> notificationCreator = mock(NotificationCreator.class);
@@ -44,7 +34,7 @@ public class ServiceNotificationDispatcherTest {
     @Before
     public void setUp() {
         Log.setShowLogs(false);
-        given(notificationCreator.createNotification(any(DownloadBatchStatus.class))).willReturn(SINGLE_PERSISTENT_NOTIFICATION_INFORMATION);
+        given(notificationCreator.createNotification(any(DownloadBatchStatus.class))).willReturn(createNotificationInfo(SINGLE_PERSISTENT_NOTIFICATION, 100));
 
         notificationDispatcher = new ServiceNotificationDispatcher<>(lock, notificationCreator, notificationManager);
         notificationDispatcher.setService(downloadService);
@@ -52,58 +42,112 @@ public class ServiceNotificationDispatcherTest {
 
     @Test
     public void showsSinglePersistentNotification() {
-        given(notificationCreator.createNotification(DOWNLOAD_BATCH_STATUS)).willReturn(SINGLE_PERSISTENT_NOTIFICATION_INFORMATION);
+        NotificationInformation notificationInfo = createNotificationInfo(SINGLE_PERSISTENT_NOTIFICATION, 100);
+        given(notificationCreator.createNotification(DOWNLOAD_BATCH_STATUS)).willReturn(notificationInfo);
 
         notificationDispatcher.updateNotification(DOWNLOAD_BATCH_STATUS);
 
-        verify(downloadService).start(SINGLE_PERSISTENT_NOTIFICATION_INFORMATION.getId(), SINGLE_PERSISTENT_NOTIFICATION_INFORMATION.getNotification());
+        verify(downloadService).start(notificationInfo.getId(), notificationInfo.getNotification());
     }
 
     @Test
     public void stacksDismissibleNotification() {
-        given(notificationCreator.createNotification(DOWNLOAD_BATCH_STATUS)).willReturn(STACKABLE_DISMISSIBLE_NOTIFICATION_INFORMATION);
+        NotificationInformation notificationInfo = createNotificationInfo(STACK_NOTIFICATION_DISMISSIBLE, 100);
+        given(notificationCreator.createNotification(DOWNLOAD_BATCH_STATUS)).willReturn(notificationInfo);
 
         notificationDispatcher.updateNotification(DOWNLOAD_BATCH_STATUS);
 
         InOrder inOrder = inOrder(downloadService, notificationManager);
+        inOrder.verify(downloadService, never()).stop(true);
+        inOrder.verify(notificationManager).notify(NOTIFICATION_TAG, notificationInfo.getId(), notificationInfo.getNotification());
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void stopsService_andStacksDismissibleNotification_ifNotificationWasPersistent() {
+        NotificationInformation persistentNotificationInfo = createNotificationInfo(SINGLE_PERSISTENT_NOTIFICATION, 100);
+        given(notificationCreator.createNotification(DOWNLOAD_BATCH_STATUS)).willReturn(persistentNotificationInfo);
+        NotificationInformation stackNotificationInfo = createNotificationInfo(STACK_NOTIFICATION_DISMISSIBLE, 100);
+        given(notificationCreator.createNotification(ANOTHER_DOWNLOAD_BATCH_STATUS)).willReturn(stackNotificationInfo);
+
+        notificationDispatcher.updateNotification(DOWNLOAD_BATCH_STATUS);
+        notificationDispatcher.updateNotification(ANOTHER_DOWNLOAD_BATCH_STATUS);
+
+        InOrder inOrder = inOrder(downloadService, notificationManager);
         inOrder.verify(downloadService).stop(true);
-        inOrder.verify(notificationManager).notify(NOTIFICATION_TAG, STACKABLE_DISMISSIBLE_NOTIFICATION_INFORMATION.getId(), STACKABLE_DISMISSIBLE_NOTIFICATION_INFORMATION.getNotification());
+        inOrder.verify(notificationManager).notify(NOTIFICATION_TAG, stackNotificationInfo.getId(), stackNotificationInfo.getNotification());
         inOrder.verifyNoMoreInteractions();
     }
 
     @Test
     public void stacksNonDismissibleNotification() {
-        given(notificationCreator.createNotification(DOWNLOAD_BATCH_STATUS)).willReturn(STACKABLE_NON_DISMISSIBLE_NOTIFICATION_INFORMATION);
+        NotificationInformation notificationInfo = createNotificationInfo(STACK_NOTIFICATION_NOT_DISMISSIBLE, 100);
+        given(notificationCreator.createNotification(DOWNLOAD_BATCH_STATUS)).willReturn(notificationInfo);
 
         notificationDispatcher.updateNotification(DOWNLOAD_BATCH_STATUS);
 
         InOrder inOrder = inOrder(downloadService, notificationManager);
+        inOrder.verify(downloadService, never()).stop(true);
+        inOrder.verify(notificationManager).notify(NOTIFICATION_TAG, notificationInfo.getId(), notificationInfo.getNotification());
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void stopsService_andStacksNonDismissibleNotification_ifNotificationWasPersistent() {
+        NotificationInformation persistentNotificationInfo = createNotificationInfo(SINGLE_PERSISTENT_NOTIFICATION, 100);
+        given(notificationCreator.createNotification(DOWNLOAD_BATCH_STATUS)).willReturn(persistentNotificationInfo);
+        NotificationInformation stackNotificationInfo = createNotificationInfo(STACK_NOTIFICATION_NOT_DISMISSIBLE, 100);
+        given(notificationCreator.createNotification(ANOTHER_DOWNLOAD_BATCH_STATUS)).willReturn(stackNotificationInfo);
+
+        notificationDispatcher.updateNotification(DOWNLOAD_BATCH_STATUS);
+        notificationDispatcher.updateNotification(ANOTHER_DOWNLOAD_BATCH_STATUS);
+
+        InOrder inOrder = inOrder(downloadService, notificationManager);
         inOrder.verify(downloadService).stop(true);
-        inOrder.verify(notificationManager).notify(NOTIFICATION_TAG, STACKABLE_NON_DISMISSIBLE_NOTIFICATION_INFORMATION.getId(), STACKABLE_NON_DISMISSIBLE_NOTIFICATION_INFORMATION.getNotification());
+        inOrder.verify(notificationManager).notify(NOTIFICATION_TAG, stackNotificationInfo.getId(), stackNotificationInfo.getNotification());
         inOrder.verifyNoMoreInteractions();
     }
 
     @Test
     public void addsOngoingEvent_whenStackingNonDismissibleNotification() {
-        given(notificationCreator.createNotification(DOWNLOAD_BATCH_STATUS)).willReturn(STACKABLE_NON_DISMISSIBLE_NOTIFICATION_INFORMATION);
+        NotificationInformation notificationInfo = createNotificationInfo(STACK_NOTIFICATION_NOT_DISMISSIBLE, 100);
+        given(notificationCreator.createNotification(DOWNLOAD_BATCH_STATUS)).willReturn(notificationInfo);
 
         notificationDispatcher.updateNotification(DOWNLOAD_BATCH_STATUS);
 
-        assertThat(STACKABLE_NON_DISMISSIBLE_NOTIFICATION_INFORMATION.getNotification().flags).isEqualTo(Notification.FLAG_ONGOING_EVENT);
+        assertThat(notificationInfo.getNotification().flags).isEqualTo(Notification.FLAG_ONGOING_EVENT);
     }
 
     @Test
     public void dismissesStackedNotification_whenUpdatingNotification() {
+        NotificationInformation notificationInfo = createNotificationInfo(SINGLE_PERSISTENT_NOTIFICATION, 100);
+
         notificationDispatcher.updateNotification(DOWNLOAD_BATCH_STATUS);
 
-        verify(notificationManager).cancel(NOTIFICATION_TAG, SINGLE_PERSISTENT_NOTIFICATION_INFORMATION.getId());
+        verify(notificationManager).cancel(NOTIFICATION_TAG, notificationInfo.getId());
     }
 
     @Test
-    public void stopsService_whenNotificationIsHidden() {
-        given(notificationCreator.createNotification(DOWNLOAD_BATCH_STATUS)).willReturn(HIDDEN_NOTIFICATION_INFORMATION);
+    public void doesNotStopService_whenNotificationIsHidden_andNotificationWasNotPersistent() {
+        NotificationInformation persistentNotificationInfo = createNotificationInfo(SINGLE_PERSISTENT_NOTIFICATION, 0);
+        given(notificationCreator.createNotification(DOWNLOAD_BATCH_STATUS)).willReturn(persistentNotificationInfo);
+        NotificationInformation hiddenNotificationInfoWithDifferentId = createNotificationInfo(HIDDEN_NOTIFICATION, 100);
+        given(notificationCreator.createNotification(DOWNLOAD_BATCH_STATUS)).willReturn(hiddenNotificationInfoWithDifferentId);
 
         notificationDispatcher.updateNotification(DOWNLOAD_BATCH_STATUS);
+
+        verify(downloadService, never()).stop(true);
+    }
+
+    @Test
+    public void stopsService_whenNotificationIsHidden_andNotificationWasPersistent() {
+        NotificationInformation persistentNotificationInfo = createNotificationInfo(SINGLE_PERSISTENT_NOTIFICATION, 100);
+        given(notificationCreator.createNotification(DOWNLOAD_BATCH_STATUS)).willReturn(persistentNotificationInfo);
+        NotificationInformation hiddenNotificationInfo = createNotificationInfo(HIDDEN_NOTIFICATION, 100);
+        given(notificationCreator.createNotification(ANOTHER_DOWNLOAD_BATCH_STATUS)).willReturn(hiddenNotificationInfo);
+
+        notificationDispatcher.updateNotification(DOWNLOAD_BATCH_STATUS);
+        notificationDispatcher.updateNotification(ANOTHER_DOWNLOAD_BATCH_STATUS);
 
         verify(downloadService).stop(true);
     }
@@ -113,6 +157,13 @@ public class ServiceNotificationDispatcherTest {
         notificationDispatcher.setService(downloadService);
 
         notificationDispatcher.updateNotification(DOWNLOAD_BATCH_STATUS);
+    }
+
+    private NotificationInformation createNotificationInfo(NotificationCustomizer.NotificationDisplayState displayState, int id) {
+        return notificationInformation()
+                .withNotificationDisplayState(displayState)
+                .withId(id)
+                .build();
     }
 
 }
