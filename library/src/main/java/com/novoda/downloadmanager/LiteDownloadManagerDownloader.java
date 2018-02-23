@@ -12,6 +12,7 @@ import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
 class LiteDownloadManagerDownloader {
 
     private final Object waitForDownloadService;
+    private final Object waitForDownloadBatchStatusCallback;
     private final ExecutorService executor;
     private final Handler callbackHandler;
     private final FileOperations fileOperations;
@@ -28,6 +29,7 @@ class LiteDownloadManagerDownloader {
     @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
 // Can't group anymore these are customisable options.
     LiteDownloadManagerDownloader(Object waitForDownloadService,
+                                  Object waitForDownloadBatchStatusCallback,
                                   ExecutorService executor,
                                   Handler callbackHandler,
                                   FileOperations fileOperations,
@@ -38,6 +40,7 @@ class LiteDownloadManagerDownloader {
                                   List<DownloadBatchStatusCallback> callbacks,
                                   CallbackThrottleCreator callbackThrottleCreator) {
         this.waitForDownloadService = waitForDownloadService;
+        this.waitForDownloadBatchStatusCallback = waitForDownloadBatchStatusCallback;
         this.executor = executor;
         this.callbackHandler = callbackHandler;
         this.fileOperations = fileOperations;
@@ -93,10 +96,12 @@ class LiteDownloadManagerDownloader {
 
     private DownloadBatchStatusCallback downloadBatchCallback() {
         return downloadBatchStatus -> callbackHandler.post(() -> {
-            for (DownloadBatchStatusCallback callback : callbacks) {
-                callback.onUpdate(downloadBatchStatus);
+            synchronized (waitForDownloadBatchStatusCallback) {
+                for (DownloadBatchStatusCallback callback : callbacks) {
+                    callback.onUpdate(downloadBatchStatus);
+                }
+                notificationDispatcher.updateNotification(downloadBatchStatus);
             }
-            notificationDispatcher.updateNotification(downloadBatchStatus);
         });
     }
 

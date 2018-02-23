@@ -4,11 +4,6 @@ import android.os.Handler;
 
 import com.novoda.notils.logger.simple.Log;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.InOrder;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,6 +11,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.InOrder;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.novoda.downloadmanager.DownloadBatchIdFixtures.aDownloadBatchId;
@@ -47,6 +47,7 @@ public class DownloadManagerTest {
     private final DownloadFileStatusCallback downloadFileStatusCallback = mock(DownloadFileStatusCallback.class);
     private final DownloadService downloadService = mock(DownloadService.class);
     private final Object serviceLock = spy(new Object());
+    private final Object callbackLock = spy(new Object());
     private final ExecutorService executorService = mock(ExecutorService.class);
     private final Handler handler = mock(Handler.class);
     private final DownloadBatch downloadBatch = mock(DownloadBatch.class);
@@ -74,6 +75,7 @@ public class DownloadManagerTest {
 
         downloadManager = new DownloadManager(
                 serviceLock,
+                callbackLock,
                 executorService,
                 handler,
                 downloadBatches,
