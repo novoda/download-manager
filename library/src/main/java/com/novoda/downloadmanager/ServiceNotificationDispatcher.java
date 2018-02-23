@@ -37,7 +37,7 @@ class ServiceNotificationDispatcher<T> {
 
             switch (notificationInformation.notificationDisplayState()) {
                 case SINGLE_PERSISTENT_NOTIFICATION:
-                    updateNotification(notificationInformation);
+                    updatePersistentNotification(notificationInformation);
                     break;
                 case STACK_NOTIFICATION_NOT_DISMISSIBLE:
                     stackNotificationNotDismissible(notificationInformation);
@@ -65,7 +65,7 @@ class ServiceNotificationDispatcher<T> {
         notificationManager.cancel(NOTIFICATION_TAG, notificationInformation.getId());
     }
 
-    private void updateNotification(NotificationInformation notificationInformation) {
+    private void updatePersistentNotification(NotificationInformation notificationInformation) {
         persistentNotificationId = notificationInformation.getId();
         service.start(notificationInformation.getId(), notificationInformation.getNotification());
     }
