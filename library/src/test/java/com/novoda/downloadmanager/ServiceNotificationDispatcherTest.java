@@ -57,10 +57,8 @@ public class ServiceNotificationDispatcherTest {
 
         notificationDispatcher.updateNotification(DOWNLOAD_BATCH_STATUS);
 
-        InOrder inOrder = inOrder(downloadService, notificationManager);
-        inOrder.verify(downloadService, never()).stop(true);
-        inOrder.verify(notificationManager).notify(NOTIFICATION_TAG, notificationInfo.getId(), notificationInfo.getNotification());
-        inOrder.verifyNoMoreInteractions();
+        verify(downloadService, never()).stop(true);
+        verify(notificationManager).notify(NOTIFICATION_TAG, notificationInfo.getId(), notificationInfo.getNotification());
     }
 
     @Test
@@ -86,10 +84,8 @@ public class ServiceNotificationDispatcherTest {
 
         notificationDispatcher.updateNotification(DOWNLOAD_BATCH_STATUS);
 
-        InOrder inOrder = inOrder(downloadService, notificationManager);
-        inOrder.verify(downloadService, never()).stop(true);
-        inOrder.verify(notificationManager).notify(NOTIFICATION_TAG, notificationInfo.getId(), notificationInfo.getNotification());
-        inOrder.verifyNoMoreInteractions();
+        verify(downloadService, never()).stop(true);
+        verify(notificationManager).notify(NOTIFICATION_TAG, notificationInfo.getId(), notificationInfo.getNotification());
     }
 
     @Test
