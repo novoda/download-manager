@@ -157,9 +157,16 @@ class DownloadBatch {
 
     private long getTotalSize(List<DownloadFile> downloadFiles) {
         if (totalBatchSizeBytes == 0) {
+            int totalBatchSize = 0;
             for (DownloadFile downloadFile : downloadFiles) {
-                totalBatchSizeBytes += downloadFile.getTotalSize();
+                long totalFileSize = downloadFile.getTotalSize();
+                if (totalFileSize == 0) {
+                    return 0;
+                }
+                
+                totalBatchSize += totalFileSize;
             }
+            return totalBatchSize;
         }
 
         return totalBatchSizeBytes;
