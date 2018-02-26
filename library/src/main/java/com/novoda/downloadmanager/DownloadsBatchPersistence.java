@@ -89,7 +89,14 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                 for (DownloadFile downloadFile : downloadFiles) {
                     downloadedFileSizeMap.put(downloadFile.id(), downloadFile.getCurrentDownloadedBytes());
                     currentBytesDownloaded += downloadFile.getCurrentDownloadedBytes();
-                    totalBatchSizeBytes += downloadFile.getTotalSize();
+                    long totalFileSize = downloadFile.getTotalSize();
+                    if (totalFileSize == 0) {
+                        totalBatchSizeBytes = 0;
+                        currentBytesDownloaded = 0;
+                        break;
+                    } else {
+                        totalBatchSizeBytes += totalFileSize;
+                    }
                 }
 
                 liteDownloadBatchStatus.update(currentBytesDownloaded, totalBatchSizeBytes);
