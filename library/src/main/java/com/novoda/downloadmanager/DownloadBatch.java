@@ -64,7 +64,9 @@ class DownloadBatch {
             notifyCallback(downloadBatchStatus);
         }
 
-        totalBatchSizeBytes = getTotalSize(downloadFiles);
+        if (totalBatchSizeBytes == 0) {
+            totalBatchSizeBytes = getTotalSize(downloadFiles);
+        }
 
         if (totalBatchSizeBytes <= ZERO_BYTES) {
             processNetworkError();
@@ -156,20 +158,16 @@ class DownloadBatch {
     }
 
     private long getTotalSize(List<DownloadFile> downloadFiles) {
-        if (totalBatchSizeBytes == 0) {
-            int totalBatchSize = 0;
-            for (DownloadFile downloadFile : downloadFiles) {
-                long totalFileSize = downloadFile.getTotalSize();
-                if (totalFileSize == 0) {
-                    return 0;
-                }
-                
-                totalBatchSize += totalFileSize;
+        long totalBatchSize = 0;
+        for (DownloadFile downloadFile : downloadFiles) {
+            long totalFileSize = downloadFile.getTotalSize();
+            if (totalFileSize == 0) {
+                return 0;
             }
-            return totalBatchSize;
-        }
 
-        return totalBatchSizeBytes;
+            totalBatchSize += totalFileSize;
+        }
+        return totalBatchSize;
     }
 
     void pause() {
