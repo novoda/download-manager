@@ -107,6 +107,10 @@ public final class DownloadMigratorBuilder {
         Intent serviceIntent = new Intent(applicationContext, LiteDownloadMigrationService.class);
         applicationContext.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationChannelProvider.registerNotificationChannel(applicationContext);
+        }
+
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(applicationContext);
         ServiceNotificationDispatcher<MigrationStatus> notificationDispatcher = new ServiceNotificationDispatcher<>(
                 LOCK,
