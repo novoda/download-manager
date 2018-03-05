@@ -197,16 +197,16 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
 
     @Override
     public String toString() {
-        return "LiteDownloadBatchStatus{" +
-                "downloadBatchTitle=" + downloadBatchTitle +
-                ", downloadBatchId=" + downloadBatchId +
-                ", downloadedDateTimeInMillis=" + downloadedDateTimeInMillis +
-                ", bytesDownloaded=" + bytesDownloaded +
-                ", totalBatchSizeBytes=" + totalBatchSizeBytes +
-                ", percentageDownloaded=" + percentageDownloaded +
-                ", status=" + status +
-                ", notificationSeen=" + notificationSeen +
-                ", downloadError=" + downloadError +
-                '}';
+        return "LiteDownloadBatchStatus{"
+                + "downloadBatchTitle=" + downloadBatchTitle
+                + ", downloadBatchId=" + downloadBatchId
+                + ", downloadedDateTimeInMillis=" + downloadedDateTimeInMillis
+                + ", bytesDownloaded=" + bytesDownloaded
+                + ", totalBatchSizeBytes=" + totalBatchSizeBytes
+                + ", percentageDownloaded=" + percentageDownloaded
+                + ", status=" + status
+                + ", notificationSeen=" + notificationSeen
+                + ", downloadError=" + downloadError
+                + '}';
     }
 }
