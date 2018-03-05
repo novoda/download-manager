@@ -353,6 +353,8 @@ public final class DownloadManagerBuilder {
                     return createDeletedNotification(builder);
                 case ERROR:
                     return createErrorNotification(builder, payload.getDownloadErrorType());
+                case DOWNLOADED:
+                    return createCompletedNotification(builder);
                 default:
                     return createProgressNotification(builder, payload);
             }
@@ -367,6 +369,13 @@ public final class DownloadManagerBuilder {
 
         private Notification createErrorNotification(NotificationCompat.Builder builder, DownloadError.Error errorType) {
             String content = resources.getString(R.string.download_notification_content_error, errorType);
+            return builder
+                    .setContentText(content)
+                    .build();
+        }
+
+        private Notification createCompletedNotification(NotificationCompat.Builder builder) {
+            String content = resources.getString(R.string.download_notification_content_completed);
             return builder
                     .setContentText(content)
                     .build();

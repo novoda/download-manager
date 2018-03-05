@@ -4,6 +4,7 @@
 
   <string name="download_notification_content_deleted">Deleted</string>
   <string name="download_notification_content_error">Error: %s</string>
+  <string name="download_notification_content_completed">Completed</string>
   <string name="download_notification_content_progress">%d%% downloaded</string>
 
   <string name="migration_notification_content_progress">%d%% migrated</string>
