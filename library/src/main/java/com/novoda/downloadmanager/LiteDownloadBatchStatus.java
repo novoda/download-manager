@@ -142,4 +142,71 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     public boolean notificationSeen() {
         return notificationSeen;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        LiteDownloadBatchStatus that = (LiteDownloadBatchStatus) o;
+
+        if (downloadedDateTimeInMillis != that.downloadedDateTimeInMillis) {
+            return false;
+        }
+        if (bytesDownloaded != that.bytesDownloaded) {
+            return false;
+        }
+        if (totalBatchSizeBytes != that.totalBatchSizeBytes) {
+            return false;
+        }
+        if (percentageDownloaded != that.percentageDownloaded) {
+            return false;
+        }
+        if (notificationSeen != that.notificationSeen) {
+            return false;
+        }
+        if (downloadBatchTitle != null ? !downloadBatchTitle.equals(that.downloadBatchTitle) : that.downloadBatchTitle != null) {
+            return false;
+        }
+        if (downloadBatchId != null ? !downloadBatchId.equals(that.downloadBatchId) : that.downloadBatchId != null) {
+            return false;
+        }
+        if (status != that.status) {
+            return false;
+        }
+        return downloadError != null ? downloadError.equals(that.downloadError) : that.downloadError == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = downloadBatchTitle != null ? downloadBatchTitle.hashCode() : 0;
+        result = 31 * result + (downloadBatchId != null ? downloadBatchId.hashCode() : 0);
+        result = 31 * result + (int) (downloadedDateTimeInMillis ^ (downloadedDateTimeInMillis >>> 32));
+        result = 31 * result + (int) (bytesDownloaded ^ (bytesDownloaded >>> 32));
+        result = 31 * result + (int) (totalBatchSizeBytes ^ (totalBatchSizeBytes >>> 32));
+        result = 31 * result + percentageDownloaded;
+        result = 31 * result + (status != null ? status.hashCode() : 0);
+        result = 31 * result + (notificationSeen ? 1 : 0);
+        result = 31 * result + (downloadError != null ? downloadError.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "LiteDownloadBatchStatus{"
+                + "downloadBatchTitle=" + downloadBatchTitle
+                + ", downloadBatchId=" + downloadBatchId
+                + ", downloadedDateTimeInMillis=" + downloadedDateTimeInMillis
+                + ", bytesDownloaded=" + bytesDownloaded
+                + ", totalBatchSizeBytes=" + totalBatchSizeBytes
+                + ", percentageDownloaded=" + percentageDownloaded
+                + ", status=" + status
+                + ", notificationSeen=" + notificationSeen
+                + ", downloadError=" + downloadError
+                + '}';
+    }
 }

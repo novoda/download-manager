@@ -124,6 +124,46 @@ class LiteDownloadFileStatus implements InternalDownloadFileStatus {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        LiteDownloadFileStatus that = (LiteDownloadFileStatus) o;
+
+        if (downloadBatchId != null ? !downloadBatchId.equals(that.downloadBatchId) : that.downloadBatchId != null) {
+            return false;
+        }
+        if (downloadFileId != null ? !downloadFileId.equals(that.downloadFileId) : that.downloadFileId != null) {
+            return false;
+        }
+        if (fileSize != null ? !fileSize.equals(that.fileSize) : that.fileSize != null) {
+            return false;
+        }
+        if (localFilePath != null ? !localFilePath.equals(that.localFilePath) : that.localFilePath != null) {
+            return false;
+        }
+        if (status != that.status) {
+            return false;
+        }
+        return downloadError != null ? downloadError.equals(that.downloadError) : that.downloadError == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = downloadBatchId != null ? downloadBatchId.hashCode() : 0;
+        result = 31 * result + (downloadFileId != null ? downloadFileId.hashCode() : 0);
+        result = 31 * result + (fileSize != null ? fileSize.hashCode() : 0);
+        result = 31 * result + (localFilePath != null ? localFilePath.hashCode() : 0);
+        result = 31 * result + (status != null ? status.hashCode() : 0);
+        result = 31 * result + (downloadError != null ? downloadError.hashCode() : 0);
+        return result;
+    }
+
+    @Override
     public String toString() {
         return "LiteDownloadFileStatus{"
                 + "downloadBatchId=" + downloadBatchId
