@@ -20,7 +20,8 @@ class NotificationCreator<T> {
         this.notificationChannelProvider = notificationChannelProvider;
     }
 
-    private int notificationId;
+    private int previousNotificationId;
+    private NotificationCustomizer.NotificationDisplayState previousNotificationDisplayState;
     private NotificationCompat.Builder builder;
 
     NotificationInformation createNotification(final T notificationPayload) {
@@ -36,14 +37,20 @@ class NotificationCreator<T> {
 
             @Override
             public Notification getNotification() {
-                int newNotificationId = getId();
+                int notificationId = getId();
+                NotificationCustomizer.NotificationDisplayState notificationDisplayState = notificationDisplayState();
 
-                if (builder == null || newNotificationId != notificationId) {
+                if (builder == null || hasChanged(previousNotificationId, notificationDisplayState)) {
                     builder = new NotificationCompat.Builder(applicationContext, notificationChannelProvider.channelId());
-                    notificationId = newNotificationId;
+                    previousNotificationId = notificationId;
+                    previousNotificationDisplayState = notificationDisplayState;
                 }
 
                 return notificationCustomizer.customNotificationFrom(builder, notificationPayload);
+            }
+
+            private boolean hasChanged(int newNotificationId, NotificationCustomizer.NotificationDisplayState newNotificationDisplayState) {
+                return previousNotificationId != newNotificationId || !previousNotificationDisplayState.equals(newNotificationDisplayState);
             }
 
             @Override
