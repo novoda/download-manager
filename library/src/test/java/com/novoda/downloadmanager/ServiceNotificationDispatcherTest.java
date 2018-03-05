@@ -11,11 +11,18 @@ import org.mockito.InOrder;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.novoda.downloadmanager.InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus;
-import static com.novoda.downloadmanager.NotificationCustomizer.NotificationDisplayState.*;
+import static com.novoda.downloadmanager.NotificationCustomizer.NotificationDisplayState.HIDDEN_NOTIFICATION;
+import static com.novoda.downloadmanager.NotificationCustomizer.NotificationDisplayState.SINGLE_PERSISTENT_NOTIFICATION;
+import static com.novoda.downloadmanager.NotificationCustomizer.NotificationDisplayState.STACK_NOTIFICATION_DISMISSIBLE;
+import static com.novoda.downloadmanager.NotificationCustomizer.NotificationDisplayState.STACK_NOTIFICATION_NOT_DISMISSIBLE;
 import static com.novoda.downloadmanager.NotificationInformationFixtures.notificationInformation;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 public class ServiceNotificationDispatcherTest {
 
@@ -25,7 +32,7 @@ public class ServiceNotificationDispatcherTest {
     private static final DownloadBatchStatus ANOTHER_DOWNLOAD_BATCH_STATUS = anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.QUEUED).build();
 
     private final Object lock = spy(new Object());
-    private final DownloadBatchStatusNotificationCreator<DownloadBatchStatus> notificationCreator = mock(DownloadBatchStatusNotificationCreator.class);
+    private final NotificationCreator<DownloadBatchStatus> notificationCreator = mock(NotificationCreator.class);
     private final NotificationManagerCompat notificationManager = mock(NotificationManagerCompat.class);
     private final DownloadManagerService downloadService = mock(DownloadManagerService.class);
 
