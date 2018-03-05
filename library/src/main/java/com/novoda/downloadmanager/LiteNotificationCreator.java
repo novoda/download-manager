@@ -4,7 +4,7 @@ import android.app.Notification;
 import android.content.Context;
 import android.support.v4.app.NotificationCompat;
 
-class LiteNotificationCrgeator<T> {
+class LiteNotificationCreator<T> {
 
     private final Context applicationContext;
     private final NotificationCustomizer<T> notificationCustomizer;
