@@ -9,14 +9,14 @@ class ServiceNotificationDispatcher<T> {
     private static final String NOTIFICATION_TAG = "download-manager";
 
     private final Object waitForDownloadService;
-    private final LiteNotificationCreator<T> notificationCreator;
+    private final NotificationCreator<T> notificationCreator;
     private final NotificationManagerCompat notificationManager;
 
     private DownloadManagerService service;
     private int persistentNotificationId;
 
     ServiceNotificationDispatcher(Object waitForDownloadService,
-                                  LiteNotificationCreator<T> notificationCreator,
+                                  NotificationCreator<T> notificationCreator,
                                   NotificationManagerCompat notificationManager) {
         this.waitForDownloadService = waitForDownloadService;
         this.notificationCreator = notificationCreator;
