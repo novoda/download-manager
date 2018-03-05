@@ -4,13 +4,13 @@ import android.app.Notification;
 import android.content.Context;
 import android.support.v4.app.NotificationCompat;
 
-class NotificationCreator<T> {
+class LiteNotificationCrgeator<T> {
 
     private final Context applicationContext;
     private final NotificationCustomizer<T> notificationCustomizer;
     private NotificationChannelProvider notificationChannelProvider;
 
-    NotificationCreator(Context context, NotificationCustomizer<T> customizer, NotificationChannelProvider notificationChannelProvider) {
+    LiteNotificationCreator(Context context, NotificationCustomizer<T> customizer, NotificationChannelProvider notificationChannelProvider) {
         this.applicationContext = context.getApplicationContext();
         this.notificationCustomizer = customizer;
         this.notificationChannelProvider = notificationChannelProvider;

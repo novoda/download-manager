@@ -29,7 +29,7 @@ public final class DownloadMigratorBuilder {
     private final Handler handler;
 
     private NotificationChannelProvider notificationChannelProvider;
-    private NotificationCreator<MigrationStatus> notificationCreator;
+    private LiteNotificationCreator<MigrationStatus> notificationCreator;
     private LiteDownloadMigrator downloadMigrator;
     private MigrationCallback migrationCallback;
 
@@ -43,7 +43,7 @@ public final class DownloadMigratorBuilder {
                 NotificationManagerCompat.IMPORTANCE_LOW
         );
         NotificationCustomizer<MigrationStatus> customizer = new MigrationNotificationCustomizer(context.getResources());
-        NotificationCreator<MigrationStatus> defaultNotificationCreator = new NotificationCreator<>(
+        LiteNotificationCreator<MigrationStatus> defaultNotificationCreator = new LiteNotificationCreator<>(
                 applicationContext,
                 customizer,
                 notificationChannelProvider
@@ -58,7 +58,7 @@ public final class DownloadMigratorBuilder {
     private DownloadMigratorBuilder(Context applicationContext,
                                     Handler handler,
                                     NotificationChannelProvider notificationChannelProvider,
-                                    NotificationCreator<MigrationStatus> notificationCreator,
+                                    LiteNotificationCreator<MigrationStatus> notificationCreator,
                                     MigrationCallback migrationCallback) {
         this.applicationContext = applicationContext;
         this.handler = handler;
@@ -86,7 +86,7 @@ public final class DownloadMigratorBuilder {
     }
 
     public DownloadMigratorBuilder withNotification(NotificationCustomizer<MigrationStatus> notificationCustomizer) {
-        this.notificationCreator = new NotificationCreator<>(applicationContext, notificationCustomizer, notificationChannelProvider);
+        this.notificationCreator = new LiteNotificationCreator<>(applicationContext, notificationCustomizer, notificationChannelProvider);
         return this;
     }
 

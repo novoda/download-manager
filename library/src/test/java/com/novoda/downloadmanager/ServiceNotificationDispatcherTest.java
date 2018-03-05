@@ -25,7 +25,7 @@ public class ServiceNotificationDispatcherTest {
     private static final DownloadBatchStatus ANOTHER_DOWNLOAD_BATCH_STATUS = anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.QUEUED).build();
 
     private final Object lock = spy(new Object());
-    private final NotificationCreator<DownloadBatchStatus> notificationCreator = mock(NotificationCreator.class);
+    private final LiteNotificationCreator<DownloadBatchStatus> notificationCreator = mock(LiteNotificationCreator.class);
     private final NotificationManagerCompat notificationManager = mock(NotificationManagerCompat.class);
     private final DownloadManagerService downloadService = mock(DownloadManagerService.class);
 

@@ -48,7 +48,7 @@ public final class DownloadManagerBuilder {
     private FileDownloader fileDownloader;
     private DownloadService downloadService;
     private DownloadManager downloadManager;
-    private NotificationCreator<DownloadBatchStatus> notificationCreator;
+    private LiteNotificationCreator<DownloadBatchStatus> notificationCreator;
     private NotificationChannelProvider notificationChannelProvider;
     private ConnectionType connectionTypeAllowed;
     private boolean allowNetworkRecovery;
@@ -88,7 +88,7 @@ public final class DownloadManagerBuilder {
                 context.getResources(),
                 notificationIcon
         );
-        NotificationCreator<DownloadBatchStatus> notificationCreator = new NotificationCreator<>(
+        LiteNotificationCreator<DownloadBatchStatus> notificationCreator = new LiteNotificationCreator<>(
                 context,
                 notificationCustomizer,
                 notificationChannelProvider
@@ -122,7 +122,7 @@ public final class DownloadManagerBuilder {
                                    FileSizeRequester fileSizeRequester,
                                    FileDownloader fileDownloader,
                                    NotificationChannelProvider notificationChannelProvider,
-                                   NotificationCreator<DownloadBatchStatus> notificationCreator,
+                                   LiteNotificationCreator<DownloadBatchStatus> notificationCreator,
                                    ConnectionType connectionTypeAllowed,
                                    boolean allowNetworkRecovery,
                                    CallbackThrottleCreator.Type callbackThrottleCreatorType) {
@@ -179,7 +179,7 @@ public final class DownloadManagerBuilder {
     }
 
     public DownloadManagerBuilder withNotification(NotificationCustomizer<DownloadBatchStatus> notificationCustomizer) {
-        this.notificationCreator = new NotificationCreator<>(applicationContext, notificationCustomizer, notificationChannelProvider);
+        this.notificationCreator = new LiteNotificationCreator<>(applicationContext, notificationCustomizer, notificationChannelProvider);
         return this;
     }
 
