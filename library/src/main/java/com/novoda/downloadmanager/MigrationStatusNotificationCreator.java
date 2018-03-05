@@ -29,7 +29,7 @@ class MigrationStatusNotificationCreator implements NotificationCreator<Migratio
         return new NotificationInformation() {
             @Override
             public int getId() {
-                return migrationStatus.status().hashCode();
+                return migrationStatus.hashCode();
             }
 
             @Override

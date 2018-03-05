@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -33,7 +34,7 @@ public final class DownloadMigratorBuilder {
     private LiteDownloadMigrator downloadMigrator;
     private MigrationCallback migrationCallback;
 
-    public static DownloadMigratorBuilder newInstance(Context context) {
+    public static DownloadMigratorBuilder newInstance(Context context, @DrawableRes int notificationIcon) {
         Context applicationContext = context.getApplicationContext();
         Resources resources = context.getResources();
 
@@ -42,7 +43,7 @@ public final class DownloadMigratorBuilder {
                 resources.getString(R.string.download_notification_channel_description),
                 NotificationManagerCompat.IMPORTANCE_LOW
         );
-        NotificationCustomizer<MigrationStatus> customizer = new MigrationNotificationCustomizer(context.getResources());
+        NotificationCustomizer<MigrationStatus> customizer = new MigrationNotificationCustomizer(context.getResources(), notificationIcon);
         NotificationCreator<MigrationStatus> defaultNotificationCreator = new MigrationStatusNotificationCreator(
                 applicationContext,
                 customizer,
@@ -123,17 +124,21 @@ public final class DownloadMigratorBuilder {
     }
 
     private static class MigrationNotificationCustomizer implements NotificationCustomizer<MigrationStatus> {
+
+        private static final boolean NOT_INDETERMINATE = false;
         private static final int MAX_PROGRESS = 100;
 
         private final Resources resources;
+        private final int notificationIcon;
 
-        MigrationNotificationCustomizer(Resources resources) {
+        MigrationNotificationCustomizer(Resources resources, int notificationIcon) {
             this.resources = resources;
+            this.notificationIcon = notificationIcon;
         }
 
         @Override
-        public NotificationDisplayState notificationDisplayState(MigrationStatus payload) {
-            MigrationStatus.Status status = payload.status();
+        public NotificationDisplayState notificationDisplayState(MigrationStatus migrationStatus) {
+            MigrationStatus.Status status = migrationStatus.status();
 
             if (status == MigrationStatus.Status.COMPLETE) {
                 return NotificationDisplayState.STACK_NOTIFICATION_DISMISSIBLE;
@@ -145,15 +150,34 @@ public final class DownloadMigratorBuilder {
         }
 
         @Override
-        public Notification customNotificationFrom(NotificationCompat.Builder builder, MigrationStatus payload) {
-            String title = payload.status().toRawValue();
-            String content = resources.getString(R.string.migration_notification_content_progress, payload.percentageMigrated());
+        public Notification customNotificationFrom(NotificationCompat.Builder builder, MigrationStatus migrationStatus) {
+            String title = migrationStatus.status().toRawValue();
+            builder.setSmallIcon(notificationIcon)
+                    .setContentTitle(title);
+
+            if (migrationStatus.status() == MigrationStatus.Status.COMPLETE) {
+                return createCompletedNotification(builder);
+            } else {
+                return createProgressNotification(builder, migrationStatus);
+            }
+        }
+
+        private Notification createCompletedNotification(NotificationCompat.Builder builder) {
+            String content = resources.getString(R.string.download_notification_content_completed);
             return builder
-                    .setProgress(MAX_PROGRESS, payload.percentageMigrated(), false)
-                    .setSmallIcon(android.R.drawable.ic_menu_gallery)
-                    .setContentTitle(title)
+                    .setContentText(content)
+                    .build();
+        }
+
+        private Notification createProgressNotification(NotificationCompat.Builder builder, MigrationStatus migrationStatus) {
+            int percentageMigrated = migrationStatus.percentageMigrated();
+            String content = resources.getString(R.string.download_notification_content_progress, percentageMigrated);
+
+            return builder
+                    .setProgress(MAX_PROGRESS, percentageMigrated, NOT_INDETERMINATE)
                     .setContentText(content)
                     .build();
         }
     }
+
 }

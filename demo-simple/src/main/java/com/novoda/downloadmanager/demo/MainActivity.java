@@ -1,8 +1,6 @@
 package com.novoda.downloadmanager.demo;
 
-import android.app.Notification;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -26,7 +24,6 @@ import com.novoda.downloadmanager.DownloadMigratorBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
-import com.novoda.downloadmanager.NotificationCustomizer;
 import com.novoda.notils.logger.simple.Log;
 
 import java.io.File;
@@ -60,15 +57,12 @@ public class MainActivity extends AppCompatActivity {
 
         Log.setShowLogs(true);
 
-        NotificationCustomizer<MigrationStatus> notificationCustomizer = new MigrationNotificationCustomizer();
-
-        downloadMigrator = DownloadMigratorBuilder.newInstance(this)
+        downloadMigrator = DownloadMigratorBuilder.newInstance(this, R.mipmap.ic_launcher_round)
                 .withNotificationChannel(
                         "chocolate",
                         "Migration notifications",
                         NotificationManagerCompat.IMPORTANCE_DEFAULT
                 )
-                .withNotification(notificationCustomizer)
                 .withMigrationCallback(migrationCallback)
                 .build();
 
@@ -226,28 +220,4 @@ public class MainActivity extends AppCompatActivity {
         buttonResumeDownload2.setOnClickListener(v -> liteDownloadManagerCommands.resume(BATCH_ID_2));
     }
 
-    private static class MigrationNotificationCustomizer implements NotificationCustomizer<MigrationStatus> {
-        @Override
-        public NotificationDisplayState notificationDisplayState(MigrationStatus payload) {
-            MigrationStatus.Status status = payload.status();
-
-            if (status == MigrationStatus.Status.COMPLETE) {
-                return NotificationDisplayState.STACK_NOTIFICATION_DISMISSIBLE;
-            } else if (status == MigrationStatus.Status.DB_NOT_PRESENT) {
-                return NotificationDisplayState.HIDDEN_NOTIFICATION;
-            } else {
-                return NotificationDisplayState.SINGLE_PERSISTENT_NOTIFICATION;
-            }
-        }
-
-        @Override
-        public Notification customNotificationFrom(NotificationCompat.Builder builder, MigrationStatus payload) {
-            return builder
-                    .setProgress(payload.totalNumberOfBatchesToMigrate(), payload.numberOfMigratedBatches(), false)
-                    .setSmallIcon(android.R.drawable.ic_lock_power_off)
-                    .setContentTitle(payload.status().toRawValue())
-                    .setContentText(payload.percentageMigrated() + "%")
-                    .build();
-        }
-    }
 }

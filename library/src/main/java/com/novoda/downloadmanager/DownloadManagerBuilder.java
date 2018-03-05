@@ -62,13 +62,10 @@ public final class DownloadManagerBuilder {
         Log.setShowLogs(true);
         Context applicationContext = context.getApplicationContext();
 
-        // File persistence
         FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(applicationContext);
 
-        // Downloads information persistence
         DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(applicationContext);
 
-        // Network downloader
         OkHttpClient okHttpClient = new OkHttpClient();
         okHttpClient.setConnectTimeout(TIMEOUT, TimeUnit.SECONDS);
         okHttpClient.setWriteTimeout(TIMEOUT, TimeUnit.SECONDS);
