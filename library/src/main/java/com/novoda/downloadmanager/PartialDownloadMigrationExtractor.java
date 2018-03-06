@@ -36,13 +36,17 @@ class PartialDownloadMigrationExtractor {
             long downloadedDateTimeInMillis = batchesCursor.getLong(MODIFIED_TIMESTAMP_COLUMN);
 
             Cursor downloadsCursor = database.rawQuery(DOWNLOADS_QUERY, batchId);
-            Batch.Builder newBatchBuilder = Batch.with(DownloadBatchIdCreator.createFrom(batchId), batchTitle);
+            Batch.Builder newBatchBuilder = null;
             List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
 
             while (downloadsCursor.moveToNext()) {
                 String originalFileId = downloadsCursor.getString(FILE_ID_COLUMN);
                 String uri = downloadsCursor.getString(URI_COLUMN);
                 String originalFileName = downloadsCursor.getString(FILE_NAME_COLUMN);
+
+                if (downloadsCursor.isFirst()) {
+                    newBatchBuilder = Batch.with(DownloadBatchIdCreator.createFrom(originalFileId), batchTitle);
+                }
 
                 newBatchBuilder.addFile(uri);
 
