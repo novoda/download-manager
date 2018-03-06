@@ -45,7 +45,8 @@ class PartialDownloadMigrationExtractor {
                 String originalFileName = downloadsCursor.getString(FILE_NAME_COLUMN);
 
                 if (downloadsCursor.isFirst()) {
-                    newBatchBuilder = Batch.with(DownloadBatchIdCreator.createFrom(originalFileId), batchTitle);
+                    DownloadBatchId downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
+                    newBatchBuilder = Batch.with(downloadBatchId, batchTitle);
                 }
 
                 newBatchBuilder.addFile(uri);
@@ -61,5 +62,12 @@ class PartialDownloadMigrationExtractor {
         }
         batchesCursor.close();
         return migrations;
+    }
+
+    private DownloadBatchId createDownloadBatchIdFrom(String originalFileId, String batchId) {
+        if (originalFileId == null || originalFileId.isEmpty()) {
+            return DownloadBatchIdCreator.createFrom(batchId);
+        }
+        return DownloadBatchIdCreator.createFrom(originalFileId);
     }
 }
