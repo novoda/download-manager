@@ -94,8 +94,8 @@ public class MigrationExtractorTest {
         secondFileMetadata.add(new Migration.FileMetadata("file_4", "data_4", new LiteFileSize(750, 750), fourthUri));
 
         return Arrays.asList(
-                new Migration(firstBatch, firstFileMetadata, 12345),
-                new Migration(secondBatch, secondFileMetadata, 67890)
+                new Migration(firstBatch, firstFileMetadata, 12345, Migration.Type.COMPLETE),
+                new Migration(secondBatch, secondFileMetadata, 67890, Migration.Type.COMPLETE)
         );
     }
 }

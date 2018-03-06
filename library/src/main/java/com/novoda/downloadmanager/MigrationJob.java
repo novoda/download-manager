@@ -94,7 +94,7 @@ class MigrationJob implements Runnable {
 
         DownloadBatchId downloadBatchId = batch.downloadBatchId();
         DownloadBatchTitle downloadBatchTitle = new LiteDownloadBatchTitle(batch.title());
-        Status downloadBatchStatus = migration.hasDownloadedBatch() ? Status.DOWNLOADED : Status.QUEUED;
+        Status downloadBatchStatus = batchStatusFrom(migration);
         long downloadedDateTimeInMillis = migration.downloadedDateTimeInMillis();
 
         DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted(
@@ -129,6 +129,10 @@ class MigrationJob implements Runnable {
             );
             downloadsPersistence.persistFile(persistedFile);
         }
+    }
+
+    private Status batchStatusFrom(Migration migration) {
+        return migration.type() == Migration.Type.COMPLETE ? Status.DOWNLOADED : Status.QUEUED;
     }
 
     private String rawFileIdFrom(Batch batch, Migration.FileMetadata fileMetadata) {

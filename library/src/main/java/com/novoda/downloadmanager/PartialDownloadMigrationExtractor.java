@@ -14,12 +14,10 @@ class PartialDownloadMigrationExtractor {
     private static final int TITLE_COLUMN = 1;
     private static final int MODIFIED_TIMESTAMP_COLUMN = 2;
 
-    private static final String DOWNLOADS_QUERY = "SELECT uri, _data, current_bytes, total_bytes, notificationextras FROM Downloads WHERE batch_id = ?";
+    private static final String DOWNLOADS_QUERY = "SELECT uri, _data, notificationextras FROM Downloads WHERE batch_id = ?";
     private static final int URI_COLUMN = 0;
     private static final int FILE_NAME_COLUMN = 1;
-    private static final int CURRENT_FILE_SIZE_COLUMN = 2;
-    private static final int TOTAL_FILE_SIZE_COLUMN = 3;
-    private static final int FILE_ID_COLUMN = 4;
+    private static final int FILE_ID_COLUMN = 2;
 
     private final SqlDatabaseWrapper database;
 
@@ -46,22 +44,16 @@ class PartialDownloadMigrationExtractor {
                 String uri = downloadsCursor.getString(URI_COLUMN);
                 String originalFileName = downloadsCursor.getString(FILE_NAME_COLUMN);
 
-                long currentRawFileSize = downloadsCursor.getLong(CURRENT_FILE_SIZE_COLUMN);
-                if (originalFileName == null || originalFileName.isEmpty()) {
-                    currentRawFileSize = 0;
-                }
-
                 newBatchBuilder.addFile(uri);
 
-                long totalRawFileSize = downloadsCursor.getLong(TOTAL_FILE_SIZE_COLUMN);
-                FileSize fileSize = new LiteFileSize(currentRawFileSize, totalRawFileSize);
+                FileSize fileSize = FileSizeCreator.unknownFileSize();
                 Migration.FileMetadata fileMetadata = new Migration.FileMetadata(originalFileId, originalFileName, fileSize, uri);
                 fileMetadataList.add(fileMetadata);
             }
             downloadsCursor.close();
 
             Batch batch = newBatchBuilder.build();
-            migrations.add(new Migration(batch, fileMetadataList, downloadedDateTimeInMillis));
+            migrations.add(new Migration(batch, fileMetadataList, downloadedDateTimeInMillis, Migration.Type.PARTIAL));
         }
         batchesCursor.close();
         return migrations;

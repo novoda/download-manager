@@ -47,7 +47,7 @@ class MigrationExtractor {
                 List<Migration.FileMetadata> fileMetadataList = extractFileMetadataFrom(batchId, newBatchBuilder);
 
                 Batch batch = newBatchBuilder.build();
-                migrations.add(new Migration(batch, fileMetadataList, downloadedDateTimeInMillis));
+                migrations.add(new Migration(batch, fileMetadataList, downloadedDateTimeInMillis, Migration.Type.COMPLETE));
             }
 
             return migrations;
