@@ -62,13 +62,10 @@ public final class DownloadManagerBuilder {
         Log.setShowLogs(true);
         Context applicationContext = context.getApplicationContext();
 
-        // File persistence
         FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(applicationContext);
 
-        // Downloads information persistence
         DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(applicationContext);
 
-        // Network downloader
         OkHttpClient okHttpClient = new OkHttpClient();
         okHttpClient.setConnectTimeout(TIMEOUT, TimeUnit.SECONDS);
         okHttpClient.setWriteTimeout(TIMEOUT, TimeUnit.SECONDS);
@@ -88,7 +85,7 @@ public final class DownloadManagerBuilder {
                 context.getResources(),
                 notificationIcon
         );
-        NotificationCreator<DownloadBatchStatus> notificationCreator = new NotificationCreator<>(
+        NotificationCreator<DownloadBatchStatus> notificationCreator = new DownloadBatchStatusNotificationCreator(
                 context,
                 notificationCustomizer,
                 notificationChannelProvider
@@ -179,7 +176,7 @@ public final class DownloadManagerBuilder {
     }
 
     public DownloadManagerBuilder withNotification(NotificationCustomizer<DownloadBatchStatus> notificationCustomizer) {
-        this.notificationCreator = new NotificationCreator<>(applicationContext, notificationCustomizer, notificationChannelProvider);
+        this.notificationCreator = new DownloadBatchStatusNotificationCreator(applicationContext, notificationCustomizer, notificationChannelProvider);
         return this;
     }
 
@@ -353,6 +350,8 @@ public final class DownloadManagerBuilder {
                     return createDeletedNotification(builder);
                 case ERROR:
                     return createErrorNotification(builder, payload.getDownloadErrorType());
+                case DOWNLOADED:
+                    return createCompletedNotification(builder);
                 default:
                     return createProgressNotification(builder, payload);
             }
@@ -367,6 +366,13 @@ public final class DownloadManagerBuilder {
 
         private Notification createErrorNotification(NotificationCompat.Builder builder, DownloadError.Error errorType) {
             String content = resources.getString(R.string.download_notification_content_error, errorType);
+            return builder
+                    .setContentText(content)
+                    .build();
+        }
+
+        private Notification createCompletedNotification(NotificationCompat.Builder builder) {
+            String content = resources.getString(R.string.download_notification_content_completed);
             return builder
                     .setContentText(content)
                     .build();
