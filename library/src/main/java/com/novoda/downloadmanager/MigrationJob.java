@@ -16,7 +16,6 @@ class MigrationJob implements Runnable {
 
     private static final String TABLE_BATCHES = "batches";
     private static final String WHERE_CLAUSE_ID = "_id = ?";
-    private static final boolean NOTIFICATION_SEEN = true;
 
     private final Context context;
     private final File databasePath;
@@ -75,7 +74,7 @@ class MigrationJob implements Runnable {
             downloadsPersistence.startTransaction();
             database.startTransaction();
 
-            migrateV1DataToV2Database(downloadsPersistence, partialMigration, basePath);
+            migrateV1DataToV2Database(downloadsPersistence, partialMigration, basePath, false);
             deleteFrom(database, partialMigration);
             deleteFiles(partialMigration);
 
@@ -87,7 +86,10 @@ class MigrationJob implements Runnable {
         Log.d(TAG, "partial migrations are all EXTRACTED, time is " + System.nanoTime());
     }
 
-    private void migrateV1DataToV2Database(DownloadsPersistence downloadsPersistence, Migration migration, String basePath) {
+    private void migrateV1DataToV2Database(DownloadsPersistence downloadsPersistence,
+                                           Migration migration,
+                                           String basePath,
+                                           boolean notificationSeen) {
         Batch batch = migration.batch();
 
         DownloadBatchId downloadBatchId = batch.downloadBatchId();
@@ -100,7 +102,7 @@ class MigrationJob implements Runnable {
                 downloadBatchId,
                 downloadBatchStatus,
                 downloadedDateTimeInMillis,
-                NOTIFICATION_SEEN
+                notificationSeen
         );
         downloadsPersistence.persistBatch(persistedBatch);
 
@@ -173,7 +175,7 @@ class MigrationJob implements Runnable {
             downloadsPersistence.startTransaction();
             database.startTransaction();
 
-            migrateV1DataToV2Database(downloadsPersistence, migration, basePath);
+            migrateV1DataToV2Database(downloadsPersistence, migration, basePath, true);
             deleteFrom(database, migration);
 
             downloadsPersistence.transactionSuccess();
