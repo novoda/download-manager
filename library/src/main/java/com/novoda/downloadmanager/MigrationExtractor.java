@@ -40,14 +40,14 @@ class MigrationExtractor {
 
             while (batchesCursor.moveToNext()) {
                 String batchId = batchesCursor.getString(BATCH_ID_COLUMN);
-                String batchTitle = batchesCursor.getString(TITLE_COLUMN);
-                long downloadedDateTimeInMillis = batchesCursor.getLong(MODIFIED_TIMESTAMP_COLUMN);
-
                 Cursor downloadsCursor = database.rawQuery(DOWNLOADS_QUERY, batchId);
 
                 if (downloadsCursor == null) {
                     return Collections.emptyList();
                 }
+
+                String batchTitle = batchesCursor.getString(TITLE_COLUMN);
+                long downloadedDateTimeInMillis = batchesCursor.getLong(MODIFIED_TIMESTAMP_COLUMN);
 
                 Batch.Builder newBatchBuilder = null;
                 List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
