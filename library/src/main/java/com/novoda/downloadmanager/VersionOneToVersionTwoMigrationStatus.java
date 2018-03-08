@@ -21,12 +21,6 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
     }
 
     @Override
-    public void update(int numberOfMigrationsCompleted, int totalNumberOfMigrations) {
-        this.numberOfMigrationsCompleted = numberOfMigrationsCompleted;
-        this.totalNumberOfMigrations = totalNumberOfMigrations;
-    }
-
-    @Override
     public void migrationComplete() {
         numberOfMigrationsCompleted++;
     }

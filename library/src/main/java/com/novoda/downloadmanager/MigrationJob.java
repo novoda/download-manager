@@ -33,14 +33,14 @@ class MigrationJob implements Runnable {
     }
 
     public void run() {
-        InternalMigrationStatus migrationStatus = new VersionOneToVersionTwoMigrationStatus(
-                jobIdentifier,
-                MigrationStatus.Status.DB_NOT_PRESENT,
-                0,
-                0
-        );
-
         if (!databasePath.exists()) {
+            InternalMigrationStatus migrationStatus = new VersionOneToVersionTwoMigrationStatus(
+                    jobIdentifier,
+                    MigrationStatus.Status.DB_NOT_PRESENT,
+                    0,
+                    0
+            );
+
             onUpdate(migrationStatus);
             return;
         }
@@ -49,25 +49,27 @@ class MigrationJob implements Runnable {
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
 
         FilePersistence filePersistence = FilePersistenceCreator.newInternalFilePersistenceCreator(context).create();
+        String basePath = filePersistence.basePath().path();
         filePersistence.initialiseWith(context);
         PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database);
         MigrationExtractor migrationExtractor = new MigrationExtractor(database, filePersistence);
+        List<Migration> partialMigrations = partialDownloadMigrationExtractor.extractMigrations();
+        List<Migration> completeMigrations = migrationExtractor.extractMigrations();
         DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
         LocalFilesDirectory localFilesDirectory = new AndroidLocalFilesDirectory(context);
         UnlinkedDataRemover unlinkedDataRemover = new UnlinkedDataRemover(downloadsPersistence, localFilesDirectory);
 
+        int totalNumberOfMigrations = partialMigrations.size() + completeMigrations.size();
+        InternalMigrationStatus migrationStatus = new VersionOneToVersionTwoMigrationStatus(
+                jobIdentifier,
+                MigrationStatus.Status.DB_NOT_PRESENT,
+                0,
+                totalNumberOfMigrations
+        );
+
         unlinkedDataRemover.remove();
         migrationStatus.markAsExtracting();
         onUpdate(migrationStatus);
-
-        String basePath = filePersistence.basePath().path();
-
-        List<Migration> partialMigrations = partialDownloadMigrationExtractor.extractMigrations();
-        List<Migration> completeMigrations = migrationExtractor.extractMigrations();
-
-        int numberOfMigrationsCompleted = 0;
-        int totalNumberOfMigrations = partialMigrations.size() + completeMigrations.size();
-        migrationStatus.update(numberOfMigrationsCompleted, totalNumberOfMigrations);
 
         migrationStatus.markAsMigrating();
         onUpdate(migrationStatus);
