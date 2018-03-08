@@ -2,7 +2,9 @@ package com.novoda.downloadmanager;
 
 interface InternalMigrationStatus extends MigrationStatus {
 
-    void update(int currentBatch, int numberOfBatches);
+    void update(int numberOfMigrationsCompleted, int totalNumberOfMigrations);
+
+    void migrationComplete();
 
     void markAsExtracting();
 
@@ -11,5 +13,7 @@ interface InternalMigrationStatus extends MigrationStatus {
     void markAsDeleting();
 
     void markAsComplete();
+
+    VersionOneToVersionTwoMigrationStatus copy();
 
 }

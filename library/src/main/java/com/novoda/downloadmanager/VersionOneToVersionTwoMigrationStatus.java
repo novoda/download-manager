@@ -9,29 +9,26 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
     private Status status;
     private int numberOfMigrationsCompleted;
     private int totalNumberOfMigrations;
-    private int percentageMigrated;
 
     VersionOneToVersionTwoMigrationStatus(String migrationId,
                                           Status status,
                                           int numberOfMigrationsCompleted,
-                                          int totalNumberOfMigrations,
-                                          int percentageMigrated) {
+                                          int totalNumberOfMigrations) {
         this.migrationId = migrationId;
         this.status = status;
         this.numberOfMigrationsCompleted = numberOfMigrationsCompleted;
         this.totalNumberOfMigrations = totalNumberOfMigrations;
-        this.percentageMigrated = percentageMigrated;
     }
 
     @Override
-    public void update(int currentBatch, int numberOfBatches) {
-        this.numberOfMigrationsCompleted = currentBatch;
-        this.totalNumberOfMigrations = numberOfBatches;
-        this.percentageMigrated = getPercentageFrom(currentBatch, numberOfBatches);
+    public void update(int numberOfMigrationsCompleted, int totalNumberOfMigrations) {
+        this.numberOfMigrationsCompleted = numberOfMigrationsCompleted;
+        this.totalNumberOfMigrations = totalNumberOfMigrations;
     }
 
-    private int getPercentageFrom(int numberOfBatches, int totalNumberOfBatches) {
-        return (int) ((((float) numberOfBatches) / ((float) totalNumberOfBatches)) * TOTAL_PERCENTAGE);
+    @Override
+    public void migrationComplete() {
+        numberOfMigrationsCompleted++;
     }
 
     @Override
@@ -71,12 +68,22 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
 
     @Override
     public int percentageMigrated() {
-        return percentageMigrated;
+        return (int) ((((float) numberOfMigrationsCompleted) / ((float) totalNumberOfMigrations)) * TOTAL_PERCENTAGE);
     }
 
     @Override
     public Status status() {
         return status;
+    }
+
+    @Override
+    public VersionOneToVersionTwoMigrationStatus copy() {
+        return new VersionOneToVersionTwoMigrationStatus(
+                migrationId,
+                status,
+                numberOfMigrationsCompleted,
+                totalNumberOfMigrations
+        );
     }
 
     @Override
@@ -96,9 +103,6 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
         if (totalNumberOfMigrations != that.totalNumberOfMigrations) {
             return false;
         }
-        if (percentageMigrated != that.percentageMigrated) {
-            return false;
-        }
         if (migrationId != null ? !migrationId.equals(that.migrationId) : that.migrationId != null) {
             return false;
         }
@@ -111,18 +115,16 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
         result = 31 * result + (status != null ? status.hashCode() : 0);
         result = 31 * result + numberOfMigrationsCompleted;
         result = 31 * result + totalNumberOfMigrations;
-        result = 31 * result + percentageMigrated;
         return result;
     }
 
     @Override
     public String toString() {
-        return "VersionOneToVersionTwoMigrationStatus{" +
-                "migrationId='" + migrationId + '\'' +
-                ", status=" + status +
-                ", numberOfMigrationsCompleted=" + numberOfMigrationsCompleted +
-                ", totalNumberOfMigrations=" + totalNumberOfMigrations +
-                ", percentageMigrated=" + percentageMigrated +
-                '}';
+        return "VersionOneToVersionTwoMigrationStatus{"
+                + "migrationId='" + migrationId + '\''
+                + ", status=" + status
+                + ", numberOfMigrationsCompleted=" + numberOfMigrationsCompleted
+                + ", totalNumberOfMigrations=" + totalNumberOfMigrations
+                + '}';
     }
 }

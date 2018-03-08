@@ -37,7 +37,6 @@ class MigrationJob implements Runnable {
                 jobIdentifier,
                 MigrationStatus.Status.DB_NOT_PRESENT,
                 0,
-                0,
                 0
         );
 
@@ -68,35 +67,22 @@ class MigrationJob implements Runnable {
         List<Migration> partialMigrations = partialDownloadMigrationExtractor.extractMigrations();
         List<Migration> completeMigrations = migrationExtractor.extractMigrations();
 
-        int totalMigrations = partialMigrations.size() + completeMigrations.size();
+        int numberOfMigrationsCompleted = 0;
+        int totalNumberOfMigrations = partialMigrations.size() + completeMigrations.size();
+        migrationStatus.update(numberOfMigrationsCompleted, totalNumberOfMigrations);
 
-        migrationStatus = new VersionOneToVersionTwoMigrationStatus(
-                migrationStatus.migrationId(),
-                migrationStatus.status(),
-                migrationStatus.numberOfMigratedBatches(),
-                totalMigrations,
-                migrationStatus.percentageMigrated()
-        );
-
-        migratePartialDownloads(database, partialMigrations, downloadsPersistence, basePath);
+        migratePartialDownloads(migrationStatus, database, partialMigrations, downloadsPersistence, basePath);
         migrateCompleteDownloads(migrationStatus, database, completeMigrations, downloadsPersistence, basePath);
     }
 
-    private void onUpdate(MigrationStatus migrationStatus) {
-        MigrationStatus clonedMigrationStatus = new VersionOneToVersionTwoMigrationStatus(
-                migrationStatus.migrationId(),
-                migrationStatus.status(),
-                migrationStatus.numberOfMigratedBatches(),
-                migrationStatus.totalNumberOfBatchesToMigrate(),
-                migrationStatus.percentageMigrated()
-        );
-
+    private void onUpdate(InternalMigrationStatus migrationStatus) {
         for (MigrationCallback migrationCallback : migrationCallbacks) {
-            migrationCallback.onUpdate(clonedMigrationStatus);
+            migrationCallback.onUpdate(migrationStatus.copy());
         }
     }
 
-    private void migratePartialDownloads(SqlDatabaseWrapper database,
+    private void migratePartialDownloads(InternalMigrationStatus migrationStatus,
+                                         SqlDatabaseWrapper database,
                                          List<Migration> partialMigrations,
                                          DownloadsPersistence downloadsPersistence,
                                          String basePath) {
@@ -112,6 +98,8 @@ class MigrationJob implements Runnable {
             downloadsPersistence.endTransaction();
             database.setTransactionSuccessful();
             database.endTransaction();
+            migrationStatus.migrationComplete();
+            onUpdate(migrationStatus);
         }
         Log.d(TAG, "partial migrations are all EXTRACTED, time is " + System.nanoTime());
     }
@@ -201,9 +189,6 @@ class MigrationJob implements Runnable {
         Log.d(TAG, "about to migrate the files, time is " + System.nanoTime());
 
         for (int i = 0, size = completeMigrations.size(); i < size; i++) {
-            migrationStatus.update(i, size);
-            onUpdate(migrationStatus);
-
             Migration migration = completeMigrations.get(i);
             downloadsPersistence.startTransaction();
             database.startTransaction();
@@ -215,6 +200,8 @@ class MigrationJob implements Runnable {
             downloadsPersistence.endTransaction();
             database.setTransactionSuccessful();
             database.endTransaction();
+            migrationStatus.migrationComplete();
+            onUpdate(migrationStatus);
         }
 
         Log.d(TAG, "all data migrations are COMMITTED, about to delete the old database, time is " + System.nanoTime());
