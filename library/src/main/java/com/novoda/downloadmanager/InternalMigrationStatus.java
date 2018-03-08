@@ -14,6 +14,6 @@ interface InternalMigrationStatus extends MigrationStatus {
 
     void markAsComplete();
 
-    VersionOneToVersionTwoMigrationStatus copy();
+    InternalMigrationStatus copy();
 
 }

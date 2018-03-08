@@ -77,7 +77,7 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
     }
 
     @Override
-    public VersionOneToVersionTwoMigrationStatus copy() {
+    public InternalMigrationStatus copy() {
         return new VersionOneToVersionTwoMigrationStatus(
                 migrationId,
                 status,
