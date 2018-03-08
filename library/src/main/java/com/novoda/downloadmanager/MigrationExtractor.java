@@ -92,9 +92,11 @@ class MigrationExtractor {
 
     private DownloadBatchId createDownloadBatchIdFrom(String originalFileId, String batchId) {
         if (originalFileId == null || originalFileId.isEmpty()) {
-            return DownloadBatchIdCreator.createFrom(batchId);
+            String hashedString = String.valueOf(batchId.hashCode());
+            return DownloadBatchIdCreator.createFrom(hashedString);
         }
-        return DownloadBatchIdCreator.createFrom(originalFileId);
+        String hashedString = String.valueOf(originalFileId.hashCode());
+        return DownloadBatchIdCreator.createFrom(hashedString);
     }
 
 }
