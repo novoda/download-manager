@@ -7,22 +7,26 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
     private final String migrationId;
 
     private Status status;
-    private int numberOfBatches;
-    private int totalNumberOfBatches;
+    private int numberOfMigrationsCompleted;
+    private int totalNumberOfMigrations;
     private int percentageMigrated;
 
-    VersionOneToVersionTwoMigrationStatus(String migrationId, Status status, int numberOfBatches, int totalNumberOfBatches, int percentageMigrated) {
+    VersionOneToVersionTwoMigrationStatus(String migrationId,
+                                          Status status,
+                                          int numberOfMigrationsCompleted,
+                                          int totalNumberOfMigrations,
+                                          int percentageMigrated) {
         this.migrationId = migrationId;
         this.status = status;
-        this.numberOfBatches = numberOfBatches;
-        this.totalNumberOfBatches = totalNumberOfBatches;
+        this.numberOfMigrationsCompleted = numberOfMigrationsCompleted;
+        this.totalNumberOfMigrations = totalNumberOfMigrations;
         this.percentageMigrated = percentageMigrated;
     }
 
     @Override
     public void update(int currentBatch, int numberOfBatches) {
-        this.numberOfBatches = currentBatch;
-        this.totalNumberOfBatches = numberOfBatches;
+        this.numberOfMigrationsCompleted = currentBatch;
+        this.totalNumberOfMigrations = numberOfBatches;
         this.percentageMigrated = getPercentageFrom(currentBatch, numberOfBatches);
     }
 
@@ -57,12 +61,12 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
 
     @Override
     public int numberOfMigratedBatches() {
-        return numberOfBatches;
+        return numberOfMigrationsCompleted;
     }
 
     @Override
     public int totalNumberOfBatchesToMigrate() {
-        return totalNumberOfBatches;
+        return totalNumberOfMigrations;
     }
 
     @Override
@@ -86,10 +90,10 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
 
         VersionOneToVersionTwoMigrationStatus that = (VersionOneToVersionTwoMigrationStatus) o;
 
-        if (numberOfBatches != that.numberOfBatches) {
+        if (numberOfMigrationsCompleted != that.numberOfMigrationsCompleted) {
             return false;
         }
-        if (totalNumberOfBatches != that.totalNumberOfBatches) {
+        if (totalNumberOfMigrations != that.totalNumberOfMigrations) {
             return false;
         }
         if (percentageMigrated != that.percentageMigrated) {
@@ -105,8 +109,8 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
     public int hashCode() {
         int result = migrationId != null ? migrationId.hashCode() : 0;
         result = 31 * result + (status != null ? status.hashCode() : 0);
-        result = 31 * result + numberOfBatches;
-        result = 31 * result + totalNumberOfBatches;
+        result = 31 * result + numberOfMigrationsCompleted;
+        result = 31 * result + totalNumberOfMigrations;
         result = 31 * result + percentageMigrated;
         return result;
     }
@@ -116,8 +120,8 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
         return "VersionOneToVersionTwoMigrationStatus{" +
                 "migrationId='" + migrationId + '\'' +
                 ", status=" + status +
-                ", numberOfBatches=" + numberOfBatches +
-                ", totalNumberOfBatches=" + totalNumberOfBatches +
+                ", numberOfMigrationsCompleted=" + numberOfMigrationsCompleted +
+                ", totalNumberOfMigrations=" + totalNumberOfMigrations +
                 ", percentageMigrated=" + percentageMigrated +
                 '}';
     }
