@@ -12,8 +12,6 @@ import static com.novoda.downloadmanager.DownloadBatchStatus.Status;
 
 class MigrationJob implements Runnable {
 
-    private static final String TAG = "V1 to V2 migrator";
-
     private static final String TABLE_BATCHES = "batches";
     private static final String WHERE_CLAUSE_ID = "_id = ?";
     private static final int NO_COMPLETED_MIGRATIONS = 0;
@@ -95,7 +93,6 @@ class MigrationJob implements Runnable {
                                          List<Migration> partialMigrations,
                                          DownloadsPersistence downloadsPersistence,
                                          String basePath) {
-        Log.d(TAG, "Partial migrations starting " + System.nanoTime());
         for (Migration partialMigration : partialMigrations) {
             downloadsPersistence.startTransaction();
             database.startTransaction();
@@ -111,7 +108,6 @@ class MigrationJob implements Runnable {
             migrationStatus.onSingleBatchMigrated();
             onUpdate(migrationStatus);
         }
-        Log.d(TAG, "Partial migrations complete " + System.nanoTime());
     }
 
     private void migrateV1DataToV2Database(DownloadsPersistence downloadsPersistence,
@@ -177,8 +173,10 @@ class MigrationJob implements Runnable {
             if (hasValidFileLocation(metadata)) {
                 File file = new File(metadata.originalFileLocation());
                 boolean deleted = file.delete();
-                String message = String.format("File or Directory: %s deleted: %s", file.getPath(), deleted);
-                Log.d(getClass().getSimpleName(), message);
+                if (!deleted) {
+                    String message = String.format("Could not delete File or Directory: %s", file.getPath());
+                    Log.e(getClass().getSimpleName(), message);
+                }
             }
         }
     }
@@ -192,7 +190,6 @@ class MigrationJob implements Runnable {
                                           List<Migration> completeMigrations,
                                           DownloadsPersistence downloadsPersistence,
                                           String basePath) {
-        Log.d(TAG, "Complete migrations starting " + System.nanoTime());
         for (Migration completeMigration : completeMigrations) {
             downloadsPersistence.startTransaction();
             database.startTransaction();
@@ -207,23 +204,19 @@ class MigrationJob implements Runnable {
             migrationStatus.onSingleBatchMigrated();
             onUpdate(migrationStatus);
         }
-        Log.d(TAG, "Complete migrations complete " + System.nanoTime());
     }
 
     private void deleteFrom(SqlDatabaseWrapper database, Migration migration) {
         Batch batch = migration.batch();
-        Log.d(TAG, "about to delete the batch: " + batch.downloadBatchId().rawId() + ", time is " + System.nanoTime());
         database.delete(TABLE_BATCHES, WHERE_CLAUSE_ID, batch.downloadBatchId().rawId());
     }
 
     private void deleteVersionOneDatabase(InternalMigrationStatus migrationStatus, SqlDatabaseWrapper database) {
-        Log.d(TAG, "Delete v1 database starting " + System.nanoTime());
         migrationStatus.markAsDeleting();
         onUpdate(migrationStatus);
 
         database.close();
         database.deleteDatabase();
-        Log.d(TAG, "Delete v1 database complete " + System.nanoTime());
     }
 
 }
