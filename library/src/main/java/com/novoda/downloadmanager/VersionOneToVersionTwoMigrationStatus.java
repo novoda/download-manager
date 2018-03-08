@@ -5,10 +5,10 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
     private static final int TOTAL_PERCENTAGE = 100;
 
     private final String migrationId;
+    private final int totalNumberOfMigrations;
 
     private Status status;
     private int numberOfMigrationsCompleted;
-    private int totalNumberOfMigrations;
 
     VersionOneToVersionTwoMigrationStatus(String migrationId,
                                           Status status,
