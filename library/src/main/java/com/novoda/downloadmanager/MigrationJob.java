@@ -60,8 +60,6 @@ class MigrationJob implements Runnable {
         migrationStatus.markAsExtracting();
         onUpdate(migrationStatus);
 
-        Log.d(TAG, "about to extract migrations, time is " + System.nanoTime());
-
         String basePath = filePersistence.basePath().path();
 
         List<Migration> partialMigrations = partialDownloadMigrationExtractor.extractMigrations();
@@ -70,6 +68,9 @@ class MigrationJob implements Runnable {
         int numberOfMigrationsCompleted = 0;
         int totalNumberOfMigrations = partialMigrations.size() + completeMigrations.size();
         migrationStatus.update(numberOfMigrationsCompleted, totalNumberOfMigrations);
+
+        migrationStatus.markAsMigrating();
+        onUpdate(migrationStatus);
 
         migratePartialDownloads(migrationStatus, database, partialMigrations, downloadsPersistence, basePath);
         migrateCompleteDownloads(migrationStatus, database, completeMigrations, downloadsPersistence, basePath);
@@ -90,6 +91,7 @@ class MigrationJob implements Runnable {
                                          List<Migration> partialMigrations,
                                          DownloadsPersistence downloadsPersistence,
                                          String basePath) {
+        Log.d(TAG, "Partial migrations starting " + System.nanoTime());
         for (Migration partialMigration : partialMigrations) {
             downloadsPersistence.startTransaction();
             database.startTransaction();
@@ -105,7 +107,7 @@ class MigrationJob implements Runnable {
             migrationStatus.migrationComplete();
             onUpdate(migrationStatus);
         }
-        Log.d(TAG, "partial migrations are all EXTRACTED, time is " + System.nanoTime());
+        Log.d(TAG, "Partial migrations complete " + System.nanoTime());
     }
 
     private void migrateV1DataToV2Database(DownloadsPersistence downloadsPersistence,
@@ -186,12 +188,7 @@ class MigrationJob implements Runnable {
                                           List<Migration> completeMigrations,
                                           DownloadsPersistence downloadsPersistence,
                                           String basePath) {
-        Log.d(TAG, "migrations are all EXTRACTED, time is " + System.nanoTime());
-
-        migrationStatus.markAsMigrating();
-        onUpdate(migrationStatus);
-        Log.d(TAG, "about to migrate the files, time is " + System.nanoTime());
-
+        Log.d(TAG, "Complete migrations starting " + System.nanoTime());
         for (Migration completeMigration : completeMigrations) {
             downloadsPersistence.startTransaction();
             database.startTransaction();
@@ -206,8 +203,7 @@ class MigrationJob implements Runnable {
             migrationStatus.migrationComplete();
             onUpdate(migrationStatus);
         }
-
-        Log.d(TAG, "all data migrations are COMMITTED, about to delete the old database, time is " + System.nanoTime());
+        Log.d(TAG, "Complete migrations complete " + System.nanoTime());
     }
 
     private void deleteFrom(SqlDatabaseWrapper database, Migration migration) {
@@ -217,12 +213,13 @@ class MigrationJob implements Runnable {
     }
 
     private void deleteVersionOneDatabase(InternalMigrationStatus migrationStatus, SqlDatabaseWrapper database) {
+        Log.d(TAG, "Delete v1 database starting " + System.nanoTime());
         migrationStatus.markAsDeleting();
         onUpdate(migrationStatus);
-        Log.d(TAG, "all traces of v1 are ERASED, time is " + System.nanoTime());
-        database.close();
 
+        database.close();
         database.deleteDatabase();
+        Log.d(TAG, "Delete v1 database complete " + System.nanoTime());
     }
 
 }
