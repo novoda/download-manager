@@ -108,7 +108,7 @@ class MigrationJob implements Runnable {
             downloadsPersistence.endTransaction();
             database.setTransactionSuccessful();
             database.endTransaction();
-            migrationStatus.migrationComplete();
+            migrationStatus.onSingleBatchMigrated();
             onUpdate(migrationStatus);
         }
         Log.d(TAG, "Partial migrations complete " + System.nanoTime());
@@ -204,7 +204,7 @@ class MigrationJob implements Runnable {
             downloadsPersistence.endTransaction();
             database.setTransactionSuccessful();
             database.endTransaction();
-            migrationStatus.migrationComplete();
+            migrationStatus.onSingleBatchMigrated();
             onUpdate(migrationStatus);
         }
         Log.d(TAG, "Complete migrations complete " + System.nanoTime());

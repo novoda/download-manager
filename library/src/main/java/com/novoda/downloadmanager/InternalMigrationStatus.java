@@ -2,7 +2,7 @@ package com.novoda.downloadmanager;
 
 interface InternalMigrationStatus extends MigrationStatus {
 
-    void migrationComplete();
+    void onSingleBatchMigrated();
 
     void markAsExtracting();
 

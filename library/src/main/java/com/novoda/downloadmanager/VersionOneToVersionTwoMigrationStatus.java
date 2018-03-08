@@ -21,7 +21,7 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
     }
 
     @Override
-    public void migrationComplete() {
+    public void onSingleBatchMigrated() {
         numberOfMigrationsCompleted++;
     }
 
