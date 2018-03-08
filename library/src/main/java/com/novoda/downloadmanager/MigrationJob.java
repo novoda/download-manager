@@ -188,13 +188,12 @@ class MigrationJob implements Runnable {
         onUpdate(migrationStatus);
         Log.d(TAG, "about to migrate the files, time is " + System.nanoTime());
 
-        for (int i = 0, size = completeMigrations.size(); i < size; i++) {
-            Migration migration = completeMigrations.get(i);
+        for (Migration completeMigration : completeMigrations) {
             downloadsPersistence.startTransaction();
             database.startTransaction();
 
-            migrateV1DataToV2Database(downloadsPersistence, migration, basePath, true);
-            deleteFrom(database, migration);
+            migrateV1DataToV2Database(downloadsPersistence, completeMigration, basePath, true);
+            deleteFrom(database, completeMigration);
 
             downloadsPersistence.transactionSuccess();
             downloadsPersistence.endTransaction();
