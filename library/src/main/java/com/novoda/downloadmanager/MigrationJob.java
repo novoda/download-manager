@@ -64,8 +64,22 @@ class MigrationJob implements Runnable {
         Log.d(TAG, "about to extract migrations, time is " + System.nanoTime());
 
         String basePath = filePersistence.basePath().path();
-        migratePartialDownloads(database, partialDownloadMigrationExtractor, downloadsPersistence, basePath);
-        migrateCompleteDownloads(migrationStatus, database, migrationExtractor, downloadsPersistence, basePath);
+
+        List<Migration> partialMigrations = partialDownloadMigrationExtractor.extractMigrations();
+        List<Migration> completeMigrations = migrationExtractor.extractMigrations();
+
+        int totalMigrations = partialMigrations.size() + completeMigrations.size();
+
+        migrationStatus = new VersionOneToVersionTwoMigrationStatus(
+                migrationStatus.migrationId(),
+                migrationStatus.status(),
+                migrationStatus.numberOfMigratedBatches(),
+                totalMigrations,
+                migrationStatus.percentageMigrated()
+        );
+
+        migratePartialDownloads(database, partialMigrations, downloadsPersistence, basePath);
+        migrateCompleteDownloads(migrationStatus, database, completeMigrations, downloadsPersistence, basePath);
     }
 
     private void onUpdate(MigrationStatus migrationStatus) {
@@ -83,10 +97,9 @@ class MigrationJob implements Runnable {
     }
 
     private void migratePartialDownloads(SqlDatabaseWrapper database,
-                                         PartialDownloadMigrationExtractor partialDownloadMigrationExtractor,
+                                         List<Migration> partialMigrations,
                                          DownloadsPersistence downloadsPersistence,
                                          String basePath) {
-        List<Migration> partialMigrations = partialDownloadMigrationExtractor.extractMigrations();
         for (Migration partialMigration : partialMigrations) {
             downloadsPersistence.startTransaction();
             database.startTransaction();
@@ -178,21 +191,20 @@ class MigrationJob implements Runnable {
 
     private void migrateCompleteDownloads(InternalMigrationStatus migrationStatus,
                                           SqlDatabaseWrapper database,
-                                          MigrationExtractor migrationExtractor,
+                                          List<Migration> completeMigrations,
                                           DownloadsPersistence downloadsPersistence,
                                           String basePath) {
-        List<Migration> migrations = migrationExtractor.extractMigrations();
         Log.d(TAG, "migrations are all EXTRACTED, time is " + System.nanoTime());
 
         migrationStatus.markAsMigrating();
         onUpdate(migrationStatus);
         Log.d(TAG, "about to migrate the files, time is " + System.nanoTime());
 
-        for (int i = 0, size = migrations.size(); i < size; i++) {
+        for (int i = 0, size = completeMigrations.size(); i < size; i++) {
             migrationStatus.update(i, size);
             onUpdate(migrationStatus);
 
-            Migration migration = migrations.get(i);
+            Migration migration = completeMigrations.get(i);
             downloadsPersistence.startTransaction();
             database.startTransaction();
 
