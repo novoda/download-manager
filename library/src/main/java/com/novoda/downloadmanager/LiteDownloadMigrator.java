@@ -42,14 +42,14 @@ class LiteDownloadMigrator implements DownloadMigrator {
     }
 
     @Override
-    public void startMigration(File databaseFile) {
+    public void startMigration(String jobIdentifier, File databaseFile) {
         executor.submit(() -> Wait.<Void>waitFor(migrationService, waitForMigrationService)
-                .thenPerform(executeMigrationFor(databaseFile)));
+                .thenPerform(executeMigrationFor(jobIdentifier, databaseFile)));
     }
 
-    private Wait.ThenPerform.Action<Void> executeMigrationFor(File databaseFile) {
+    private Wait.ThenPerform.Action<Void> executeMigrationFor(String jobIdentifier, File databaseFile) {
         return () -> {
-            migrationService.startMigration(new MigrationJob(applicationContext, databaseFile), migrationCallback());
+            migrationService.startMigration(new MigrationJob(applicationContext, jobIdentifier, databaseFile), migrationCallback());
             return null;
         };
     }

@@ -4,6 +4,6 @@ import java.io.File;
 
 public interface DownloadMigrator {
 
-    void startMigration(File databaseFile);
+    void startMigration(String jobIdentifier, File databaseFile);
 
 }

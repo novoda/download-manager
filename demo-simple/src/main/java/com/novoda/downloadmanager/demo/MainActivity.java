@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());
     };
 
-    private final View.OnClickListener startMigrationOnClick = v -> downloadMigrator.startMigration(getDatabasePath("downloads.db"));
+    private final View.OnClickListener startMigrationOnClick = v -> downloadMigrator.startMigration("migrationJob", getDatabasePath("downloads.db"));
 
     private final CompoundButton.OnCheckedChangeListener wifiOnlyOnCheckedChange = (buttonView, isChecked) -> {
         LiteDownloadManagerCommands downloadManagerCommands = ((DemoApplication) getApplication()).getLiteDownloadManagerCommands();
