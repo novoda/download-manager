@@ -13,6 +13,7 @@ import static com.novoda.downloadmanager.DownloadBatchStatus.Status;
 class MigrationJob implements Runnable {
 
     private static final String TAG = "V1 to V2 migrator";
+    private static final String MIGRATION_ID = "migration" + System.nanoTime();
 
     private static final String TABLE_BATCHES = "batches";
     private static final String WHERE_CLAUSE_ID = "_id = ?";
@@ -31,7 +32,7 @@ class MigrationJob implements Runnable {
     }
 
     public void run() {
-        InternalMigrationStatus migrationStatus = new VersionOneToVersionTwoMigrationStatus(MigrationStatus.Status.DB_NOT_PRESENT, 0, 0, 0);
+        InternalMigrationStatus migrationStatus = new VersionOneToVersionTwoMigrationStatus(MIGRATION_ID, MigrationStatus.Status.DB_NOT_PRESENT, 0, 0, 0);
         if (!databasePath.exists()) {
             onUpdate(migrationStatus);
             return;
@@ -61,6 +62,7 @@ class MigrationJob implements Runnable {
 
     private void onUpdate(MigrationStatus migrationStatus) {
         MigrationStatus clonedMigrationStatus = new VersionOneToVersionTwoMigrationStatus(
+                migrationStatus.migrationId(),
                 migrationStatus.status(),
                 migrationStatus.numberOfMigratedBatches(),
                 migrationStatus.totalNumberOfBatchesToMigrate(),

@@ -4,12 +4,15 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
 
     private static final int TOTAL_PERCENTAGE = 100;
 
+    private final String migrationId;
+
     private Status status;
     private int numberOfBatches;
     private int totalNumberOfBatches;
     private int percentageMigrated;
 
-    VersionOneToVersionTwoMigrationStatus(Status status, int numberOfBatches, int totalNumberOfBatches, int percentageMigrated) {
+    VersionOneToVersionTwoMigrationStatus(String migrationId, Status status, int numberOfBatches, int totalNumberOfBatches, int percentageMigrated) {
+        this.migrationId = migrationId;
         this.status = status;
         this.numberOfBatches = numberOfBatches;
         this.totalNumberOfBatches = totalNumberOfBatches;
@@ -45,6 +48,11 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
     @Override
     public void markAsComplete() {
         status = Status.COMPLETE;
+    }
+
+    @Override
+    public String migrationId() {
+        return migrationId;
     }
 
     @Override
@@ -87,12 +95,16 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
         if (percentageMigrated != that.percentageMigrated) {
             return false;
         }
+        if (migrationId != null ? !migrationId.equals(that.migrationId) : that.migrationId != null) {
+            return false;
+        }
         return status == that.status;
     }
 
     @Override
     public int hashCode() {
-        int result = status != null ? status.hashCode() : 0;
+        int result = migrationId != null ? migrationId.hashCode() : 0;
+        result = 31 * result + (status != null ? status.hashCode() : 0);
         result = 31 * result + numberOfBatches;
         result = 31 * result + totalNumberOfBatches;
         result = 31 * result + percentageMigrated;
@@ -101,11 +113,12 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
 
     @Override
     public String toString() {
-        return "VersionOneToVersionTwoMigrationStatus{"
-                + "status=" + status
-                + ", numberOfBatches=" + numberOfBatches
-                + ", totalNumberOfBatches=" + totalNumberOfBatches
-                + ", percentageMigrated=" + percentageMigrated
-                + '}';
+        return "VersionOneToVersionTwoMigrationStatus{" +
+                "migrationId='" + migrationId + '\'' +
+                ", status=" + status +
+                ", numberOfBatches=" + numberOfBatches +
+                ", totalNumberOfBatches=" + totalNumberOfBatches +
+                ", percentageMigrated=" + percentageMigrated +
+                '}';
     }
 }
