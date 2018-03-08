@@ -31,7 +31,7 @@ class MigrationJob implements Runnable {
     }
 
     public void run() {
-        InternalMigrationStatus migrationStatus = new VersionOneToVersionTwoMigrationStatus(MigrationStatus.Status.DB_NOT_PRESENT);
+        InternalMigrationStatus migrationStatus = new VersionOneToVersionTwoMigrationStatus(MigrationStatus.Status.DB_NOT_PRESENT, 0, 0, 0);
         if (!databasePath.exists()) {
             onUpdate(migrationStatus);
             return;
@@ -60,8 +60,15 @@ class MigrationJob implements Runnable {
     }
 
     private void onUpdate(MigrationStatus migrationStatus) {
+        MigrationStatus clonedMigrationStatus = new VersionOneToVersionTwoMigrationStatus(
+                migrationStatus.status(),
+                migrationStatus.numberOfMigratedBatches(),
+                migrationStatus.totalNumberOfBatchesToMigrate(),
+                migrationStatus.percentageMigrated()
+        );
+
         for (MigrationCallback migrationCallback : migrationCallbacks) {
-            migrationCallback.onUpdate(migrationStatus);
+            migrationCallback.onUpdate(clonedMigrationStatus);
         }
     }
 

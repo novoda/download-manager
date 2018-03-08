@@ -9,8 +9,11 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
     private int totalNumberOfBatches;
     private int percentageMigrated;
 
-    VersionOneToVersionTwoMigrationStatus(Status status) {
+    VersionOneToVersionTwoMigrationStatus(Status status, int numberOfBatches, int totalNumberOfBatches, int percentageMigrated) {
         this.status = status;
+        this.numberOfBatches = numberOfBatches;
+        this.totalNumberOfBatches = totalNumberOfBatches;
+        this.percentageMigrated = percentageMigrated;
     }
 
     @Override
@@ -62,5 +65,47 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
     @Override
     public Status status() {
         return status;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        VersionOneToVersionTwoMigrationStatus that = (VersionOneToVersionTwoMigrationStatus) o;
+
+        if (numberOfBatches != that.numberOfBatches) {
+            return false;
+        }
+        if (totalNumberOfBatches != that.totalNumberOfBatches) {
+            return false;
+        }
+        if (percentageMigrated != that.percentageMigrated) {
+            return false;
+        }
+        return status == that.status;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = status != null ? status.hashCode() : 0;
+        result = 31 * result + numberOfBatches;
+        result = 31 * result + totalNumberOfBatches;
+        result = 31 * result + percentageMigrated;
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "VersionOneToVersionTwoMigrationStatus{"
+                + "status=" + status
+                + ", numberOfBatches=" + numberOfBatches
+                + ", totalNumberOfBatches=" + totalNumberOfBatches
+                + ", percentageMigrated=" + percentageMigrated
+                + '}';
     }
 }
