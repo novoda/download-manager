@@ -14,12 +14,10 @@ class PartialDownloadMigrationExtractor {
     private static final int TITLE_COLUMN = 1;
     private static final int MODIFIED_TIMESTAMP_COLUMN = 2;
 
-    private static final String DOWNLOADS_QUERY = "SELECT uri, _data, current_bytes, total_bytes, notificationextras FROM Downloads WHERE batch_id = ?";
+    private static final String DOWNLOADS_QUERY = "SELECT uri, _data, notificationextras FROM Downloads WHERE batch_id = ?";
     private static final int URI_COLUMN = 0;
     private static final int FILE_NAME_COLUMN = 1;
-    private static final int CURRENT_FILE_SIZE_COLUMN = 2;
-    private static final int TOTAL_FILE_SIZE_COLUMN = 3;
-    private static final int FILE_ID_COLUMN = 4;
+    private static final int FILE_ID_COLUMN = 2;
 
     private final SqlDatabaseWrapper database;
 
@@ -38,7 +36,7 @@ class PartialDownloadMigrationExtractor {
             long downloadedDateTimeInMillis = batchesCursor.getLong(MODIFIED_TIMESTAMP_COLUMN);
 
             Cursor downloadsCursor = database.rawQuery(DOWNLOADS_QUERY, batchId);
-            Batch.Builder newBatchBuilder = Batch.with(DownloadBatchIdCreator.createFrom(batchId), batchTitle);
+            Batch.Builder newBatchBuilder = null;
             List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
 
             while (downloadsCursor.moveToNext()) {
@@ -46,24 +44,32 @@ class PartialDownloadMigrationExtractor {
                 String uri = downloadsCursor.getString(URI_COLUMN);
                 String originalFileName = downloadsCursor.getString(FILE_NAME_COLUMN);
 
-                long currentRawFileSize = downloadsCursor.getLong(CURRENT_FILE_SIZE_COLUMN);
-                if (originalFileName == null || originalFileName.isEmpty()) {
-                    currentRawFileSize = 0;
+                if (downloadsCursor.isFirst()) {
+                    DownloadBatchId downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
+                    newBatchBuilder = Batch.with(downloadBatchId, batchTitle);
                 }
 
                 newBatchBuilder.addFile(uri);
 
-                long totalRawFileSize = downloadsCursor.getLong(TOTAL_FILE_SIZE_COLUMN);
-                FileSize fileSize = new LiteFileSize(currentRawFileSize, totalRawFileSize);
+                FileSize fileSize = FileSizeCreator.unknownFileSize();
                 Migration.FileMetadata fileMetadata = new Migration.FileMetadata(originalFileId, originalFileName, fileSize, uri);
                 fileMetadataList.add(fileMetadata);
             }
             downloadsCursor.close();
 
             Batch batch = newBatchBuilder.build();
-            migrations.add(new Migration(batch, fileMetadataList, downloadedDateTimeInMillis));
+            migrations.add(new Migration(batch, fileMetadataList, downloadedDateTimeInMillis, Migration.Type.PARTIAL));
         }
         batchesCursor.close();
         return migrations;
+    }
+
+    private DownloadBatchId createDownloadBatchIdFrom(String originalFileId, String batchId) {
+        if (originalFileId == null || originalFileId.isEmpty()) {
+            String hashedString = String.valueOf(batchId.hashCode());
+            return DownloadBatchIdCreator.createFrom(hashedString);
+        }
+        String hashedString = String.valueOf(originalFileId.hashCode());
+        return DownloadBatchIdCreator.createFrom(hashedString);
     }
 }

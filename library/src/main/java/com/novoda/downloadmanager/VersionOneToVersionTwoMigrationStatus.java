@@ -4,24 +4,25 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
 
     private static final int TOTAL_PERCENTAGE = 100;
 
-    private Status status;
-    private int numberOfBatches;
-    private int totalNumberOfBatches;
-    private int percentageMigrated;
+    private final String migrationId;
+    private final int totalNumberOfMigrations;
 
-    VersionOneToVersionTwoMigrationStatus(Status status) {
+    private Status status;
+    private int numberOfMigrationsCompleted;
+
+    VersionOneToVersionTwoMigrationStatus(String migrationId,
+                                          Status status,
+                                          int numberOfMigrationsCompleted,
+                                          int totalNumberOfMigrations) {
+        this.migrationId = migrationId;
         this.status = status;
+        this.numberOfMigrationsCompleted = numberOfMigrationsCompleted;
+        this.totalNumberOfMigrations = totalNumberOfMigrations;
     }
 
     @Override
-    public void update(int currentBatch, int numberOfBatches) {
-        this.numberOfBatches = currentBatch;
-        this.totalNumberOfBatches = numberOfBatches;
-        this.percentageMigrated = getPercentageFrom(currentBatch, numberOfBatches);
-    }
-
-    private int getPercentageFrom(int numberOfBatches, int totalNumberOfBatches) {
-        return (int) ((((float) numberOfBatches) / ((float) totalNumberOfBatches)) * TOTAL_PERCENTAGE);
+    public void onSingleBatchMigrated() {
+        numberOfMigrationsCompleted++;
     }
 
     @Override
@@ -45,22 +46,79 @@ class VersionOneToVersionTwoMigrationStatus implements InternalMigrationStatus {
     }
 
     @Override
+    public String migrationId() {
+        return migrationId;
+    }
+
+    @Override
     public int numberOfMigratedBatches() {
-        return numberOfBatches;
+        return numberOfMigrationsCompleted;
     }
 
     @Override
     public int totalNumberOfBatchesToMigrate() {
-        return totalNumberOfBatches;
+        return totalNumberOfMigrations;
     }
 
     @Override
     public int percentageMigrated() {
-        return percentageMigrated;
+        return (int) ((((float) numberOfMigrationsCompleted) / ((float) totalNumberOfMigrations)) * TOTAL_PERCENTAGE);
     }
 
     @Override
     public Status status() {
         return status;
+    }
+
+    @Override
+    public InternalMigrationStatus copy() {
+        return new VersionOneToVersionTwoMigrationStatus(
+                migrationId,
+                status,
+                numberOfMigrationsCompleted,
+                totalNumberOfMigrations
+        );
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        VersionOneToVersionTwoMigrationStatus that = (VersionOneToVersionTwoMigrationStatus) o;
+
+        if (numberOfMigrationsCompleted != that.numberOfMigrationsCompleted) {
+            return false;
+        }
+        if (totalNumberOfMigrations != that.totalNumberOfMigrations) {
+            return false;
+        }
+        if (migrationId != null ? !migrationId.equals(that.migrationId) : that.migrationId != null) {
+            return false;
+        }
+        return status == that.status;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = migrationId != null ? migrationId.hashCode() : 0;
+        result = 31 * result + (status != null ? status.hashCode() : 0);
+        result = 31 * result + numberOfMigrationsCompleted;
+        result = 31 * result + totalNumberOfMigrations;
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "VersionOneToVersionTwoMigrationStatus{"
+                + "migrationId='" + migrationId + '\''
+                + ", status=" + status
+                + ", numberOfMigrationsCompleted=" + numberOfMigrationsCompleted
+                + ", totalNumberOfMigrations=" + totalNumberOfMigrations
+                + '}';
     }
 }

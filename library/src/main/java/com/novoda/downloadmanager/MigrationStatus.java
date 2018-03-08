@@ -16,6 +16,8 @@ public interface MigrationStatus {
 
     }
 
+    String migrationId();
+
     int numberOfMigratedBatches();
 
     int totalNumberOfBatchesToMigrate();

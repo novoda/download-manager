@@ -5,14 +5,21 @@ import java.util.List;
 
 class Migration {
 
+    enum Type {
+        COMPLETE,
+        PARTIAL
+    }
+
     private final Batch batch;
     private final List<FileMetadata> fileMetadata;
     private final long downloadedDateTimeInMillis;
+    private final Type type;
 
-    Migration(Batch batch, List<FileMetadata> fileMetadata, long downloadedDateTimeInMillis) {
+    Migration(Batch batch, List<FileMetadata> fileMetadata, long downloadedDateTimeInMillis, Type type) {
         this.batch = batch;
         this.fileMetadata = Collections.unmodifiableList(fileMetadata);
         this.downloadedDateTimeInMillis = downloadedDateTimeInMillis;
+        this.type = type;
     }
 
     Batch batch() {
@@ -27,13 +34,8 @@ class Migration {
         return downloadedDateTimeInMillis;
     }
 
-    boolean hasDownloadedBatch() {
-        for (FileMetadata fileMetadatum : fileMetadata) {
-            if (fileMetadatum.fileSize().currentSize() != fileMetadatum.fileSize().totalSize()) {
-                return false;
-            }
-        }
-        return true;
+    Type type() {
+        return type;
     }
 
     @Override
@@ -50,17 +52,21 @@ class Migration {
         if (downloadedDateTimeInMillis != migration.downloadedDateTimeInMillis) {
             return false;
         }
-        if (!batch.equals(migration.batch)) {
+        if (batch != null ? !batch.equals(migration.batch) : migration.batch != null) {
             return false;
         }
-        return fileMetadata.equals(migration.fileMetadata);
+        if (fileMetadata != null ? !fileMetadata.equals(migration.fileMetadata) : migration.fileMetadata != null) {
+            return false;
+        }
+        return type == migration.type;
     }
 
     @Override
     public int hashCode() {
-        int result = batch.hashCode();
-        result = 31 * result + fileMetadata.hashCode();
+        int result = batch != null ? batch.hashCode() : 0;
+        result = 31 * result + (fileMetadata != null ? fileMetadata.hashCode() : 0);
         result = 31 * result + (int) (downloadedDateTimeInMillis ^ (downloadedDateTimeInMillis >>> 32));
+        result = 31 * result + (type != null ? type.hashCode() : 0);
         return result;
     }
 
@@ -70,6 +76,7 @@ class Migration {
                 + "batch=" + batch
                 + ", fileMetadata=" + fileMetadata
                 + ", downloadedDateTimeInMillis=" + downloadedDateTimeInMillis
+                + ", type=" + type
                 + '}';
     }
 

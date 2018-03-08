@@ -40,14 +40,48 @@ class MigrationExtractor {
 
             while (batchesCursor.moveToNext()) {
                 String batchId = batchesCursor.getString(BATCH_ID_COLUMN);
+                Cursor downloadsCursor = database.rawQuery(DOWNLOADS_QUERY, batchId);
+
+                if (downloadsCursor == null) {
+                    return Collections.emptyList();
+                }
+
                 String batchTitle = batchesCursor.getString(TITLE_COLUMN);
                 long downloadedDateTimeInMillis = batchesCursor.getLong(MODIFIED_TIMESTAMP_COLUMN);
 
-                Batch.Builder newBatchBuilder = Batch.with(DownloadBatchIdCreator.createFrom(batchId), batchTitle);
-                List<Migration.FileMetadata> fileMetadataList = extractFileMetadataFrom(batchId, newBatchBuilder);
+                Batch.Builder newBatchBuilder = null;
+                List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
+
+                try {
+                    while (downloadsCursor.moveToNext()) {
+                        String originalFileId = downloadsCursor.getString(FILE_ID_COLUMN);
+                        String originalNetworkAddress = downloadsCursor.getString(NETWORK_ADDRESS_COLUMN);
+                        String originalFileLocation = downloadsCursor.getString(FILE_LOCATION_COLUMN);
+
+                        if (downloadsCursor.isFirst()) {
+                            DownloadBatchId downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
+                            newBatchBuilder = Batch.with(downloadBatchId, batchTitle);
+                        }
+
+                        newBatchBuilder.addFile(originalNetworkAddress).apply();
+
+                        FilePath filePath = new LiteFilePath(originalFileLocation);
+                        long rawFileSize = filePersistence.getCurrentSize(filePath);
+                        FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
+                        Migration.FileMetadata fileMetadata = new Migration.FileMetadata(
+                                originalFileId,
+                                originalFileLocation,
+                                fileSize,
+                                originalNetworkAddress
+                        );
+                        fileMetadataList.add(fileMetadata);
+                    }
+                } finally {
+                    downloadsCursor.close();
+                }
 
                 Batch batch = newBatchBuilder.build();
-                migrations.add(new Migration(batch, fileMetadataList, downloadedDateTimeInMillis));
+                migrations.add(new Migration(batch, fileMetadataList, downloadedDateTimeInMillis, Migration.Type.COMPLETE));
             }
 
             return migrations;
@@ -56,36 +90,13 @@ class MigrationExtractor {
         }
     }
 
-    private List<Migration.FileMetadata> extractFileMetadataFrom(String batchId, Batch.Builder newBatchBuilder) {
-        Cursor downloadsCursor = database.rawQuery(DOWNLOADS_QUERY, batchId);
-
-        if (downloadsCursor == null) {
-            return Collections.emptyList();
+    private DownloadBatchId createDownloadBatchIdFrom(String originalFileId, String batchId) {
+        if (originalFileId == null || originalFileId.isEmpty()) {
+            String hashedString = String.valueOf(batchId.hashCode());
+            return DownloadBatchIdCreator.createFrom(hashedString);
         }
-
-        try {
-            List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
-
-            while (downloadsCursor.moveToNext()) {
-                String originalFileId = downloadsCursor.getString(FILE_ID_COLUMN);
-                String originalNetworkAddress = downloadsCursor.getString(NETWORK_ADDRESS_COLUMN);
-                String originalFileLocation = downloadsCursor.getString(FILE_LOCATION_COLUMN);
-                newBatchBuilder.addFile(originalNetworkAddress).apply();
-
-                FilePath filePath = new LiteFilePath(originalFileLocation);
-                long rawFileSize = filePersistence.getCurrentSize(filePath);
-                FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
-                Migration.FileMetadata fileMetadata = new Migration.FileMetadata(
-                        originalFileId,
-                        originalFileLocation,
-                        fileSize,
-                        originalNetworkAddress
-                );
-                fileMetadataList.add(fileMetadata);
-            }
-            return fileMetadataList;
-        } finally {
-            downloadsCursor.close();
-        }
+        String hashedString = String.valueOf(originalFileId.hashCode());
+        return DownloadBatchIdCreator.createFrom(hashedString);
     }
+
 }

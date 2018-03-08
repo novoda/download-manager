@@ -73,7 +73,7 @@ public class MigrationExtractorTest {
     private List<Migration> expectedMigrations() {
         String firstUri = "uri_1";
         String secondUri = "uri_2";
-        Batch firstBatch = Batch.with(DownloadBatchIdCreator.createFrom("1"), "title_1")
+        Batch firstBatch = Batch.with(DownloadBatchIdCreator.createFrom(String.valueOf("file_1".hashCode())), "title_1")
                 .addFile(firstUri).apply()
                 .addFile(secondUri).apply()
                 .build();
@@ -84,7 +84,7 @@ public class MigrationExtractorTest {
 
         String thirdUri = "uri_3";
         String fourthUri = "uri_4";
-        Batch secondBatch = Batch.with(DownloadBatchIdCreator.createFrom("2"), "title_2")
+        Batch secondBatch = Batch.with(DownloadBatchIdCreator.createFrom(String.valueOf("file_3".hashCode())), "title_2")
                 .addFile(thirdUri).apply()
                 .addFile(fourthUri).apply()
                 .build();
@@ -94,8 +94,8 @@ public class MigrationExtractorTest {
         secondFileMetadata.add(new Migration.FileMetadata("file_4", "data_4", new LiteFileSize(750, 750), fourthUri));
 
         return Arrays.asList(
-                new Migration(firstBatch, firstFileMetadata, 12345),
-                new Migration(secondBatch, secondFileMetadata, 67890)
+                new Migration(firstBatch, firstFileMetadata, 12345, Migration.Type.COMPLETE),
+                new Migration(secondBatch, secondFileMetadata, 67890, Migration.Type.COMPLETE)
         );
     }
 }
