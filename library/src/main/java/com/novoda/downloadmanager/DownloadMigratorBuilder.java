@@ -151,7 +151,7 @@ public final class DownloadMigratorBuilder {
 
         @Override
         public Notification customNotificationFrom(NotificationCompat.Builder builder, MigrationStatus migrationStatus) {
-            String title = migrationStatus.status().toRawValue();
+            String title = resources.getString(R.string.migration_notification_content_title);
             builder.setSmallIcon(notificationIcon)
                     .setContentTitle(title);
 
