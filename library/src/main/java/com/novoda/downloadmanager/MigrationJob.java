@@ -73,6 +73,10 @@ class MigrationJob implements Runnable {
 
         migratePartialDownloads(migrationStatus, database, partialMigrations, downloadsPersistence, basePath);
         migrateCompleteDownloads(migrationStatus, database, completeMigrations, downloadsPersistence, basePath);
+        deleteVersionOneDatabase(migrationStatus, database);
+
+        migrationStatus.markAsComplete();
+        onUpdate(migrationStatus);
     }
 
     private void onUpdate(InternalMigrationStatus migrationStatus) {
@@ -204,21 +208,21 @@ class MigrationJob implements Runnable {
         }
 
         Log.d(TAG, "all data migrations are COMMITTED, about to delete the old database, time is " + System.nanoTime());
-
-        migrationStatus.markAsDeleting();
-        onUpdate(migrationStatus);
-        Log.d(TAG, "all traces of v1 are ERASED, time is " + System.nanoTime());
-        database.close();
-
-        database.deleteDatabase();
-        migrationStatus.markAsComplete();
-        onUpdate(migrationStatus);
     }
 
     private void deleteFrom(SqlDatabaseWrapper database, Migration migration) {
         Batch batch = migration.batch();
         Log.d(TAG, "about to delete the batch: " + batch.downloadBatchId().rawId() + ", time is " + System.nanoTime());
         database.delete(TABLE_BATCHES, WHERE_CLAUSE_ID, batch.downloadBatchId().rawId());
+    }
+
+    private void deleteVersionOneDatabase(InternalMigrationStatus migrationStatus, SqlDatabaseWrapper database) {
+        migrationStatus.markAsDeleting();
+        onUpdate(migrationStatus);
+        Log.d(TAG, "all traces of v1 are ERASED, time is " + System.nanoTime());
+        database.close();
+
+        database.deleteDatabase();
     }
 
 }
