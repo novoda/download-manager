@@ -16,6 +16,8 @@ class MigrationJob implements Runnable {
 
     private static final String TABLE_BATCHES = "batches";
     private static final String WHERE_CLAUSE_ID = "_id = ?";
+    private static final int NO_COMPLETED_MIGRATIONS = 0;
+    private static final int NO_MIGRATIONS = 0;
 
     private final Context context;
     private final String jobIdentifier;
@@ -37,8 +39,8 @@ class MigrationJob implements Runnable {
             InternalMigrationStatus migrationStatus = new VersionOneToVersionTwoMigrationStatus(
                     jobIdentifier,
                     MigrationStatus.Status.DB_NOT_PRESENT,
-                    0,
-                    0
+                    NO_COMPLETED_MIGRATIONS,
+                    NO_MIGRATIONS
             );
 
             onUpdate(migrationStatus);
@@ -63,7 +65,7 @@ class MigrationJob implements Runnable {
         InternalMigrationStatus migrationStatus = new VersionOneToVersionTwoMigrationStatus(
                 jobIdentifier,
                 MigrationStatus.Status.DB_NOT_PRESENT,
-                0,
+                NO_COMPLETED_MIGRATIONS,
                 totalNumberOfMigrations
         );
 
