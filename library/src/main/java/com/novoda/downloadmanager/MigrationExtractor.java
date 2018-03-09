@@ -10,7 +10,12 @@ class MigrationExtractor {
 
     private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title, batches.last_modified_timestamp FROM "
             + "batches INNER JOIN DownloadsByBatch ON DownloadsByBatch.batch_id = batches._id "
-            + "WHERE DownloadsByBatch.batch_total_bytes = DownloadsByBatch.batch_current_bytes GROUP BY batches._id";
+            + "WHERE batches._id NOT IN (SELECT DownloadsByBatch.batch_id FROM DownloadsByBatch "
+            + "INNER JOIN batches ON batches._id = DownloadsByBatch.batch_id "
+            + "WHERE DownloadsByBatch._data IS NULL "
+            + "GROUP BY DownloadsByBatch.batch_id) "
+            + "GROUP BY batches._id";
+
     private static final int BATCH_ID_COLUMN = 0;
     private static final int TITLE_COLUMN = 1;
     private static final int MODIFIED_TIMESTAMP_COLUMN = 2;
