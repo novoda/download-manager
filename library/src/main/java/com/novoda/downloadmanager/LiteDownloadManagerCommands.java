@@ -29,9 +29,9 @@ public interface LiteDownloadManagerCommands {
 
     @Nullable
     @WorkerThread
-    DownloadFileStatus getDownloadStatusWithMatching(DownloadFileId downloadFileId);
+    DownloadFileStatus getDownloadStatusWithMatching(DownloadBatchId downloadBatchId, DownloadFileId downloadFileId);
 
-    void getDownloadStatusWithMatching(DownloadFileId downloadFileId, DownloadFileStatusCallback callback);
+    void getDownloadStatusWithMatching(DownloadBatchId downloadBatchId, DownloadFileId downloadFileId, DownloadFileStatusCallback callback);
 
     void updateAllowedConnectionType(ConnectionType allowedConnectionType);
 

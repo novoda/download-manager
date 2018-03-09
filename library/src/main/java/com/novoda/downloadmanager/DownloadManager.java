@@ -160,28 +160,31 @@ class DownloadManager implements LiteDownloadManagerCommands {
     @Nullable
     @WorkerThread
     @Override
-    public DownloadFileStatus getDownloadStatusWithMatching(DownloadFileId downloadFileId) {
+    public DownloadFileStatus getDownloadStatusWithMatching(DownloadBatchId downloadBatchId, DownloadFileId downloadFileId) {
         return Wait.<DownloadFileStatus>waitFor(downloadService, waitForDownloadService)
-                .thenPerform(() -> executeGetDownloadStatusWithMatching(downloadFileId));
+                .thenPerform(() -> executeGetDownloadStatusWithMatching(downloadBatchId, downloadFileId));
     }
 
     @Nullable
-    private DownloadFileStatus executeGetDownloadStatusWithMatching(DownloadFileId downloadFileId) {
-        for (DownloadBatch downloadBatch : downloadBatchMap.values()) {
-            DownloadFileStatus downloadFileStatus = downloadBatch.downloadFileStatusWith(downloadFileId);
-
-            if (downloadFileStatus != null) {
-                return downloadFileStatus;
-            }
+    private DownloadFileStatus executeGetDownloadStatusWithMatching(DownloadBatchId downloadBatchId, DownloadFileId downloadFileId) {
+        DownloadBatch downloadBatch = downloadBatchMap.get(downloadBatchId);
+        if (downloadBatch == null) {
+            return null;
         }
-        return null;
+
+        DownloadFileStatus downloadFileStatus = downloadBatch.downloadFileStatusWith(downloadFileId);
+        if (downloadFileStatus == null) {
+            return null;
+        }
+
+        return downloadFileStatus;
     }
 
     @Override
-    public void getDownloadStatusWithMatching(DownloadFileId downloadFileId, DownloadFileStatusCallback callback) {
+    public void getDownloadStatusWithMatching(DownloadBatchId downloadBatchId, DownloadFileId downloadFileId, DownloadFileStatusCallback callback) {
         executor.submit((Runnable) () -> Wait.<Void>waitFor(downloadService, waitForDownloadService)
                 .thenPerform(() -> {
-                    DownloadFileStatus downloadFileStatus = executeGetDownloadStatusWithMatching(downloadFileId);
+                    DownloadFileStatus downloadFileStatus = executeGetDownloadStatusWithMatching(downloadBatchId, downloadFileId);
                     callbackHandler.post(() -> callback.onReceived(downloadFileStatus));
                     return null;
                 }));
