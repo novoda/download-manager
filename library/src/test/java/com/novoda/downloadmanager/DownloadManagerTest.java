@@ -314,7 +314,7 @@ public class DownloadManagerTest {
     public void waitsForServiceToExist_whenGettingDownloadStatusWithMatchingId() {
         notifyLockOnAnotherThread();
 
-        downloadManager.getDownloadStatusWithMatching(DOWNLOAD_BATCH_ID, DOWNLOAD_FILE_ID, downloadFileStatusCallback);
+        downloadManager.getDownloadFileStatusWithMatching(DOWNLOAD_BATCH_ID, DOWNLOAD_FILE_ID, downloadFileStatusCallback);
 
         assertThat(downloadFileStatus).isEqualTo(DOWNLOAD_FILE_STATUS);
     }
@@ -323,7 +323,7 @@ public class DownloadManagerTest {
     public void getsDownloadStatusMatchingId_whenServiceAlreadyExists() {
         downloadManager.initialise(mock(DownloadService.class));
 
-        downloadManager.getDownloadStatusWithMatching(DOWNLOAD_BATCH_ID, DOWNLOAD_FILE_ID, downloadFileStatusCallback);
+        downloadManager.getDownloadFileStatusWithMatching(DOWNLOAD_BATCH_ID, DOWNLOAD_FILE_ID, downloadFileStatusCallback);
 
         assertThat(downloadFileStatus).isEqualTo(DOWNLOAD_FILE_STATUS);
     }
@@ -332,7 +332,7 @@ public class DownloadManagerTest {
     public void waitsForServiceToExist_whenGettingDownloadStatusWithMatchingIdWithSynchronousCall() {
         notifyLockOnAnotherThread();
 
-        DownloadFileStatus fileStatus = downloadManager.getDownloadStatusWithMatching(DOWNLOAD_BATCH_ID, DOWNLOAD_FILE_ID);
+        DownloadFileStatus fileStatus = downloadManager.getDownloadFileStatusWithMatching(DOWNLOAD_BATCH_ID, DOWNLOAD_FILE_ID);
 
         assertThat(fileStatus).isEqualTo(DOWNLOAD_FILE_STATUS);
     }
@@ -341,7 +341,7 @@ public class DownloadManagerTest {
     public void getsDownloadStatusMatchingIdWithSynchronousCall_whenServiceAlreadyExists() {
         downloadManager.initialise(mock(DownloadService.class));
 
-        DownloadFileStatus fileStatus = downloadManager.getDownloadStatusWithMatching(DOWNLOAD_BATCH_ID, DOWNLOAD_FILE_ID);
+        DownloadFileStatus fileStatus = downloadManager.getDownloadFileStatusWithMatching(DOWNLOAD_BATCH_ID, DOWNLOAD_FILE_ID);
 
         assertThat(fileStatus).isEqualTo(DOWNLOAD_FILE_STATUS);
     }

@@ -160,7 +160,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
     @Nullable
     @WorkerThread
     @Override
-    public DownloadFileStatus getDownloadStatusWithMatching(DownloadBatchId downloadBatchId, DownloadFileId downloadFileId) {
+    public DownloadFileStatus getDownloadFileStatusWithMatching(DownloadBatchId downloadBatchId, DownloadFileId downloadFileId) {
         return Wait.<DownloadFileStatus>waitFor(downloadService, waitForDownloadService)
                 .thenPerform(() -> executeGetDownloadStatusWithMatching(downloadBatchId, downloadFileId));
     }
@@ -181,7 +181,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
     }
 
     @Override
-    public void getDownloadStatusWithMatching(DownloadBatchId downloadBatchId, DownloadFileId downloadFileId, DownloadFileStatusCallback callback) {
+    public void getDownloadFileStatusWithMatching(DownloadBatchId downloadBatchId, DownloadFileId downloadFileId, DownloadFileStatusCallback callback) {
         executor.submit((Runnable) () -> Wait.<Void>waitFor(downloadService, waitForDownloadService)
                 .thenPerform(() -> {
                     DownloadFileStatus downloadFileStatus = executeGetDownloadStatusWithMatching(downloadBatchId, downloadFileId);
