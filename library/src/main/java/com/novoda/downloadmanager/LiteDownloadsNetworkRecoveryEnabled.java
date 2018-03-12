@@ -21,7 +21,7 @@ class LiteDownloadsNetworkRecoveryEnabled implements DownloadsNetworkRecovery {
     @Override
     public void scheduleRecovery() {
         JobRequest.Builder builder = new JobRequest.Builder(LiteJobCreator.TAG)
-                .setExecutionWindow(TimeUnit.SECONDS.toMillis(1), TimeUnit.DAYS.toMillis(1));
+                .setExecutionWindow(TimeUnit.SECONDS.toMillis(1), TimeUnit.MINUTES.toMillis(5));
 
         switch (connectionType) {
             case ALL:
