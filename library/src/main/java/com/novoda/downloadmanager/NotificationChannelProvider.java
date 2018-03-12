@@ -8,6 +8,6 @@ interface NotificationChannelProvider {
 
     @RequiresApi(Build.VERSION_CODES.O)
     void registerNotificationChannel(Context context);
-    
+
     String channelId();
 }
