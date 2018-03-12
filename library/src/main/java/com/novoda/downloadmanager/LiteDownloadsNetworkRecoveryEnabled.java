@@ -12,6 +12,7 @@ class LiteDownloadsNetworkRecoveryEnabled implements DownloadsNetworkRecovery {
 
     private static final long ONE_SECOND_IN_MILLIS = TimeUnit.SECONDS.toMillis(1);
     private static final long FIVE_MINUTES_IN_MILLIS = TimeUnit.MINUTES.toMillis(5);
+    private static final boolean ENFORCE_NETWORK_REQUIREMENTS = true;
 
     private ConnectionType connectionType;
 
@@ -24,7 +25,8 @@ class LiteDownloadsNetworkRecoveryEnabled implements DownloadsNetworkRecovery {
     @Override
     public void scheduleRecovery() {
         JobRequest.Builder builder = new JobRequest.Builder(LiteJobCreator.TAG)
-                .setExecutionWindow(ONE_SECOND_IN_MILLIS, FIVE_MINUTES_IN_MILLIS);
+                .setExecutionWindow(ONE_SECOND_IN_MILLIS, FIVE_MINUTES_IN_MILLIS)
+                .setRequirementsEnforced(ENFORCE_NETWORK_REQUIREMENTS);
 
         switch (connectionType) {
             case ALL:
