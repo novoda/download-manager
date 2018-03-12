@@ -10,6 +10,9 @@ import java.util.concurrent.TimeUnit;
 
 class LiteDownloadsNetworkRecoveryEnabled implements DownloadsNetworkRecovery {
 
+    private static final long ONE_SECOND_IN_MILLIS = TimeUnit.SECONDS.toMillis(1);
+    private static final long FIVE_MINUTES_IN_MILLIS = TimeUnit.MINUTES.toMillis(5);
+
     private ConnectionType connectionType;
 
     LiteDownloadsNetworkRecoveryEnabled(Context context, DownloadManager downloadManager, ConnectionType connectionType) {
@@ -21,7 +24,7 @@ class LiteDownloadsNetworkRecoveryEnabled implements DownloadsNetworkRecovery {
     @Override
     public void scheduleRecovery() {
         JobRequest.Builder builder = new JobRequest.Builder(LiteJobCreator.TAG)
-                .setExecutionWindow(TimeUnit.SECONDS.toMillis(1), TimeUnit.MINUTES.toMillis(5));
+                .setExecutionWindow(ONE_SECOND_IN_MILLIS, FIVE_MINUTES_IN_MILLIS);
 
         switch (connectionType) {
             case ALL:
