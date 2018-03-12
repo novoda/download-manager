@@ -10,7 +10,9 @@ class MigrationStatusNotificationCreator implements NotificationCreator<Migratio
     private final NotificationCustomizer<MigrationStatus> notificationCustomizer;
     private NotificationChannelProvider notificationChannelProvider;
 
-    MigrationStatusNotificationCreator(Context context, NotificationCustomizer<MigrationStatus> customizer, NotificationChannelProvider notificationChannelProvider) {
+    MigrationStatusNotificationCreator(Context context,
+                                       NotificationCustomizer<MigrationStatus> customizer,
+                                       NotificationChannelProvider notificationChannelProvider) {
         this.applicationContext = context.getApplicationContext();
         this.notificationCustomizer = customizer;
         this.notificationChannelProvider = notificationChannelProvider;
