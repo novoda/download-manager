@@ -2,6 +2,8 @@ package com.novoda.downloadmanager;
 
 import android.support.annotation.Nullable;
 
+import com.novoda.notils.logger.simple.Log;
+
 import java.util.List;
 import java.util.Map;
 
@@ -250,8 +252,19 @@ class DownloadBatch {
         return null;
     }
 
-    void persist() {
+    void persistAsync() {
         downloadsBatchPersistence.persistAsync(
+                downloadBatchStatus.getDownloadBatchTitle(),
+                downloadBatchStatus.getDownloadBatchId(),
+                downloadBatchStatus.status(),
+                downloadFiles,
+                downloadBatchStatus.downloadedDateTimeInMillis(),
+                downloadBatchStatus.notificationSeen()
+        );
+    }
+
+    void persist() {
+        downloadsBatchPersistence.persist(
                 downloadBatchStatus.getDownloadBatchTitle(),
                 downloadBatchStatus.getDownloadBatchId(),
                 downloadBatchStatus.status(),

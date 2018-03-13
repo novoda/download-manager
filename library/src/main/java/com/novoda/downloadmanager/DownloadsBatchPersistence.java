@@ -33,29 +33,38 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                       long downloadedDateTimeInMillis,
                       boolean notificationSeen) {
         executor.execute(() -> {
-            downloadsPersistence.startTransaction();
-
-            try {
-                LiteDownloadsBatchPersisted batchPersisted = new LiteDownloadsBatchPersisted(
-                        downloadBatchTitle,
-                        downloadBatchId,
-                        status,
-                        downloadedDateTimeInMillis,
-                        notificationSeen
-                );
-                downloadsPersistence.persistBatch(batchPersisted);
-                downloadsPersistence.transactionSuccess();
-            } finally {
-                downloadsPersistence.endTransaction();
-            }
-
-            for (DownloadFile downloadFile : downloadFiles) {
-                downloadFile.persistSync();
-            }
+            persist(downloadBatchTitle, downloadBatchId, status, downloadFiles, downloadedDateTimeInMillis, notificationSeen);
         });
     }
 
-    void loadAsync(final FileOperations fileOperations, final LoadBatchesCallback callback) {
+    void persist(DownloadBatchTitle downloadBatchTitle,
+                 DownloadBatchId downloadBatchId,
+                 DownloadBatchStatus.Status status,
+                 List<DownloadFile> downloadFiles,
+                 long downloadedDateTimeInMillis,
+                 boolean notificationSeen) {
+        downloadsPersistence.startTransaction();
+
+        try {
+            LiteDownloadsBatchPersisted batchPersisted = new LiteDownloadsBatchPersisted(
+                    downloadBatchTitle,
+                    downloadBatchId,
+                    status,
+                    downloadedDateTimeInMillis,
+                    notificationSeen
+            );
+            downloadsPersistence.persistBatch(batchPersisted);
+            downloadsPersistence.transactionSuccess();
+        } finally {
+            downloadsPersistence.endTransaction();
+        }
+
+        for (DownloadFile downloadFile : downloadFiles) {
+            downloadFile.persistSync();
+        }
+    }
+
+    void loadAsync(FileOperations fileOperations, LoadBatchesCallback callback) {
         executor.execute(() -> {
             List<DownloadsBatchPersisted> batchPersistedList = downloadsPersistence.loadBatches();
 
@@ -133,20 +142,23 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
     }
 
     @Override
-    public void updateStatusAsync(final DownloadBatchId downloadBatchId, final DownloadBatchStatus.Status status) {
-        executor.execute(() -> {
-            downloadsPersistence.startTransaction();
-            try {
-                downloadsPersistence.update(downloadBatchId, status);
-                downloadsPersistence.transactionSuccess();
-            } finally {
-                downloadsPersistence.endTransaction();
-            }
-        });
+    public void updateStatusAsync(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status) {
+        executor.execute(() -> updateStatusAsync(downloadBatchId, status));
     }
 
     @Override
-    public void updateNotificationSeenAsync(final DownloadBatchId downloadBatchId, final boolean notificationSeen) {
+    public void updateStatus(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status) {
+        downloadsPersistence.startTransaction();
+        try {
+            downloadsPersistence.update(downloadBatchId, status);
+            downloadsPersistence.transactionSuccess();
+        } finally {
+            downloadsPersistence.endTransaction();
+        }
+    }
+
+    @Override
+    public void updateNotificationSeenAsync(DownloadBatchId downloadBatchId, boolean notificationSeen) {
         executor.execute(() -> {
             downloadsPersistence.startTransaction();
             try {

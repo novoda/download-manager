@@ -69,7 +69,7 @@ class LiteDownloadManagerDownloader {
                 connectionChecker
         );
 
-        downloadBatch.persist();
+        downloadBatch.persistAsync();
         download(downloadBatch, downloadBatchMap);
     }
 

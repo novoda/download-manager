@@ -2,6 +2,8 @@ package com.novoda.downloadmanager;
 
 import android.content.Context;
 
+import com.novoda.notils.logger.simple.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +36,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
     }
 
     @Override
-    public void persistBatch(final DownloadsBatchPersisted batchPersisted) {
+    public void persistBatch(DownloadsBatchPersisted batchPersisted) {
         RoomBatch roomBatch = new RoomBatch();
         roomBatch.id = batchPersisted.downloadBatchId().rawId();
         roomBatch.status = batchPersisted.downloadBatchStatus().toRawValue();
