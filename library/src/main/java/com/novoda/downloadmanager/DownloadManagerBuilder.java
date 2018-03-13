@@ -176,7 +176,11 @@ public final class DownloadManagerBuilder {
     }
 
     public DownloadManagerBuilder withNotification(NotificationCustomizer<DownloadBatchStatus> notificationCustomizer) {
-        this.notificationCreator = new DownloadBatchStatusNotificationCreator(applicationContext, notificationCustomizer, notificationChannelProvider);
+        this.notificationCreator = new DownloadBatchStatusNotificationCreator(
+                applicationContext,
+                notificationCustomizer,
+                notificationChannelProvider
+        );
         return this;
     }
 

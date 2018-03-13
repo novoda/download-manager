@@ -10,7 +10,9 @@ class DownloadBatchStatusNotificationCreator implements NotificationCreator<Down
     private final NotificationCustomizer<DownloadBatchStatus> notificationCustomizer;
     private NotificationChannelProvider notificationChannelProvider;
 
-    DownloadBatchStatusNotificationCreator(Context context, NotificationCustomizer<DownloadBatchStatus> customizer, NotificationChannelProvider notificationChannelProvider) {
+    DownloadBatchStatusNotificationCreator(Context context,
+                                           NotificationCustomizer<DownloadBatchStatus> customizer,
+                                           NotificationChannelProvider notificationChannelProvider) {
         this.applicationContext = context.getApplicationContext();
         this.notificationCustomizer = customizer;
         this.notificationChannelProvider = notificationChannelProvider;
