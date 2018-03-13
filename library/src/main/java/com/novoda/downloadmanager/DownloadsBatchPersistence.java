@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager;
 
+import android.support.annotation.WorkerThread;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,11 +34,12 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                       List<DownloadFile> downloadFiles,
                       long downloadedDateTimeInMillis,
                       boolean notificationSeen) {
-        executor.execute(() -> {
-            persist(downloadBatchTitle, downloadBatchId, status, downloadFiles, downloadedDateTimeInMillis, notificationSeen);
-        });
+        executor.execute(
+                () -> persist(downloadBatchTitle, downloadBatchId, status, downloadFiles, downloadedDateTimeInMillis, notificationSeen)
+        );
     }
 
+    @WorkerThread
     void persist(DownloadBatchTitle downloadBatchTitle,
                  DownloadBatchId downloadBatchId,
                  DownloadBatchStatus.Status status,
@@ -127,6 +130,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
         });
     }
 
+    @WorkerThread
     void delete(DownloadBatchId downloadBatchId) {
         downloadsPersistence.startTransaction();
         try {
@@ -146,6 +150,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
         executor.execute(() -> updateStatusAsync(downloadBatchId, status));
     }
 
+    @WorkerThread
     @Override
     public void updateStatus(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status) {
         downloadsPersistence.startTransaction();
