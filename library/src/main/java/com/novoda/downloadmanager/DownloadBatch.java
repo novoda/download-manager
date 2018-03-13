@@ -2,8 +2,6 @@ package com.novoda.downloadmanager;
 
 import android.support.annotation.Nullable;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.util.List;
 import java.util.Map;
 

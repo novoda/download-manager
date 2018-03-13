@@ -2,8 +2,6 @@ package com.novoda.downloadmanager;
 
 import android.content.Context;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.util.ArrayList;
 import java.util.List;
 
