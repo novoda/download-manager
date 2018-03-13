@@ -44,14 +44,13 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                         notificationSeen
                 );
                 downloadsPersistence.persistBatch(batchPersisted);
-
-                for (DownloadFile downloadFile : downloadFiles) {
-                    downloadFile.persistSync();
-                }
-
                 downloadsPersistence.transactionSuccess();
             } finally {
                 downloadsPersistence.endTransaction();
+            }
+
+            for (DownloadFile downloadFile : downloadFiles) {
+                downloadFile.persistSync();
             }
         });
     }
@@ -119,16 +118,18 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
         });
     }
 
-    void deleteAsync(final DownloadBatchId downloadBatchId) {
-        executor.execute(() -> {
-            downloadsPersistence.startTransaction();
-            try {
-                downloadsPersistence.delete(downloadBatchId);
-                downloadsPersistence.transactionSuccess();
-            } finally {
-                downloadsPersistence.endTransaction();
-            }
-        });
+    void delete(DownloadBatchId downloadBatchId) {
+        downloadsPersistence.startTransaction();
+        try {
+            downloadsPersistence.delete(downloadBatchId);
+            downloadsPersistence.transactionSuccess();
+        } finally {
+            downloadsPersistence.endTransaction();
+        }
+    }
+
+    void deleteAsync(DownloadBatchId downloadBatchId) {
+        executor.execute(() -> delete(downloadBatchId));
     }
 
     @Override

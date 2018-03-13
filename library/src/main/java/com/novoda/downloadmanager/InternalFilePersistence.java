@@ -99,6 +99,10 @@ class InternalFilePersistence implements FilePersistence {
         }
 
         File fileToDelete = new File(absoluteFilePath.path());
+        if (!fileToDelete.exists()) {
+            return;
+        }
+
         boolean deleted = fileToDelete.delete();
 
         String message = String.format("File or Directory: %s deleted: %s", absoluteFilePath.path(), deleted);

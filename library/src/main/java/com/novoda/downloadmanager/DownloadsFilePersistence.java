@@ -29,7 +29,13 @@ class DownloadsFilePersistence {
                 filePersistenceType
         );
 
-        downloadsPersistence.persistFile(filePersisted);
+        downloadsPersistence.startTransaction();
+        try {
+            downloadsPersistence.persistFile(filePersisted);
+            downloadsPersistence.transactionSuccess();
+        } finally {
+            downloadsPersistence.endTransaction();
+        }
     }
 
     List<DownloadFile> loadSync(DownloadBatchId batchId,

@@ -51,7 +51,7 @@ publish {
     userOrg = 'novoda'
     groupId = 'com.novoda'
     artifactId = 'download-manager'
-    publishVersion = 'SNAPSHOT-2.0.27'
+    publishVersion = 'SNAPSHOT-2.0.28'
     description = 'Download manager based on AOSP DM but allowing downloading to internal private storage.'
     website = 'https://github.com/novoda/download-manager'
 }

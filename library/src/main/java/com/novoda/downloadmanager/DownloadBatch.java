@@ -50,7 +50,13 @@ class DownloadBatch {
 
     void download() {
         DownloadBatchStatus.Status status = downloadBatchStatus.status();
-        if (status == PAUSED || status == DELETED) {
+
+        if (status == DELETED) {
+            deleteBatchIfNeeded();
+            return;
+        }
+
+        if (status == PAUSED) {
             return;
         }
 
@@ -69,6 +75,7 @@ class DownloadBatch {
         }
 
         if (totalBatchSizeBytes <= ZERO_BYTES) {
+            deleteBatchIfNeeded();
             processNetworkError();
             return;
         }
@@ -90,6 +97,13 @@ class DownloadBatch {
         }
 
         callbackThrottle.stopUpdates();
+        deleteBatchIfNeeded();
+    }
+
+    private void deleteBatchIfNeeded() {
+        if (downloadBatchStatus.status() == DELETED) {
+            downloadsBatchPersistence.delete(downloadBatchStatus.getDownloadBatchId());
+        }
     }
 
     private void processNetworkError() {
@@ -207,7 +221,10 @@ class DownloadBatch {
     }
 
     void delete() {
-        downloadsBatchPersistence.deleteAsync(downloadBatchStatus.getDownloadBatchId());
+        if (downloadBatchStatus.status() == PAUSED) {
+            downloadsBatchPersistence.deleteAsync(downloadBatchStatus.getDownloadBatchId());
+        }
+
         downloadBatchStatus.markAsDeleted();
         notifyCallback(downloadBatchStatus);
         for (DownloadFile downloadFile : downloadFiles) {
