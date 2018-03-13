@@ -5,7 +5,7 @@ import com.evernote.android.job.JobCreator;
 
 class LiteJobCreator implements JobCreator {
 
-    static final String TAG = "test";
+    static final String TAG = "download-manager-reschedule";
 
     private final DownloadManager downloadManager;
 
@@ -16,7 +16,7 @@ class LiteJobCreator implements JobCreator {
     @Override
     public Job create(String tag) {
         if (tag.equals(TAG)) {
-           return new LiteJobDownload(downloadManager);
+            return new LiteJobDownload(downloadManager);
         }
 
         return null;
