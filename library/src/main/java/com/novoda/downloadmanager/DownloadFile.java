@@ -16,9 +16,9 @@ class DownloadFile {
     private final FileSizeRequester fileSizeRequester;
     private final FilePersistence filePersistence;
     private final DownloadsFilePersistence downloadsFilePersistence;
+    private final FilePath filePath;
 
     private InternalFileSize fileSize;
-    private FilePath filePath;
 
     // Model that knows how to interact with low-level components.
     @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
@@ -167,6 +167,7 @@ class DownloadFile {
             downloadFileStatus.markAsDeleted();
             fileDownloader.stopDownloading();
         } else {
+            downloadFileStatus.markAsDeleted();
             filePersistence.delete(filePath);
         }
     }
