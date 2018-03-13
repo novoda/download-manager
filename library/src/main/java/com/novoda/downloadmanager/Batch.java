@@ -112,13 +112,9 @@ public class Batch {
         }
 
         private void ensureNoFileIdDuplicates(List<BatchFile> batchFiles) {
-            Set<String> rawIdsWithoutDuplicates = new HashSet<>();
+            Set<DownloadFileId> rawIdsWithoutDuplicates = new HashSet<>();
             for (BatchFile batchFile : batchFiles) {
-                if (batchFile.downloadFileId().isPresent()) {
-                    rawIdsWithoutDuplicates.add(batchFile.downloadFileId().get().rawId());
-                } else {
-                    rawIdsWithoutDuplicates.add(batchFile.networkAddress());
-                }
+                rawIdsWithoutDuplicates.add(FallbackDownloadFileIdProvider.downloadFileIdFor(downloadBatchId, batchFile));
             }
 
             if (rawIdsWithoutDuplicates.size() != batchFiles.size()) {
