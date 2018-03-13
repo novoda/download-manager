@@ -57,7 +57,10 @@ class LiteDownloadManagerDownloader {
     public void download(Batch batch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         DownloadBatch runningDownloadBatch = downloadBatchMap.get(batch.downloadBatchId());
         if (runningDownloadBatch != null) {
-            Log.w("Ignoring duplicate batch with id " + batch.downloadBatchId());
+            Log.w(String.format(
+                    "Already running download for DownloadBatchId: %s, ensure you are not duplicating identifiers.",
+                    batch.downloadBatchId().rawId()
+            ));
             return;
         }
 
