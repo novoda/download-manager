@@ -62,7 +62,6 @@ class DownloadBatch {
 
         if (connectionNotAllowedForDownload(status)) {
             processNetworkError();
-            deleteBatchIfNeeded();
             return;
         }
 
@@ -77,7 +76,6 @@ class DownloadBatch {
 
         if (totalBatchSizeBytes <= ZERO_BYTES) {
             processNetworkError();
-            deleteBatchIfNeeded();
             return;
         }
 
