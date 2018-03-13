@@ -2,6 +2,8 @@ package com.novoda.downloadmanager;
 
 import android.os.Handler;
 
+import com.novoda.notils.logger.simple.Log;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -55,6 +57,7 @@ class LiteDownloadManagerDownloader {
     public void download(Batch batch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         DownloadBatch runningDownloadBatch = downloadBatchMap.get(batch.downloadBatchId());
         if (runningDownloadBatch != null) {
+            Log.w("Ignoring duplicate batch with id " + batch.downloadBatchId());
             return;
         }
 
