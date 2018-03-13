@@ -75,6 +75,7 @@ class DownloadBatch {
         }
 
         if (totalBatchSizeBytes <= ZERO_BYTES) {
+            deleteBatchIfNeeded();
             processNetworkError();
             return;
         }
