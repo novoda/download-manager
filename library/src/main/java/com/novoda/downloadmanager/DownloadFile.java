@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager;
 
+import android.support.annotation.WorkerThread;
+
 import com.novoda.downloadmanager.DownloadError.Error;
 import com.novoda.notils.logger.simple.Log;
 
@@ -60,7 +62,12 @@ class DownloadFile {
 
         fileSize.setCurrentSize(filePersistence.getCurrentSize(filePath));
 
-        persistSync();
+        if (downloadFileStatus.isMarkedAsDeleted()) {
+            return;
+        }
+        Log.v("Ferran, start DownloadFile.persistSync with " + downloadBatchId.rawId() + ", status: " + downloadFileStatus.status());
+        persistAsync();
+        Log.v("Ferran, end DownloadFile.persistSync with " + downloadBatchId.rawId() + ", status: " + downloadFileStatus.status());
 
         if (fileSize.currentSize() == fileSize.totalSize()) {
             downloadFileStatus.update(fileSize, filePath);
@@ -163,6 +170,7 @@ class DownloadFile {
     }
 
     void delete() {
+        Log.v("Ferran, start DownloadFile.delete() with " + downloadBatchId.rawId());
         if (downloadFileStatus.isMarkedAsDownloading()) {
             downloadFileStatus.markAsDeleted();
             fileDownloader.stopDownloading();
@@ -170,18 +178,32 @@ class DownloadFile {
             downloadFileStatus.markAsDeleted();
             filePersistence.delete(filePath);
         }
+        Log.v("Ferran, end DownloadFile.delete() with " + downloadBatchId.rawId());
     }
 
     long getTotalSize() {
         if (fileSize.isTotalSizeUnknown()) {
             FileSize requestFileSize = fileSizeRequester.requestFileSize(url);
             fileSize.setTotalSize(requestFileSize.totalSize());
-            persistSync();
+            persistAsync();
         }
 
         return fileSize.totalSize();
     }
 
+    void persistAsync() {
+        downloadsFilePersistence.persistAsync(
+                downloadBatchId,
+                fileName,
+                filePath,
+                fileSize,
+                url,
+                downloadFileStatus,
+                filePersistence.getType()
+        );
+    }
+
+    @WorkerThread
     void persistSync() {
         downloadsFilePersistence.persistSync(
                 downloadBatchId,
@@ -189,7 +211,7 @@ class DownloadFile {
                 filePath,
                 fileSize,
                 url,
-                downloadFileStatus.downloadFileId(),
+                downloadFileStatus,
                 filePersistence.getType()
         );
     }

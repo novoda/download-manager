@@ -1,8 +1,9 @@
 package com.novoda.downloadmanager;
 
-import android.support.annotation.WorkerThread;
+import com.novoda.notils.logger.simple.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,37 +35,29 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                       List<DownloadFile> downloadFiles,
                       long downloadedDateTimeInMillis,
                       boolean notificationSeen) {
-        executor.execute(
-                () -> persist(downloadBatchTitle, downloadBatchId, status, downloadFiles, downloadedDateTimeInMillis, notificationSeen)
-        );
-    }
+        executor.execute(() -> {
+            List<DownloadFile> downloadFilesToPersist = new ArrayList<>(downloadFiles);
+            Log.v("Ferran, start DownloadBatchPersistence persist full batch " + downloadBatchId + ", downloadFilesSize: " + downloadFilesToPersist.size());
+            downloadsPersistence.startTransaction();
 
-    @WorkerThread
-    void persist(DownloadBatchTitle downloadBatchTitle,
-                 DownloadBatchId downloadBatchId,
-                 DownloadBatchStatus.Status status,
-                 List<DownloadFile> downloadFiles,
-                 long downloadedDateTimeInMillis,
-                 boolean notificationSeen) {
-        downloadsPersistence.startTransaction();
-
-        try {
-            LiteDownloadsBatchPersisted batchPersisted = new LiteDownloadsBatchPersisted(
-                    downloadBatchTitle,
-                    downloadBatchId,
-                    status,
-                    downloadedDateTimeInMillis,
-                    notificationSeen
-            );
-            downloadsPersistence.persistBatch(batchPersisted);
-            downloadsPersistence.transactionSuccess();
-        } finally {
-            downloadsPersistence.endTransaction();
-        }
-
-        for (DownloadFile downloadFile : downloadFiles) {
-            downloadFile.persistSync();
-        }
+            try {
+                LiteDownloadsBatchPersisted batchPersisted = new LiteDownloadsBatchPersisted(
+                        downloadBatchTitle,
+                        downloadBatchId,
+                        status,
+                        downloadedDateTimeInMillis,
+                        notificationSeen
+                );
+                downloadsPersistence.persistBatch(batchPersisted);
+                for (DownloadFile downloadFile : downloadFilesToPersist) {
+                    downloadFile.persistSync();
+                }
+                downloadsPersistence.transactionSuccess();
+            } finally {
+                downloadsPersistence.endTransaction();
+            }
+            Log.v("Ferran, end DownloadBatchPersistence persist full batch " + downloadBatchId);
+        });
     }
 
     void loadAsync(FileOperations fileOperations, LoadBatchesCallback callback) {
@@ -92,6 +85,8 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                         fileOperations,
                         downloadsFilePersistence
                 );
+
+                downloadFiles = Collections.unmodifiableList(downloadFiles);
 
                 Map<DownloadFileId, Long> downloadedFileSizeMap = new HashMap<>(downloadFiles.size());
 
@@ -130,36 +125,29 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
         });
     }
 
-    @WorkerThread
-    void delete(DownloadBatchId downloadBatchId) {
-        downloadsPersistence.startTransaction();
-        try {
-            downloadsPersistence.delete(downloadBatchId);
-            downloadsPersistence.transactionSuccess();
-        } finally {
-            downloadsPersistence.endTransaction();
-        }
-    }
-
     void deleteAsync(DownloadBatchId downloadBatchId) {
-        executor.execute(() -> delete(downloadBatchId));
+        executor.execute(() -> {
+            downloadsPersistence.startTransaction();
+            try {
+                downloadsPersistence.delete(downloadBatchId);
+                downloadsPersistence.transactionSuccess();
+            } finally {
+                downloadsPersistence.endTransaction();
+            }
+        });
     }
 
     @Override
     public void updateStatusAsync(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status) {
-        executor.execute(() -> updateStatusAsync(downloadBatchId, status));
-    }
-
-    @WorkerThread
-    @Override
-    public void updateStatus(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status) {
-        downloadsPersistence.startTransaction();
-        try {
-            downloadsPersistence.update(downloadBatchId, status);
-            downloadsPersistence.transactionSuccess();
-        } finally {
-            downloadsPersistence.endTransaction();
-        }
+        executor.execute(() -> {
+            downloadsPersistence.startTransaction();
+            try {
+                downloadsPersistence.update(downloadBatchId, status);
+                downloadsPersistence.transactionSuccess();
+            } finally {
+                downloadsPersistence.endTransaction();
+            }
+        });
     }
 
     @Override

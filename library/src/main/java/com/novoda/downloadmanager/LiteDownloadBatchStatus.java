@@ -86,7 +86,7 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     @Override
     public void markAsDownloading(DownloadsBatchStatusPersistence persistence) {
         status = Status.DOWNLOADING;
-        updateStatus(status, persistence);
+        updateStatusAsync(status, persistence);
     }
 
     @Override
@@ -112,29 +112,25 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     public void markAsError(Optional<DownloadError> downloadError, DownloadsBatchStatusPersistence persistence) {
         this.status = Status.ERROR;
         this.downloadError = downloadError;
-        updateStatus(status, persistence);
+        updateStatusAsync(status, persistence);
     }
 
     @WorkerThread
     @Override
     public void markAsDownloaded(DownloadsBatchStatusPersistence persistence) {
         this.status = Status.DOWNLOADED;
-        updateStatus(status, persistence);
+        updateStatusAsync(status, persistence);
     }
 
     @WorkerThread
     @Override
     public void markAsWaitingForNetwork(DownloadsBatchPersistence persistence) {
         this.status = Status.WAITING_FOR_NETWORK;
-        updateStatus(status, persistence);
+        updateStatusAsync(status, persistence);
     }
 
     private void updateStatusAsync(Status status, DownloadsBatchStatusPersistence persistence) {
         persistence.updateStatusAsync(downloadBatchId, status);
-    }
-
-    private void updateStatus(Status status, DownloadsBatchStatusPersistence persistence) {
-        persistence.updateStatus(downloadBatchId, status);
     }
 
     @Nullable

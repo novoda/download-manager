@@ -1,7 +1,8 @@
 package com.novoda.downloadmanager;
 
 import android.support.annotation.Nullable;
-import android.support.annotation.WorkerThread;
+
+import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
 import java.util.Map;
@@ -103,11 +104,14 @@ class DownloadBatch {
 
     private void deleteBatchIfNeeded() {
         if (downloadBatchStatus.status() == DELETED) {
-            downloadsBatchPersistence.delete(downloadBatchStatus.getDownloadBatchId());
+            downloadsBatchPersistence.deleteAsync(downloadBatchStatus.getDownloadBatchId());
         }
     }
 
     private void processNetworkError() {
+        if (downloadBatchStatus.status() == DELETED) {
+            return;
+        }
         downloadBatchStatus.markAsWaitingForNetwork(downloadsBatchPersistence);
         notifyCallback(downloadBatchStatus);
         DownloadsNetworkRecoveryCreator.getInstance().scheduleRecovery();
@@ -175,6 +179,10 @@ class DownloadBatch {
     private long getTotalSize(List<DownloadFile> downloadFiles) {
         long totalBatchSize = 0;
         for (DownloadFile downloadFile : downloadFiles) {
+            if (downloadBatchStatus.status() == DELETED) {
+                return 0;
+            }
+            Log.v("Ferran, DownloadBatch.getTotalSize() " + downloadBatchStatus.getDownloadBatchId().rawId() + ", status: " + downloadBatchStatus.status());
             long totalFileSize = downloadFile.getTotalSize();
             if (totalFileSize == 0) {
                 return 0;
@@ -253,18 +261,6 @@ class DownloadBatch {
 
     void persistAsync() {
         downloadsBatchPersistence.persistAsync(
-                downloadBatchStatus.getDownloadBatchTitle(),
-                downloadBatchStatus.getDownloadBatchId(),
-                downloadBatchStatus.status(),
-                downloadFiles,
-                downloadBatchStatus.downloadedDateTimeInMillis(),
-                downloadBatchStatus.notificationSeen()
-        );
-    }
-
-    @WorkerThread
-    void persist() {
-        downloadsBatchPersistence.persist(
                 downloadBatchStatus.getDownloadBatchTitle(),
                 downloadBatchStatus.getDownloadBatchId(),
                 downloadBatchStatus.status(),

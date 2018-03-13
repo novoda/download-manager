@@ -58,7 +58,7 @@ public class LiteDownloadService extends Service implements DownloadService {
 
         executor.execute(() -> {
             acquireCpuWakeLock();
-            downloadBatch.persist();
+            downloadBatch.persistAsync();
             downloadBatch.download();
             releaseHeldCpuWakeLock();
         });

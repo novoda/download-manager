@@ -249,7 +249,7 @@ public final class DownloadManagerBuilder {
         );
 
         Executor executor = Executors.newSingleThreadExecutor();
-        DownloadsFilePersistence downloadsFilePersistence = new DownloadsFilePersistence(downloadsPersistence);
+        DownloadsFilePersistence downloadsFilePersistence = new DownloadsFilePersistence(downloadsPersistence, executor);
         MerlinsBeard merlinsBeard = MerlinsBeard.from(applicationContext);
         ConnectionChecker connectionChecker = new ConnectionChecker(merlinsBeard, connectionTypeAllowed);
         DownloadsBatchPersistence downloadsBatchPersistence = new DownloadsBatchPersistence(
