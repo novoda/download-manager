@@ -19,10 +19,10 @@ class PartialDownloadMigrationExtractor {
     private static final int TITLE_COLUMN = 1;
     private static final int MODIFIED_TIMESTAMP_COLUMN = 2;
 
-    private static final String DOWNLOADS_QUERY = "SELECT uri, _data, notificationextras FROM Downloads WHERE batch_id = ?";
+    private static final String DOWNLOADS_QUERY = "SELECT uri, notificationextras FROM Downloads WHERE batch_id = ?";
     private static final int URI_COLUMN = 0;
-    private static final int FILE_NAME_COLUMN = 1;
-    private static final int FILE_ID_COLUMN = 2;
+    private static final int FILE_ID_COLUMN = 1;
+    private static final String UNKNOWN_ORIGINAL_LOCATION = "";
 
     private final SqlDatabaseWrapper database;
 
@@ -48,7 +48,6 @@ class PartialDownloadMigrationExtractor {
             while (downloadsCursor.moveToNext()) {
                 String originalFileId = downloadsCursor.getString(FILE_ID_COLUMN);
                 String uri = downloadsCursor.getString(URI_COLUMN);
-                String originalFileName = downloadsCursor.getString(FILE_NAME_COLUMN);
 
                 if (downloadsCursor.isFirst()) {
                     DownloadBatchId downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
@@ -60,10 +59,10 @@ class PartialDownloadMigrationExtractor {
                 } else {
                     uris.add(uri);
                 }
-                newBatchBuilder.addFile(uri);
+                newBatchBuilder.addFile(uri).apply();
 
                 FileSize fileSize = FileSizeCreator.unknownFileSize();
-                Migration.FileMetadata fileMetadata = new Migration.FileMetadata(originalFileId, originalFileName, fileSize, uri);
+                Migration.FileMetadata fileMetadata = new Migration.FileMetadata(originalFileId, UNKNOWN_ORIGINAL_LOCATION, fileSize, uri);
                 fileMetadataList.add(fileMetadata);
             }
             downloadsCursor.close();
