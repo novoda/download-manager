@@ -3,7 +3,9 @@ package com.novoda.downloadmanager;
 import android.database.Cursor;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 class PartialDownloadMigrationExtractor {
 
@@ -41,6 +43,7 @@ class PartialDownloadMigrationExtractor {
             Cursor downloadsCursor = database.rawQuery(DOWNLOADS_QUERY, batchId);
             Batch.Builder newBatchBuilder = null;
             List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
+            Set<String> uris = new HashSet<>();
 
             while (downloadsCursor.moveToNext()) {
                 String originalFileId = downloadsCursor.getString(FILE_ID_COLUMN);
@@ -51,6 +54,11 @@ class PartialDownloadMigrationExtractor {
                     newBatchBuilder = Batch.with(downloadBatchId, batchTitle);
                 }
 
+                if (uris.contains(uri)) {
+                    continue;
+                } else {
+                    uris.add(uri);
+                }
                 newBatchBuilder.addFile(uri).apply();
 
                 FileSize fileSize = FileSizeCreator.unknownFileSize();
