@@ -4,7 +4,9 @@ import android.database.Cursor;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 class MigrationExtractor {
 
@@ -56,6 +58,7 @@ class MigrationExtractor {
 
                 Batch.Builder newBatchBuilder = null;
                 List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
+                Set<String> uris = new HashSet<>();
 
                 try {
                     while (downloadsCursor.moveToNext()) {
@@ -68,6 +71,11 @@ class MigrationExtractor {
                             newBatchBuilder = Batch.with(downloadBatchId, batchTitle);
                         }
 
+                        if (uris.contains(originalNetworkAddress)) {
+                            continue;
+                        } else {
+                            uris.add(originalNetworkAddress);
+                        }
                         newBatchBuilder.addFile(originalNetworkAddress).apply();
 
                         FilePath filePath = new LiteFilePath(originalFileLocation);
