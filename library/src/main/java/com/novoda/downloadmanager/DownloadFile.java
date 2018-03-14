@@ -65,9 +65,9 @@ class DownloadFile {
         if (downloadFileStatus.isMarkedAsDeleted()) {
             return;
         }
-        Log.v("Ferran, start DownloadFile.persistSync with " + downloadBatchId.rawId() + ", status: " + downloadFileStatus.status());
+        Log.v("start DownloadFile.persistSync with " + downloadBatchId.rawId() + ", status: " + downloadFileStatus.status());
         persistAsync();
-        Log.v("Ferran, end DownloadFile.persistSync with " + downloadBatchId.rawId() + ", status: " + downloadFileStatus.status());
+        Log.v("end DownloadFile.persistSync with " + downloadBatchId.rawId() + ", status: " + downloadFileStatus.status());
 
         if (fileSize.currentSize() == fileSize.totalSize()) {
             downloadFileStatus.update(fileSize, filePath);
@@ -170,7 +170,7 @@ class DownloadFile {
     }
 
     void delete() {
-        Log.v("Ferran, start DownloadFile.delete() with " + downloadBatchId.rawId());
+        Log.v("start DownloadFile.delete() with " + downloadBatchId.rawId());
         if (downloadFileStatus.isMarkedAsDownloading()) {
             downloadFileStatus.markAsDeleted();
             fileDownloader.stopDownloading();
@@ -178,7 +178,7 @@ class DownloadFile {
             downloadFileStatus.markAsDeleted();
             filePersistence.delete(filePath);
         }
-        Log.v("Ferran, end DownloadFile.delete() with " + downloadBatchId.rawId());
+        Log.v("end DownloadFile.delete() with " + downloadBatchId.rawId());
     }
 
     long getTotalSize() {

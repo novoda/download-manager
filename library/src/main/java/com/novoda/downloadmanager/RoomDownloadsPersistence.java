@@ -37,7 +37,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
 
     @Override
     public void persistBatch(DownloadsBatchPersisted batchPersisted) {
-        Log.v("Ferran, start persistBatch " + batchPersisted.downloadBatchId().rawId());
+        Log.v("start persistBatch " + batchPersisted.downloadBatchId().rawId());
         RoomBatch roomBatch = new RoomBatch();
         roomBatch.id = batchPersisted.downloadBatchId().rawId();
         roomBatch.status = batchPersisted.downloadBatchStatus().toRawValue();
@@ -46,7 +46,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
         roomBatch.notificationSeen = batchPersisted.notificationSeen();
 
         database.roomBatchDao().insert(roomBatch);
-        Log.v("Ferran, end persistBatch " + batchPersisted.downloadBatchId().rawId());
+        Log.v("end persistBatch " + batchPersisted.downloadBatchId().rawId());
     }
 
     @Override
@@ -70,7 +70,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
 
     @Override
     public void persistFile(DownloadsFilePersisted filePersisted) {
-        Log.v("Ferran, start persistFile " + filePersisted.downloadBatchId().rawId());
+        Log.v("start persistFile " + filePersisted.downloadBatchId().rawId());
         RoomFile roomFile = new RoomFile();
         roomFile.totalSize = filePersisted.totalFileSize();
         roomFile.batchId = filePersisted.downloadBatchId().rawId();
@@ -81,7 +81,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
         roomFile.persistenceType = filePersisted.filePersistenceType().toRawValue();
 
         database.roomFileDao().insert(roomFile);
-        Log.v("Ferran, end persistFile " + filePersisted.downloadBatchId().rawId());
+        Log.v("end persistFile " + filePersisted.downloadBatchId().rawId());
     }
 
     @Override
@@ -116,27 +116,27 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
 
     @Override
     public void delete(DownloadBatchId downloadBatchId) {
-        Log.v("Ferran, start delete " + downloadBatchId.rawId());
+        Log.v("start delete " + downloadBatchId.rawId());
         RoomBatch roomBatch = database.roomBatchDao().load(downloadBatchId.rawId());
         database.roomBatchDao().delete(roomBatch);
-        Log.v("Ferran, end delete " + downloadBatchId.rawId());
+        Log.v("end delete " + downloadBatchId.rawId());
     }
 
     @Override
     public void update(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status) {
-        Log.v("Ferran, start update " + downloadBatchId.rawId() + ", status: " + status);
+        Log.v("start update " + downloadBatchId.rawId() + ", status: " + status);
         RoomBatch roomBatch = database.roomBatchDao().load(downloadBatchId.rawId());
         roomBatch.status = status.toRawValue();
         database.roomBatchDao().update(roomBatch);
-        Log.v("Ferran, end update " + downloadBatchId.rawId() + ", status: " + status);
+        Log.v("end update " + downloadBatchId.rawId() + ", status: " + status);
     }
 
     @Override
     public void update(DownloadBatchId downloadBatchId, boolean notificationSeen) {
-        Log.v("Ferran, start update notification " + downloadBatchId.rawId());
+        Log.v("start update notification " + downloadBatchId.rawId());
         RoomBatch roomBatch = database.roomBatchDao().load(downloadBatchId.rawId());
         roomBatch.notificationSeen = notificationSeen;
         database.roomBatchDao().update(roomBatch);
-        Log.v("Ferran, end update  notification" + downloadBatchId.rawId());
+        Log.v("end update  notification" + downloadBatchId.rawId());
     }
 }

@@ -182,7 +182,7 @@ class DownloadBatch {
             if (downloadBatchStatus.status() == DELETED) {
                 return 0;
             }
-            Log.v("Ferran, DownloadBatch.getTotalSize() " + downloadBatchStatus.getDownloadBatchId().rawId() + ", status: " + downloadBatchStatus.status());
+            Log.v("DownloadBatch.getTotalSize() " + downloadBatchStatus.getDownloadBatchId().rawId() + ", status: " + downloadBatchStatus.status());
             long totalFileSize = downloadFile.getTotalSize();
             if (totalFileSize == 0) {
                 return 0;

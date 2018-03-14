@@ -37,7 +37,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                       boolean notificationSeen) {
         executor.execute(() -> {
             List<DownloadFile> downloadFilesToPersist = new ArrayList<>(downloadFiles);
-            Log.v("Ferran, start DownloadBatchPersistence persist full batch " + downloadBatchId + ", downloadFilesSize: " + downloadFilesToPersist.size());
+            Log.v("start DownloadBatchPersistence persist full batch " + downloadBatchId + ", downloadFilesSize: " + downloadFilesToPersist.size());
             downloadsPersistence.startTransaction();
 
             try {
@@ -56,7 +56,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
             } finally {
                 downloadsPersistence.endTransaction();
             }
-            Log.v("Ferran, end DownloadBatchPersistence persist full batch " + downloadBatchId);
+            Log.v("end DownloadBatchPersistence persist full batch " + downloadBatchId);
         });
     }
 
