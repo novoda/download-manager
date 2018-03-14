@@ -23,7 +23,7 @@ class DownloadBatchStatusNotificationDispatcher {
         }
 
         if (downloadBatchStatus.status() == DOWNLOADED) {
-            notificationSeenPersistence.updateNotificationSeenAsync(downloadBatchStatus.getDownloadBatchId(), NOTIFICATION_SEEN);
+            notificationSeenPersistence.updateNotificationSeenAsync(downloadBatchStatus, NOTIFICATION_SEEN);
         }
 
         notificationDispatcher.updateNotification(downloadBatchStatus);

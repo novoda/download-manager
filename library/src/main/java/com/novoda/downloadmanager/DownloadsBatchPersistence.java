@@ -151,14 +151,16 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
     }
 
     @Override
-    public void updateNotificationSeenAsync(DownloadBatchId downloadBatchId, boolean notificationSeen) {
+    public void updateNotificationSeenAsync(DownloadBatchStatus downloadBatchStatus, boolean notificationSeen) {
         executor.execute(() -> {
-            downloadsPersistence.startTransaction();
-            try {
-                downloadsPersistence.update(downloadBatchId, notificationSeen);
-                downloadsPersistence.transactionSuccess();
-            } finally {
-                downloadsPersistence.endTransaction();
+            if (downloadBatchStatus.status() == DownloadBatchStatus.Status.DOWNLOADED) {
+                downloadsPersistence.startTransaction();
+                try {
+                    downloadsPersistence.update(downloadBatchStatus.getDownloadBatchId(), notificationSeen);
+                    downloadsPersistence.transactionSuccess();
+                } finally {
+                    downloadsPersistence.endTransaction();
+                }
             }
         });
     }
