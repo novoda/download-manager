@@ -17,6 +17,7 @@ class DownloadBatchStatusNotificationDispatcher {
     }
 
     void updateNotification(DownloadBatchStatus downloadBatchStatus) {
+        Log.v("start updateNotification: " + downloadBatchStatus);
         if (downloadBatchStatus.notificationSeen()) {
             Log.v("DownloadBatchStatus:", downloadBatchStatus.getDownloadBatchId(), "notification has already been seen.");
             return;
@@ -27,6 +28,7 @@ class DownloadBatchStatusNotificationDispatcher {
         }
 
         notificationDispatcher.updateNotification(downloadBatchStatus);
+        Log.v("end updateNotification: " + downloadBatchStatus);
     }
 
     void setDownloadService(DownloadService downloadService) {

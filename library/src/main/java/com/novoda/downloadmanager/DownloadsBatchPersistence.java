@@ -153,6 +153,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
     @Override
     public void updateNotificationSeenAsync(DownloadBatchStatus downloadBatchStatus, boolean notificationSeen) {
         executor.execute(() -> {
+            Log.v("start updateNotificationSeenAsync with: " + downloadBatchStatus + ", notificationSeen: " + notificationSeen);
             if (downloadBatchStatus.status() == DownloadBatchStatus.Status.DOWNLOADED) {
                 downloadsPersistence.startTransaction();
                 try {
@@ -162,6 +163,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                     downloadsPersistence.endTransaction();
                 }
             }
+            Log.v("end updateNotificationSeenAsync with: " + downloadBatchStatus + ", notificationSeen: " + notificationSeen);
         });
     }
 

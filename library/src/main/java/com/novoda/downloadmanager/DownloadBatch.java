@@ -55,15 +55,18 @@ class DownloadBatch {
 
         if (status == DELETED) {
             deleteBatchIfNeeded();
+            notifyCallback(downloadBatchStatus);
             return;
         }
 
         if (status == PAUSED) {
+            notifyCallback(downloadBatchStatus);
             return;
         }
 
         if (connectionNotAllowedForDownload(status)) {
             processNetworkError();
+            notifyCallback(downloadBatchStatus);
             return;
         }
 
@@ -79,6 +82,7 @@ class DownloadBatch {
         if (totalBatchSizeBytes <= ZERO_BYTES) {
             deleteBatchIfNeeded();
             processNetworkError();
+            notifyCallback(downloadBatchStatus);
             return;
         }
 
@@ -98,8 +102,9 @@ class DownloadBatch {
             processNetworkError();
         }
 
-        callbackThrottle.stopUpdates();
+        notifyCallback(downloadBatchStatus);
         deleteBatchIfNeeded();
+        callbackThrottle.stopUpdates();
     }
 
     private void deleteBatchIfNeeded() {
