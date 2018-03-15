@@ -65,9 +65,8 @@ class DownloadFile {
         if (downloadFileStatus.isMarkedAsDeleted()) {
             return;
         }
-        Log.v("start DownloadFile.persistSync with " + downloadBatchId.rawId() + ", status: " + downloadFileStatus.status());
-        persistAsync();
-        Log.v("end DownloadFile.persistSync with " + downloadBatchId.rawId() + ", status: " + downloadFileStatus.status());
+
+        persist();
 
         if (fileSize.currentSize() == fileSize.totalSize()) {
             downloadFileStatus.update(fileSize, filePath);
@@ -170,28 +169,29 @@ class DownloadFile {
     }
 
     void delete() {
-        Log.v("start DownloadFile.delete() with " + downloadBatchId.rawId());
         if (downloadFileStatus.isMarkedAsDownloading()) {
             downloadFileStatus.markAsDeleted();
+            Log.v("mark file as deleted for batchId: " + downloadBatchId.rawId());
             fileDownloader.stopDownloading();
         } else {
             downloadFileStatus.markAsDeleted();
+            Log.v("mark file as deleted for batchId: " + downloadBatchId.rawId());
             filePersistence.delete(filePath);
         }
-        Log.v("end DownloadFile.delete() with " + downloadBatchId.rawId());
     }
 
     long getTotalSize() {
         if (fileSize.isTotalSizeUnknown()) {
             FileSize requestFileSize = fileSizeRequester.requestFileSize(url);
             fileSize.setTotalSize(requestFileSize.totalSize());
+            Log.v("file getTotalSize for batchId: " + downloadBatchId + ", status: " + fileStatus().status() + ", fileId: " + fileStatus().downloadFileId().rawId());
             persistAsync();
         }
 
         return fileSize.totalSize();
     }
 
-    void persistAsync() {
+    private void persistAsync() {
         downloadsFilePersistence.persistAsync(
                 downloadBatchId,
                 fileName,
@@ -204,7 +204,7 @@ class DownloadFile {
     }
 
     @WorkerThread
-    void persistSync() {
+    void persist() {
         downloadsFilePersistence.persistSync(
                 downloadBatchId,
                 fileName,

@@ -4,6 +4,11 @@ import android.os.Handler;
 
 import com.novoda.notils.logger.simple.Log;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.InOrder;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,11 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.InOrder;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.novoda.downloadmanager.DownloadBatchIdFixtures.aDownloadBatchId;
@@ -27,6 +27,7 @@ import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -60,16 +61,16 @@ public class DownloadManagerTest {
     private final ConnectionChecker connectionChecker = mock(ConnectionChecker.class);
 
     private DownloadManager downloadManager;
-    private Map<DownloadBatchId, DownloadBatch> downloadBatches = new HashMap<>();
+    private Map<DownloadBatchId, DownloadBatch> downloadingBatches = new HashMap<>();
     private List<DownloadBatchStatus> downloadBatchStatuses = new ArrayList<>();
     private List<DownloadBatchStatusCallback> downloadBatchCallbacks = new ArrayList<>();
     private DownloadFileStatus downloadFileStatus = null;
 
     @Before
     public void setUp() {
-        downloadBatches = new HashMap<>();
-        downloadBatches.put(DOWNLOAD_BATCH_ID, downloadBatch);
-        downloadBatches.put(ADDITIONAL_DOWNLOAD_BATCH_ID, additionalDownloadBatch);
+        downloadingBatches = new HashMap<>();
+        downloadingBatches.put(DOWNLOAD_BATCH_ID, downloadBatch);
+        downloadingBatches.put(ADDITIONAL_DOWNLOAD_BATCH_ID, additionalDownloadBatch);
 
         downloadBatchCallbacks.add(downloadBatchCallback);
 
@@ -78,7 +79,7 @@ public class DownloadManagerTest {
                 callbackLock,
                 executorService,
                 handler,
-                downloadBatches,
+                downloadingBatches,
                 downloadBatchCallbacks,
                 fileOperations,
                 downloadsBatchPersistence,
@@ -160,8 +161,8 @@ public class DownloadManagerTest {
         downloadManager.submitAllStoredDownloads(allStoredDownloadsSubmittedCallback);
 
         InOrder inOrder = inOrder(downloadManagerDownloader);
-        inOrder.verify(downloadManagerDownloader).download(downloadBatch, downloadBatches);
-        inOrder.verify(downloadManagerDownloader).download(additionalDownloadBatch, downloadBatches);
+        inOrder.verify(downloadManagerDownloader).download(downloadBatch, downloadingBatches);
+        inOrder.verify(downloadManagerDownloader).download(additionalDownloadBatch, downloadingBatches);
     }
 
     @Test
@@ -172,10 +173,19 @@ public class DownloadManagerTest {
     }
 
     @Test
-    public void downloadGivenBatch() {
+    public void downloadGivenBatch_whenBatchIsNotAlreadyBeingDownloaded() {
+        downloadingBatches.clear();
+
         downloadManager.download(BATCH);
 
-        verify(downloadManagerDownloader).download(BATCH, downloadBatches);
+        verify(downloadManagerDownloader).download(BATCH, downloadingBatches);
+    }
+
+    @Test
+    public void doesNotDownload_whenBatchIsAlreadyBeingDownloaded() {
+        downloadManager.download(BATCH);
+
+        verify(downloadManagerDownloader, never()).download(BATCH, downloadingBatches);
     }
 
     @Test
@@ -216,7 +226,7 @@ public class DownloadManagerTest {
 
         downloadManager.resume(DOWNLOAD_BATCH_ID);
 
-        assertThat(downloadBatches).doesNotContainEntry(DOWNLOAD_BATCH_ID, downloadBatch);
+        assertThat(downloadingBatches).doesNotContainEntry(DOWNLOAD_BATCH_ID, downloadBatch);
     }
 
     @Test
@@ -234,7 +244,7 @@ public class DownloadManagerTest {
 
         downloadManager.resume(DOWNLOAD_BATCH_ID);
 
-        verify(downloadManagerDownloader).download(downloadBatch, downloadBatches);
+        verify(downloadManagerDownloader).download(downloadBatch, downloadingBatches);
     }
 
     @Test
@@ -242,13 +252,6 @@ public class DownloadManagerTest {
         downloadManager.delete(new LiteDownloadBatchId("unknown"));
 
         verifyZeroInteractions(downloadBatch, additionalDownloadBatch);
-    }
-
-    @Test
-    public void removesBatchFromInternalList_whenDeleting() {
-        downloadManager.delete(DOWNLOAD_BATCH_ID);
-
-        assertThat(downloadBatches).doesNotContainEntry(DOWNLOAD_BATCH_ID, downloadBatch);
     }
 
     @Test
@@ -359,7 +362,7 @@ public class DownloadManagerTest {
 
         downloadManager.updateAllowedConnectionType(ANY_CONNECTION_TYPE);
 
-        for (DownloadBatch batch : downloadBatches.values()) {
+        for (DownloadBatch batch : downloadingBatches.values()) {
             verify(batch).waitForNetwork();
         }
     }

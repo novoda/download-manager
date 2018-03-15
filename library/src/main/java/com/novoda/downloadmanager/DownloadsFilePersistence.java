@@ -119,6 +119,7 @@ class DownloadsFilePersistence {
             case ERROR:
                 return InternalDownloadFileStatus.Status.ERROR;
             case DELETED:
+            case DELETING:
                 return InternalDownloadFileStatus.Status.DELETED;
             case DOWNLOADED:
                 return InternalDownloadFileStatus.Status.DOWNLOADED;

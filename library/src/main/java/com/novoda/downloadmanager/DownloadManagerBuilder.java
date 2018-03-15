@@ -22,6 +22,7 @@ import com.squareup.okhttp.OkHttpClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -29,6 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETING;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
@@ -284,7 +286,8 @@ public final class DownloadManagerBuilder {
         );
         DownloadBatchStatusNotificationDispatcher batchStatusNotificationDispatcher = new DownloadBatchStatusNotificationDispatcher(
                 downloadsBatchPersistence,
-                notificationDispatcher
+                notificationDispatcher,
+                new HashSet<>()
         );
 
         LiteDownloadManagerDownloader downloader = new LiteDownloadManagerDownloader(
@@ -347,7 +350,7 @@ public final class DownloadManagerBuilder {
         @Override
         public NotificationDisplayState notificationDisplayState(DownloadBatchStatus payload) {
             DownloadBatchStatus.Status status = payload.status();
-            if (status == DOWNLOADED || status == DELETED || status == ERROR || status == PAUSED) {
+            if (status == DOWNLOADED || status == DELETED || status == DELETING || status == ERROR || status == PAUSED) {
                 return NotificationDisplayState.STACK_NOTIFICATION_DISMISSIBLE;
             } else {
                 return NotificationDisplayState.SINGLE_PERSISTENT_NOTIFICATION;
@@ -363,6 +366,7 @@ public final class DownloadManagerBuilder {
 
             switch (payload.status()) {
                 case DELETED:
+                case DELETING:
                     return createDeletedNotification(builder);
                 case ERROR:
                     return createErrorNotification(builder, payload.getDownloadErrorType());

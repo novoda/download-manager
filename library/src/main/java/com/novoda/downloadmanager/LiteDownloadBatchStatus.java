@@ -12,22 +12,28 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     private final DownloadBatchId downloadBatchId;
     private final long downloadedDateTimeInMillis;
 
+    private Status status;
+    private boolean notificationSeen;
     private long bytesDownloaded;
     private long totalBatchSizeBytes;
     private int percentageDownloaded;
-    private Status status;
-    private boolean notificationSeen;
-
-    private Optional<DownloadError> downloadError = Optional.absent();
+    private Optional<DownloadError> downloadError;
 
     LiteDownloadBatchStatus(DownloadBatchId downloadBatchId,
                             DownloadBatchTitle downloadBatchTitle,
                             long downloadedDateTimeInMillis,
+                            long bytesDownloaded,
+                            long totalBatchSizeBytes,
                             Status status,
-                            boolean notificationSeen) {
+                            boolean notificationSeen,
+                            Optional<DownloadError> downloadError) {
         this.downloadBatchTitle = downloadBatchTitle;
         this.downloadBatchId = downloadBatchId;
         this.downloadedDateTimeInMillis = downloadedDateTimeInMillis;
+        this.bytesDownloaded = bytesDownloaded;
+        this.totalBatchSizeBytes = totalBatchSizeBytes;
+        this.downloadError = downloadError;
+        this.percentageDownloaded = getPercentageFrom(bytesDownloaded, totalBatchSizeBytes);
         this.status = status;
         this.notificationSeen = notificationSeen;
     }
@@ -102,6 +108,12 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     }
 
     @Override
+    public void markAsDeleting() {
+        status = Status.DELETING;
+        notificationSeen = false;
+    }
+
+    @Override
     public void markAsDeleted() {
         status = Status.DELETED;
         notificationSeen = false;
@@ -127,6 +139,20 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     public void markAsWaitingForNetwork(DownloadsBatchPersistence persistence) {
         this.status = Status.WAITING_FOR_NETWORK;
         updateStatusAsync(status, persistence);
+    }
+
+    @Override
+    public InternalDownloadBatchStatus copy() {
+        return new LiteDownloadBatchStatus(
+                downloadBatchId,
+                downloadBatchTitle,
+                downloadedDateTimeInMillis,
+                bytesDownloaded,
+                totalBatchSizeBytes,
+                status,
+                notificationSeen,
+                downloadError
+        );
     }
 
     private void updateStatusAsync(Status status, DownloadsBatchStatusPersistence persistence) {
