@@ -4,6 +4,11 @@ import android.support.annotation.Nullable;
 
 class FileDownloaderCreator {
 
+    enum FileDownloaderType {
+        NETWORK,
+        CUSTOM
+    }
+
     private final FileDownloaderType type;
     @Nullable
     private final Class<? extends FileDownloader> customClass;
