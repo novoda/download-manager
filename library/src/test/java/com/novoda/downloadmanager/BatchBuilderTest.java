@@ -38,4 +38,20 @@ public class BatchBuilderTest {
         assertThat(batch).isEqualTo(expectedBatch);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void throwsException_whenDuplicatedFileIDsAreSupplied() {
+        Batch.with(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
+                .addFile("net_address").withDownloadFileId(DOWNLOAD_FILE_ID).apply()
+                .addFile("another_address").withDownloadFileId(DOWNLOAD_FILE_ID).apply()
+                .build();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throwsException_whenDuplicatedNetworkAddressWithoutFileIDsAreSupplied() {
+        Batch.with(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
+                .addFile("net_address").apply()
+                .addFile("net_address").apply()
+                .build();
+    }
+
 }

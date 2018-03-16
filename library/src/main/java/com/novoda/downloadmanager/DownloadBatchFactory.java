@@ -41,7 +41,7 @@ final class DownloadBatchFactory {
             FilePath filePath = FilePathCreator.create(basePath, prependBatchIdTo(relativePathFrom(batchFile), downloadBatchId));
             FileName fileName = FileNameExtractor.extractFrom(filePath.path());
 
-            DownloadFileId downloadFileId = downloadFileIdFrom(batch, batchFile);
+            DownloadFileId downloadFileId = FallbackDownloadFileIdProvider.downloadFileIdFor(batch.downloadBatchId(), batchFile);
             InternalDownloadFileStatus downloadFileStatus = new LiteDownloadFileStatus(
                     downloadBatchId,
                     downloadFileId,
@@ -50,7 +50,7 @@ final class DownloadBatchFactory {
                     filePath
             );
 
-            FileDownloader fileDownloader = fileOperations.fileDownloader();
+            FileDownloader fileDownloader = fileOperations.fileDownloaderCreator().create();
             FileSizeRequester fileSizeRequester = fileOperations.fileSizeRequester();
 
             DownloadFile downloadFile = new DownloadFile(
@@ -103,11 +103,6 @@ final class DownloadBatchFactory {
     private static String relativePathFrom(BatchFile batchFile) {
         String fileNameFromNetworkAddress = FileNameExtractor.extractFrom(batchFile.networkAddress()).name();
         return batchFile.relativePath().or(fileNameFromNetworkAddress);
-    }
-
-    private static DownloadFileId downloadFileIdFrom(Batch batch, BatchFile batchFile) {
-        String rawId = batch.downloadBatchId().rawId() + batchFile.networkAddress();
-        return batchFile.downloadFileId().or(DownloadFileIdCreator.createFrom(rawId));
     }
 
 }

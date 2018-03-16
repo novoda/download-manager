@@ -56,6 +56,7 @@ public class DownloadManagerTest {
     private final DownloadBatchStatusCallback downloadBatchCallback = mock(DownloadBatchStatusCallback.class);
     private final FileOperations fileOperations = mock(FileOperations.class);
     private final FileDownloader fileDownloader = mock(FileDownloader.class);
+    private final FileDownloaderCreator fileDownloaderCreator = mock(FileDownloaderCreator.class);
     private final DownloadsBatchPersistence downloadsBatchPersistence = mock(DownloadsBatchPersistence.class);
     private final LiteDownloadManagerDownloader downloadManagerDownloader = mock(LiteDownloadManagerDownloader.class);
     private final ConnectionChecker connectionChecker = mock(ConnectionChecker.class);
@@ -137,7 +138,8 @@ public class DownloadManagerTest {
     }
 
     private void setupFileOperations() {
-        given(fileOperations.fileDownloader()).willReturn(fileDownloader);
+        given(fileOperations.fileDownloaderCreator()).willReturn(fileDownloaderCreator);
+        given(fileDownloaderCreator.create()).willReturn(fileDownloader);
     }
 
     @Test

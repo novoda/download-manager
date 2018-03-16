@@ -18,7 +18,6 @@ import android.support.v4.app.NotificationManagerCompat;
 
 import com.novoda.merlin.MerlinsBeard;
 import com.novoda.notils.logger.simple.Log;
-import com.squareup.okhttp.OkHttpClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,14 +39,13 @@ public final class DownloadManagerBuilder {
     private static final Object SERVICE_LOCK = new Object();
     private static final Object CALLBACK_LOCK = new Object();
     private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
-    private static final int TIMEOUT = 5;
 
     private final Context applicationContext;
     private final Handler callbackHandler;
 
     private FilePersistenceCreator filePersistenceCreator;
     private FileSizeRequester fileSizeRequester;
-    private FileDownloader fileDownloader;
+    private FileDownloaderCreator fileDownloaderCreator;
     private DownloadService downloadService;
     private DownloadManager downloadManager;
     private NotificationCreator<DownloadBatchStatus> notificationCreator;
@@ -65,18 +63,13 @@ public final class DownloadManagerBuilder {
         Context applicationContext = context.getApplicationContext();
 
         FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(applicationContext);
-
-        DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(applicationContext);
-
-        OkHttpClient okHttpClient = new OkHttpClient();
-        okHttpClient.setConnectTimeout(TIMEOUT, TimeUnit.SECONDS);
-        okHttpClient.setWriteTimeout(TIMEOUT, TimeUnit.SECONDS);
-        okHttpClient.setReadTimeout(TIMEOUT, TimeUnit.SECONDS);
-        HttpClient httpClient = new WrappedOkHttpClient(okHttpClient);
+        FileDownloaderCreator fileDownloaderCreator = FileDownloaderCreator.newNetworkFileDownloaderCreator();
 
         NetworkRequestCreator requestCreator = new NetworkRequestCreator();
+        HttpClient httpClient = HttpClientFactory.getInstance();
         FileSizeRequester fileSizeRequester = new NetworkFileSizeRequester(httpClient, requestCreator);
-        FileDownloader fileDownloader = new NetworkFileDownloader(httpClient, requestCreator);
+
+        DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(applicationContext);
 
         NotificationChannelProvider notificationChannelProvider = new DefaultNotificationChannelProvider(
                 context.getResources().getString(R.string.download_notification_channel_name),
@@ -106,7 +99,7 @@ public final class DownloadManagerBuilder {
                 filePersistenceCreator,
                 downloadsPersistence,
                 fileSizeRequester,
-                fileDownloader,
+                fileDownloaderCreator,
                 notificationChannelProvider,
                 notificationCreator,
                 connectionTypeAllowed,
@@ -122,7 +115,7 @@ public final class DownloadManagerBuilder {
                                    FilePersistenceCreator filePersistenceCreator,
                                    DownloadsPersistence downloadsPersistence,
                                    FileSizeRequester fileSizeRequester,
-                                   FileDownloader fileDownloader,
+                                   FileDownloaderCreator fileDownloaderCreator,
                                    NotificationChannelProvider notificationChannelProvider,
                                    NotificationCreator<DownloadBatchStatus> notificationCreator,
                                    ConnectionType connectionTypeAllowed,
@@ -134,7 +127,7 @@ public final class DownloadManagerBuilder {
         this.filePersistenceCreator = filePersistenceCreator;
         this.downloadsPersistence = downloadsPersistence;
         this.fileSizeRequester = fileSizeRequester;
-        this.fileDownloader = fileDownloader;
+        this.fileDownloaderCreator = fileDownloaderCreator;
         this.notificationChannelProvider = notificationChannelProvider;
         this.notificationCreator = notificationCreator;
         this.connectionTypeAllowed = connectionTypeAllowed;
@@ -153,9 +146,9 @@ public final class DownloadManagerBuilder {
         return this;
     }
 
-    public DownloadManagerBuilder withFileDownloaderCustom(FileSizeRequester fileSizeRequester, FileDownloader fileDownloader) {
+    public DownloadManagerBuilder withFileDownloaderCustom(FileSizeRequester fileSizeRequester, Class<? extends FileDownloader> customFileDownloaderClass) {
         this.fileSizeRequester = fileSizeRequester;
-        this.fileDownloader = fileDownloader;
+        this.fileDownloaderCreator = FileDownloaderCreator.newCustomFileDownloaderCreator(customFileDownloaderClass);
         return this;
     }
 
@@ -252,7 +245,7 @@ public final class DownloadManagerBuilder {
 
         applicationContext.bindService(intent, serviceConnection, Service.BIND_AUTO_CREATE);
 
-        FileOperations fileOperations = new FileOperations(filePersistenceCreator, fileSizeRequester, fileDownloader);
+        FileOperations fileOperations = new FileOperations(filePersistenceCreator, fileSizeRequester, fileDownloaderCreator);
         List<DownloadBatchStatusCallback> callbacks = new ArrayList<>();
 
         CallbackThrottleCreator callbackThrottleCreator = getCallbackThrottleCreator(
