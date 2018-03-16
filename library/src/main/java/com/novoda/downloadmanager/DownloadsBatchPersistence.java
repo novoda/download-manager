@@ -142,17 +142,18 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
 
     void deleteAsync(DownloadBatchStatus downloadBatchStatus, DeleteCallback deleteCallback) {
         executor.execute(() -> {
-//            DownloadBatchId downloadBatchId = downloadBatchStatus.getDownloadBatchId();
-//            DownloadBatchStatus.Status status = downloadBatchStatus.status();
-//            if (status == DownloadBatchStatus.Status.DELETED) {
-//                return;
-//            }
-            delete(downloadBatchStatus);
+            try {
+                deleteSync(downloadBatchStatus);
+            } catch (NullPointerException e) {
+                Log.w("could not delete batch " + downloadBatchStatus.getDownloadBatchId().rawId() + " with status " + downloadBatchStatus.status());
+            }
+
             deleteCallback.onDeleted(downloadBatchStatus.getDownloadBatchId());
         });
     }
 
-    void delete(DownloadBatchStatus downloadBatchStatus) {
+    @WorkerThread
+    void deleteSync(DownloadBatchStatus downloadBatchStatus) {
         DownloadBatchId downloadBatchId = downloadBatchStatus.getDownloadBatchId();
         Log.v("start batch delete " + downloadBatchId.rawId() + " with status: " + downloadBatchStatus.status());
         downloadsPersistence.startTransaction();
@@ -173,6 +174,8 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
             try {
                 downloadsPersistence.update(downloadBatchId, status);
                 downloadsPersistence.transactionSuccess();
+            } catch (NullPointerException e) {
+                Log.w("could not update batch status " + status + " failed for " + downloadBatchId.rawId());
             } finally {
                 downloadsPersistence.endTransaction();
             }
@@ -187,6 +190,8 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                 try {
                     downloadsPersistence.update(downloadBatchStatus.getDownloadBatchId(), notificationSeen);
                     downloadsPersistence.transactionSuccess();
+                } catch (NullPointerException e) {
+                    Log.w("could not update notification to status " + downloadBatchStatus.status() + " for batch id " + downloadBatchStatus.getDownloadBatchId().rawId());
                 } finally {
                     downloadsPersistence.endTransaction();
                 }

@@ -5,26 +5,13 @@ import android.support.annotation.WorkerThread;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 class DownloadsFilePersistence {
 
     private final DownloadsPersistence downloadsPersistence;
-    private final Executor executor;
 
-    DownloadsFilePersistence(DownloadsPersistence downloadsPersistence, Executor executor) {
+    DownloadsFilePersistence(DownloadsPersistence downloadsPersistence) {
         this.downloadsPersistence = downloadsPersistence;
-        this.executor = executor;
-    }
-
-    void persistAsync(DownloadBatchId downloadBatchId,
-                      FileName fileName,
-                      FilePath filePath,
-                      FileSize fileSize,
-                      String url,
-                      DownloadFileStatus downloadFileStatus,
-                      FilePersistenceType filePersistenceType) {
-        executor.execute(() -> persistSync(downloadBatchId, fileName, filePath, fileSize, url, downloadFileStatus, filePersistenceType));
     }
 
     @WorkerThread

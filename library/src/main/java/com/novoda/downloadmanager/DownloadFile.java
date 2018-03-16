@@ -180,27 +180,19 @@ class DownloadFile {
         }
     }
 
+    @WorkerThread
     long getTotalSize() {
         if (fileSize.isTotalSizeUnknown()) {
             FileSize requestFileSize = fileSizeRequester.requestFileSize(url);
             fileSize.setTotalSize(requestFileSize.totalSize());
             Log.v("file getTotalSize for batchId: " + downloadBatchId + ", status: " + fileStatus().status() + ", fileId: " + fileStatus().downloadFileId().rawId());
-            persistAsync();
+            if (fileStatus().status() == DownloadFileStatus.Status.DELETED) {
+                return 0;
+            }
+            persist();
         }
 
         return fileSize.totalSize();
-    }
-
-    private void persistAsync() {
-        downloadsFilePersistence.persistAsync(
-                downloadBatchId,
-                fileName,
-                filePath,
-                fileSize,
-                url,
-                downloadFileStatus,
-                filePersistence.getType()
-        );
     }
 
     @WorkerThread

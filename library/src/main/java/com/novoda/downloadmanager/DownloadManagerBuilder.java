@@ -255,10 +255,10 @@ public final class DownloadManagerBuilder {
                 customCallbackThrottle
         );
 
-        Executor executor = Executors.newSingleThreadExecutor();
-        DownloadsFilePersistence downloadsFilePersistence = new DownloadsFilePersistence(downloadsPersistence, executor);
+        DownloadsFilePersistence downloadsFilePersistence = new DownloadsFilePersistence(downloadsPersistence);
         MerlinsBeard merlinsBeard = MerlinsBeard.from(applicationContext);
         ConnectionChecker connectionChecker = new ConnectionChecker(merlinsBeard, connectionTypeAllowed);
+        Executor executor = Executors.newSingleThreadExecutor();
         DownloadsBatchPersistence downloadsBatchPersistence = new DownloadsBatchPersistence(
                 executor,
                 downloadsFilePersistence,

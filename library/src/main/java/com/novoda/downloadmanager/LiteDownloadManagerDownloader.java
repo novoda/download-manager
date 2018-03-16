@@ -94,20 +94,26 @@ class LiteDownloadManagerDownloader {
     }
 
     private DownloadBatchStatusCallback downloadBatchCallback(Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
-        return downloadBatchStatus -> callbackHandler.post(() -> {
+        return downloadBatchStatus -> {
+            if (downloadBatchStatus == null) {
+                return;
+            }
+
             DownloadBatchId downloadBatchId = downloadBatchStatus.getDownloadBatchId();
             if (downloadBatchStatus.status() == DELETED) {
                 Log.v("batch " + downloadBatchId.rawId() + " is finally deleted, removing it from the map");
                 downloadBatchMap.remove(downloadBatchId);
             }
 
-            synchronized (waitForDownloadBatchStatusCallback) {
-                for (DownloadBatchStatusCallback callback : callbacks) {
-                    callback.onUpdate(downloadBatchStatus);
+            callbackHandler.post(() -> {
+                synchronized (waitForDownloadBatchStatusCallback) {
+                    for (DownloadBatchStatusCallback callback : callbacks) {
+                        callback.onUpdate(downloadBatchStatus);
+                    }
+                    notificationDispatcher.updateNotification(downloadBatchStatus);
                 }
-                notificationDispatcher.updateNotification(downloadBatchStatus);
-            }
-        });
+            });
+        };
     }
 
     void setDownloadService(DownloadService downloadService) {
