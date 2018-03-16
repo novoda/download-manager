@@ -34,7 +34,7 @@ class FileDownloaderCreator {
                 fileDownloader = createCustomFileDownloader();
                 break;
             default:
-                throw new IllegalStateException("Persistence of type " + type + " is not supported");
+                throw new IllegalStateException("FileDownloader of type " + type + " is not supported");
         }
 
         return fileDownloader;
@@ -42,28 +42,28 @@ class FileDownloaderCreator {
 
     private FileDownloader createCustomFileDownloader() {
         if (customClass == null) {
-            throw new CustomFilePersistenceException("CustomFilePersistence class cannot be accessed, is it public?");
+            throw new CustomFileDownloaderException("CustomFileDownloader class cannot be accessed, is it public?");
         }
 
         try {
             ClassLoader systemClassLoader = getClass().getClassLoader();
-            Class<?> customFilePersistenceClass = systemClassLoader.loadClass(customClass.getCanonicalName());
-            return (FileDownloader) customFilePersistenceClass.newInstance();
+            Class<?> customFileDownloaderClass = systemClassLoader.loadClass(customClass.getCanonicalName());
+            return (FileDownloader) customFileDownloaderClass.newInstance();
         } catch (IllegalAccessException e) {
-            throw new CustomFilePersistenceException(customClass, "Class cannot be accessed, is it public?", e);
+            throw new CustomFileDownloaderException(customClass, "Class cannot be accessed, is it public?", e);
         } catch (ClassNotFoundException e) {
-            throw new CustomFilePersistenceException(customClass, "Class does not exist", e);
+            throw new CustomFileDownloaderException(customClass, "Class does not exist", e);
         } catch (InstantiationException e) {
-            throw new CustomFilePersistenceException(customClass, "Class cannot be instantiated", e);
+            throw new CustomFileDownloaderException(customClass, "Class cannot be instantiated", e);
         }
     }
 
-    private static class CustomFilePersistenceException extends RuntimeException {
-        CustomFilePersistenceException(Class customClass, String message, Exception cause) {
+    private static class CustomFileDownloaderException extends RuntimeException {
+        CustomFileDownloaderException(Class customClass, String message, Exception cause) {
             super(customClass.getSimpleName() + ": " + message, cause);
         }
 
-        CustomFilePersistenceException(String message) {
+        CustomFileDownloaderException(String message) {
             super(message);
         }
     }

@@ -13,9 +13,9 @@ enum FileDownloaderType {
     }
 
     static FileDownloaderType from(String rawValue) {
-        for (FileDownloaderType filePersistenceType : values()) {
-            if (filePersistenceType.rawValue.equals(rawValue)) {
-                return filePersistenceType;
+        for (FileDownloaderType fileDownloaderType : values()) {
+            if (fileDownloaderType.rawValue.equals(rawValue)) {
+                return fileDownloaderType;
             }
         }
 
