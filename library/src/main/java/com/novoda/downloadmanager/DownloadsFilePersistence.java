@@ -67,7 +67,8 @@ class DownloadsFilePersistence {
             );
 
             FileSizeRequester fileSizeRequester = fileOperations.fileSizeRequester();
-            FileDownloader fileDownloader = fileOperations.fileDownloader();
+            FileDownloaderCreator fileDownloaderCreator = fileOperations.fileDownloaderCreator();
+            FileDownloader fileDownloader = fileDownloaderCreator.create();
 
             DownloadFile downloadFile = new DownloadFile(
                     batchId,

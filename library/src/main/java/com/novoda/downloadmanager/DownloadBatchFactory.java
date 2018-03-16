@@ -46,7 +46,7 @@ final class DownloadBatchFactory {
                     filePath
             );
 
-            FileDownloader fileDownloader = fileOperations.fileDownloader();
+            FileDownloader fileDownloader = fileOperations.fileDownloaderCreator().create();
             FileSizeRequester fileSizeRequester = fileOperations.fileSizeRequester();
 
             DownloadFile downloadFile = new DownloadFile(
