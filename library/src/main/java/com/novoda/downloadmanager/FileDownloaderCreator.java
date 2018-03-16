@@ -22,10 +22,6 @@ class FileDownloaderCreator {
     }
 
     FileDownloader create() {
-        return create(type);
-    }
-
-    private FileDownloader create(FileDownloaderType type) {
         FileDownloader fileDownloader;
 
         switch (type) {
