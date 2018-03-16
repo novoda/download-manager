@@ -1,5 +1,6 @@
 package com.novoda.downloadmanager;
 
+import android.database.sqlite.SQLiteConstraintException;
 import android.support.annotation.WorkerThread;
 
 import com.novoda.notils.logger.simple.Log;
@@ -77,67 +78,74 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
 
             List<DownloadBatch> downloadBatches = new ArrayList<>(batchPersistedList.size());
             for (DownloadsBatchPersisted batchPersisted : batchPersistedList) {
-                DownloadBatchStatus.Status status = batchPersisted.downloadBatchStatus();
-                DownloadBatchId downloadBatchId = batchPersisted.downloadBatchId();
-                DownloadBatchTitle downloadBatchTitle = batchPersisted.downloadBatchTitle();
-                long downloadedDateTimeInMillis = batchPersisted.downloadedDateTimeInMillis();
-                boolean notificationSeen = batchPersisted.notificationSeen();
-
-                List<DownloadFile> downloadFiles = downloadsFilePersistence.loadSync(
-                        downloadBatchId,
-                        status,
-                        fileOperations,
-                        downloadsFilePersistence
-                );
-
-                downloadFiles = Collections.unmodifiableList(downloadFiles);
-
-                Map<DownloadFileId, Long> downloadedFileSizeMap = new HashMap<>(downloadFiles.size());
-
-                long currentBytesDownloaded = 0;
-                long totalBatchSizeBytes = 0;
-                for (DownloadFile downloadFile : downloadFiles) {
-                    downloadedFileSizeMap.put(downloadFile.id(), downloadFile.getCurrentDownloadedBytes());
-                    currentBytesDownloaded += downloadFile.getCurrentDownloadedBytes();
-                    long totalFileSize = downloadFile.getTotalSize();
-                    if (totalFileSize == 0) {
-                        totalBatchSizeBytes = 0;
-                        currentBytesDownloaded = 0;
-                        break;
-                    } else {
-                        totalBatchSizeBytes += totalFileSize;
-                    }
+                try {
+                    DownloadBatch downloadBatch = getDownloadBatch(fileOperations, batchPersisted);
+                    downloadBatches.add(downloadBatch);
+                } catch (SQLiteConstraintException e) {
+                    Log.e("exception loading async batch " + batchPersisted.downloadBatchId().rawId());
                 }
-
-                InternalDownloadBatchStatus liteDownloadBatchStatus = new LiteDownloadBatchStatus(
-                        downloadBatchId,
-                        downloadBatchTitle,
-                        downloadedDateTimeInMillis,
-                        currentBytesDownloaded,
-                        totalBatchSizeBytes,
-                        status,
-                        notificationSeen,
-                        DOWNLOAD_ERROR
-                );
-
-                liteDownloadBatchStatus.update(currentBytesDownloaded, totalBatchSizeBytes);
-
-                CallbackThrottle callbackThrottle = callbackThrottleCreator.create();
-
-                DownloadBatch downloadBatch = new DownloadBatch(
-                        liteDownloadBatchStatus,
-                        downloadFiles,
-                        downloadedFileSizeMap,
-                        DownloadsBatchPersistence.this,
-                        callbackThrottle,
-                        connectionChecker
-                );
-
-                downloadBatches.add(downloadBatch);
             }
 
             callback.onLoaded(downloadBatches);
         });
+    }
+
+    private DownloadBatch getDownloadBatch(FileOperations fileOperations, DownloadsBatchPersisted batchPersisted) {
+        DownloadBatchStatus.Status status = batchPersisted.downloadBatchStatus();
+        DownloadBatchId downloadBatchId = batchPersisted.downloadBatchId();
+        DownloadBatchTitle downloadBatchTitle = batchPersisted.downloadBatchTitle();
+        long downloadedDateTimeInMillis = batchPersisted.downloadedDateTimeInMillis();
+        boolean notificationSeen = batchPersisted.notificationSeen();
+
+        List<DownloadFile> downloadFiles = downloadsFilePersistence.loadSync(
+                downloadBatchId,
+                status,
+                fileOperations,
+                downloadsFilePersistence
+        );
+
+        downloadFiles = Collections.unmodifiableList(downloadFiles);
+
+        Map<DownloadFileId, Long> downloadedFileSizeMap = new HashMap<>(downloadFiles.size());
+
+        long currentBytesDownloaded = 0;
+        long totalBatchSizeBytes = 0;
+        for (DownloadFile downloadFile : downloadFiles) {
+            downloadedFileSizeMap.put(downloadFile.id(), downloadFile.getCurrentDownloadedBytes());
+            currentBytesDownloaded += downloadFile.getCurrentDownloadedBytes();
+            long totalFileSize = downloadFile.getTotalSize();
+            if (totalFileSize == 0) {
+                totalBatchSizeBytes = 0;
+                currentBytesDownloaded = 0;
+                break;
+            } else {
+                totalBatchSizeBytes += totalFileSize;
+            }
+        }
+
+        InternalDownloadBatchStatus liteDownloadBatchStatus = new LiteDownloadBatchStatus(
+                downloadBatchId,
+                downloadBatchTitle,
+                downloadedDateTimeInMillis,
+                currentBytesDownloaded,
+                totalBatchSizeBytes,
+                status,
+                notificationSeen,
+                DOWNLOAD_ERROR
+        );
+
+        liteDownloadBatchStatus.update(currentBytesDownloaded, totalBatchSizeBytes);
+
+        CallbackThrottle callbackThrottle = callbackThrottleCreator.create();
+
+        return new DownloadBatch(
+                liteDownloadBatchStatus,
+                downloadFiles,
+                downloadedFileSizeMap,
+                DownloadsBatchPersistence.this,
+                callbackThrottle,
+                connectionChecker
+        );
     }
 
     void deleteAsync(DownloadBatchStatus downloadBatchStatus, DeleteCallback deleteCallback) {
@@ -145,7 +153,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
             try {
                 deleteSync(downloadBatchStatus);
             } catch (NullPointerException e) {
-                Log.w("could not delete batch " + downloadBatchStatus.getDownloadBatchId().rawId() + " with status " + downloadBatchStatus.status());
+                Log.e("could not delete batch " + downloadBatchStatus.getDownloadBatchId().rawId() + " with status " + downloadBatchStatus.status());
             }
 
             deleteCallback.onDeleted(downloadBatchStatus.getDownloadBatchId());
@@ -164,7 +172,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
             downloadsPersistence.endTransaction();
         }
 
-        Log.v("start batch delete " + downloadBatchId.rawId() + " with status: " + downloadBatchStatus.status());
+        Log.v("end batch delete " + downloadBatchId.rawId() + " with status: " + downloadBatchStatus.status());
     }
 
     @Override
@@ -175,7 +183,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                 downloadsPersistence.update(downloadBatchId, status);
                 downloadsPersistence.transactionSuccess();
             } catch (NullPointerException e) {
-                Log.w("could not update batch status " + status + " failed for " + downloadBatchId.rawId());
+                Log.e("could not update batch status " + status + " failed for " + downloadBatchId.rawId());
             } finally {
                 downloadsPersistence.endTransaction();
             }
@@ -191,7 +199,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                     downloadsPersistence.update(downloadBatchStatus.getDownloadBatchId(), notificationSeen);
                     downloadsPersistence.transactionSuccess();
                 } catch (NullPointerException e) {
-                    Log.w("could not update notification to status " + downloadBatchStatus.status() + " for batch id " + downloadBatchStatus.getDownloadBatchId().rawId());
+                    Log.e("could not update notification to status " + downloadBatchStatus.status() + " for batch id " + downloadBatchStatus.getDownloadBatchId().rawId());
                 } finally {
                     downloadsPersistence.endTransaction();
                 }

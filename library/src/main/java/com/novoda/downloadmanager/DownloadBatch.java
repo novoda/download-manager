@@ -122,6 +122,11 @@ class DownloadBatch {
                                                                  DownloadsBatchPersistence downloadsBatchPersistence,
                                                                  DownloadBatchStatusCallback callback,
                                                                  long totalBatchSizeBytes) {
+        if (downloadBatchStatus.status() == PAUSED) {
+            notifyCallback(callback, downloadBatchStatus);
+            return true;
+        }
+
         if (downloadBatchStatus.status() == DELETING) {
             deleteBatchIfNeeded(downloadBatchStatus, downloadsBatchPersistence, callback);
             notifyCallback(callback, downloadBatchStatus);
@@ -150,8 +155,8 @@ class DownloadBatch {
                                             DownloadsBatchPersistence downloadsBatchPersistence,
                                             DownloadBatchStatusCallback callback) {
         if (downloadBatchStatus.status() == DELETING) {
+            Log.v("deleteBatchIfNeeded: " + downloadBatchStatus.getDownloadBatchId().rawId());
             downloadsBatchPersistence.deleteSync(downloadBatchStatus);
-            Log.v("deleteBatchIfNeeded markAsDeleted: " + downloadBatchStatus.getDownloadBatchId().rawId());
             downloadBatchStatus.markAsDeleted();
             notifyCallback(callback, downloadBatchStatus);
         }
@@ -183,7 +188,7 @@ class DownloadBatch {
             notifyCallback(callback, downloadBatchStatus);
             return true;
         } else {
-            return status == ERROR || status == DELETING || status == PAUSED || status == WAITING_FOR_NETWORK;
+            return status == ERROR || status == DELETING || status == DELETED || status == PAUSED || status == WAITING_FOR_NETWORK;
         }
     }
 
@@ -241,7 +246,7 @@ class DownloadBatch {
         long totalBatchSize = 0;
         for (DownloadFile downloadFile : downloadFiles) {
             DownloadBatchStatus.Status status = downloadBatchStatus.status();
-            if (status == DELETING || status == DELETED) {
+            if (status == DELETING || status == DELETED || status == PAUSED) {
                 return 0;
             }
 
@@ -258,6 +263,7 @@ class DownloadBatch {
     }
 
     void pause() {
+        Log.v("pause batch " + downloadBatchStatus.getDownloadBatchId().rawId() + ", status: " + downloadBatchStatus.status());
         DownloadBatchStatus.Status status = downloadBatchStatus.status();
         if (status == PAUSED || status == DOWNLOADED) {
             return;
