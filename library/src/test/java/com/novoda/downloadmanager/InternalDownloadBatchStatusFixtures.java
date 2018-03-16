@@ -158,7 +158,7 @@ class InternalDownloadBatchStatusFixtures {
 
             @Override
             public InternalDownloadBatchStatus copy() {
-                return null;
+                return build();
             }
 
             @Override
