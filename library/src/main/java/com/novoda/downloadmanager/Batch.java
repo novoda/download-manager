@@ -1,7 +1,9 @@
 package com.novoda.downloadmanager;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Batch {
 
@@ -105,7 +107,19 @@ public class Batch {
 
         @Override
         public Batch build() {
+            ensureNoFileIdDuplicates(batchFiles);
             return new Batch(downloadBatchId, title, batchFiles);
+        }
+
+        private void ensureNoFileIdDuplicates(List<BatchFile> batchFiles) {
+            Set<DownloadFileId> rawIdsWithoutDuplicates = new HashSet<>();
+            for (BatchFile batchFile : batchFiles) {
+                rawIdsWithoutDuplicates.add(FallbackDownloadFileIdProvider.downloadFileIdFor(downloadBatchId, batchFile));
+            }
+
+            if (rawIdsWithoutDuplicates.size() != batchFiles.size()) {
+                throw new IllegalArgumentException(String.format("Duplicated file for batch %s (batchId: %s)", title, downloadBatchId.rawId()));
+            }
         }
 
     }

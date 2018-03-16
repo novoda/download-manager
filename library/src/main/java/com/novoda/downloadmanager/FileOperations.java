@@ -4,12 +4,12 @@ class FileOperations {
 
     private final FilePersistenceCreator filePersistenceCreator;
     private final FileSizeRequester fileSizeRequester;
-    private final FileDownloader fileDownloader;
+    private final FileDownloaderCreator fileDownloaderCreator;
 
-    FileOperations(FilePersistenceCreator filePersistenceCreator, FileSizeRequester fileSizeRequester, FileDownloader fileDownloader) {
+    FileOperations(FilePersistenceCreator filePersistenceCreator, FileSizeRequester fileSizeRequester, FileDownloaderCreator fileDownloaderCreator) {
         this.filePersistenceCreator = filePersistenceCreator;
         this.fileSizeRequester = fileSizeRequester;
-        this.fileDownloader = fileDownloader;
+        this.fileDownloaderCreator = fileDownloaderCreator;
     }
 
     FilePersistenceCreator filePersistenceCreator() {
@@ -20,7 +20,7 @@ class FileOperations {
         return fileSizeRequester;
     }
 
-    FileDownloader fileDownloader() {
-        return fileDownloader;
+    FileDownloaderCreator fileDownloaderCreator() {
+        return fileDownloaderCreator;
     }
 }
