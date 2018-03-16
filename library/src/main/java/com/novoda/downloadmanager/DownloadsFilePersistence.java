@@ -1,6 +1,9 @@
 package com.novoda.downloadmanager;
 
+import android.database.sqlite.SQLiteConstraintException;
 import android.support.annotation.WorkerThread;
+
+import com.novoda.notils.logger.simple.Log;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -15,7 +18,7 @@ class DownloadsFilePersistence {
     }
 
     @WorkerThread
-    void persistSync(DownloadBatchId downloadBatchId,
+    boolean persistSync(DownloadBatchId downloadBatchId,
                      FileName fileName,
                      FilePath filePath,
                      FileSize fileSize,
@@ -23,7 +26,7 @@ class DownloadsFilePersistence {
                      DownloadFileStatus downloadFileStatus,
                      FilePersistenceType filePersistenceType) {
         if (downloadFileStatus.status() == DownloadFileStatus.Status.DELETED) {
-            return;
+            return false;
         }
         LiteDownloadsFilePersisted filePersisted = new LiteDownloadsFilePersisted(
                 downloadBatchId,
@@ -39,6 +42,10 @@ class DownloadsFilePersistence {
         try {
             downloadsPersistence.persistFile(filePersisted);
             downloadsPersistence.transactionSuccess();
+            return true;
+        } catch (SQLiteConstraintException e) {
+            Log.e("failure to persist sync file " + downloadFileStatus.downloadFileId().rawId() + " with status " + downloadFileStatus.status());
+            return false;
         } finally {
             downloadsPersistence.endTransaction();
         }

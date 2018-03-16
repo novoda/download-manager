@@ -67,7 +67,9 @@ class DownloadFile {
         }
 
         Log.v("persist file " + downloadFileId.rawId() + ", with status: " + downloadFileStatus.status());
-        persist();
+        if (persist()) {
+            return;
+        }
 
         if (fileSize.currentSize() == fileSize.totalSize()) {
             downloadFileStatus.update(fileSize, filePath);
@@ -199,8 +201,8 @@ class DownloadFile {
     }
 
     @WorkerThread
-    void persist() {
-        downloadsFilePersistence.persistSync(
+    boolean persist() {
+        return downloadsFilePersistence.persistSync(
                 downloadBatchId,
                 fileName,
                 filePath,
