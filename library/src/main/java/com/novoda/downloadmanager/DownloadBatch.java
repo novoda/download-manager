@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager;
 
 import android.support.annotation.Nullable;
+import android.support.annotation.WorkerThread;
 
 import com.novoda.notils.logger.simple.Log;
 
@@ -352,6 +353,7 @@ class DownloadBatch {
         );
     }
 
+    @WorkerThread
     void persist() {
         downloadsBatchPersistence.persist(
                 downloadBatchStatus.getDownloadBatchTitle(),
