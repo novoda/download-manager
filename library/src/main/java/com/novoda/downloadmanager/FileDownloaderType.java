@@ -2,7 +2,7 @@ package com.novoda.downloadmanager;
 
 import java.security.InvalidParameterException;
 
-public enum FileDownloaderType {
+enum FileDownloaderType {
     NETWORK("network"),
     CUSTOM("custom");
 
@@ -20,9 +20,5 @@ public enum FileDownloaderType {
         }
 
         throw new InvalidParameterException("Type " + rawValue + " is not supported");
-    }
-
-    String toRawValue() {
-        return rawValue;
     }
 }
