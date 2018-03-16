@@ -20,10 +20,10 @@ public interface DownloadsPersistence {
 
     List<DownloadsFilePersisted> loadFiles(DownloadBatchId batchId);
 
-    void delete(DownloadBatchId downloadBatchId);
+    boolean delete(DownloadBatchId downloadBatchId);
 
-    void update(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status);
+    boolean update(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status);
 
-    void update(DownloadBatchId downloadBatchId, boolean notificationSeen);
+    boolean update(DownloadBatchId downloadBatchId, boolean notificationSeen);
 
 }

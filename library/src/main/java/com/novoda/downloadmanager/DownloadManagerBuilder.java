@@ -34,6 +34,7 @@ import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
 
+@SuppressWarnings("PMD.ExcessiveImports")
 public final class DownloadManagerBuilder {
 
     private static final Object SERVICE_LOCK = new Object();
@@ -146,7 +147,8 @@ public final class DownloadManagerBuilder {
         return this;
     }
 
-    public DownloadManagerBuilder withFileDownloaderCustom(FileSizeRequester fileSizeRequester, Class<? extends FileDownloader> customFileDownloaderClass) {
+    public DownloadManagerBuilder withFileDownloaderCustom(FileSizeRequester fileSizeRequester,
+                                                           Class<? extends FileDownloader> customFileDownloaderClass) {
         this.fileSizeRequester = fileSizeRequester;
         this.fileDownloaderCreator = FileDownloaderCreator.newCustomFileDownloaderCreator(customFileDownloaderClass);
         return this;

@@ -19,6 +19,7 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     private int percentageDownloaded;
     private Optional<DownloadError> downloadError;
 
+    @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
     LiteDownloadBatchStatus(DownloadBatchId downloadBatchId,
                             DownloadBatchTitle downloadBatchTitle,
                             long downloadedDateTimeInMillis,

@@ -66,6 +66,7 @@ class DownloadFile {
             return;
         }
 
+        Log.v("persist file " + downloadFileId.rawId() + ", with status: " + downloadFileStatus.status());
         persist();
 
         if (fileSize.currentSize() == fileSize.totalSize()) {
@@ -185,7 +186,9 @@ class DownloadFile {
         if (fileSize.isTotalSizeUnknown()) {
             FileSize requestFileSize = fileSizeRequester.requestFileSize(url);
             fileSize.setTotalSize(requestFileSize.totalSize());
-            Log.v("file getTotalSize for batchId: " + downloadBatchId + ", status: " + fileStatus().status() + ", fileId: " + fileStatus().downloadFileId().rawId());
+            Log.v("file getTotalSize for batchId: " + downloadBatchId
+                    + ", status: " + fileStatus().status()
+                    + ", fileId: " + fileStatus().downloadFileId().rawId());
             if (fileStatus().status() == DownloadFileStatus.Status.DELETED) {
                 return 0;
             }

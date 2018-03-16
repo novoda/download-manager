@@ -109,22 +109,36 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
     }
 
     @Override
-    public void delete(DownloadBatchId downloadBatchId) {
+    public boolean delete(DownloadBatchId downloadBatchId) {
         RoomBatch roomBatch = database.roomBatchDao().load(downloadBatchId.rawId());
+        if (roomBatch == null) {
+            return false;
+        }
+
         database.roomBatchDao().delete(roomBatch);
+        return true;
     }
 
     @Override
-    public void update(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status) {
+    public boolean update(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status) {
         RoomBatch roomBatch = database.roomBatchDao().load(downloadBatchId.rawId());
+        if (roomBatch == null) {
+            return false;
+        }
+
         roomBatch.status = status.toRawValue();
         database.roomBatchDao().update(roomBatch);
+        return true;
     }
 
     @Override
-    public void update(DownloadBatchId downloadBatchId, boolean notificationSeen) {
+    public boolean update(DownloadBatchId downloadBatchId, boolean notificationSeen) {
         RoomBatch roomBatch = database.roomBatchDao().load(downloadBatchId.rawId());
+        if (roomBatch == null) {
+            return false;
+        }
         roomBatch.notificationSeen = notificationSeen;
         database.roomBatchDao().update(roomBatch);
+        return true;
     }
 }

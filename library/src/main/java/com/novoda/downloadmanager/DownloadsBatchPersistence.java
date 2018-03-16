@@ -150,29 +150,28 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
 
     void deleteAsync(DownloadBatchStatus downloadBatchStatus, DeleteCallback deleteCallback) {
         executor.execute(() -> {
-            try {
-                deleteSync(downloadBatchStatus);
-            } catch (NullPointerException e) {
+            if (deleteSync(downloadBatchStatus)) {
+                deleteCallback.onDeleted(downloadBatchStatus.getDownloadBatchId());
+            } else {
                 Log.e("could not delete batch " + downloadBatchStatus.getDownloadBatchId().rawId() + " with status " + downloadBatchStatus.status());
             }
-
-            deleteCallback.onDeleted(downloadBatchStatus.getDownloadBatchId());
         });
     }
 
     @WorkerThread
-    void deleteSync(DownloadBatchStatus downloadBatchStatus) {
+    boolean deleteSync(DownloadBatchStatus downloadBatchStatus) {
         DownloadBatchId downloadBatchId = downloadBatchStatus.getDownloadBatchId();
-        Log.v("start batch delete " + downloadBatchId.rawId() + " with status: " + downloadBatchStatus.status());
         downloadsPersistence.startTransaction();
         try {
-            downloadsPersistence.delete(downloadBatchId);
-            downloadsPersistence.transactionSuccess();
+            if (downloadsPersistence.delete(downloadBatchId)) {
+                downloadsPersistence.transactionSuccess();
+                return true;
+            } else {
+                return false;
+            }
         } finally {
             downloadsPersistence.endTransaction();
         }
-
-        Log.v("end batch delete " + downloadBatchId.rawId() + " with status: " + downloadBatchStatus.status());
     }
 
     @Override
@@ -180,10 +179,11 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
         executor.execute(() -> {
             downloadsPersistence.startTransaction();
             try {
-                downloadsPersistence.update(downloadBatchId, status);
-                downloadsPersistence.transactionSuccess();
-            } catch (NullPointerException e) {
-                Log.e("could not update batch status " + status + " failed for " + downloadBatchId.rawId());
+                if (downloadsPersistence.update(downloadBatchId, status)) {
+                    downloadsPersistence.transactionSuccess();
+                } else {
+                    Log.e("could not update batch status " + status + " failed for " + downloadBatchId.rawId());
+                }
             } finally {
                 downloadsPersistence.endTransaction();
             }
@@ -193,16 +193,16 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
     @Override
     public void updateNotificationSeenAsync(DownloadBatchStatus downloadBatchStatus, boolean notificationSeen) {
         executor.execute(() -> {
-            if (downloadBatchStatus.status() == DownloadBatchStatus.Status.DOWNLOADED) {
-                downloadsPersistence.startTransaction();
-                try {
-                    downloadsPersistence.update(downloadBatchStatus.getDownloadBatchId(), notificationSeen);
+            downloadsPersistence.startTransaction();
+            try {
+                if (downloadsPersistence.update(downloadBatchStatus.getDownloadBatchId(), notificationSeen)) {
                     downloadsPersistence.transactionSuccess();
-                } catch (NullPointerException e) {
-                    Log.e("could not update notification to status " + downloadBatchStatus.status() + " for batch id " + downloadBatchStatus.getDownloadBatchId().rawId());
-                } finally {
-                    downloadsPersistence.endTransaction();
+                } else {
+                    Log.e("could not update notification to status " + downloadBatchStatus.status()
+                            + " for batch id " + downloadBatchStatus.getDownloadBatchId().rawId());
                 }
+            } finally {
+                downloadsPersistence.endTransaction();
             }
         });
     }

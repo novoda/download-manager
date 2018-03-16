@@ -37,7 +37,9 @@ class DownloadBatchStatusNotificationDispatcher {
 
         if (notificationIsNotMarkedAsSeenYet(downloadBatchStatus, rawDownloadBatchId)) {
             downloadBatchIdNotificationSeen.add(rawDownloadBatchId);
-            Log.v("start updateNotificationSeenAsync " + rawDownloadBatchId + ", seen: " + NOTIFICATION_SEEN + ", status: " + downloadBatchStatus.status());
+            Log.v("start updateNotificationSeenAsync " + rawDownloadBatchId
+                    + ", seen: " + NOTIFICATION_SEEN
+                    + ", status: " + downloadBatchStatus.status());
             notificationSeenPersistence.updateNotificationSeenAsync(downloadBatchStatus, NOTIFICATION_SEEN);
         }
 

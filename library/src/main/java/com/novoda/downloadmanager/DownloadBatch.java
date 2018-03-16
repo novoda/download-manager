@@ -155,9 +155,7 @@ class DownloadBatch {
     private static void deleteBatchIfNeeded(InternalDownloadBatchStatus downloadBatchStatus,
                                             DownloadsBatchPersistence downloadsBatchPersistence,
                                             DownloadBatchStatusCallback callback) {
-        if (downloadBatchStatus.status() == DELETING) {
-            Log.v("deleteBatchIfNeeded: " + downloadBatchStatus.getDownloadBatchId().rawId());
-            downloadsBatchPersistence.deleteSync(downloadBatchStatus);
+        if (downloadBatchStatus.status() == DELETING && downloadsBatchPersistence.deleteSync(downloadBatchStatus)) {
             downloadBatchStatus.markAsDeleted();
             notifyCallback(callback, downloadBatchStatus);
         }
