@@ -1,7 +1,6 @@
 package com.novoda.downloadmanager;
 
 import android.support.annotation.Nullable;
-import android.support.annotation.WorkerThread;
 
 class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
 
@@ -89,7 +88,6 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
         return downloadedDateTimeInMillis;
     }
 
-    @WorkerThread
     @Override
     public void markAsDownloading(DownloadsBatchStatusPersistence persistence) {
         status = Status.DOWNLOADING;
@@ -120,7 +118,6 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
         notificationSeen = false;
     }
 
-    @WorkerThread
     @Override
     public void markAsError(Optional<DownloadError> downloadError, DownloadsBatchStatusPersistence persistence) {
         this.status = Status.ERROR;
@@ -128,14 +125,12 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
         updateStatusAsync(status, persistence);
     }
 
-    @WorkerThread
     @Override
     public void markAsDownloaded(DownloadsBatchStatusPersistence persistence) {
         this.status = Status.DOWNLOADED;
         updateStatusAsync(status, persistence);
     }
 
-    @WorkerThread
     @Override
     public void markAsWaitingForNetwork(DownloadsBatchPersistence persistence) {
         this.status = Status.WAITING_FOR_NETWORK;
