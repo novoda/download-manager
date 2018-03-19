@@ -72,7 +72,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
         roomFile.url = filePersisted.url();
         roomFile.name = filePersisted.fileName().name();
         roomFile.path = filePersisted.filePath().path();
-        roomFile.id = filePersisted.downloadFileId().rawId();
+        roomFile.fileId = filePersisted.downloadFileId().rawId();
         roomFile.persistenceType = filePersisted.filePersistenceType().toRawValue();
 
         database.roomFileDao().insert(roomFile);
@@ -95,7 +95,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
         for (RoomFile roomFile : roomFiles) {
             DownloadsFilePersisted filePersisted = new LiteDownloadsFilePersisted(
                     DownloadBatchIdCreator.createFrom(roomFile.batchId),
-                    DownloadFileIdCreator.createFrom(roomFile.id),
+                    DownloadFileIdCreator.createFrom(roomFile.fileId),
                     LiteFileName.from(roomFile.name),
                     new LiteFilePath(roomFile.path),
                     roomFile.totalSize,

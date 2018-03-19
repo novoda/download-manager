@@ -4,23 +4,23 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.Index;
-import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
 import static android.arch.persistence.room.ForeignKey.CASCADE;
 
 @SuppressWarnings("checkstyle:visibilitymodifier") // Accessors will add a lot of boilerplate code.
 @Entity(
+        primaryKeys = {"file_id", "batch_id"},
         foreignKeys = @ForeignKey(entity = RoomBatch.class, parentColumns = "batch_id", childColumns = "batch_id", onDelete = CASCADE),
         indices = {@Index("batch_id")}
 )
 class RoomFile {
 
     @NonNull
-    @PrimaryKey
     @ColumnInfo(name = "file_id")
-    String id;
+    String fileId;
 
+    @NonNull
     @ColumnInfo(name = "batch_id")
     String batchId;
 
