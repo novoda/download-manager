@@ -135,8 +135,6 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                 NO_DOWNLOAD_ERROR
         );
 
-        liteDownloadBatchStatus.update(currentBytesDownloaded, totalBatchSizeBytes);
-
         CallbackThrottle callbackThrottle = callbackThrottleCreator.create();
 
         return new DownloadBatch(
