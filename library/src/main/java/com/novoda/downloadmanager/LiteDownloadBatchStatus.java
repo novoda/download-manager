@@ -11,22 +11,29 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     private final DownloadBatchId downloadBatchId;
     private final long downloadedDateTimeInMillis;
 
+    private Status status;
+    private boolean notificationSeen;
     private long bytesDownloaded;
     private long totalBatchSizeBytes;
     private int percentageDownloaded;
-    private Status status;
-    private boolean notificationSeen;
+    private Optional<DownloadError> downloadError;
 
-    private Optional<DownloadError> downloadError = Optional.absent();
-
+    @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
     LiteDownloadBatchStatus(DownloadBatchId downloadBatchId,
                             DownloadBatchTitle downloadBatchTitle,
                             long downloadedDateTimeInMillis,
+                            long bytesDownloaded,
+                            long totalBatchSizeBytes,
                             Status status,
-                            boolean notificationSeen) {
+                            boolean notificationSeen,
+                            Optional<DownloadError> downloadError) {
         this.downloadBatchTitle = downloadBatchTitle;
         this.downloadBatchId = downloadBatchId;
         this.downloadedDateTimeInMillis = downloadedDateTimeInMillis;
+        this.bytesDownloaded = bytesDownloaded;
+        this.totalBatchSizeBytes = totalBatchSizeBytes;
+        this.downloadError = downloadError;
+        this.percentageDownloaded = getPercentageFrom(bytesDownloaded, totalBatchSizeBytes);
         this.status = status;
         this.notificationSeen = notificationSeen;
     }
@@ -84,19 +91,25 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     @Override
     public void markAsDownloading(DownloadsBatchStatusPersistence persistence) {
         status = Status.DOWNLOADING;
-        updateStatus(status, persistence);
+        updateStatusAsync(status, persistence);
     }
 
     @Override
     public void markAsPaused(DownloadsBatchStatusPersistence persistence) {
         status = Status.PAUSED;
-        updateStatus(status, persistence);
+        updateStatusAsync(status, persistence);
     }
 
     @Override
     public void markAsQueued(DownloadsBatchStatusPersistence persistence) {
         status = Status.QUEUED;
-        updateStatus(status, persistence);
+        updateStatusAsync(status, persistence);
+    }
+
+    @Override
+    public void markAsDeleting() {
+        status = Status.DELETING;
+        notificationSeen = false;
     }
 
     @Override
@@ -109,22 +122,36 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     public void markAsError(Optional<DownloadError> downloadError, DownloadsBatchStatusPersistence persistence) {
         this.status = Status.ERROR;
         this.downloadError = downloadError;
-        updateStatus(status, persistence);
+        updateStatusAsync(status, persistence);
     }
 
     @Override
     public void markAsDownloaded(DownloadsBatchStatusPersistence persistence) {
         this.status = Status.DOWNLOADED;
-        updateStatus(status, persistence);
+        updateStatusAsync(status, persistence);
     }
 
     @Override
     public void markAsWaitingForNetwork(DownloadsBatchPersistence persistence) {
         this.status = Status.WAITING_FOR_NETWORK;
-        updateStatus(status, persistence);
+        updateStatusAsync(status, persistence);
     }
 
-    private void updateStatus(Status status, DownloadsBatchStatusPersistence persistence) {
+    @Override
+    public InternalDownloadBatchStatus copy() {
+        return new LiteDownloadBatchStatus(
+                downloadBatchId,
+                downloadBatchTitle,
+                downloadedDateTimeInMillis,
+                bytesDownloaded,
+                totalBatchSizeBytes,
+                status,
+                notificationSeen,
+                downloadError
+        );
+    }
+
+    private void updateStatusAsync(Status status, DownloadsBatchStatusPersistence persistence) {
         persistence.updateStatusAsync(downloadBatchId, status);
     }
 

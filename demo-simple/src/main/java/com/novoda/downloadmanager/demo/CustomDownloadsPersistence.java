@@ -56,17 +56,20 @@ public class CustomDownloadsPersistence implements DownloadsPersistence {
     }
 
     @Override
-    public void delete(DownloadBatchId downloadBatchId) {
+    public boolean delete(DownloadBatchId downloadBatchId) {
         Log.v("Delete batch id: " + downloadBatchId.rawId());
+        return true;
     }
 
     @Override
-    public void update(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status) {
+    public boolean update(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status) {
         Log.v("update batch id: " + downloadBatchId.rawId() + " with status: " + status);
+        return true;
     }
 
     @Override
-    public void update(DownloadBatchId downloadBatchId, boolean notificationSeen) {
+    public boolean update(DownloadBatchId downloadBatchId, boolean notificationSeen) {
         Log.v("update batch id: " + downloadBatchId.rawId() + " with notificationSeen: " + notificationSeen);
+        return true;
     }
 }

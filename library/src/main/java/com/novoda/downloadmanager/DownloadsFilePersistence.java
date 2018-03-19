@@ -1,5 +1,10 @@
 package com.novoda.downloadmanager;
 
+import android.database.sqlite.SQLiteConstraintException;
+import android.support.annotation.WorkerThread;
+
+import com.novoda.notils.logger.simple.Log;
+
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,16 +17,20 @@ class DownloadsFilePersistence {
         this.downloadsPersistence = downloadsPersistence;
     }
 
-    void persistSync(DownloadBatchId downloadBatchId,
+    @WorkerThread
+    boolean persistSync(DownloadBatchId downloadBatchId,
                      FileName fileName,
                      FilePath filePath,
                      FileSize fileSize,
                      String url,
-                     DownloadFileId downloadFileId,
+                     DownloadFileStatus downloadFileStatus,
                      FilePersistenceType filePersistenceType) {
+        if (downloadFileStatus.status() == DownloadFileStatus.Status.DELETED) {
+            return false;
+        }
         LiteDownloadsFilePersisted filePersisted = new LiteDownloadsFilePersisted(
                 downloadBatchId,
-                downloadFileId,
+                downloadFileStatus.downloadFileId(),
                 fileName,
                 filePath,
                 fileSize.totalSize(),
@@ -33,6 +42,10 @@ class DownloadsFilePersistence {
         try {
             downloadsPersistence.persistFile(filePersisted);
             downloadsPersistence.transactionSuccess();
+            return true;
+        } catch (SQLiteConstraintException e) {
+            Log.e("failure to persist sync file " + downloadFileStatus.downloadFileId().rawId() + " with status " + downloadFileStatus.status());
+            return false;
         } finally {
             downloadsPersistence.endTransaction();
         }
@@ -101,6 +114,7 @@ class DownloadsFilePersistence {
             case ERROR:
                 return InternalDownloadFileStatus.Status.ERROR;
             case DELETED:
+            case DELETING:
                 return InternalDownloadFileStatus.Status.DELETED;
             case DOWNLOADED:
                 return InternalDownloadFileStatus.Status.DOWNLOADED;

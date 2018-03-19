@@ -2,12 +2,16 @@ package com.novoda.downloadmanager;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
 final class DownloadBatchFactory {
 
     private static final boolean NOTIFICATION_NOT_SEEN = false;
+    private static final int BYTES_DOWNLOADED = 0;
+    private static final int TOTAL_BATCH_SIZE_BYTES = 0;
+    private static final Optional<DownloadError> DOWNLOAD_ERROR = Optional.absent();
 
     private DownloadBatchFactory() {
         // non instantiable factory class
@@ -65,12 +69,17 @@ final class DownloadBatchFactory {
             downloadFiles.add(downloadFile);
         }
 
+        downloadFiles = Collections.unmodifiableList(downloadFiles);
+
         InternalDownloadBatchStatus liteDownloadBatchStatus = new LiteDownloadBatchStatus(
                 downloadBatchId,
                 downloadBatchTitle,
                 downloadedDateTimeInMillis,
-                DownloadBatchStatus.Status.QUEUED,
-                NOTIFICATION_NOT_SEEN
+                BYTES_DOWNLOADED,
+                TOTAL_BATCH_SIZE_BYTES,
+                DownloadBatchStatus.Status.UNKNOWN,
+                NOTIFICATION_NOT_SEEN,
+                DOWNLOAD_ERROR
         );
 
         return new DownloadBatch(

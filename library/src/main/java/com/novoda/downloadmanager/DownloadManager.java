@@ -76,7 +76,12 @@ class DownloadManager implements LiteDownloadManagerCommands {
 
     @Override
     public void download(Batch batch) {
-        downloader.download(batch, downloadBatchMap);
+        DownloadBatchId downloadBatchId = batch.downloadBatchId();
+        DownloadBatch downloadBatch = downloadBatchMap.get(downloadBatchId);
+        if (downloadBatch == null) {
+            Log.v("download " + downloadBatchId);
+            downloader.download(batch, downloadBatchMap);
+        }
     }
 
     @Override
@@ -111,7 +116,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
         if (downloadBatch == null) {
             return;
         }
-        downloadBatchMap.remove(downloadBatchId);
+
         downloadBatch.delete();
     }
 

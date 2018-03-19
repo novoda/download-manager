@@ -21,6 +21,7 @@ import com.novoda.notils.logger.simple.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -28,10 +29,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETING;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
 
+@SuppressWarnings("PMD.ExcessiveImports")
 public final class DownloadManagerBuilder {
 
     private static final Object SERVICE_LOCK = new Object();
@@ -55,9 +58,9 @@ public final class DownloadManagerBuilder {
     private CallbackThrottleCreator.Type callbackThrottleCreatorType;
     private TimeUnit timeUnit;
     private long frequency;
+    private boolean logs;
 
     public static DownloadManagerBuilder newInstance(Context context, Handler callbackHandler, @DrawableRes final int notificationIcon) {
-        Log.setShowLogs(true);
         Context applicationContext = context.getApplicationContext();
 
         FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(applicationContext);
@@ -89,6 +92,8 @@ public final class DownloadManagerBuilder {
 
         CallbackThrottleCreator.Type callbackThrottleCreatorType = CallbackThrottleCreator.Type.THROTTLE_BY_PROGRESS_INCREASE;
 
+        boolean logs = false;
+
         return new DownloadManagerBuilder(
                 applicationContext,
                 callbackHandler,
@@ -100,7 +105,8 @@ public final class DownloadManagerBuilder {
                 notificationCreator,
                 connectionTypeAllowed,
                 allowNetworkRecovery,
-                callbackThrottleCreatorType
+                callbackThrottleCreatorType,
+                logs
         );
     }
 
@@ -115,7 +121,8 @@ public final class DownloadManagerBuilder {
                                    NotificationCreator<DownloadBatchStatus> notificationCreator,
                                    ConnectionType connectionTypeAllowed,
                                    boolean allowNetworkRecovery,
-                                   CallbackThrottleCreator.Type callbackThrottleCreatorType) {
+                                   CallbackThrottleCreator.Type callbackThrottleCreatorType,
+                                   boolean logs) {
         this.applicationContext = applicationContext;
         this.callbackHandler = callbackHandler;
         this.filePersistenceCreator = filePersistenceCreator;
@@ -127,6 +134,7 @@ public final class DownloadManagerBuilder {
         this.connectionTypeAllowed = connectionTypeAllowed;
         this.allowNetworkRecovery = allowNetworkRecovery;
         this.callbackThrottleCreatorType = callbackThrottleCreatorType;
+        this.logs = logs;
     }
 
     public DownloadManagerBuilder withFilePersistenceInternal() {
@@ -139,7 +147,8 @@ public final class DownloadManagerBuilder {
         return this;
     }
 
-    public DownloadManagerBuilder withFileDownloaderCustom(FileSizeRequester fileSizeRequester, Class<? extends FileDownloader> customFileDownloaderClass) {
+    public DownloadManagerBuilder withFileDownloaderCustom(FileSizeRequester fileSizeRequester,
+                                                           Class<? extends FileDownloader> customFileDownloaderClass) {
         this.fileSizeRequester = fileSizeRequester;
         this.fileDownloaderCreator = FileDownloaderCreator.newCustomFileDownloaderCreator(customFileDownloaderClass);
         return this;
@@ -205,7 +214,14 @@ public final class DownloadManagerBuilder {
         return this;
     }
 
+    public DownloadManagerBuilder withLogs() {
+        this.logs = true;
+        return this;
+    }
+
     public DownloadManager build() {
+        Log.setShowLogs(logs);
+
         Intent intent = new Intent(applicationContext, LiteDownloadService.class);
         ServiceConnection serviceConnection = new ServiceConnection() {
             @Override
@@ -241,10 +257,10 @@ public final class DownloadManagerBuilder {
                 customCallbackThrottle
         );
 
-        Executor executor = Executors.newSingleThreadExecutor();
         DownloadsFilePersistence downloadsFilePersistence = new DownloadsFilePersistence(downloadsPersistence);
         MerlinsBeard merlinsBeard = MerlinsBeard.from(applicationContext);
         ConnectionChecker connectionChecker = new ConnectionChecker(merlinsBeard, connectionTypeAllowed);
+        Executor executor = Executors.newSingleThreadExecutor();
         DownloadsBatchPersistence downloadsBatchPersistence = new DownloadsBatchPersistence(
                 executor,
                 downloadsFilePersistence,
@@ -265,7 +281,8 @@ public final class DownloadManagerBuilder {
         );
         DownloadBatchStatusNotificationDispatcher batchStatusNotificationDispatcher = new DownloadBatchStatusNotificationDispatcher(
                 downloadsBatchPersistence,
-                notificationDispatcher
+                notificationDispatcher,
+                new HashSet<>()
         );
 
         LiteDownloadManagerDownloader downloader = new LiteDownloadManagerDownloader(
@@ -328,7 +345,7 @@ public final class DownloadManagerBuilder {
         @Override
         public NotificationDisplayState notificationDisplayState(DownloadBatchStatus payload) {
             DownloadBatchStatus.Status status = payload.status();
-            if (status == DOWNLOADED || status == DELETED || status == ERROR || status == PAUSED) {
+            if (status == DOWNLOADED || status == DELETED || status == DELETING || status == ERROR || status == PAUSED) {
                 return NotificationDisplayState.STACK_NOTIFICATION_DISMISSIBLE;
             } else {
                 return NotificationDisplayState.SINGLE_PERSISTENT_NOTIFICATION;
@@ -344,6 +361,7 @@ public final class DownloadManagerBuilder {
 
             switch (payload.status()) {
                 case DELETED:
+                case DELETING:
                     return createDeletedNotification(builder);
                 case ERROR:
                     return createErrorNotification(builder, payload.getDownloadErrorType());

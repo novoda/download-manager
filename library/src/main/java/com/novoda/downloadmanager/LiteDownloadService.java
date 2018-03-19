@@ -51,13 +51,13 @@ public class LiteDownloadService extends Service implements DownloadService {
     }
 
     @Override
-    public void download(final DownloadBatch downloadBatch, final DownloadBatchStatusCallback callback) {
-        callback.onUpdate(downloadBatch.status());
-
+    public void download(DownloadBatch downloadBatch, DownloadBatchStatusCallback callback) {
+        callback.onUpdate(downloadBatch.status().copy());
         downloadBatch.setCallback(callback);
 
         executor.execute(() -> {
             acquireCpuWakeLock();
+            downloadBatch.persist();
             downloadBatch.download();
             releaseHeldCpuWakeLock();
         });

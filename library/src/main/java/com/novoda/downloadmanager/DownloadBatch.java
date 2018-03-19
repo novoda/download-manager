@@ -1,11 +1,15 @@
 package com.novoda.downloadmanager;
 
 import android.support.annotation.Nullable;
+import android.support.annotation.WorkerThread;
+
+import com.novoda.notils.logger.simple.Log;
 
 import java.util.List;
 import java.util.Map;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETING;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADING;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
@@ -49,71 +53,168 @@ class DownloadBatch {
     }
 
     void download() {
-        DownloadBatchStatus.Status status = downloadBatchStatus.status();
+        String rawBatchId = downloadBatchStatus.getDownloadBatchId().rawId();
+        Log.v("start download " + rawBatchId + ", status: " + downloadBatchStatus.status());
 
-        if (status == DELETED) {
-            deleteBatchIfNeeded();
+        if (shouldAbortStartingBatch(connectionChecker, callback, downloadBatchStatus, downloadsBatchPersistence)) {
+            Log.v("abort starting download " + rawBatchId);
             return;
         }
 
-        if (status == PAUSED) {
-            return;
-        }
-
-        if (connectionNotAllowedForDownload(status)) {
-            processNetworkError();
-            return;
-        }
-
-        if (status != DOWNLOADED) {
-            downloadBatchStatus.markAsDownloading(downloadsBatchPersistence);
-            notifyCallback(downloadBatchStatus);
-        }
+        markAsDownloadingIfNeeded(downloadBatchStatus, downloadsBatchPersistence, callback);
 
         if (totalBatchSizeBytes == 0) {
-            totalBatchSizeBytes = getTotalSize(downloadFiles);
+            totalBatchSizeBytes = getTotalSize(downloadFiles, downloadBatchStatus);
         }
 
-        if (totalBatchSizeBytes <= ZERO_BYTES) {
-            deleteBatchIfNeeded();
-            processNetworkError();
+        if (shouldAbortAfterGettingTotalBatchSize(downloadBatchStatus, downloadsBatchPersistence, callback, totalBatchSizeBytes)) {
+            Log.v("abort after getting total batch size download " + rawBatchId);
             return;
         }
 
         for (DownloadFile downloadFile : downloadFiles) {
-            if (connectionNotAllowedForDownload(status)) {
-                downloadBatchStatus.markAsWaitingForNetwork(downloadsBatchPersistence);
-                notifyCallback(downloadBatchStatus);
+            if (batchCannotContinue(downloadBatchStatus, connectionChecker, downloadsBatchPersistence, callback)) {
                 break;
             }
             downloadFile.download(fileDownloadCallback);
-            if (batchCannotContinue()) {
-                break;
-            }
         }
 
-        if (networkError()) {
-            processNetworkError();
+        if (networkError(downloadBatchStatus)) {
+            processNetworkError(downloadBatchStatus, callback, downloadsBatchPersistence);
         }
 
+        deleteBatchIfNeeded(downloadBatchStatus, downloadsBatchPersistence, callback);
+        notifyCallback(callback, downloadBatchStatus);
         callbackThrottle.stopUpdates();
-        deleteBatchIfNeeded();
+        Log.v("end download " + rawBatchId);
     }
 
-    private void deleteBatchIfNeeded() {
-        if (downloadBatchStatus.status() == DELETED) {
-            downloadsBatchPersistence.delete(downloadBatchStatus.getDownloadBatchId());
+    private static boolean shouldAbortStartingBatch(ConnectionChecker connectionChecker,
+                                                    DownloadBatchStatusCallback callback,
+                                                    InternalDownloadBatchStatus downloadBatchStatus,
+                                                    DownloadsBatchPersistence downloadsBatchPersistence) {
+        DownloadBatchStatus.Status status = downloadBatchStatus.status();
+
+        if (status == DELETED) {
+            return true;
+        }
+
+        if (status == DELETING) {
+            deleteBatchIfNeeded(downloadBatchStatus, downloadsBatchPersistence, callback);
+            notifyCallback(callback, downloadBatchStatus);
+            return true;
+        }
+
+        if (status == PAUSED) {
+            notifyCallback(callback, downloadBatchStatus);
+            return true;
+        }
+
+        if (connectionNotAllowedForDownload(connectionChecker, status)) {
+            processNetworkError(downloadBatchStatus, callback, downloadsBatchPersistence);
+            notifyCallback(callback, downloadBatchStatus);
+            return true;
+        }
+
+        return false;
+    }
+
+    private static void deleteBatchIfNeeded(InternalDownloadBatchStatus downloadBatchStatus,
+                                            DownloadsBatchPersistence downloadsBatchPersistence,
+                                            DownloadBatchStatusCallback callback) {
+        if (downloadBatchStatus.status() == DELETING && downloadsBatchPersistence.deleteSync(downloadBatchStatus)) {
+            downloadBatchStatus.markAsDeleted();
+            notifyCallback(callback, downloadBatchStatus);
         }
     }
 
-    private void processNetworkError() {
+    private static void notifyCallback(DownloadBatchStatusCallback callback, InternalDownloadBatchStatus downloadBatchStatus) {
+        if (callback != null) {
+            callback.onUpdate(downloadBatchStatus.copy());
+        }
+    }
+
+    private static boolean connectionNotAllowedForDownload(ConnectionChecker connectionChecker, DownloadBatchStatus.Status status) {
+        return !connectionChecker.isAllowedToDownload() && status != DOWNLOADED;
+    }
+
+    private static void processNetworkError(InternalDownloadBatchStatus downloadBatchStatus,
+                                            DownloadBatchStatusCallback callback,
+                                            DownloadsBatchPersistence downloadsBatchPersistence) {
+        if (downloadBatchStatus.status() == DELETING) {
+            return;
+        }
         downloadBatchStatus.markAsWaitingForNetwork(downloadsBatchPersistence);
-        notifyCallback(downloadBatchStatus);
+        notifyCallback(callback, downloadBatchStatus);
         DownloadsNetworkRecoveryCreator.getInstance().scheduleRecovery();
     }
 
-    private boolean connectionNotAllowedForDownload(DownloadBatchStatus.Status status) {
-        return !connectionChecker.isAllowedToDownload() && status != DOWNLOADED;
+    private static void markAsDownloadingIfNeeded(InternalDownloadBatchStatus downloadBatchStatus,
+                                                  DownloadsBatchPersistence downloadsBatchPersistence,
+                                                  DownloadBatchStatusCallback callback) {
+        if (downloadBatchStatus.status() != DOWNLOADED) {
+            downloadBatchStatus.markAsDownloading(downloadsBatchPersistence);
+            notifyCallback(callback, downloadBatchStatus);
+        }
+    }
+
+    private static long getTotalSize(List<DownloadFile> downloadFiles, InternalDownloadBatchStatus downloadBatchStatus) {
+        long totalBatchSize = 0;
+        for (DownloadFile downloadFile : downloadFiles) {
+            DownloadBatchStatus.Status status = downloadBatchStatus.status();
+            if (status == DELETING || status == DELETED || status == PAUSED) {
+                return 0;
+            }
+
+            Log.v("batch id: " + downloadBatchStatus.getDownloadBatchId().rawId() + ", status: " + status + ", file: " + downloadFile.id().rawId());
+
+            long totalFileSize = downloadFile.getTotalSize();
+            if (totalFileSize == 0) {
+                return 0;
+            }
+
+            totalBatchSize += totalFileSize;
+        }
+        return totalBatchSize;
+    }
+
+    private static boolean shouldAbortAfterGettingTotalBatchSize(InternalDownloadBatchStatus downloadBatchStatus,
+                                                                 DownloadsBatchPersistence downloadsBatchPersistence,
+                                                                 DownloadBatchStatusCallback callback,
+                                                                 long totalBatchSizeBytes) {
+        if (downloadBatchStatus.status() == PAUSED) {
+            notifyCallback(callback, downloadBatchStatus);
+            return true;
+        }
+
+        if (downloadBatchStatus.status() == DELETING) {
+            deleteBatchIfNeeded(downloadBatchStatus, downloadsBatchPersistence, callback);
+            notifyCallback(callback, downloadBatchStatus);
+            return true;
+        }
+
+        if (totalBatchSizeBytes <= ZERO_BYTES) {
+            processNetworkError(downloadBatchStatus, callback, downloadsBatchPersistence);
+            notifyCallback(callback, downloadBatchStatus);
+            return true;
+        }
+
+        return false;
+    }
+
+    private static boolean batchCannotContinue(InternalDownloadBatchStatus downloadBatchStatus,
+                                               ConnectionChecker connectionChecker,
+                                               DownloadsBatchPersistence downloadsBatchPersistence,
+                                               DownloadBatchStatusCallback callback) {
+        DownloadBatchStatus.Status status = downloadBatchStatus.status();
+
+        if (connectionNotAllowedForDownload(connectionChecker, status)) {
+            downloadBatchStatus.markAsWaitingForNetwork(downloadsBatchPersistence);
+            notifyCallback(callback, downloadBatchStatus);
+            return true;
+        } else {
+            return status == ERROR || status == DELETING || status == DELETED || status == PAUSED || status == WAITING_FOR_NETWORK;
+        }
     }
 
     private final DownloadFile.Callback fileDownloadCallback = new DownloadFile.Callback() {
@@ -139,7 +240,15 @@ class DownloadBatch {
         }
     };
 
-    private boolean networkError() {
+    private static long getBytesDownloadedFrom(Map<DownloadFileId, Long> fileBytesDownloadedMap) {
+        long bytesDownloaded = 0;
+        for (Map.Entry<DownloadFileId, Long> entry : fileBytesDownloadedMap.entrySet()) {
+            bytesDownloaded += entry.getValue();
+        }
+        return bytesDownloaded;
+    }
+
+    private static boolean networkError(InternalDownloadBatchStatus downloadBatchStatus) {
         DownloadBatchStatus.Status status = downloadBatchStatus.status();
         if (status == WAITING_FOR_NETWORK) {
             return true;
@@ -152,45 +261,14 @@ class DownloadBatch {
         return false;
     }
 
-    private boolean batchCannotContinue() {
-        DownloadBatchStatus.Status status = downloadBatchStatus.status();
-        return status == ERROR || status == DELETED || status == PAUSED || status == WAITING_FOR_NETWORK;
-    }
-
-    private long getBytesDownloadedFrom(Map<DownloadFileId, Long> fileBytesDownloadedMap) {
-        long bytesDownloaded = 0;
-        for (Map.Entry<DownloadFileId, Long> entry : fileBytesDownloadedMap.entrySet()) {
-            bytesDownloaded += entry.getValue();
-        }
-        return bytesDownloaded;
-    }
-
-    private void notifyCallback(InternalDownloadBatchStatus downloadBatchStatus) {
-        if (callback != null) {
-            callback.onUpdate(downloadBatchStatus);
-        }
-    }
-
-    private long getTotalSize(List<DownloadFile> downloadFiles) {
-        long totalBatchSize = 0;
-        for (DownloadFile downloadFile : downloadFiles) {
-            long totalFileSize = downloadFile.getTotalSize();
-            if (totalFileSize == 0) {
-                return 0;
-            }
-
-            totalBatchSize += totalFileSize;
-        }
-        return totalBatchSize;
-    }
-
     void pause() {
+        Log.v("pause batch " + downloadBatchStatus.getDownloadBatchId().rawId() + ", status: " + downloadBatchStatus.status());
         DownloadBatchStatus.Status status = downloadBatchStatus.status();
         if (status == PAUSED || status == DOWNLOADED) {
             return;
         }
         downloadBatchStatus.markAsPaused(downloadsBatchPersistence);
-        notifyCallback(downloadBatchStatus);
+        notifyCallback(callback, downloadBatchStatus);
 
         for (DownloadFile downloadFile : downloadFiles) {
             downloadFile.pause();
@@ -214,21 +292,33 @@ class DownloadBatch {
             return;
         }
         downloadBatchStatus.markAsQueued(downloadsBatchPersistence);
-        notifyCallback(downloadBatchStatus);
+        notifyCallback(callback, downloadBatchStatus);
         for (DownloadFile downloadFile : downloadFiles) {
             downloadFile.resume();
         }
     }
 
     void delete() {
-        if (downloadBatchStatus.status() == PAUSED) {
-            downloadsBatchPersistence.deleteAsync(downloadBatchStatus.getDownloadBatchId());
+        DownloadBatchStatus.Status status = downloadBatchStatus.status();
+        if (status == DELETING || status == DELETED) {
+            return;
         }
 
-        downloadBatchStatus.markAsDeleted();
-        notifyCallback(downloadBatchStatus);
+        Log.v("delete batch " + downloadBatchStatus.getDownloadBatchId().rawId() + ", mark as deleting from " + downloadBatchStatus.status());
+        downloadBatchStatus.markAsDeleting();
+        notifyCallback(callback, downloadBatchStatus);
+
         for (DownloadFile downloadFile : downloadFiles) {
             downloadFile.delete();
+        }
+
+        if (status == PAUSED || status == DOWNLOADED) {
+            Log.v("delete paused or downloaded batch " + downloadBatchStatus.getDownloadBatchId().rawId());
+            downloadsBatchPersistence.deleteAsync(downloadBatchStatus, downloadBatchId -> {
+                Log.v("delete paused or downloaded mark as deleted: " + downloadBatchId.rawId());
+                downloadBatchStatus.markAsDeleted();
+                notifyCallback(callback, downloadBatchStatus);
+            });
         }
     }
 
@@ -250,8 +340,20 @@ class DownloadBatch {
         return null;
     }
 
-    void persist() {
+    void persistAsync() {
         downloadsBatchPersistence.persistAsync(
+                downloadBatchStatus.getDownloadBatchTitle(),
+                downloadBatchStatus.getDownloadBatchId(),
+                downloadBatchStatus.status(),
+                downloadFiles,
+                downloadBatchStatus.downloadedDateTimeInMillis(),
+                downloadBatchStatus.notificationSeen()
+        );
+    }
+
+    @WorkerThread
+    void persist() {
+        downloadsBatchPersistence.persist(
                 downloadBatchStatus.getDownloadBatchTitle(),
                 downloadBatchStatus.getDownloadBatchId(),
                 downloadBatchStatus.status(),

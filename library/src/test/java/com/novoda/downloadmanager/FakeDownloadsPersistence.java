@@ -65,17 +65,17 @@ class FakeDownloadsPersistence implements DownloadsPersistence {
     }
 
     @Override
-    public void delete(DownloadBatchId downloadBatchId) {
-        // no-op.
+    public boolean delete(DownloadBatchId downloadBatchId) {
+        return true;
     }
 
     @Override
-    public void update(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status) {
-        // no-op.
+    public boolean update(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status) {
+        return true;
     }
 
     @Override
-    public void update(DownloadBatchId downloadBatchId, boolean notificationSeen) {
-        // no-op.
+    public boolean update(DownloadBatchId downloadBatchId, boolean notificationSeen) {
+        return true;
     }
 }

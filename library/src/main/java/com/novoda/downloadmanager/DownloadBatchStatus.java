@@ -11,9 +11,11 @@ public interface DownloadBatchStatus {
         DOWNLOADING,
         PAUSED,
         ERROR,
+        DELETING,
         DELETED,
         DOWNLOADED,
-        WAITING_FOR_NETWORK;
+        WAITING_FOR_NETWORK,
+        UNKNOWN;
 
         public String toRawValue() {
             return this.name();

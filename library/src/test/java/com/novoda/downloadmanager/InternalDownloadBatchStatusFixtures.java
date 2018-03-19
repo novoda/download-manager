@@ -128,6 +128,11 @@ class InternalDownloadBatchStatusFixtures {
             }
 
             @Override
+            public void markAsDeleting() {
+                status = Status.DELETING;
+            }
+
+            @Override
             public void markAsDeleted() {
                 status = Status.DELETED;
             }
@@ -149,6 +154,11 @@ class InternalDownloadBatchStatusFixtures {
             public void markAsWaitingForNetwork(DownloadsBatchPersistence persistence) {
                 status = Status.WAITING_FOR_NETWORK;
                 persistence.updateStatusAsync(downloadBatchId, status);
+            }
+
+            @Override
+            public InternalDownloadBatchStatus copy() {
+                return build();
             }
 
             @Override

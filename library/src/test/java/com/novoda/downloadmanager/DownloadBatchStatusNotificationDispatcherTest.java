@@ -5,6 +5,8 @@ import com.novoda.notils.logger.simple.Log;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashSet;
+
 import static com.novoda.downloadmanager.InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -20,7 +22,8 @@ public class DownloadBatchStatusNotificationDispatcherTest {
     @Before
     public void setUp() {
         Log.setShowLogs(false);
-        downloadBatchStatusNotificationDispatcher = new DownloadBatchStatusNotificationDispatcher(persistence, notificationDispatcher);
+        HashSet<String> downloadBatchIdNotificationSeen = new HashSet<>();
+        downloadBatchStatusNotificationDispatcher = new DownloadBatchStatusNotificationDispatcher(persistence, notificationDispatcher, downloadBatchIdNotificationSeen);
     }
 
     @Test
@@ -29,7 +32,7 @@ public class DownloadBatchStatusNotificationDispatcherTest {
 
         downloadBatchStatusNotificationDispatcher.updateNotification(downloadedBatchStatus);
 
-        verify(persistence).updateNotificationSeenAsync(downloadedBatchStatus.getDownloadBatchId(), true);
+        verify(persistence).updateNotificationSeenAsync(downloadedBatchStatus, true);
     }
 
     @Test
