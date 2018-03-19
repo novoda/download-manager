@@ -67,7 +67,9 @@ class DownloadFile {
         }
 
         Log.v("persist file " + downloadFileId.rawId() + ", with status: " + downloadFileStatus.status());
-        if (persist()) {
+        boolean persist = persist();
+        if (!persist) {
+            Log.e("persisting file " + downloadFileId.rawId() + " with status " + downloadFileStatus.status() + " failed");
             return;
         }
 
