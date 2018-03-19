@@ -14,7 +14,8 @@ import java.util.concurrent.Executor;
 
 class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, DownloadsNotificationSeenPersistence {
 
-    private static final Optional<DownloadError> DOWNLOAD_ERROR = Optional.absent();
+    private static final Optional<DownloadError> NO_DOWNLOAD_ERROR = Optional.absent();
+
     private final Executor executor;
     private final DownloadsFilePersistence downloadsFilePersistence;
     private final DownloadsPersistence downloadsPersistence;
@@ -131,7 +132,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                 totalBatchSizeBytes,
                 status,
                 notificationSeen,
-                DOWNLOAD_ERROR
+                NO_DOWNLOAD_ERROR
         );
 
         liteDownloadBatchStatus.update(currentBytesDownloaded, totalBatchSizeBytes);
