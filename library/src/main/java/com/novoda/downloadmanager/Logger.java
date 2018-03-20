@@ -10,6 +10,8 @@ import java.util.List;
 @SuppressWarnings("PMD.ShortMethodName")
 final class Logger {
 
+    private static final int DOT_CLASS = 5;
+    private static final int STACK_DEPTH = 4;
     private static final List<LogHandle> HANDLES = new ArrayList<>();
 
     private Logger() {
@@ -49,7 +51,7 @@ final class Logger {
     public static void v(Object... message) {
         for (int i = 0; i < HANDLES.size(); i++) {
             LogHandle handle = HANDLES.get(i);
-            handle.v(message);
+            handle.v(getDetailedLog(message));
         }
     }
 
@@ -61,7 +63,7 @@ final class Logger {
     public static void i(Object... message) {
         for (int i = 0; i < HANDLES.size(); i++) {
             LogHandle handle = HANDLES.get(i);
-            handle.i(message);
+            handle.i(getDetailedLog(message));
         }
     }
 
@@ -73,7 +75,7 @@ final class Logger {
     public static void d(Object... message) {
         for (int i = 0; i < HANDLES.size(); i++) {
             LogHandle handle = HANDLES.get(i);
-            handle.d(message);
+            handle.d(getDetailedLog(message));
         }
     }
 
@@ -86,7 +88,7 @@ final class Logger {
     public static void d(Throwable throwable, Object... message) {
         for (int i = 0; i < HANDLES.size(); i++) {
             LogHandle handle = HANDLES.get(i);
-            handle.d(throwable, message);
+            handle.d(throwable, getDetailedLog(message));
         }
     }
 
@@ -98,7 +100,7 @@ final class Logger {
     public static void w(Object... message) {
         for (int i = 0; i < HANDLES.size(); i++) {
             LogHandle handle = HANDLES.get(i);
-            handle.w(message);
+            handle.w(getDetailedLog(message));
         }
     }
 
@@ -111,7 +113,7 @@ final class Logger {
     public static void w(Throwable throwable, Object... message) {
         for (int i = 0; i < HANDLES.size(); i++) {
             LogHandle handle = HANDLES.get(i);
-            handle.w(throwable, message);
+            handle.w(throwable, getDetailedLog(message));
         }
     }
 
@@ -123,7 +125,7 @@ final class Logger {
     public static void e(Object... message) {
         for (int i = 0; i < HANDLES.size(); i++) {
             LogHandle handle = HANDLES.get(i);
-            handle.e(message);
+            handle.e(getDetailedLog(message));
         }
     }
 
@@ -136,8 +138,24 @@ final class Logger {
     public static void e(Throwable throwable, Object... message) {
         for (int i = 0; i < HANDLES.size(); i++) {
             LogHandle handle = HANDLES.get(i);
-            handle.e(throwable, message);
+            handle.e(throwable, getDetailedLog(message));
         }
+    }
+
+    private static Object[] getDetailedLog(Object... message) {
+        Thread currentThread = Thread.currentThread();
+        final StackTraceElement trace = currentThread.getStackTrace()[STACK_DEPTH];
+        final String filename = trace.getFileName();
+        final String linkableSourcePosition = String.format(
+                "(%s.java:%d)",
+                filename.substring(0, filename.length() - DOT_CLASS),
+                trace.getLineNumber()
+        );
+        final String logPrefix = String.format("[%s][%s.%s] ", currentThread.getName(), linkableSourcePosition, trace.getMethodName());
+        Object[] detailedMessage = new Object[message.length + 1];
+        detailedMessage[0] = logPrefix;
+        System.arraycopy(message, 0, detailedMessage, 1, message.length);
+        return detailedMessage;
     }
 
 }
