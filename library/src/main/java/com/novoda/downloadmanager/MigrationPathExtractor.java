@@ -7,6 +7,10 @@ final class MigrationPathExtractor {
     private static final String PATH_SEPARATOR = "/";
     private static final String EMPTY = "";
 
+    private MigrationPathExtractor() {
+        // Uses static utility methods.
+    }
+
     static FilePath extractMigrationPath(String basePath, String assetPath, DownloadBatchId downloadBatchId) {
         String relativePath = extractRelativePath(basePath, assetPath);
         String relativePathWithBatchId = prependBatchIdTo(relativePath, downloadBatchId);
