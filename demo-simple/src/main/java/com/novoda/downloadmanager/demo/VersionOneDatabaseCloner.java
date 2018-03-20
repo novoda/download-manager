@@ -6,7 +6,6 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.novoda.downloadmanager.Logger;
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
-import com.novoda.notils.exception.DeveloperError;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -69,7 +68,7 @@ class VersionOneDatabaseCloner {
         }
 
         if (parentPathDoesNotExist) {
-            throw new DeveloperError("Unable to create path: " + outputFile.getParentFile().getAbsolutePath());
+            throw new IllegalArgumentException("Unable to create path: " + outputFile.getParentFile().getAbsolutePath());
         }
     }
 
