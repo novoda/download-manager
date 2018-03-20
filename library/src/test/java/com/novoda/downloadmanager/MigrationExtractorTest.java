@@ -25,7 +25,7 @@ public class MigrationExtractorTest {
             + "GROUP BY DownloadsByBatch.batch_id) "
             + "GROUP BY batches._id";
 
-    private static final String DOWNLOADS_QUERY = "SELECT uri, _data, notificationextras FROM Downloads WHERE batch_id = ?";
+    private static final String DOWNLOADS_QUERY = "SELECT uri, hint, notificationextras FROM Downloads WHERE batch_id = ?";
 
     private static final StubCursor BATCHES_CURSOR = new StubCursor.Builder()
             .with("_id", "1", "2")

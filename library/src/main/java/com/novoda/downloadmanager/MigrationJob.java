@@ -19,12 +19,14 @@ class MigrationJob implements Runnable {
     private final Context context;
     private final String jobIdentifier;
     private final File databasePath;
+    private final String basePath;
     private final List<MigrationCallback> migrationCallbacks = new ArrayList<>();
 
-    MigrationJob(Context context, String jobIdentifier, File databasePath) {
+    MigrationJob(Context context, String jobIdentifier, File databasePath, String basePath) {
         this.context = context;
         this.jobIdentifier = jobIdentifier;
         this.databasePath = databasePath;
+        this.basePath = basePath;
     }
 
     void addCallback(MigrationCallback callback) {
@@ -48,7 +50,6 @@ class MigrationJob implements Runnable {
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
 
         FilePersistence filePersistence = FilePersistenceCreator.newInternalFilePersistenceCreator(context).create();
-        String basePath = filePersistence.basePath().path();
         filePersistence.initialiseWith(context);
         PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database);
         MigrationExtractor migrationExtractor = new MigrationExtractor(database, filePersistence);
@@ -73,8 +74,8 @@ class MigrationJob implements Runnable {
         migrationStatus.markAsMigrating();
         onUpdate(migrationStatus);
 
-        migratePartialDownloads(migrationStatus, database, partialMigrations, downloadsPersistence, basePath);
-        migrateCompleteDownloads(migrationStatus, database, completeMigrations, downloadsPersistence, basePath);
+        migratePartialDownloads(migrationStatus, database, partialMigrations, downloadsPersistence);
+        migrateCompleteDownloads(migrationStatus, database, completeMigrations, downloadsPersistence);
         deleteVersionOneDatabase(migrationStatus, database);
 
         migrationStatus.markAsComplete();
@@ -90,13 +91,12 @@ class MigrationJob implements Runnable {
     private void migratePartialDownloads(InternalMigrationStatus migrationStatus,
                                          SqlDatabaseWrapper database,
                                          List<Migration> partialMigrations,
-                                         DownloadsPersistence downloadsPersistence,
-                                         String basePath) {
+                                         DownloadsPersistence downloadsPersistence) {
         for (Migration partialMigration : partialMigrations) {
             downloadsPersistence.startTransaction();
             database.startTransaction();
 
-            migrateV1DataToV2Database(downloadsPersistence, partialMigration, basePath, false);
+            migrateV1DataToV2Database(downloadsPersistence, partialMigration, false);
             deleteFrom(database, partialMigration);
             deleteFiles(partialMigration);
 
@@ -111,7 +111,6 @@ class MigrationJob implements Runnable {
 
     private void migrateV1DataToV2Database(DownloadsPersistence downloadsPersistence,
                                            Migration migration,
-                                           String basePath,
                                            boolean notificationSeen) {
         Batch batch = migration.batch();
 
@@ -132,10 +131,8 @@ class MigrationJob implements Runnable {
         for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
             String url = fileMetadata.originalNetworkAddress();
 
-            FilePath filePath = new LiteFilePath(fileMetadata.originalFileLocation());
-            if (filePath.path() == null || filePath.path().isEmpty()) {
-                filePath = FilePathCreator.create(basePath, FileNameExtractor.extractFrom(url).name());
-            }
+            FilePath filePath = MigrationPathExtractor.extractMigrationPath(basePath, fileMetadata.originalFileLocation(), downloadBatchId);
+
             FileName fileName = LiteFileName.from(batch, url);
 
             String rawDownloadFileId = rawFileIdFrom(batch, fileMetadata);
@@ -156,6 +153,14 @@ class MigrationJob implements Runnable {
 
     private Status batchStatusFrom(Migration migration) {
         return migration.type() == Migration.Type.COMPLETE ? Status.DOWNLOADED : Status.QUEUED;
+    }
+
+    private static String prependBatchIdTo(String filePath, DownloadBatchId downloadBatchId) {
+        return sanitizeBatchIdPath(downloadBatchId.rawId()) + File.separatorChar + filePath;
+    }
+
+    private static String sanitizeBatchIdPath(String batchIdPath) {
+        return batchIdPath.replaceAll("[:\\\\/*?|<>]", "_");
     }
 
     private String rawFileIdFrom(Batch batch, Migration.FileMetadata fileMetadata) {
@@ -187,13 +192,12 @@ class MigrationJob implements Runnable {
     private void migrateCompleteDownloads(InternalMigrationStatus migrationStatus,
                                           SqlDatabaseWrapper database,
                                           List<Migration> completeMigrations,
-                                          DownloadsPersistence downloadsPersistence,
-                                          String basePath) {
+                                          DownloadsPersistence downloadsPersistence) {
         for (Migration completeMigration : completeMigrations) {
             downloadsPersistence.startTransaction();
             database.startTransaction();
 
-            migrateV1DataToV2Database(downloadsPersistence, completeMigration, basePath, true);
+            migrateV1DataToV2Database(downloadsPersistence, completeMigration, true);
             deleteFrom(database, completeMigration);
 
             downloadsPersistence.transactionSuccess();
