@@ -2,8 +2,11 @@ package com.novoda.downloadmanager;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +16,7 @@ class MigrationJob implements Runnable {
 
     private static final String TABLE_BATCHES = "batches";
     private static final String WHERE_CLAUSE_ID = "_id = ?";
+    private static final int RANDOMLY_CHOSEN_BUFFER_SIZE_THAT_SEEMS_TO_WORK = 4096;
     private static final int NO_COMPLETED_MIGRATIONS = 0;
     private static final int NO_MIGRATIONS = 0;
 
@@ -75,7 +79,7 @@ class MigrationJob implements Runnable {
         onUpdate(migrationStatus);
 
         migratePartialDownloads(migrationStatus, database, partialMigrations, downloadsPersistence);
-        migrateCompleteDownloads(migrationStatus, database, completeMigrations, downloadsPersistence);
+        migrateCompleteDownloads(migrationStatus, database, completeMigrations, downloadsPersistence, filePersistence);
         deleteVersionOneDatabase(migrationStatus, database);
 
         migrationStatus.markAsComplete();
@@ -182,11 +186,13 @@ class MigrationJob implements Runnable {
     private void migrateCompleteDownloads(InternalMigrationStatus migrationStatus,
                                           SqlDatabaseWrapper database,
                                           List<Migration> completeMigrations,
-                                          DownloadsPersistence downloadsPersistence) {
+                                          DownloadsPersistence downloadsPersistence,
+                                          FilePersistence filePersistence) {
         for (Migration completeMigration : completeMigrations) {
             downloadsPersistence.startTransaction();
             database.startTransaction();
 
+            migrateV1FilesToV2Location(filePersistence, completeMigration);
             migrateV1DataToV2Database(downloadsPersistence, completeMigration, true);
             deleteFrom(database, completeMigration);
 
@@ -210,6 +216,40 @@ class MigrationJob implements Runnable {
 
         database.close();
         database.deleteDatabase();
+    }
+
+    private void migrateV1FilesToV2Location(FilePersistence filePersistence, Migration migration) {
+        for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
+            filePersistence.create(fileMetadata.newFileLocation(), fileMetadata.fileSize());
+            FileInputStream inputStream = null;
+            try {
+                // open the v1 file
+                inputStream = new FileInputStream(new File(fileMetadata.originalFileLocation().path()));
+                byte[] bytes = new byte[RANDOMLY_CHOSEN_BUFFER_SIZE_THAT_SEEMS_TO_WORK];
+
+                // read the v1 file
+                int readLast = 0;
+                while (readLast != -1) {
+                    readLast = inputStream.read(bytes);
+                    if (readLast != 0 && readLast != -1) {
+                        // write the v1 file to the v2 location
+                        filePersistence.write(bytes, 0, readLast);
+                        bytes = new byte[RANDOMLY_CHOSEN_BUFFER_SIZE_THAT_SEEMS_TO_WORK];
+                    }
+                }
+            } catch (IOException e) {
+                Log.e(getClass().getSimpleName(), e.getMessage());
+            } finally {
+                try {
+                    filePersistence.close();
+                    if (inputStream != null) {
+                        inputStream.close();
+                    }
+                } catch (IOException e) {
+                    Log.e(getClass().getSimpleName(), e.getMessage());
+                }
+            }
+        }
     }
 
 }
