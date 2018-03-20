@@ -25,11 +25,9 @@ class PartialDownloadMigrationExtractor {
     private static final int FILE_LOCATION_COLUMN = 2;
 
     private final SqlDatabaseWrapper database;
-    private final FilePersistence filePersistence;
 
-    PartialDownloadMigrationExtractor(SqlDatabaseWrapper database, FilePersistence filePersistence) {
+    PartialDownloadMigrationExtractor(SqlDatabaseWrapper database) {
         this.database = database;
-        this.filePersistence = filePersistence;
     }
 
     List<Migration> extractMigrations() {
@@ -65,10 +63,12 @@ class PartialDownloadMigrationExtractor {
                 }
                 newBatchBuilder.addFile(uri).apply();
 
-                FilePath filePath = new LiteFilePath(sanitizedOriginalFileLocation);
-                long rawFileSize = filePersistence.getCurrentSize(filePath);
-                FileSize fileSize = FileSizeCreator.createFromTotalSize(rawFileSize);
-                Migration.FileMetadata fileMetadata = new Migration.FileMetadata(originalFileId, sanitizedOriginalFileLocation, fileSize, uri);
+                Migration.FileMetadata fileMetadata = new Migration.FileMetadata(
+                        originalFileId,
+                        sanitizedOriginalFileLocation,
+                        FileSizeCreator.unknownFileSize(),
+                        uri
+                );
                 fileMetadataList.add(fileMetadata);
             }
             downloadsCursor.close();
