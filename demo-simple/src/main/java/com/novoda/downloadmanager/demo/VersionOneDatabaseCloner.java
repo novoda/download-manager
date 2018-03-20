@@ -4,8 +4,8 @@ import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.novoda.downloadmanager.Logger;
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
+import com.novoda.notils.logger.simple.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -63,7 +63,7 @@ class VersionOneDatabaseCloner {
     private void createFileIfDoesNotExist(File outputFile) {
         boolean parentPathDoesNotExist = !outputFile.getParentFile().exists();
         if (parentPathDoesNotExist) {
-            Logger.w(String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
+            Log.w(String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
             parentPathDoesNotExist = !outputFile.getParentFile().mkdirs();
         }
 
@@ -82,9 +82,9 @@ class VersionOneDatabaseCloner {
             while ((length = inputStream.read(BUFFER)) > 0) {
                 myOutput.write(BUFFER, 0, length);
             }
-            Logger.d(getClass().getSimpleName(), "Copied asset: " + assetName);
+            Log.d(getClass().getSimpleName(), "Copied asset: " + assetName);
         } catch (IOException e) {
-            Logger.e("Failed to copy asset: " + assetName, e);
+            Log.e("Failed to copy asset: " + assetName, e);
         } finally {
             try {
                 if (myOutput != null) {
@@ -96,7 +96,7 @@ class VersionOneDatabaseCloner {
                     inputStream.close();
                 }
             } catch (IOException e) {
-                Logger.e("Failed to close streams.", e);
+                Log.e("Failed to close streams.", e);
             }
         }
     }

@@ -22,9 +22,9 @@ import com.novoda.downloadmanager.DownloadFileIdCreator;
 import com.novoda.downloadmanager.DownloadMigrator;
 import com.novoda.downloadmanager.DownloadMigratorBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
-import com.novoda.downloadmanager.Logger;
 import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
+import com.novoda.notils.logger.simple.Log;
 
 import java.io.File;
 
@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final MigrationCallback migrationCallback = migrationStatus -> {
         if (migrationStatus.status() == MigrationStatus.Status.COMPLETE) {
-            liteDownloadManagerCommands.submitAllStoredDownloads(() -> Logger.d("Migration completed, submitting all downloads"));
+            liteDownloadManagerCommands.submitAllStoredDownloads(() -> Log.d("Migration completed, submitting all downloads"));
         }
         databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());
     };
@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
     private final View.OnClickListener logFileDirectoryOnClick = v -> {
         LiteDownloadManagerCommands downloadManagerCommands = ((DemoApplication) getApplication()).getLiteDownloadManagerCommands();
         File downloadsDir = downloadManagerCommands.getDownloadsDir();
-        Logger.d("LogFileDirectory", "Downloads dir:", downloadsDir.getAbsolutePath());
+        Log.d("LogFileDirectory", "Downloads dir:", downloadsDir.getAbsolutePath());
         if (downloadsDir.exists()) {
             logAllFiles(downloadsDir.listFiles());
         }
@@ -162,14 +162,14 @@ public class MainActivity extends AppCompatActivity {
             if (file.isDirectory()) {
                 logAllFiles(file.listFiles());
             } else {
-                Logger.d("LogFileDirectory", file.getAbsolutePath());
+                Log.d("LogFileDirectory", file.getAbsolutePath());
             }
         }
     }
 
     private final View.OnClickListener logDownloadFileStatusOnClick = v -> liteDownloadManagerCommands.getDownloadFileStatusWithMatching(
             BATCH_ID_1, FILE_ID_1,
-            downloadFileStatus -> Logger.d("FileStatus: ", downloadFileStatus)
+            downloadFileStatus -> Log.d("FileStatus: ", downloadFileStatus)
     );
 
     private final DownloadBatchStatusCallback callback = downloadBatchStatus -> {

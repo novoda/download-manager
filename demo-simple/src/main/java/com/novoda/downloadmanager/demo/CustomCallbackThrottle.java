@@ -3,7 +3,7 @@ package com.novoda.downloadmanager.demo;
 import com.novoda.downloadmanager.CallbackThrottle;
 import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.DownloadBatchStatusCallback;
-import com.novoda.downloadmanager.Logger;
+import com.novoda.notils.logger.simple.Log;
 
 // Must be public
 public class CustomCallbackThrottle implements CallbackThrottle {
@@ -12,13 +12,13 @@ public class CustomCallbackThrottle implements CallbackThrottle {
 
     @Override
     public void setCallback(DownloadBatchStatusCallback callback) {
-        Logger.v("setCallback");
+        Log.v("setCallback");
         this.callback = callback;
     }
 
     @Override
     public void update(DownloadBatchStatus downloadBatchStatus) {
-        Logger.v("update " + downloadBatchStatus.getDownloadBatchTitle().asString()
+        Log.v("update " + downloadBatchStatus.getDownloadBatchTitle().asString()
                       + ", progress: " + downloadBatchStatus.percentageDownloaded() + "%");
 
         if (callback == null) {
@@ -31,6 +31,6 @@ public class CustomCallbackThrottle implements CallbackThrottle {
 
     @Override
     public void stopUpdates() {
-        Logger.v("stopUpdates");
+        Log.v("stopUpdates");
     }
 }

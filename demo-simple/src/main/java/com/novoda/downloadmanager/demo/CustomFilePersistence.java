@@ -8,7 +8,7 @@ import com.novoda.downloadmanager.FilePersistence;
 import com.novoda.downloadmanager.FilePersistenceResult;
 import com.novoda.downloadmanager.FilePersistenceType;
 import com.novoda.downloadmanager.FileSize;
-import com.novoda.downloadmanager.Logger;
+import com.novoda.notils.logger.simple.Log;
 
 // Must be public
 public class CustomFilePersistence implements FilePersistence {
@@ -17,43 +17,43 @@ public class CustomFilePersistence implements FilePersistence {
 
     @Override
     public void initialiseWith(Context context) {
-        Logger.v("initialise");
+        Log.v("initialise");
     }
 
     @Override
     public FilePath basePath() {
         FilePath filePath = FilePathCreator.unknownFilePath();
-        Logger.v("basePath " + filePath.toString());
+        Log.v("basePath " + filePath.toString());
         return filePath;
     }
 
     @Override
     public FilePersistenceResult create(FilePath absoluteFilePath, FileSize fileSize) {
-        Logger.v("create " + absoluteFilePath.toString() + ", " + fileSize.toString());
+        Log.v("create " + absoluteFilePath.toString() + ", " + fileSize.toString());
         return FilePersistenceResult.SUCCESS;
     }
 
     @Override
     public boolean write(byte[] buffer, int offset, int numberOfBytesToWrite) {
-        Logger.v("write offset: " + offset + ", numberOfBytesToWrite: " + numberOfBytesToWrite);
+        Log.v("write offset: " + offset + ", numberOfBytesToWrite: " + numberOfBytesToWrite);
         currentSize = +numberOfBytesToWrite;
         return true;
     }
 
     @Override
     public void delete(FilePath absoluteFilePath) {
-        Logger.v("delete: " + absoluteFilePath);
+        Log.v("delete: " + absoluteFilePath);
     }
 
     @Override
     public long getCurrentSize(FilePath filePath) {
-        Logger.v("getCurrentSize for " + filePath + ": " + currentSize);
+        Log.v("getCurrentSize for " + filePath + ": " + currentSize);
         return currentSize;
     }
 
     @Override
     public void close() {
-        Logger.v("close");
+        Log.v("close");
     }
 
     @Override
