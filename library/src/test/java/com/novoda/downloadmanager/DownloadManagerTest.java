@@ -223,15 +223,6 @@ public class DownloadManagerTest {
     }
 
     @Test
-    public void removesBatchFromInternalList_whenResuming() {
-        given(downloadBatch.status()).willReturn(anInternalDownloadsBatchStatus().build());
-
-        downloadManager.resume(DOWNLOAD_BATCH_ID);
-
-        assertThat(downloadingBatches).doesNotContainEntry(DOWNLOAD_BATCH_ID, downloadBatch);
-    }
-
-    @Test
     public void resumesBatch() {
         given(downloadBatch.status()).willReturn(anInternalDownloadsBatchStatus().build());
 

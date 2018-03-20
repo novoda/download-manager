@@ -2,7 +2,6 @@ package com.novoda.downloadmanager;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -27,15 +26,15 @@ final class DownloadBatchFactory {
         DownloadBatchId downloadBatchId = batch.downloadBatchId();
         long downloadedDateTimeInMillis = System.currentTimeMillis();
 
-        List<DownloadFile> downloadFiles = new ArrayList<>(batch.batchFiles().size());
+        List<BatchFile> batchFiles = batch.batchFiles();
+        List<DownloadFile> downloadFiles = new ArrayList<>(batchFiles.size());
 
-        for (BatchFile batchFile : batch.batchFiles()) {
+        for (BatchFile batchFile : batchFiles) {
             String networkAddress = batchFile.networkAddress();
 
             InternalFileSize fileSize = InternalFileSizeCreator.unknownFileSize();
 
-            FilePersistenceCreator filePersistenceCreator = fileOperations.filePersistenceCreator();
-            FilePersistence filePersistence = filePersistenceCreator.create();
+            FilePersistence filePersistence = fileOperations.filePersistenceCreator().create();
 
             String basePath = filePersistence.basePath().path();
             FilePath filePath = FilePathCreator.create(basePath, prependBatchIdTo(relativePathFrom(batchFile), downloadBatchId));
@@ -68,8 +67,6 @@ final class DownloadBatchFactory {
             );
             downloadFiles.add(downloadFile);
         }
-
-        downloadFiles = Collections.unmodifiableList(downloadFiles);
 
         InternalDownloadBatchStatus liteDownloadBatchStatus = new LiteDownloadBatchStatus(
                 downloadBatchId,
