@@ -188,10 +188,10 @@ class DownloadFile {
         if (fileSize.isTotalSizeUnknown()) {
             FileSize requestFileSize = fileSizeRequester.requestFileSize(url);
             fileSize.setTotalSize(requestFileSize.totalSize());
-            Logger.v("file getTotalSize for batchId: " + downloadBatchId
-                    + ", status: " + fileStatus().status()
-                    + ", fileId: " + fileStatus().downloadFileId().rawId());
             if (fileStatus().status() == DownloadFileStatus.Status.DELETED) {
+                Logger.e("file getTotalSize return zero because is deleted, " + downloadFileId.rawId()
+                        + " from batch " + downloadBatchId.rawId()
+                        + " with file status " + fileStatus().status());
                 return 0;
             }
             persist();

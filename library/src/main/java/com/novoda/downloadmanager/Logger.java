@@ -7,6 +7,7 @@ import java.util.List;
  * This class provides a mechanism for adding a variety
  * of {@link LogHandle} that when logging will log to all handles.
  */
+@SuppressWarnings("PMD.ShortMethodName")
 final class Logger {
 
     private static final List<LogHandle> HANDLES = new ArrayList<>();

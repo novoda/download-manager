@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.novoda.downloadmanager.LogHandle;
 
+@SuppressWarnings("PMD.ShortMethodName")
 public class DemoLogHandle implements LogHandle {
 
     private static final String TAG = "DownloadManagerDemo";

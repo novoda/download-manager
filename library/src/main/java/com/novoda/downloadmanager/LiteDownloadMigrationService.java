@@ -15,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 public class LiteDownloadMigrationService extends Service implements DownloadMigrationService {
 
     private static final long TEN_MINUTES_IN_MILLIS = TimeUnit.MINUTES.toMillis(10);
-    private static final String TAG = "MigrationService";
     private static final String WAKELOCK_TAG = "MigrationWakelockTag";
 
     private ExecutorService executor;
