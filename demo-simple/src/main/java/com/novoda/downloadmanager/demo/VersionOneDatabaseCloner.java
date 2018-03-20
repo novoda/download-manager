@@ -3,9 +3,9 @@ package com.novoda.downloadmanager.demo;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
-import com.novoda.notils.logger.simple.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -18,6 +18,7 @@ import java.util.concurrent.Executor;
 
 class VersionOneDatabaseCloner {
 
+    private static final String TAG = VersionOneDatabaseCloner.class.getSimpleName();
     private static final int BUFFER_SIZE = 1024;
     private static final byte[] BUFFER = new byte[BUFFER_SIZE];
 
@@ -63,7 +64,7 @@ class VersionOneDatabaseCloner {
     private void createFileIfDoesNotExist(File outputFile) {
         boolean parentPathDoesNotExist = !outputFile.getParentFile().exists();
         if (parentPathDoesNotExist) {
-            Log.w(String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
+            Log.w(TAG, String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
             parentPathDoesNotExist = !outputFile.getParentFile().mkdirs();
         }
 
@@ -84,7 +85,7 @@ class VersionOneDatabaseCloner {
             }
             Log.d(getClass().getSimpleName(), "Copied asset: " + assetName);
         } catch (IOException e) {
-            Log.e("Failed to copy asset: " + assetName, e);
+            Log.e(TAG, "Failed to copy asset: " + assetName, e);
         } finally {
             try {
                 if (myOutput != null) {
@@ -96,7 +97,7 @@ class VersionOneDatabaseCloner {
                     inputStream.close();
                 }
             } catch (IOException e) {
-                Log.e("Failed to close streams.", e);
+                Log.e(TAG, "Failed to close streams.", e);
             }
         }
     }

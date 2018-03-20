@@ -7,7 +7,6 @@ import android.os.Looper;
 import com.facebook.stetho.Stetho;
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
-import com.novoda.notils.logger.simple.Log;
 
 public class DemoApplication extends Application {
 
@@ -17,7 +16,6 @@ public class DemoApplication extends Application {
     public void onCreate() {
         super.onCreate();
         Stetho.initializeWithDefaults(this);
-        Log.setShowLogs(true);
         createLiteDownloadManager();
     }
 
