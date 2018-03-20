@@ -1,7 +1,5 @@
 package com.novoda.downloadmanager;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.io.IOException;
 
 class NetworkFileSizeRequester implements FileSizeRequester {
@@ -28,7 +26,7 @@ class NetworkFileSizeRequester implements FileSizeRequester {
                 return FileSizeCreator.createFromTotalSize(totalFileSize);
             }
         } catch (IOException e) {
-            Log.e(e, "Error requesting file size for " + url);
+            Logger.e(e, "Error requesting file size for " + url);
         }
 
         return FileSizeCreator.unknownFileSize();

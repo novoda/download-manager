@@ -3,8 +3,6 @@ package com.novoda.downloadmanager;
 import android.app.Notification;
 import android.support.v4.app.NotificationManagerCompat;
 
-import com.novoda.notils.logger.simple.Log;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -40,7 +38,6 @@ public class ServiceNotificationDispatcherTest {
 
     @Before
     public void setUp() {
-        Log.setShowLogs(false);
         given(notificationCreator.createNotification(any(DownloadBatchStatus.class))).willReturn(createNotificationInfo(SINGLE_PERSISTENT_NOTIFICATION, 100));
 
         notificationDispatcher = new ServiceNotificationDispatcher<>(lock, notificationCreator, notificationManager);

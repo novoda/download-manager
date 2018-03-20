@@ -3,7 +3,6 @@ package com.novoda.downloadmanager;
 import android.support.annotation.NonNull;
 
 import com.evernote.android.job.Job;
-import com.novoda.notils.logger.simple.Log;
 
 class LiteJobDownload extends Job {
 
@@ -16,8 +15,8 @@ class LiteJobDownload extends Job {
     @NonNull
     @Override
     protected Result onRunJob(Params params) {
-        downloadManager.submitAllStoredDownloads(() -> Log.v("LiteJobDownload all jobs submitted"));
-        Log.v("LiteJobDownload run network recovery job");
+        downloadManager.submitAllStoredDownloads(() -> Logger.v("LiteJobDownload all jobs submitted"));
+        Logger.v("LiteJobDownload run network recovery job");
         return Result.SUCCESS;
     }
 }

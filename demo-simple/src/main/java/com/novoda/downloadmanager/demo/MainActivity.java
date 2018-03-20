@@ -3,6 +3,7 @@ package com.novoda.downloadmanager.demo;
 import android.os.Bundle;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
@@ -24,7 +25,6 @@ import com.novoda.downloadmanager.DownloadMigratorBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
-import com.novoda.notils.logger.simple.Log;
 
 import java.io.File;
 
@@ -34,6 +34,7 @@ import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.StdCyclomaticComplexity", "PMD.ModifiedCyclomaticComplexity"})
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
     private static final DownloadBatchId BATCH_ID_1 = DownloadBatchIdCreator.createFrom("batch_id_1");
     private static final DownloadBatchId BATCH_ID_2 = DownloadBatchIdCreator.createFrom("batch_id_2");
     private static final DownloadFileId FILE_ID_1 = DownloadFileIdCreator.createFrom("file_id_1");
@@ -113,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final MigrationCallback migrationCallback = migrationStatus -> {
         if (migrationStatus.status() == MigrationStatus.Status.COMPLETE) {
-            liteDownloadManagerCommands.submitAllStoredDownloads(() -> Log.d("Migration completed, submitting all downloads"));
+            liteDownloadManagerCommands.submitAllStoredDownloads(() -> Log.d(TAG, "Migration completed, submitting all downloads"));
         }
         databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());
     };
@@ -151,25 +152,25 @@ public class MainActivity extends AppCompatActivity {
     private final View.OnClickListener logFileDirectoryOnClick = v -> {
         LiteDownloadManagerCommands downloadManagerCommands = ((DemoApplication) getApplication()).getLiteDownloadManagerCommands();
         File downloadsDir = downloadManagerCommands.getDownloadsDir();
-        Log.d("LogFileDirectory", "Downloads dir:", downloadsDir.getAbsolutePath());
+        Log.d(TAG, "LogFileDirectory. Downloads dir: " + downloadsDir.getAbsolutePath());
         if (downloadsDir.exists()) {
             logAllFiles(downloadsDir.listFiles());
         }
     };
 
-    private void logAllFiles(File[] files) {
+    private void logAllFiles(File... files) {
         for (File file : files) {
             if (file.isDirectory()) {
                 logAllFiles(file.listFiles());
             } else {
-                Log.d("LogFileDirectory", file.getAbsolutePath());
+                Log.d(TAG, "LogFileDirectory. " + file.getAbsolutePath());
             }
         }
     }
 
     private final View.OnClickListener logDownloadFileStatusOnClick = v -> liteDownloadManagerCommands.getDownloadFileStatusWithMatching(
             BATCH_ID_1, FILE_ID_1,
-            downloadFileStatus -> Log.d("FileStatus: ", downloadFileStatus)
+            downloadFileStatus -> Log.d(TAG, "FileStatus: " + downloadFileStatus)
     );
 
     private final DownloadBatchStatusCallback callback = downloadBatchStatus -> {

@@ -7,7 +7,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 public class LiteDownloadMigrationService extends Service implements DownloadMigrationService {
 
     private static final long TEN_MINUTES_IN_MILLIS = TimeUnit.MINUTES.toMillis(10);
-    private static final String TAG = "MigrationService";
     private static final String WAKELOCK_TAG = "MigrationWakelockTag";
 
     private ExecutorService executor;
@@ -26,7 +24,6 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d(TAG, "onCreate");
         executor = Executors.newSingleThreadExecutor();
         binder = new MigrationDownloadServiceBinder();
         super.onCreate();

@@ -4,7 +4,6 @@ import android.content.Context;
 
 import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
-import com.novoda.notils.logger.simple.Log;
 
 import java.util.concurrent.TimeUnit;
 
@@ -39,7 +38,7 @@ class LiteDownloadsNetworkRecoveryEnabled implements DownloadsNetworkRecovery {
                 builder.setRequiredNetworkType(JobRequest.NetworkType.METERED);
                 break;
             default:
-                Log.w("Unknown ConnectionType: " + connectionType);
+                Logger.w("Unknown ConnectionType: " + connectionType);
                 break;
         }
 
@@ -48,7 +47,7 @@ class LiteDownloadsNetworkRecoveryEnabled implements DownloadsNetworkRecovery {
 
         jobManager.cancelAllForTag(LiteJobCreator.TAG);
         jobManager.schedule(jobRequest);
-        Log.v("Scheduling Network Recovery.");
+        Logger.v("Scheduling Network Recovery.");
     }
 
     @Override
