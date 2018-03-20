@@ -2,6 +2,7 @@ package com.novoda.downloadmanager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * This class provides a mechanism for adding a variety
@@ -147,6 +148,7 @@ final class Logger {
         final StackTraceElement trace = currentThread.getStackTrace()[STACK_DEPTH];
         final String filename = trace.getFileName();
         final String linkableSourcePosition = String.format(
+                Locale.UK,
                 "(%s.java:%d)",
                 filename.substring(0, filename.length() - DOT_CLASS),
                 trace.getLineNumber()
