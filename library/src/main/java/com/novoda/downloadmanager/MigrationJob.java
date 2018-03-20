@@ -51,7 +51,7 @@ class MigrationJob implements Runnable {
         FilePersistence filePersistence = FilePersistenceCreator.newInternalFilePersistenceCreator(context).create();
         String basePath = filePersistence.basePath().path();
         filePersistence.initialiseWith(context);
-        PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database);
+        PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database, filePersistence);
         MigrationExtractor migrationExtractor = new MigrationExtractor(database, filePersistence);
         List<Migration> partialMigrations = partialDownloadMigrationExtractor.extractMigrations();
         List<Migration> completeMigrations = migrationExtractor.extractMigrations();

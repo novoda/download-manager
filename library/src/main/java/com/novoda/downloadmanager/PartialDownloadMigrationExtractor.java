@@ -19,15 +19,17 @@ class PartialDownloadMigrationExtractor {
     private static final int TITLE_COLUMN = 1;
     private static final int MODIFIED_TIMESTAMP_COLUMN = 2;
 
-    private static final String DOWNLOADS_QUERY = "SELECT uri, notificationextras FROM Downloads WHERE batch_id = ?";
+    private static final String DOWNLOADS_QUERY = "SELECT uri, notificationextras, hint FROM Downloads WHERE batch_id = ?";
     private static final int URI_COLUMN = 0;
     private static final int FILE_ID_COLUMN = 1;
-    private static final String UNKNOWN_ORIGINAL_LOCATION = "";
+    private static final int FILE_LOCATION_COLUMN = 2;
 
     private final SqlDatabaseWrapper database;
+    private final FilePersistence filePersistence;
 
-    PartialDownloadMigrationExtractor(SqlDatabaseWrapper database) {
+    PartialDownloadMigrationExtractor(SqlDatabaseWrapper database, FilePersistence filePersistence) {
         this.database = database;
+        this.filePersistence = filePersistence;
     }
 
     List<Migration> extractMigrations() {
@@ -48,6 +50,7 @@ class PartialDownloadMigrationExtractor {
             while (downloadsCursor.moveToNext()) {
                 String originalFileId = downloadsCursor.getString(FILE_ID_COLUMN);
                 String uri = downloadsCursor.getString(URI_COLUMN);
+                String originalFileLocation = downloadsCursor.getString(FILE_LOCATION_COLUMN);
 
                 if (downloadsCursor.isFirst()) {
                     DownloadBatchId downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
@@ -61,8 +64,10 @@ class PartialDownloadMigrationExtractor {
                 }
                 newBatchBuilder.addFile(uri).apply();
 
-                FileSize fileSize = FileSizeCreator.unknownFileSize();
-                Migration.FileMetadata fileMetadata = new Migration.FileMetadata(originalFileId, UNKNOWN_ORIGINAL_LOCATION, fileSize, uri);
+                FilePath filePath = new LiteFilePath(originalFileLocation);
+                long rawFileSize = filePersistence.getCurrentSize(filePath);
+                FileSize fileSize = FileSizeCreator.createFromTotalSize(rawFileSize);
+                Migration.FileMetadata fileMetadata = new Migration.FileMetadata(originalFileId, originalFileLocation, fileSize, uri);
                 fileMetadataList.add(fileMetadata);
             }
             downloadsCursor.close();
