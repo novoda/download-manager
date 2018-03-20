@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private void logAllFiles(File[] files) {
+    private void logAllFiles(File... files) {
         for (File file : files) {
             if (file.isDirectory()) {
                 logAllFiles(file.listFiles());
