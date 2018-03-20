@@ -51,8 +51,8 @@ class MigrationJob implements Runnable {
 
         FilePersistence filePersistence = FilePersistenceCreator.newInternalFilePersistenceCreator(context).create();
         filePersistence.initialiseWith(context);
-        PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database);
-        MigrationExtractor migrationExtractor = new MigrationExtractor(database, filePersistence);
+        PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database, basePath);
+        MigrationExtractor migrationExtractor = new MigrationExtractor(database, filePersistence, basePath);
         List<Migration> partialMigrations = partialDownloadMigrationExtractor.extractMigrations();
         List<Migration> completeMigrations = migrationExtractor.extractMigrations();
         DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
@@ -131,8 +131,6 @@ class MigrationJob implements Runnable {
         for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
             String url = fileMetadata.originalNetworkAddress();
 
-            FilePath filePath = MigrationPathExtractor.extractMigrationPath(basePath, fileMetadata.originalFileLocation().path(), downloadBatchId);
-
             FileName fileName = LiteFileName.from(batch, url);
 
             String rawDownloadFileId = rawFileIdFrom(batch, fileMetadata);
@@ -142,7 +140,7 @@ class MigrationJob implements Runnable {
                     downloadBatchId,
                     downloadFileId,
                     fileName,
-                    filePath,
+                    fileMetadata.newFileLocation(),
                     fileMetadata.fileSize().totalSize(),
                     url,
                     FilePersistenceType.INTERNAL
@@ -153,14 +151,6 @@ class MigrationJob implements Runnable {
 
     private Status batchStatusFrom(Migration migration) {
         return migration.type() == Migration.Type.COMPLETE ? Status.DOWNLOADED : Status.QUEUED;
-    }
-
-    private static String prependBatchIdTo(String filePath, DownloadBatchId downloadBatchId) {
-        return sanitizeBatchIdPath(downloadBatchId.rawId()) + File.separatorChar + filePath;
-    }
-
-    private static String sanitizeBatchIdPath(String batchIdPath) {
-        return batchIdPath.replaceAll("[:\\\\/*?|<>]", "_");
     }
 
     private String rawFileIdFrom(Batch batch, Migration.FileMetadata fileMetadata) {

@@ -52,7 +52,7 @@ public class MigrationExtractorTest {
 
     @Before
     public void setUp() {
-        migrationExtractor = new MigrationExtractor(database, internalFilePersistence);
+        migrationExtractor = new MigrationExtractor(database, internalFilePersistence, basePath);
     }
 
     @Test

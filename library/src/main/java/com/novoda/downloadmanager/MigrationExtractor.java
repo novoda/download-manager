@@ -29,10 +29,12 @@ class MigrationExtractor {
 
     private final SqlDatabaseWrapper database;
     private final FilePersistence filePersistence;
+    private final String basePath;
 
-    MigrationExtractor(SqlDatabaseWrapper database, FilePersistence filePersistence) {
+    MigrationExtractor(SqlDatabaseWrapper database, FilePersistence filePersistence, String basePath) {
         this.database = database;
         this.filePersistence = filePersistence;
+        this.basePath = basePath;
     }
 
     List<Migration> extractMigrations() {
@@ -60,6 +62,7 @@ class MigrationExtractor {
                 List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
                 Set<String> uris = new HashSet<>();
 
+                DownloadBatchId downloadBatchId = null;
                 try {
                     while (downloadsCursor.moveToNext()) {
                         String originalFileId = downloadsCursor.getString(FILE_ID_COLUMN);
@@ -68,7 +71,7 @@ class MigrationExtractor {
                         String sanitizedOriginalFileLocation = MigrationStoragePathSanitizer.sanitize(originalFileLocation);
 
                         if (downloadsCursor.isFirst()) {
-                            DownloadBatchId downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
+                            downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
                             newBatchBuilder = Batch.with(downloadBatchId, batchTitle);
                         }
 
@@ -80,12 +83,14 @@ class MigrationExtractor {
                         newBatchBuilder.addFile(originalNetworkAddress).apply();
 
                         FilePath originalFilePath = new LiteFilePath(sanitizedOriginalFileLocation);
+                        FilePath newFilePath = MigrationPathExtractor.extractMigrationPath(basePath, originalFilePath.path(), downloadBatchId);
+
                         long rawFileSize = filePersistence.getCurrentSize(originalFilePath);
                         FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
                         Migration.FileMetadata fileMetadata = new Migration.FileMetadata(
                                 originalFileId,
                                 originalFilePath,
-                                FilePathCreator.unknownFilePath(),
+                                newFilePath,
                                 fileSize,
                                 originalNetworkAddress
                         );

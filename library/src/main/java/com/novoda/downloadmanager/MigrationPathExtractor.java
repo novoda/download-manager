@@ -20,8 +20,8 @@ final class MigrationPathExtractor {
         return new LiteFilePath(sanitizedAbsolutePath);
     }
 
-    private static String extractRelativePath(String rootUrlPath, String assetUrl) {
-        String subPathWithFileName = removeSubstring(assetUrl, rootUrlPath);
+    private static String extractRelativePath(String basePath, String assetPath) {
+        String subPathWithFileName = removeSubstring(assetPath, basePath);
         String fileName = extractFileName(subPathWithFileName);
         return removeSubstring(subPathWithFileName, fileName);
     }

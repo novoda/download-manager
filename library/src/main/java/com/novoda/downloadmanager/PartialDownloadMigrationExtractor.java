@@ -25,9 +25,11 @@ class PartialDownloadMigrationExtractor {
     private static final int FILE_LOCATION_COLUMN = 2;
 
     private final SqlDatabaseWrapper database;
+    private final String basePath;
 
-    PartialDownloadMigrationExtractor(SqlDatabaseWrapper database) {
+    PartialDownloadMigrationExtractor(SqlDatabaseWrapper database, String basePath) {
         this.database = database;
+        this.basePath = basePath;
     }
 
     List<Migration> extractMigrations() {
@@ -45,6 +47,7 @@ class PartialDownloadMigrationExtractor {
             List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
             Set<String> uris = new HashSet<>();
 
+            DownloadBatchId downloadBatchId = null;
             while (downloadsCursor.moveToNext()) {
                 String originalFileId = downloadsCursor.getString(FILE_ID_COLUMN);
                 String uri = downloadsCursor.getString(URI_COLUMN);
@@ -53,7 +56,7 @@ class PartialDownloadMigrationExtractor {
                 FilePath originalFilePath = new LiteFilePath(sanitizedOriginalFileLocation);
 
                 if (downloadsCursor.isFirst()) {
-                    DownloadBatchId downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
+                    downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
                     newBatchBuilder = Batch.with(downloadBatchId, batchTitle);
                 }
 
@@ -64,10 +67,12 @@ class PartialDownloadMigrationExtractor {
                 }
                 newBatchBuilder.addFile(uri).apply();
 
+                FilePath newFilePath = MigrationPathExtractor.extractMigrationPath(basePath, originalFilePath.path(), downloadBatchId);
+
                 Migration.FileMetadata fileMetadata = new Migration.FileMetadata(
                         originalFileId,
                         originalFilePath,
-                        FilePathCreator.unknownFilePath(),
+                        newFilePath,
                         FileSizeCreator.unknownFileSize(),
                         uri
                 );
