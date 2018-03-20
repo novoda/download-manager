@@ -80,8 +80,8 @@ public class MigrationExtractorTest {
                 .build();
 
         List<Migration.FileMetadata> firstFileMetadata = new ArrayList<>();
-        firstFileMetadata.add(new Migration.FileMetadata("file_1", "data_1", new LiteFileSize(1000, 1000), firstUri));
-        firstFileMetadata.add(new Migration.FileMetadata("file_2", "data_2", new LiteFileSize(2000, 2000), secondUri));
+        firstFileMetadata.add(new Migration.FileMetadata("file_1", "data_1", newFileLocation, new LiteFileSize(1000, 1000), firstUri));
+        firstFileMetadata.add(new Migration.FileMetadata("file_2", "data_2", newFileLocation, new LiteFileSize(2000, 2000), secondUri));
 
         String thirdUri = "uri_3";
         String fourthUri = "uri_4";
@@ -91,8 +91,8 @@ public class MigrationExtractorTest {
                 .build();
 
         List<Migration.FileMetadata> secondFileMetadata = new ArrayList<>();
-        secondFileMetadata.add(new Migration.FileMetadata("file_3", "data_3", new LiteFileSize(500, 500), thirdUri));
-        secondFileMetadata.add(new Migration.FileMetadata("file_4", "data_4", new LiteFileSize(750, 750), fourthUri));
+        secondFileMetadata.add(new Migration.FileMetadata("file_3", "data_3", newFileLocation, new LiteFileSize(500, 500), thirdUri));
+        secondFileMetadata.add(new Migration.FileMetadata("file_4", "data_4", newFileLocation, new LiteFileSize(750, 750), fourthUri));
 
         return Arrays.asList(
                 new Migration(firstBatch, firstFileMetadata, 12345, Migration.Type.COMPLETE),

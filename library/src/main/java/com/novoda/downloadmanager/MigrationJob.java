@@ -131,7 +131,7 @@ class MigrationJob implements Runnable {
         for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
             String url = fileMetadata.originalNetworkAddress();
 
-            FilePath filePath = MigrationPathExtractor.extractMigrationPath(basePath, fileMetadata.originalFileLocation(), downloadBatchId);
+            FilePath filePath = MigrationPathExtractor.extractMigrationPath(basePath, fileMetadata.originalFileLocation().path(), downloadBatchId);
 
             FileName fileName = LiteFileName.from(batch, url);
 
@@ -175,7 +175,7 @@ class MigrationJob implements Runnable {
     private void deleteFiles(Migration migration) {
         for (Migration.FileMetadata metadata : migration.getFileMetadata()) {
             if (hasValidFileLocation(metadata)) {
-                File file = new File(metadata.originalFileLocation());
+                File file = new File(metadata.originalFileLocation().path());
                 boolean deleted = file.delete();
                 if (!deleted) {
                     String message = String.format("Could not delete File or Directory: %s", file.getPath());
@@ -186,7 +186,7 @@ class MigrationJob implements Runnable {
     }
 
     private boolean hasValidFileLocation(Migration.FileMetadata metadata) {
-        return metadata.originalFileLocation() != null && !metadata.originalFileLocation().isEmpty();
+        return metadata.originalFileLocation() != null && !metadata.originalFileLocation().path().isEmpty();
     }
 
     private void migrateCompleteDownloads(InternalMigrationStatus migrationStatus,

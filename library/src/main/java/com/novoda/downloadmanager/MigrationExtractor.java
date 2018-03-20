@@ -79,12 +79,13 @@ class MigrationExtractor {
                         }
                         newBatchBuilder.addFile(originalNetworkAddress).apply();
 
-                        FilePath filePath = new LiteFilePath(sanitizedOriginalFileLocation);
-                        long rawFileSize = filePersistence.getCurrentSize(filePath);
+                        FilePath originalFilePath = new LiteFilePath(sanitizedOriginalFileLocation);
+                        long rawFileSize = filePersistence.getCurrentSize(originalFilePath);
                         FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
                         Migration.FileMetadata fileMetadata = new Migration.FileMetadata(
                                 originalFileId,
-                                sanitizedOriginalFileLocation,
+                                originalFilePath,
+                                FilePathCreator.unknownFilePath(),
                                 fileSize,
                                 originalNetworkAddress
                         );
