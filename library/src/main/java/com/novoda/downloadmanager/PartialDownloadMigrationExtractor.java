@@ -51,6 +51,7 @@ class PartialDownloadMigrationExtractor {
                 String originalFileId = downloadsCursor.getString(FILE_ID_COLUMN);
                 String uri = downloadsCursor.getString(URI_COLUMN);
                 String originalFileLocation = downloadsCursor.getString(FILE_LOCATION_COLUMN);
+                String sanitizedOriginalFileLocation = MigrationStoragePathSanitizer.sanitize(originalFileLocation);
 
                 if (downloadsCursor.isFirst()) {
                     DownloadBatchId downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
@@ -64,10 +65,10 @@ class PartialDownloadMigrationExtractor {
                 }
                 newBatchBuilder.addFile(uri).apply();
 
-                FilePath filePath = new LiteFilePath(originalFileLocation);
+                FilePath filePath = new LiteFilePath(sanitizedOriginalFileLocation);
                 long rawFileSize = filePersistence.getCurrentSize(filePath);
                 FileSize fileSize = FileSizeCreator.createFromTotalSize(rawFileSize);
-                Migration.FileMetadata fileMetadata = new Migration.FileMetadata(originalFileId, originalFileLocation, fileSize, uri);
+                Migration.FileMetadata fileMetadata = new Migration.FileMetadata(originalFileId, sanitizedOriginalFileLocation, fileSize, uri);
                 fileMetadataList.add(fileMetadata);
             }
             downloadsCursor.close();

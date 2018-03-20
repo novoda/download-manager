@@ -65,6 +65,7 @@ class MigrationExtractor {
                         String originalFileId = downloadsCursor.getString(FILE_ID_COLUMN);
                         String originalNetworkAddress = downloadsCursor.getString(NETWORK_ADDRESS_COLUMN);
                         String originalFileLocation = downloadsCursor.getString(FILE_LOCATION_COLUMN);
+                        String sanitizedOriginalFileLocation = MigrationStoragePathSanitizer.sanitize(originalFileLocation);
 
                         if (downloadsCursor.isFirst()) {
                             DownloadBatchId downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
@@ -78,12 +79,12 @@ class MigrationExtractor {
                         }
                         newBatchBuilder.addFile(originalNetworkAddress).apply();
 
-                        FilePath filePath = new LiteFilePath(originalFileLocation);
+                        FilePath filePath = new LiteFilePath(sanitizedOriginalFileLocation);
                         long rawFileSize = filePersistence.getCurrentSize(filePath);
                         FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
                         Migration.FileMetadata fileMetadata = new Migration.FileMetadata(
                                 originalFileId,
-                                originalFileLocation,
+                                sanitizedOriginalFileLocation,
                                 fileSize,
                                 originalNetworkAddress
                         );
