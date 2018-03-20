@@ -79,8 +79,9 @@ class DownloadManager implements LiteDownloadManagerCommands {
         DownloadBatchId downloadBatchId = batch.downloadBatchId();
         DownloadBatch downloadBatch = downloadBatchMap.get(downloadBatchId);
         if (downloadBatch == null) {
-            Log.v("download " + downloadBatchId);
             downloader.download(batch, downloadBatchMap);
+        } else {
+            Log.v("abort download batch " + downloadBatchId + " will not download as exists already in the running batches map");
         }
     }
 
@@ -88,6 +89,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
     public void pause(DownloadBatchId downloadBatchId) {
         DownloadBatch downloadBatch = downloadBatchMap.get(downloadBatchId);
         if (downloadBatch == null) {
+            Log.v("abort pause batch " + downloadBatchId + " will not be paused as it does not exists in the running batches map");
             return;
         }
         downloadBatch.pause();
@@ -97,16 +99,16 @@ class DownloadManager implements LiteDownloadManagerCommands {
     public void resume(DownloadBatchId downloadBatchId) {
         DownloadBatch downloadBatch = downloadBatchMap.get(downloadBatchId);
         if (downloadBatch == null) {
+            Log.v("abort resume batch " + downloadBatchId + " will not be resume as it does not exists in the running batches map");
             return;
         }
 
         if (downloadBatch.status().status() == DownloadBatchStatus.Status.DOWNLOADING) {
+            Log.v("abort resume batch " + downloadBatchId + " will not be resume as it's already downloading");
             return;
         }
 
-        downloadBatchMap.remove(downloadBatchId);
         downloadBatch.resume();
-
         downloader.download(downloadBatch, downloadBatchMap);
     }
 
@@ -114,6 +116,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
     public void delete(DownloadBatchId downloadBatchId) {
         DownloadBatch downloadBatch = downloadBatchMap.get(downloadBatchId);
         if (downloadBatch == null) {
+            Log.v("abort delete batch " + downloadBatchId + " will not be deleted as it does not exists in the running batches map");
             return;
         }
 
