@@ -4,8 +4,6 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +77,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
         DownloadBatchId downloadBatchId = batch.downloadBatchId();
         DownloadBatch downloadBatch = downloadBatchMap.get(downloadBatchId);
         if (downloadBatch == null) {
-            Log.v("download " + downloadBatchId);
+            Logger.v("download " + downloadBatchId);
             downloader.download(batch, downloadBatchMap);
         }
     }
@@ -206,7 +204,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
         DownloadsNetworkRecoveryCreator.getInstance().updateAllowedConnectionType(allowedConnectionType);
 
         if (connectionChecker.isAllowedToDownload()) {
-            submitAllStoredDownloads(() -> Log.v("Allowed connectionType updated to " + allowedConnectionType + ". All jobs submitted"));
+            submitAllStoredDownloads(() -> Logger.v("Allowed connectionType updated to " + allowedConnectionType + ". All jobs submitted"));
         } else {
             for (DownloadBatch downloadBatch : downloadBatchMap.values()) {
                 downloadBatch.waitForNetwork();

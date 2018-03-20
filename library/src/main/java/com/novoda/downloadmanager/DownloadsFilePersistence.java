@@ -3,8 +3,6 @@ package com.novoda.downloadmanager;
 import android.database.sqlite.SQLiteConstraintException;
 import android.support.annotation.WorkerThread;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +42,7 @@ class DownloadsFilePersistence {
             downloadsPersistence.transactionSuccess();
             return true;
         } catch (SQLiteConstraintException e) {
-            Log.e("failure to persist sync file " + downloadFileStatus.downloadFileId().rawId() + " with status " + downloadFileStatus.status());
+            Logger.e("failure to persist sync file " + downloadFileStatus.downloadFileId().rawId() + " with status " + downloadFileStatus.status());
             return false;
         } finally {
             downloadsPersistence.endTransaction();

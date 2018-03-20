@@ -2,8 +2,6 @@ package com.novoda.downloadmanager;
 
 import android.support.annotation.Nullable;
 
-import com.novoda.notils.logger.simple.Log;
-
 final class Wait {
 
     private Wait() {
@@ -43,7 +41,7 @@ final class Wait {
                     }
                 }
             } catch (InterruptedException e) {
-                Log.e(e, "Interrupted waiting for instance.");
+                Logger.e(e, "Interrupted waiting for instance.");
             }
         }
 

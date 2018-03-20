@@ -3,8 +3,6 @@ package com.novoda.downloadmanager;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.util.List;
 import java.util.Map;
 
@@ -54,10 +52,10 @@ class DownloadBatch {
 
     void download() {
         String rawBatchId = downloadBatchStatus.getDownloadBatchId().rawId();
-        Log.v("start download " + rawBatchId + ", status: " + downloadBatchStatus.status());
+        Logger.v("start download " + rawBatchId + ", status: " + downloadBatchStatus.status());
 
         if (shouldAbortStartingBatch(connectionChecker, callback, downloadBatchStatus, downloadsBatchPersistence)) {
-            Log.v("abort starting download " + rawBatchId);
+            Logger.v("abort starting download " + rawBatchId);
             return;
         }
 
@@ -68,7 +66,7 @@ class DownloadBatch {
         }
 
         if (shouldAbortAfterGettingTotalBatchSize(downloadBatchStatus, downloadsBatchPersistence, callback, totalBatchSizeBytes)) {
-            Log.v("abort after getting total batch size download " + rawBatchId);
+            Logger.v("abort after getting total batch size download " + rawBatchId);
             return;
         }
 
@@ -86,7 +84,7 @@ class DownloadBatch {
         deleteBatchIfNeeded(downloadBatchStatus, downloadsBatchPersistence, callback);
         notifyCallback(callback, downloadBatchStatus);
         callbackThrottle.stopUpdates();
-        Log.v("end download " + rawBatchId);
+        Logger.v("end download " + rawBatchId);
     }
 
     private static boolean shouldAbortStartingBatch(ConnectionChecker connectionChecker,
@@ -166,7 +164,7 @@ class DownloadBatch {
                 return 0;
             }
 
-            Log.v("batch id: " + downloadBatchStatus.getDownloadBatchId().rawId() + ", status: " + status + ", file: " + downloadFile.id().rawId());
+            Logger.v("batch id: " + downloadBatchStatus.getDownloadBatchId().rawId() + ", status: " + status + ", file: " + downloadFile.id().rawId());
 
             long totalFileSize = downloadFile.getTotalSize();
             if (totalFileSize == 0) {
@@ -262,7 +260,7 @@ class DownloadBatch {
     }
 
     void pause() {
-        Log.v("pause batch " + downloadBatchStatus.getDownloadBatchId().rawId() + ", status: " + downloadBatchStatus.status());
+        Logger.v("pause batch " + downloadBatchStatus.getDownloadBatchId().rawId() + ", status: " + downloadBatchStatus.status());
         DownloadBatchStatus.Status status = downloadBatchStatus.status();
         if (status == PAUSED || status == DOWNLOADED) {
             return;
@@ -304,7 +302,7 @@ class DownloadBatch {
             return;
         }
 
-        Log.v("delete batch " + downloadBatchStatus.getDownloadBatchId().rawId() + ", mark as deleting from " + downloadBatchStatus.status());
+        Logger.v("delete batch " + downloadBatchStatus.getDownloadBatchId().rawId() + ", mark as deleting from " + downloadBatchStatus.status());
         downloadBatchStatus.markAsDeleting();
         notifyCallback(callback, downloadBatchStatus);
 
@@ -313,9 +311,9 @@ class DownloadBatch {
         }
 
         if (status == PAUSED || status == DOWNLOADED) {
-            Log.v("delete paused or downloaded batch " + downloadBatchStatus.getDownloadBatchId().rawId());
+            Logger.v("delete paused or downloaded batch " + downloadBatchStatus.getDownloadBatchId().rawId());
             downloadsBatchPersistence.deleteAsync(downloadBatchStatus, downloadBatchId -> {
-                Log.v("delete paused or downloaded mark as deleted: " + downloadBatchId.rawId());
+                Logger.v("delete paused or downloaded mark as deleted: " + downloadBatchId.rawId());
                 downloadBatchStatus.markAsDeleted();
                 notifyCallback(callback, downloadBatchStatus);
             });

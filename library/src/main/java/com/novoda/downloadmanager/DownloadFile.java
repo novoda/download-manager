@@ -3,7 +3,6 @@ package com.novoda.downloadmanager;
 import android.support.annotation.WorkerThread;
 
 import com.novoda.downloadmanager.DownloadError.Error;
-import com.novoda.notils.logger.simple.Log;
 
 // This model knows how to interact with low level components.
 @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.StdCyclomaticComplexity", "PMD.ModifiedCyclomaticComplexity"})
@@ -66,9 +65,9 @@ class DownloadFile {
             return;
         }
 
-        Log.v("persist file " + downloadFileId.rawId() + ", with status: " + downloadFileStatus.status());
+        Logger.v("persist file " + downloadFileId.rawId() + ", with status: " + downloadFileStatus.status());
         if (!persist()) {
-            Log.e("persisting file " + downloadFileId.rawId() + " with status " + downloadFileStatus.status() + " failed");
+            Logger.e("persisting file " + downloadFileId.rawId() + " with status " + downloadFileStatus.status() + " failed");
             return;
         }
 
@@ -121,7 +120,7 @@ class DownloadFile {
     private Error convertError(FilePersistenceResult status) {
         switch (status) {
             case SUCCESS:
-                Log.e("Cannot convert success status to any DownloadError type");
+                Logger.e("Cannot convert success status to any DownloadError type");
                 break;
             case ERROR_UNKNOWN_TOTAL_FILE_SIZE:
                 return DownloadError.Error.FILE_TOTAL_SIZE_REQUEST_FAILED;
@@ -132,7 +131,7 @@ class DownloadFile {
             case ERROR_OPENING_FILE:
                 return DownloadError.Error.FILE_CANNOT_BE_WRITTEN;
             default:
-                Log.e("Status " + status + " missing to be processed");
+                Logger.e("Status " + status + " missing to be processed");
                 break;
 
         }
@@ -175,11 +174,11 @@ class DownloadFile {
     void delete() {
         if (downloadFileStatus.isMarkedAsDownloading()) {
             downloadFileStatus.markAsDeleted();
-            Log.v("mark file as deleted for batchId: " + downloadBatchId.rawId());
+            Logger.v("mark file as deleted for batchId: " + downloadBatchId.rawId());
             fileDownloader.stopDownloading();
         } else {
             downloadFileStatus.markAsDeleted();
-            Log.v("mark file as deleted for batchId: " + downloadBatchId.rawId());
+            Logger.v("mark file as deleted for batchId: " + downloadBatchId.rawId());
             filePersistence.delete(filePath);
         }
     }
@@ -189,7 +188,7 @@ class DownloadFile {
         if (fileSize.isTotalSizeUnknown()) {
             FileSize requestFileSize = fileSizeRequester.requestFileSize(url);
             fileSize.setTotalSize(requestFileSize.totalSize());
-            Log.v("file getTotalSize for batchId: " + downloadBatchId
+            Logger.v("file getTotalSize for batchId: " + downloadBatchId
                     + ", status: " + fileStatus().status()
                     + ", fileId: " + fileStatus().downloadFileId().rawId());
             if (fileStatus().status() == DownloadFileStatus.Status.DELETED) {

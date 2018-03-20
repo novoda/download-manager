@@ -2,7 +2,7 @@ package com.novoda.downloadmanager.demo;
 
 import com.novoda.downloadmanager.FileDownloader;
 import com.novoda.downloadmanager.FileSize;
-import com.novoda.notils.logger.simple.Log;
+import com.novoda.downloadmanager.Logger;
 
 class CustomFileDownloader implements FileDownloader {
 
@@ -16,7 +16,7 @@ class CustomFileDownloader implements FileDownloader {
 
     @Override
     public void startDownloading(String url, FileSize fileSize, Callback callback) {
-        Log.v("Start downloading");
+        Logger.v("Start downloading");
 
         canDownload = true;
 
@@ -24,18 +24,18 @@ class CustomFileDownloader implements FileDownloader {
             try {
                 Thread.sleep(SLEEP_IN_MILLIS);
             } catch (InterruptedException e) {
-                Log.e("CustomFileDownloader Thread interrupted.", e);
+                Logger.e("CustomFileDownloader Thread interrupted.", e);
             }
             callback.onBytesRead(buffer, BYTES_READ);
         }
 
-        Log.v("Download finished");
+        Logger.v("Download finished");
         callback.onDownloadFinished();
     }
 
     @Override
     public void stopDownloading() {
-        Log.v("Stop downloading");
+        Logger.v("Stop downloading");
         canDownload = false;
     }
 }

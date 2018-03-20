@@ -2,8 +2,6 @@ package com.novoda.downloadmanager;
 
 import android.database.Cursor;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -54,7 +52,6 @@ public class MigrationExtractorTest {
 
     @Before
     public void setUp() {
-        Log.setShowLogs(false);
         migrationExtractor = new MigrationExtractor(database, internalFilePersistence);
     }
 

@@ -3,8 +3,6 @@ package com.novoda.downloadmanager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,7 +37,7 @@ public class SqlDatabaseWrapper {
         if (outputFile.exists()) {
             boolean deleted = outputFile.delete();
             String message = String.format("File or Directory: %s deleted: %s", outputFile.getPath(), deleted);
-            Log.d(getClass().getSimpleName(), message);
+            Logger.d(getClass().getSimpleName(), message);
         }
     }
 

@@ -1,7 +1,5 @@
 package com.novoda.downloadmanager;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
@@ -34,7 +32,6 @@ public class NetworkFileDownloaderTest {
 
     @Before
     public void setUp() {
-        Log.setShowLogs(false);
         networkFileDownloader = new NetworkFileDownloader(httpClient, requestCreator);
     }
 
