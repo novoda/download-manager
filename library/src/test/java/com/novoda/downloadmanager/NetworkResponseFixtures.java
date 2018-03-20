@@ -10,6 +10,7 @@ class NetworkResponseFixtures {
     private boolean isSuccessful = true;
     private String header = "header";
     private InputStream inputStream = new ByteArrayInputStream("input".getBytes());
+    private long bodyContentLength = 0;
 
     static NetworkResponseFixtures aNetworkResponse() {
         return new NetworkResponseFixtures();
@@ -34,6 +35,12 @@ class NetworkResponseFixtures {
         this.inputStream = inputStream;
         return this;
     }
+
+    NetworkResponseFixtures withBodyContentLength(long bodyContentLength) {
+        this.bodyContentLength = bodyContentLength;
+        return this;
+    }
+
 
     HttpClient.NetworkResponse build() {
         return new HttpClient.NetworkResponse() {
@@ -60,6 +67,11 @@ class NetworkResponseFixtures {
             @Override
             public void closeByteStream() throws IOException {
                 inputStream.close();
+            }
+
+            @Override
+            public long bodyContentLength() {
+                return bodyContentLength;
             }
         };
     }

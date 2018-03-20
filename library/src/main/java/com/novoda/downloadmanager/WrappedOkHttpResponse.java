@@ -1,9 +1,9 @@
 package com.novoda.downloadmanager;
 
-import com.squareup.okhttp.Response;
-
 import java.io.IOException;
 import java.io.InputStream;
+
+import okhttp3.Response;
 
 class WrappedOkHttpResponse implements HttpClient.NetworkResponse {
 
@@ -36,5 +36,10 @@ class WrappedOkHttpResponse implements HttpClient.NetworkResponse {
     @Override
     public void closeByteStream() throws IOException {
         response.body().close();
+    }
+
+    @Override
+    public long bodyContentLength() {
+        return response.body().contentLength();
     }
 }
