@@ -34,7 +34,6 @@ android {
 
 dependencies {
     annotationProcessor 'android.arch.persistence.room:compiler:1.0.0'
-    implementation 'com.novoda:notils:2.2.16'
     implementation 'com.novoda:merlin:1.1.6'
     implementation 'com.facebook.stetho:stetho:1.5.0'
     implementation 'com.android.support:support-v4:27.1.0'
@@ -51,7 +50,7 @@ publish {
     userOrg = 'novoda'
     groupId = 'com.novoda'
     artifactId = 'download-manager'
-    publishVersion = 'SNAPSHOT-2.0.30'
+    publishVersion = 'SNAPSHOT-2.0.31'
     description = 'Download manager based on AOSP DM but allowing downloading to internal private storage.'
     website = 'https://github.com/novoda/download-manager'
 }

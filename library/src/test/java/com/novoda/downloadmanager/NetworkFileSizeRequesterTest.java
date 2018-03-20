@@ -1,7 +1,5 @@
 package com.novoda.downloadmanager;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.io.IOException;
 
 import org.junit.Before;
@@ -26,7 +24,6 @@ public class NetworkFileSizeRequesterTest {
 
     @Before
     public void setUp() {
-        Log.setShowLogs(false);
         fileSizeRequester = new NetworkFileSizeRequester(httpClient, requestCreator);
     }
 

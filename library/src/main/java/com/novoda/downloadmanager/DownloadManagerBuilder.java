@@ -17,7 +17,6 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
 import com.novoda.merlin.MerlinsBeard;
-import com.novoda.notils.logger.simple.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,7 +57,7 @@ public final class DownloadManagerBuilder {
     private CallbackThrottleCreator.Type callbackThrottleCreatorType;
     private TimeUnit timeUnit;
     private long frequency;
-    private boolean logs;
+    private Optional<LogHandle> logHandle;
 
     public static DownloadManagerBuilder newInstance(Context context, Handler callbackHandler, @DrawableRes final int notificationIcon) {
         Context applicationContext = context.getApplicationContext();
@@ -92,7 +91,7 @@ public final class DownloadManagerBuilder {
 
         CallbackThrottleCreator.Type callbackThrottleCreatorType = CallbackThrottleCreator.Type.THROTTLE_BY_PROGRESS_INCREASE;
 
-        boolean logs = false;
+        Optional<LogHandle> logHandle = Optional.absent();
 
         return new DownloadManagerBuilder(
                 applicationContext,
@@ -106,7 +105,7 @@ public final class DownloadManagerBuilder {
                 connectionTypeAllowed,
                 allowNetworkRecovery,
                 callbackThrottleCreatorType,
-                logs
+                logHandle
         );
     }
 
@@ -122,7 +121,7 @@ public final class DownloadManagerBuilder {
                                    ConnectionType connectionTypeAllowed,
                                    boolean allowNetworkRecovery,
                                    CallbackThrottleCreator.Type callbackThrottleCreatorType,
-                                   boolean logs) {
+                                   Optional<LogHandle> logHandle) {
         this.applicationContext = applicationContext;
         this.callbackHandler = callbackHandler;
         this.filePersistenceCreator = filePersistenceCreator;
@@ -134,7 +133,7 @@ public final class DownloadManagerBuilder {
         this.connectionTypeAllowed = connectionTypeAllowed;
         this.allowNetworkRecovery = allowNetworkRecovery;
         this.callbackThrottleCreatorType = callbackThrottleCreatorType;
-        this.logs = logs;
+        this.logHandle = logHandle;
     }
 
     public DownloadManagerBuilder withFilePersistenceInternal() {
@@ -214,13 +213,15 @@ public final class DownloadManagerBuilder {
         return this;
     }
 
-    public DownloadManagerBuilder withLogs() {
-        this.logs = true;
+    public DownloadManagerBuilder withLogHandle(LogHandle logHandle) {
+        this.logHandle = Optional.fromNullable(logHandle);
         return this;
     }
 
     public DownloadManager build() {
-        Log.setShowLogs(logs);
+        if (logHandle.isPresent()) {
+            Logger.attach(logHandle.get());
+        }
 
         Intent intent = new Intent(applicationContext, LiteDownloadService.class);
         ServiceConnection serviceConnection = new ServiceConnection() {

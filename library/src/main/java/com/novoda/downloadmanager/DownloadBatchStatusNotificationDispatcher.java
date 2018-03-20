@@ -1,7 +1,5 @@
 package com.novoda.downloadmanager;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.util.Set;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
@@ -25,7 +23,7 @@ class DownloadBatchStatusNotificationDispatcher {
 
     void updateNotification(DownloadBatchStatus downloadBatchStatus) {
         if (downloadBatchStatus.notificationSeen()) {
-            Log.v("DownloadBatchStatus:", downloadBatchStatus.getDownloadBatchId(), "notification has already been seen.");
+            Logger.v("DownloadBatchStatus:", downloadBatchStatus.getDownloadBatchId(), "notification has already been seen.");
             return;
         }
 
@@ -37,7 +35,7 @@ class DownloadBatchStatusNotificationDispatcher {
 
         if (notificationIsNotMarkedAsSeenYet(downloadBatchStatus, rawDownloadBatchId)) {
             downloadBatchIdNotificationSeen.add(rawDownloadBatchId);
-            Log.v("start updateNotificationSeenAsync " + rawDownloadBatchId
+            Logger.v("start updateNotificationSeenAsync " + rawDownloadBatchId
                     + ", seen: " + NOTIFICATION_SEEN
                     + ", status: " + downloadBatchStatus.status());
             notificationSeenPersistence.updateNotificationSeenAsync(downloadBatchStatus, NOTIFICATION_SEEN);

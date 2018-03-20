@@ -2,8 +2,6 @@ package com.novoda.downloadmanager;
 
 import android.os.Handler;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -71,7 +69,11 @@ class LiteDownloadManagerDownloader {
     }
 
     public void download(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
-        downloadBatchMap.put(downloadBatch.getId(), downloadBatch);
+        DownloadBatchId downloadBatchId = downloadBatch.getId();
+        if (!downloadBatchMap.containsKey(downloadBatchId)) {
+            downloadBatchMap.put(downloadBatchId, downloadBatch);
+        }
+
         executor.submit(() -> Wait.<Void>waitFor(downloadService, waitForDownloadService)
                 .thenPerform(executeDownload(downloadBatch, downloadBatchMap)));
     }
@@ -101,7 +103,7 @@ class LiteDownloadManagerDownloader {
 
             DownloadBatchId downloadBatchId = downloadBatchStatus.getDownloadBatchId();
             if (downloadBatchStatus.status() == DELETED) {
-                Log.v("batch " + downloadBatchId.rawId() + " is finally deleted, removing it from the map");
+                Logger.v("batch " + downloadBatchId.rawId() + " is finally deleted, removing it from the map");
                 downloadBatchMap.remove(downloadBatchId);
             }
 

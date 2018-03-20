@@ -3,8 +3,6 @@ package com.novoda.downloadmanager;
 import android.database.sqlite.SQLiteConstraintException;
 import android.support.annotation.WorkerThread;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -83,7 +81,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                     DownloadBatch downloadBatch = getDownloadBatch(fileOperations, batchPersisted);
                     downloadBatches.add(downloadBatch);
                 } catch (SQLiteConstraintException e) {
-                    Log.e("exception loading async batch " + batchPersisted.downloadBatchId().rawId());
+                    Logger.e("exception loading async batch " + batchPersisted.downloadBatchId().rawId());
                 }
             }
 
@@ -152,7 +150,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
             if (deleteSync(downloadBatchStatus)) {
                 deleteCallback.onDeleted(downloadBatchStatus.getDownloadBatchId());
             } else {
-                Log.e("could not delete batch " + downloadBatchStatus.getDownloadBatchId().rawId() + " with status " + downloadBatchStatus.status());
+                Logger.e("could not delete batch " + downloadBatchStatus.getDownloadBatchId().rawId() + " with status " + downloadBatchStatus.status());
             }
         });
     }
@@ -181,7 +179,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                 if (downloadsPersistence.update(downloadBatchId, status)) {
                     downloadsPersistence.transactionSuccess();
                 } else {
-                    Log.e("could not update batch status " + status + " failed for " + downloadBatchId.rawId());
+                    Logger.e("could not update batch status " + status + " failed for " + downloadBatchId.rawId());
                 }
             } finally {
                 downloadsPersistence.endTransaction();
@@ -197,7 +195,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                 if (downloadsPersistence.update(downloadBatchStatus.getDownloadBatchId(), notificationSeen)) {
                     downloadsPersistence.transactionSuccess();
                 } else {
-                    Log.e("could not update notification to status " + downloadBatchStatus.status()
+                    Logger.e("could not update notification to status " + downloadBatchStatus.status()
                             + " for batch id " + downloadBatchStatus.getDownloadBatchId().rawId());
                 }
             } finally {

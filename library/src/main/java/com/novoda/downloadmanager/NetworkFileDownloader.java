@@ -1,7 +1,5 @@
 package com.novoda.downloadmanager;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -31,7 +29,7 @@ class NetworkFileDownloader implements FileDownloader {
             int responseCode = response.code();
             processResponse(callback, response, responseCode);
         } catch (IOException e) {
-            Log.e(e, "Exception with http request");
+            Logger.e(e, "Exception with http request");
             callback.onError();
         } finally {
             try {
@@ -39,7 +37,7 @@ class NetworkFileDownloader implements FileDownloader {
                     response.closeByteStream();
                 }
             } catch (IOException e) {
-                Log.e(e, "Exception while closing the body response");
+                Logger.e(e, "Exception while closing the body response");
             }
         }
 
@@ -60,7 +58,7 @@ class NetworkFileDownloader implements FileDownloader {
                 }
             }
         } else {
-            Log.e("Network response code is not ok, responseCode: " + responseCode);
+            Logger.e("Network response code is not ok, responseCode: " + responseCode);
             callback.onError();
         }
     }

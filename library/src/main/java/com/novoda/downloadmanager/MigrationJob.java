@@ -2,7 +2,6 @@ package com.novoda.downloadmanager;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -175,7 +174,7 @@ class MigrationJob implements Runnable {
                 boolean deleted = file.delete();
                 if (!deleted) {
                     String message = String.format("Could not delete File or Directory: %s", file.getPath());
-                    Log.e(getClass().getSimpleName(), message);
+                    Logger.e(getClass().getSimpleName(), message);
                 }
             }
         }

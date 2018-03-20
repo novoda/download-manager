@@ -2,13 +2,6 @@ package com.novoda.downloadmanager;
 
 import android.os.Handler;
 
-import com.novoda.notils.logger.simple.Log;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.InOrder;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,6 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.InOrder;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.novoda.downloadmanager.DownloadBatchIdFixtures.aDownloadBatchId;
@@ -133,7 +131,6 @@ public class DownloadManagerTest {
     }
 
     private void setupNetworkRecoveryCreator() {
-        Log.setShowLogs(false);
         DownloadsNetworkRecoveryCreator.createDisabled();
     }
 
@@ -220,15 +217,6 @@ public class DownloadManagerTest {
         InOrder inOrder = inOrder(downloadBatch);
         inOrder.verify(downloadBatch).status();
         inOrder.verifyNoMoreInteractions();
-    }
-
-    @Test
-    public void removesBatchFromInternalList_whenResuming() {
-        given(downloadBatch.status()).willReturn(anInternalDownloadsBatchStatus().build());
-
-        downloadManager.resume(DOWNLOAD_BATCH_ID);
-
-        assertThat(downloadingBatches).doesNotContainEntry(DOWNLOAD_BATCH_ID, downloadBatch);
     }
 
     @Test

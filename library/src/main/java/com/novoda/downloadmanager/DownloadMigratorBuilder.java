@@ -16,8 +16,6 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -51,7 +49,7 @@ public final class DownloadMigratorBuilder {
         );
         Handler handler = new Handler(Looper.getMainLooper());
         MigrationCallback migrationCallback = (status) -> {
-            Log.v(status.toString());
+            Logger.v(status.toString());
         };
         return new DownloadMigratorBuilder(applicationContext, handler, notificationChannelProvider, defaultNotificationCreator, migrationCallback);
     }

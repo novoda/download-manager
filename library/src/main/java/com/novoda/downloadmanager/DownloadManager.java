@@ -4,8 +4,6 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,8 +77,9 @@ class DownloadManager implements LiteDownloadManagerCommands {
         DownloadBatchId downloadBatchId = batch.downloadBatchId();
         DownloadBatch downloadBatch = downloadBatchMap.get(downloadBatchId);
         if (downloadBatch == null) {
-            Log.v("download " + downloadBatchId);
             downloader.download(batch, downloadBatchMap);
+        } else {
+            Logger.v("abort download batch " + downloadBatchId + " will not download as exists already in the running batches map");
         }
     }
 
@@ -88,6 +87,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
     public void pause(DownloadBatchId downloadBatchId) {
         DownloadBatch downloadBatch = downloadBatchMap.get(downloadBatchId);
         if (downloadBatch == null) {
+            Logger.v("abort pause batch " + downloadBatchId + " will not be paused as it does not exists in the running batches map");
             return;
         }
         downloadBatch.pause();
@@ -97,16 +97,16 @@ class DownloadManager implements LiteDownloadManagerCommands {
     public void resume(DownloadBatchId downloadBatchId) {
         DownloadBatch downloadBatch = downloadBatchMap.get(downloadBatchId);
         if (downloadBatch == null) {
+            Logger.v("abort resume batch " + downloadBatchId + " will not be resume as it does not exists in the running batches map");
             return;
         }
 
         if (downloadBatch.status().status() == DownloadBatchStatus.Status.DOWNLOADING) {
+            Logger.v("abort resume batch " + downloadBatchId + " will not be resume as it's already downloading");
             return;
         }
 
-        downloadBatchMap.remove(downloadBatchId);
         downloadBatch.resume();
-
         downloader.download(downloadBatch, downloadBatchMap);
     }
 
@@ -114,6 +114,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
     public void delete(DownloadBatchId downloadBatchId) {
         DownloadBatch downloadBatch = downloadBatchMap.get(downloadBatchId);
         if (downloadBatch == null) {
+            Logger.v("abort delete batch " + downloadBatchId + " will not be deleted as it does not exists in the running batches map");
             return;
         }
 
@@ -206,7 +207,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
         DownloadsNetworkRecoveryCreator.getInstance().updateAllowedConnectionType(allowedConnectionType);
 
         if (connectionChecker.isAllowedToDownload()) {
-            submitAllStoredDownloads(() -> Log.v("Allowed connectionType updated to " + allowedConnectionType + ". All jobs submitted"));
+            submitAllStoredDownloads(() -> Logger.v("Allowed connectionType updated to " + allowedConnectionType + ". All jobs submitted"));
         } else {
             for (DownloadBatch downloadBatch : downloadBatchMap.values()) {
                 downloadBatch.waitForNetwork();

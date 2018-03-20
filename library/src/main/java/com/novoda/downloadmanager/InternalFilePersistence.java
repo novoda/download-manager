@@ -3,8 +3,6 @@ package com.novoda.downloadmanager;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
-import com.novoda.notils.logger.simple.Log;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -58,7 +56,7 @@ class InternalFilePersistence implements FilePersistence {
 
             fileOutputStream = new FileOutputStream(outputFile, true);
         } catch (FileNotFoundException e) {
-            Log.e(e, "File could not be opened");
+            Logger.e(e, "File could not be opened");
             return FilePersistenceResult.ERROR_OPENING_FILE;
         }
 
@@ -71,14 +69,14 @@ class InternalFilePersistence implements FilePersistence {
             return true;
         }
 
-        Log.w(String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
+        Logger.w(String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
         return outputFile.getParentFile().mkdirs();
     }
 
     @Override
     public boolean write(byte[] buffer, int offset, int numberOfBytesToWrite) {
         if (fileOutputStream == null) {
-            Log.e("Cannot write, you must create the file first");
+            Logger.e("Cannot write, you must create the file first");
             return false;
         }
 
@@ -86,7 +84,7 @@ class InternalFilePersistence implements FilePersistence {
             fileOutputStream.write(buffer, offset, numberOfBytesToWrite);
             return true;
         } catch (IOException e) {
-            Log.e(e, "Exception while writing to internal physical storage");
+            Logger.e(e, "Exception while writing to internal physical storage");
             return false;
         }
     }
@@ -94,7 +92,7 @@ class InternalFilePersistence implements FilePersistence {
     @Override
     public void delete(FilePath absoluteFilePath) {
         if (absoluteFilePath == null || absoluteFilePath.isUnknown()) {
-            Log.w("Cannot delete, you must create the file first");
+            Logger.w("Cannot delete, you must create the file first");
             return;
         }
 
@@ -106,7 +104,7 @@ class InternalFilePersistence implements FilePersistence {
         boolean deleted = fileToDelete.delete();
 
         String message = String.format("File or Directory: %s deleted: %s", absoluteFilePath.path(), deleted);
-        Log.d(getClass().getSimpleName(), message);
+        Logger.d(getClass().getSimpleName(), message);
     }
 
     @Override
@@ -124,7 +122,7 @@ class InternalFilePersistence implements FilePersistence {
         try {
             fileOutputStream.close();
         } catch (IOException e) {
-            Log.e(e, "Failed to close.");
+            Logger.e(e, "Failed to close.");
         }
     }
 
