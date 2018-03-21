@@ -78,8 +78,8 @@ class MigrationJob implements Runnable {
         migrationStatus.markAsMigrating();
         onUpdate(migrationStatus);
 
-        migratePartialDownloads(migrationStatus, database, partialMigrations, downloadsPersistence);
         migrateCompleteDownloads(migrationStatus, database, completeMigrations, downloadsPersistence, filePersistence);
+        migratePartialDownloads(migrationStatus, database, partialMigrations, downloadsPersistence);
         deleteVersionOneDatabase(migrationStatus, database);
 
         migrationStatus.markAsComplete();
@@ -102,7 +102,7 @@ class MigrationJob implements Runnable {
 
             migrateV1DataToV2Database(downloadsPersistence, partialMigration, false);
             deleteFrom(database, partialMigration);
-            deleteFiles(partialMigration);
+            deleteVersionOneFiles(partialMigration);
 
             downloadsPersistence.transactionSuccess();
             downloadsPersistence.endTransaction();
@@ -166,7 +166,7 @@ class MigrationJob implements Runnable {
     }
 
     // TODO: See https://github.com/novoda/download-manager/issues/270
-    private void deleteFiles(Migration migration) {
+    private void deleteVersionOneFiles(Migration migration) {
         for (Migration.FileMetadata metadata : migration.getFileMetadata()) {
             if (hasValidFileLocation(metadata)) {
                 File file = new File(metadata.originalFileLocation().path());
@@ -194,6 +194,7 @@ class MigrationJob implements Runnable {
 
             migrateV1FilesToV2Location(filePersistence, completeMigration);
             migrateV1DataToV2Database(downloadsPersistence, completeMigration, true);
+            deleteVersionOneFiles(completeMigration);
             deleteFrom(database, completeMigration);
 
             downloadsPersistence.transactionSuccess();
