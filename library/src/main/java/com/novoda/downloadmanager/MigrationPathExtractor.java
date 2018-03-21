@@ -4,7 +4,7 @@ import java.io.File;
 
 final class MigrationPathExtractor {
 
-    private static final String PATH_SEPARATOR = "/";
+    private static final String PATH_SEPARATOR = File.separator;
     private static final String EMPTY = "";
 
     private MigrationPathExtractor() {
@@ -16,7 +16,7 @@ final class MigrationPathExtractor {
         String relativePathWithBatchId = prependBatchIdTo(relativePath, downloadBatchId);
         String fileName = extractFileName(assetPath);
         String absolutePath = basePath + PATH_SEPARATOR + relativePathWithBatchId + fileName;
-        String sanitizedAbsolutePath = absolutePath.replaceAll("//", "/");
+        String sanitizedAbsolutePath = absolutePath.replaceAll("//", PATH_SEPARATOR);
         return new LiteFilePath(sanitizedAbsolutePath);
     }
 
