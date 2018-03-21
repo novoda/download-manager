@@ -35,8 +35,12 @@ final class MigrationPathExtractor {
     }
 
     private static String extractFileName(String assetUri) {
-        String[] subPaths = assetUri.split(PATH_SEPARATOR);
+        String[] subPaths = assetUri.split(regexUsablePathSeparator());
         return subPaths.length == 0 ? assetUri : subPaths[subPaths.length - 1];
+    }
+
+    private static String regexUsablePathSeparator() {
+        return File.separatorChar == '\\' ? "\\\\" : File.separator;
     }
 
     private static String removeSubstring(String source, String subString) {
