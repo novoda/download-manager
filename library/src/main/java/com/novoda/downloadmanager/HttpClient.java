@@ -18,5 +18,7 @@ interface HttpClient {
         InputStream openByteStream() throws IOException;
 
         void closeByteStream() throws IOException;
+
+        long bodyContentLength();
     }
 }
