@@ -234,7 +234,6 @@ class MigrationJob implements Runnable {
                     if (readLast != 0 && readLast != -1) {
                         // write the v1 file to the v2 location
                         filePersistence.write(bytes, 0, readLast);
-                        bytes = new byte[RANDOMLY_CHOSEN_BUFFER_SIZE_THAT_SEEMS_TO_WORK];
                     }
                 }
             } catch (IOException e) {
