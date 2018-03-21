@@ -1,8 +1,9 @@
 package com.novoda.downloadmanager;
 
-import com.squareup.okhttp.OkHttpClient;
 
 import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
 
 final class HttpClientFactory {
 
@@ -21,10 +22,11 @@ final class HttpClientFactory {
         private static final HttpClient INSTANCE = createInstance();
 
         private static HttpClient createInstance() {
-            OkHttpClient okHttpClient = new OkHttpClient();
-            okHttpClient.setConnectTimeout(TIMEOUT, TimeUnit.SECONDS);
-            okHttpClient.setWriteTimeout(TIMEOUT, TimeUnit.SECONDS);
-            okHttpClient.setReadTimeout(TIMEOUT, TimeUnit.SECONDS);
+            OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                    .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
+                    .writeTimeout(TIMEOUT, TimeUnit.SECONDS)
+                    .readTimeout(TIMEOUT, TimeUnit.SECONDS)
+                    .build();
             return new WrappedOkHttpClient(okHttpClient);
         }
     }

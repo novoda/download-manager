@@ -1,11 +1,11 @@
 package com.novoda.downloadmanager;
 
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-
 import java.io.IOException;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 
 class WrappedOkHttpClient implements HttpClient {
 

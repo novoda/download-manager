@@ -1,9 +1,9 @@
 package com.novoda.downloadmanager;
 
-import java.io.IOException;
-
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.novoda.downloadmanager.NetworkResponseFixtures.aNetworkResponse;
@@ -39,6 +39,7 @@ public class NetworkFileSizeRequesterTest {
     @Test
     public void returnsUnknownSize_whenResponseIsUnsuccessful() throws IOException {
         given(httpClient.execute(requestCreator.createFileSizeRequest(ANY_RAW_URL))).willReturn(UNSUCCESSFUL_RESPONSE);
+        given(httpClient.execute(requestCreator.createDownloadRequest(ANY_RAW_URL))).willReturn(UNSUCCESSFUL_RESPONSE);
 
         FileSize fileSize = fileSizeRequester.requestFileSize(ANY_RAW_URL);
 

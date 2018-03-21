@@ -150,6 +150,7 @@ class DownloadBatch {
                                             DownloadBatchStatusCallback callback,
                                             DownloadsBatchPersistence downloadsBatchPersistence) {
         if (downloadBatchStatus.status() == DELETING) {
+            Logger.v("abort processNetworkError, the batch " + downloadBatchStatus.getDownloadBatchId().rawId() + " is deleting");
             return;
         }
         downloadBatchStatus.markAsWaitingForNetwork(downloadsBatchPersistence);
@@ -173,6 +174,10 @@ class DownloadBatch {
         for (DownloadFile downloadFile : downloadFiles) {
             DownloadBatchStatus.Status status = downloadBatchStatus.status();
             if (status == DELETING || status == DELETED || status == PAUSED) {
+                Logger.w("abort getTotalSize file " + downloadFile.id().rawId()
+                        + " from batch " + downloadBatchStatus.getDownloadBatchId().rawId()
+                        + " with " + STATUS + " " + downloadBatchStatus.status()
+                        + " returns 0 as totalFileSize");
                 return 0;
             }
 
@@ -261,6 +266,10 @@ class DownloadBatch {
     }
 
     private static boolean networkError(InternalDownloadBatchStatus downloadBatchStatus) {
+        if (downloadBatchStatus.status() == DELETING) {
+            Logger.v("abort networkError check because the batch " + downloadBatchStatus.getDownloadBatchId().rawId() + " is deleting");
+            return false;
+        }
         DownloadBatchStatus.Status status = downloadBatchStatus.status();
         if (status == WAITING_FOR_NETWORK) {
             return true;
