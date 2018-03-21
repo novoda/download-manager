@@ -2,7 +2,6 @@ package com.novoda.downloadmanager;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -239,7 +238,7 @@ class MigrationJob implements Runnable {
                     }
                 }
             } catch (IOException e) {
-                Log.e(getClass().getSimpleName(), e.getMessage());
+                Logger.e(e.getMessage());
             } finally {
                 try {
                     filePersistence.close();
@@ -247,7 +246,7 @@ class MigrationJob implements Runnable {
                         inputStream.close();
                     }
                 } catch (IOException e) {
-                    Log.e(getClass().getSimpleName(), e.getMessage());
+                    Logger.e(e.getMessage());
                 }
             }
         }
