@@ -83,12 +83,12 @@ class MigrationExtractor {
                             fileIds.add(originalFileId);
                         }
 
-                        if (originalFileId != null) {
+                        if (originalFileId == null) {
                             newBatchBuilder.addFile(originalNetworkAddress)
-                                    .withDownloadFileId(DownloadFileIdCreator.createFrom(originalFileId))
                                     .apply();
                         } else {
                             newBatchBuilder.addFile(originalNetworkAddress)
+                                    .withDownloadFileId(DownloadFileIdCreator.createFrom(originalFileId))
                                     .apply();
                         }
 
