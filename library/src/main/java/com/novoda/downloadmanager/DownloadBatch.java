@@ -67,8 +67,8 @@ class DownloadBatch {
         }
 
         Logger.v("batch " + downloadBatchStatus.getDownloadBatchId().rawId()
-                + " " + STATUS + " " + downloadBatchStatus.status()
-                + " totalBatchSize " + totalBatchSizeBytes);
+                         + " " + STATUS + " " + downloadBatchStatus.status()
+                         + " totalBatchSize " + totalBatchSizeBytes);
 
         if (shouldAbortAfterGettingTotalBatchSize(downloadBatchStatus, downloadsBatchPersistence, callback, totalBatchSizeBytes)) {
             Logger.v("abort after getting total batch size download " + rawBatchId + ", " + STATUS + " " + downloadBatchStatus.status());
@@ -175,18 +175,18 @@ class DownloadBatch {
             DownloadBatchStatus.Status status = downloadBatchStatus.status();
             if (status == DELETING || status == DELETED || status == PAUSED) {
                 Logger.w("abort getTotalSize file " + downloadFile.id().rawId()
-                        + " from batch " + downloadBatchStatus.getDownloadBatchId().rawId()
-                        + " with " + STATUS + " " + downloadBatchStatus.status()
-                        + " returns 0 as totalFileSize");
+                                 + " from batch " + downloadBatchStatus.getDownloadBatchId().rawId()
+                                 + " with " + STATUS + " " + downloadBatchStatus.status()
+                                 + " returns 0 as totalFileSize");
                 return 0;
             }
 
             long totalFileSize = downloadFile.getTotalSize();
             if (totalFileSize == 0) {
                 Logger.w("file " + downloadFile.id().rawId()
-                        + " from batch " + downloadBatchStatus.getDownloadBatchId().rawId()
-                        + " with " + STATUS + " " + downloadBatchStatus.status()
-                        + " returns 0 as totalFileSize");
+                                 + " from batch " + downloadBatchStatus.getDownloadBatchId().rawId()
+                                 + " with " + STATUS + " " + downloadBatchStatus.status()
+                                 + " returns 0 as totalFileSize");
                 return 0;
             }
 
@@ -328,15 +328,15 @@ class DownloadBatch {
 
         downloadBatchStatus.markAsDeleting();
         Logger.v("delete request for batch " + downloadBatchStatus.getDownloadBatchId().rawId()
-                + ", " + STATUS + " " + downloadBatchStatus.status()
-                + ", should be deleting");
+                         + ", " + STATUS + " " + downloadBatchStatus.status()
+                         + ", should be deleting");
         notifyCallback(callback, downloadBatchStatus);
 
         for (DownloadFile downloadFile : downloadFiles) {
             downloadFile.delete();
         }
 
-        if (status == PAUSED || status == DOWNLOADED) {
+        if (status == PAUSED || status == DOWNLOADED || status == WAITING_FOR_NETWORK) {
             Logger.v("delete async paused or downloaded batch " + downloadBatchStatus.getDownloadBatchId().rawId());
             downloadsBatchPersistence.deleteAsync(downloadBatchStatus, downloadBatchId -> {
                 Logger.v("delete paused or downloaded mark as deleted: " + downloadBatchId.rawId());
@@ -346,8 +346,8 @@ class DownloadBatch {
         }
 
         Logger.v("delete request for batch end " + downloadBatchStatus.getDownloadBatchId().rawId()
-                + ", " + STATUS + ": " + downloadBatchStatus.status()
-                + ", should be deleting");
+                         + ", " + STATUS + ": " + downloadBatchStatus.status()
+                         + ", should be deleting");
     }
 
     DownloadBatchId getId() {
