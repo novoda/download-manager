@@ -83,13 +83,15 @@ class Migration {
     static class FileMetadata {
 
         private final String fileId;
-        private final String originalFileLocation;
+        private final FilePath originalFileLocation;
+        private final FilePath newFileLocation;
         private final FileSize fileSize;
         private final String originalNetworkAddress;
 
-        FileMetadata(String fileId, String originalFileLocation, FileSize fileSize, String originalNetworkAddress) {
+        FileMetadata(String fileId, FilePath originalFileLocation, FilePath newFileLocation, FileSize fileSize, String originalNetworkAddress) {
             this.fileId = fileId;
             this.originalFileLocation = originalFileLocation;
+            this.newFileLocation = newFileLocation;
             this.fileSize = fileSize;
             this.originalNetworkAddress = originalNetworkAddress;
         }
@@ -98,8 +100,12 @@ class Migration {
             return fileId;
         }
 
-        String originalFileLocation() {
+        FilePath originalFileLocation() {
             return originalFileLocation;
+        }
+
+        FilePath newFileLocation() {
+            return newFileLocation;
         }
 
         FileSize fileSize() {
@@ -127,6 +133,9 @@ class Migration {
             if (originalFileLocation != null ? !originalFileLocation.equals(that.originalFileLocation) : that.originalFileLocation != null) {
                 return false;
             }
+            if (newFileLocation != null ? !newFileLocation.equals(that.newFileLocation) : that.newFileLocation != null) {
+                return false;
+            }
             if (fileSize != null ? !fileSize.equals(that.fileSize) : that.fileSize != null) {
                 return false;
             }
@@ -137,6 +146,7 @@ class Migration {
         public int hashCode() {
             int result = fileId != null ? fileId.hashCode() : 0;
             result = 31 * result + (originalFileLocation != null ? originalFileLocation.hashCode() : 0);
+            result = 31 * result + (newFileLocation != null ? newFileLocation.hashCode() : 0);
             result = 31 * result + (fileSize != null ? fileSize.hashCode() : 0);
             result = 31 * result + (originalNetworkAddress != null ? originalNetworkAddress.hashCode() : 0);
             return result;
@@ -146,7 +156,8 @@ class Migration {
         public String toString() {
             return "FileMetadata{"
                     + "fileId='" + fileId + '\''
-                    + ", originalFileLocation='" + originalFileLocation + '\''
+                    + ", originalFileLocation=" + originalFileLocation
+                    + ", newFileLocation=" + newFileLocation
                     + ", fileSize=" + fileSize
                     + ", originalNetworkAddress='" + originalNetworkAddress + '\''
                     + '}';

@@ -1,5 +1,6 @@
 package com.novoda.downloadmanager.demo;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -35,6 +36,10 @@ import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+
+    @SuppressLint("SdCardPath")
+    private static final String V1_BASE_PATH = "/data/data/com.novoda.downloadmanager.demo.simple/files/Pictures/";
+
     private static final DownloadBatchId BATCH_ID_1 = DownloadBatchIdCreator.createFrom("batch_id_1");
     private static final DownloadBatchId BATCH_ID_2 = DownloadBatchIdCreator.createFrom("batch_id_2");
     private static final DownloadFileId FILE_ID_1 = DownloadFileIdCreator.createFrom("file_id_1");
@@ -119,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
         databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());
     };
 
-    private final View.OnClickListener startMigrationOnClick = v -> downloadMigrator.startMigration("migrationJob", getDatabasePath("downloads.db"));
+    private final View.OnClickListener startMigrationOnClick = v -> downloadMigrator.startMigration("migrationJob", getDatabasePath("downloads.db"), V1_BASE_PATH);
 
     private final CompoundButton.OnCheckedChangeListener wifiOnlyOnCheckedChange = (buttonView, isChecked) -> {
         LiteDownloadManagerCommands downloadManagerCommands = ((DemoApplication) getApplication()).getLiteDownloadManagerCommands();

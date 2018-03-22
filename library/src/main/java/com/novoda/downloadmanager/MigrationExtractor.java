@@ -22,17 +22,19 @@ class MigrationExtractor {
     private static final int TITLE_COLUMN = 1;
     private static final int MODIFIED_TIMESTAMP_COLUMN = 2;
 
-    private static final String DOWNLOADS_QUERY = "SELECT uri, _data, notificationextras FROM Downloads WHERE batch_id = ?";
+    private static final String DOWNLOADS_QUERY = "SELECT uri, hint, notificationextras FROM Downloads WHERE batch_id = ?";
     private static final int NETWORK_ADDRESS_COLUMN = 0;
     private static final int FILE_LOCATION_COLUMN = 1;
     private static final int FILE_ID_COLUMN = 2;
 
     private final SqlDatabaseWrapper database;
     private final FilePersistence filePersistence;
+    private final String basePath;
 
-    MigrationExtractor(SqlDatabaseWrapper database, FilePersistence filePersistence) {
+    MigrationExtractor(SqlDatabaseWrapper database, FilePersistence filePersistence, String basePath) {
         this.database = database;
         this.filePersistence = filePersistence;
+        this.basePath = basePath;
     }
 
     List<Migration> extractMigrations() {
@@ -60,14 +62,16 @@ class MigrationExtractor {
                 List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
                 Set<String> uris = new HashSet<>();
 
+                DownloadBatchId downloadBatchId = null;
                 try {
                     while (downloadsCursor.moveToNext()) {
                         String originalFileId = downloadsCursor.getString(FILE_ID_COLUMN);
                         String originalNetworkAddress = downloadsCursor.getString(NETWORK_ADDRESS_COLUMN);
                         String originalFileLocation = downloadsCursor.getString(FILE_LOCATION_COLUMN);
+                        String sanitizedOriginalFileLocation = MigrationStoragePathSanitizer.sanitize(originalFileLocation);
 
                         if (downloadsCursor.isFirst()) {
-                            DownloadBatchId downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
+                            downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
                             newBatchBuilder = Batch.with(downloadBatchId, batchTitle);
                         }
 
@@ -78,12 +82,15 @@ class MigrationExtractor {
                         }
                         newBatchBuilder.addFile(originalNetworkAddress).apply();
 
-                        FilePath filePath = new LiteFilePath(originalFileLocation);
-                        long rawFileSize = filePersistence.getCurrentSize(filePath);
+                        FilePath originalFilePath = new LiteFilePath(sanitizedOriginalFileLocation);
+                        FilePath newFilePath = MigrationPathExtractor.extractMigrationPath(basePath, originalFilePath.path(), downloadBatchId);
+
+                        long rawFileSize = filePersistence.getCurrentSize(originalFilePath);
                         FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
                         Migration.FileMetadata fileMetadata = new Migration.FileMetadata(
                                 originalFileId,
-                                originalFileLocation,
+                                originalFilePath,
+                                newFilePath,
                                 fileSize,
                                 originalNetworkAddress
                         );
