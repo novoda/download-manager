@@ -10,7 +10,6 @@ import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETING;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.WAITING_FOR_NETWORK;
 
 class LiteDownloadManagerDownloader {
 
@@ -103,8 +102,8 @@ class LiteDownloadManagerDownloader {
             }
 
             DownloadBatchId downloadBatchId = downloadBatchStatus.getDownloadBatchId();
-            if (downloadBatchStatus.status() == DELETED || downloadBatchStatus.status() == WAITING_FOR_NETWORK) {
-                Logger.v("batch " + downloadBatchId.rawId() + " is finally" + downloadBatchStatus.status() + ", removing it from the map");
+            if (downloadBatchStatus.status() == DELETED) {
+                Logger.v("batch " + downloadBatchId.rawId() + " is finally deleted, removing it from the map");
                 downloadBatchMap.remove(downloadBatchId);
             }
 
