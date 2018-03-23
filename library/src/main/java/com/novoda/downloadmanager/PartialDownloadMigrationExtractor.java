@@ -46,6 +46,7 @@ class PartialDownloadMigrationExtractor {
             Batch.Builder newBatchBuilder = null;
             List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
             Set<String> uris = new HashSet<>();
+            Set<String> fileIds = new HashSet<>();
 
             DownloadBatchId downloadBatchId = null;
             while (downloadsCursor.moveToNext()) {
@@ -60,12 +61,21 @@ class PartialDownloadMigrationExtractor {
                     newBatchBuilder = Batch.with(downloadBatchId, batchTitle);
                 }
 
-                if (uris.contains(uri)) {
+                if (uris.contains(uri) && fileIds.contains(originalFileId)) {
                     continue;
                 } else {
                     uris.add(uri);
+                    fileIds.add(originalFileId);
                 }
-                newBatchBuilder.addFile(uri).apply();
+
+                if (originalFileId == null) {
+                    newBatchBuilder.addFile(uri)
+                            .apply();
+                } else {
+                    newBatchBuilder.addFile(uri)
+                            .withDownloadFileId(DownloadFileIdCreator.createFrom(originalFileId))
+                            .apply();
+                }
 
                 FilePath newFilePath = MigrationPathExtractor.extractMigrationPath(basePath, originalFilePath.path(), downloadBatchId);
 

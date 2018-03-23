@@ -61,6 +61,7 @@ class MigrationExtractor {
                 Batch.Builder newBatchBuilder = null;
                 List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
                 Set<String> uris = new HashSet<>();
+                Set<String> fileIds = new HashSet<>();
 
                 DownloadBatchId downloadBatchId = null;
                 try {
@@ -75,12 +76,21 @@ class MigrationExtractor {
                             newBatchBuilder = Batch.with(downloadBatchId, batchTitle);
                         }
 
-                        if (uris.contains(originalNetworkAddress)) {
+                        if (uris.contains(originalNetworkAddress) && fileIds.contains(originalFileId)) {
                             continue;
                         } else {
                             uris.add(originalNetworkAddress);
+                            fileIds.add(originalFileId);
                         }
-                        newBatchBuilder.addFile(originalNetworkAddress).apply();
+
+                        if (originalFileId == null) {
+                            newBatchBuilder.addFile(originalNetworkAddress)
+                                    .apply();
+                        } else {
+                            newBatchBuilder.addFile(originalNetworkAddress)
+                                    .withDownloadFileId(DownloadFileIdCreator.createFrom(originalFileId))
+                                    .apply();
+                        }
 
                         FilePath originalFilePath = new LiteFilePath(sanitizedOriginalFileLocation);
                         FilePath newFilePath = MigrationPathExtractor.extractMigrationPath(basePath, originalFilePath.path(), downloadBatchId);
