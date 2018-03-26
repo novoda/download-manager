@@ -218,7 +218,7 @@ public final class DownloadManagerBuilder {
         return this;
     }
 
-    public DownloadManager build() {
+    public LiteDownloadManagerCommands build() {
         if (logHandle.isPresent()) {
             Logger.attach(logHandle.get());
         }
