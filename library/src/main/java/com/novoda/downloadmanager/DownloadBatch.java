@@ -122,6 +122,11 @@ class DownloadBatch {
             return true;
         }
 
+        if (downloadBatchStatus.status() == DOWNLOADED) {
+            notifyCallback(callback, downloadBatchStatus);
+            return true;
+        }
+
         return false;
     }
 
