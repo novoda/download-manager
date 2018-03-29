@@ -8,5 +8,4 @@
   <string name="download_notification_content_progress">%d%% downloaded</string>
 
   <string name="migration_notification_content_title">Migrating Download Manager V1</string>
-  <string name="migration_notification_content_progress">%d%% migrated</string>
 </resources>
