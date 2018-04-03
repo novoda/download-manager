@@ -2,12 +2,12 @@ package com.novoda.downloadmanager;
 
 import android.database.Cursor;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.junit.Before;
-import org.junit.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,7 +25,7 @@ public class MigrationExtractorTest {
             + "GROUP BY DownloadsByBatch.batch_id) "
             + "GROUP BY batches._id";
 
-    private static final String DOWNLOADS_QUERY = "SELECT uri, hint, notificationextras FROM Downloads WHERE batch_id = ?";
+    private static final String DOWNLOADS_QUERY = "SELECT uri, _data, hint, notificationextras FROM Downloads WHERE batch_id = ?";
 
     private static final StubCursor BATCHES_CURSOR = new StubCursor.Builder()
             .with("_id", "1", "2")
@@ -35,12 +35,14 @@ public class MigrationExtractorTest {
 
     private static final Cursor BATCH_ONE_DOWNLOADS_CURSOR = new StubCursor.Builder()
             .with("uri", "uri_1", "uri_2")
+            .with("_data", "base/data_1", "base/data_2-1")
             .with("hint", "base/data_1", "base/data_2")
             .with("notificationextras", "file_1", "file_2")
             .build();
 
     private static final Cursor BATCH_TWO_DOWNLOADS_CURSOR = new StubCursor.Builder()
             .with("uri", "uri_3", "uri_4")
+            .with("_data", "base/data_3-1", "base/data_4")
             .with("hint", "base/data_3", "base/data_4")
             .with("notificationextras", "file_3", "file_4")
             .build();
@@ -81,7 +83,7 @@ public class MigrationExtractorTest {
 
         List<Migration.FileMetadata> firstFileMetadata = new ArrayList<>();
         firstFileMetadata.add(new Migration.FileMetadata("file_1", new LiteFilePath("base/data_1"), new LiteFilePath("base/-1274506706/data_1"), new LiteFileSize(1000, 1000), firstUri));
-        firstFileMetadata.add(new Migration.FileMetadata("file_2", new LiteFilePath("base/data_2"), new LiteFilePath("base/-1274506706/data_2"), new LiteFileSize(2000, 2000), secondUri));
+        firstFileMetadata.add(new Migration.FileMetadata("file_2", new LiteFilePath("base/data_2-1"), new LiteFilePath("base/-1274506706/data_2"), new LiteFileSize(2000, 2000), secondUri));
 
         String thirdUri = "uri_3";
         String fourthUri = "uri_4";
@@ -91,7 +93,7 @@ public class MigrationExtractorTest {
                 .build();
 
         List<Migration.FileMetadata> secondFileMetadata = new ArrayList<>();
-        secondFileMetadata.add(new Migration.FileMetadata("file_3", new LiteFilePath("base/data_3"), new LiteFilePath("base/-1274506704/data_3"), new LiteFileSize(500, 500), thirdUri));
+        secondFileMetadata.add(new Migration.FileMetadata("file_3", new LiteFilePath("base/data_3-1"), new LiteFilePath("base/-1274506704/data_3"), new LiteFileSize(500, 500), thirdUri));
         secondFileMetadata.add(new Migration.FileMetadata("file_4", new LiteFilePath("base/data_4"), new LiteFilePath("base/-1274506704/data_4"), new LiteFileSize(750, 750), fourthUri));
 
         return Arrays.asList(
