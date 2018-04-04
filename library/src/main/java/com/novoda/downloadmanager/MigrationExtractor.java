@@ -22,10 +22,11 @@ class MigrationExtractor {
     private static final int TITLE_COLUMN = 1;
     private static final int MODIFIED_TIMESTAMP_COLUMN = 2;
 
-    private static final String DOWNLOADS_QUERY = "SELECT uri, hint, notificationextras FROM Downloads WHERE batch_id = ?";
+    private static final String DOWNLOADS_QUERY = "SELECT uri, _data, hint, notificationextras FROM Downloads WHERE batch_id = ?";
     private static final int NETWORK_ADDRESS_COLUMN = 0;
-    private static final int FILE_LOCATION_COLUMN = 1;
-    private static final int FILE_ID_COLUMN = 2;
+    private static final int FILE_ORIGINAL_LOCATION_COLUMN = 1;
+    private static final int FILE_UNIQUE_LOCATION_COLUMN = 2;
+    private static final int FILE_ID_COLUMN = 3;
 
     private final SqlDatabaseWrapper database;
     private final FilePersistence filePersistence;
@@ -36,6 +37,7 @@ class MigrationExtractor {
         this.filePersistence = filePersistence;
         this.basePath = basePath;
     }
+
 
     List<Migration> extractMigrations() {
         Cursor batchesCursor = database.rawQuery(BATCHES_QUERY);
@@ -68,8 +70,13 @@ class MigrationExtractor {
                     while (downloadsCursor.moveToNext()) {
                         String originalFileId = downloadsCursor.getString(FILE_ID_COLUMN);
                         String originalNetworkAddress = downloadsCursor.getString(NETWORK_ADDRESS_COLUMN);
-                        String originalFileLocation = downloadsCursor.getString(FILE_LOCATION_COLUMN);
-                        String sanitizedOriginalFileLocation = MigrationStoragePathSanitizer.sanitize(originalFileLocation);
+
+                        // hint: file:/data/user/0/com.channel4.ondemand/files/all4/23241337
+                        String originalUniqueFileLocation = downloadsCursor.getString(FILE_UNIQUE_LOCATION_COLUMN);
+                        String sanitizedOriginalUniqueFileLocation = MigrationStoragePathSanitizer.sanitize(originalUniqueFileLocation);
+
+                        // _data: /data/user/0/com.channel4.ondemand/files/all4/23241337-1
+                        String originalFileLocation = downloadsCursor.getString(FILE_ORIGINAL_LOCATION_COLUMN);
 
                         if (downloadsCursor.isFirst()) {
                             downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
@@ -92,9 +99,10 @@ class MigrationExtractor {
                                     .apply();
                         }
 
-                        FilePath originalFilePath = new LiteFilePath(sanitizedOriginalFileLocation);
-                        FilePath newFilePath = MigrationPathExtractor.extractMigrationPath(basePath, originalFilePath.path(), downloadBatchId);
+                        String rawNewFilePath = new LiteFilePath(sanitizedOriginalUniqueFileLocation).path();
+                        FilePath newFilePath = MigrationPathExtractor.extractMigrationPath(basePath, rawNewFilePath, downloadBatchId);
 
+                        FilePath originalFilePath = new LiteFilePath(originalFileLocation);
                         long rawFileSize = filePersistence.getCurrentSize(originalFilePath);
                         FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
                         Migration.FileMetadata fileMetadata = new Migration.FileMetadata(
