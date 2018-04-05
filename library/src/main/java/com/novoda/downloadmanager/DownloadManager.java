@@ -78,7 +78,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
         DownloadBatchId downloadBatchId = batch.downloadBatchId();
         DownloadBatch downloadBatch = downloadBatchMap.get(downloadBatchId);
         if (downloadBatch == null) {
-            downloader.download(batch, downloadBatchMap);
+            downloader.creteDownloadBatchAndDownload(batch, downloadBatchMap);
         } else {
             Logger.v("abort download batch " + downloadBatchId + " will not download as exists already in the running batches map");
         }

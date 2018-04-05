@@ -54,28 +54,40 @@ class LiteDownloadManagerDownloader {
         this.callbackThrottleCreator = callbackThrottleCreator;
     }
 
-    public void download(Batch batch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
-        DownloadBatch downloadBatch = DownloadBatchFactory.newInstance(
+    void creteDownloadBatchAndDownload(Batch batch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
+        executor.submit(() -> {
+            DownloadBatch downloadBatch = DownloadBatchFactory.newInstance(
                 batch,
                 fileOperations,
                 downloadsBatchPersistence,
                 downloadsFilePersistence,
                 callbackThrottleCreator.create(),
                 connectionChecker
-        );
+            );
 
-        downloadBatchMap.put(downloadBatch.getId(), downloadBatch);
-        download(downloadBatch, downloadBatchMap);
+            downloadBatchMap.put(downloadBatch.getId(), downloadBatch);
+            downloadSync(downloadBatch, downloadBatchMap);
+        });
     }
 
-    public void download(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
+    private void downloadSync(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
+        DownloadBatchId downloadBatchId = downloadBatch.getId();
+        if (!downloadBatchMap.containsKey(downloadBatchId)) {
+            downloadBatchMap.put(downloadBatchId, downloadBatch);
+        }
+
+        Wait.<Void>waitFor(downloadService, waitForDownloadService)
+            .thenPerform(executeDownload(downloadBatch, downloadBatchMap));
+    }
+
+    void download(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         DownloadBatchId downloadBatchId = downloadBatch.getId();
         if (!downloadBatchMap.containsKey(downloadBatchId)) {
             downloadBatchMap.put(downloadBatchId, downloadBatch);
         }
 
         executor.submit(() -> Wait.<Void>waitFor(downloadService, waitForDownloadService)
-                .thenPerform(executeDownload(downloadBatch, downloadBatchMap)));
+            .thenPerform(executeDownload(downloadBatch, downloadBatchMap)));
     }
 
     private Wait.ThenPerform.Action<Void> executeDownload(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {

@@ -177,14 +177,14 @@ public class DownloadManagerTest {
 
         downloadManager.download(BATCH);
 
-        verify(downloadManagerDownloader).download(BATCH, downloadingBatches);
+        verify(downloadManagerDownloader).creteDownloadBatchAndDownload(BATCH, downloadingBatches);
     }
 
     @Test
     public void doesNotDownload_whenBatchIsAlreadyBeingDownloaded() {
         downloadManager.download(BATCH);
 
-        verify(downloadManagerDownloader, never()).download(BATCH, downloadingBatches);
+        verify(downloadManagerDownloader, never()).creteDownloadBatchAndDownload(BATCH, downloadingBatches);
     }
 
     @Test
