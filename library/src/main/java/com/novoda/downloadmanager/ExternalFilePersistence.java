@@ -45,19 +45,22 @@ class ExternalFilePersistence implements FilePersistence {
 
         File externalFileDir = getExternalFileDirWithBiggerAvailableSpace();
 
-        long usableSpaceInBytes = externalFileDir.getUsableSpace();
-        long remainingSpaceAfterDownloadInBytes = usableSpaceInBytes - fileSize.totalSize();
-
-        if (remainingSpaceAfterDownloadInBytes < minimumStorageRequiredAfterDownloadInBytes(externalFileDir)) {
+        if (hasViolatedStorageRequirements(externalFileDir, fileSize)) {
             return FilePersistenceResult.ERROR_INSUFFICIENT_SPACE;
         }
 
         return create(absoluteFilePath);
     }
 
-    private long minimumStorageRequiredAfterDownloadInBytes(File externalFileDir) {
-        StatFs statFs = new StatFs(externalFileDir.getPath());
-        return (long) (StorageCapacityReader.storageCapacityInBytes(statFs) * TEN_PERCENT);
+    private boolean hasViolatedStorageRequirements(File storageDirectory, FileSize downloadFileSize) {
+        StatFs statFs = new StatFs(storageDirectory.getPath());
+        long minimumStorageRequiredInBytes = (long) (StorageCapacityReader.storageCapacityInBytes(statFs) * TEN_PERCENT);
+        long usableStorageInBytes = storageDirectory.getUsableSpace();
+        long remainingStorageAfterDownloadInBytes = usableStorageInBytes - downloadFileSize.totalSize();
+
+        Logger.d("Usable storage in bytes: ", usableStorageInBytes);
+        Logger.d("Minimum required storage in bytes: ", minimumStorageRequiredInBytes);
+        return remainingStorageAfterDownloadInBytes < minimumStorageRequiredInBytes;
     }
 
     private FilePersistenceResult create(FilePath absoluteFilePath) {

@@ -35,20 +35,22 @@ class InternalFilePersistence implements FilePersistence {
             return FilePersistenceResult.ERROR_UNKNOWN_TOTAL_FILE_SIZE;
         }
 
-        long usableSpaceInBytes = context.getFilesDir().getUsableSpace();
-        long remainingSpaceAfterDownloadInBytes = usableSpaceInBytes - fileSize.totalSize();
-
-        if (remainingSpaceAfterDownloadInBytes < minimumStorageRequiredAfterDownloadInBytes()) {
+        if (hasViolatedStorageRequirements(context.getFilesDir(), fileSize)) {
             return FilePersistenceResult.ERROR_INSUFFICIENT_SPACE;
         }
 
         return create(absoluteFilePath);
     }
 
-    private long minimumStorageRequiredAfterDownloadInBytes() {
-        File filesDir = context.getFilesDir();
-        StatFs statFs = new StatFs(filesDir.getPath());
-        return (long) (StorageCapacityReader.storageCapacityInBytes(statFs) * TEN_PERCENT);
+    private boolean hasViolatedStorageRequirements(File storageDirectory, FileSize downloadFileSize) {
+        StatFs statFs = new StatFs(storageDirectory.getPath());
+        long minimumStorageRequiredInBytes = (long) (StorageCapacityReader.storageCapacityInBytes(statFs) * TEN_PERCENT);
+        long usableStorageInBytes = context.getFilesDir().getUsableSpace();
+        long remainingStorageAfterDownloadInBytes = usableStorageInBytes - downloadFileSize.totalSize();
+
+        Logger.d("Usable storage in bytes: ", usableStorageInBytes);
+        Logger.d("Minimum required storage in bytes: ", minimumStorageRequiredInBytes);
+        return remainingStorageAfterDownloadInBytes < minimumStorageRequiredInBytes;
     }
 
     private FilePersistenceResult create(FilePath absoluteFilePath) {
