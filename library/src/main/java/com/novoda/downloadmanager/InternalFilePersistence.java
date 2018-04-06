@@ -29,12 +29,6 @@ class InternalFilePersistence implements FilePersistence {
         return FilePathCreator.create(context.getFilesDir().getAbsolutePath(), DOWNLOADS_DIR);
     }
 
-    private long minimumStorageRequiredAfterDownloadInBytes() {
-        File filesDir = context.getFilesDir();
-        StatFs statFs = new StatFs(filesDir.getPath());
-        return (long) (StorageCapacityReader.storageCapacityInBytes(statFs) * TEN_PERCENT);
-    }
-
     @Override
     public FilePersistenceResult create(FilePath absoluteFilePath, FileSize fileSize) {
         if (fileSize.isTotalSizeUnknown()) {
@@ -49,6 +43,12 @@ class InternalFilePersistence implements FilePersistence {
         }
 
         return create(absoluteFilePath);
+    }
+
+    private long minimumStorageRequiredAfterDownloadInBytes() {
+        File filesDir = context.getFilesDir();
+        StatFs statFs = new StatFs(filesDir.getPath());
+        return (long) (StorageCapacityReader.storageCapacityInBytes(statFs) * TEN_PERCENT);
     }
 
     private FilePersistenceResult create(FilePath absoluteFilePath) {
