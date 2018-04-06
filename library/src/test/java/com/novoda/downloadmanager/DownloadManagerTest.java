@@ -160,8 +160,8 @@ public class DownloadManagerTest {
         downloadManager.submitAllStoredDownloads(allStoredDownloadsSubmittedCallback);
 
         InOrder inOrder = inOrder(downloadManagerDownloader);
-        inOrder.verify(downloadManagerDownloader).download(downloadBatch, downloadingBatches);
-        inOrder.verify(downloadManagerDownloader).download(additionalDownloadBatch, downloadingBatches);
+        inOrder.verify(downloadManagerDownloader).submitDownload(downloadBatch, downloadingBatches);
+        inOrder.verify(downloadManagerDownloader).submitDownload(additionalDownloadBatch, downloadingBatches);
     }
 
     @Test
@@ -234,7 +234,7 @@ public class DownloadManagerTest {
 
         downloadManager.resume(DOWNLOAD_BATCH_ID);
 
-        verify(downloadManagerDownloader).download(downloadBatch, downloadingBatches);
+        verify(downloadManagerDownloader).submitDownload(downloadBatch, downloadingBatches);
     }
 
     @Test

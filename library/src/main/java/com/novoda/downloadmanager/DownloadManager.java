@@ -66,7 +66,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
         return downloadBatches -> {
             for (DownloadBatch downloadBatch : downloadBatches) {
                 downloadBatchMap.put(downloadBatch.getId(), downloadBatch);
-                downloader.download(downloadBatch, downloadBatchMap);
+                downloader.submitDownload(downloadBatch, downloadBatchMap);
             }
 
             callbackHandler.post(callback::onAllDownloadsSubmitted);
@@ -108,7 +108,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
         }
 
         downloadBatch.resume();
-        downloader.download(downloadBatch, downloadBatchMap);
+        downloader.submitDownload(downloadBatch, downloadBatchMap);
     }
 
     @Override

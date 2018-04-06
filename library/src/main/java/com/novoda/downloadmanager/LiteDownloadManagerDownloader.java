@@ -67,12 +67,12 @@ class LiteDownloadManagerDownloader {
             );
 
             downloadBatchMap.put(downloadBatch.getId(), downloadBatch);
-            downloadSync(downloadBatch, downloadBatchMap);
+            download(downloadBatch, downloadBatchMap);
         });
     }
 
     @WorkerThread
-    private void downloadSync(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
+    private void download(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         DownloadBatchId downloadBatchId = downloadBatch.getId();
         if (!downloadBatchMap.containsKey(downloadBatchId)) {
             downloadBatchMap.put(downloadBatchId, downloadBatch);
@@ -82,7 +82,7 @@ class LiteDownloadManagerDownloader {
             .thenPerform(executeDownload(downloadBatch, downloadBatchMap));
     }
 
-    void download(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
+    void submitDownload(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         DownloadBatchId downloadBatchId = downloadBatch.getId();
         if (!downloadBatchMap.containsKey(downloadBatchId)) {
             downloadBatchMap.put(downloadBatchId, downloadBatch);
