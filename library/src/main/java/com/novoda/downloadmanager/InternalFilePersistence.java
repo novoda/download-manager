@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager;
 
 import android.content.Context;
+import android.os.StatFs;
 import android.support.annotation.Nullable;
 
 import java.io.File;
@@ -11,6 +12,7 @@ import java.io.IOException;
 class InternalFilePersistence implements FilePersistence {
 
     private static final String DOWNLOADS_DIR = "/downloads/";
+    private static final double TEN_PERCENT = 0.1;
 
     private Context context;
 
@@ -27,14 +29,22 @@ class InternalFilePersistence implements FilePersistence {
         return FilePathCreator.create(context.getFilesDir().getAbsolutePath(), DOWNLOADS_DIR);
     }
 
+    private long minimumStorageRequiredAfterDownloadInBytes() {
+        File filesDir = context.getFilesDir();
+        StatFs statFs = new StatFs(filesDir.getPath());
+        return (long) (StorageCapacityReader.storageCapacityInBytes(statFs) * TEN_PERCENT);
+    }
+
     @Override
     public FilePersistenceResult create(FilePath absoluteFilePath, FileSize fileSize) {
         if (fileSize.isTotalSizeUnknown()) {
             return FilePersistenceResult.ERROR_UNKNOWN_TOTAL_FILE_SIZE;
         }
 
-        long usableSpace = context.getFilesDir().getUsableSpace();
-        if (usableSpace < fileSize.totalSize()) {
+        long usableSpaceInBytes = context.getFilesDir().getUsableSpace();
+        long remainingSpaceAfterDownload = usableSpaceInBytes - fileSize.totalSize();
+
+        if (remainingSpaceAfterDownload < minimumStorageRequiredAfterDownloadInBytes()) {
             return FilePersistenceResult.ERROR_INSUFFICIENT_SPACE;
         }
 
