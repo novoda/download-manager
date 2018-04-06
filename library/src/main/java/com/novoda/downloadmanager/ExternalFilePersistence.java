@@ -2,6 +2,7 @@ package com.novoda.downloadmanager;
 
 import android.content.Context;
 import android.os.Environment;
+import android.os.StatFs;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 
@@ -14,6 +15,7 @@ class ExternalFilePersistence implements FilePersistence {
 
     private static final String DOWNLOADS_DIR = "/downloads/";
     private static final String UNDEFINED_DIRECTORY_TYPE = null;
+    private static final double TEN_PERCENT = 0.1;
     private static final boolean APPEND = true;
 
     private Context context;
@@ -43,12 +45,19 @@ class ExternalFilePersistence implements FilePersistence {
 
         File externalFileDir = getExternalFileDirWithBiggerAvailableSpace();
 
-        long usableSpace = externalFileDir.getUsableSpace();
-        if (usableSpace < fileSize.totalSize()) {
+        long usableSpaceInBytes = externalFileDir.getUsableSpace();
+        long remainingSpaceAfterDownloadInBytes = usableSpaceInBytes - fileSize.totalSize();
+
+        if (remainingSpaceAfterDownloadInBytes < minimumStorageRequiredAfterDownloadInBytes(externalFileDir)) {
             return FilePersistenceResult.ERROR_INSUFFICIENT_SPACE;
         }
 
         return create(absoluteFilePath);
+    }
+
+    private long minimumStorageRequiredAfterDownloadInBytes(File externalFileDir) {
+        StatFs statFs = new StatFs(externalFileDir.getPath());
+        return (long) (StorageCapacityReader.storageCapacityInBytes(statFs) * TEN_PERCENT);
     }
 
     private FilePersistenceResult create(FilePath absoluteFilePath) {

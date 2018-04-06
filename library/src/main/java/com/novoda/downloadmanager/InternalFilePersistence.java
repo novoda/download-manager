@@ -36,9 +36,9 @@ class InternalFilePersistence implements FilePersistence {
         }
 
         long usableSpaceInBytes = context.getFilesDir().getUsableSpace();
-        long remainingSpaceAfterDownload = usableSpaceInBytes - fileSize.totalSize();
+        long remainingSpaceAfterDownloadInBytes = usableSpaceInBytes - fileSize.totalSize();
 
-        if (remainingSpaceAfterDownload < minimumStorageRequiredAfterDownloadInBytes()) {
+        if (remainingSpaceAfterDownloadInBytes < minimumStorageRequiredAfterDownloadInBytes()) {
             return FilePersistenceResult.ERROR_INSUFFICIENT_SPACE;
         }
 
