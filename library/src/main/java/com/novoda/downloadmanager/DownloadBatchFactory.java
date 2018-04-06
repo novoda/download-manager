@@ -67,14 +67,15 @@ final class DownloadBatchFactory {
             downloadFiles.add(downloadFile);
         }
 
-        long totalSize = getTotalSize(downloadFiles, downloadBatchId);
+        DownloadBatchStatus.Status status = DownloadBatchStatus.Status.UNKNOWN;
+        long totalSize = DownloadBatchSizeCalculator.getTotalSize(downloadFiles, status, downloadBatchId);
         InternalDownloadBatchStatus liteDownloadBatchStatus = new LiteDownloadBatchStatus(
                 downloadBatchId,
                 downloadBatchTitle,
                 downloadedDateTimeInMillis,
                 BYTES_DOWNLOADED,
                 totalSize,
-                DownloadBatchStatus.Status.UNKNOWN,
+                status,
                 NOTIFICATION_NOT_SEEN,
                 DOWNLOAD_ERROR
         );
@@ -87,22 +88,6 @@ final class DownloadBatchFactory {
                 callbackThrottle,
                 connectionChecker
         );
-    }
-
-    private static long getTotalSize(List<DownloadFile> downloadFiles, DownloadBatchId downloadBatchId) {
-        long totalBatchSize = 0;
-        for (DownloadFile downloadFile : downloadFiles) {
-            long totalFileSize = downloadFile.getTotalSize();
-            if (totalFileSize == 0) {
-                Logger.w("file " + downloadFile.id().rawId()
-                             + " from batch " + downloadBatchId.rawId()
-                             + " returns 0 as totalFileSize");
-                return 0;
-            }
-
-            totalBatchSize += totalFileSize;
-        }
-        return totalBatchSize;
     }
 
     private static String prependBatchIdTo(String filePath, DownloadBatchId downloadBatchId) {

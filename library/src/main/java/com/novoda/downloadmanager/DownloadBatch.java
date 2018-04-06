@@ -63,7 +63,11 @@ class DownloadBatch {
         markAsDownloadingIfNeeded(downloadBatchStatus, downloadsBatchPersistence, callback);
 
         if (totalBatchSizeBytes == 0) {
-            totalBatchSizeBytes = getTotalSize(downloadFiles, downloadBatchStatus);
+            totalBatchSizeBytes = DownloadBatchSizeCalculator.getTotalSize(
+                downloadFiles,
+                downloadBatchStatus.status(),
+                downloadBatchStatus.getDownloadBatchId()
+            );
         }
 
         Logger.v("batch " + downloadBatchStatus.getDownloadBatchId().rawId()
@@ -172,32 +176,6 @@ class DownloadBatch {
             downloadBatchStatus.markAsDownloading(downloadsBatchPersistence);
             notifyCallback(callback, downloadBatchStatus);
         }
-    }
-
-    private static long getTotalSize(List<DownloadFile> downloadFiles, InternalDownloadBatchStatus downloadBatchStatus) {
-        long totalBatchSize = 0;
-        for (DownloadFile downloadFile : downloadFiles) {
-            DownloadBatchStatus.Status status = downloadBatchStatus.status();
-            if (status == DELETING || status == DELETED || status == PAUSED) {
-                Logger.w("abort getTotalSize file " + downloadFile.id().rawId()
-                                 + " from batch " + downloadBatchStatus.getDownloadBatchId().rawId()
-                                 + " with " + STATUS + " " + downloadBatchStatus.status()
-                                 + " returns 0 as totalFileSize");
-                return 0;
-            }
-
-            long totalFileSize = downloadFile.getTotalSize();
-            if (totalFileSize == 0) {
-                Logger.w("file " + downloadFile.id().rawId()
-                                 + " from batch " + downloadBatchStatus.getDownloadBatchId().rawId()
-                                 + " with " + STATUS + " " + downloadBatchStatus.status()
-                                 + " returns 0 as totalFileSize");
-                return 0;
-            }
-
-            totalBatchSize += totalFileSize;
-        }
-        return totalBatchSize;
     }
 
     private static boolean shouldAbortAfterGettingTotalBatchSize(InternalDownloadBatchStatus downloadBatchStatus,
