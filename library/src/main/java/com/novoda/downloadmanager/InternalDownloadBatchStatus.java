@@ -2,7 +2,9 @@ package com.novoda.downloadmanager;
 
 interface InternalDownloadBatchStatus extends DownloadBatchStatus {
 
-    void update(long currentBytesDownloaded, long totalBatchSizeBytes);
+    void updateTotalSize(long totalBatchSizeBytes);
+
+    void updateDownloaded(long currentBytesDownloaded);
 
     void markAsDownloading(DownloadsBatchStatusPersistence persistence);
 

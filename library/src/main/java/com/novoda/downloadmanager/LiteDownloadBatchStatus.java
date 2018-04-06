@@ -49,9 +49,13 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     }
 
     @Override
-    public void update(long currentBytesDownloaded, long totalBatchSizeBytes) {
-        this.bytesDownloaded = currentBytesDownloaded;
+    public void updateTotalSize(long totalBatchSizeBytes) {
         this.totalBatchSizeBytes = totalBatchSizeBytes;
+    }
+
+    @Override
+    public void updateDownloaded(long currentBytesDownloaded) {
+        this.bytesDownloaded = currentBytesDownloaded;
         this.percentageDownloaded = getPercentageFrom(bytesDownloaded, totalBatchSizeBytes);
     }
 

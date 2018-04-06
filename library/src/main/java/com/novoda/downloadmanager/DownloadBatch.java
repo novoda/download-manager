@@ -62,9 +62,7 @@ class DownloadBatch {
 
         markAsDownloadingIfNeeded(downloadBatchStatus, downloadsBatchPersistence, callback);
 
-        if (totalBatchSizeBytes == 0) {
-            totalBatchSizeBytes = getTotalSize(downloadFiles, downloadBatchStatus);
-        }
+        updateTotalSize();
 
         Logger.v("batch " + downloadBatchStatus.getDownloadBatchId().rawId()
                          + " " + STATUS + " " + downloadBatchStatus.status()
@@ -174,32 +172,6 @@ class DownloadBatch {
         }
     }
 
-    private static long getTotalSize(List<DownloadFile> downloadFiles, InternalDownloadBatchStatus downloadBatchStatus) {
-        long totalBatchSize = 0;
-        for (DownloadFile downloadFile : downloadFiles) {
-            DownloadBatchStatus.Status status = downloadBatchStatus.status();
-            if (status == DELETING || status == DELETED || status == PAUSED) {
-                Logger.w("abort getTotalSize file " + downloadFile.id().rawId()
-                                 + " from batch " + downloadBatchStatus.getDownloadBatchId().rawId()
-                                 + " with " + STATUS + " " + downloadBatchStatus.status()
-                                 + " returns 0 as totalFileSize");
-                return 0;
-            }
-
-            long totalFileSize = downloadFile.getTotalSize();
-            if (totalFileSize == 0) {
-                Logger.w("file " + downloadFile.id().rawId()
-                                 + " from batch " + downloadBatchStatus.getDownloadBatchId().rawId()
-                                 + " with " + STATUS + " " + downloadBatchStatus.status()
-                                 + " returns 0 as totalFileSize");
-                return 0;
-            }
-
-            totalBatchSize += totalFileSize;
-        }
-        return totalBatchSize;
-    }
-
     private static boolean shouldAbortAfterGettingTotalBatchSize(InternalDownloadBatchStatus downloadBatchStatus,
                                                                  DownloadsBatchPersistence downloadsBatchPersistence,
                                                                  DownloadBatchStatusCallback callback,
@@ -244,7 +216,7 @@ class DownloadBatch {
         public void onUpdate(InternalDownloadFileStatus downloadFileStatus) {
             fileBytesDownloadedMap.put(downloadFileStatus.downloadFileId(), downloadFileStatus.bytesDownloaded());
             long currentBytesDownloaded = getBytesDownloadedFrom(fileBytesDownloadedMap);
-            downloadBatchStatus.update(currentBytesDownloaded, totalBatchSizeBytes);
+            downloadBatchStatus.updateDownloaded(currentBytesDownloaded);
 
             if (currentBytesDownloaded == totalBatchSizeBytes && totalBatchSizeBytes != ZERO_BYTES) {
                 downloadBatchStatus.markAsDownloaded(downloadsBatchPersistence);
@@ -394,5 +366,17 @@ class DownloadBatch {
                 downloadBatchStatus.downloadedDateTimeInMillis(),
                 downloadBatchStatus.notificationSeen()
         );
+    }
+
+    @WorkerThread
+    void updateTotalSize() {
+        if (totalBatchSizeBytes == 0) {
+            totalBatchSizeBytes = DownloadBatchSizeCalculator.getTotalSize(
+                downloadFiles,
+                downloadBatchStatus.status(),
+                downloadBatchStatus.getDownloadBatchId()
+            );
+        }
+        downloadBatchStatus.updateTotalSize(totalBatchSizeBytes);
     }
 }
