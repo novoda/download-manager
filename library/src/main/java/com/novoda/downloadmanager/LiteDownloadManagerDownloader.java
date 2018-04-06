@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager;
 
 import android.os.Handler;
+import android.support.annotation.WorkerThread;
 
 import java.util.List;
 import java.util.Map;
@@ -70,6 +71,7 @@ class LiteDownloadManagerDownloader {
         });
     }
 
+    @WorkerThread
     private void downloadSync(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         DownloadBatchId downloadBatchId = downloadBatch.getId();
         if (!downloadBatchMap.containsKey(downloadBatchId)) {
