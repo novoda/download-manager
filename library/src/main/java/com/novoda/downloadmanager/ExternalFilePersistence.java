@@ -54,10 +54,12 @@ class ExternalFilePersistence implements FilePersistence {
 
     private boolean hasViolatedStorageRequirements(File storageDirectory, FileSize downloadFileSize) {
         StatFs statFs = new StatFs(storageDirectory.getPath());
-        long minimumStorageRequiredInBytes = (long) (StorageCapacityReader.storageCapacityInBytes(statFs) * TEN_PERCENT);
+        long storageCapacityInBytes = StorageCapacityReader.storageCapacityInBytes(statFs);
+        long minimumStorageRequiredInBytes = (long) (storageCapacityInBytes * TEN_PERCENT);
         long usableStorageInBytes = storageDirectory.getUsableSpace();
         long remainingStorageAfterDownloadInBytes = usableStorageInBytes - downloadFileSize.totalSize();
 
+        Logger.d("Storage capacity in bytes: ", storageCapacityInBytes);
         Logger.d("Usable storage in bytes: ", usableStorageInBytes);
         Logger.d("Minimum required storage in bytes: ", minimumStorageRequiredInBytes);
         return remainingStorageAfterDownloadInBytes < minimumStorageRequiredInBytes;
