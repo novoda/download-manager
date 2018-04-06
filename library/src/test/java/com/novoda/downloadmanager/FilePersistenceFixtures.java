@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager;
 
 import android.content.Context;
+import android.support.annotation.FloatRange;
 
 class FilePersistenceFixtures {
 
