@@ -3,6 +3,7 @@ package com.novoda.downloadmanager;
 import android.content.Context;
 import android.os.Environment;
 import android.os.StatFs;
+import android.support.annotation.FloatRange;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 
@@ -15,17 +16,18 @@ class ExternalFilePersistence implements FilePersistence {
 
     private static final String DOWNLOADS_DIR = "/downloads/";
     private static final String UNDEFINED_DIRECTORY_TYPE = null;
-    private static final double TEN_PERCENT = 0.1;
     private static final boolean APPEND = true;
 
     private Context context;
+    private float percentageStorageRemaining;
 
     @Nullable
     private FileOutputStream fileOutputStream;
 
     @Override
-    public void initialiseWith(Context context) {
+    public void initialiseWith(Context context, @FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
         this.context = context.getApplicationContext();
+        this.percentageStorageRemaining = percentageOfStorageRemaining;
     }
 
     @Override
@@ -55,7 +57,7 @@ class ExternalFilePersistence implements FilePersistence {
     private boolean hasViolatedStorageRequirements(File storageDirectory, FileSize downloadFileSize) {
         StatFs statFs = new StatFs(storageDirectory.getPath());
         long storageCapacityInBytes = StorageCapacityReader.storageCapacityInBytes(statFs);
-        long minimumStorageRequiredInBytes = (long) (storageCapacityInBytes * TEN_PERCENT);
+        long minimumStorageRequiredInBytes = (long) (storageCapacityInBytes * percentageStorageRemaining);
         long usableStorageInBytes = storageDirectory.getUsableSpace();
         long remainingStorageAfterDownloadInBytes = usableStorageInBytes - downloadFileSize.totalSize();
 

@@ -2,6 +2,7 @@ package com.novoda.downloadmanager;
 
 import android.content.Context;
 import android.os.StatFs;
+import android.support.annotation.FloatRange;
 import android.support.annotation.Nullable;
 
 import java.io.File;
@@ -12,16 +13,17 @@ import java.io.IOException;
 class InternalFilePersistence implements FilePersistence {
 
     private static final String DOWNLOADS_DIR = "/downloads/";
-    private static final double TEN_PERCENT = 0.1;
 
     private Context context;
+    private float percentageOfStorageRemaining;
 
     @Nullable
     private FileOutputStream fileOutputStream;
 
     @Override
-    public void initialiseWith(Context context) {
+    public void initialiseWith(Context context, @FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
         this.context = context.getApplicationContext();
+        this.percentageOfStorageRemaining = percentageOfStorageRemaining;
     }
 
     @Override
@@ -45,7 +47,7 @@ class InternalFilePersistence implements FilePersistence {
     private boolean hasViolatedStorageRequirements(File storageDirectory, FileSize downloadFileSize) {
         StatFs statFs = new StatFs(storageDirectory.getPath());
         long storageCapacityInBytes = StorageCapacityReader.storageCapacityInBytes(statFs);
-        long minimumStorageRequiredInBytes = (long) (storageCapacityInBytes * TEN_PERCENT);
+        long minimumStorageRequiredInBytes = (long) (storageCapacityInBytes * percentageOfStorageRemaining);
         long usableStorageInBytes = context.getFilesDir().getUsableSpace();
         long remainingStorageAfterDownloadInBytes = usableStorageInBytes - downloadFileSize.totalSize();
 

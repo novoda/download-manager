@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.FloatRange;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -58,10 +59,12 @@ public final class DownloadManagerBuilder {
     private TimeUnit timeUnit;
     private long frequency;
     private Optional<LogHandle> logHandle;
+    private float percentageOfStorageRemaining;
 
     public static DownloadManagerBuilder newInstance(Context context, Handler callbackHandler, @DrawableRes final int notificationIcon) {
         Context applicationContext = context.getApplicationContext();
 
+        float percentageRequiredRemainingStorageAfterDownload = 0.1f;
         FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(applicationContext);
         FileDownloaderCreator fileDownloaderCreator = FileDownloaderCreator.newNetworkFileDownloaderCreator();
 
@@ -96,6 +99,7 @@ public final class DownloadManagerBuilder {
         return new DownloadManagerBuilder(
                 applicationContext,
                 callbackHandler,
+                percentageRequiredRemainingStorageAfterDownload,
                 filePersistenceCreator,
                 downloadsPersistence,
                 fileSizeRequester,
@@ -112,6 +116,7 @@ public final class DownloadManagerBuilder {
     @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})     // Can't group anymore these are customisable options.
     private DownloadManagerBuilder(Context applicationContext,
                                    Handler callbackHandler,
+                                   float percentageOfStorageRemaining,
                                    FilePersistenceCreator filePersistenceCreator,
                                    DownloadsPersistence downloadsPersistence,
                                    FileSizeRequester fileSizeRequester,
@@ -124,6 +129,7 @@ public final class DownloadManagerBuilder {
                                    Optional<LogHandle> logHandle) {
         this.applicationContext = applicationContext;
         this.callbackHandler = callbackHandler;
+        this.percentageOfStorageRemaining = percentageOfStorageRemaining;
         this.filePersistenceCreator = filePersistenceCreator;
         this.downloadsPersistence = downloadsPersistence;
         this.fileSizeRequester = fileSizeRequester;
@@ -155,6 +161,11 @@ public final class DownloadManagerBuilder {
 
     public DownloadManagerBuilder withFilePersistenceCustom(Class<? extends FilePersistence> customFilePersistenceClass) {
         filePersistenceCreator = FilePersistenceCreator.newCustomFilePersistenceCreator(applicationContext, customFilePersistenceClass);
+        return this;
+    }
+
+    public DownloadManagerBuilder withRequiredFreeStorageAfterDownload(@FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
+        this.percentageOfStorageRemaining = percentageOfStorageRemaining;
         return this;
     }
 
@@ -248,6 +259,7 @@ public final class DownloadManagerBuilder {
 
         applicationContext.bindService(intent, serviceConnection, Service.BIND_AUTO_CREATE);
 
+        filePersistenceCreator.withPercentageOfStorageRemaining(percentageOfStorageRemaining);
         FileOperations fileOperations = new FileOperations(filePersistenceCreator, fileSizeRequester, fileDownloaderCreator);
         List<DownloadBatchStatusCallback> callbacks = new ArrayList<>();
 
