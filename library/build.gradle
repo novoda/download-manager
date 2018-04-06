@@ -36,7 +36,7 @@ dependencies {
     annotationProcessor 'android.arch.persistence.room:compiler:1.0.0'
     implementation 'com.novoda:merlin:1.1.6'
     implementation 'com.facebook.stetho:stetho:1.5.0'
-    implementation 'com.android.support:support-v4:27.1.0'
+    implementation 'com.android.support:support-v4:27.1.1'
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
     implementation 'android.arch.persistence.room:runtime:1.0.0'
     implementation('com.evernote:android-job:1.2.5') {
