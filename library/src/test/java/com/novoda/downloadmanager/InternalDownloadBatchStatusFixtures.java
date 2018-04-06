@@ -105,7 +105,12 @@ class InternalDownloadBatchStatusFixtures {
             }
 
             @Override
-            public void update(long currentBytesDownloaded, long totalBatchSizeBytes) {
+            public void updateTotalSize(long totalBatchSizeBytes) {
+                // do nothing.
+            }
+
+            @Override
+            public void updateDownloaded(long currentBytesDownloaded) {
                 // do nothing.
             }
 

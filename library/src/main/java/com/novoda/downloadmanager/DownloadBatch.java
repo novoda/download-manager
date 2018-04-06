@@ -62,13 +62,7 @@ class DownloadBatch {
 
         markAsDownloadingIfNeeded(downloadBatchStatus, downloadsBatchPersistence, callback);
 
-        if (totalBatchSizeBytes == 0) {
-            totalBatchSizeBytes = DownloadBatchSizeCalculator.getTotalSize(
-                downloadFiles,
-                downloadBatchStatus.status(),
-                downloadBatchStatus.getDownloadBatchId()
-            );
-        }
+        updateTotalSize();
 
         Logger.v("batch " + downloadBatchStatus.getDownloadBatchId().rawId()
                          + " " + STATUS + " " + downloadBatchStatus.status()
@@ -222,7 +216,7 @@ class DownloadBatch {
         public void onUpdate(InternalDownloadFileStatus downloadFileStatus) {
             fileBytesDownloadedMap.put(downloadFileStatus.downloadFileId(), downloadFileStatus.bytesDownloaded());
             long currentBytesDownloaded = getBytesDownloadedFrom(fileBytesDownloadedMap);
-            downloadBatchStatus.update(currentBytesDownloaded, totalBatchSizeBytes);
+            downloadBatchStatus.updateDownloaded(currentBytesDownloaded);
 
             if (currentBytesDownloaded == totalBatchSizeBytes && totalBatchSizeBytes != ZERO_BYTES) {
                 downloadBatchStatus.markAsDownloaded(downloadsBatchPersistence);
@@ -372,5 +366,17 @@ class DownloadBatch {
                 downloadBatchStatus.downloadedDateTimeInMillis(),
                 downloadBatchStatus.notificationSeen()
         );
+    }
+
+    @WorkerThread
+    void updateTotalSize() {
+        if (totalBatchSizeBytes == 0) {
+            totalBatchSizeBytes = DownloadBatchSizeCalculator.getTotalSize(
+                downloadFiles,
+                downloadBatchStatus.status(),
+                downloadBatchStatus.getDownloadBatchId()
+            );
+        }
+        downloadBatchStatus.updateTotalSize(totalBatchSizeBytes);
     }
 }

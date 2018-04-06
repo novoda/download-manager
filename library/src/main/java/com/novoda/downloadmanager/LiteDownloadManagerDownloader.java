@@ -1,7 +1,6 @@
 package com.novoda.downloadmanager;
 
 import android.os.Handler;
-import android.support.annotation.WorkerThread;
 
 import java.util.List;
 import java.util.Map;
@@ -55,34 +54,23 @@ class LiteDownloadManagerDownloader {
         this.callbackThrottleCreator = callbackThrottleCreator;
     }
 
-    void creteDownloadBatchAndDownload(Batch batch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
-        executor.submit(() -> {
-            DownloadBatch downloadBatch = DownloadBatchFactory.newInstance(
-                batch,
-                fileOperations,
-                downloadsBatchPersistence,
-                downloadsFilePersistence,
-                callbackThrottleCreator.create(),
-                connectionChecker
-            );
+    void download(Batch batch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
+        DownloadBatch downloadBatch = DownloadBatchFactory.newInstance(
+            batch,
+            fileOperations,
+            downloadsBatchPersistence,
+            downloadsFilePersistence,
+            callbackThrottleCreator.create(),
+            connectionChecker
+        );
 
-            downloadBatchMap.put(downloadBatch.getId(), downloadBatch);
-            download(downloadBatch, downloadBatchMap);
-        });
+        downloadBatchMap.put(downloadBatch.getId(), downloadBatch);
+        executor.submit(downloadBatch::updateTotalSize);
+        download(downloadBatch, downloadBatchMap);
     }
 
-    @WorkerThread
-    private void download(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
-        DownloadBatchId downloadBatchId = downloadBatch.getId();
-        if (!downloadBatchMap.containsKey(downloadBatchId)) {
-            downloadBatchMap.put(downloadBatchId, downloadBatch);
-        }
 
-        Wait.<Void>waitFor(downloadService, waitForDownloadService)
-            .thenPerform(executeDownload(downloadBatch, downloadBatchMap));
-    }
-
-    void submitDownload(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
+    void download(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         DownloadBatchId downloadBatchId = downloadBatch.getId();
         if (!downloadBatchMap.containsKey(downloadBatchId)) {
             downloadBatchMap.put(downloadBatchId, downloadBatch);

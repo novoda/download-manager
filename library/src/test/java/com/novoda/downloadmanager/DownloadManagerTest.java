@@ -160,8 +160,8 @@ public class DownloadManagerTest {
         downloadManager.submitAllStoredDownloads(allStoredDownloadsSubmittedCallback);
 
         InOrder inOrder = inOrder(downloadManagerDownloader);
-        inOrder.verify(downloadManagerDownloader).submitDownload(downloadBatch, downloadingBatches);
-        inOrder.verify(downloadManagerDownloader).submitDownload(additionalDownloadBatch, downloadingBatches);
+        inOrder.verify(downloadManagerDownloader).download(downloadBatch, downloadingBatches);
+        inOrder.verify(downloadManagerDownloader).download(additionalDownloadBatch, downloadingBatches);
     }
 
     @Test
@@ -177,14 +177,14 @@ public class DownloadManagerTest {
 
         downloadManager.download(BATCH);
 
-        verify(downloadManagerDownloader).creteDownloadBatchAndDownload(BATCH, downloadingBatches);
+        verify(downloadManagerDownloader).download(BATCH, downloadingBatches);
     }
 
     @Test
     public void doesNotDownload_whenBatchIsAlreadyBeingDownloaded() {
         downloadManager.download(BATCH);
 
-        verify(downloadManagerDownloader, never()).creteDownloadBatchAndDownload(BATCH, downloadingBatches);
+        verify(downloadManagerDownloader, never()).download(BATCH, downloadingBatches);
     }
 
     @Test
@@ -234,7 +234,7 @@ public class DownloadManagerTest {
 
         downloadManager.resume(DOWNLOAD_BATCH_ID);
 
-        verify(downloadManagerDownloader).submitDownload(downloadBatch, downloadingBatches);
+        verify(downloadManagerDownloader).download(downloadBatch, downloadingBatches);
     }
 
     @Test

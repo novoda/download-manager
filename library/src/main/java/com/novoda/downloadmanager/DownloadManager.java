@@ -66,7 +66,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
         return downloadBatches -> {
             for (DownloadBatch downloadBatch : downloadBatches) {
                 downloadBatchMap.put(downloadBatch.getId(), downloadBatch);
-                downloader.submitDownload(downloadBatch, downloadBatchMap);
+                downloader.download(downloadBatch, downloadBatchMap);
             }
 
             callbackHandler.post(callback::onAllDownloadsSubmitted);
@@ -78,7 +78,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
         DownloadBatchId downloadBatchId = batch.downloadBatchId();
         DownloadBatch downloadBatch = downloadBatchMap.get(downloadBatchId);
         if (downloadBatch == null) {
-            downloader.creteDownloadBatchAndDownload(batch, downloadBatchMap);
+            downloader.download(batch, downloadBatchMap);
         } else {
             Logger.v("abort download batch " + downloadBatchId + " will not download as exists already in the running batches map");
         }
@@ -108,7 +108,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
         }
 
         downloadBatch.resume();
-        downloader.submitDownload(downloadBatch, downloadBatchMap);
+        downloader.download(downloadBatch, downloadBatchMap);
     }
 
     @Override
