@@ -1,7 +1,6 @@
 package com.novoda.downloadmanager;
 
 import android.content.Context;
-import android.support.annotation.FloatRange;
 
 class FilePersistenceFixtures {
 
@@ -37,7 +36,7 @@ class FilePersistenceFixtures {
     FilePersistence build() {
         return new FilePersistence() {
             @Override
-            public void initialiseWith(Context context, @FloatRange(from = 0.0, to = 0.5) StorageRequirementsRule storageRequirementsRule) {
+            public void initialiseWith(Context context, StorageRequirementsRule storageRequirementsRule) {
 
             }
 

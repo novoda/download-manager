@@ -1,11 +1,10 @@
 package com.novoda.downloadmanager;
 
 import android.content.Context;
-import android.support.annotation.FloatRange;
 
 public interface FilePersistence {
 
-    void initialiseWith(Context context, @FloatRange(from = 0.0, to = 0.5) StorageRequirementsRule storageRequirementsRule);
+    void initialiseWith(Context context, StorageRequirementsRule storageRequirementsRule);
 
     FilePath basePath();
 
