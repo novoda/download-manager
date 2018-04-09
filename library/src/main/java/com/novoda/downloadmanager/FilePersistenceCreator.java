@@ -10,6 +10,8 @@ class FilePersistenceCreator {
     @Nullable
     private final Class<? extends FilePersistence> customClass;
 
+    private StorageRequirementsRule storageRequirementsRule;
+
     static FilePersistenceCreator newInternalFilePersistenceCreator(Context context) {
         return new FilePersistenceCreator(context, FilePersistenceType.INTERNAL, null);
     }
@@ -26,6 +28,10 @@ class FilePersistenceCreator {
         this.context = context.getApplicationContext();
         this.type = type;
         this.customClass = customClass;
+    }
+
+    void withStorageRequirementsRule(StorageRequirementsRule storageRequirementsRule) {
+        this.storageRequirementsRule = storageRequirementsRule;
     }
 
     FilePersistence create() {
@@ -49,7 +55,7 @@ class FilePersistenceCreator {
                 throw new IllegalStateException("Persistence of type " + type + " is not supported");
         }
 
-        filePersistence.initialiseWith(context);
+        filePersistence.initialiseWith(context, storageRequirementsRule);
         return filePersistence;
     }
 

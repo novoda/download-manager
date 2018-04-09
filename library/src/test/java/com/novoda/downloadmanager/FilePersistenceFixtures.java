@@ -36,7 +36,7 @@ class FilePersistenceFixtures {
     FilePersistence build() {
         return new FilePersistence() {
             @Override
-            public void initialiseWith(Context context) {
+            public void initialiseWith(Context context, StorageRequirementsRule storageRequirementsRule) {
 
             }
 

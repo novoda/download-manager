@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.FloatRange;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -39,6 +40,7 @@ public final class DownloadManagerBuilder {
     private static final Object SERVICE_LOCK = new Object();
     private static final Object CALLBACK_LOCK = new Object();
     private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
+    private static final float TEN_PERCENT = 0.1f;
 
     private final Context applicationContext;
     private final Handler callbackHandler;
@@ -58,10 +60,12 @@ public final class DownloadManagerBuilder {
     private TimeUnit timeUnit;
     private long frequency;
     private Optional<LogHandle> logHandle;
+    private StorageRequirementsRule storageRequirementsRule;
 
     public static DownloadManagerBuilder newInstance(Context context, Handler callbackHandler, @DrawableRes final int notificationIcon) {
         Context applicationContext = context.getApplicationContext();
 
+        StorageRequirementsRule storageRequirementsRule = StorageRequirementsRule.withPercentageOfStorageRemaining(TEN_PERCENT);
         FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(applicationContext);
         FileDownloaderCreator fileDownloaderCreator = FileDownloaderCreator.newNetworkFileDownloaderCreator();
 
@@ -96,6 +100,7 @@ public final class DownloadManagerBuilder {
         return new DownloadManagerBuilder(
                 applicationContext,
                 callbackHandler,
+                storageRequirementsRule,
                 filePersistenceCreator,
                 downloadsPersistence,
                 fileSizeRequester,
@@ -112,6 +117,7 @@ public final class DownloadManagerBuilder {
     @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})     // Can't group anymore these are customisable options.
     private DownloadManagerBuilder(Context applicationContext,
                                    Handler callbackHandler,
+                                   StorageRequirementsRule storageRequirementsRule,
                                    FilePersistenceCreator filePersistenceCreator,
                                    DownloadsPersistence downloadsPersistence,
                                    FileSizeRequester fileSizeRequester,
@@ -124,6 +130,7 @@ public final class DownloadManagerBuilder {
                                    Optional<LogHandle> logHandle) {
         this.applicationContext = applicationContext;
         this.callbackHandler = callbackHandler;
+        this.storageRequirementsRule = storageRequirementsRule;
         this.filePersistenceCreator = filePersistenceCreator;
         this.downloadsPersistence = downloadsPersistence;
         this.fileSizeRequester = fileSizeRequester;
@@ -155,6 +162,11 @@ public final class DownloadManagerBuilder {
 
     public DownloadManagerBuilder withFilePersistenceCustom(Class<? extends FilePersistence> customFilePersistenceClass) {
         filePersistenceCreator = FilePersistenceCreator.newCustomFilePersistenceCreator(applicationContext, customFilePersistenceClass);
+        return this;
+    }
+
+    public DownloadManagerBuilder withRequiredFreeStorageAfterDownload(@FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
+        this.storageRequirementsRule = StorageRequirementsRule.withPercentageOfStorageRemaining(percentageOfStorageRemaining);
         return this;
     }
 
@@ -248,6 +260,7 @@ public final class DownloadManagerBuilder {
 
         applicationContext.bindService(intent, serviceConnection, Service.BIND_AUTO_CREATE);
 
+        filePersistenceCreator.withStorageRequirementsRule(storageRequirementsRule);
         FileOperations fileOperations = new FileOperations(filePersistenceCreator, fileSizeRequester, fileDownloaderCreator);
         List<DownloadBatchStatusCallback> callbacks = new ArrayList<>();
 

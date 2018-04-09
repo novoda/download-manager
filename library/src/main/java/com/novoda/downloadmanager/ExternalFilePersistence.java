@@ -17,13 +17,15 @@ class ExternalFilePersistence implements FilePersistence {
     private static final boolean APPEND = true;
 
     private Context context;
+    private StorageRequirementsRule storageRequirementsRule;
 
     @Nullable
     private FileOutputStream fileOutputStream;
 
     @Override
-    public void initialiseWith(Context context) {
+    public void initialiseWith(Context context, StorageRequirementsRule storageRequirementsRule) {
         this.context = context.getApplicationContext();
+        this.storageRequirementsRule = storageRequirementsRule;
     }
 
     @Override
@@ -43,8 +45,7 @@ class ExternalFilePersistence implements FilePersistence {
 
         File externalFileDir = getExternalFileDirWithBiggerAvailableSpace();
 
-        long usableSpace = externalFileDir.getUsableSpace();
-        if (usableSpace < fileSize.totalSize()) {
+        if (storageRequirementsRule.hasViolatedRule(externalFileDir, fileSize)) {
             return FilePersistenceResult.ERROR_INSUFFICIENT_SPACE;
         }
 

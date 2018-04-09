@@ -18,6 +18,7 @@ class MigrationJob implements Runnable {
     private static final int RANDOMLY_CHOSEN_BUFFER_SIZE_THAT_SEEMS_TO_WORK = 4096;
     private static final int NO_COMPLETED_MIGRATIONS = 0;
     private static final int NO_MIGRATIONS = 0;
+    private static final float TEN_PERCENT = 0.1f;
 
     private final Context context;
     private final String jobIdentifier;
@@ -52,8 +53,11 @@ class MigrationJob implements Runnable {
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
 
-        FilePersistence filePersistence = FilePersistenceCreator.newInternalFilePersistenceCreator(context).create();
-        filePersistence.initialiseWith(context);
+        FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(context);
+        StorageRequirementsRule storageRequirementsRule = StorageRequirementsRule.withPercentageOfStorageRemaining(TEN_PERCENT);
+        filePersistenceCreator.withStorageRequirementsRule(storageRequirementsRule);
+        FilePersistence filePersistence = filePersistenceCreator.create();
+
         PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database, basePath);
         MigrationExtractor migrationExtractor = new MigrationExtractor(database, filePersistence, basePath);
         List<Migration> partialMigrations = partialDownloadMigrationExtractor.extractMigrations();

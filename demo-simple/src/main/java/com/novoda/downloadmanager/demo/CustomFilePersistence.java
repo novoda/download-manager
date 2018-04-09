@@ -9,6 +9,7 @@ import com.novoda.downloadmanager.FilePersistence;
 import com.novoda.downloadmanager.FilePersistenceResult;
 import com.novoda.downloadmanager.FilePersistenceType;
 import com.novoda.downloadmanager.FileSize;
+import com.novoda.downloadmanager.StorageRequirementsRule;
 
 // Must be public
 public class CustomFilePersistence implements FilePersistence {
@@ -18,7 +19,7 @@ public class CustomFilePersistence implements FilePersistence {
     private int currentSize;
 
     @Override
-    public void initialiseWith(Context context) {
+    public void initialiseWith(Context context, StorageRequirementsRule storageRequirementsRule) {
         Log.v(TAG, "initialise");
     }
 
