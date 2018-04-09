@@ -5,7 +5,7 @@ import android.support.annotation.FloatRange;
 
 import java.io.File;
 
-public class StorageRequirementsRule {
+public final class StorageRequirementsRule {
 
     private final StorageCapacityReader storageCapacityReader;
     private final float percentageOfStorageRemaining;
