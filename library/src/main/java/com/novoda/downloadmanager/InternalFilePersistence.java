@@ -51,9 +51,9 @@ class InternalFilePersistence implements FilePersistence {
         long usableStorageInBytes = context.getFilesDir().getUsableSpace();
         long remainingStorageAfterDownloadInBytes = usableStorageInBytes - downloadFileSize.totalSize();
 
-        Logger.d("Storage capacity in bytes: ", storageCapacityInBytes);
-        Logger.d("Usable storage in bytes: ", usableStorageInBytes);
-        Logger.d("Minimum required storage in bytes: ", minimumStorageRequiredInBytes);
+        Logger.v("Storage capacity in bytes: ", storageCapacityInBytes);
+        Logger.v("Usable storage in bytes: ", usableStorageInBytes);
+        Logger.v("Minimum required storage in bytes: ", minimumStorageRequiredInBytes);
         return remainingStorageAfterDownloadInBytes < minimumStorageRequiredInBytes;
     }
 
