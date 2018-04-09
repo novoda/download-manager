@@ -1,7 +1,6 @@
 package com.novoda.downloadmanager;
 
 import android.content.Context;
-import android.support.annotation.FloatRange;
 import android.support.annotation.Nullable;
 
 class FilePersistenceCreator {
@@ -11,7 +10,7 @@ class FilePersistenceCreator {
     @Nullable
     private final Class<? extends FilePersistence> customClass;
 
-    private float percentageOfStorageRemaining;
+    private StorageRequirementsRule storageRequirementsRule;
 
     static FilePersistenceCreator newInternalFilePersistenceCreator(Context context) {
         return new FilePersistenceCreator(context, FilePersistenceType.INTERNAL, null);
@@ -31,8 +30,8 @@ class FilePersistenceCreator {
         this.customClass = customClass;
     }
 
-    void withPercentageOfStorageRemaining(@FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
-        this.percentageOfStorageRemaining = percentageOfStorageRemaining;
+    void withStorageRequirementsRule(StorageRequirementsRule storageRequirementsRule) {
+        this.storageRequirementsRule = storageRequirementsRule;
     }
 
     FilePersistence create() {
@@ -56,7 +55,7 @@ class FilePersistenceCreator {
                 throw new IllegalStateException("Persistence of type " + type + " is not supported");
         }
 
-        filePersistence.initialiseWith(context, percentageOfStorageRemaining);
+        filePersistence.initialiseWith(context, storageRequirementsRule);
         return filePersistence;
     }
 

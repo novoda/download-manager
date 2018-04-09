@@ -1,7 +1,6 @@
 package com.novoda.downloadmanager.demo;
 
 import android.content.Context;
-import android.support.annotation.FloatRange;
 import android.util.Log;
 
 import com.novoda.downloadmanager.FilePath;
@@ -10,6 +9,7 @@ import com.novoda.downloadmanager.FilePersistence;
 import com.novoda.downloadmanager.FilePersistenceResult;
 import com.novoda.downloadmanager.FilePersistenceType;
 import com.novoda.downloadmanager.FileSize;
+import com.novoda.downloadmanager.StorageRequirementsRule;
 
 // Must be public
 public class CustomFilePersistence implements FilePersistence {
@@ -19,7 +19,7 @@ public class CustomFilePersistence implements FilePersistence {
     private int currentSize;
 
     @Override
-    public void initialiseWith(Context context, @FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
+    public void initialiseWith(Context context, StorageRequirementsRule storageRequirementsRule) {
         Log.v(TAG, "initialise");
     }
 

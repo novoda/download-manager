@@ -1,8 +1,6 @@
 package com.novoda.downloadmanager;
 
 import android.content.Context;
-import android.os.StatFs;
-import android.support.annotation.FloatRange;
 import android.support.annotation.Nullable;
 
 import java.io.File;
@@ -15,15 +13,15 @@ class InternalFilePersistence implements FilePersistence {
     private static final String DOWNLOADS_DIR = "/downloads/";
 
     private Context context;
-    private float percentageOfStorageRemaining;
+    private StorageRequirementsRule storageRequirementsRule;
 
     @Nullable
     private FileOutputStream fileOutputStream;
 
     @Override
-    public void initialiseWith(Context context, @FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
+    public void initialiseWith(Context context, StorageRequirementsRule storageRequirementsRule) {
         this.context = context.getApplicationContext();
-        this.percentageOfStorageRemaining = percentageOfStorageRemaining;
+        this.storageRequirementsRule = storageRequirementsRule;
     }
 
     @Override
@@ -37,24 +35,11 @@ class InternalFilePersistence implements FilePersistence {
             return FilePersistenceResult.ERROR_UNKNOWN_TOTAL_FILE_SIZE;
         }
 
-        if (hasViolatedStorageRequirements(context.getFilesDir(), fileSize)) {
+        if (storageRequirementsRule.hasViolatedRule(context.getFilesDir(), fileSize)) {
             return FilePersistenceResult.ERROR_INSUFFICIENT_SPACE;
         }
 
         return create(absoluteFilePath);
-    }
-
-    private boolean hasViolatedStorageRequirements(File storageDirectory, FileSize downloadFileSize) {
-        StatFs statFs = new StatFs(storageDirectory.getPath());
-        long storageCapacityInBytes = StorageCapacityReader.storageCapacityInBytes(statFs);
-        long minimumStorageRequiredInBytes = (long) (storageCapacityInBytes * percentageOfStorageRemaining);
-        long usableStorageInBytes = context.getFilesDir().getUsableSpace();
-        long remainingStorageAfterDownloadInBytes = usableStorageInBytes - downloadFileSize.totalSize();
-
-        Logger.v("Storage capacity in bytes: ", storageCapacityInBytes);
-        Logger.v("Usable storage in bytes: ", usableStorageInBytes);
-        Logger.v("Minimum required storage in bytes: ", minimumStorageRequiredInBytes);
-        return remainingStorageAfterDownloadInBytes < minimumStorageRequiredInBytes;
     }
 
     private FilePersistenceResult create(FilePath absoluteFilePath) {

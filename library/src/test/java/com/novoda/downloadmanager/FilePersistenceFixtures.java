@@ -37,7 +37,7 @@ class FilePersistenceFixtures {
     FilePersistence build() {
         return new FilePersistence() {
             @Override
-            public void initialiseWith(Context context, @FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
+            public void initialiseWith(Context context, @FloatRange(from = 0.0, to = 0.5) StorageRequirementsRule storageRequirementsRule) {
 
             }
 

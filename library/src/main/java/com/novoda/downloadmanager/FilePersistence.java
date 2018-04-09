@@ -5,7 +5,7 @@ import android.support.annotation.FloatRange;
 
 public interface FilePersistence {
 
-    void initialiseWith(Context context, @FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining);
+    void initialiseWith(Context context, @FloatRange(from = 0.0, to = 0.5) StorageRequirementsRule storageRequirementsRule);
 
     FilePath basePath();
 
