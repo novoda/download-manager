@@ -54,28 +54,30 @@ class LiteDownloadManagerDownloader {
         this.callbackThrottleCreator = callbackThrottleCreator;
     }
 
-    public void download(Batch batch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
+    void download(Batch batch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         DownloadBatch downloadBatch = DownloadBatchFactory.newInstance(
-                batch,
-                fileOperations,
-                downloadsBatchPersistence,
-                downloadsFilePersistence,
-                callbackThrottleCreator.create(),
-                connectionChecker
+            batch,
+            fileOperations,
+            downloadsBatchPersistence,
+            downloadsFilePersistence,
+            callbackThrottleCreator.create(),
+            connectionChecker
         );
 
         downloadBatchMap.put(downloadBatch.getId(), downloadBatch);
+        executor.submit(downloadBatch::updateTotalSize);
         download(downloadBatch, downloadBatchMap);
     }
 
-    public void download(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
+
+    void download(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         DownloadBatchId downloadBatchId = downloadBatch.getId();
         if (!downloadBatchMap.containsKey(downloadBatchId)) {
             downloadBatchMap.put(downloadBatchId, downloadBatch);
         }
 
         executor.submit(() -> Wait.<Void>waitFor(downloadService, waitForDownloadService)
-                .thenPerform(executeDownload(downloadBatch, downloadBatchMap)));
+            .thenPerform(executeDownload(downloadBatch, downloadBatchMap)));
     }
 
     private Wait.ThenPerform.Action<Void> executeDownload(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {

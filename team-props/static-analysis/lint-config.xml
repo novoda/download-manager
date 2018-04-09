@@ -24,4 +24,6 @@
     <ignore path="*res/mipmap*/ic_launcher_background.png" />
   </issue>
 
+  <issue id="GradleDependency" severity="informational" />
+
 </lint>
