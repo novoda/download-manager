@@ -1,0 +1,144 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "51452b9dd78209a95c31b52116d23081",
+    "entities": [
+      {
+        "tableName": "RoomBatch",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`batch_id` TEXT NOT NULL, `batch_title` TEXT, `batch_status` TEXT, `batch_downloaded_date_time_in_millis` INTEGER NOT NULL, `notification_seen` INTEGER NOT NULL, PRIMARY KEY(`batch_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "batch_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "batch_title",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "batch_status",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "downloadedDateTimeInMillis",
+            "columnName": "batch_downloaded_date_time_in_millis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notificationSeen",
+            "columnName": "notification_seen",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "batch_id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_RoomBatch_batch_id",
+            "unique": false,
+            "columnNames": [
+              "batch_id"
+            ],
+            "createSql": "CREATE  INDEX `index_RoomBatch_batch_id` ON `${TABLE_NAME}` (`batch_id`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "RoomFile",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`file_id` TEXT NOT NULL, `batch_id` TEXT NOT NULL, `file_name` TEXT, `file_path` TEXT, `total_size` INTEGER NOT NULL, `url` TEXT, `persistence_type` TEXT, PRIMARY KEY(`file_id`, `batch_id`), FOREIGN KEY(`batch_id`) REFERENCES `RoomBatch`(`batch_id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "fileId",
+            "columnName": "file_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "batchId",
+            "columnName": "batch_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "file_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "path",
+            "columnName": "file_path",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "totalSize",
+            "columnName": "total_size",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "persistenceType",
+            "columnName": "persistence_type",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "file_id",
+            "batch_id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_RoomFile_batch_id",
+            "unique": false,
+            "columnNames": [
+              "batch_id"
+            ],
+            "createSql": "CREATE  INDEX `index_RoomFile_batch_id` ON `${TABLE_NAME}` (`batch_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "RoomBatch",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "batch_id"
+            ],
+            "referencedColumns": [
+              "batch_id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"51452b9dd78209a95c31b52116d23081\")"
+    ]
+  }
+}
