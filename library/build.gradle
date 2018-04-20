@@ -12,6 +12,12 @@ android {
         versionName "0.1"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation": "$projectDir/roomSchemas".toString()]
+            }
+        }
     }
 
     lintOptions {
@@ -34,7 +40,7 @@ android {
 
 dependencies {
     annotationProcessor 'android.arch.persistence.room:compiler:1.0.0'
-    implementation 'com.novoda:merlin:1.1.6'
+    implementation 'com.novoda:merlin:1.1.7'
     implementation 'com.facebook.stetho:stetho:1.5.0'
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
     implementation 'android.arch.persistence.room:runtime:1.0.0'
@@ -52,6 +58,6 @@ publish {
     groupId = 'com.novoda'
     artifactId = 'download-manager'
     publishVersion = 'SNAPSHOT-2.0.38'
-    description = 'Download manager based on AOSP DM but allowing downloading to internal private storage.'
+    desc = 'Download Manager capable of batching, auto-resume, internal and external storage and highly customizable.'
     website = 'https://github.com/novoda/download-manager'
 }
