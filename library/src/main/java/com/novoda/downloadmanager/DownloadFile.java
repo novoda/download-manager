@@ -12,7 +12,6 @@ class DownloadFile {
     private final DownloadFileId downloadFileId;
     private final String url;
     private final InternalDownloadFileStatus downloadFileStatus;
-    private final FileName fileName;
     private final FileDownloader fileDownloader;
     private final FileSizeRequester fileSizeRequester;
     private final FilePersistence filePersistence;
@@ -27,7 +26,6 @@ class DownloadFile {
                  DownloadFileId downloadFileId,
                  String url,
                  InternalDownloadFileStatus downloadFileStatus,
-                 FileName fileName,
                  FilePath filePath,
                  InternalFileSize fileSize,
                  FileDownloader fileDownloader,
@@ -38,7 +36,6 @@ class DownloadFile {
         this.downloadFileId = downloadFileId;
         this.url = url;
         this.downloadFileStatus = downloadFileStatus;
-        this.fileName = fileName;
         this.filePath = filePath;
         this.fileDownloader = fileDownloader;
         this.fileSizeRequester = fileSizeRequester;
@@ -190,8 +187,8 @@ class DownloadFile {
             fileSize.setTotalSize(requestFileSize.totalSize());
             if (fileStatus().status() == DownloadFileStatus.Status.DELETED) {
                 Logger.e("file getTotalSize return zero because is deleted, " + downloadFileId.rawId()
-                        + " from batch " + downloadBatchId.rawId()
-                        + " with file status " + fileStatus().status());
+                                 + " from batch " + downloadBatchId.rawId()
+                                 + " with file status " + fileStatus().status());
                 return 0;
             }
             persist();
@@ -204,7 +201,6 @@ class DownloadFile {
     boolean persist() {
         return downloadsFilePersistence.persistSync(
                 downloadBatchId,
-                fileName,
                 filePath,
                 fileSize,
                 url,
