@@ -71,7 +71,7 @@ public class Batch {
     }
 
     public interface Builder {
-        BatchFile.Builder downloadFrom(String networkAddress);
+        com.novoda.downloadmanager.Builder downloadFrom(String networkAddress);
 
         Batch build();
     }
@@ -97,10 +97,10 @@ public class Batch {
             batchFiles.add(batchFile);
         }
 
-        private BatchFile.Builder fileBuilder;
+        private com.novoda.downloadmanager.Builder fileBuilder;
 
         @Override
-        public BatchFile.Builder downloadFrom(String networkAddress) {
+        public com.novoda.downloadmanager.Builder downloadFrom(String networkAddress) {
             this.fileBuilder = BatchFile.from(downloadBatchId, networkAddress).withParentBuilder(this);
             return this.fileBuilder;
         }
