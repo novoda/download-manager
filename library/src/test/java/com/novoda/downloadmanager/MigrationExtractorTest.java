@@ -76,7 +76,7 @@ public class MigrationExtractorTest {
     private List<Migration> expectedMigrations() {
         String firstUri = "uri_1";
         String secondUri = "uri_2";
-        Batch firstBatch = Batch.with(DownloadBatchIdCreator.createFrom(String.valueOf("file_1".hashCode())), "title_1")
+        Batch firstBatch = Batch.with(DownloadBatchIdCreator.createSanitizedFrom(String.valueOf("file_1".hashCode())), "title_1")
                 .downloadFrom(firstUri).withIdentifier(DownloadFileIdCreator.createFrom("file_1")).apply()
                 .downloadFrom(secondUri).withIdentifier(DownloadFileIdCreator.createFrom("file_2")).apply()
                 .build();
@@ -87,7 +87,7 @@ public class MigrationExtractorTest {
 
         String thirdUri = "uri_3";
         String fourthUri = "uri_4";
-        Batch secondBatch = Batch.with(DownloadBatchIdCreator.createFrom(String.valueOf("file_3".hashCode())), "title_2")
+        Batch secondBatch = Batch.with(DownloadBatchIdCreator.createSanitizedFrom(String.valueOf("file_3".hashCode())), "title_2")
                 .downloadFrom(thirdUri).withIdentifier(DownloadFileIdCreator.createFrom("file_3")).apply()
                 .downloadFrom(fourthUri).withIdentifier(DownloadFileIdCreator.createFrom("file_4")).apply()
                 .build();

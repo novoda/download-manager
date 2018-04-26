@@ -8,7 +8,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 public class BatchBuilderTest {
 
-    private static final DownloadBatchId DOWNLOAD_BATCH_ID = DownloadBatchIdCreator.createFrom("download_batch_id");
+    private static final DownloadBatchId DOWNLOAD_BATCH_ID = DownloadBatchIdCreator.createSanitizedFrom("download_batch_id");
     private static final String DOWNLOAD_BATCH_TITLE = "download_batch_title";
     private static final DownloadFileId DOWNLOAD_FILE_ID = new LiteDownloadFileId("download_file_id");
     private static final String RELATIVE_PATH = "/foo/bar/5MB.zip";

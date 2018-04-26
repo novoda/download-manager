@@ -101,7 +101,7 @@ public class Batch {
 
         @Override
         public BatchFile.Builder downloadFrom(String networkAddress) {
-            this.fileBuilder = BatchFile.downloadFrom(networkAddress).withParentBuilder(this);
+            this.fileBuilder = BatchFile.from(downloadBatchId, networkAddress).withParentBuilder(this);
             return this.fileBuilder;
         }
 
