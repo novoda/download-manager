@@ -70,6 +70,8 @@ public class BatchFile {
 
         Builder saveTo(String path);
 
+        Builder saveTo(String path, String fileName);
+
         Batch.Builder apply();
     }
 
@@ -103,7 +105,16 @@ public class BatchFile {
 
         @Override
         public Builder saveTo(String path) {
-            this.path = Optional.fromNullable(path);
+            String networkAddressDerivedFileName = FileNameExtractor.extractFrom(networkAddress);
+            return saveTo(path, networkAddressDerivedFileName);
+        }
+
+        @Override
+        public Builder saveTo(String path, String fileName) {
+            if (path != null && fileName != null) {
+                this.path = Optional.of(path + fileName);
+            }
+
             return this;
         }
 

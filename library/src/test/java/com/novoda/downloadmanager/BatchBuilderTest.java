@@ -28,7 +28,7 @@ public class BatchBuilderTest {
     @Test
     public void returnsBatch_whenOptionalParametersAreSupplied() {
         Batch batch = Batch.with(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
-                .downloadFrom("net_address").withIdentifier(DOWNLOAD_FILE_ID).saveTo(RELATIVE_PATH).apply()
+                .downloadFrom("net_address").withIdentifier(DOWNLOAD_FILE_ID).saveTo(RELATIVE_PATH, "5mb.zip").apply()
                 .build();
 
         BatchFile expectedBatchFile = new BatchFile("net_address", Optional.of(DOWNLOAD_FILE_ID), Optional.of(RELATIVE_PATH));
