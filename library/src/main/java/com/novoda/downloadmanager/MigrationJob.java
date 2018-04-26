@@ -63,8 +63,6 @@ class MigrationJob implements Runnable {
         List<Migration> partialMigrations = partialDownloadMigrationExtractor.extractMigrations();
         List<Migration> completeMigrations = migrationExtractor.extractMigrations();
         DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
-        LocalFilesDirectory localFilesDirectory = new AndroidLocalFilesDirectory(context);
-        UnlinkedDataRemover unlinkedDataRemover = new UnlinkedDataRemover(downloadsPersistence, localFilesDirectory);
 
         int totalNumberOfMigrations = partialMigrations.size() + completeMigrations.size();
         InternalMigrationStatus migrationStatus = new VersionOneToVersionTwoMigrationStatus(
@@ -74,7 +72,6 @@ class MigrationJob implements Runnable {
                 totalNumberOfMigrations
         );
 
-        unlinkedDataRemover.remove();
         migrationStatus.markAsExtracting();
         onUpdate(migrationStatus);
 
@@ -138,15 +135,12 @@ class MigrationJob implements Runnable {
         for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
             String url = fileMetadata.originalNetworkAddress();
 
-            FileName fileName = LiteFileName.from(batch, url);
-
             String rawDownloadFileId = rawFileIdFrom(batch, fileMetadata);
             DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(rawDownloadFileId);
 
             DownloadsFilePersisted persistedFile = new LiteDownloadsFilePersisted(
                     downloadBatchId,
                     downloadFileId,
-                    fileName,
                     fileMetadata.newFileLocation(),
                     fileMetadata.fileSize().totalSize(),
                     url,

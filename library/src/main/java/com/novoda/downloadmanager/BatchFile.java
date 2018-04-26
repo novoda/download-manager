@@ -4,13 +4,11 @@ public class BatchFile {
 
     private final String networkAddress;
     private final Optional<DownloadFileId> downloadFileId;
-    private final Optional<FileName> fileName;
     private final Optional<String> relativePath;
 
-    BatchFile(String networkAddress, Optional<DownloadFileId> downloadFileId, Optional<FileName> fileName, Optional<String> relativePath) {
+    BatchFile(String networkAddress, Optional<DownloadFileId> downloadFileId, Optional<String> relativePath) {
         this.networkAddress = networkAddress;
         this.downloadFileId = downloadFileId;
-        this.fileName = fileName;
         this.relativePath = relativePath;
     }
 
@@ -24,10 +22,6 @@ public class BatchFile {
 
     public Optional<DownloadFileId> downloadFileId() {
         return downloadFileId;
-    }
-
-    public Optional<FileName> fileName() {
-        return fileName;
     }
 
     public Optional<String> relativePath() {
@@ -51,9 +45,6 @@ public class BatchFile {
         if (downloadFileId != null ? !downloadFileId.equals(batchFile.downloadFileId) : batchFile.downloadFileId != null) {
             return false;
         }
-        if (fileName != null ? !fileName.equals(batchFile.fileName) : batchFile.fileName != null) {
-            return false;
-        }
         return relativePath != null ? relativePath.equals(batchFile.relativePath) : batchFile.relativePath == null;
     }
 
@@ -61,7 +52,6 @@ public class BatchFile {
     public int hashCode() {
         int result = networkAddress != null ? networkAddress.hashCode() : 0;
         result = 31 * result + (downloadFileId != null ? downloadFileId.hashCode() : 0);
-        result = 31 * result + (fileName != null ? fileName.hashCode() : 0);
         result = 31 * result + (relativePath != null ? relativePath.hashCode() : 0);
         return result;
     }
@@ -71,15 +61,12 @@ public class BatchFile {
         return "BatchFile{"
                 + "networkAddress='" + networkAddress + '\''
                 + ", downloadFileId=" + downloadFileId
-                + ", fileName=" + fileName
                 + ", relativePath=" + relativePath
                 + '}';
     }
 
     public interface Builder {
         Builder withDownloadFileId(DownloadFileId downloadFileId);
-
-        Builder withFileName(FileName fileName);
 
         Builder withRelativePath(String relativePath);
 
@@ -94,7 +81,6 @@ public class BatchFile {
 
         private final String networkAddress;
         private Optional<DownloadFileId> downloadFileId = Optional.absent();
-        private Optional<FileName> fileName = Optional.absent();
         private Optional<String> relativePath = Optional.absent();
 
         private Batch.InternalBuilder parentBuilder;
@@ -116,12 +102,6 @@ public class BatchFile {
         }
 
         @Override
-        public Builder withFileName(FileName fileName) {
-            this.fileName = Optional.fromNullable(fileName);
-            return this;
-        }
-
-        @Override
         public Builder withRelativePath(String relativePath) {
             this.relativePath = Optional.fromNullable(relativePath);
             return this;
@@ -129,7 +109,7 @@ public class BatchFile {
 
         @Override
         public Batch.Builder apply() {
-            parentBuilder.withFile(new BatchFile(networkAddress, downloadFileId, fileName, relativePath));
+            parentBuilder.withFile(new BatchFile(networkAddress, downloadFileId, relativePath));
             return parentBuilder;
         }
 

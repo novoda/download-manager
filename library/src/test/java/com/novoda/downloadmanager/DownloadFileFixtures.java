@@ -3,7 +3,6 @@ package com.novoda.downloadmanager;
 import static com.novoda.downloadmanager.DownloadBatchIdFixtures.aDownloadBatchId;
 import static com.novoda.downloadmanager.DownloadFileIdFixtures.aDownloadFileId;
 import static com.novoda.downloadmanager.DownloadFileStatusFixtures.aDownloadFileStatus;
-import static com.novoda.downloadmanager.FileNameFixtures.aFileName;
 import static com.novoda.downloadmanager.FilePathFixtures.aFilePath;
 import static com.novoda.downloadmanager.FilePersistenceFixtures.aFilePersistence;
 import static com.novoda.downloadmanager.InternalFileSizeFixtures.aFileSize;
@@ -15,7 +14,6 @@ class DownloadFileFixtures {
     private DownloadFileId downloadFileId = aDownloadFileId().build();
     private String url = "http://example.com";
     private InternalDownloadFileStatus downloadFileStatus = aDownloadFileStatus().build();
-    private FileName fileName = aFileName().build();
     private FilePath filePath = aFilePath().build();
     private InternalFileSize fileSize = aFileSize().build();
     private FileDownloader fileDownloader = mock(FileDownloader.class);
@@ -44,11 +42,6 @@ class DownloadFileFixtures {
 
     DownloadFileFixtures withDownloadFileStatus(InternalDownloadFileStatus downloadFileStatus) {
         this.downloadFileStatus = downloadFileStatus;
-        return this;
-    }
-
-    DownloadFileFixtures withFileName(FileName fileName) {
-        this.fileName = fileName;
         return this;
     }
 
@@ -88,7 +81,6 @@ class DownloadFileFixtures {
                 downloadFileId,
                 url,
                 downloadFileStatus,
-                fileName,
                 filePath,
                 fileSize,
                 fileDownloader,

@@ -24,9 +24,6 @@ class RoomFile {
     @ColumnInfo(name = "batch_id")
     String batchId;
 
-    @ColumnInfo(name = "file_name")
-    String name;
-
     @ColumnInfo(name = "file_path")
     String path;
 

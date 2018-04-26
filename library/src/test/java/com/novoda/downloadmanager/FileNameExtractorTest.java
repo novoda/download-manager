@@ -10,18 +10,18 @@ public class FileNameExtractorTest {
     public void returnsFileName_whenAssetUrlOnlyContainsFileName() {
         String assetUrl = "10MB.zip";
 
-        FileName fileName = FileNameExtractor.extractFrom(assetUrl);
+        String fileName = FileNameExtractor.extractFrom(assetUrl);
 
-        assertThat(fileName).isEqualTo(LiteFileName.from("10MB.zip"));
+        assertThat(fileName).isEqualTo("10MB.zip");
     }
 
     @Test
     public void returnsFileName_whenAssetUrlContainsSubdirectories() {
         String assetUrl = "foo/bar/10MB.zip";
 
-        FileName fileName = FileNameExtractor.extractFrom(assetUrl);
+        String fileName = FileNameExtractor.extractFrom(assetUrl);
 
-        assertThat(fileName).isEqualTo(LiteFileName.from("10MB.zip"));
+        assertThat(fileName).isEqualTo("10MB.zip");
     }
 
 }

@@ -8,12 +8,7 @@ final class FileNameExtractor {
         // Uses static method.
     }
 
-    static FileName extractFrom(String assetUrl) {
-        String rawFileName = getRawFileName(assetUrl);
-        return LiteFileName.from(rawFileName);
-    }
-
-    private static String getRawFileName(String assetUrl) {
+    static String extractFrom(String assetUrl) {
         String[] subPaths = assetUrl.split(PATH_SEPARATOR);
         return subPaths.length == 0 ? assetUrl : subPaths[subPaths.length - 1];
     }
