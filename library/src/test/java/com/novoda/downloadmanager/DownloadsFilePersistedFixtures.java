@@ -1,11 +1,9 @@
 package com.novoda.downloadmanager;
 
 import static com.novoda.downloadmanager.DownloadBatchIdFixtures.aDownloadBatchId;
-import static com.novoda.downloadmanager.FileNameFixtures.aFileName;
 
 class DownloadsFilePersistedFixtures {
     private DownloadBatchId downloadBatchId = aDownloadBatchId().build();
-    private FileName fileName;
     private FilePath filePath;
     private long totalFileSize;
     private String url;
@@ -22,11 +20,6 @@ class DownloadsFilePersistedFixtures {
 
     DownloadsFilePersistedFixtures withDownloadBatchId(DownloadBatchId downloadBatchId) {
         this.downloadBatchId = downloadBatchId;
-        return this;
-    }
-
-    DownloadsFilePersistedFixtures withRawFileName(final String fileName) {
-        this.fileName = aFileName().withRawFileName(fileName).build();
         return this;
     }
 
@@ -60,11 +53,6 @@ class DownloadsFilePersistedFixtures {
             @Override
             public DownloadBatchId downloadBatchId() {
                 return downloadBatchId;
-            }
-
-            @Override
-            public FileName fileName() {
-                return fileName;
             }
 
             @Override
