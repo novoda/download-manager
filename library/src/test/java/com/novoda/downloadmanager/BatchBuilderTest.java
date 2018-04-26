@@ -15,10 +15,10 @@ public class BatchBuilderTest {
     @Test
     public void returnsBatch_whenOptionalParametersAreNotSupplied() {
         Batch batch = Batch.with(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
-                .downloadFrom("net_address").apply()
+                .downloadFrom("http://example.com/5mb.zip").apply()
                 .build();
 
-        BatchFile expectedBatchFile = new BatchFile("net_address", Optional.absent(), Optional.absent());
+        BatchFile expectedBatchFile = new BatchFile("http://example.com/5mb.zip", Optional.absent(), "download_batch_id/5mb.zip");
         Batch expectedBatch = new Batch(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE, Collections.singletonList(expectedBatchFile));
 
         assertThat(batch).isEqualTo(expectedBatch);
@@ -27,10 +27,10 @@ public class BatchBuilderTest {
     @Test
     public void returnsBatch_whenOptionalParametersAreSupplied() {
         Batch batch = Batch.with(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
-                .downloadFrom("net_address").withIdentifier(DOWNLOAD_FILE_ID).saveTo("/foo/bar/", "5MB.zip").apply()
+                .downloadFrom("http://example.com/5mb.zip").withIdentifier(DOWNLOAD_FILE_ID).saveTo("foo/bar/", "5mb.zip").apply()
                 .build();
 
-        BatchFile expectedBatchFile = new BatchFile("net_address", Optional.of(DOWNLOAD_FILE_ID), Optional.of("/foo/bar/5MB.zip"));
+        BatchFile expectedBatchFile = new BatchFile("http://example.com/5mb.zip", Optional.of(DOWNLOAD_FILE_ID), "download_batch_id/foo/bar/5mb.zip");
         Batch expectedBatch = new Batch(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE, Collections.singletonList(expectedBatchFile));
 
         assertThat(batch).isEqualTo(expectedBatch);
