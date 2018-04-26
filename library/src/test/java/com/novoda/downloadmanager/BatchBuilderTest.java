@@ -16,7 +16,7 @@ public class BatchBuilderTest {
     @Test
     public void returnsBatch_whenOptionalParametersAreNotSupplied() {
         Batch batch = Batch.with(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
-                .addFile("net_address").apply()
+                .downloadFrom("net_address").apply()
                 .build();
 
         BatchFile expectedBatchFile = new BatchFile("net_address", Optional.absent(), Optional.absent());
@@ -28,7 +28,7 @@ public class BatchBuilderTest {
     @Test
     public void returnsBatch_whenOptionalParametersAreSupplied() {
         Batch batch = Batch.with(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
-                .addFile("net_address").withDownloadFileId(DOWNLOAD_FILE_ID).withRelativePath(RELATIVE_PATH).apply()
+                .downloadFrom("net_address").withDownloadFileId(DOWNLOAD_FILE_ID).withRelativePath(RELATIVE_PATH).apply()
                 .build();
 
         BatchFile expectedBatchFile = new BatchFile("net_address", Optional.of(DOWNLOAD_FILE_ID), Optional.of(RELATIVE_PATH));
@@ -40,16 +40,16 @@ public class BatchBuilderTest {
     @Test(expected = IllegalArgumentException.class)
     public void throwsException_whenDuplicatedFileIDsAreSupplied() {
         Batch.with(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
-                .addFile("net_address").withDownloadFileId(DOWNLOAD_FILE_ID).apply()
-                .addFile("another_address").withDownloadFileId(DOWNLOAD_FILE_ID).apply()
+                .downloadFrom("net_address").withDownloadFileId(DOWNLOAD_FILE_ID).apply()
+                .downloadFrom("another_address").withDownloadFileId(DOWNLOAD_FILE_ID).apply()
                 .build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throwsException_whenDuplicatedNetworkAddressWithoutFileIDsAreSupplied() {
         Batch.with(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
-                .addFile("net_address").apply()
-                .addFile("net_address").apply()
+                .downloadFrom("net_address").apply()
+                .downloadFrom("net_address").apply()
                 .build();
     }
 

@@ -12,7 +12,7 @@ public class BatchFile {
         this.relativePath = relativePath;
     }
 
-    static InternalBuilder with(String networkAddress) {
+    static InternalBuilder downloadFrom(String networkAddress) {
         return new LiteFileBuilder(networkAddress);
     }
 

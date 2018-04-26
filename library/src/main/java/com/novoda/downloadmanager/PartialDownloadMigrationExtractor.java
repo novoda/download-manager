@@ -69,10 +69,10 @@ class PartialDownloadMigrationExtractor {
                 }
 
                 if (originalFileId == null) {
-                    newBatchBuilder.addFile(uri)
+                    newBatchBuilder.downloadFrom(uri)
                             .apply();
                 } else {
-                    newBatchBuilder.addFile(uri)
+                    newBatchBuilder.downloadFrom(uri)
                             .withDownloadFileId(DownloadFileIdCreator.createFrom(originalFileId))
                             .apply();
                 }

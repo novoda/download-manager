@@ -71,7 +71,7 @@ public class Batch {
     }
 
     public interface Builder {
-        BatchFile.Builder addFile(String networkAddress);
+        BatchFile.Builder downloadFrom(String networkAddress);
 
         Batch build();
     }
@@ -100,8 +100,8 @@ public class Batch {
         private BatchFile.Builder fileBuilder;
 
         @Override
-        public BatchFile.Builder addFile(String networkAddress) {
-            this.fileBuilder = BatchFile.with(networkAddress).withParentBuilder(this);
+        public BatchFile.Builder downloadFrom(String networkAddress) {
+            this.fileBuilder = BatchFile.downloadFrom(networkAddress).withParentBuilder(this);
             return this.fileBuilder;
         }
 
