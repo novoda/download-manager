@@ -6,7 +6,12 @@ public final class DownloadBatchIdCreator {
         // non-instantiable class
     }
 
-    public static DownloadBatchId createFrom(String rawId) {
-        return new LiteDownloadBatchId(rawId);
+    public static DownloadBatchId createSanitizedFrom(String rawId) {
+        String sanitizedBatchId = sanitizeBatchId(rawId);
+        return new LiteDownloadBatchId(sanitizedBatchId);
+    }
+
+    private static String sanitizeBatchId(String batchIdPath) {
+        return batchIdPath.replaceAll("[:\\\\/*?|<>]", "_");
     }
 }
