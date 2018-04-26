@@ -28,7 +28,7 @@ public class BatchBuilderTest {
     @Test
     public void returnsBatch_whenOptionalParametersAreSupplied() {
         Batch batch = Batch.with(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
-                .downloadFrom("net_address").withDownloadFileId(DOWNLOAD_FILE_ID).saveTo(RELATIVE_PATH).apply()
+                .downloadFrom("net_address").withIdentifier(DOWNLOAD_FILE_ID).saveTo(RELATIVE_PATH).apply()
                 .build();
 
         BatchFile expectedBatchFile = new BatchFile("net_address", Optional.of(DOWNLOAD_FILE_ID), Optional.of(RELATIVE_PATH));
@@ -40,8 +40,8 @@ public class BatchBuilderTest {
     @Test(expected = IllegalArgumentException.class)
     public void throwsException_whenDuplicatedFileIDsAreSupplied() {
         Batch.with(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
-                .downloadFrom("net_address").withDownloadFileId(DOWNLOAD_FILE_ID).apply()
-                .downloadFrom("another_address").withDownloadFileId(DOWNLOAD_FILE_ID).apply()
+                .downloadFrom("net_address").withIdentifier(DOWNLOAD_FILE_ID).apply()
+                .downloadFrom("another_address").withIdentifier(DOWNLOAD_FILE_ID).apply()
                 .build();
     }
 

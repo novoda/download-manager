@@ -95,7 +95,7 @@ class MigrationExtractor {
                                     .apply();
                         } else {
                             newBatchBuilder.downloadFrom(originalNetworkAddress)
-                                    .withDownloadFileId(DownloadFileIdCreator.createFrom(originalFileId))
+                                    .withIdentifier(DownloadFileIdCreator.createFrom(originalFileId))
                                     .apply();
                         }
 

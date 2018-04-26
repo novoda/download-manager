@@ -66,7 +66,7 @@ public class BatchFile {
     }
 
     public interface Builder {
-        Builder withDownloadFileId(DownloadFileId downloadFileId);
+        Builder withIdentifier(DownloadFileId downloadFileId);
 
         Builder saveTo(String path);
 
@@ -96,7 +96,7 @@ public class BatchFile {
         }
 
         @Override
-        public Builder withDownloadFileId(DownloadFileId downloadFileId) {
+        public Builder withIdentifier(DownloadFileId downloadFileId) {
             this.downloadFileId = Optional.fromNullable(downloadFileId);
             return this;
         }

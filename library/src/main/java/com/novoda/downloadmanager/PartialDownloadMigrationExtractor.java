@@ -73,7 +73,7 @@ class PartialDownloadMigrationExtractor {
                             .apply();
                 } else {
                     newBatchBuilder.downloadFrom(uri)
-                            .withDownloadFileId(DownloadFileIdCreator.createFrom(originalFileId))
+                            .withIdentifier(DownloadFileIdCreator.createFrom(originalFileId))
                             .apply();
                 }
 
