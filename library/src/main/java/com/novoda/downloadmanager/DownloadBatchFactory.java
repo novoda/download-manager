@@ -97,7 +97,7 @@ final class DownloadBatchFactory {
 
     private static String relativePathFrom(BatchFile batchFile) {
         String fileNameFromNetworkAddress = FileNameExtractor.extractFrom(batchFile.networkAddress());
-        return batchFile.relativePath().or(fileNameFromNetworkAddress);
+        return batchFile.path().or(fileNameFromNetworkAddress);
     }
 
 }

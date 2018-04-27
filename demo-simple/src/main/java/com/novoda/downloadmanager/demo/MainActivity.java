@@ -137,14 +137,14 @@ public class MainActivity extends AppCompatActivity {
 
     private final View.OnClickListener downloadBatchesOnClick = v -> {
         Batch batch = Batch.with(BATCH_ID_1, "Made in chelsea")
-                .addFile(FIVE_MB_FILE_URL).withDownloadFileId(FILE_ID_1).withRelativePath("foo/bar/5mb.zip").apply()
-                .addFile(TEN_MB_FILE_URL).apply()
+                .downloadFrom(FIVE_MB_FILE_URL).saveTo("foo/bar/", "5mb.zip").withIdentifier(FILE_ID_1).apply()
+                .downloadFrom(TEN_MB_FILE_URL).apply()
                 .build();
         liteDownloadManagerCommands.download(batch);
 
         batch = Batch.with(BATCH_ID_2, "Hollyoaks")
-                .addFile(TEN_MB_FILE_URL).apply()
-                .addFile(TWENTY_MB_FILE_URL).apply()
+                .downloadFrom(TEN_MB_FILE_URL).apply()
+                .downloadFrom(TWENTY_MB_FILE_URL).apply()
                 .build();
         liteDownloadManagerCommands.download(batch);
     };

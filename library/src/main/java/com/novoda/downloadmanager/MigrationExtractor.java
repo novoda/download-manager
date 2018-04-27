@@ -91,11 +91,11 @@ class MigrationExtractor {
                         }
 
                         if (originalFileId == null) {
-                            newBatchBuilder.addFile(originalNetworkAddress)
+                            newBatchBuilder.downloadFrom(originalNetworkAddress)
                                     .apply();
                         } else {
-                            newBatchBuilder.addFile(originalNetworkAddress)
-                                    .withDownloadFileId(DownloadFileIdCreator.createFrom(originalFileId))
+                            newBatchBuilder.downloadFrom(originalNetworkAddress)
+                                    .withIdentifier(DownloadFileIdCreator.createFrom(originalFileId))
                                     .apply();
                         }
 
