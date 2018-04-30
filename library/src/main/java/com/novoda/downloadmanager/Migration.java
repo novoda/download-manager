@@ -3,9 +3,9 @@ package com.novoda.downloadmanager;
 import java.util.Collections;
 import java.util.List;
 
-class Migration {
+public class Migration {
 
-    enum Type {
+    public enum Type {
         COMPLETE,
         PARTIAL
     }
@@ -15,18 +15,18 @@ class Migration {
     private final long downloadedDateTimeInMillis;
     private final Type type;
 
-    Migration(Batch batch, List<FileMetadata> fileMetadata, long downloadedDateTimeInMillis, Type type) {
+    public Migration(Batch batch, List<FileMetadata> fileMetadata, long downloadedDateTimeInMillis, Type type) {
         this.batch = batch;
         this.fileMetadata = Collections.unmodifiableList(fileMetadata);
         this.downloadedDateTimeInMillis = downloadedDateTimeInMillis;
         this.type = type;
     }
 
-    Batch batch() {
+    public Batch batch() {
         return batch;
     }
 
-    List<FileMetadata> getFileMetadata() {
+    public List<FileMetadata> getFileMetadata() {
         return fileMetadata;
     }
 
@@ -34,7 +34,7 @@ class Migration {
         return downloadedDateTimeInMillis;
     }
 
-    Type type() {
+    public Type type() {
         return type;
     }
 
@@ -80,39 +80,49 @@ class Migration {
                 + '}';
     }
 
-    static class FileMetadata {
+    public static class FileMetadata {
 
         private final String fileId;
-        private final FilePath originalFileLocation;
-        private final FilePath newFileLocation;
-        private final FileSize fileSize;
+        private final String originalFileLocation;
+        private final String newFileLocation;
+        private final long currentSizeInBytes;
+        private final long totalSizeInBytes;
         private final String originalNetworkAddress;
 
-        FileMetadata(String fileId, FilePath originalFileLocation, FilePath newFileLocation, FileSize fileSize, String originalNetworkAddress) {
+        public FileMetadata(String fileId,
+                            String originalFileLocation,
+                            String newFileLocation,
+                            long currentSizeInBytes, long totalSizeInBytes,
+                            String originalNetworkAddress) {
             this.fileId = fileId;
             this.originalFileLocation = originalFileLocation;
             this.newFileLocation = newFileLocation;
-            this.fileSize = fileSize;
+            this.currentSizeInBytes = currentSizeInBytes;
+            this.totalSizeInBytes = totalSizeInBytes;
             this.originalNetworkAddress = originalNetworkAddress;
         }
 
-        String fileId() {
+        public String fileId() {
             return fileId;
         }
 
-        FilePath originalFileLocation() {
+        public String originalFileLocation() {
             return originalFileLocation;
         }
 
-        FilePath newFileLocation() {
+        public String newFileLocation() {
             return newFileLocation;
         }
 
-        FileSize fileSize() {
-            return fileSize;
+        public long currentSizeInBytes() {
+            return currentSizeInBytes;
         }
 
-        String originalNetworkAddress() {
+        public long totalSizeInBytes() {
+            return totalSizeInBytes;
+        }
+
+        public String originalNetworkAddress() {
             return originalNetworkAddress;
         }
 
@@ -127,6 +137,12 @@ class Migration {
 
             FileMetadata that = (FileMetadata) o;
 
+            if (currentSizeInBytes != that.currentSizeInBytes) {
+                return false;
+            }
+            if (totalSizeInBytes != that.totalSizeInBytes) {
+                return false;
+            }
             if (fileId != null ? !fileId.equals(that.fileId) : that.fileId != null) {
                 return false;
             }
@@ -134,9 +150,6 @@ class Migration {
                 return false;
             }
             if (newFileLocation != null ? !newFileLocation.equals(that.newFileLocation) : that.newFileLocation != null) {
-                return false;
-            }
-            if (fileSize != null ? !fileSize.equals(that.fileSize) : that.fileSize != null) {
                 return false;
             }
             return originalNetworkAddress != null ? originalNetworkAddress.equals(that.originalNetworkAddress) : that.originalNetworkAddress == null;
@@ -147,7 +160,8 @@ class Migration {
             int result = fileId != null ? fileId.hashCode() : 0;
             result = 31 * result + (originalFileLocation != null ? originalFileLocation.hashCode() : 0);
             result = 31 * result + (newFileLocation != null ? newFileLocation.hashCode() : 0);
-            result = 31 * result + (fileSize != null ? fileSize.hashCode() : 0);
+            result = 31 * result + (int) (currentSizeInBytes ^ (currentSizeInBytes >>> 32));
+            result = 31 * result + (int) (totalSizeInBytes ^ (totalSizeInBytes >>> 32));
             result = 31 * result + (originalNetworkAddress != null ? originalNetworkAddress.hashCode() : 0);
             return result;
         }
@@ -156,9 +170,10 @@ class Migration {
         public String toString() {
             return "FileMetadata{"
                     + "fileId='" + fileId + '\''
-                    + ", originalFileLocation=" + originalFileLocation
-                    + ", newFileLocation=" + newFileLocation
-                    + ", fileSize=" + fileSize
+                    + ", originalFileLocation='" + originalFileLocation + '\''
+                    + ", newFileLocation='" + newFileLocation + '\''
+                    + ", currentSizeInBytes=" + currentSizeInBytes
+                    + ", totalSizeInBytes=" + totalSizeInBytes
                     + ", originalNetworkAddress='" + originalNetworkAddress + '\''
                     + '}';
         }

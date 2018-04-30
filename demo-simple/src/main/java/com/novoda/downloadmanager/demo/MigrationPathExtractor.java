@@ -1,4 +1,6 @@
-package com.novoda.downloadmanager;
+package com.novoda.downloadmanager.demo;
+
+import com.novoda.downloadmanager.DownloadBatchId;
 
 import java.io.File;
 
@@ -11,13 +13,12 @@ final class MigrationPathExtractor {
         // Uses static utility methods.
     }
 
-    static FilePath extractMigrationPath(String basePath, String assetPath, DownloadBatchId downloadBatchId) {
+    static String extractMigrationPath(String basePath, String assetPath, DownloadBatchId downloadBatchId) {
         String relativePath = extractRelativePath(basePath, assetPath);
         String relativePathWithBatchId = prependBatchIdTo(relativePath, downloadBatchId);
         String fileName = extractFileName(assetPath);
         String absolutePath = basePath + PATH_SEPARATOR + relativePathWithBatchId + fileName;
-        String sanitizedAbsolutePath = absolutePath.replaceAll("//", PATH_SEPARATOR);
-        return new LiteFilePath(sanitizedAbsolutePath);
+        return absolutePath.replaceAll("//", PATH_SEPARATOR);
     }
 
     private static String extractRelativePath(String basePath, String assetPath) {

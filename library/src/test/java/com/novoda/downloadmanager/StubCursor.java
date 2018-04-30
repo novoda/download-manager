@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class StubCursor implements Cursor {
+public class StubCursor implements Cursor {
 
     private final List<String> columnNames;
     private final Map<String, List<String>> rowsByColumn;
@@ -263,7 +263,7 @@ class StubCursor implements Cursor {
         return null;
     }
 
-    static class Builder {
+    public static class Builder {
 
         private List<String> columns = new ArrayList<>();
         private Map<String, List<String>> rowsByColumn = new HashMap<>();

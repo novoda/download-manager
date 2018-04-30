@@ -1,6 +1,16 @@
-package com.novoda.downloadmanager;
+package com.novoda.downloadmanager.demo;
 
 import android.database.Cursor;
+
+import com.novoda.downloadmanager.Batch;
+import com.novoda.downloadmanager.BatchBuilder;
+import com.novoda.downloadmanager.DownloadBatchId;
+import com.novoda.downloadmanager.DownloadBatchIdCreator;
+import com.novoda.downloadmanager.DownloadFileIdCreator;
+import com.novoda.downloadmanager.FilePath;
+import com.novoda.downloadmanager.FilePersistence;
+import com.novoda.downloadmanager.Migration;
+import com.novoda.downloadmanager.SqlDatabaseWrapper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,7 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-class MigrationExtractor {
+public class CompleteDownloadMigrationExtractor {
 
     private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title, batches.last_modified_timestamp FROM "
             + "batches INNER JOIN DownloadsByBatch ON DownloadsByBatch.batch_id = batches._id "
@@ -32,14 +42,13 @@ class MigrationExtractor {
     private final FilePersistence filePersistence;
     private final String basePath;
 
-    MigrationExtractor(SqlDatabaseWrapper database, FilePersistence filePersistence, String basePath) {
+    public CompleteDownloadMigrationExtractor(SqlDatabaseWrapper database, FilePersistence filePersistence, String basePath) {
         this.database = database;
         this.filePersistence = filePersistence;
         this.basePath = basePath;
     }
 
-
-    List<Migration> extractMigrations() {
+    public List<Migration> extractMigrations() {
         Cursor batchesCursor = database.rawQuery(BATCHES_QUERY);
 
         if (batchesCursor == null) {
@@ -99,17 +108,26 @@ class MigrationExtractor {
                                     .apply();
                         }
 
-                        String rawNewFilePath = new LiteFilePath(sanitizedOriginalUniqueFileLocation).path();
-                        FilePath newFilePath = MigrationPathExtractor.extractMigrationPath(basePath, rawNewFilePath, downloadBatchId);
+                        String newFilePath = MigrationPathExtractor.extractMigrationPath(basePath, sanitizedOriginalUniqueFileLocation, downloadBatchId);
 
-                        FilePath originalFilePath = new LiteFilePath(originalFileLocation);
-                        long rawFileSize = filePersistence.getCurrentSize(originalFilePath);
-                        FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
+                        long rawFileSize = filePersistence.getCurrentSize(new FilePath() {
+                            @Override
+                            public String path() {
+                                return originalFileLocation;
+                            }
+
+                            @Override
+                            public boolean isUnknown() {
+                                return false;
+                            }
+                        });
+
                         Migration.FileMetadata fileMetadata = new Migration.FileMetadata(
                                 originalFileId,
-                                originalFilePath,
+                                originalFileLocation,
                                 newFilePath,
-                                fileSize,
+                                rawFileSize,
+                                rawFileSize,
                                 originalNetworkAddress
                         );
                         fileMetadataList.add(fileMetadata);

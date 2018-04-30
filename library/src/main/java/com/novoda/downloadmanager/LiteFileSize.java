@@ -61,7 +61,7 @@ class LiteFileSize implements InternalFileSize {
     public String toString() {
         return "LiteFileSize{"
                 + "currentSize=" + currentSize
-                + ", totalSize=" + totalSize
+                + ", totalSizeInBytes=" + totalSize
                 + '}';
     }
 

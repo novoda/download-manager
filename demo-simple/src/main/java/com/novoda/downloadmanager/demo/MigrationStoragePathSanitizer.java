@@ -1,4 +1,4 @@
-package com.novoda.downloadmanager;
+package com.novoda.downloadmanager.demo;
 
 final class MigrationStoragePathSanitizer {
 

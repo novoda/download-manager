@@ -85,11 +85,13 @@ class MigrationJobTemp {
 
     private void migrateV1FilesToV2Location(FilePersistence filePersistence, Migration migration) {
         for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
-            filePersistence.create(fileMetadata.newFileLocation(), fileMetadata.fileSize());
+            FileSize fileSize = FileSizeCreator.createFromTotalSize(fileMetadata.totalSizeInBytes());
+            FilePath filePath = new LiteFilePath(fileMetadata.newFileLocation());
+            filePersistence.create(filePath, fileSize);
             FileInputStream inputStream = null;
             try {
                 // open the v1 file
-                inputStream = new FileInputStream(new File(fileMetadata.originalFileLocation().path()));
+                inputStream = new FileInputStream(new File(filePath.path()));
                 byte[] bytes = new byte[RANDOMLY_CHOSEN_BUFFER_SIZE_THAT_SEEMS_TO_WORK];
 
                 // read the v1 file
@@ -141,11 +143,13 @@ class MigrationJobTemp {
             String rawDownloadFileId = rawFileIdFrom(batch, fileMetadata);
             DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(rawDownloadFileId);
 
+            FilePath filePath = new LiteFilePath(fileMetadata.newFileLocation());
+
             DownloadsFilePersisted persistedFile = new LiteDownloadsFilePersisted(
                     downloadBatchId,
                     downloadFileId,
-                    fileMetadata.newFileLocation(),
-                    fileMetadata.fileSize().totalSize(),
+                    filePath,
+                    fileMetadata.totalSizeInBytes(),
                     url,
                     FilePersistenceType.INTERNAL
             );
