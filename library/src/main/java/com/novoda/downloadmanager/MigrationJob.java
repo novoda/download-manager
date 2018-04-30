@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-class MigrationJobTemp {
+class MigrationJob {
 
     private static final int NO_COMPLETED_MIGRATIONS = 0;
     private static final int RANDOMLY_CHOSEN_BUFFER_SIZE_THAT_SEEMS_TO_WORK = 4096;
@@ -20,7 +20,7 @@ class MigrationJobTemp {
     private final List<Migration> completeMigrations;
     private final List<MigrationCallback> migrationCallbacks = new ArrayList<>();
 
-    MigrationJobTemp(Context context, String jobIdentifier, List<Migration> partialMigrations, List<Migration> completeMigrations) {
+    MigrationJob(Context context, String jobIdentifier, List<Migration> partialMigrations, List<Migration> completeMigrations) {
         this.context = context;
         this.jobIdentifier = jobIdentifier;
         this.partialMigrations = partialMigrations;

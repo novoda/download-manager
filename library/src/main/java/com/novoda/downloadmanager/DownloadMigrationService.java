@@ -2,5 +2,5 @@ package com.novoda.downloadmanager;
 
 interface DownloadMigrationService extends DownloadManagerService {
 
-    void startMigration(MigrationJobTemp migrationJob, MigrationCallback migrationCallback);
+    void startMigration(MigrationJob migrationJob, MigrationCallback migrationCallback);
 }

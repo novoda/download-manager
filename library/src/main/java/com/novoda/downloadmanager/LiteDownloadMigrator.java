@@ -49,7 +49,7 @@ class LiteDownloadMigrator implements DownloadMigrator {
 
     private Wait.ThenPerform.Action<Void> executeMigrationFor(String jobIdentifier, List<Migration> partialMigrations, List<Migration> completeMigrations) {
         return () -> {
-            MigrationJobTemp migrationJob = new MigrationJobTemp(applicationContext, jobIdentifier, partialMigrations, completeMigrations);
+            MigrationJob migrationJob = new MigrationJob(applicationContext, jobIdentifier, partialMigrations, completeMigrations);
             migrationService.startMigration(migrationJob, migrationCallback());
             return null;
         };

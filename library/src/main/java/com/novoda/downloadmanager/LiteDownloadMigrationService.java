@@ -52,7 +52,7 @@ public class LiteDownloadMigrationService extends Service implements DownloadMig
     }
 
     @Override
-    public void startMigration(MigrationJobTemp migrationJob, MigrationCallback migrationCallback) {
+    public void startMigration(MigrationJob migrationJob, MigrationCallback migrationCallback) {
         migrationJob.addCallback(migrationCallback);
 
         executor.execute(() -> {
