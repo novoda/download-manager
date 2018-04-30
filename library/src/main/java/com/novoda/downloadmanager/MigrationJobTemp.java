@@ -16,18 +16,22 @@ class MigrationJobTemp {
 
     private final Context context;
     private final String jobIdentifier;
+    private final List<Migration> partialMigrations;
+    private final List<Migration> completeMigrations;
     private final List<MigrationCallback> migrationCallbacks = new ArrayList<>();
 
-    MigrationJobTemp(Context context, String jobIdentifier) {
+    MigrationJobTemp(Context context, String jobIdentifier, List<Migration> partialMigrations, List<Migration> completeMigrations) {
         this.context = context;
         this.jobIdentifier = jobIdentifier;
+        this.partialMigrations = partialMigrations;
+        this.completeMigrations = completeMigrations;
     }
 
     void addCallback(MigrationCallback callback) {
         migrationCallbacks.add(callback);
     }
 
-    public void migrate(List<Migration> partialMigrations, List<Migration> completeMigrations) {
+    public void migrate() {
         FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(context);
         StorageRequirementsRule storageRequirementsRule = StorageRequirementsRule.withPercentageOfStorageRemaining(TEN_PERCENT);
         filePersistenceCreator.withStorageRequirementsRule(storageRequirementsRule);
