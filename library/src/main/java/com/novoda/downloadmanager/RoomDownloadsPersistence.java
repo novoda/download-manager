@@ -53,7 +53,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
         for (RoomBatch roomBatch : roomBatches) {
             DownloadsBatchPersisted batchPersisted = new LiteDownloadsBatchPersisted(
                     DownloadBatchTitleCreator.createFrom(roomBatch.title),
-                    DownloadBatchIdCreator.createFrom(roomBatch.id),
+                    DownloadBatchIdCreator.createSanitizedFrom(roomBatch.id),
                     DownloadBatchStatus.Status.from(roomBatch.status),
                     roomBatch.downloadedDateTimeInMillis,
                     roomBatch.notificationSeen
@@ -70,7 +70,6 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
         roomFile.totalSize = filePersisted.totalFileSize();
         roomFile.batchId = filePersisted.downloadBatchId().rawId();
         roomFile.url = filePersisted.url();
-        roomFile.name = filePersisted.fileName().name();
         roomFile.path = filePersisted.filePath().path();
         roomFile.fileId = filePersisted.downloadFileId().rawId();
         roomFile.persistenceType = filePersisted.filePersistenceType().toRawValue();
@@ -94,9 +93,8 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
         List<DownloadsFilePersisted> filePersistedList = new ArrayList<>(roomFiles.size());
         for (RoomFile roomFile : roomFiles) {
             DownloadsFilePersisted filePersisted = new LiteDownloadsFilePersisted(
-                    DownloadBatchIdCreator.createFrom(roomFile.batchId),
+                    DownloadBatchIdCreator.createSanitizedFrom(roomFile.batchId),
                     DownloadFileIdCreator.createFrom(roomFile.fileId),
-                    LiteFileName.from(roomFile.name),
                     new LiteFilePath(roomFile.path),
                     roomFile.totalSize,
                     roomFile.url,

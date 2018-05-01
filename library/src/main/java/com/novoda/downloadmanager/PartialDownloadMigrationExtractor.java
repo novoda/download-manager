@@ -43,7 +43,7 @@ class PartialDownloadMigrationExtractor {
             long downloadedDateTimeInMillis = batchesCursor.getLong(MODIFIED_TIMESTAMP_COLUMN);
 
             Cursor downloadsCursor = database.rawQuery(DOWNLOADS_QUERY, batchId);
-            Batch.Builder newBatchBuilder = null;
+            BatchBuilder newBatchBuilder = null;
             List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
             Set<String> uris = new HashSet<>();
             Set<String> fileIds = new HashSet<>();
@@ -69,11 +69,11 @@ class PartialDownloadMigrationExtractor {
                 }
 
                 if (originalFileId == null) {
-                    newBatchBuilder.addFile(uri)
+                    newBatchBuilder.downloadFrom(uri)
                             .apply();
                 } else {
-                    newBatchBuilder.addFile(uri)
-                            .withDownloadFileId(DownloadFileIdCreator.createFrom(originalFileId))
+                    newBatchBuilder.downloadFrom(uri)
+                            .withIdentifier(DownloadFileIdCreator.createFrom(originalFileId))
                             .apply();
                 }
 
@@ -100,9 +100,9 @@ class PartialDownloadMigrationExtractor {
     private DownloadBatchId createDownloadBatchIdFrom(String originalFileId, String batchId) {
         if (originalFileId == null || originalFileId.isEmpty()) {
             String hashedString = String.valueOf(batchId.hashCode());
-            return DownloadBatchIdCreator.createFrom(hashedString);
+            return DownloadBatchIdCreator.createSanitizedFrom(hashedString);
         }
         String hashedString = String.valueOf(originalFileId.hashCode());
-        return DownloadBatchIdCreator.createFrom(hashedString);
+        return DownloadBatchIdCreator.createSanitizedFrom(hashedString);
     }
 }

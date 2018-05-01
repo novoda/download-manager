@@ -17,19 +17,17 @@ class DownloadsFilePersistence {
 
     @WorkerThread
     boolean persistSync(DownloadBatchId downloadBatchId,
-                     FileName fileName,
-                     FilePath filePath,
-                     FileSize fileSize,
-                     String url,
-                     DownloadFileStatus downloadFileStatus,
-                     FilePersistenceType filePersistenceType) {
+                        FilePath filePath,
+                        FileSize fileSize,
+                        String url,
+                        DownloadFileStatus downloadFileStatus,
+                        FilePersistenceType filePersistenceType) {
         if (downloadFileStatus.status() == DownloadFileStatus.Status.DELETED) {
             return false;
         }
         LiteDownloadsFilePersisted filePersisted = new LiteDownloadsFilePersisted(
                 downloadBatchId,
                 downloadFileStatus.downloadFileId(),
-                fileName,
                 filePath,
                 fileSize.totalSize(),
                 url,
@@ -58,7 +56,6 @@ class DownloadsFilePersistence {
         List<DownloadFile> downloadFiles = new ArrayList<>(filePersistedList.size());
         for (DownloadsFilePersisted filePersisted : filePersistedList) {
             DownloadFileId downloadFileId = filePersisted.downloadFileId();
-            FileName fileName = filePersisted.fileName();
 
             FilePersistenceCreator filePersistenceCreator = fileOperations.filePersistenceCreator();
             FilePersistence filePersistence = filePersistenceCreator.create(filePersisted.filePersistenceType());
@@ -86,7 +83,6 @@ class DownloadsFilePersistence {
                     downloadFileId,
                     url,
                     downloadFileStatus,
-                    fileName,
                     filePath,
                     fileSize,
                     fileDownloader,

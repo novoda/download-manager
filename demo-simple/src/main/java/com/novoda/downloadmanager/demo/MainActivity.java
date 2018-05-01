@@ -40,8 +40,8 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("SdCardPath")
     private static final String V1_BASE_PATH = "/data/data/com.novoda.downloadmanager.demo.simple/files/Pictures/";
 
-    private static final DownloadBatchId BATCH_ID_1 = DownloadBatchIdCreator.createFrom("batch_id_1");
-    private static final DownloadBatchId BATCH_ID_2 = DownloadBatchIdCreator.createFrom("batch_id_2");
+    private static final DownloadBatchId BATCH_ID_1 = DownloadBatchIdCreator.createSanitizedFrom("batch_id_1");
+    private static final DownloadBatchId BATCH_ID_2 = DownloadBatchIdCreator.createSanitizedFrom("batch_id_2");
     private static final DownloadFileId FILE_ID_1 = DownloadFileIdCreator.createFrom("file_id_1");
     private static final String FIVE_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/5MB.zip";
     private static final String TEN_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/10MB.zip";
@@ -137,14 +137,14 @@ public class MainActivity extends AppCompatActivity {
 
     private final View.OnClickListener downloadBatchesOnClick = v -> {
         Batch batch = Batch.with(BATCH_ID_1, "Made in chelsea")
-                .addFile(FIVE_MB_FILE_URL).withDownloadFileId(FILE_ID_1).withRelativePath("foo/bar/5mb.zip").apply()
-                .addFile(TEN_MB_FILE_URL).apply()
+                .downloadFrom(FIVE_MB_FILE_URL).saveTo("foo/bar/", "5mb.zip").withIdentifier(FILE_ID_1).apply()
+                .downloadFrom(TEN_MB_FILE_URL).apply()
                 .build();
         liteDownloadManagerCommands.download(batch);
 
         batch = Batch.with(BATCH_ID_2, "Hollyoaks")
-                .addFile(TEN_MB_FILE_URL).apply()
-                .addFile(TWENTY_MB_FILE_URL).apply()
+                .downloadFrom(TEN_MB_FILE_URL).apply()
+                .downloadFrom(TWENTY_MB_FILE_URL).apply()
                 .build();
         liteDownloadManagerCommands.download(batch);
     };
