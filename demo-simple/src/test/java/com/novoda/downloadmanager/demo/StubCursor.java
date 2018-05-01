@@ -1,4 +1,4 @@
-package com.novoda.downloadmanager;
+package com.novoda.downloadmanager.demo;
 
 import android.content.ContentResolver;
 import android.database.CharArrayBuffer;
@@ -268,7 +268,7 @@ public class StubCursor implements Cursor {
         private List<String> columns = new ArrayList<>();
         private Map<String, List<String>> rowsByColumn = new HashMap<>();
 
-        Builder with(String columnName, String value, String... values) {
+        public Builder with(String columnName, String value, String... values) {
             if (columns.contains(columnName)) {
                 Log.w(getClass().getSimpleName(), "Cursor already contains column: " + columnName);
                 return this;
@@ -284,7 +284,7 @@ public class StubCursor implements Cursor {
             return this;
         }
 
-        StubCursor build() {
+        public StubCursor build() {
             return new StubCursor(columns, rowsByColumn);
         }
 

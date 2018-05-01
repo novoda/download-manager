@@ -7,8 +7,6 @@ import com.novoda.downloadmanager.BatchBuilder;
 import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadFileIdCreator;
-import com.novoda.downloadmanager.FilePath;
-import com.novoda.downloadmanager.FilePersistence;
 import com.novoda.downloadmanager.Migration;
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
 
@@ -39,12 +37,12 @@ public class CompleteDownloadMigrationExtractor {
     private static final int FILE_ID_COLUMN = 3;
 
     private final SqlDatabaseWrapper database;
-    private final FilePersistence filePersistence;
+    private final FileSizeExtractor fileSizeExtractor;
     private final String basePath;
 
-    public CompleteDownloadMigrationExtractor(SqlDatabaseWrapper database, FilePersistence filePersistence, String basePath) {
+    public CompleteDownloadMigrationExtractor(SqlDatabaseWrapper database, FileSizeExtractor fileSizeExtractor, String basePath) {
         this.database = database;
-        this.filePersistence = filePersistence;
+        this.fileSizeExtractor = fileSizeExtractor;
         this.basePath = basePath;
     }
 
@@ -110,17 +108,7 @@ public class CompleteDownloadMigrationExtractor {
 
                         String newFilePath = MigrationPathExtractor.extractMigrationPath(basePath, sanitizedOriginalUniqueFileLocation, downloadBatchId);
 
-                        long rawFileSize = filePersistence.getCurrentSize(new FilePath() {
-                            @Override
-                            public String path() {
-                                return originalFileLocation;
-                            }
-
-                            @Override
-                            public boolean isUnknown() {
-                                return false;
-                            }
-                        });
+                        long rawFileSize = fileSizeExtractor.extract(originalFileLocation);
 
                         Migration.FileMetadata fileMetadata = new Migration.FileMetadata(
                                 originalFileId,

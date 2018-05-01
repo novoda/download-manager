@@ -2,17 +2,11 @@ package com.novoda.downloadmanager.demo;
 
 import android.database.Cursor;
 
-import com.google.common.truth.Truth;
 import com.novoda.downloadmanager.Batch;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadFileIdCreator;
-import com.novoda.downloadmanager.FilePath;
-import com.novoda.downloadmanager.InternalFilePersistence;
-import com.novoda.downloadmanager.LiteFilePath;
-import com.novoda.downloadmanager.LiteFileSize;
 import com.novoda.downloadmanager.Migration;
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
-import com.novoda.downloadmanager.StubCursor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,9 +14,11 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.BDDMockito;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 public class CompleteDownloadMigrationExtractorTest {
@@ -58,21 +54,21 @@ public class CompleteDownloadMigrationExtractorTest {
             .build();
 
     private final SqlDatabaseWrapper database = mock(SqlDatabaseWrapper.class);
-    private final InternalFilePersistence internalFilePersistence = mock(InternalFilePersistence.class);
+    private final FileSizeExtractor fileSizeExtractor = mock(FileSizeExtractor.class);
 
     private CompleteDownloadMigrationExtractor migrationExtractor;
 
     @Before
     public void setUp() {
-        migrationExtractor = new CompleteDownloadMigrationExtractor(database, internalFilePersistence, "base");
+        migrationExtractor = new CompleteDownloadMigrationExtractor(database, fileSizeExtractor, "base");
     }
 
     @Test
     public void returnsMigrations_WhenExtracting() {
-        BDDMockito.given(database.rawQuery(BATCHES_QUERY)).willReturn(BATCHES_CURSOR);
-        BDDMockito.given(database.rawQuery(ArgumentMatchers.eq(DOWNLOADS_QUERY), ArgumentMatchers.eq("1"))).willReturn(BATCH_ONE_DOWNLOADS_CURSOR);
-        BDDMockito.given(database.rawQuery(ArgumentMatchers.eq(DOWNLOADS_QUERY), ArgumentMatchers.eq("2"))).willReturn(BATCH_TWO_DOWNLOADS_CURSOR);
-        BDDMockito.given(internalFilePersistence.getCurrentSize(ArgumentMatchers.any(FilePath.class)))
+        given(database.rawQuery(BATCHES_QUERY)).willReturn(BATCHES_CURSOR);
+        given(database.rawQuery(eq(DOWNLOADS_QUERY), eq("1"))).willReturn(BATCH_ONE_DOWNLOADS_CURSOR);
+        given(database.rawQuery(eq(DOWNLOADS_QUERY), eq("2"))).willReturn(BATCH_TWO_DOWNLOADS_CURSOR);
+        given(fileSizeExtractor.extract(anyString()))
                 .willReturn(1000L)
                 .willReturn(2000L)
                 .willReturn(500L)
@@ -80,7 +76,7 @@ public class CompleteDownloadMigrationExtractorTest {
 
         List<Migration> migrations = migrationExtractor.extractMigrations();
 
-        Truth.assertThat(migrations).isEqualTo(expectedMigrations());
+        assertThat(migrations).isEqualTo(expectedMigrations());
     }
 
     private List<Migration> expectedMigrations() {
@@ -92,8 +88,8 @@ public class CompleteDownloadMigrationExtractorTest {
                 .build();
 
         List<Migration.FileMetadata> firstFileMetadata = new ArrayList<>();
-        firstFileMetadata.add(new Migration.FileMetadata("file_1", new LiteFilePath("base/data_1"), new LiteFilePath("base/-1274506706/data_1"), currentSizeInBytes, new LiteFileSize(1000, 1000), firstUri));
-        firstFileMetadata.add(new Migration.FileMetadata("file_2", new LiteFilePath("base/data_2-1"), new LiteFilePath("base/-1274506706/data_2"), currentSizeInBytes, new LiteFileSize(2000, 2000), secondUri));
+        firstFileMetadata.add(new Migration.FileMetadata("file_1", "base/data_1", "base/-1274506706/data_1", 1000, 1000, firstUri));
+        firstFileMetadata.add(new Migration.FileMetadata("file_2", "base/data_2-1", "base/-1274506706/data_2", 2000, 2000, secondUri));
 
         String thirdUri = "uri_3";
         String fourthUri = "uri_4";
@@ -103,8 +99,8 @@ public class CompleteDownloadMigrationExtractorTest {
                 .build();
 
         List<Migration.FileMetadata> secondFileMetadata = new ArrayList<>();
-        secondFileMetadata.add(new Migration.FileMetadata("file_3", new LiteFilePath("base/data_3-1"), new LiteFilePath("base/-1274506704/data_3"), currentSizeInBytes, new LiteFileSize(500, 500), thirdUri));
-        secondFileMetadata.add(new Migration.FileMetadata("file_4", new LiteFilePath("base/data_4"), new LiteFilePath("base/-1274506704/data_4"), currentSizeInBytes, new LiteFileSize(750, 750), fourthUri));
+        secondFileMetadata.add(new Migration.FileMetadata("file_3", "base/data_3-1", "base/-1274506704/data_3", 500, 500, thirdUri));
+        secondFileMetadata.add(new Migration.FileMetadata("file_4", "base/data_4", "base/-1274506704/data_4", 750, 750, fourthUri));
 
         return Arrays.asList(
                 new Migration(firstBatch, firstFileMetadata, 12345, Migration.Type.COMPLETE),
