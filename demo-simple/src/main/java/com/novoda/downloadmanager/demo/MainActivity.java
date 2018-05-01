@@ -45,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Executor migrationExecutor = Executors.newSingleThreadExecutor();
 
-    // TODO: This is for the v1 db migration.
     @SuppressLint("SdCardPath")
     private static final String V1_BASE_PATH = "/data/data/com.novoda.downloadmanager.demo.simple/files/Pictures/";
 
