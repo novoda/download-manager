@@ -1,31 +1,33 @@
 package com.novoda.downloadmanager;
 
+import java.io.File;
+
 public class BatchFile {
 
     private final String networkAddress;
+    private final String path;
     private final Optional<DownloadFileId> downloadFileId;
-    private final Optional<String> path;
 
-    BatchFile(String networkAddress, Optional<DownloadFileId> downloadFileId, Optional<String> path) {
+    BatchFile(String networkAddress, Optional<DownloadFileId> downloadFileId, String path) {
         this.networkAddress = networkAddress;
         this.downloadFileId = downloadFileId;
         this.path = path;
     }
 
-    static InternalBuilder downloadFrom(String networkAddress) {
-        return new LiteFileBuilder(networkAddress);
+    static InternalBuilder from(DownloadBatchId downloadBatchId, String networkAddress) {
+        return new LiteFileBuilder(downloadBatchId, networkAddress);
     }
 
     public String networkAddress() {
         return networkAddress;
     }
 
-    public Optional<DownloadFileId> downloadFileId() {
-        return downloadFileId;
+    public String path() {
+        return path;
     }
 
-    public Optional<String> path() {
-        return path;
+    public Optional<DownloadFileId> downloadFileId() {
+        return downloadFileId;
     }
 
     @Override
@@ -42,17 +44,17 @@ public class BatchFile {
         if (networkAddress != null ? !networkAddress.equals(batchFile.networkAddress) : batchFile.networkAddress != null) {
             return false;
         }
-        if (downloadFileId != null ? !downloadFileId.equals(batchFile.downloadFileId) : batchFile.downloadFileId != null) {
+        if (path != null ? !path.equals(batchFile.path) : batchFile.path != null) {
             return false;
         }
-        return path != null ? path.equals(batchFile.path) : batchFile.path == null;
+        return downloadFileId != null ? downloadFileId.equals(batchFile.downloadFileId) : batchFile.downloadFileId == null;
     }
 
     @Override
     public int hashCode() {
         int result = networkAddress != null ? networkAddress.hashCode() : 0;
-        result = 31 * result + (downloadFileId != null ? downloadFileId.hashCode() : 0);
         result = 31 * result + (path != null ? path.hashCode() : 0);
+        result = 31 * result + (downloadFileId != null ? downloadFileId.hashCode() : 0);
         return result;
     }
 
@@ -60,8 +62,8 @@ public class BatchFile {
     public String toString() {
         return "BatchFile{"
                 + "networkAddress='" + networkAddress + '\''
+                + ", path='" + path + '\''
                 + ", downloadFileId=" + downloadFileId
-                + ", path=" + path
                 + '}';
     }
 
@@ -81,13 +83,16 @@ public class BatchFile {
 
     private static final class LiteFileBuilder implements InternalBuilder {
 
+        private final DownloadBatchId downloadBatchId;
         private final String networkAddress;
+
         private Optional<DownloadFileId> downloadFileId = Optional.absent();
         private Optional<String> path = Optional.absent();
 
         private Batch.InternalBuilder parentBuilder;
 
-        LiteFileBuilder(String networkAddress) {
+        LiteFileBuilder(DownloadBatchId downloadBatchId, String networkAddress) {
+            this.downloadBatchId = downloadBatchId;
             this.networkAddress = networkAddress;
         }
 
@@ -120,8 +125,15 @@ public class BatchFile {
 
         @Override
         public Batch.Builder apply() {
-            parentBuilder.withFile(new BatchFile(networkAddress, downloadFileId, path));
+            String networkAddressDerivedFileName = FileNameExtractor.extractFrom(networkAddress);
+            String pathPrependedWithBatchId = prependBatchIdTo(path.or(networkAddressDerivedFileName), downloadBatchId);
+
+            parentBuilder.withFile(new BatchFile(networkAddress, downloadFileId, pathPrependedWithBatchId));
             return parentBuilder;
+        }
+
+        private static String prependBatchIdTo(String filePath, DownloadBatchId downloadBatchId) {
+            return downloadBatchId.rawId() + File.separatorChar + filePath;
         }
 
     }

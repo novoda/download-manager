@@ -7,7 +7,7 @@ import static com.google.common.truth.Truth.assertThat;
 public class MigrationPathExtractorTest {
 
     private static final String BASE_PATH = "/data/data/com.novoda.downloadmanager.demo.simple/files/Pictures/";
-    private static final DownloadBatchId DOWNLOAD_BATCH_ID = DownloadBatchIdCreator.createFrom("batch_01");
+    private static final DownloadBatchId DOWNLOAD_BATCH_ID = DownloadBatchIdCreator.createSanitizedFrom("batch_01");
 
     @Test
     public void returnsAbsolutePathAndFileName_whenAssetPathConsistsOfFileNameOnly() {
