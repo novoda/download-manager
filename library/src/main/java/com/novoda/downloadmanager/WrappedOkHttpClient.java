@@ -24,6 +24,7 @@ class WrappedOkHttpClient implements HttpClient {
             requestBuilder = requestBuilder.head();
         }
 
+        requestBuilder.addHeader("Accept-Encoding", "identity");
         for (Map.Entry<String, String> entry : request.headers().entrySet()) {
             requestBuilder.addHeader(entry.getKey(), entry.getValue());
         }
