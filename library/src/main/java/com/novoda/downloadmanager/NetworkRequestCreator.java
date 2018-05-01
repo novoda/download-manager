@@ -8,7 +8,7 @@ class NetworkRequestCreator {
     private static final String DOWNLOADED_BYTES_VALUE_FORMAT = "bytes=%s-%s";
 
     NetworkRequest createFileSizeRequest(String url) {
-        return new NetworkRequest(new HashMap<>(), url, NetworkRequest.Method.GET);
+        return new NetworkRequest(new HashMap<>(), url, NetworkRequest.Method.HEAD);
     }
 
     NetworkRequest createDownloadRequest(String url) {

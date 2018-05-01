@@ -34,7 +34,7 @@ class NetworkFileSizeRequester implements FileSizeRequester {
 
     private long executeRequestFileSize(String url) throws IOException {
         long fileSize = requestFileSizeThroughHeaderRequest(url);
-        if (fileSize == 0) {
+        if (fileSize == UNKNOWN_CONTENT_LENGTH || fileSize == ZERO_FILE_SIZE) {
             Logger.w("filesize request through header returned zero, we'll try again " + url);
             fileSize = requestFileSizeThroughBodyRequest(url);
             if (fileSize == 0) {
