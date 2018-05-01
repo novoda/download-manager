@@ -21,12 +21,9 @@ final class LiteBatchBuilder implements InternalBatchBuilder {
         batchFiles.add(batchFile);
     }
 
-    private BatchFileBuilder fileBuilder;
-
     @Override
     public BatchFileBuilder downloadFrom(String networkAddress) {
-        this.fileBuilder = BatchFile.from(downloadBatchId, networkAddress).withParentBuilder(this);
-        return this.fileBuilder;
+        return BatchFile.from(downloadBatchId, networkAddress).withParentBuilder(this);
     }
 
     @Override
