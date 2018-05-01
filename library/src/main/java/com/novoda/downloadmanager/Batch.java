@@ -1,9 +1,7 @@
 package com.novoda.downloadmanager;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class Batch {
 
@@ -11,7 +9,7 @@ public class Batch {
     private final String title;
     private final List<BatchFile> batchFiles;
 
-    public static Builder with(DownloadBatchId downloadBatchId, String title) {
+    public static BatchBuilder with(DownloadBatchId downloadBatchId, String title) {
         return new LiteBatchBuilder(downloadBatchId, title, new ArrayList<>());
     }
 
@@ -68,60 +66,6 @@ public class Batch {
                 + ", title='" + title + '\''
                 + ", batchFiles=" + batchFiles
                 + '}';
-    }
-
-    public interface Builder {
-        BatchFile.Builder downloadFrom(String networkAddress);
-
-        Batch build();
-    }
-
-    interface InternalBuilder extends Builder {
-        void withFile(BatchFile batchFile);
-    }
-
-    private static final class LiteBatchBuilder implements InternalBuilder {
-
-        private final DownloadBatchId downloadBatchId;
-        private final String title;
-        private final List<BatchFile> batchFiles;
-
-        LiteBatchBuilder(DownloadBatchId downloadBatchId, String title, List<BatchFile> batchFiles) {
-            this.downloadBatchId = downloadBatchId;
-            this.title = title;
-            this.batchFiles = batchFiles;
-        }
-
-        @Override
-        public void withFile(BatchFile batchFile) {
-            batchFiles.add(batchFile);
-        }
-
-        private BatchFile.Builder fileBuilder;
-
-        @Override
-        public BatchFile.Builder downloadFrom(String networkAddress) {
-            this.fileBuilder = BatchFile.from(downloadBatchId, networkAddress).withParentBuilder(this);
-            return this.fileBuilder;
-        }
-
-        @Override
-        public Batch build() {
-            ensureNoFileIdDuplicates(batchFiles);
-            return new Batch(downloadBatchId, title, batchFiles);
-        }
-
-        private void ensureNoFileIdDuplicates(List<BatchFile> batchFiles) {
-            Set<DownloadFileId> rawIdsWithoutDuplicates = new HashSet<>();
-            for (BatchFile batchFile : batchFiles) {
-                rawIdsWithoutDuplicates.add(FallbackDownloadFileIdProvider.downloadFileIdFor(downloadBatchId, batchFile));
-            }
-
-            if (rawIdsWithoutDuplicates.size() != batchFiles.size()) {
-                throw new IllegalArgumentException(String.format("Duplicated file for batch %s (batchId: %s)", title, downloadBatchId.rawId()));
-            }
-        }
-
     }
 
 }
