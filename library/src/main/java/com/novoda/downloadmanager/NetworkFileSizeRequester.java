@@ -46,7 +46,7 @@ class NetworkFileSizeRequester implements FileSizeRequester {
     }
 
     private long requestFileSizeThroughHeaderRequest(String url) throws IOException {
-        NetworkRequest fileSizeRequest = requestCreator.createFileSizeRequest(url);
+        NetworkRequest fileSizeRequest = requestCreator.createFileSizeHeadRequest(url);
         HttpClient.NetworkResponse response = httpClient.execute(fileSizeRequest);
         long fileSize = ZERO_FILE_SIZE;
         if (response.isSuccessful()) {
@@ -57,7 +57,7 @@ class NetworkFileSizeRequester implements FileSizeRequester {
     }
 
     private long requestFileSizeThroughBodyRequest(String url) throws IOException {
-        NetworkRequest downloadRequest = requestCreator.createDownloadRequest(url);
+        NetworkRequest downloadRequest = requestCreator.createFileSizeBodyRequest(url);
         HttpClient.NetworkResponse response = httpClient.execute(downloadRequest);
         long fileSize = ZERO_FILE_SIZE;
         if (response.isSuccessful()) {
