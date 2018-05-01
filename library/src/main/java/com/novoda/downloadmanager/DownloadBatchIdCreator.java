@@ -7,7 +7,7 @@ public final class DownloadBatchIdCreator {
     }
 
     /**
-     * Sanitizes the given rawId replacing any of [:\\\\/*?|<>] with an underscore
+     * Sanitizes the given rawId replacing any of {@code [:\\\\/*?|<>]} with an underscore
      * before returning an instance of {@link DownloadBatchId}.
      *
      * @param rawId to be sanitized before creating {@link DownloadBatchId}.
