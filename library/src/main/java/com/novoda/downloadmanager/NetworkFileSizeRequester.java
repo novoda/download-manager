@@ -20,7 +20,7 @@ class NetworkFileSizeRequester implements FileSizeRequester {
     public FileSize requestFileSize(String url) {
         try {
             long fileSize = executeRequestFileSize(url);
-            if (fileSize == 0) {
+            if (fileSize == UNKNOWN_CONTENT_LENGTH || fileSize == ZERO_FILE_SIZE) {
                 return FileSizeCreator.unknownFileSize();
             } else {
                 return FileSizeCreator.createFromTotalSize(fileSize);
@@ -35,10 +35,10 @@ class NetworkFileSizeRequester implements FileSizeRequester {
     private long executeRequestFileSize(String url) throws IOException {
         long fileSize = requestFileSizeThroughHeaderRequest(url);
         if (fileSize == UNKNOWN_CONTENT_LENGTH || fileSize == ZERO_FILE_SIZE) {
-            Logger.w("filesize request through header returned zero, we'll try again " + url);
+            Logger.w(String.format("file size header request '%s' returned %s, we'll try with a body request", url, fileSize));
             fileSize = requestFileSizeThroughBodyRequest(url);
-            if (fileSize == 0) {
-                Logger.w("filesize request through body returned zero");
+            if (fileSize == UNKNOWN_CONTENT_LENGTH || fileSize == ZERO_FILE_SIZE) {
+                Logger.w(String.format("file size body request '%s' returned %s", url, fileSize));
             }
         }
 
