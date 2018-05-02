@@ -127,6 +127,14 @@ public class MainActivity extends AppCompatActivity {
 
     private final MigrationCallback migrationCallback = migrationStatus -> {
         if (migrationStatus.status() == MigrationStatus.Status.COMPLETE) {
+            File databasePath = getDatabasePath("downloads.db");
+            if (databasePath.exists()) {
+                SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
+                SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
+
+                database.deleteDatabase();
+            }
+
             liteDownloadManagerCommands.submitAllStoredDownloads(() -> Log.d(TAG, "Migration completed, submitting all downloads"));
         }
         databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());
