@@ -6,9 +6,18 @@ import java.util.Map;
 class NetworkRequestCreator {
 
     private static final String DOWNLOADED_BYTES_VALUE_FORMAT = "bytes=%s-%s";
+    private static final Map<String, String> DISABLE_COMPRESSION_HEADERS = new HashMap<>(1);
 
-    NetworkRequest createFileSizeRequest(String url) {
-        return new NetworkRequest(new HashMap<>(), url, NetworkRequest.Method.HEAD);
+    static {
+        DISABLE_COMPRESSION_HEADERS.put("Accept-Encoding", "identity");
+    }
+
+    NetworkRequest createFileSizeHeadRequest(String url) {
+        return new NetworkRequest(DISABLE_COMPRESSION_HEADERS, url, NetworkRequest.Method.HEAD);
+    }
+
+    NetworkRequest createFileSizeBodyRequest(String url) {
+        return new NetworkRequest(DISABLE_COMPRESSION_HEADERS, url, NetworkRequest.Method.GET);
     }
 
     NetworkRequest createDownloadRequest(String url) {

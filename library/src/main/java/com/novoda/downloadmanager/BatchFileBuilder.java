@@ -8,8 +8,7 @@ public interface BatchFileBuilder {
 
     /**
      * Sets {@link BatchFileBuilder} to build a {@link BatchFile} with a corresponding
-     * {@param downloadFileId} that can be used to lookup a download file belonging to
-     * a given {@link Batch}.
+     * identifier that can be later used to lookup a downloaded file.
      *
      * @param downloadFileId to flag a {@link BatchFile} with.
      * @return {@link BatchFileBuilder}.
@@ -18,19 +17,19 @@ public interface BatchFileBuilder {
 
     /**
      * Sets {@link BatchFileBuilder} to build a {@link BatchFile} that will be saved
-     * to the given {@param path}.
+     * to the given path.
      *
-     * @param path to save file to.
+     * @param path directory to save the file to.
      * @return {@link BatchFileBuilder}.
      */
     BatchFileBuilder saveTo(String path);
 
     /**
      * Sets {@link BatchFileBuilder} to build a {@link BatchFile} that will be saved
-     * to the given {@param path} along with the given {@param filename}.
+     * to the given path along with the given filename.
      *
-     * @param path     to save the file to.
-     * @param fileName of the file to save.
+     * @param path     directory to save the file to.
+     * @param fileName to assign to file.
      * @return {@link BatchFileBuilder}.
      */
     BatchFileBuilder saveTo(String path, String fileName);

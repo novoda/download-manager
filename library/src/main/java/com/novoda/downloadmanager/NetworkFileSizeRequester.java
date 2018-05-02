@@ -20,7 +20,7 @@ class NetworkFileSizeRequester implements FileSizeRequester {
     public FileSize requestFileSize(String url) {
         try {
             long fileSize = executeRequestFileSize(url);
-            if (fileSize == 0) {
+            if (fileSize == UNKNOWN_CONTENT_LENGTH || fileSize == ZERO_FILE_SIZE) {
                 return FileSizeCreator.unknownFileSize();
             } else {
                 return FileSizeCreator.createFromTotalSize(fileSize);
@@ -34,11 +34,11 @@ class NetworkFileSizeRequester implements FileSizeRequester {
 
     private long executeRequestFileSize(String url) throws IOException {
         long fileSize = requestFileSizeThroughHeaderRequest(url);
-        if (fileSize == 0) {
-            Logger.w("filesize request through header returned zero, we'll try again " + url);
+        if (fileSize == UNKNOWN_CONTENT_LENGTH || fileSize == ZERO_FILE_SIZE) {
+            Logger.w(String.format("file size header request '%s' returned %s, we'll try with a body request", url, fileSize));
             fileSize = requestFileSizeThroughBodyRequest(url);
-            if (fileSize == 0) {
-                Logger.w("filesize request through body returned zero");
+            if (fileSize == UNKNOWN_CONTENT_LENGTH || fileSize == ZERO_FILE_SIZE) {
+                Logger.w(String.format("file size body request '%s' returned %s", url, fileSize));
             }
         }
 
@@ -46,7 +46,7 @@ class NetworkFileSizeRequester implements FileSizeRequester {
     }
 
     private long requestFileSizeThroughHeaderRequest(String url) throws IOException {
-        NetworkRequest fileSizeRequest = requestCreator.createFileSizeRequest(url);
+        NetworkRequest fileSizeRequest = requestCreator.createFileSizeHeadRequest(url);
         HttpClient.NetworkResponse response = httpClient.execute(fileSizeRequest);
         long fileSize = ZERO_FILE_SIZE;
         if (response.isSuccessful()) {
@@ -57,7 +57,7 @@ class NetworkFileSizeRequester implements FileSizeRequester {
     }
 
     private long requestFileSizeThroughBodyRequest(String url) throws IOException {
-        NetworkRequest downloadRequest = requestCreator.createDownloadRequest(url);
+        NetworkRequest downloadRequest = requestCreator.createFileSizeBodyRequest(url);
         HttpClient.NetworkResponse response = httpClient.execute(downloadRequest);
         long fileSize = ZERO_FILE_SIZE;
         if (response.isSuccessful()) {
