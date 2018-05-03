@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager.demo;
 
 import android.annotation.SuppressLint;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -24,10 +25,15 @@ import com.novoda.downloadmanager.DownloadFileIdCreator;
 import com.novoda.downloadmanager.DownloadMigrator;
 import com.novoda.downloadmanager.DownloadMigratorBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
+import com.novoda.downloadmanager.Migration;
 import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
+import com.novoda.downloadmanager.SqlDatabaseWrapper;
 
 import java.io.File;
+import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 
@@ -36,6 +42,9 @@ import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String V1_DB_PATH = "downloads.db";
+
+    private Executor migrationExecutor = Executors.newSingleThreadExecutor();
 
     @SuppressLint("SdCardPath")
     private static final String V1_BASE_PATH = "/data/data/com.novoda.downloadmanager.demo.simple/files/Pictures/";
@@ -119,12 +128,37 @@ public class MainActivity extends AppCompatActivity {
 
     private final MigrationCallback migrationCallback = migrationStatus -> {
         if (migrationStatus.status() == MigrationStatus.Status.COMPLETE) {
+            File databasePath = getDatabasePath(V1_DB_PATH);
+            if (databasePath.exists()) {
+                SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
+                SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
+
+                database.deleteDatabase();
+            }
+
             liteDownloadManagerCommands.submitAllStoredDownloads(() -> Log.d(TAG, "Migration completed, submitting all downloads"));
         }
         databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());
     };
 
-    private final View.OnClickListener startMigrationOnClick = v -> downloadMigrator.startMigration("migrationJob", getDatabasePath("downloads.db"), V1_BASE_PATH);
+    private final View.OnClickListener startMigrationOnClick = v -> migrationExecutor.execute(new Runnable() {
+        @Override
+        public void run() {
+            File databasePath = getDatabasePath(V1_DB_PATH);
+            if (databasePath.exists()) {
+                SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
+                SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
+
+                PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database, V1_BASE_PATH);
+                FileSizeExtractor fileSizeExtractor = new FileSizeExtractor();
+                CompleteDownloadMigrationExtractor completeDownloadMigrationExtractor = new CompleteDownloadMigrationExtractor(database, fileSizeExtractor, V1_BASE_PATH);
+                List<Migration> partialMigrations = partialDownloadMigrationExtractor.extractMigrations();
+                List<Migration> completeMigrations = completeDownloadMigrationExtractor.extractMigrations();
+
+                downloadMigrator.startMigration("migrationJob", partialMigrations, completeMigrations);
+            }
+        }
+    });
 
     private final CompoundButton.OnCheckedChangeListener wifiOnlyOnCheckedChange = (buttonView, isChecked) -> {
         LiteDownloadManagerCommands downloadManagerCommands = ((DemoApplication) getApplication()).getLiteDownloadManagerCommands();

@@ -1,13 +1,21 @@
-package com.novoda.downloadmanager;
+package com.novoda.downloadmanager.demo;
 
 import android.database.Cursor;
+
+import com.novoda.downloadmanager.Batch;
+import com.novoda.downloadmanager.BatchBuilder;
+import com.novoda.downloadmanager.DownloadBatchId;
+import com.novoda.downloadmanager.DownloadBatchIdCreator;
+import com.novoda.downloadmanager.DownloadFileIdCreator;
+import com.novoda.downloadmanager.Migration;
+import com.novoda.downloadmanager.SqlDatabaseWrapper;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-class PartialDownloadMigrationExtractor {
+public class PartialDownloadMigrationExtractor {
 
     private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title, batches.last_modified_timestamp "
             + "FROM batches INNER JOIN DownloadsByBatch ON DownloadsByBatch.batch_id = batches._id "
@@ -27,7 +35,7 @@ class PartialDownloadMigrationExtractor {
     private final SqlDatabaseWrapper database;
     private final String basePath;
 
-    PartialDownloadMigrationExtractor(SqlDatabaseWrapper database, String basePath) {
+    public PartialDownloadMigrationExtractor(SqlDatabaseWrapper database, String basePath) {
         this.database = database;
         this.basePath = basePath;
     }
@@ -54,7 +62,6 @@ class PartialDownloadMigrationExtractor {
                 String uri = downloadsCursor.getString(URI_COLUMN);
                 String originalFileLocation = downloadsCursor.getString(FILE_LOCATION_COLUMN);
                 String sanitizedOriginalFileLocation = MigrationStoragePathSanitizer.sanitize(originalFileLocation);
-                FilePath originalFilePath = new LiteFilePath(sanitizedOriginalFileLocation);
 
                 if (downloadsCursor.isFirst()) {
                     downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
@@ -77,13 +84,14 @@ class PartialDownloadMigrationExtractor {
                             .apply();
                 }
 
-                FilePath newFilePath = MigrationPathExtractor.extractMigrationPath(basePath, originalFilePath.path(), downloadBatchId);
+                String newFilePath = MigrationPathExtractor.extractMigrationPath(basePath, sanitizedOriginalFileLocation, downloadBatchId);
 
                 Migration.FileMetadata fileMetadata = new Migration.FileMetadata(
                         originalFileId,
-                        originalFilePath,
+                        sanitizedOriginalFileLocation,
                         newFilePath,
-                        FileSizeCreator.unknownFileSize(),
+                        0,
+                        0,
                         uri
                 );
                 fileMetadataList.add(fileMetadata);

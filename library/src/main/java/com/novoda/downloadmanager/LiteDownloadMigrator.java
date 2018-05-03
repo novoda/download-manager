@@ -3,7 +3,7 @@ package com.novoda.downloadmanager;
 import android.content.Context;
 import android.os.Handler;
 
-import java.io.File;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 class LiteDownloadMigrator implements DownloadMigrator {
@@ -42,14 +42,15 @@ class LiteDownloadMigrator implements DownloadMigrator {
     }
 
     @Override
-    public void startMigration(String jobIdentifier, File databaseFile, String basePath) {
+    public void startMigration(String jobIdentifier, List<Migration> partialMigrations, List<Migration> completeMigrations) {
         executor.submit(() -> Wait.<Void>waitFor(migrationService, waitForMigrationService)
-                .thenPerform(executeMigrationFor(jobIdentifier, databaseFile, basePath)));
+                .thenPerform(executeMigrationFor(jobIdentifier, partialMigrations, completeMigrations)));
     }
 
-    private Wait.ThenPerform.Action<Void> executeMigrationFor(String jobIdentifier, File databaseFile, String basePath) {
+    private Wait.ThenPerform.Action<Void> executeMigrationFor(String jobIdentifier, List<Migration> partialMigrations, List<Migration> completeMigrations) {
         return () -> {
-            migrationService.startMigration(new MigrationJob(applicationContext, jobIdentifier, databaseFile, basePath), migrationCallback());
+            MigrationJob migrationJob = new MigrationJob(applicationContext, jobIdentifier, partialMigrations, completeMigrations);
+            migrationService.startMigration(migrationJob, migrationCallback());
             return null;
         };
     }
