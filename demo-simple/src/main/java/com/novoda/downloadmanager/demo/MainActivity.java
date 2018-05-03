@@ -42,6 +42,7 @@ import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String V1_DB_PATH = "downloads.db";
 
     private Executor migrationExecutor = Executors.newSingleThreadExecutor();
 
@@ -127,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final MigrationCallback migrationCallback = migrationStatus -> {
         if (migrationStatus.status() == MigrationStatus.Status.COMPLETE) {
-            File databasePath = getDatabasePath("downloads.db");
+            File databasePath = getDatabasePath(V1_DB_PATH);
             if (databasePath.exists()) {
                 SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
                 SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
@@ -143,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
     private final View.OnClickListener startMigrationOnClick = v -> migrationExecutor.execute(new Runnable() {
         @Override
         public void run() {
-            File databasePath = getDatabasePath("downloads.db");
+            File databasePath = getDatabasePath(V1_DB_PATH);
             if (databasePath.exists()) {
                 SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
                 SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
