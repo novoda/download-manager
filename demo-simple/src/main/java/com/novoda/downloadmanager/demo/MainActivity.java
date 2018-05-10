@@ -29,6 +29,7 @@ import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
 import com.novoda.downloadmanager.PartialDownloadMigrationExtractor;
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
+import com.novoda.downloadmanager.VersionOnePartialDownloadBatch;
 
 import java.io.File;
 import java.util.List;
@@ -135,10 +136,10 @@ public class MainActivity extends AppCompatActivity {
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
         PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database);
 
-        List<Batch> partialDownloads = partialDownloadMigrationExtractor.extractMigrations();
+        List<VersionOnePartialDownloadBatch> partialDownloadBatches = partialDownloadMigrationExtractor.extractMigrations();
 
-        for (Batch partialDownload : partialDownloads) {
-            liteDownloadManagerCommands.download(partialDownload);
+        for (VersionOnePartialDownloadBatch partialDownloadBatch : partialDownloadBatches) {
+            liteDownloadManagerCommands.download(partialDownloadBatch.batch());
         }
     };
 

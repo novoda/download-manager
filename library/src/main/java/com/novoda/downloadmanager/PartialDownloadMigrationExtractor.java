@@ -29,10 +29,10 @@ public class PartialDownloadMigrationExtractor {
         this.database = database;
     }
 
-    public List<Batch> extractMigrations() {
+    public List<VersionOnePartialDownloadBatch> extractMigrations() {
         Cursor batchesCursor = database.rawQuery(BATCHES_QUERY);
 
-        List<Batch> batches = new ArrayList<>();
+        List<VersionOnePartialDownloadBatch> partialMigrations = new ArrayList<>();
         while (batchesCursor.moveToNext()) {
 
             String batchId = batchesCursor.getString(BATCH_ID_COLUMN);
@@ -44,9 +44,13 @@ public class PartialDownloadMigrationExtractor {
             Set<String> fileIds = new HashSet<>();
 
             DownloadBatchId downloadBatchId;
+            List<String> originalFileLocations = new ArrayList<>();
             while (downloadsCursor.moveToNext()) {
                 String originalFileId = downloadsCursor.getString(FILE_ID_COLUMN);
                 String uri = downloadsCursor.getString(URI_COLUMN);
+                String originalFileLocation = downloadsCursor.getString(FILE_LOCATION_COLUMN);
+                String sanitizedOriginalFileLocation = MigrationStoragePathSanitizer.sanitize(originalFileLocation);
+                originalFileLocations.add(sanitizedOriginalFileLocation);
 
                 if (downloadsCursor.isFirst()) {
                     downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
@@ -72,10 +76,10 @@ public class PartialDownloadMigrationExtractor {
             downloadsCursor.close();
 
             Batch batch = newBatchBuilder.build();
-            batches.add(batch);
+            partialMigrations.add(new VersionOnePartialDownloadBatch(batch, originalFileLocations));
         }
         batchesCursor.close();
-        return batches;
+        return partialMigrations;
     }
 
     private DownloadBatchId createDownloadBatchIdFrom(String originalFileId, String batchId) {
