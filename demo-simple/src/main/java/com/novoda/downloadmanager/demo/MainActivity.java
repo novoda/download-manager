@@ -140,8 +140,22 @@ public class MainActivity extends AppCompatActivity {
 
         for (VersionOnePartialDownloadBatch partialDownloadBatch : partialDownloadBatches) {
             liteDownloadManagerCommands.download(partialDownloadBatch.batch());
+            deleteVersionOneFiles(partialDownloadBatch);
         }
     };
+
+    private void deleteVersionOneFiles(VersionOnePartialDownloadBatch partialDownloadBatch) {
+        for (String originalFileLocation : partialDownloadBatch.originalFileLocations()) {
+            if (originalFileLocation != null && !originalFileLocation.isEmpty()) {
+                File file = new File(originalFileLocation);
+                boolean deleted = file.delete();
+                if (!deleted) {
+                    String message = String.format("Could not delete File or Directory: %s", file.getPath());
+                    Log.e(getClass().getSimpleName(), message);
+                }
+            }
+        }
+    }
 
     private final CompoundButton.OnCheckedChangeListener wifiOnlyOnCheckedChange = (buttonView, isChecked) -> {
         LiteDownloadManagerCommands downloadManagerCommands = ((DemoApplication) getApplication()).getLiteDownloadManagerCommands();
