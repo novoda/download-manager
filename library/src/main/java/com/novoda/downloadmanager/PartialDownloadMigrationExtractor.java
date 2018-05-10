@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-class PartialDownloadMigrationExtractor {
+public class PartialDownloadMigrationExtractor {
 
     private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title, batches.last_modified_timestamp "
             + "FROM batches INNER JOIN DownloadsByBatch ON DownloadsByBatch.batch_id = batches._id "
@@ -27,12 +27,12 @@ class PartialDownloadMigrationExtractor {
     private final SqlDatabaseWrapper database;
     private final String basePath;
 
-    PartialDownloadMigrationExtractor(SqlDatabaseWrapper database, String basePath) {
+    public PartialDownloadMigrationExtractor(SqlDatabaseWrapper database, String basePath) {
         this.database = database;
         this.basePath = basePath;
     }
 
-    List<Migration> extractMigrations() {
+    public List<Migration> extractMigrations() {
         Cursor batchesCursor = database.rawQuery(BATCHES_QUERY);
 
         List<Migration> migrations = new ArrayList<>();

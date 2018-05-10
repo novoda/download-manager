@@ -3,9 +3,9 @@ package com.novoda.downloadmanager;
 import java.util.Collections;
 import java.util.List;
 
-class Migration {
+public class Migration {
 
-    enum Type {
+    public enum Type {
         COMPLETE,
         PARTIAL
     }
@@ -15,18 +15,18 @@ class Migration {
     private final long downloadedDateTimeInMillis;
     private final Type type;
 
-    Migration(Batch batch, List<FileMetadata> fileMetadata, long downloadedDateTimeInMillis, Type type) {
+    public Migration(Batch batch, List<FileMetadata> fileMetadata, long downloadedDateTimeInMillis, Type type) {
         this.batch = batch;
         this.fileMetadata = Collections.unmodifiableList(fileMetadata);
         this.downloadedDateTimeInMillis = downloadedDateTimeInMillis;
         this.type = type;
     }
 
-    Batch batch() {
+    public Batch batch() {
         return batch;
     }
 
-    List<FileMetadata> getFileMetadata() {
+    public List<FileMetadata> getFileMetadata() {
         return fileMetadata;
     }
 
@@ -34,7 +34,7 @@ class Migration {
         return downloadedDateTimeInMillis;
     }
 
-    Type type() {
+    public Type type() {
         return type;
     }
 
@@ -80,7 +80,7 @@ class Migration {
                 + '}';
     }
 
-    static class FileMetadata {
+    public static class FileMetadata {
 
         private final String fileId;
         private final FilePath originalFileLocation;
@@ -88,7 +88,7 @@ class Migration {
         private final FileSize fileSize;
         private final String originalNetworkAddress;
 
-        FileMetadata(String fileId, FilePath originalFileLocation, FilePath newFileLocation, FileSize fileSize, String originalNetworkAddress) {
+        public FileMetadata(String fileId, FilePath originalFileLocation, FilePath newFileLocation, FileSize fileSize, String originalNetworkAddress) {
             this.fileId = fileId;
             this.originalFileLocation = originalFileLocation;
             this.newFileLocation = newFileLocation;
@@ -96,23 +96,23 @@ class Migration {
             this.originalNetworkAddress = originalNetworkAddress;
         }
 
-        String fileId() {
+        public String fileId() {
             return fileId;
         }
 
-        FilePath originalFileLocation() {
+        public FilePath originalFileLocation() {
             return originalFileLocation;
         }
 
-        FilePath newFileLocation() {
+        public FilePath newFileLocation() {
             return newFileLocation;
         }
 
-        FileSize fileSize() {
+        public FileSize fileSize() {
             return fileSize;
         }
 
-        String originalNetworkAddress() {
+        public String originalNetworkAddress() {
             return originalNetworkAddress;
         }
 
