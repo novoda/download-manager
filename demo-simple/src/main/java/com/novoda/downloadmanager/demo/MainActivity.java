@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager.demo;
 
 import android.annotation.SuppressLint;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -24,10 +25,14 @@ import com.novoda.downloadmanager.DownloadFileIdCreator;
 import com.novoda.downloadmanager.DownloadMigrator;
 import com.novoda.downloadmanager.DownloadMigratorBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
+import com.novoda.downloadmanager.Migration;
 import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
+import com.novoda.downloadmanager.PartialDownloadMigrationExtractor;
+import com.novoda.downloadmanager.SqlDatabaseWrapper;
 
 import java.io.File;
+import java.util.List;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 
@@ -124,7 +129,19 @@ public class MainActivity extends AppCompatActivity {
         databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());
     };
 
-    private final View.OnClickListener startMigrationOnClick = v -> downloadMigrator.startMigration("migrationJob", getDatabasePath("downloads.db"), V1_BASE_PATH);
+    private final View.OnClickListener startMigrationOnClick = v -> {
+        File databasePath = getDatabasePath("downloads.db");
+
+        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
+        SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
+        PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database, V1_BASE_PATH);
+
+        List<Migration> migrations = partialDownloadMigrationExtractor.extractMigrations();
+
+        for (Migration migration : migrations) {
+            liteDownloadManagerCommands.download(migration.batch());
+        }
+    };
 
     private final CompoundButton.OnCheckedChangeListener wifiOnlyOnCheckedChange = (buttonView, isChecked) -> {
         LiteDownloadManagerCommands downloadManagerCommands = ((DemoApplication) getApplication()).getLiteDownloadManagerCommands();
