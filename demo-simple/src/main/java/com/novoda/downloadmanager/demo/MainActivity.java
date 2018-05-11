@@ -27,7 +27,7 @@ import com.novoda.downloadmanager.DownloadMigratorBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
-import com.novoda.downloadmanager.PartialDownloadMigrationExtractor;
+import com.novoda.downloadmanager.VersionOnePartialDownloadBatchesExtractor;
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
 import com.novoda.downloadmanager.VersionOnePartialDownloadBatch;
 
@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
 
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
-        PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database);
+        VersionOnePartialDownloadBatchesExtractor partialDownloadMigrationExtractor = new VersionOnePartialDownloadBatchesExtractor(database);
 
         List<VersionOnePartialDownloadBatch> partialDownloadBatches = partialDownloadMigrationExtractor.extractMigrations();
 
