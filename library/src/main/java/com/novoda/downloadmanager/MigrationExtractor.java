@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-class MigrationExtractor {
+public class MigrationExtractor {
 
     private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title, batches.last_modified_timestamp FROM "
             + "batches INNER JOIN DownloadsByBatch ON DownloadsByBatch.batch_id = batches._id "
@@ -32,14 +32,13 @@ class MigrationExtractor {
     private final FilePersistence filePersistence;
     private final String basePath;
 
-    MigrationExtractor(SqlDatabaseWrapper database, FilePersistence filePersistence, String basePath) {
+    public MigrationExtractor(SqlDatabaseWrapper database, FilePersistence filePersistence, String basePath) {
         this.database = database;
         this.filePersistence = filePersistence;
         this.basePath = basePath;
     }
 
-
-    List<Migration> extractMigrations() {
+    public List<Migration> extractMigrations() {
         Cursor batchesCursor = database.rawQuery(BATCHES_QUERY);
 
         if (batchesCursor == null) {
