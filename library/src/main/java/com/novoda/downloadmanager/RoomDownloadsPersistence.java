@@ -139,4 +139,48 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
         database.roomBatchDao().update(roomBatch);
         return true;
     }
+
+    @Override
+    public void persistCompletedBatch(Migration migration) {
+        Batch batch = migration.batch();
+
+        DownloadBatchId downloadBatchId = batch.downloadBatchId();
+        DownloadBatchTitle downloadBatchTitle = new LiteDownloadBatchTitle(batch.title());
+        DownloadBatchStatus.Status downloadBatchStatus = DownloadBatchStatus.Status.DOWNLOADED;
+        long downloadedDateTimeInMillis = migration.downloadedDateTimeInMillis();
+
+        DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted(
+                downloadBatchTitle,
+                downloadBatchId,
+                downloadBatchStatus,
+                downloadedDateTimeInMillis,
+                true
+        );
+        persistBatch(persistedBatch);
+
+        for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
+            String url = fileMetadata.originalNetworkAddress();
+
+            String rawDownloadFileId = rawFileIdFrom(batch, fileMetadata);
+            DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(rawDownloadFileId);
+
+            DownloadsFilePersisted persistedFile = new LiteDownloadsFilePersisted(
+                    downloadBatchId,
+                    downloadFileId,
+                    fileMetadata.newFileLocation(),
+                    fileMetadata.fileSize().totalSize(),
+                    url,
+                    FilePersistenceType.INTERNAL
+            );
+            persistFile(persistedFile);
+        }
+    }
+
+    private String rawFileIdFrom(Batch batch, Migration.FileMetadata fileMetadata) {
+        if (fileMetadata.fileId() == null || fileMetadata.fileId().isEmpty()) {
+            return batch.title() + System.nanoTime();
+        } else {
+            return fileMetadata.fileId();
+        }
+    }
 }

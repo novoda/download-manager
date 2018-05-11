@@ -196,8 +196,21 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                     downloadsPersistence.transactionSuccess();
                 } else {
                     Logger.e("could not update notification to status " + downloadBatchStatus.status()
-                            + " for batch id " + downloadBatchStatus.getDownloadBatchId().rawId());
+                                     + " for batch id " + downloadBatchStatus.getDownloadBatchId().rawId());
                 }
+            } finally {
+                downloadsPersistence.endTransaction();
+            }
+        });
+    }
+
+    @Override
+    public void persistCompleteDownload(Migration migration) {
+        executor.execute(() -> {
+            downloadsPersistence.startTransaction();
+            try {
+                downloadsPersistence.persistCompletedBatch(migration);
+                downloadsPersistence.transactionSuccess();
             } finally {
                 downloadsPersistence.endTransaction();
             }

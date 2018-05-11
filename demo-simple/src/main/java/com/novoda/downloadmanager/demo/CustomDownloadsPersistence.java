@@ -7,6 +7,7 @@ import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.DownloadsBatchPersisted;
 import com.novoda.downloadmanager.DownloadsFilePersisted;
 import com.novoda.downloadmanager.DownloadsPersistence;
+import com.novoda.downloadmanager.Migration;
 
 import java.util.Collections;
 import java.util.List;
@@ -74,5 +75,10 @@ public class CustomDownloadsPersistence implements DownloadsPersistence {
     public boolean update(DownloadBatchId downloadBatchId, boolean notificationSeen) {
         Log.v(TAG, "update batch id: " + downloadBatchId.rawId() + " with notificationSeen: " + notificationSeen);
         return true;
+    }
+
+    @Override
+    public void persistCompletedBatch(Migration migration) {
+        Log.v(TAG, "Persist completed batch id: " + migration.batch().downloadBatchId());
     }
 }
