@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         for (Migration completeDownloadBatch : completeDownloadBatches) {
-            liteDownloadManagerCommands.addCompletedDownload(completeDownloadBatch);
+            liteDownloadManagerCommands.addCompletedBatch(completeDownloadBatch);
         }
 
         database.deleteDatabase();

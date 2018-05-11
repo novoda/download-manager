@@ -37,5 +37,5 @@ public interface LiteDownloadManagerCommands {
 
     File getDownloadsDir();
 
-    void addCompletedDownload(Migration migration);
+    void addCompletedBatch(CompletedDownloadBatch completedDownloadBatch);
 }

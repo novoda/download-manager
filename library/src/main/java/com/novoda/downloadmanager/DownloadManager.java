@@ -224,8 +224,8 @@ class DownloadManager implements LiteDownloadManagerCommands {
     }
 
     @Override
-    public void addCompletedDownload(Migration migration) {
-        downloader.addCompletedDownload(migration, downloadBatchMap);
+    public void addCompletedBatch(CompletedDownloadBatch completedDownloadBatch) {
+        downloader.addCompletedBatch(completedDownloadBatch, downloadBatchMap);
     }
 
 }
