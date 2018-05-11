@@ -58,7 +58,7 @@ class MigrationJob implements Runnable {
         filePersistenceCreator.withStorageRequirementsRule(storageRequirementsRule);
         FilePersistence filePersistence = filePersistenceCreator.create();
 
-        MigrationExtractor migrationExtractor = new MigrationExtractor(database, filePersistence, basePath);
+        MigrationExtractor migrationExtractor = new MigrationExtractor(database, basePath);
         List<Migration> completeMigrations = migrationExtractor.extractMigrations();
         DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
 

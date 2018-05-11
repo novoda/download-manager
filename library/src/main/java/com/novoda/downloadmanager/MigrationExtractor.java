@@ -2,6 +2,7 @@ package com.novoda.downloadmanager;
 
 import android.database.Cursor;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -29,12 +30,10 @@ public class MigrationExtractor {
     private static final int FILE_ID_COLUMN = 3;
 
     private final SqlDatabaseWrapper database;
-    private final FilePersistence filePersistence;
     private final String basePath;
 
-    public MigrationExtractor(SqlDatabaseWrapper database, FilePersistence filePersistence, String basePath) {
+    public MigrationExtractor(SqlDatabaseWrapper database, String basePath) {
         this.database = database;
-        this.filePersistence = filePersistence;
         this.basePath = basePath;
     }
 
@@ -101,12 +100,13 @@ public class MigrationExtractor {
                         String rawNewFilePath = new LiteFilePath(sanitizedOriginalUniqueFileLocation).path();
                         FilePath newFilePath = MigrationPathExtractor.extractMigrationPath(basePath, rawNewFilePath, downloadBatchId);
 
-                        FilePath originalFilePath = new LiteFilePath(originalFileLocation);
-                        long rawFileSize = filePersistence.getCurrentSize(originalFilePath);
+                        File file = new File(originalFileLocation);
+                        long rawFileSize = file.length();
+
                         FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
                         Migration.FileMetadata fileMetadata = new Migration.FileMetadata(
                                 originalFileId,
-                                originalFilePath,
+                                new LiteFilePath(originalFileLocation),
                                 newFilePath,
                                 fileSize,
                                 originalNetworkAddress

@@ -25,7 +25,9 @@ import com.novoda.downloadmanager.DownloadFileIdCreator;
 import com.novoda.downloadmanager.DownloadMigrator;
 import com.novoda.downloadmanager.DownloadMigratorBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
+import com.novoda.downloadmanager.Migration;
 import com.novoda.downloadmanager.MigrationCallback;
+import com.novoda.downloadmanager.MigrationExtractor;
 import com.novoda.downloadmanager.MigrationStatus;
 import com.novoda.downloadmanager.PartialDownloadMigrationExtractor;
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
@@ -136,12 +138,21 @@ public class MainActivity extends AppCompatActivity {
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
         PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database);
 
+        MigrationExtractor migrationExtractor = new MigrationExtractor(database, V1_BASE_PATH);
+
         List<VersionOnePartialDownloadBatch> partialDownloadBatches = partialDownloadMigrationExtractor.extractMigrations();
+        List<Migration> completeDownloadBatches = migrationExtractor.extractMigrations();
 
         for (VersionOnePartialDownloadBatch partialDownloadBatch : partialDownloadBatches) {
             liteDownloadManagerCommands.download(partialDownloadBatch.batch());
             deleteVersionOneFiles(partialDownloadBatch);
         }
+
+        for (Migration completeDownloadBatch : completeDownloadBatches) {
+            liteDownloadManagerCommands.addCompletedDownload(completeDownloadBatch);
+        }
+
+        database.deleteDatabase();
     };
 
     private void deleteVersionOneFiles(VersionOnePartialDownloadBatch partialDownloadBatch) {
