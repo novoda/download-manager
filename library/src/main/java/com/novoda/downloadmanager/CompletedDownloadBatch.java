@@ -9,11 +9,30 @@ public class CompletedDownloadBatch {
     private final long downloadedDateTimeInMillis;
     private final List<CompletedDownloadFile> completedDownloadFiles;
 
-    public CompletedDownloadBatch(DownloadBatchId downloadBatchId, DownloadBatchTitle downloadBatchTitle, long downloadedDateTimeInMillis, List<CompletedDownloadFile> completedDownloadFiles) {
+    public CompletedDownloadBatch(DownloadBatchId downloadBatchId,
+                                  DownloadBatchTitle downloadBatchTitle,
+                                  long downloadedDateTimeInMillis,
+                                  List<CompletedDownloadFile> completedDownloadFiles) {
         this.downloadBatchId = downloadBatchId;
         this.downloadBatchTitle = downloadBatchTitle;
         this.downloadedDateTimeInMillis = downloadedDateTimeInMillis;
         this.completedDownloadFiles = completedDownloadFiles;
+    }
+
+    public DownloadBatchId downloadBatchId() {
+        return downloadBatchId;
+    }
+
+    public DownloadBatchTitle downloadBatchTitle() {
+        return downloadBatchTitle;
+    }
+
+    public long downloadedDateTimeInMillis() {
+        return downloadedDateTimeInMillis;
+    }
+
+    public List<CompletedDownloadFile> completedDownloadFiles() {
+        return completedDownloadFiles;
     }
 
     @Override
@@ -63,15 +82,39 @@ public class CompletedDownloadBatch {
         private final String fileId;
         private final String originalFileLocation;
         private final String newFileLocation;
-        private final String fileSize;
+        private final FileSize fileSize;
         private final String originalNetworkAddress;
 
-        public CompletedDownloadFile(String fileId, String originalFileLocation, String newFileLocation, String fileSize, String originalNetworkAddress) {
+        public CompletedDownloadFile(String fileId,
+                                     String originalFileLocation,
+                                     String newFileLocation,
+                                     FileSize fileSize,
+                                     String originalNetworkAddress) {
             this.fileId = fileId;
             this.originalFileLocation = originalFileLocation;
             this.newFileLocation = newFileLocation;
             this.fileSize = fileSize;
             this.originalNetworkAddress = originalNetworkAddress;
+        }
+
+        public String fileId() {
+            return fileId;
+        }
+
+        public String originalFileLocation() {
+            return originalFileLocation;
+        }
+
+        public String newFileLocation() {
+            return newFileLocation;
+        }
+
+        public FileSize fileSize() {
+            return fileSize;
+        }
+
+        public String originalNetworkAddress() {
+            return originalNetworkAddress;
         }
 
         @Override
@@ -116,7 +159,7 @@ public class CompletedDownloadBatch {
                     + "fileId='" + fileId + '\''
                     + ", originalFileLocation='" + originalFileLocation + '\''
                     + ", newFileLocation='" + newFileLocation + '\''
-                    + ", fileSize='" + fileSize + '\''
+                    + ", fileSize=" + fileSize
                     + ", originalNetworkAddress='" + originalNetworkAddress + '\''
                     + '}';
         }

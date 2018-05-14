@@ -124,18 +124,7 @@ class LiteDownloadManagerDownloader {
         notificationDispatcher.setDownloadService(downloadService);
     }
 
-    public void addCompletedBatch(Migration migration, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
-        DownloadBatchId downloadBatchId = migration.batch().downloadBatchId();
-        Batch batch = migration.batch();
-        DownloadBatch downloadBatch = DownloadBatchFactory.newInstance(
-                batch,
-                fileOperations,
-                downloadsBatchPersistence,
-                downloadsFilePersistence,
-                callbackThrottleCreator.create(),
-                connectionChecker
-        );
-        downloadsBatchPersistence.persistCompletedBatch(migration);
-        downloadBatchMap.put(downloadBatchId, downloadBatch);
+    public void addCompletedBatch(CompletedDownloadBatch completedDownloadBatch) {
+        downloadsBatchPersistence.persistCompletedBatch(completedDownloadBatch);
     }
 }

@@ -3,7 +3,6 @@ package com.novoda.downloadmanager.demo;
 import android.annotation.SuppressLint;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -15,6 +14,7 @@ import android.widget.TextView;
 
 import com.novoda.downloadmanager.AllBatchStatusesCallback;
 import com.novoda.downloadmanager.Batch;
+import com.novoda.downloadmanager.CompletedDownloadBatch;
 import com.novoda.downloadmanager.ConnectionType;
 import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
@@ -22,13 +22,8 @@ import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.DownloadBatchStatusCallback;
 import com.novoda.downloadmanager.DownloadFileId;
 import com.novoda.downloadmanager.DownloadFileIdCreator;
-import com.novoda.downloadmanager.DownloadMigrator;
-import com.novoda.downloadmanager.DownloadMigratorBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
-import com.novoda.downloadmanager.Migration;
-import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationExtractor;
-import com.novoda.downloadmanager.MigrationStatus;
 import com.novoda.downloadmanager.PartialDownloadMigrationExtractor;
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
 import com.novoda.downloadmanager.VersionOnePartialDownloadBatch;
@@ -59,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
     private TextView textViewBatch1;
     private TextView textViewBatch2;
     private LiteDownloadManagerCommands liteDownloadManagerCommands;
-    private DownloadMigrator downloadMigrator;
     private VersionOneDatabaseCloner versionOneDatabaseCloner;
     private Spinner downloadFileSizeSpinner;
 
@@ -67,15 +61,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        downloadMigrator = DownloadMigratorBuilder.newInstance(this, R.mipmap.ic_launcher_round)
-                .withNotificationChannel(
-                        "chocolate",
-                        "Migration notifications",
-                        NotificationManagerCompat.IMPORTANCE_DEFAULT
-                )
-                .withMigrationCallback(migrationCallback)
-                .build();
 
         textViewBatch1 = findViewById(R.id.batch_1);
         textViewBatch2 = findViewById(R.id.batch_2);
@@ -124,13 +109,6 @@ public class MainActivity extends AppCompatActivity {
         versionOneDatabaseCloner.cloneDatabaseWithDownloadSize(selectedFileSize);
     };
 
-    private final MigrationCallback migrationCallback = migrationStatus -> {
-        if (migrationStatus.status() == MigrationStatus.Status.COMPLETE) {
-            liteDownloadManagerCommands.submitAllStoredDownloads(() -> Log.d(TAG, "Migration completed, submitting all downloads"));
-        }
-        databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());
-    };
-
     private final View.OnClickListener startMigrationOnClick = v -> {
         File databasePath = getDatabasePath("downloads.db");
 
@@ -141,29 +119,38 @@ public class MainActivity extends AppCompatActivity {
         MigrationExtractor migrationExtractor = new MigrationExtractor(database, V1_BASE_PATH);
 
         List<VersionOnePartialDownloadBatch> partialDownloadBatches = partialDownloadMigrationExtractor.extractMigrations();
-        List<Migration> completeDownloadBatches = migrationExtractor.extractMigrations();
+        List<CompletedDownloadBatch> completeDownloadBatches = migrationExtractor.extractMigrations();
 
+        databaseMigrationUpdates.setText("Migrating Partial Downloads");
         for (VersionOnePartialDownloadBatch partialDownloadBatch : partialDownloadBatches) {
             liteDownloadManagerCommands.download(partialDownloadBatch.batch());
-            deleteVersionOneFiles(partialDownloadBatch);
+
+            for (String originalFileLocation : partialDownloadBatch.originalFileLocations()) {
+                deleteVersionOneFile(originalFileLocation);
+            }
         }
 
-        for (Migration completeDownloadBatch : completeDownloadBatches) {
+        databaseMigrationUpdates.setText("Migrating Complete Downloads");
+        for (CompletedDownloadBatch completeDownloadBatch : completeDownloadBatches) {
             liteDownloadManagerCommands.addCompletedBatch(completeDownloadBatch);
+
+            for (CompletedDownloadBatch.CompletedDownloadFile completedDownloadFile : completeDownloadBatch.completedDownloadFiles()) {
+                deleteVersionOneFile(completedDownloadFile.originalFileLocation());
+            }
         }
 
+        databaseMigrationUpdates.setText("Deleting Database");
         database.deleteDatabase();
+        databaseMigrationUpdates.setText("Migration Complete");
     };
 
-    private void deleteVersionOneFiles(VersionOnePartialDownloadBatch partialDownloadBatch) {
-        for (String originalFileLocation : partialDownloadBatch.originalFileLocations()) {
-            if (originalFileLocation != null && !originalFileLocation.isEmpty()) {
-                File file = new File(originalFileLocation);
-                boolean deleted = file.delete();
-                if (!deleted) {
-                    String message = String.format("Could not delete File or Directory: %s", file.getPath());
-                    Log.e(getClass().getSimpleName(), message);
-                }
+    private void deleteVersionOneFile(String originalFileLocation) {
+        if (originalFileLocation != null && !originalFileLocation.isEmpty()) {
+            File file = new File(originalFileLocation);
+            boolean deleted = file.delete();
+            if (!deleted) {
+                String message = String.format("Could not delete File or Directory: %s", file.getPath());
+                Log.e(getClass().getSimpleName(), message);
             }
         }
     }

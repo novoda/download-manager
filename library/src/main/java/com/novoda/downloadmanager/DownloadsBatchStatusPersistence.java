@@ -4,5 +4,5 @@ interface DownloadsBatchStatusPersistence {
 
     void updateStatusAsync(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status);
 
-    void persistCompletedBatch(Migration migration);
+    void persistCompletedBatch(CompletedDownloadBatch completedDownloadBatch);
 }

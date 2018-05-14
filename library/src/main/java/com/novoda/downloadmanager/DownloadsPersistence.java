@@ -26,5 +26,5 @@ public interface DownloadsPersistence {
 
     boolean update(DownloadBatchId downloadBatchId, boolean notificationSeen);
 
-    void persistCompletedBatch(Migration migration);
+    void persistCompletedBatch(CompletedDownloadBatch completedDownloadBatch);
 }

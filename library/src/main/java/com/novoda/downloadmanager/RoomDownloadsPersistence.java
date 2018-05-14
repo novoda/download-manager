@@ -141,13 +141,11 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
     }
 
     @Override
-    public void persistCompletedBatch(Migration migration) {
-        Batch batch = migration.batch();
-
-        DownloadBatchId downloadBatchId = batch.downloadBatchId();
-        DownloadBatchTitle downloadBatchTitle = new LiteDownloadBatchTitle(batch.title());
+    public void persistCompletedBatch(CompletedDownloadBatch completedDownloadBatch) {
+        DownloadBatchId downloadBatchId = completedDownloadBatch.downloadBatchId();
+        DownloadBatchTitle downloadBatchTitle = completedDownloadBatch.downloadBatchTitle();
         DownloadBatchStatus.Status downloadBatchStatus = DownloadBatchStatus.Status.DOWNLOADED;
-        long downloadedDateTimeInMillis = migration.downloadedDateTimeInMillis();
+        long downloadedDateTimeInMillis = completedDownloadBatch.downloadedDateTimeInMillis();
 
         DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted(
                 downloadBatchTitle,
@@ -158,17 +156,17 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
         );
         persistBatch(persistedBatch);
 
-        for (Migration.FileMetadata fileMetadata : migration.getFileMetadata()) {
-            String url = fileMetadata.originalNetworkAddress();
+        for (CompletedDownloadBatch.CompletedDownloadFile completedDownloadFile : completedDownloadBatch.completedDownloadFiles()) {
+            String url = completedDownloadFile.originalNetworkAddress();
 
-            String rawDownloadFileId = rawFileIdFrom(batch, fileMetadata);
+            String rawDownloadFileId = rawFileIdFrom(completedDownloadBatch.downloadBatchTitle(), completedDownloadFile);
             DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(rawDownloadFileId);
 
             DownloadsFilePersisted persistedFile = new LiteDownloadsFilePersisted(
                     downloadBatchId,
                     downloadFileId,
-                    fileMetadata.newFileLocation(),
-                    fileMetadata.fileSize().totalSize(),
+                    new LiteFilePath(completedDownloadFile.newFileLocation()),
+                    completedDownloadFile.fileSize().totalSize(),
                     url,
                     FilePersistenceType.INTERNAL
             );
@@ -176,11 +174,11 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
         }
     }
 
-    private String rawFileIdFrom(Batch batch, Migration.FileMetadata fileMetadata) {
-        if (fileMetadata.fileId() == null || fileMetadata.fileId().isEmpty()) {
-            return batch.title() + System.nanoTime();
+    private String rawFileIdFrom(DownloadBatchTitle batch, CompletedDownloadBatch.CompletedDownloadFile completedDownloadFile) {
+        if (completedDownloadFile.fileId() == null || completedDownloadFile.fileId().isEmpty()) {
+            return batch.asString() + System.nanoTime();
         } else {
-            return fileMetadata.fileId();
+            return completedDownloadFile.fileId();
         }
     }
 }

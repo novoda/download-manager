@@ -2,12 +2,12 @@ package com.novoda.downloadmanager.demo;
 
 import android.util.Log;
 
+import com.novoda.downloadmanager.CompletedDownloadBatch;
 import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.DownloadsBatchPersisted;
 import com.novoda.downloadmanager.DownloadsFilePersisted;
 import com.novoda.downloadmanager.DownloadsPersistence;
-import com.novoda.downloadmanager.Migration;
 
 import java.util.Collections;
 import java.util.List;
@@ -78,7 +78,7 @@ public class CustomDownloadsPersistence implements DownloadsPersistence {
     }
 
     @Override
-    public void persistCompletedBatch(Migration migration) {
-        Log.v(TAG, "Persist completed batch id: " + migration.batch().downloadBatchId());
+    public void persistCompletedBatch(CompletedDownloadBatch completedDownloadBatch) {
+        Log.v(TAG, "Persist completed batch id: " + completedDownloadBatch.downloadBatchId());
     }
 }

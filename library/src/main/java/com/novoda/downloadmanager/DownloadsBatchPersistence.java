@@ -205,11 +205,11 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
     }
 
     @Override
-    public void persistCompletedBatch(Migration migration) {
+    public void persistCompletedBatch(CompletedDownloadBatch completedDownloadBatch) {
         executor.execute(() -> {
             downloadsPersistence.startTransaction();
             try {
-                downloadsPersistence.persistCompletedBatch(migration);
+                downloadsPersistence.persistCompletedBatch(completedDownloadBatch);
                 downloadsPersistence.transactionSuccess();
             } finally {
                 downloadsPersistence.endTransaction();
