@@ -1,7 +1,5 @@
 package com.novoda.downloadmanager.demo;
 
-import android.annotation.SuppressLint;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -14,7 +12,6 @@ import android.widget.TextView;
 
 import com.novoda.downloadmanager.AllBatchStatusesCallback;
 import com.novoda.downloadmanager.Batch;
-import com.novoda.downloadmanager.CompletedDownloadBatch;
 import com.novoda.downloadmanager.ConnectionType;
 import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
@@ -23,13 +20,9 @@ import com.novoda.downloadmanager.DownloadBatchStatusCallback;
 import com.novoda.downloadmanager.DownloadFileId;
 import com.novoda.downloadmanager.DownloadFileIdCreator;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
-import com.novoda.downloadmanager.MigrationExtractor;
-import com.novoda.downloadmanager.PartialDownloadMigrationExtractor;
-import com.novoda.downloadmanager.SqlDatabaseWrapper;
-import com.novoda.downloadmanager.VersionOnePartialDownloadBatch;
 
 import java.io.File;
-import java.util.List;
+import java.util.concurrent.Executors;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 
@@ -39,9 +32,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    @SuppressLint("SdCardPath")
-    private static final String V1_BASE_PATH = "/data/data/com.novoda.downloadmanager.demo.simple/files/Pictures/";
-
     private static final DownloadBatchId BATCH_ID_1 = DownloadBatchIdCreator.createSanitizedFrom("batch_id_1");
     private static final DownloadBatchId BATCH_ID_2 = DownloadBatchIdCreator.createSanitizedFrom("batch_id_2");
     private static final DownloadFileId FILE_ID_1 = DownloadFileIdCreator.createFrom("file_id_1");
@@ -50,12 +40,13 @@ public class MainActivity extends AppCompatActivity {
     private static final String TWENTY_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/20MB.zip";
 
     private TextView databaseCloningUpdates;
-    private TextView databaseMigrationUpdates;
+    private TextView databaseMigrationUpdates;    // TODO: report updates from MigrationJob.
     private TextView textViewBatch1;
     private TextView textViewBatch2;
     private LiteDownloadManagerCommands liteDownloadManagerCommands;
     private VersionOneDatabaseCloner versionOneDatabaseCloner;
     private Spinner downloadFileSizeSpinner;
+    private MigrationJob migrationJob;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +90,8 @@ public class MainActivity extends AppCompatActivity {
         liteDownloadManagerCommands.addDownloadBatchCallback(callback);
         liteDownloadManagerCommands.getAllDownloadBatchStatuses(batchStatusesCallback);
 
+        migrationJob = new MigrationJob(getDatabasePath("downloads.db"), liteDownloadManagerCommands);
+
         bindBatchViews();
     }
 
@@ -109,51 +102,7 @@ public class MainActivity extends AppCompatActivity {
         versionOneDatabaseCloner.cloneDatabaseWithDownloadSize(selectedFileSize);
     };
 
-    private final View.OnClickListener startMigrationOnClick = v -> {
-        File databasePath = getDatabasePath("downloads.db");
-
-        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
-        SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
-        PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database);
-
-        MigrationExtractor migrationExtractor = new MigrationExtractor(database, V1_BASE_PATH);
-
-        List<VersionOnePartialDownloadBatch> partialDownloadBatches = partialDownloadMigrationExtractor.extractMigrations();
-        List<CompletedDownloadBatch> completeDownloadBatches = migrationExtractor.extractMigrations();
-
-        databaseMigrationUpdates.setText("Migrating Partial Downloads");
-        for (VersionOnePartialDownloadBatch partialDownloadBatch : partialDownloadBatches) {
-            liteDownloadManagerCommands.download(partialDownloadBatch.batch());
-
-            for (String originalFileLocation : partialDownloadBatch.originalFileLocations()) {
-                deleteVersionOneFile(originalFileLocation);
-            }
-        }
-
-        databaseMigrationUpdates.setText("Migrating Complete Downloads");
-        for (CompletedDownloadBatch completeDownloadBatch : completeDownloadBatches) {
-            liteDownloadManagerCommands.addCompletedBatch(completeDownloadBatch);
-
-            for (CompletedDownloadBatch.CompletedDownloadFile completedDownloadFile : completeDownloadBatch.completedDownloadFiles()) {
-                deleteVersionOneFile(completedDownloadFile.originalFileLocation());
-            }
-        }
-
-        databaseMigrationUpdates.setText("Deleting Database");
-        database.deleteDatabase();
-        databaseMigrationUpdates.setText("Migration Complete");
-    };
-
-    private void deleteVersionOneFile(String originalFileLocation) {
-        if (originalFileLocation != null && !originalFileLocation.isEmpty()) {
-            File file = new File(originalFileLocation);
-            boolean deleted = file.delete();
-            if (!deleted) {
-                String message = String.format("Could not delete File or Directory: %s", file.getPath());
-                Log.e(getClass().getSimpleName(), message);
-            }
-        }
-    }
+    private final View.OnClickListener startMigrationOnClick = v -> Executors.newSingleThreadExecutor().submit(migrationJob);
 
     private final CompoundButton.OnCheckedChangeListener wifiOnlyOnCheckedChange = (buttonView, isChecked) -> {
         LiteDownloadManagerCommands downloadManagerCommands = ((DemoApplication) getApplication()).getLiteDownloadManagerCommands();
