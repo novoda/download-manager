@@ -2,6 +2,7 @@ package com.novoda.downloadmanager.demo;
 
 import android.annotation.SuppressLint;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Handler;
 import android.util.Log;
 
 import com.novoda.downloadmanager.CompletedDownloadBatch;
@@ -21,10 +22,18 @@ class MigrationJob implements Runnable {
 
     private final File databaseFile;
     private final LiteDownloadManagerCommands downloadManager;
+    private final Handler callbackHandler;
+    private final MigrationJobCallback migrationJobCallback;
 
-    MigrationJob(File databaseFile, LiteDownloadManagerCommands downloadManager) {
+    interface MigrationJobCallback {
+        void onUpdate(String message);
+    }
+
+    MigrationJob(File databaseFile, LiteDownloadManagerCommands downloadManager, Handler callbackHandler, MigrationJobCallback migrationJobCallback) {
         this.databaseFile = databaseFile;
         this.downloadManager = downloadManager;
+        this.callbackHandler = callbackHandler;
+        this.migrationJobCallback = migrationJobCallback;
     }
 
     @Override
@@ -35,9 +44,11 @@ class MigrationJob implements Runnable {
 
         MigrationExtractor migrationExtractor = new MigrationExtractor(database, V1_BASE_PATH);
 
+        onUpdate("Extracting V1 downloads");
         List<VersionOnePartialDownloadBatch> partialDownloadBatches = partialDownloadMigrationExtractor.extractMigrations();
         List<CompletedDownloadBatch> completeDownloadBatches = migrationExtractor.extractMigrations();
 
+        onUpdate("Queuing Partial Downloads");
         for (VersionOnePartialDownloadBatch partialDownloadBatch : partialDownloadBatches) {
             downloadManager.download(partialDownloadBatch.batch());
 
@@ -46,6 +57,7 @@ class MigrationJob implements Runnable {
             }
         }
 
+        onUpdate("Migrating Complete Downloads");
         for (CompletedDownloadBatch completeDownloadBatch : completeDownloadBatches) {
             downloadManager.addCompletedBatch(completeDownloadBatch);
 
@@ -54,7 +66,9 @@ class MigrationJob implements Runnable {
             }
         }
 
+        onUpdate("Deleting V1 Database");
         database.deleteDatabase();
+        onUpdate("Completed Migration");
     }
 
     private void deleteVersionOneFile(String originalFileLocation) {
@@ -66,5 +80,9 @@ class MigrationJob implements Runnable {
                 Log.e(getClass().getSimpleName(), message);
             }
         }
+    }
+
+    private void onUpdate(String message) {
+        callbackHandler.post(() -> migrationJobCallback.onUpdate(message));
     }
 }

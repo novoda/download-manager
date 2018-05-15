@@ -1,6 +1,8 @@
 package com.novoda.downloadmanager.demo;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -40,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TWENTY_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/20MB.zip";
 
     private TextView databaseCloningUpdates;
-    private TextView databaseMigrationUpdates;    // TODO: report updates from MigrationJob.
+    private TextView versionOneMigrationStatus;    // TODO: report updates from MigrationJob.
     private TextView textViewBatch1;
     private TextView textViewBatch2;
     private LiteDownloadManagerCommands liteDownloadManagerCommands;
@@ -66,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
         View buttonCreateDB = findViewById(R.id.button_create_v1_db);
         buttonCreateDB.setOnClickListener(createDatabaseOnClick);
 
-        databaseMigrationUpdates = findViewById(R.id.database_migration_updates);
+        versionOneMigrationStatus = findViewById(R.id.database_migration_updates);
         View buttonMigrate = findViewById(R.id.button_migrate);
         buttonMigrate.setOnClickListener(startMigrationOnClick);
 
@@ -90,7 +92,13 @@ public class MainActivity extends AppCompatActivity {
         liteDownloadManagerCommands.addDownloadBatchCallback(callback);
         liteDownloadManagerCommands.getAllDownloadBatchStatuses(batchStatusesCallback);
 
-        migrationJob = new MigrationJob(getDatabasePath("downloads.db"), liteDownloadManagerCommands);
+        Handler migrationCallbackHandler = new Handler(Looper.getMainLooper());
+        migrationJob = new MigrationJob(
+                getDatabasePath("downloads.db"),
+                liteDownloadManagerCommands,
+                migrationCallbackHandler,
+                migrationJobCallback
+        );
 
         bindBatchViews();
     }
@@ -188,6 +196,8 @@ public class MainActivity extends AppCompatActivity {
             callback.onUpdate(downloadBatchStatus);
         }
     };
+
+    private final MigrationJob.MigrationJobCallback migrationJobCallback = message -> versionOneMigrationStatus.setText(message);
 
     private void bindBatchViews() {
         View buttonPauseDownload1 = findViewById(R.id.button_pause_downloading_1);
