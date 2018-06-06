@@ -9,9 +9,9 @@ import com.novoda.downloadmanager.CompletedDownloadBatch;
 import com.novoda.downloadmanager.CompletedDownloadBatchesExtractor;
 import com.novoda.downloadmanager.FileSizeExtractor;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
-import com.novoda.downloadmanager.PartialDownloadBatchesExtractor;
+import com.novoda.downloadmanager.demo.migration.PartialDownloadBatchesExtractor;
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
-import com.novoda.downloadmanager.VersionOnePartialDownloadBatch;
+import com.novoda.downloadmanager.demo.migration.VersionOnePartialDownloadBatch;
 
 import java.io.File;
 import java.util.List;
