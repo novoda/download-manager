@@ -6,7 +6,7 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.novoda.downloadmanager.CompletedDownloadBatch;
-import com.novoda.downloadmanager.CompletedDownloadBatchesExtractor;
+import com.novoda.downloadmanager.demo.migration.CompletedDownloadBatchesExtractor;
 import com.novoda.downloadmanager.FileSizeExtractor;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.demo.migration.PartialDownloadBatchesExtractor;

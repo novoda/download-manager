@@ -1,6 +1,20 @@
-package com.novoda.downloadmanager;
+package com.novoda.downloadmanager.demo.migration;
 
 import android.database.Cursor;
+
+import com.novoda.downloadmanager.CompletedDownloadBatch;
+import com.novoda.downloadmanager.DownloadBatchId;
+import com.novoda.downloadmanager.DownloadBatchIdCreator;
+import com.novoda.downloadmanager.DownloadBatchTitle;
+import com.novoda.downloadmanager.DownloadBatchTitleCreator;
+import com.novoda.downloadmanager.FilePath;
+import com.novoda.downloadmanager.FilePathCreator;
+import com.novoda.downloadmanager.FileSize;
+import com.novoda.downloadmanager.FileSizeCreator;
+import com.novoda.downloadmanager.FileSizeExtractor;
+import com.novoda.downloadmanager.MigrationPathExtractor;
+import com.novoda.downloadmanager.MigrationStoragePathSanitizer;
+import com.novoda.downloadmanager.SqlDatabaseWrapper;
 
 import java.util.ArrayList;
 import java.util.Collections;

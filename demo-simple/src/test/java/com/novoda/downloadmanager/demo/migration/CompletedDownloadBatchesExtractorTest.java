@@ -1,6 +1,16 @@
-package com.novoda.downloadmanager;
+package com.novoda.downloadmanager.demo.migration;
 
 import android.database.Cursor;
+
+import com.google.common.truth.Truth;
+import com.novoda.downloadmanager.Batch;
+import com.novoda.downloadmanager.CompletedDownloadBatch;
+import com.novoda.downloadmanager.DownloadBatchIdCreator;
+import com.novoda.downloadmanager.DownloadBatchTitleCreator;
+import com.novoda.downloadmanager.DownloadFileIdCreator;
+import com.novoda.downloadmanager.FileSizeCreator;
+import com.novoda.downloadmanager.FileSizeExtractor;
+import com.novoda.downloadmanager.SqlDatabaseWrapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,12 +18,9 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import org.mockito.ArgumentMatchers;
+import org.mockito.BDDMockito;
+import org.mockito.Mockito;
 
 public class CompletedDownloadBatchesExtractorTest {
 
@@ -47,8 +54,8 @@ public class CompletedDownloadBatchesExtractorTest {
             .with("notificationextras", "file_3", "file_4")
             .build();
 
-    private final SqlDatabaseWrapper database = mock(SqlDatabaseWrapper.class);
-    private final FileSizeExtractor fileSizeExtractor = mock(FileSizeExtractor.class);
+    private final SqlDatabaseWrapper database = Mockito.mock(SqlDatabaseWrapper.class);
+    private final FileSizeExtractor fileSizeExtractor = Mockito.mock(FileSizeExtractor.class);
 
     private CompletedDownloadBatchesExtractor migrationExtractor;
 
@@ -59,10 +66,10 @@ public class CompletedDownloadBatchesExtractorTest {
 
     @Test
     public void returnsMigrations_WhenExtracting() {
-        given(database.rawQuery(BATCHES_QUERY)).willReturn(BATCHES_CURSOR);
-        given(database.rawQuery(eq(DOWNLOADS_QUERY), eq("1"))).willReturn(BATCH_ONE_DOWNLOADS_CURSOR);
-        given(database.rawQuery(eq(DOWNLOADS_QUERY), eq("2"))).willReturn(BATCH_TWO_DOWNLOADS_CURSOR);
-        given(fileSizeExtractor.fileSizeFor(anyString()))
+        BDDMockito.given(database.rawQuery(BATCHES_QUERY)).willReturn(BATCHES_CURSOR);
+        BDDMockito.given(database.rawQuery(ArgumentMatchers.eq(DOWNLOADS_QUERY), ArgumentMatchers.eq("1"))).willReturn(BATCH_ONE_DOWNLOADS_CURSOR);
+        BDDMockito.given(database.rawQuery(ArgumentMatchers.eq(DOWNLOADS_QUERY), ArgumentMatchers.eq("2"))).willReturn(BATCH_TWO_DOWNLOADS_CURSOR);
+        BDDMockito.given(fileSizeExtractor.fileSizeFor(ArgumentMatchers.anyString()))
                 .willReturn(1000L)
                 .willReturn(2000L)
                 .willReturn(500L)
@@ -70,7 +77,7 @@ public class CompletedDownloadBatchesExtractorTest {
 
         List<CompletedDownloadBatch> migrations = migrationExtractor.extractMigrations();
 
-        assertThat(migrations).isEqualTo(expectedMigrations());
+        Truth.assertThat(migrations).isEqualTo(expectedMigrations());
     }
 
     private List<CompletedDownloadBatch> expectedMigrations() {
@@ -82,8 +89,8 @@ public class CompletedDownloadBatchesExtractorTest {
                 .build();
 
         List<CompletedDownloadBatch.CompletedDownloadFile> firstFileMetadata = new ArrayList<>();
-        firstFileMetadata.add(new CompletedDownloadBatch.CompletedDownloadFile("file_1", "base/data_1", "base/-1274506706/data_1", new LiteFileSize(1000, 1000), firstUri));
-        firstFileMetadata.add(new CompletedDownloadBatch.CompletedDownloadFile("file_2", "base/data_2-1", "base/-1274506706/data_2", new LiteFileSize(2000, 2000), secondUri));
+        firstFileMetadata.add(new CompletedDownloadBatch.CompletedDownloadFile("file_1", "base/data_1", "base/-1274506706/data_1", FileSizeCreator.createForCompletedDownloadBatch(1000), firstUri));
+        firstFileMetadata.add(new CompletedDownloadBatch.CompletedDownloadFile("file_2", "base/data_2-1", "base/-1274506706/data_2", FileSizeCreator.createForCompletedDownloadBatch(2000), secondUri));
 
         String thirdUri = "uri_3";
         String fourthUri = "uri_4";
@@ -93,8 +100,8 @@ public class CompletedDownloadBatchesExtractorTest {
                 .build();
 
         List<CompletedDownloadBatch.CompletedDownloadFile> secondFileMetadata = new ArrayList<>();
-        secondFileMetadata.add(new CompletedDownloadBatch.CompletedDownloadFile("file_3", "base/data_3-1", "base/-1274506704/data_3", new LiteFileSize(500, 500), thirdUri));
-        secondFileMetadata.add(new CompletedDownloadBatch.CompletedDownloadFile("file_4", "base/data_4", "base/-1274506704/data_4", new LiteFileSize(750, 750), fourthUri));
+        secondFileMetadata.add(new CompletedDownloadBatch.CompletedDownloadFile("file_3", "base/data_3-1", "base/-1274506704/data_3", FileSizeCreator.createForCompletedDownloadBatch(500), thirdUri));
+        secondFileMetadata.add(new CompletedDownloadBatch.CompletedDownloadFile("file_4", "base/data_4", "base/-1274506704/data_4", FileSizeCreator.createForCompletedDownloadBatch(750), fourthUri));
 
         return Arrays.asList(
                 new CompletedDownloadBatch(firstBatch.downloadBatchId(), DownloadBatchTitleCreator.createFrom(firstBatch), 12345, firstFileMetadata),
