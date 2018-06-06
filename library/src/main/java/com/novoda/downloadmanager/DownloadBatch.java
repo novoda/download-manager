@@ -219,13 +219,7 @@ class DownloadBatch {
             downloadBatchStatus.updateDownloaded(currentBytesDownloaded);
 
             if (currentBytesDownloaded > totalBatchSizeBytes) {
-                String sizeMismatchMessage = String.format(
-                        "Download File with ID: %s has a greater current size: %s than the total size: ",
-                        downloadFileStatus.downloadBatchId().rawId(),
-                        downloadFileStatus.bytesDownloaded(),
-                        downloadFileStatus.totalBytes()
-                );
-                DownloadError downloadError = new DownloadError(DownloadError.Type.FILE_CURRENT_AND_TOTAL_SIZE_MISMATCH, sizeMismatchMessage);
+                DownloadError downloadError = DownloadErrorFactory.createSizeMismatchError(downloadFileStatus);
                 downloadBatchStatus.markAsError(Optional.of(downloadError), downloadsBatchPersistence);
             }
 
