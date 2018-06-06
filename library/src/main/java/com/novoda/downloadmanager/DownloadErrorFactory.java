@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-class DownloadErrorFactory {
+final class DownloadErrorFactory {
 
     private DownloadErrorFactory() {
         // Uses static factory methods.
