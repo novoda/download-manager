@@ -55,7 +55,7 @@ class DownloadErrorFactory {
                 "Network error, cannot download file. Cause: %s",
                 networkErrorCause
         );
-        return new DownloadError(DownloadError.Type.STORAGE_UNAVAILABLE, networkErrorMessage);
+        return new DownloadError(DownloadError.Type.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE, networkErrorMessage);
     }
 
     static DownloadError createUnknownError() {
