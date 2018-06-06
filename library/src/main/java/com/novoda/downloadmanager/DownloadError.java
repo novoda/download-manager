@@ -13,12 +13,23 @@ public class DownloadError {
     }
 
     private final Type type;
+    private final String message;
+
+    DownloadError(Type type, String message) {
+        this.type = type;
+        this.message = message;
+    }
 
     DownloadError(Type type) {
         this.type = type;
+        this.message = "";
     }
 
     Type error() {
         return type;
+    }
+
+    public String message() {
+        return message;
     }
 }
