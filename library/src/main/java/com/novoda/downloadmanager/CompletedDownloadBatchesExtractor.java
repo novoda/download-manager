@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class MigrationExtractor {
+public class CompletedDownloadBatchesExtractor {
 
     private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title, batches.last_modified_timestamp FROM "
             + "batches INNER JOIN DownloadsByBatch ON DownloadsByBatch.batch_id = batches._id "
@@ -32,7 +32,7 @@ public class MigrationExtractor {
     private final SqlDatabaseWrapper database;
     private final String basePath;
 
-    public MigrationExtractor(SqlDatabaseWrapper database, String basePath) {
+    public CompletedDownloadBatchesExtractor(SqlDatabaseWrapper database, String basePath) {
         this.database = database;
         this.basePath = basePath;
     }

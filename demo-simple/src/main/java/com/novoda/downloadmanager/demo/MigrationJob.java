@@ -6,9 +6,9 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.novoda.downloadmanager.CompletedDownloadBatch;
+import com.novoda.downloadmanager.CompletedDownloadBatchesExtractor;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
-import com.novoda.downloadmanager.MigrationExtractor;
-import com.novoda.downloadmanager.PartialDownloadMigrationExtractor;
+import com.novoda.downloadmanager.PartialDownloadBatchesExtractor;
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
 import com.novoda.downloadmanager.VersionOnePartialDownloadBatch;
 
@@ -40,9 +40,9 @@ class MigrationJob implements Runnable {
     public void run() {
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databaseFile.getAbsolutePath(), null, 0);
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
-        PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database);
+        PartialDownloadBatchesExtractor partialDownloadMigrationExtractor = new PartialDownloadBatchesExtractor(database);
 
-        MigrationExtractor migrationExtractor = new MigrationExtractor(database, V1_BASE_PATH);
+        CompletedDownloadBatchesExtractor migrationExtractor = new CompletedDownloadBatchesExtractor(database, V1_BASE_PATH);
 
         onUpdate("Extracting V1 downloads");
         List<VersionOnePartialDownloadBatch> partialDownloadBatches = partialDownloadMigrationExtractor.extractMigrations();

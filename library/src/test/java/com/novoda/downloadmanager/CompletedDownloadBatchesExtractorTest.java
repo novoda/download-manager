@@ -15,7 +15,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-public class MigrationExtractorTest {
+public class CompletedDownloadBatchesExtractorTest {
 
     private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title, batches.last_modified_timestamp FROM "
             + "batches INNER JOIN DownloadsByBatch ON DownloadsByBatch.batch_id = batches._id "
@@ -50,11 +50,11 @@ public class MigrationExtractorTest {
     private final SqlDatabaseWrapper database = mock(SqlDatabaseWrapper.class);
     private final InternalFilePersistence internalFilePersistence = mock(InternalFilePersistence.class);
 
-    private MigrationExtractor migrationExtractor;
+    private CompletedDownloadBatchesExtractor migrationExtractor;
 
     @Before
     public void setUp() {
-        migrationExtractor = new MigrationExtractor(database, "base");
+        migrationExtractor = new CompletedDownloadBatchesExtractor(database, "base");
     }
 
     @Test
