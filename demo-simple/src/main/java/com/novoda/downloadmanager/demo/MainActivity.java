@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TWENTY_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/20MB.zip";
 
     private TextView databaseCloningUpdates;
-    private TextView versionOneMigrationStatus;    // TODO: report updates from MigrationJob.
+    private TextView versionOneMigrationStatus;
     private TextView textViewBatch1;
     private TextView textViewBatch2;
     private LiteDownloadManagerCommands liteDownloadManagerCommands;
