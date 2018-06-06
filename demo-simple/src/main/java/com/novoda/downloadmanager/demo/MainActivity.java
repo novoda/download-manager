@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager.demo;
 
 import android.annotation.SuppressLint;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -26,8 +27,12 @@ import com.novoda.downloadmanager.DownloadMigratorBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
+import com.novoda.downloadmanager.VersionOnePartialDownloadBatchesExtractor;
+import com.novoda.downloadmanager.SqlDatabaseWrapper;
+import com.novoda.downloadmanager.VersionOnePartialDownloadBatch;
 
 import java.io.File;
+import java.util.List;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 
@@ -124,7 +129,33 @@ public class MainActivity extends AppCompatActivity {
         databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());
     };
 
-    private final View.OnClickListener startMigrationOnClick = v -> downloadMigrator.startMigration("migrationJob", getDatabasePath("downloads.db"), V1_BASE_PATH);
+    private final View.OnClickListener startMigrationOnClick = v -> {
+        File databasePath = getDatabasePath("downloads.db");
+
+        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
+        SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
+        VersionOnePartialDownloadBatchesExtractor partialDownloadMigrationExtractor = new VersionOnePartialDownloadBatchesExtractor(database);
+
+        List<VersionOnePartialDownloadBatch> partialDownloadBatches = partialDownloadMigrationExtractor.extractMigrations();
+
+        for (VersionOnePartialDownloadBatch partialDownloadBatch : partialDownloadBatches) {
+            liteDownloadManagerCommands.download(partialDownloadBatch.batch());
+            deleteVersionOneFiles(partialDownloadBatch);
+        }
+    };
+
+    private void deleteVersionOneFiles(VersionOnePartialDownloadBatch partialDownloadBatch) {
+        for (String originalFileLocation : partialDownloadBatch.originalFileLocations()) {
+            if (originalFileLocation != null && !originalFileLocation.isEmpty()) {
+                File file = new File(originalFileLocation);
+                boolean deleted = file.delete();
+                if (!deleted) {
+                    String message = String.format("Could not delete File or Directory: %s", file.getPath());
+                    Log.e(getClass().getSimpleName(), message);
+                }
+            }
+        }
+    }
 
     private final CompoundButton.OnCheckedChangeListener wifiOnlyOnCheckedChange = (buttonView, isChecked) -> {
         LiteDownloadManagerCommands downloadManagerCommands = ((DemoApplication) getApplication()).getLiteDownloadManagerCommands();

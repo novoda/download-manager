@@ -58,13 +58,11 @@ class MigrationJob implements Runnable {
         filePersistenceCreator.withStorageRequirementsRule(storageRequirementsRule);
         FilePersistence filePersistence = filePersistenceCreator.create();
 
-        PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database, basePath);
         MigrationExtractor migrationExtractor = new MigrationExtractor(database, filePersistence, basePath);
-        List<Migration> partialMigrations = partialDownloadMigrationExtractor.extractMigrations();
         List<Migration> completeMigrations = migrationExtractor.extractMigrations();
         DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
 
-        int totalNumberOfMigrations = partialMigrations.size() + completeMigrations.size();
+        int totalNumberOfMigrations = completeMigrations.size();
         InternalMigrationStatus migrationStatus = new VersionOneToVersionTwoMigrationStatus(
                 jobIdentifier,
                 MigrationStatus.Status.DB_NOT_PRESENT,
@@ -79,7 +77,6 @@ class MigrationJob implements Runnable {
         onUpdate(migrationStatus);
 
         migrateCompleteDownloads(migrationStatus, database, completeMigrations, downloadsPersistence, filePersistence);
-        migratePartialDownloads(migrationStatus, database, partialMigrations, downloadsPersistence);
         deleteVersionOneDatabase(migrationStatus, database);
 
         migrationStatus.markAsComplete();
@@ -89,27 +86,6 @@ class MigrationJob implements Runnable {
     private void onUpdate(InternalMigrationStatus migrationStatus) {
         for (MigrationCallback migrationCallback : migrationCallbacks) {
             migrationCallback.onUpdate(migrationStatus.copy());
-        }
-    }
-
-    private void migratePartialDownloads(InternalMigrationStatus migrationStatus,
-                                         SqlDatabaseWrapper database,
-                                         List<Migration> partialMigrations,
-                                         DownloadsPersistence downloadsPersistence) {
-        for (Migration partialMigration : partialMigrations) {
-            downloadsPersistence.startTransaction();
-            database.startTransaction();
-
-            migrateV1DataToV2Database(downloadsPersistence, partialMigration, false);
-            deleteFrom(database, partialMigration);
-            deleteVersionOneFiles(partialMigration);
-
-            downloadsPersistence.transactionSuccess();
-            downloadsPersistence.endTransaction();
-            database.setTransactionSuccessful();
-            database.endTransaction();
-            migrationStatus.onSingleBatchMigrated();
-            onUpdate(migrationStatus);
         }
     }
 
