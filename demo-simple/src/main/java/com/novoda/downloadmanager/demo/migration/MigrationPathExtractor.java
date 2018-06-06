@@ -6,7 +6,7 @@ import com.novoda.downloadmanager.FilePathCreator;
 
 import java.io.File;
 
-public final class MigrationPathExtractor {
+final class MigrationPathExtractor {
 
     private static final String PATH_SEPARATOR = File.separator;
     private static final String EMPTY = "";
@@ -16,7 +16,7 @@ public final class MigrationPathExtractor {
         // Uses static utility methods.
     }
 
-    public static FilePath extractMigrationPath(String basePath, String assetPath, DownloadBatchId downloadBatchId) {
+    static FilePath extractMigrationPath(String basePath, String assetPath, DownloadBatchId downloadBatchId) {
         String relativePath = extractRelativePath(basePath, assetPath);
         String relativePathWithBatchId = prependBatchIdTo(relativePath, downloadBatchId);
         String fileName = extractFileName(assetPath);
