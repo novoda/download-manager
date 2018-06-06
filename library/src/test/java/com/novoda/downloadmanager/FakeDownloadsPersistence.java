@@ -78,4 +78,9 @@ class FakeDownloadsPersistence implements DownloadsPersistence {
     public boolean update(DownloadBatchId downloadBatchId, boolean notificationSeen) {
         return true;
     }
+
+    @Override
+    public void persistCompletedBatch(CompletedDownloadBatch completedDownloadBatch) {
+        // no-op
+    }
 }

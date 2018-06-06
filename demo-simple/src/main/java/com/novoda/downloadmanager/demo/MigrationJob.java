@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.novoda.downloadmanager.CompletedDownloadBatch;
 import com.novoda.downloadmanager.CompletedDownloadBatchesExtractor;
+import com.novoda.downloadmanager.FileSizeExtractor;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.PartialDownloadBatchesExtractor;
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
@@ -42,7 +43,8 @@ class MigrationJob implements Runnable {
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
         PartialDownloadBatchesExtractor partialDownloadMigrationExtractor = new PartialDownloadBatchesExtractor(database);
 
-        CompletedDownloadBatchesExtractor migrationExtractor = new CompletedDownloadBatchesExtractor(database, V1_BASE_PATH);
+        FileSizeExtractor fileSizeExtractor = new FileSizeExtractor();
+        CompletedDownloadBatchesExtractor migrationExtractor = new CompletedDownloadBatchesExtractor(database, V1_BASE_PATH, fileSizeExtractor);
 
         onUpdate("Extracting V1 downloads");
         List<VersionOnePartialDownloadBatch> partialDownloadBatches = partialDownloadMigrationExtractor.extractMigrations();
