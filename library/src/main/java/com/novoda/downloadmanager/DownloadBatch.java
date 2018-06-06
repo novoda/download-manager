@@ -218,6 +218,11 @@ class DownloadBatch {
             long currentBytesDownloaded = getBytesDownloadedFrom(fileBytesDownloadedMap);
             downloadBatchStatus.updateDownloaded(currentBytesDownloaded);
 
+            if (currentBytesDownloaded > totalBatchSizeBytes) {
+                DownloadError downloadError = new DownloadError(DownloadError.Error.FILE_CURRENT_AND_TOTAL_SIZE_MISMATCH);
+                downloadBatchStatus.markAsError(Optional.of(downloadError), downloadsBatchPersistence);
+            }
+
             if (currentBytesDownloaded == totalBatchSizeBytes && totalBatchSizeBytes != ZERO_BYTES) {
                 downloadBatchStatus.markAsDownloaded(downloadsBatchPersistence);
             }
@@ -372,9 +377,9 @@ class DownloadBatch {
     void updateTotalSize() {
         if (totalBatchSizeBytes == 0) {
             totalBatchSizeBytes = DownloadBatchSizeCalculator.getTotalSize(
-                downloadFiles,
-                downloadBatchStatus.status(),
-                downloadBatchStatus.getDownloadBatchId()
+                    downloadFiles,
+                    downloadBatchStatus.status(),
+                    downloadBatchStatus.getDownloadBatchId()
             );
         }
         downloadBatchStatus.updateTotalSize(totalBatchSizeBytes);

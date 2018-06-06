@@ -3,6 +3,7 @@ package com.novoda.downloadmanager;
 public class DownloadError {
 
     public enum Error {
+        FILE_CURRENT_AND_TOTAL_SIZE_MISMATCH,
         FILE_TOTAL_SIZE_REQUEST_FAILED,
         FILE_CANNOT_BE_CREATED_LOCALLY_INSUFFICIENT_FREE_SPACE,
         FILE_CANNOT_BE_WRITTEN,
