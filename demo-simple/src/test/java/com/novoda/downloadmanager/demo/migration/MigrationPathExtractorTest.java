@@ -1,4 +1,8 @@
-package com.novoda.downloadmanager;
+package com.novoda.downloadmanager.demo.migration;
+
+import com.novoda.downloadmanager.DownloadBatchId;
+import com.novoda.downloadmanager.DownloadBatchIdCreator;
+import com.novoda.downloadmanager.FilePath;
 
 import org.junit.Test;
 
@@ -15,7 +19,7 @@ public class MigrationPathExtractorTest {
 
         FilePath migrationPath = MigrationPathExtractor.extractMigrationPath(BASE_PATH, assetUrl, DOWNLOAD_BATCH_ID);
 
-        assertThat(migrationPath).isEqualTo(new LiteFilePath("/data/data/com.novoda.downloadmanager.demo.simple/files/Pictures/batch_01/thechase.dat"));
+        assertThat(migrationPath.path()).isEqualTo("/data/data/com.novoda.downloadmanager.demo.simple/files/Pictures/batch_01/thechase.dat");
     }
 
     @Test
@@ -24,7 +28,7 @@ public class MigrationPathExtractorTest {
 
         FilePath migrationPath = MigrationPathExtractor.extractMigrationPath(BASE_PATH, assetUrl, DOWNLOAD_BATCH_ID);
 
-        assertThat(migrationPath).isEqualTo(new LiteFilePath("/data/data/com.novoda.downloadmanager.demo.simple/files/Pictures/batch_01/foo/thechase.dat"));
+        assertThat(migrationPath.path()).isEqualTo("/data/data/com.novoda.downloadmanager.demo.simple/files/Pictures/batch_01/foo/thechase.dat");
     }
 
     @Test
@@ -33,7 +37,7 @@ public class MigrationPathExtractorTest {
 
         FilePath migrationPath = MigrationPathExtractor.extractMigrationPath(BASE_PATH, assetUrl, DOWNLOAD_BATCH_ID);
 
-        assertThat(migrationPath).isEqualTo(new LiteFilePath("/data/data/com.novoda.downloadmanager.demo.simple/files/Pictures/batch_01/foo/bar/thechase.dat"));
+        assertThat(migrationPath.path()).isEqualTo("/data/data/com.novoda.downloadmanager.demo.simple/files/Pictures/batch_01/foo/bar/thechase.dat");
     }
 
 }

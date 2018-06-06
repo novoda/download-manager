@@ -12,7 +12,6 @@ import com.novoda.downloadmanager.FilePathCreator;
 import com.novoda.downloadmanager.FileSize;
 import com.novoda.downloadmanager.FileSizeCreator;
 import com.novoda.downloadmanager.FileSizeExtractor;
-import com.novoda.downloadmanager.MigrationPathExtractor;
 import com.novoda.downloadmanager.MigrationStoragePathSanitizer;
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
 
