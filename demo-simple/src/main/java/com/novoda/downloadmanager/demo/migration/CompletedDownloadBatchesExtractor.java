@@ -8,7 +8,6 @@ import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchTitle;
 import com.novoda.downloadmanager.DownloadBatchTitleCreator;
 import com.novoda.downloadmanager.FilePath;
-import com.novoda.downloadmanager.FilePathCreator;
 import com.novoda.downloadmanager.FileSize;
 import com.novoda.downloadmanager.FileSizeCreator;
 import com.novoda.downloadmanager.FileSizeExtractor;
@@ -99,9 +98,11 @@ public class CompletedDownloadBatchesExtractor {
                             fileIds.add(originalFileId);
                         }
 
-                        String rawNewFilePath = FilePathCreator.create(sanitizedOriginalUniqueFileLocation, sanitizedOriginalUniqueFileLocation)
-                                .path();
-                        FilePath newFilePath = MigrationPathExtractor.extractMigrationPath(basePath, rawNewFilePath, downloadBatchId);
+                        FilePath newFilePath = MigrationPathExtractor.extractMigrationPath(
+                                basePath,
+                                sanitizedOriginalUniqueFileLocation,
+                                downloadBatchId
+                        );
 
                         long rawFileSize = fileSizeExtractor.fileSizeFor(originalFileLocation);
 

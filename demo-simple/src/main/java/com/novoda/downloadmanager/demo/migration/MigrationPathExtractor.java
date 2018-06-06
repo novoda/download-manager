@@ -10,7 +10,6 @@ final class MigrationPathExtractor {
 
     private static final String PATH_SEPARATOR = File.separator;
     private static final String EMPTY = "";
-    private static final String BASE_PATH = "";
 
     private MigrationPathExtractor() {
         // Uses static utility methods.
@@ -22,7 +21,7 @@ final class MigrationPathExtractor {
         String fileName = extractFileName(assetPath);
         String absolutePath = basePath + PATH_SEPARATOR + relativePathWithBatchId + fileName;
         String sanitizedAbsolutePath = absolutePath.replaceAll("//", PATH_SEPARATOR);
-        return FilePathCreator.create(BASE_PATH, sanitizedAbsolutePath);
+        return FilePathCreator.create(sanitizedAbsolutePath);
     }
 
     private static String extractRelativePath(String basePath, String assetPath) {
