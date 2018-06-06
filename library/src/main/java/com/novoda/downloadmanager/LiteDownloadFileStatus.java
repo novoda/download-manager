@@ -98,9 +98,9 @@ class LiteDownloadFileStatus implements InternalDownloadFileStatus {
     }
 
     @Override
-    public void markAsError(DownloadError.Type type) {
+    public void markAsError(DownloadError downloadError) {
         status = Status.ERROR;
-        downloadError = Optional.of(new DownloadError(type));
+        this.downloadError = Optional.of(downloadError);
     }
 
     @Override

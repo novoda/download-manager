@@ -2,8 +2,6 @@ package com.novoda.downloadmanager;
 
 class DownloadErrorFactory {
 
-    private static final String NO_MESSAGE = "";
-
     private DownloadErrorFactory() {
         // Uses static factory methods.
     }
