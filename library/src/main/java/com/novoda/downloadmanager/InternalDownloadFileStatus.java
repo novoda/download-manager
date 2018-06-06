@@ -20,7 +20,7 @@ interface InternalDownloadFileStatus extends DownloadFileStatus {
 
     void markAsDeleted();
 
-    void markAsError(DownloadError.Error error);
+    void markAsError(DownloadError.Type type);
 
     boolean isMarkedAsWaitingForNetwork();
 

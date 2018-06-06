@@ -2,7 +2,7 @@ package com.novoda.downloadmanager;
 
 import android.support.annotation.WorkerThread;
 
-import com.novoda.downloadmanager.DownloadError.Error;
+import com.novoda.downloadmanager.DownloadError.Type;
 
 // This model knows how to interact with low level components.
 @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.StdCyclomaticComplexity", "PMD.ModifiedCyclomaticComplexity"})
@@ -52,7 +52,7 @@ class DownloadFile {
         fileSize = requestTotalFileSizeIfNecessary(fileSize);
 
         if (fileSize.isTotalSizeUnknown()) {
-            updateAndFeedbackWithStatus(Error.FILE_TOTAL_SIZE_REQUEST_FAILED, callback);
+            updateAndFeedbackWithStatus(Type.FILE_TOTAL_SIZE_REQUEST_FAILED, callback);
             return;
         }
 
@@ -76,8 +76,8 @@ class DownloadFile {
 
         FilePersistenceResult result = filePersistence.create(filePath, fileSize);
         if (result != FilePersistenceResult.SUCCESS) {
-            Error error = convertError(result);
-            updateAndFeedbackWithStatus(error, callback);
+            Type type = convertError(result);
+            updateAndFeedbackWithStatus(type, callback);
             return;
         }
 
@@ -86,7 +86,7 @@ class DownloadFile {
             public void onBytesRead(byte[] buffer, int bytesRead) {
                 boolean success = filePersistence.write(buffer, 0, bytesRead);
                 if (!success) {
-                    updateAndFeedbackWithStatus(Error.FILE_CANNOT_BE_WRITTEN, callback);
+                    updateAndFeedbackWithStatus(Type.FILE_CANNOT_BE_WRITTEN, callback);
                 }
 
                 if (downloadFileStatus.isMarkedAsDownloading()) {
@@ -98,7 +98,7 @@ class DownloadFile {
 
             @Override
             public void onError() {
-                updateAndFeedbackWithStatus(Error.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE, callback);
+                updateAndFeedbackWithStatus(Type.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE, callback);
             }
 
             @Override
@@ -114,26 +114,26 @@ class DownloadFile {
         });
     }
 
-    private Error convertError(FilePersistenceResult status) {
+    private Type convertError(FilePersistenceResult status) {
         switch (status) {
             case SUCCESS:
                 Logger.e("Cannot convert success status to any DownloadError type");
                 break;
             case ERROR_UNKNOWN_TOTAL_FILE_SIZE:
-                return DownloadError.Error.FILE_TOTAL_SIZE_REQUEST_FAILED;
+                return Type.FILE_TOTAL_SIZE_REQUEST_FAILED;
             case ERROR_INSUFFICIENT_SPACE:
-                return DownloadError.Error.FILE_CANNOT_BE_CREATED_LOCALLY_INSUFFICIENT_FREE_SPACE;
+                return Type.FILE_CANNOT_BE_CREATED_LOCALLY_INSUFFICIENT_FREE_SPACE;
             case ERROR_EXTERNAL_STORAGE_NON_WRITABLE:
-                return DownloadError.Error.STORAGE_UNAVAILABLE;
+                return Type.STORAGE_UNAVAILABLE;
             case ERROR_OPENING_FILE:
-                return DownloadError.Error.FILE_CANNOT_BE_WRITTEN;
+                return Type.FILE_CANNOT_BE_WRITTEN;
             default:
                 Logger.e("Status " + status + " missing to be processed");
                 break;
 
         }
 
-        return DownloadError.Error.UNKNOWN;
+        return Type.UNKNOWN;
     }
 
     private InternalFileSize requestTotalFileSizeIfNecessary(InternalFileSize fileSize) {
@@ -149,8 +149,8 @@ class DownloadFile {
         return updatedFileSize;
     }
 
-    private void updateAndFeedbackWithStatus(Error error, Callback callback) {
-        downloadFileStatus.markAsError(error);
+    private void updateAndFeedbackWithStatus(Type type, Callback callback) {
+        downloadFileStatus.markAsError(type);
         callback.onUpdate(downloadFileStatus);
     }
 

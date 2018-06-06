@@ -393,7 +393,7 @@ public final class DownloadManagerBuilder {
                     .build();
         }
 
-        private Notification createErrorNotification(NotificationCompat.Builder builder, DownloadError.Error errorType) {
+        private Notification createErrorNotification(NotificationCompat.Builder builder, DownloadError.Type errorType) {
             String content = resources.getString(R.string.download_notification_content_error, errorType);
             return builder
                     .setContentText(content)

@@ -161,7 +161,7 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
 
     @Nullable
     @Override
-    public DownloadError.Error getDownloadErrorType() {
+    public DownloadError.Type getDownloadErrorType() {
         if (downloadError.isPresent()) {
             return downloadError.get().error();
         } else {

@@ -219,7 +219,7 @@ class DownloadBatch {
             downloadBatchStatus.updateDownloaded(currentBytesDownloaded);
 
             if (currentBytesDownloaded > totalBatchSizeBytes) {
-                DownloadError downloadError = new DownloadError(DownloadError.Error.FILE_CURRENT_AND_TOTAL_SIZE_MISMATCH);
+                DownloadError downloadError = new DownloadError(DownloadError.Type.FILE_CURRENT_AND_TOTAL_SIZE_MISMATCH);
                 downloadBatchStatus.markAsError(Optional.of(downloadError), downloadsBatchPersistence);
             }
 
@@ -256,8 +256,8 @@ class DownloadBatch {
         if (status == WAITING_FOR_NETWORK) {
             return true;
         } else if (status == ERROR) {
-            DownloadError.Error downloadErrorType = downloadBatchStatus.getDownloadErrorType();
-            if (downloadErrorType == DownloadError.Error.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE) {
+            DownloadError.Type downloadErrorType = downloadBatchStatus.getDownloadErrorType();
+            if (downloadErrorType == DownloadError.Type.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE) {
                 return true;
             }
         }
