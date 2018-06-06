@@ -93,7 +93,8 @@ public class CompletedDownloadBatchesExtractor {
 
                         long rawFileSize = fileSizeExtractor.fileSizeFor(originalFileLocation);
 
-                        FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
+                        FileSize fileSize = FileSizeCreator.createForCompletedDownloadBatch(rawFileSize);
+
                         CompletedDownloadBatch.CompletedDownloadFile downloadFile = new CompletedDownloadBatch.CompletedDownloadFile(
                                 originalFileId,
                                 originalFileLocation,
