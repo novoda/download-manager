@@ -7,7 +7,6 @@ import com.novoda.downloadmanager.BatchBuilder;
 import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadFileIdCreator;
-import com.novoda.downloadmanager.MigrationStoragePathSanitizer;
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
 
 import java.util.ArrayList;

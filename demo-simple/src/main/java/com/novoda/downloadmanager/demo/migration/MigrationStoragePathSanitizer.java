@@ -1,6 +1,6 @@
-package com.novoda.downloadmanager;
+package com.novoda.downloadmanager.demo.migration;
 
-public final class MigrationStoragePathSanitizer {
+final class MigrationStoragePathSanitizer {
 
     private static final String FILE_SCHEME_TO_REMOVE = "file:";
     private static final String EMPTY = "";
@@ -9,7 +9,7 @@ public final class MigrationStoragePathSanitizer {
         // Uses static utility methods.
     }
 
-    public static String sanitize(String originalFilePath) {
+    static String sanitize(String originalFilePath) {
         return originalFilePath.replace(FILE_SCHEME_TO_REMOVE, EMPTY);
     }
 
