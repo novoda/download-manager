@@ -87,7 +87,8 @@ public class CompletedDownloadBatchesExtractor {
                             fileIds.add(originalFileId);
                         }
 
-                        String rawNewFilePath = new LiteFilePath(sanitizedOriginalUniqueFileLocation).path();
+                        String rawNewFilePath = FilePathCreator.create(sanitizedOriginalUniqueFileLocation, sanitizedOriginalUniqueFileLocation)
+                                .path();
                         FilePath newFilePath = MigrationPathExtractor.extractMigrationPath(basePath, rawNewFilePath, downloadBatchId);
 
                         long rawFileSize = fileSizeExtractor.fileSizeFor(originalFileLocation);
