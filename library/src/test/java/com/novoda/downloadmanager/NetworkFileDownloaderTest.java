@@ -10,10 +10,14 @@ import org.junit.Test;
 import static com.novoda.downloadmanager.InternalFileSizeFixtures.aFileSize;
 import static com.novoda.downloadmanager.NetworkResponseFixtures.aNetworkResponse;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 public class NetworkFileDownloaderTest {
 
+    private static final String MESSAGE = "message";
     private static final byte[] BYTES_TO_RECEIVE = "s".getBytes();
     private static final HttpClient.NetworkResponse RESPONSE_WITH_INPUT_STREAM = aNetworkResponse()
             .withInputStream(new ByteArrayInputStream(BYTES_TO_RECEIVE))
@@ -63,7 +67,12 @@ public class NetworkFileDownloaderTest {
 
         networkFileDownloader.startDownloading(ANY_RAW_URL, UNKNOWN_FILE_SIZE, callback);
 
-        verify(callback).onError();
+        String expectedCause = String.format(
+                "Request: %s with response code: %s failed.",
+                ANY_RAW_URL,
+                418
+        );
+        verify(callback).onError(expectedCause);
     }
 
     @Test
@@ -77,11 +86,13 @@ public class NetworkFileDownloaderTest {
 
     @Test
     public void emitsError_whenRequestExecutionFails() throws IOException {
-        given(httpClient.execute(requestCreator.createDownloadRequest(ANY_RAW_URL))).willThrow(IOException.class);
+        IOException ioException = mock(IOException.class);
+        given(ioException.getMessage()).willReturn(MESSAGE);
+        given(httpClient.execute(requestCreator.createDownloadRequest(ANY_RAW_URL))).willThrow(ioException);
 
         networkFileDownloader.startDownloading(ANY_RAW_URL, UNKNOWN_FILE_SIZE, callback);
 
-        verify(callback).onError();
+        verify(callback).onError(MESSAGE);
     }
 
     @Test
@@ -95,7 +106,7 @@ public class NetworkFileDownloaderTest {
 
     @Ignore // How can we test the `canDownload` flag?
     @Test
-    public void stopsEmittingBytes_whenStoppingDownload() throws IOException {
+    public void stopsEmittingBytes_whenStoppingDownload() {
         networkFileDownloader.startDownloading(ANY_RAW_URL, UNKNOWN_FILE_SIZE, callback);
 
         networkFileDownloader.stopDownloading();
