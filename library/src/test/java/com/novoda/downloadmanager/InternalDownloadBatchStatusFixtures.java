@@ -145,7 +145,7 @@ class InternalDownloadBatchStatusFixtures {
             @Override
             public void markAsError(Optional<DownloadError> downloadError, DownloadsBatchStatusPersistence persistence) {
                 status = Status.ERROR;
-                downloadErrorType = downloadError.get().error();
+                downloadErrorType = downloadError.get().type();
                 persistence.updateStatusAsync(downloadBatchId, status);
             }
 
