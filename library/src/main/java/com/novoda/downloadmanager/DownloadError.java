@@ -25,7 +25,7 @@ public class DownloadError {
         this.message = "";
     }
 
-    Type type() {
+    public Type type() {
         return type;
     }
 
