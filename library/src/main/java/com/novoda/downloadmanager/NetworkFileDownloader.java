@@ -27,10 +27,10 @@ class NetworkFileDownloader implements FileDownloader {
         try {
             response = httpClient.execute(request);
             int responseCode = response.code();
-            processResponse(callback, response, responseCode);
+            processResponse(callback, response, responseCode, url);
         } catch (IOException e) {
             Logger.e(e, "Exception with http request");
-            callback.onError();
+            callback.onError(e.getMessage());
         } finally {
             try {
                 if (response != null) {
@@ -44,7 +44,7 @@ class NetworkFileDownloader implements FileDownloader {
         callback.onDownloadFinished();
     }
 
-    private void processResponse(Callback callback, HttpClient.NetworkResponse response, int responseCode) throws IOException {
+    private void processResponse(Callback callback, HttpClient.NetworkResponse response, int responseCode, String url) throws IOException {
         if (isValid(responseCode)) {
             byte[] buffer = new byte[BUFFER_SIZE];
             int readLast = 0;
@@ -59,7 +59,12 @@ class NetworkFileDownloader implements FileDownloader {
             }
         } else {
             Logger.e("Network response code is not ok, responseCode: " + responseCode);
-            callback.onError();
+            String networkErrorMessage = String.format(
+                    "Request: %s with response code: %s failed.",
+                    url,
+                    responseCode
+            );
+            callback.onError(networkErrorMessage);
         }
     }
 

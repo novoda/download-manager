@@ -2,8 +2,6 @@ package com.novoda.downloadmanager;
 
 import android.support.annotation.WorkerThread;
 
-import com.novoda.downloadmanager.DownloadError.Error;
-
 // This model knows how to interact with low level components.
 @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.StdCyclomaticComplexity", "PMD.ModifiedCyclomaticComplexity"})
 class DownloadFile {
@@ -52,7 +50,8 @@ class DownloadFile {
         fileSize = requestTotalFileSizeIfNecessary(fileSize);
 
         if (fileSize.isTotalSizeUnknown()) {
-            updateAndFeedbackWithStatus(Error.FILE_TOTAL_SIZE_REQUEST_FAILED, callback);
+            DownloadError downloadError = DownloadErrorFactory.createTotalSizeRequestFailedError(downloadFileId, url);
+            updateAndFeedbackWithStatus(downloadError, callback);
             return;
         }
 
@@ -76,8 +75,8 @@ class DownloadFile {
 
         FilePersistenceResult result = filePersistence.create(filePath, fileSize);
         if (result != FilePersistenceResult.SUCCESS) {
-            Error error = convertError(result);
-            updateAndFeedbackWithStatus(error, callback);
+            DownloadError downloadError = convertError(result);
+            updateAndFeedbackWithStatus(downloadError, callback);
             return;
         }
 
@@ -86,7 +85,8 @@ class DownloadFile {
             public void onBytesRead(byte[] buffer, int bytesRead) {
                 boolean success = filePersistence.write(buffer, 0, bytesRead);
                 if (!success) {
-                    updateAndFeedbackWithStatus(Error.FILE_CANNOT_BE_WRITTEN, callback);
+                    DownloadError downloadError = DownloadErrorFactory.createCannotWriteToFileError(downloadFileStatus);
+                    updateAndFeedbackWithStatus(downloadError, callback);
                 }
 
                 if (downloadFileStatus.isMarkedAsDownloading()) {
@@ -97,8 +97,9 @@ class DownloadFile {
             }
 
             @Override
-            public void onError() {
-                updateAndFeedbackWithStatus(Error.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE, callback);
+            public void onError(String cause) {
+                DownloadError downloadError = DownloadErrorFactory.createNetworkError(cause);
+                updateAndFeedbackWithStatus(downloadError, callback);
             }
 
             @Override
@@ -114,26 +115,20 @@ class DownloadFile {
         });
     }
 
-    private Error convertError(FilePersistenceResult status) {
+    private DownloadError convertError(FilePersistenceResult status) {
         switch (status) {
-            case SUCCESS:
-                Logger.e("Cannot convert success status to any DownloadError type");
-                break;
             case ERROR_UNKNOWN_TOTAL_FILE_SIZE:
-                return DownloadError.Error.FILE_TOTAL_SIZE_REQUEST_FAILED;
+                return DownloadErrorFactory.createTotalSizeRequestFailedError(downloadFileId, url);
             case ERROR_INSUFFICIENT_SPACE:
-                return DownloadError.Error.FILE_CANNOT_BE_CREATED_LOCALLY_INSUFFICIENT_FREE_SPACE;
+                return DownloadErrorFactory.createInsufficientFreeSpaceError(downloadFileStatus);
             case ERROR_EXTERNAL_STORAGE_NON_WRITABLE:
-                return DownloadError.Error.STORAGE_UNAVAILABLE;
+                return DownloadErrorFactory.createStorageNotAvailableError(filePersistence);
             case ERROR_OPENING_FILE:
-                return DownloadError.Error.FILE_CANNOT_BE_WRITTEN;
+                return DownloadErrorFactory.createCannotWriteToFileError(downloadFileStatus);
             default:
                 Logger.e("Status " + status + " missing to be processed");
-                break;
-
+                return DownloadErrorFactory.createUnknownErrorFor(status);
         }
-
-        return DownloadError.Error.UNKNOWN;
     }
 
     private InternalFileSize requestTotalFileSizeIfNecessary(InternalFileSize fileSize) {
@@ -149,8 +144,8 @@ class DownloadFile {
         return updatedFileSize;
     }
 
-    private void updateAndFeedbackWithStatus(Error error, Callback callback) {
-        downloadFileStatus.markAsError(error);
+    private void updateAndFeedbackWithStatus(DownloadError downloadError, Callback callback) {
+        downloadFileStatus.markAsError(downloadError);
         callback.onUpdate(downloadFileStatus);
     }
 
