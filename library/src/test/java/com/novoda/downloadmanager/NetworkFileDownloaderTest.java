@@ -67,11 +67,7 @@ public class NetworkFileDownloaderTest {
 
         networkFileDownloader.startDownloading(ANY_RAW_URL, UNKNOWN_FILE_SIZE, callback);
 
-        String expectedCause = String.format(
-                "Request: %s with response code: %s failed.",
-                ANY_RAW_URL,
-                418
-        );
+        String expectedCause = "Request: http://example.com with response code: 418 failed.";
         verify(callback).onError(expectedCause);
     }
 

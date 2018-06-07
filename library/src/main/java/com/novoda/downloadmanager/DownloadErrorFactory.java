@@ -7,54 +7,47 @@ final class DownloadErrorFactory {
     }
 
     static DownloadError createSizeMismatchError(DownloadFileStatus downloadFileStatus) {
-        String sizeMismatchMessage = String.format(
-                "Download File with ID: %s has a greater current size: %s than the total size: %s",
-                downloadFileStatus.downloadBatchId().rawId(),
-                downloadFileStatus.bytesDownloaded(),
-                downloadFileStatus.totalBytes()
-        );
+        String sizeMismatchMessage = "Download File with ID: "
+                + downloadFileStatus.downloadBatchId().rawId()
+                + " has a greater current size: "
+                + downloadFileStatus.bytesDownloaded()
+                + " than the total size: "
+                + downloadFileStatus.totalBytes();
+
         return new DownloadError(DownloadError.Type.FILE_CURRENT_AND_TOTAL_SIZE_MISMATCH, sizeMismatchMessage);
     }
 
     static DownloadError createTotalSizeRequestFailedError(DownloadFileId downloadFileId, String url) {
-        String totalSizeRequestFailedMessage = String.format(
-                "Total size request failed for File with ID: %s and Request: %s",
-                downloadFileId.rawId(),
-                url
-        );
+        String totalSizeRequestFailedMessage = "Total size request failed for File with ID: "
+                + downloadFileId.rawId()
+                + " and Request: "
+                + url;
+
         return new DownloadError(DownloadError.Type.FILE_TOTAL_SIZE_REQUEST_FAILED, totalSizeRequestFailedMessage);
     }
 
     static DownloadError createInsufficientFreeSpaceError(DownloadFileStatus downloadFileStatus) {
-        String insufficientFreeSpaceMessage = String.format(
-                "Insufficient free space to create file with ID: %s Bytes Required: %s",
-                downloadFileStatus.downloadFileId().rawId(),
-                downloadFileStatus.totalBytes()
-        );
+        String insufficientFreeSpaceMessage =
+                "Insufficient free space to create file with ID: "
+                        + downloadFileStatus.downloadFileId().rawId()
+                        + " Bytes Required: "
+                        + downloadFileStatus.totalBytes();
+
         return new DownloadError(DownloadError.Type.FILE_CANNOT_BE_CREATED_LOCALLY_INSUFFICIENT_FREE_SPACE, insufficientFreeSpaceMessage);
     }
 
     static DownloadError createCannotWriteToFileError(DownloadFileStatus downloadFileStatus) {
-        String cannotWriteToFileMessage = String.format(
-                "Cannot write to file with Id: %s",
-                downloadFileStatus.downloadFileId().rawId()
-        );
+        String cannotWriteToFileMessage = "Cannot write to file with Id: " + downloadFileStatus.downloadFileId().rawId();
         return new DownloadError(DownloadError.Type.FILE_CANNOT_BE_WRITTEN, cannotWriteToFileMessage);
     }
 
     static DownloadError createStorageNotAvailableError(FilePersistence filePersistence) {
-        String storageUnavailableMessage = String.format(
-                "Storage with base path: %s is not available",
-                filePersistence.basePath()
-        );
+        String storageUnavailableMessage = "Storage with base path: " + filePersistence.basePath() + " is not available";
         return new DownloadError(DownloadError.Type.STORAGE_UNAVAILABLE, storageUnavailableMessage);
     }
 
     static DownloadError createNetworkError(String networkErrorCause) {
-        String networkErrorMessage = String.format(
-                "Network error, cannot download file. Cause: %s",
-                networkErrorCause
-        );
+        String networkErrorMessage = "Network error, cannot download file. Cause: " + networkErrorCause;
         return new DownloadError(DownloadError.Type.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE, networkErrorMessage);
     }
 
@@ -62,5 +55,4 @@ final class DownloadErrorFactory {
         String unknownErrorMessage = "Unknown download error, additional information unavailable.";
         return new DownloadError(DownloadError.Type.UNKNOWN, unknownErrorMessage);
     }
-
 }
