@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-class MigrationExtractor {
+public class CompletedDownloadBatchesExtractor {
 
     private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title, batches.last_modified_timestamp FROM "
             + "batches INNER JOIN DownloadsByBatch ON DownloadsByBatch.batch_id = batches._id "
@@ -29,17 +29,16 @@ class MigrationExtractor {
     private static final int FILE_ID_COLUMN = 3;
 
     private final SqlDatabaseWrapper database;
-    private final FilePersistence filePersistence;
     private final String basePath;
+    private final FileSizeExtractor fileSizeExtractor;
 
-    MigrationExtractor(SqlDatabaseWrapper database, FilePersistence filePersistence, String basePath) {
+    public CompletedDownloadBatchesExtractor(SqlDatabaseWrapper database, String basePath, FileSizeExtractor fileSizeExtractor) {
         this.database = database;
-        this.filePersistence = filePersistence;
         this.basePath = basePath;
+        this.fileSizeExtractor = fileSizeExtractor;
     }
 
-
-    List<Migration> extractMigrations() {
+    public List<CompletedDownloadBatch> extractMigrations() {
         Cursor batchesCursor = database.rawQuery(BATCHES_QUERY);
 
         if (batchesCursor == null) {
@@ -47,7 +46,7 @@ class MigrationExtractor {
         }
 
         try {
-            List<Migration> migrations = new ArrayList<>();
+            List<CompletedDownloadBatch> completedDownloadBatches = new ArrayList<>();
 
             while (batchesCursor.moveToNext()) {
                 String batchId = batchesCursor.getString(BATCH_ID_COLUMN);
@@ -60,8 +59,7 @@ class MigrationExtractor {
                 String batchTitle = batchesCursor.getString(TITLE_COLUMN);
                 long downloadedDateTimeInMillis = batchesCursor.getLong(MODIFIED_TIMESTAMP_COLUMN);
 
-                BatchBuilder newBatchBuilder = null;
-                List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
+                List<CompletedDownloadBatch.CompletedDownloadFile> downloadFiles = new ArrayList<>();
                 Set<String> uris = new HashSet<>();
                 Set<String> fileIds = new HashSet<>();
 
@@ -80,7 +78,6 @@ class MigrationExtractor {
 
                         if (downloadsCursor.isFirst()) {
                             downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
-                            newBatchBuilder = Batch.with(downloadBatchId, batchTitle);
                         }
 
                         if (uris.contains(originalNetworkAddress) && fileIds.contains(originalFileId)) {
@@ -90,39 +87,36 @@ class MigrationExtractor {
                             fileIds.add(originalFileId);
                         }
 
-                        if (originalFileId == null) {
-                            newBatchBuilder.downloadFrom(originalNetworkAddress)
-                                    .apply();
-                        } else {
-                            newBatchBuilder.downloadFrom(originalNetworkAddress)
-                                    .withIdentifier(DownloadFileIdCreator.createFrom(originalFileId))
-                                    .apply();
-                        }
-
                         String rawNewFilePath = new LiteFilePath(sanitizedOriginalUniqueFileLocation).path();
                         FilePath newFilePath = MigrationPathExtractor.extractMigrationPath(basePath, rawNewFilePath, downloadBatchId);
 
-                        FilePath originalFilePath = new LiteFilePath(originalFileLocation);
-                        long rawFileSize = filePersistence.getCurrentSize(originalFilePath);
+                        long rawFileSize = fileSizeExtractor.fileSizeFor(originalFileLocation);
+
                         FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
-                        Migration.FileMetadata fileMetadata = new Migration.FileMetadata(
+                        CompletedDownloadBatch.CompletedDownloadFile downloadFile = new CompletedDownloadBatch.CompletedDownloadFile(
                                 originalFileId,
-                                originalFilePath,
-                                newFilePath,
+                                originalFileLocation,
+                                newFilePath.path(),
                                 fileSize,
                                 originalNetworkAddress
                         );
-                        fileMetadataList.add(fileMetadata);
+                        downloadFiles.add(downloadFile);
                     }
                 } finally {
                     downloadsCursor.close();
                 }
 
-                Batch batch = newBatchBuilder.build();
-                migrations.add(new Migration(batch, fileMetadataList, downloadedDateTimeInMillis, Migration.Type.COMPLETE));
+                DownloadBatchTitle downloadBatchTitle = DownloadBatchTitleCreator.createFrom(batchTitle);
+                CompletedDownloadBatch completedDownloadBatch = new CompletedDownloadBatch(
+                        downloadBatchId,
+                        downloadBatchTitle,
+                        downloadedDateTimeInMillis,
+                        downloadFiles
+                );
+                completedDownloadBatches.add(completedDownloadBatch);
             }
 
-            return migrations;
+            return completedDownloadBatches;
         } finally {
             batchesCursor.close();
         }

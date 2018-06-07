@@ -223,4 +223,9 @@ class DownloadManager implements LiteDownloadManagerCommands {
         return new File(filePath.path());
     }
 
+    @Override
+    public void addCompletedBatch(CompletedDownloadBatch completedDownloadBatch) {
+        downloader.addCompletedBatch(completedDownloadBatch);
+    }
+
 }

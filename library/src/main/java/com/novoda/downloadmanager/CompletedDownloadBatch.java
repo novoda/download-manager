@@ -1,41 +1,38 @@
 package com.novoda.downloadmanager;
 
-import java.util.Collections;
 import java.util.List;
 
-public class Migration {
+public class CompletedDownloadBatch {
 
-    public enum Type {
-        COMPLETE,
-        PARTIAL
-    }
-
-    private final Batch batch;
-    private final List<FileMetadata> fileMetadata;
+    private final DownloadBatchId downloadBatchId;
+    private final DownloadBatchTitle downloadBatchTitle;
     private final long downloadedDateTimeInMillis;
-    private final Type type;
+    private final List<CompletedDownloadFile> completedDownloadFiles;
 
-    public Migration(Batch batch, List<FileMetadata> fileMetadata, long downloadedDateTimeInMillis, Type type) {
-        this.batch = batch;
-        this.fileMetadata = Collections.unmodifiableList(fileMetadata);
+    public CompletedDownloadBatch(DownloadBatchId downloadBatchId,
+                                  DownloadBatchTitle downloadBatchTitle,
+                                  long downloadedDateTimeInMillis,
+                                  List<CompletedDownloadFile> completedDownloadFiles) {
+        this.downloadBatchId = downloadBatchId;
+        this.downloadBatchTitle = downloadBatchTitle;
         this.downloadedDateTimeInMillis = downloadedDateTimeInMillis;
-        this.type = type;
+        this.completedDownloadFiles = completedDownloadFiles;
     }
 
-    public Batch batch() {
-        return batch;
+    public DownloadBatchId downloadBatchId() {
+        return downloadBatchId;
     }
 
-    public List<FileMetadata> getFileMetadata() {
-        return fileMetadata;
+    public DownloadBatchTitle downloadBatchTitle() {
+        return downloadBatchTitle;
     }
 
     public long downloadedDateTimeInMillis() {
         return downloadedDateTimeInMillis;
     }
 
-    public Type type() {
-        return type;
+    public List<CompletedDownloadFile> completedDownloadFiles() {
+        return completedDownloadFiles;
     }
 
     @Override
@@ -47,48 +44,52 @@ public class Migration {
             return false;
         }
 
-        Migration migration = (Migration) o;
+        CompletedDownloadBatch that = (CompletedDownloadBatch) o;
 
-        if (downloadedDateTimeInMillis != migration.downloadedDateTimeInMillis) {
+        if (downloadedDateTimeInMillis != that.downloadedDateTimeInMillis) {
             return false;
         }
-        if (batch != null ? !batch.equals(migration.batch) : migration.batch != null) {
+        if (downloadBatchId != null ? !downloadBatchId.equals(that.downloadBatchId) : that.downloadBatchId != null) {
             return false;
         }
-        if (fileMetadata != null ? !fileMetadata.equals(migration.fileMetadata) : migration.fileMetadata != null) {
+        if (downloadBatchTitle != null ? !downloadBatchTitle.equals(that.downloadBatchTitle) : that.downloadBatchTitle != null) {
             return false;
         }
-        return type == migration.type;
+        return completedDownloadFiles != null ? completedDownloadFiles.equals(that.completedDownloadFiles) : that.completedDownloadFiles == null;
     }
 
     @Override
     public int hashCode() {
-        int result = batch != null ? batch.hashCode() : 0;
-        result = 31 * result + (fileMetadata != null ? fileMetadata.hashCode() : 0);
+        int result = downloadBatchId != null ? downloadBatchId.hashCode() : 0;
+        result = 31 * result + (downloadBatchTitle != null ? downloadBatchTitle.hashCode() : 0);
         result = 31 * result + (int) (downloadedDateTimeInMillis ^ (downloadedDateTimeInMillis >>> 32));
-        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (completedDownloadFiles != null ? completedDownloadFiles.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        return "Migration{"
-                + "batch=" + batch
-                + ", fileMetadata=" + fileMetadata
+        return "CompletedDownloadBatch{"
+                + "downloadBatchId=" + downloadBatchId
+                + ", downloadBatchTitle=" + downloadBatchTitle
                 + ", downloadedDateTimeInMillis=" + downloadedDateTimeInMillis
-                + ", type=" + type
+                + ", completedDownloadFiles=" + completedDownloadFiles
                 + '}';
     }
 
-    public static class FileMetadata {
+    public static class CompletedDownloadFile {
 
         private final String fileId;
-        private final FilePath originalFileLocation;
-        private final FilePath newFileLocation;
+        private final String originalFileLocation;
+        private final String newFileLocation;
         private final FileSize fileSize;
         private final String originalNetworkAddress;
 
-        public FileMetadata(String fileId, FilePath originalFileLocation, FilePath newFileLocation, FileSize fileSize, String originalNetworkAddress) {
+        public CompletedDownloadFile(String fileId,
+                                     String originalFileLocation,
+                                     String newFileLocation,
+                                     FileSize fileSize,
+                                     String originalNetworkAddress) {
             this.fileId = fileId;
             this.originalFileLocation = originalFileLocation;
             this.newFileLocation = newFileLocation;
@@ -100,11 +101,11 @@ public class Migration {
             return fileId;
         }
 
-        public FilePath originalFileLocation() {
+        public String originalFileLocation() {
             return originalFileLocation;
         }
 
-        public FilePath newFileLocation() {
+        public String newFileLocation() {
             return newFileLocation;
         }
 
@@ -125,7 +126,7 @@ public class Migration {
                 return false;
             }
 
-            FileMetadata that = (FileMetadata) o;
+            CompletedDownloadFile that = (CompletedDownloadFile) o;
 
             if (fileId != null ? !fileId.equals(that.fileId) : that.fileId != null) {
                 return false;
@@ -154,10 +155,10 @@ public class Migration {
 
         @Override
         public String toString() {
-            return "FileMetadata{"
+            return "CompletedDownloadFile{"
                     + "fileId='" + fileId + '\''
-                    + ", originalFileLocation=" + originalFileLocation
-                    + ", newFileLocation=" + newFileLocation
+                    + ", originalFileLocation='" + originalFileLocation + '\''
+                    + ", newFileLocation='" + newFileLocation + '\''
                     + ", fileSize=" + fileSize
                     + ", originalNetworkAddress='" + originalNetworkAddress + '\''
                     + '}';

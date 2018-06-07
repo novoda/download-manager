@@ -12,7 +12,6 @@
   <application>
 
     <service android:name="com.novoda.downloadmanager.LiteDownloadService" />
-    <service android:name="com.novoda.downloadmanager.LiteDownloadMigrationService" />
 
   </application>
 

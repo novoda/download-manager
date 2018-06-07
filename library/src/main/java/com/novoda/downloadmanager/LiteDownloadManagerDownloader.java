@@ -56,19 +56,18 @@ class LiteDownloadManagerDownloader {
 
     void download(Batch batch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         DownloadBatch downloadBatch = DownloadBatchFactory.newInstance(
-            batch,
-            fileOperations,
-            downloadsBatchPersistence,
-            downloadsFilePersistence,
-            callbackThrottleCreator.create(),
-            connectionChecker
+                batch,
+                fileOperations,
+                downloadsBatchPersistence,
+                downloadsFilePersistence,
+                callbackThrottleCreator.create(),
+                connectionChecker
         );
 
         downloadBatchMap.put(downloadBatch.getId(), downloadBatch);
         executor.submit(downloadBatch::updateTotalSize);
         download(downloadBatch, downloadBatchMap);
     }
-
 
     void download(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         DownloadBatchId downloadBatchId = downloadBatch.getId();
@@ -77,7 +76,7 @@ class LiteDownloadManagerDownloader {
         }
 
         executor.submit(() -> Wait.<Void>waitFor(downloadService, waitForDownloadService)
-            .thenPerform(executeDownload(downloadBatch, downloadBatchMap)));
+                .thenPerform(executeDownload(downloadBatch, downloadBatchMap)));
     }
 
     private Wait.ThenPerform.Action<Void> executeDownload(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
@@ -123,5 +122,9 @@ class LiteDownloadManagerDownloader {
     void setDownloadService(DownloadService downloadService) {
         this.downloadService = downloadService;
         notificationDispatcher.setDownloadService(downloadService);
+    }
+
+    public void addCompletedBatch(CompletedDownloadBatch completedDownloadBatch) {
+        downloadsBatchPersistence.persistCompletedBatch(completedDownloadBatch);
     }
 }

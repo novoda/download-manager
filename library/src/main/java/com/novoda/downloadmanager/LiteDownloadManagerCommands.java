@@ -36,4 +36,6 @@ public interface LiteDownloadManagerCommands {
     void updateAllowedConnectionType(ConnectionType allowedConnectionType);
 
     File getDownloadsDir();
+
+    void addCompletedBatch(CompletedDownloadBatch completedDownloadBatch);
 }

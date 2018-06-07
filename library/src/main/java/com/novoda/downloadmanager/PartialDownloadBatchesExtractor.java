@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class VersionOnePartialDownloadBatchesExtractor {
+public class PartialDownloadBatchesExtractor {
 
     private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title "
             + "FROM batches INNER JOIN DownloadsByBatch ON DownloadsByBatch.batch_id = batches._id "
@@ -25,7 +25,7 @@ public class VersionOnePartialDownloadBatchesExtractor {
 
     private final SqlDatabaseWrapper database;
 
-    public VersionOnePartialDownloadBatchesExtractor(SqlDatabaseWrapper database) {
+    public PartialDownloadBatchesExtractor(SqlDatabaseWrapper database) {
         this.database = database;
     }
 
