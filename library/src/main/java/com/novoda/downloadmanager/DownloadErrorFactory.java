@@ -51,8 +51,8 @@ final class DownloadErrorFactory {
         return new DownloadError(DownloadError.Type.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE, networkErrorMessage);
     }
 
-    static DownloadError createUnknownError() {
-        String unknownErrorMessage = "Unknown download error, additional information unavailable.";
+    static DownloadError createUnknownErrorFor(FilePersistenceResult status) {
+        String unknownErrorMessage = "Unhandled error for FilePersistenceResult: " + status.name();
         return new DownloadError(DownloadError.Type.UNKNOWN, unknownErrorMessage);
     }
 }
