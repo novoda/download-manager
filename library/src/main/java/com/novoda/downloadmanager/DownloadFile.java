@@ -127,10 +127,8 @@ class DownloadFile {
                 return DownloadErrorFactory.createCannotWriteToFileError(downloadFileStatus);
             default:
                 Logger.e("Status " + status + " missing to be processed");
-                break;
-
+                return DownloadErrorFactory.createUnknownError();
         }
-        return DownloadErrorFactory.createUnknownError();
     }
 
     private InternalFileSize requestTotalFileSizeIfNecessary(InternalFileSize fileSize) {
