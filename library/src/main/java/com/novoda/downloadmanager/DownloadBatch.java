@@ -221,6 +221,8 @@ class DownloadBatch {
             if (currentBytesDownloaded > totalBatchSizeBytes) {
                 DownloadError downloadError = DownloadErrorFactory.createSizeMismatchError(downloadFileStatus);
                 downloadBatchStatus.markAsError(Optional.of(downloadError), downloadsBatchPersistence);
+                callbackThrottle.update(downloadBatchStatus);
+                return;
             }
 
             if (currentBytesDownloaded == totalBatchSizeBytes && totalBatchSizeBytes != ZERO_BYTES) {
