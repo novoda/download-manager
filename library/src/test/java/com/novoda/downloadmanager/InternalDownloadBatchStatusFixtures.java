@@ -100,7 +100,7 @@ class InternalDownloadBatchStatusFixtures {
             }
 
             @Override
-            public DownloadError.Type getDownloadErrorType() {
+            public DownloadError downloadError() {
                 return downloadErrorType;
             }
 

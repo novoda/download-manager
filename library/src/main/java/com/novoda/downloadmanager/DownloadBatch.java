@@ -258,8 +258,8 @@ class DownloadBatch {
         if (status == WAITING_FOR_NETWORK) {
             return true;
         } else if (status == ERROR) {
-            DownloadError.Type downloadErrorType = downloadBatchStatus.getDownloadErrorType();
-            if (downloadErrorType == DownloadError.Type.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE) {
+            DownloadError downloadError = downloadBatchStatus.downloadError();
+            if (downloadError != null && downloadError.type() == DownloadError.Type.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE) {
                 return true;
             }
         }
