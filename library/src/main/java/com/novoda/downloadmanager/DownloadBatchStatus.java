@@ -51,7 +51,7 @@ public interface DownloadBatchStatus {
      * @return null if {@link DownloadBatchStatus#status()} is not {@link Status#ERROR}.
      */
     @Nullable
-    DownloadError.Type getDownloadErrorType();
+    DownloadError downloadError();
 
     boolean notificationSeen();
 }

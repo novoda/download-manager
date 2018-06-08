@@ -8,7 +8,7 @@ class InternalDownloadBatchStatusFixtures {
     private long bytesTotalSize = 1000;
     private DownloadBatchId downloadBatchId = DownloadBatchIdFixtures.aDownloadBatchId().build();
     private DownloadBatchStatus.Status status = DownloadBatchStatus.Status.QUEUED;
-    private DownloadError.Type downloadErrorType = null;
+    private DownloadError downloadError = null;
     private long downloadedDateTimeInMillis = 123456789L;
     private boolean notificationSeen = false;
 
@@ -51,8 +51,8 @@ class InternalDownloadBatchStatusFixtures {
         return this;
     }
 
-    InternalDownloadBatchStatusFixtures withDownloadErrorType(DownloadError.Type downloadErrorType) {
-        this.downloadErrorType = downloadErrorType;
+    InternalDownloadBatchStatusFixtures withDownloadError(DownloadError downloadError) {
+        this.downloadError = downloadError;
         return this;
     }
 
@@ -100,8 +100,8 @@ class InternalDownloadBatchStatusFixtures {
             }
 
             @Override
-            public DownloadError.Type getDownloadErrorType() {
-                return downloadErrorType;
+            public DownloadError downloadError() {
+                return downloadError;
             }
 
             @Override
@@ -145,7 +145,7 @@ class InternalDownloadBatchStatusFixtures {
             @Override
             public void markAsError(Optional<DownloadError> downloadError, DownloadsBatchStatusPersistence persistence) {
                 status = Status.ERROR;
-                downloadErrorType = downloadError.get().type();
+                InternalDownloadBatchStatusFixtures.this.downloadError = downloadError.get();
                 persistence.updateStatusAsync(downloadBatchId, status);
             }
 
