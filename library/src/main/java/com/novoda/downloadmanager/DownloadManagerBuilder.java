@@ -239,20 +239,19 @@ public final class DownloadManagerBuilder {
         ServiceConnection serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
-                if (!(service instanceof LiteDownloadService.DownloadServiceBinder)) {
-                    return;
-                }
-                LiteDownloadService.DownloadServiceBinder binder = (LiteDownloadService.DownloadServiceBinder) service;
-                downloadService = binder.getService();
-                downloadManager.submitAllStoredDownloads(() -> {
-                    downloadManager.initialise(downloadService);
+                if (service instanceof LiteDownloadService.DownloadServiceBinder) {
+                    LiteDownloadService.DownloadServiceBinder binder = (LiteDownloadService.DownloadServiceBinder) service;
+                    downloadService = binder.getService();
+                    downloadManager.submitAllStoredDownloads(() -> {
+                        downloadManager.initialise(downloadService);
 
-                    if (allowNetworkRecovery) {
-                        DownloadsNetworkRecoveryCreator.createEnabled(applicationContext, downloadManager, connectionTypeAllowed);
-                    } else {
-                        DownloadsNetworkRecoveryCreator.createDisabled();
-                    }
-                });
+                        if (allowNetworkRecovery) {
+                            DownloadsNetworkRecoveryCreator.createEnabled(applicationContext, downloadManager, connectionTypeAllowed);
+                        } else {
+                            DownloadsNetworkRecoveryCreator.createDisabled();
+                        }
+                    });
+                }
             }
 
             @Override

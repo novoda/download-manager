@@ -93,8 +93,10 @@ public final class DownloadMigratorBuilder {
         ServiceConnection serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder binder) {
-                DownloadMigrationService migrationService = ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) binder).getService();
-                downloadMigrator.initialise(migrationService);
+                if (binder instanceof LiteDownloadMigrationService.MigrationDownloadServiceBinder) {
+                    DownloadMigrationService migrationService = ((LiteDownloadMigrationService.MigrationDownloadServiceBinder) binder).getService();
+                    downloadMigrator.initialise(migrationService);
+                }
             }
 
             @Override
