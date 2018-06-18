@@ -1,4 +1,4 @@
-package com.novoda.downloadmanager;
+package com.novoda.downloadmanager.demo.migration;
 
 import android.content.ContentResolver;
 import android.database.CharArrayBuffer;

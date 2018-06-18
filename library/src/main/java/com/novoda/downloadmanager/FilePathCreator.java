@@ -20,6 +20,10 @@ public final class FilePathCreator {
         return new LiteFilePath(absolutePath);
     }
 
+    public static FilePath create(String absolutePath) {
+        return new LiteFilePath(absolutePath);
+    }
+
     private static String removeSubstring(String source, String subString) {
         return source.replaceAll(subString, EMPTY);
     }

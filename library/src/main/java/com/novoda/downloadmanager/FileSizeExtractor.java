@@ -4,7 +4,7 @@ import java.io.File;
 
 public class FileSizeExtractor {
 
-    long fileSizeFor(String filePath) {
+    public long fileSizeFor(String filePath) {
         File file = new File(filePath);
         return file.length();
     }

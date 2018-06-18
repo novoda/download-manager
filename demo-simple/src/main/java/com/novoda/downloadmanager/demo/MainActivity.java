@@ -22,6 +22,7 @@ import com.novoda.downloadmanager.DownloadBatchStatusCallback;
 import com.novoda.downloadmanager.DownloadFileId;
 import com.novoda.downloadmanager.DownloadFileIdCreator;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
+import com.novoda.downloadmanager.demo.migration.MigrationJob;
 
 import java.io.File;
 import java.util.concurrent.Executors;

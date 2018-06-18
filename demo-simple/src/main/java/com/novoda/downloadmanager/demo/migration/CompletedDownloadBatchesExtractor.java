@@ -1,6 +1,17 @@
-package com.novoda.downloadmanager;
+package com.novoda.downloadmanager.demo.migration;
 
 import android.database.Cursor;
+
+import com.novoda.downloadmanager.CompletedDownloadBatch;
+import com.novoda.downloadmanager.DownloadBatchId;
+import com.novoda.downloadmanager.DownloadBatchIdCreator;
+import com.novoda.downloadmanager.DownloadBatchTitle;
+import com.novoda.downloadmanager.DownloadBatchTitleCreator;
+import com.novoda.downloadmanager.FilePath;
+import com.novoda.downloadmanager.FileSize;
+import com.novoda.downloadmanager.FileSizeCreator;
+import com.novoda.downloadmanager.FileSizeExtractor;
+import com.novoda.downloadmanager.SqlDatabaseWrapper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -87,12 +98,16 @@ public class CompletedDownloadBatchesExtractor {
                             fileIds.add(originalFileId);
                         }
 
-                        String rawNewFilePath = new LiteFilePath(sanitizedOriginalUniqueFileLocation).path();
-                        FilePath newFilePath = MigrationPathExtractor.extractMigrationPath(basePath, rawNewFilePath, downloadBatchId);
+                        FilePath newFilePath = MigrationPathExtractor.extractMigrationPath(
+                                basePath,
+                                sanitizedOriginalUniqueFileLocation,
+                                downloadBatchId
+                        );
 
                         long rawFileSize = fileSizeExtractor.fileSizeFor(originalFileLocation);
 
-                        FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
+                        FileSize fileSize = FileSizeCreator.createForCompletedDownloadBatch(rawFileSize);
+
                         CompletedDownloadBatch.CompletedDownloadFile downloadFile = new CompletedDownloadBatch.CompletedDownloadFile(
                                 originalFileId,
                                 originalFileLocation,

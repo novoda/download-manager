@@ -1,4 +1,6 @@
-package com.novoda.downloadmanager;
+package com.novoda.downloadmanager.demo.migration;
+
+import com.novoda.downloadmanager.Batch;
 
 import java.util.List;
 
