@@ -19,8 +19,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
-import org.mockito.BDDMockito;
-import org.mockito.Mockito;
+
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 public class CompletedDownloadBatchesExtractorTest {
 
@@ -54,8 +55,8 @@ public class CompletedDownloadBatchesExtractorTest {
             .with("notificationextras", "file_3", "file_4")
             .build();
 
-    private final SqlDatabaseWrapper database = Mockito.mock(SqlDatabaseWrapper.class);
-    private final FileSizeExtractor fileSizeExtractor = Mockito.mock(FileSizeExtractor.class);
+    private final SqlDatabaseWrapper database = mock(SqlDatabaseWrapper.class);
+    private final FileSizeExtractor fileSizeExtractor = mock(FileSizeExtractor.class);
 
     private CompletedDownloadBatchesExtractor migrationExtractor;
 
@@ -66,10 +67,10 @@ public class CompletedDownloadBatchesExtractorTest {
 
     @Test
     public void returnsMigrations_WhenExtracting() {
-        BDDMockito.given(database.rawQuery(BATCHES_QUERY)).willReturn(BATCHES_CURSOR);
-        BDDMockito.given(database.rawQuery(ArgumentMatchers.eq(DOWNLOADS_QUERY), ArgumentMatchers.eq("1"))).willReturn(BATCH_ONE_DOWNLOADS_CURSOR);
-        BDDMockito.given(database.rawQuery(ArgumentMatchers.eq(DOWNLOADS_QUERY), ArgumentMatchers.eq("2"))).willReturn(BATCH_TWO_DOWNLOADS_CURSOR);
-        BDDMockito.given(fileSizeExtractor.fileSizeFor(ArgumentMatchers.anyString()))
+        given(database.rawQuery(BATCHES_QUERY)).willReturn(BATCHES_CURSOR);
+        given(database.rawQuery(ArgumentMatchers.eq(DOWNLOADS_QUERY), ArgumentMatchers.eq("1"))).willReturn(BATCH_ONE_DOWNLOADS_CURSOR);
+        given(database.rawQuery(ArgumentMatchers.eq(DOWNLOADS_QUERY), ArgumentMatchers.eq("2"))).willReturn(BATCH_TWO_DOWNLOADS_CURSOR);
+        given(fileSizeExtractor.fileSizeFor(ArgumentMatchers.anyString()))
                 .willReturn(1000L)
                 .willReturn(2000L)
                 .willReturn(500L)
