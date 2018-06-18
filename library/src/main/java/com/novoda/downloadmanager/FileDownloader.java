@@ -10,7 +10,7 @@ public interface FileDownloader {
 
         void onBytesRead(byte[] buffer, int bytesRead);
 
-        void onError();
+        void onError(String cause);
 
         void onDownloadFinished();
     }
