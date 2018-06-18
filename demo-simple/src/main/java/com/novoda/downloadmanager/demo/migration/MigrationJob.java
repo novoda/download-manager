@@ -1,4 +1,4 @@
-package com.novoda.downloadmanager.demo;
+package com.novoda.downloadmanager.demo.migration;
 
 import android.annotation.SuppressLint;
 import android.database.sqlite.SQLiteDatabase;
@@ -6,17 +6,14 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.novoda.downloadmanager.CompletedDownloadBatch;
-import com.novoda.downloadmanager.demo.migration.CompletedDownloadBatchesExtractor;
 import com.novoda.downloadmanager.FileSizeExtractor;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
-import com.novoda.downloadmanager.demo.migration.PartialDownloadBatchesExtractor;
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
-import com.novoda.downloadmanager.demo.migration.VersionOnePartialDownloadBatch;
 
 import java.io.File;
 import java.util.List;
 
-class MigrationJob implements Runnable {
+public class MigrationJob implements Runnable {
 
     @SuppressLint("SdCardPath")
     private static final String V1_BASE_PATH = "/data/data/com.novoda.downloadmanager.demo.simple/files/Pictures/";
@@ -26,11 +23,14 @@ class MigrationJob implements Runnable {
     private final Handler callbackHandler;
     private final MigrationJobCallback migrationJobCallback;
 
-    interface MigrationJobCallback {
+    public interface MigrationJobCallback {
         void onUpdate(String message);
     }
 
-    MigrationJob(File databaseFile, LiteDownloadManagerCommands downloadManager, Handler callbackHandler, MigrationJobCallback migrationJobCallback) {
+    public MigrationJob(File databaseFile,
+                        LiteDownloadManagerCommands downloadManager,
+                        Handler callbackHandler,
+                        MigrationJobCallback migrationJobCallback) {
         this.databaseFile = databaseFile;
         this.downloadManager = downloadManager;
         this.callbackHandler = callbackHandler;
