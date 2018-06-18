@@ -7,6 +7,7 @@ import java.util.List;
 
 final class RoomDownloadsPersistence implements DownloadsPersistence {
 
+    private static final boolean NOTIFICATION_SEEN = true;
     private final RoomAppDatabase database;
 
     static RoomDownloadsPersistence newInstance(Context context) {
@@ -152,7 +153,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
                 downloadBatchId,
                 downloadBatchStatus,
                 downloadedDateTimeInMillis,
-                true
+                NOTIFICATION_SEEN
         );
         persistBatch(persistedBatch);
 
