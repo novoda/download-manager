@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
     private String getStatusMessage(DownloadBatchStatus downloadBatchStatus) {
         if (downloadBatchStatus.status() == ERROR) {
             return "\nstatus: " + downloadBatchStatus.status()
-                    + " - " + downloadBatchStatus.getDownloadErrorType();
+                    + " - " + downloadBatchStatus.downloadError().type();
         } else {
             return "\nstatus: " + downloadBatchStatus.status();
         }

@@ -239,17 +239,19 @@ public final class DownloadManagerBuilder {
         ServiceConnection serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
-                LiteDownloadService.DownloadServiceBinder binder = (LiteDownloadService.DownloadServiceBinder) service;
-                downloadService = binder.getService();
-                downloadManager.submitAllStoredDownloads(() -> {
-                    downloadManager.initialise(downloadService);
+                if (service instanceof LiteDownloadService.DownloadServiceBinder) {
+                    LiteDownloadService.DownloadServiceBinder binder = (LiteDownloadService.DownloadServiceBinder) service;
+                    downloadService = binder.getService();
+                    downloadManager.submitAllStoredDownloads(() -> {
+                        downloadManager.initialise(downloadService);
 
-                    if (allowNetworkRecovery) {
-                        DownloadsNetworkRecoveryCreator.createEnabled(applicationContext, downloadManager, connectionTypeAllowed);
-                    } else {
-                        DownloadsNetworkRecoveryCreator.createDisabled();
-                    }
-                });
+                        if (allowNetworkRecovery) {
+                            DownloadsNetworkRecoveryCreator.createEnabled(applicationContext, downloadManager, connectionTypeAllowed);
+                        } else {
+                            DownloadsNetworkRecoveryCreator.createDisabled();
+                        }
+                    });
+                }
             }
 
             @Override
@@ -378,7 +380,7 @@ public final class DownloadManagerBuilder {
                 case DELETING:
                     return createDeletedNotification(builder);
                 case ERROR:
-                    return createErrorNotification(builder, payload.getDownloadErrorType());
+                    return createErrorNotification(builder, payload.downloadError());
                 case DOWNLOADED:
                     return createCompletedNotification(builder);
                 default:
@@ -393,8 +395,8 @@ public final class DownloadManagerBuilder {
                     .build();
         }
 
-        private Notification createErrorNotification(NotificationCompat.Builder builder, DownloadError.Error errorType) {
-            String content = resources.getString(R.string.download_notification_content_error, errorType);
+        private Notification createErrorNotification(NotificationCompat.Builder builder, DownloadError downloadError) {
+            String content = resources.getString(R.string.download_notification_content_error, downloadError.type().name());
             return builder
                     .setContentText(content)
                     .build();
