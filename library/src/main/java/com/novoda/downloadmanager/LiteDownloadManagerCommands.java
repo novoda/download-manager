@@ -37,5 +37,6 @@ public interface LiteDownloadManagerCommands {
 
     File getDownloadsDir();
 
-    void addCompletedBatch(CompletedDownloadBatch completedDownloadBatch) throws IllegalArgumentException;
+    @WorkerThread
+    boolean addCompletedBatch(CompletedDownloadBatch completedDownloadBatch);
 }
