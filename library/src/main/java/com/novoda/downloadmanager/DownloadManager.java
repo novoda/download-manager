@@ -235,7 +235,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
     }
 
     private boolean alreadyContainsBatch(CompletedDownloadBatch completedDownloadBatch) {
-        return downloadBatchMap.get(completedDownloadBatch.downloadBatchId()) != null;
+        return downloadBatchMap.containsKey(completedDownloadBatch.downloadBatchId());
     }
 
 }
