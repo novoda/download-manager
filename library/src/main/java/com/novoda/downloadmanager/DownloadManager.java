@@ -225,6 +225,12 @@ class DownloadManager implements LiteDownloadManagerCommands {
 
     @Override
     public void addCompletedBatch(CompletedDownloadBatch completedDownloadBatch) {
+        DownloadBatchId downloadBatchId = completedDownloadBatch.downloadBatchId();
+        DownloadBatch downloadBatch = downloadBatchMap.get(downloadBatchId);
+        if (downloadBatch != null) {
+            throw new IllegalStateException("CompletedDownloadBatch with id: " + downloadBatchId + " already exists.");
+        }
+
         downloader.addCompletedBatch(completedDownloadBatch);
     }
 
