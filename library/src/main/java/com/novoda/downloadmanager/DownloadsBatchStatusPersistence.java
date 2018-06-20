@@ -1,8 +1,11 @@
 package com.novoda.downloadmanager;
 
+import android.support.annotation.WorkerThread;
+
 interface DownloadsBatchStatusPersistence {
 
     void updateStatusAsync(DownloadBatchId downloadBatchId, DownloadBatchStatus.Status status);
 
-    void persistCompletedBatch(CompletedDownloadBatch completedDownloadBatch);
+    @WorkerThread
+    boolean persistCompletedBatch(CompletedDownloadBatch completedDownloadBatch);
 }

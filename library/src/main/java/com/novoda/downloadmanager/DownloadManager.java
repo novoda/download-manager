@@ -223,9 +223,19 @@ class DownloadManager implements LiteDownloadManagerCommands {
         return new File(filePath.path());
     }
 
+    @WorkerThread
     @Override
-    public void addCompletedBatch(CompletedDownloadBatch completedDownloadBatch) {
-        downloader.addCompletedBatch(completedDownloadBatch);
+    public boolean addCompletedBatch(CompletedDownloadBatch completedDownloadBatch) throws IllegalArgumentException {
+        if (alreadyContainsBatch(completedDownloadBatch)) {
+            Logger.w("CompletedDownloadBatch with id: " + completedDownloadBatch.downloadBatchId() + " already exists.");
+            return false;
+        }
+
+        return downloader.addCompletedBatch(completedDownloadBatch, downloadBatchMap);
+    }
+
+    private boolean alreadyContainsBatch(CompletedDownloadBatch completedDownloadBatch) {
+        return downloadBatchMap.containsKey(completedDownloadBatch.downloadBatchId());
     }
 
 }

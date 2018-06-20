@@ -204,17 +204,21 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
         });
     }
 
+    @WorkerThread
     @Override
-    public void persistCompletedBatch(CompletedDownloadBatch completedDownloadBatch) {
-        executor.execute(() -> {
-            downloadsPersistence.startTransaction();
-            try {
-                downloadsPersistence.persistCompletedBatch(completedDownloadBatch);
-                downloadsPersistence.transactionSuccess();
-            } finally {
-                downloadsPersistence.endTransaction();
-            }
-        });
+    public boolean persistCompletedBatch(CompletedDownloadBatch completedDownloadBatch) {
+        downloadsPersistence.startTransaction();
+
+        try {
+            downloadsPersistence.persistCompletedBatch(completedDownloadBatch);
+            downloadsPersistence.transactionSuccess();
+            return true;
+        } catch (SQLiteConstraintException e) {
+            Logger.e("failure to persist completed batch " + completedDownloadBatch.downloadBatchId());
+            return false;
+        } finally {
+            downloadsPersistence.endTransaction();
+        }
     }
 
     interface LoadBatchesCallback {

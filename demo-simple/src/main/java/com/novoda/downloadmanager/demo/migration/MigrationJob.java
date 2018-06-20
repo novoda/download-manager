@@ -61,10 +61,10 @@ public class MigrationJob implements Runnable {
 
         onUpdate("Migrating Complete Downloads");
         for (CompletedDownloadBatch completeDownloadBatch : completeDownloadBatches) {
-            downloadManager.addCompletedBatch(completeDownloadBatch);
-
-            for (CompletedDownloadBatch.CompletedDownloadFile completedDownloadFile : completeDownloadBatch.completedDownloadFiles()) {
-                deleteVersionOneFile(completedDownloadFile.originalFileLocation());
+            if (downloadManager.addCompletedBatch(completeDownloadBatch)) {
+                for (CompletedDownloadBatch.CompletedDownloadFile completedDownloadFile : completeDownloadBatch.completedDownloadFiles()) {
+                    deleteVersionOneFile(completedDownloadFile.originalFileLocation());
+                }
             }
         }
 
