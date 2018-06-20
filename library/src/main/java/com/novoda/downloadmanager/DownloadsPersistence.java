@@ -2,6 +2,10 @@ package com.novoda.downloadmanager;
 
 import java.util.List;
 
+/**
+ * For defining the persistence layer that the download-manager will use to
+ * persist {@link DownloadBatch} and {@link BatchFile}.
+ */
 public interface DownloadsPersistence {
 
     void startTransaction();

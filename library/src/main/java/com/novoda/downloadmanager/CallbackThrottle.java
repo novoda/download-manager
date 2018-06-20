@@ -1,8 +1,7 @@
 package com.novoda.downloadmanager;
 
 /**
- * An interface for defining the speed at which {@link DownloadBatchStatus}
- * notifications are emitted.
+ * For defining the speed at which {@link DownloadBatchStatus} notifications are emitted.
  */
 public interface CallbackThrottle {
 
