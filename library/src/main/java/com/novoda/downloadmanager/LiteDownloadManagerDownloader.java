@@ -124,7 +124,16 @@ class LiteDownloadManagerDownloader {
         notificationDispatcher.setDownloadService(downloadService);
     }
 
-    public void addCompletedBatch(CompletedDownloadBatch completedDownloadBatch) {
+    public void addCompletedBatch(CompletedDownloadBatch completedDownloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
+        DownloadBatch downloadBatch = DownloadBatchFactory.newInstance(
+                completedDownloadBatch.asBatch(),
+                fileOperations,
+                downloadsBatchPersistence,
+                downloadsFilePersistence,
+                callbackThrottleCreator.create(),
+                connectionChecker
+        );
+        downloadBatchMap.put(downloadBatch.getId(), downloadBatch);
         downloadsBatchPersistence.persistCompletedBatch(completedDownloadBatch);
     }
 }

@@ -1,5 +1,6 @@
 package com.novoda.downloadmanager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CompletedDownloadBatch {
@@ -33,6 +34,22 @@ public class CompletedDownloadBatch {
 
     public List<CompletedDownloadFile> completedDownloadFiles() {
         return completedDownloadFiles;
+    }
+
+    public Batch asBatch() {
+        return new Batch(
+                downloadBatchId,
+                downloadBatchTitle.asString(),
+                asBatchFiles()
+        );
+    }
+
+    private List<BatchFile> asBatchFiles() {
+        List<BatchFile> batchFiles = new ArrayList<>(completedDownloadFiles.size());
+        for (CompletedDownloadFile completedDownloadFile : completedDownloadFiles) {
+            batchFiles.add(completedDownloadFile.asBatchFile());
+        }
+        return batchFiles;
     }
 
     @Override
@@ -115,6 +132,15 @@ public class CompletedDownloadBatch {
 
         public String originalNetworkAddress() {
             return originalNetworkAddress;
+        }
+
+        public BatchFile asBatchFile() {
+            DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(fileId);
+            return new BatchFile(
+                    originalNetworkAddress,
+                    Optional.of(downloadFileId),
+                    newFileLocation
+            );
         }
 
         @Override
