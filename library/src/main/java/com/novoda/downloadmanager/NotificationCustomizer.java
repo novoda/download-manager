@@ -7,6 +7,13 @@ public interface NotificationCustomizer<T> {
 
     NotificationDisplayState notificationDisplayState(T payload);
 
+    /**
+     * Create a custom {@link Notification} from the given {@link NotificationCompat.Builder} and payload.
+     *
+     * @param builder the base {@link NotificationCompat.Builder} to build the {@link Notification} from.
+     * @param payload the information to add to the {@link Notification}.
+     * @return the custom {@link Notification} to display.
+     */
     Notification customNotificationFrom(NotificationCompat.Builder builder, T payload);
 
     enum NotificationDisplayState {
