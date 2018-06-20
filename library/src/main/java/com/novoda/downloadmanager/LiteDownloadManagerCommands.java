@@ -53,7 +53,7 @@ public interface LiteDownloadManagerCommands {
     void removeDownloadBatchCallback(DownloadBatchStatusCallback downloadBatchCallback);
 
     /**
-     * Retrieves all stored batches from the database and queues them ready for download,
+     * Retrieves all stored batches from the persistence layer and queues them ready for download,
      * repopulating the internal map.
      *
      * @param callback to be notified when all downloads are queued.
