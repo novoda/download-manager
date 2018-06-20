@@ -1,5 +1,8 @@
 package com.novoda.downloadmanager;
 
+/**
+ * For defining the mechanism by which files are downloaded.
+ */
 public interface FileDownloader {
 
     void startDownloading(String url, FileSize fileSize, Callback callback);
