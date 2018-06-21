@@ -11,7 +11,7 @@ import com.novoda.downloadmanager.StorageRequirementRuleFactory;
 
 public class DemoApplication extends Application {
 
-    private static final int TWO_HUNDRED_MB_IN_BYTES = 200000000;
+    private static final int TWO_HUNDRED_MB_IN_BYTES = 209715200;
     private volatile LiteDownloadManagerCommands liteDownloadManagerCommands;
 
     @Override
