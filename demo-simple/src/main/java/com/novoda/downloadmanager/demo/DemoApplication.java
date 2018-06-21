@@ -5,12 +5,13 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.facebook.stetho.Stetho;
+import com.novoda.downloadmanager.ByteBasedStorageRequirementRule;
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
-import com.novoda.downloadmanager.PercentageBasedStorageRequirementRule;
 
 public class DemoApplication extends Application {
 
+    private static final int TWO_HUNDRED_MB_IN_BYTES = 200000000;
     private volatile LiteDownloadManagerCommands liteDownloadManagerCommands;
 
     @Override
@@ -26,7 +27,7 @@ public class DemoApplication extends Application {
         liteDownloadManagerCommands = DownloadManagerBuilder
                 .newInstance(this, handler, R.mipmap.ic_launcher_round)
                 .withLogHandle(new DemoLogHandle())
-                .withStorageRequirementRules(PercentageBasedStorageRequirementRule.withPercentageOfStorageRemaining(0.2f))
+                .withStorageRequirementRules(ByteBasedStorageRequirementRule.withBytesOfStorageRemaining(TWO_HUNDRED_MB_IN_BYTES))
                 .build();
     }
 
