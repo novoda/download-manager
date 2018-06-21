@@ -5,23 +5,24 @@ import android.support.annotation.FloatRange;
 
 import java.io.File;
 
-public final class StorageRequirementsRule {
+public final class PercentageBasedStorageRequirementRule implements StorageRequirementRule {
 
     private final StorageCapacityReader storageCapacityReader;
     private final float percentageOfStorageRemaining;
 
-    public static StorageRequirementsRule withPercentageOfStorageRemaining(@FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
-        return new StorageRequirementsRule(new StorageCapacityReader(), percentageOfStorageRemaining);
+    public static PercentageBasedStorageRequirementRule withPercentageOfStorageRemaining(@FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
+        return new PercentageBasedStorageRequirementRule(new StorageCapacityReader(), percentageOfStorageRemaining);
     }
 
-    private StorageRequirementsRule(StorageCapacityReader storageCapacityReader,
-                                    @FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
+    private PercentageBasedStorageRequirementRule(StorageCapacityReader storageCapacityReader,
+                                                  @FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
         this.storageCapacityReader = storageCapacityReader;
         this.percentageOfStorageRemaining = percentageOfStorageRemaining;
     }
 
-    boolean hasViolatedRule(File storageDirectory,
-                            FileSize downloadFileSize) {
+    @Override
+    public boolean hasViolatedRule(File storageDirectory,
+                                   FileSize downloadFileSize) {
         StatFs statFs = new StatFs(storageDirectory.getPath());
         long storageCapacityInBytes = storageCapacityReader.storageCapacityInBytes(statFs);
         long minimumStorageRequiredInBytes = (long) (storageCapacityInBytes * percentageOfStorageRemaining);

@@ -13,15 +13,15 @@ class InternalFilePersistence implements FilePersistence {
     private static final String DOWNLOADS_DIR = "/downloads/";
 
     private Context context;
-    private StorageRequirementsRule storageRequirementsRule;
+    private StorageRequirementRule storageRequirementRule;
 
     @Nullable
     private FileOutputStream fileOutputStream;
 
     @Override
-    public void initialiseWith(Context context, StorageRequirementsRule storageRequirementsRule) {
+    public void initialiseWith(Context context, StorageRequirementRule storageRequirementRule) {
         this.context = context.getApplicationContext();
-        this.storageRequirementsRule = storageRequirementsRule;
+        this.storageRequirementRule = storageRequirementRule;
     }
 
     @Override
@@ -35,7 +35,7 @@ class InternalFilePersistence implements FilePersistence {
             return FilePersistenceResult.ERROR_UNKNOWN_TOTAL_FILE_SIZE;
         }
 
-        if (storageRequirementsRule.hasViolatedRule(context.getFilesDir(), fileSize)) {
+        if (storageRequirementRule.hasViolatedRule(context.getFilesDir(), fileSize)) {
             return FilePersistenceResult.ERROR_INSUFFICIENT_SPACE;
         }
 

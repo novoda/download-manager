@@ -54,8 +54,8 @@ class MigrationJob implements Runnable {
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
 
         FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(context);
-        StorageRequirementsRule storageRequirementsRule = StorageRequirementsRule.withPercentageOfStorageRemaining(TEN_PERCENT);
-        filePersistenceCreator.withStorageRequirementsRule(storageRequirementsRule);
+        StorageRequirementRule storageRequirementRule = PercentageBasedStorageRequirementRule.withPercentageOfStorageRemaining(TEN_PERCENT);
+        filePersistenceCreator.withStorageRequirementsRule(storageRequirementRule);
         FilePersistence filePersistence = filePersistenceCreator.create();
 
         PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database, basePath);
