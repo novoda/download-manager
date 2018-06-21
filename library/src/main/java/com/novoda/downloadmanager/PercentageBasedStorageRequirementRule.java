@@ -1,6 +1,5 @@
 package com.novoda.downloadmanager;
 
-import android.os.StatFs;
 import android.support.annotation.FloatRange;
 
 import java.io.File;
@@ -23,8 +22,7 @@ public final class PercentageBasedStorageRequirementRule implements StorageRequi
     @Override
     public boolean hasViolatedRule(File storageDirectory,
                                    FileSize downloadFileSize) {
-        StatFs statFs = new StatFs(storageDirectory.getPath());
-        long storageCapacityInBytes = storageCapacityReader.storageCapacityInBytes(statFs);
+        long storageCapacityInBytes = storageCapacityReader.storageCapacityInBytes(storageDirectory.getPath());
         long minimumStorageRequiredInBytes = (long) (storageCapacityInBytes * percentageOfStorageRemaining);
         long usableStorageInBytes = storageDirectory.getUsableSpace();
         long remainingStorageAfterDownloadInBytes = usableStorageInBytes - downloadFileSize.totalSize();
