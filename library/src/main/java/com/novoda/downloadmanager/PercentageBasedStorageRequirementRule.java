@@ -13,8 +13,8 @@ public final class PercentageBasedStorageRequirementRule implements StorageRequi
         return new PercentageBasedStorageRequirementRule(new StorageCapacityReader(), percentageOfStorageRemaining);
     }
 
-    private PercentageBasedStorageRequirementRule(StorageCapacityReader storageCapacityReader,
-                                                  @FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
+    PercentageBasedStorageRequirementRule(StorageCapacityReader storageCapacityReader,
+                                          @FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
         this.storageCapacityReader = storageCapacityReader;
         this.percentageOfStorageRemaining = percentageOfStorageRemaining;
     }
@@ -25,7 +25,7 @@ public final class PercentageBasedStorageRequirementRule implements StorageRequi
         long storageCapacityInBytes = storageCapacityReader.storageCapacityInBytes(storageDirectory.getPath());
         long minimumStorageRequiredInBytes = (long) (storageCapacityInBytes * percentageOfStorageRemaining);
         long usableStorageInBytes = storageDirectory.getUsableSpace();
-        long remainingStorageAfterDownloadInBytes = usableStorageInBytes - downloadFileSize.totalSize();
+        long remainingStorageAfterDownloadInBytes = usableStorageInBytes - downloadFileSize.remainingSize();
 
         Logger.v("Storage capacity in bytes: ", storageCapacityInBytes);
         Logger.v("Usable storage in bytes: ", usableStorageInBytes);
