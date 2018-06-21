@@ -6,7 +6,7 @@ import java.util.List;
 
 final class StorageRequirementRules implements StorageRequirementRule {
 
-    private List<StorageRequirementRule> rules;
+    private final List<StorageRequirementRule> rules;
 
     static StorageRequirementRules newInstance() {
         return new StorageRequirementRules(new ArrayList<>());
