@@ -7,6 +7,7 @@ import android.os.Looper;
 import com.facebook.stetho.Stetho;
 import com.novoda.downloadmanager.DownloadManagerBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
+import com.novoda.downloadmanager.PercentageBasedStorageRequirementRule;
 
 public class DemoApplication extends Application {
 
@@ -25,6 +26,7 @@ public class DemoApplication extends Application {
         liteDownloadManagerCommands = DownloadManagerBuilder
                 .newInstance(this, handler, R.mipmap.ic_launcher_round)
                 .withLogHandle(new DemoLogHandle())
+                .withStorageRequirementRules(PercentageBasedStorageRequirementRule.withPercentageOfStorageRemaining(0.2f))
                 .build();
     }
 

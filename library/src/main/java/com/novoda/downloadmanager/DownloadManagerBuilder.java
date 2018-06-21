@@ -40,7 +40,6 @@ public final class DownloadManagerBuilder {
     private static final Object SERVICE_LOCK = new Object();
     private static final Object CALLBACK_LOCK = new Object();
     private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
-    private static final float TEN_PERCENT = 0.1f;
 
     private final Context applicationContext;
     private final Handler callbackHandler;
@@ -165,8 +164,15 @@ public final class DownloadManagerBuilder {
         return this;
     }
 
+    public DownloadManagerBuilder withStorageRequirementRules(StorageRequirementRule... storageRequirementRules) {
+        for (StorageRequirementRule storageRequirementRule : storageRequirementRules) {
+            this.storageRequirementRules.addRule(storageRequirementRule);
+        }
+        return this;
+    }
+
     public DownloadManagerBuilder withRequiredFreeStorageAfterDownload(@FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
-        storageRequirementRules.addRule(PercentageBasedStorageRequirementRule.withPercentageOfStorageRemaining(percentageOfStorageRemaining));
+        this.storageRequirementRules.addRule(PercentageBasedStorageRequirementRule.withPercentageOfStorageRemaining(percentageOfStorageRemaining));
         return this;
     }
 
