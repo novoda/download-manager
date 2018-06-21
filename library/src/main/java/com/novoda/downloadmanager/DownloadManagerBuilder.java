@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.DrawableRes;
-import android.support.annotation.FloatRange;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -168,11 +167,6 @@ public final class DownloadManagerBuilder {
         for (StorageRequirementRule storageRequirementRule : storageRequirementRules) {
             this.storageRequirementRules.addRule(storageRequirementRule);
         }
-        return this;
-    }
-
-    public DownloadManagerBuilder withRequiredFreeStorageAfterDownload(@FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
-        this.storageRequirementRules.addRule(PercentageBasedStorageRequirementRule.withPercentageOfStorageRemaining(percentageOfStorageRemaining));
         return this;
     }
 
