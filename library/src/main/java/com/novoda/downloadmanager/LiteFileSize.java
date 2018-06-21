@@ -38,6 +38,11 @@ class LiteFileSize implements InternalFileSize {
     }
 
     @Override
+    public long remainingSize() {
+        return totalSize - currentSize;
+    }
+
+    @Override
     public void addToCurrentSize(long newBytes) {
         currentSize += newBytes;
     }

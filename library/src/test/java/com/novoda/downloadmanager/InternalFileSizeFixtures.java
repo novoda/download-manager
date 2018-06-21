@@ -76,6 +76,11 @@ class InternalFileSizeFixtures {
             }
 
             @Override
+            public long remainingSize() {
+                return totalSize - currentSize;
+            }
+
+            @Override
             public boolean isTotalSizeKnown() {
                 return isTotalSizeKnown;
             }
