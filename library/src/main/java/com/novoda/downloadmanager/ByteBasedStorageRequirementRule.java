@@ -11,7 +11,7 @@ public final class ByteBasedStorageRequirementRule implements StorageRequirement
         return new ByteBasedStorageRequirementRule(new StorageCapacityReader(), bytesRemainingAfterDownload);
     }
 
-    private ByteBasedStorageRequirementRule(StorageCapacityReader storageCapacityReader, long bytesRemainingAfterDownload) {
+    ByteBasedStorageRequirementRule(StorageCapacityReader storageCapacityReader, long bytesRemainingAfterDownload) {
         this.storageCapacityReader = storageCapacityReader;
         this.bytesRemainingAfterDownload = bytesRemainingAfterDownload;
     }
@@ -21,7 +21,7 @@ public final class ByteBasedStorageRequirementRule implements StorageRequirement
                                    FileSize downloadFileSize) {
         long storageCapacityInBytes = storageCapacityReader.storageCapacityInBytes(storageDirectory.getPath());
         long usableStorageInBytes = storageDirectory.getUsableSpace();
-        long remainingStorageAfterDownloadInBytes = usableStorageInBytes - downloadFileSize.totalSize();
+        long remainingStorageAfterDownloadInBytes = usableStorageInBytes - downloadFileSize.remainingSize();
 
         Logger.v("Storage capacity in bytes: ", storageCapacityInBytes);
         Logger.v("Usable storage in bytes: ", usableStorageInBytes);
