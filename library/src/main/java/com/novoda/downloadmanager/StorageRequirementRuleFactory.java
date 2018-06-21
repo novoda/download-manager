@@ -12,7 +12,7 @@ public final class StorageRequirementRuleFactory {
         return new ByteBasedStorageRequirementRule(new StorageCapacityReader(), bytesRemainingAfterDownload);
     }
 
-    public static StorageRequirementRule createPercetageBasedRule(@FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
+    public static StorageRequirementRule createPercentageBasedRule(@FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
         return new PercentageBasedStorageRequirementRule(new StorageCapacityReader(), percentageOfStorageRemaining);
     }
 }
