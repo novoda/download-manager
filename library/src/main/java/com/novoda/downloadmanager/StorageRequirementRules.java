@@ -1,17 +1,22 @@
 package com.novoda.downloadmanager;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
-class StorageRequirementRules implements StorageRequirementRule {
+final class StorageRequirementRules implements StorageRequirementRule {
 
     private List<StorageRequirementRule> storageRequirementRules;
 
-    public StorageRequirementRules(List<StorageRequirementRule> storageRequirementRules) {
+    static StorageRequirementRules newInstance() {
+        return new StorageRequirementRules(new ArrayList<>());
+    }
+
+    private StorageRequirementRules(List<StorageRequirementRule> storageRequirementRules) {
         this.storageRequirementRules = storageRequirementRules;
     }
 
-    public void addRule(StorageRequirementRule storageRequirementRule) {
+    void addRule(StorageRequirementRule storageRequirementRule) {
         storageRequirementRules.add(storageRequirementRule);
     }
 

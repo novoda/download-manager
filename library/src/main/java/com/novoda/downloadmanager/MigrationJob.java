@@ -55,7 +55,7 @@ class MigrationJob implements Runnable {
 
         FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(context);
         StorageRequirementRule storageRequirementRule = PercentageBasedStorageRequirementRule.withPercentageOfStorageRemaining(TEN_PERCENT);
-        filePersistenceCreator.withStorageRequirementsRule(storageRequirementRule);
+        filePersistenceCreator.withStorageRequirementRules(storageRequirementRule);
         FilePersistence filePersistence = filePersistenceCreator.create();
 
         PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database, basePath);

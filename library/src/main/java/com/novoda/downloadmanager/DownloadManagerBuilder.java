@@ -60,12 +60,12 @@ public final class DownloadManagerBuilder {
     private TimeUnit timeUnit;
     private long frequency;
     private Optional<LogHandle> logHandle;
-    private StorageRequirementRule storageRequirementRule;
+    private StorageRequirementRules storageRequirementRules;
 
     public static DownloadManagerBuilder newInstance(Context context, Handler callbackHandler, @DrawableRes final int notificationIcon) {
         Context applicationContext = context.getApplicationContext();
 
-        StorageRequirementRule storageRequirementRule = PercentageBasedStorageRequirementRule.withPercentageOfStorageRemaining(TEN_PERCENT);
+        StorageRequirementRules storageRequirementRule = StorageRequirementRules.newInstance();
         FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(applicationContext);
         FileDownloaderCreator fileDownloaderCreator = FileDownloaderCreator.newNetworkFileDownloaderCreator();
 
@@ -117,7 +117,7 @@ public final class DownloadManagerBuilder {
     @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})     // Can't group anymore these are customisable options.
     private DownloadManagerBuilder(Context applicationContext,
                                    Handler callbackHandler,
-                                   StorageRequirementRule storageRequirementRule,
+                                   StorageRequirementRules storageRequirementRules,
                                    FilePersistenceCreator filePersistenceCreator,
                                    DownloadsPersistence downloadsPersistence,
                                    FileSizeRequester fileSizeRequester,
@@ -130,7 +130,7 @@ public final class DownloadManagerBuilder {
                                    Optional<LogHandle> logHandle) {
         this.applicationContext = applicationContext;
         this.callbackHandler = callbackHandler;
-        this.storageRequirementRule = storageRequirementRule;
+        this.storageRequirementRules = storageRequirementRules;
         this.filePersistenceCreator = filePersistenceCreator;
         this.downloadsPersistence = downloadsPersistence;
         this.fileSizeRequester = fileSizeRequester;
@@ -166,7 +166,7 @@ public final class DownloadManagerBuilder {
     }
 
     public DownloadManagerBuilder withRequiredFreeStorageAfterDownload(@FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
-        this.storageRequirementRule = PercentageBasedStorageRequirementRule.withPercentageOfStorageRemaining(percentageOfStorageRemaining);
+        storageRequirementRules.addRule(PercentageBasedStorageRequirementRule.withPercentageOfStorageRemaining(percentageOfStorageRemaining));
         return this;
     }
 
@@ -262,7 +262,7 @@ public final class DownloadManagerBuilder {
 
         applicationContext.bindService(intent, serviceConnection, Service.BIND_AUTO_CREATE);
 
-        filePersistenceCreator.withStorageRequirementsRule(storageRequirementRule);
+        filePersistenceCreator.withStorageRequirementRules(storageRequirementRules);
         FileOperations fileOperations = new FileOperations(filePersistenceCreator, fileSizeRequester, fileDownloaderCreator);
         List<DownloadBatchStatusCallback> callbacks = new ArrayList<>();
 

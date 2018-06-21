@@ -30,7 +30,7 @@ class FilePersistenceCreator {
         this.customClass = customClass;
     }
 
-    void withStorageRequirementsRule(StorageRequirementRule storageRequirementRule) {
+    void withStorageRequirementRules(StorageRequirementRule storageRequirementRule) {
         this.storageRequirementRule = storageRequirementRule;
     }
 
