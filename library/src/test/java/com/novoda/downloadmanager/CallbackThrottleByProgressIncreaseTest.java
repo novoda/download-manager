@@ -66,19 +66,14 @@ public class CallbackThrottleByProgressIncreaseTest {
         then(downloadBatchCallback).should(never()).onUpdate(any(DownloadBatchStatus.class));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void throwsException_whenStoppingUpdatesWithoutCallback() {
-        callbackThrottleByProgressIncrease.stopUpdates();
-    }
-
     @Test
     public void emitsLastStatus_whenStoppingUpdates() {
         callbackThrottleByProgressIncrease.setCallback(downloadBatchCallback);
-        givenPreviousUpdate(percentageIncreasedStatus);
-
         callbackThrottleByProgressIncrease.stopUpdates();
 
-        then(downloadBatchCallback).should().onUpdate(percentageIncreasedStatus);
+        callbackThrottleByProgressIncrease.update(percentageIncreasedStatus);
+
+        then(downloadBatchCallback).should(never()).onUpdate(percentageIncreasedStatus);
     }
 
     private void givenPreviousUpdate(DownloadBatchStatus downloadBatchStatus) {

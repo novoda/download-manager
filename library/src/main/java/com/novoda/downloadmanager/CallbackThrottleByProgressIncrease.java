@@ -3,8 +3,10 @@ package com.novoda.downloadmanager;
 class CallbackThrottleByProgressIncrease implements CallbackThrottle {
 
     private DownloadBatchStatusCallback callback;
-    private DownloadBatchStatus previousDownloadBatchStatus;
+
     private int currentProgress;
+    private DownloadBatchStatus.Status currentStatus;
+    private DownloadError currentDownloadError;
 
     @Override
     public void setCallback(DownloadBatchStatusCallback callback) {
@@ -17,37 +19,35 @@ class CallbackThrottleByProgressIncrease implements CallbackThrottle {
             return;
         }
 
-        if (matchesPreviousStatus(currentDownloadBatchStatus)) {
-            return;
+        if (statusHasChanged(currentDownloadBatchStatus)
+                || progressHasChanged(currentDownloadBatchStatus)
+                || errorHasChanged(currentDownloadBatchStatus)) {
+
+            currentStatus = currentDownloadBatchStatus.status();
+            currentProgress = currentDownloadBatchStatus.percentageDownloaded();
+            currentDownloadError = currentDownloadBatchStatus.downloadError();
+
+            callback.onUpdate(currentDownloadBatchStatus);
         }
-
-        if (previousDownloadBatchStatus != null
-                && errorUnchanged(currentDownloadBatchStatus)
-                && progressUnchanged(currentDownloadBatchStatus)) {
-            return;
-        }
-
-        callback.onUpdate(currentDownloadBatchStatus);
-        this.previousDownloadBatchStatus = currentDownloadBatchStatus;
     }
 
-    private boolean matchesPreviousStatus(DownloadBatchStatus currentDownloadBatchStatus) {
-        return currentDownloadBatchStatus.equals(previousDownloadBatchStatus);
+    private boolean statusHasChanged(DownloadBatchStatus currentDownloadBatchStatus) {
+        DownloadBatchStatus.Status newStatus = currentDownloadBatchStatus.status();
+        return currentStatus != newStatus;
     }
 
-    private boolean errorUnchanged(DownloadBatchStatus currentDownloadBatchStatus) {
-        DownloadError previousError = previousDownloadBatchStatus.downloadError();
-        DownloadError currentError = currentDownloadBatchStatus.downloadError();
-
-        return currentError != null && currentError.equals(previousError);
+    private boolean progressHasChanged(DownloadBatchStatus currentDownloadBatchStatus) {
+        int newProgress = currentDownloadBatchStatus.percentageDownloaded();
+        return currentProgress != newProgress;
     }
 
-    private boolean progressUnchanged(DownloadBatchStatus currentDownloadBatchStatus) {
-        return previousDownloadBatchStatus.percentageDownloaded() == currentDownloadBatchStatus.percentageDownloaded();
+    private boolean errorHasChanged(DownloadBatchStatus currentDownloadBatchStatus) {
+        DownloadError newDownloadError = currentDownloadBatchStatus.downloadError();
+        return currentDownloadError != newDownloadError;
     }
 
     @Override
     public void stopUpdates() {
-        callback.onUpdate(previousDownloadBatchStatus);
+        callback = null;
     }
 }
