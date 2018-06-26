@@ -42,6 +42,7 @@ final class DownloadErrorFactory {
     }
 
     static DownloadError createStorageNotAvailableError(FilePersistence filePersistence) {
+        // TODO: Can we pass the base path here? It might vary between downloads.
         String storageUnavailableMessage = "Storage with base path: " + filePersistence.basePath() + " is not available";
         return new DownloadError(DownloadError.Type.STORAGE_UNAVAILABLE, storageUnavailableMessage);
     }

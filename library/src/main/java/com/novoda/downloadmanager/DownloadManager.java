@@ -217,7 +217,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
     }
 
     @Override
-    public File getDownloadsDir() {
+    public File getDownloadsDir() { // TODO: Not really relevant, this can vary between application runs.
         FilePersistence filePersistence = fileOperations.filePersistenceCreator().create();
         FilePath filePath = filePersistence.basePath();
         return new File(filePath.path());
