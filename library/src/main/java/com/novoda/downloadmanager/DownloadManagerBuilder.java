@@ -42,6 +42,7 @@ public final class DownloadManagerBuilder {
 
     private final Context applicationContext;
     private final Handler callbackHandler;
+    private final StorageRequirementRules storageRequirementRules;
 
     private FilePersistenceCreator filePersistenceCreator;
     private FileSizeRequester fileSizeRequester;
@@ -58,7 +59,6 @@ public final class DownloadManagerBuilder {
     private TimeUnit timeUnit;
     private long frequency;
     private Optional<LogHandle> logHandle;
-    private StorageRequirementRules storageRequirementRules;
 
     public static DownloadManagerBuilder newInstance(Context context, Handler callbackHandler, @DrawableRes final int notificationIcon) {
         Context applicationContext = context.getApplicationContext();
