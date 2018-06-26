@@ -137,11 +137,6 @@ public final class DownloadManagerBuilder {
         this.logHandle = logHandle;
     }
 
-    public DownloadManagerBuilder withFilePersistenceExternal() {
-        filePersistenceCreator = FilePersistenceCreator.newExternalFilePersistenceCreator(applicationContext);
-        return this;
-    }
-
     public DownloadManagerBuilder withFileDownloaderCustom(FileSizeRequester fileSizeRequester,
                                                            Class<? extends FileDownloader> customFileDownloaderClass) {
         this.fileSizeRequester = fileSizeRequester;

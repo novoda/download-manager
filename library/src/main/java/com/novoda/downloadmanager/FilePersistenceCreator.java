@@ -16,10 +16,6 @@ class FilePersistenceCreator {
         return new FilePersistenceCreator(context, FilePersistenceType.PATH, null);
     }
 
-    static FilePersistenceCreator newExternalFilePersistenceCreator(Context context) {
-        return new FilePersistenceCreator(context, FilePersistenceType.EXTERNAL, null);
-    }
-
     static FilePersistenceCreator newCustomFilePersistenceCreator(Context context, Class<? extends FilePersistence> customClass) {
         return new FilePersistenceCreator(context, FilePersistenceType.CUSTOM, customClass);
     }
@@ -42,9 +38,6 @@ class FilePersistenceCreator {
         FilePersistence filePersistence;
 
         switch (type) {
-            case EXTERNAL:
-                filePersistence = new ExternalFilePersistence();
-                break;
             case CUSTOM:
                 filePersistence = createCustomFilePersistence();
                 break;

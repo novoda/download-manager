@@ -3,7 +3,6 @@ package com.novoda.downloadmanager;
 import java.security.InvalidParameterException;
 
 public enum FilePersistenceType {
-    EXTERNAL("external"),
     PATH("path"),
     CUSTOM("custom");
 
