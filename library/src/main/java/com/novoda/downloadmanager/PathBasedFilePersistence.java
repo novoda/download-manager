@@ -1,9 +1,7 @@
 package com.novoda.downloadmanager;
 
 import android.content.Context;
-import android.os.Environment;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,11 +10,8 @@ import java.io.IOException;
 
 class PathBasedFilePersistence implements FilePersistence {
 
-    private static final String DOWNLOADS_DIR = "/downloads/";
-    private static final String UNDEFINED_DIRECTORY_TYPE = null;
     private static final boolean APPEND = true;
 
-    private Context context;
     private StorageRequirementRule storageRequirementRule;
 
     @Nullable
@@ -24,13 +19,12 @@ class PathBasedFilePersistence implements FilePersistence {
 
     @Override
     public void initialiseWith(Context context, StorageRequirementRule storageRequirementRule) {
-        this.context = context.getApplicationContext();
         this.storageRequirementRule = storageRequirementRule;
     }
 
     @Override
     public FilePath basePath() {
-        return FilePathCreator.create(getExternalFileDirWithBiggerAvailableSpace().getAbsolutePath(), DOWNLOADS_DIR);
+        return FilePathCreator.create("", ""); // TODO: Remove this from the persistence.
     }
 
     @Override
@@ -39,26 +33,17 @@ class PathBasedFilePersistence implements FilePersistence {
             return FilePersistenceResult.ERROR_UNKNOWN_TOTAL_FILE_SIZE;
         }
 
-        if (!isExternalStorageWritable()) {
-            return FilePersistenceResult.ERROR_EXTERNAL_STORAGE_NON_WRITABLE;
-        }
-
-        File externalFileDir = getExternalFileDirWithBiggerAvailableSpace();
-
-        if (storageRequirementRule.hasViolatedRule(externalFileDir, fileSize)) {
-            return FilePersistenceResult.ERROR_INSUFFICIENT_SPACE;
-        }
-
-        return create(absoluteFilePath);
-    }
-
-    private FilePersistenceResult create(FilePath absoluteFilePath) {
         if (absoluteFilePath.isUnknown()) {
             return FilePersistenceResult.ERROR_OPENING_FILE;
         }
 
         try {
             File file = new File(absoluteFilePath.path());
+
+            if (storageRequirementRule.hasViolatedRule(file, fileSize)) {
+                return FilePersistenceResult.ERROR_INSUFFICIENT_SPACE;
+            }
+
             boolean parentDirectoriesExist = ensureParentDirectoriesExistFor(file);
 
             if (!parentDirectoriesExist) {
@@ -82,31 +67,6 @@ class PathBasedFilePersistence implements FilePersistence {
 
         Logger.w(String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
         return outputFile.getParentFile().mkdirs();
-    }
-
-    private boolean isExternalStorageWritable() {
-        String state = Environment.getExternalStorageState();
-        return Environment.MEDIA_MOUNTED.equals(state);
-    }
-
-    private File getExternalFileDirWithBiggerAvailableSpace() {
-        File externalFileDir = null;
-        long usableSpace = 0;
-
-        File[] externalFilesDirs = ContextCompat.getExternalFilesDirs(context, UNDEFINED_DIRECTORY_TYPE);
-        for (File dir : externalFilesDirs) {
-            if (dir == null) {
-                continue;
-            }
-
-            long localUsableSpace = dir.getUsableSpace();
-            if (usableSpace < localUsableSpace) {
-                externalFileDir = dir;
-                usableSpace = localUsableSpace;
-            }
-        }
-
-        return externalFileDir;
     }
 
     @Override
