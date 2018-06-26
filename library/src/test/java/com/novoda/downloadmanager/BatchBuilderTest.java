@@ -19,7 +19,7 @@ public class BatchBuilderTest {
                 .build();
 
         BatchFile expectedBatchFile = new BatchFile("http://example.com/5mb.zip", Optional.absent(), "download_batch_id/5mb.zip");
-        Batch expectedBatch = new Batch(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE, Collections.singletonList(expectedBatchFile));
+        Batch expectedBatch = new Batch(storageRoot, DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE, Collections.singletonList(expectedBatchFile));
 
         assertThat(batch).isEqualTo(expectedBatch);
     }
@@ -31,7 +31,7 @@ public class BatchBuilderTest {
                 .build();
 
         BatchFile expectedBatchFile = new BatchFile("http://example.com/5mb.zip", Optional.of(DOWNLOAD_FILE_ID), "download_batch_id/foo/bar/5mb.zip");
-        Batch expectedBatch = new Batch(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE, Collections.singletonList(expectedBatchFile));
+        Batch expectedBatch = new Batch(storageRoot, DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE, Collections.singletonList(expectedBatchFile));
 
         assertThat(batch).isEqualTo(expectedBatch);
     }

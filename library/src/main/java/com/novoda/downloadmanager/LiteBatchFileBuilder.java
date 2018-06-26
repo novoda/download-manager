@@ -4,6 +4,7 @@ import java.io.File;
 
 final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
 
+    private final StorageRoot storageRoot;
     private final DownloadBatchId downloadBatchId;
     private final String networkAddress;
 
@@ -13,7 +14,8 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
 
     private InternalBatchBuilder parentBuilder;
 
-    LiteBatchFileBuilder(DownloadBatchId downloadBatchId, String networkAddress) {
+    LiteBatchFileBuilder(StorageRoot storageRoot, DownloadBatchId downloadBatchId, String networkAddress) {
+        this.storageRoot = storageRoot;
         this.downloadBatchId = downloadBatchId;
         this.networkAddress = networkAddress;
     }
@@ -40,25 +42,29 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
     public BatchFileBuilder saveTo(String path, String fileName) {
         this.path = path;
         this.fileName = fileName;
-
         return this;
     }
 
     @Override
     public BatchBuilder apply() {
-        StringBuilder stringBuilder = new StringBuilder(path);
-        if (!path.endsWith("/")) {
-            stringBuilder.append("/");
+        if (fileName == null) {
+            fileName = FileNameExtractor.extractFrom(networkAddress);
         }
 
-        if (fileName.startsWith("/")) {
-            fileName = fileName.replaceFirst("/", "");
-        }
-        stringBuilder.append(downloadBatchId.rawId());
-        stringBuilder.append(File.separatorChar);
-        stringBuilder.append(fileName);
+        StringBuilder absolutePath = new StringBuilder(storageRoot.path());
 
-        parentBuilder.withFile(new BatchFile(networkAddress, downloadFileId, stringBuilder.toString()));
+        absolutePath.append(File.separatorChar);
+        absolutePath.append(downloadBatchId.rawId());
+        absolutePath.append(File.separatorChar);
+
+        if (path != null) {
+            absolutePath.append(path);
+            absolutePath.append(File.separatorChar);
+        }
+
+        absolutePath.append(fileName);
+
+        parentBuilder.withFile(new BatchFile(networkAddress, downloadFileId, absolutePath.toString()));
         return parentBuilder;
     }
 

@@ -26,6 +26,8 @@ import com.novoda.downloadmanager.DownloadMigratorBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
+import com.novoda.downloadmanager.StorageRoot;
+import com.novoda.downloadmanager.StorageRootFactory;
 
 import java.io.File;
 
@@ -136,11 +138,17 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private final View.OnClickListener downloadBatchesOnClick = v -> {
-        String primaryStorageApplicationDirectory = getApplicationContext().getFilesDir().getAbsolutePath();
+        StorageRoot primaryStorageRoot = StorageRootFactory.createPrimaryStorageRoot(getApplicationContext());
 
-        Batch batch = Batch.with(BATCH_ID_1, "Made in chelsea")
-                .downloadFrom(FIVE_MB_FILE_URL).saveTo(primaryStorageApplicationDirectory + "/foo/bar/", "5mb.zip").withIdentifier(FILE_ID_1).apply()
-                .downloadFrom(TEN_MB_FILE_URL).saveTo(primaryStorageApplicationDirectory).apply()
+        Batch batch = Batch.with(primaryStorageRoot, BATCH_ID_1, "Made in chelsea")
+                .downloadFrom(FIVE_MB_FILE_URL).saveTo("foo/bar/", "5mb.zip").withIdentifier(FILE_ID_1).apply()
+                .downloadFrom(TEN_MB_FILE_URL).apply()
+                .build();
+        liteDownloadManagerCommands.download(batch);
+
+        batch = Batch.with(primaryStorageRoot, BATCH_ID_2, "Hollyoaks")
+                .downloadFrom(TEN_MB_FILE_URL).apply()
+                .downloadFrom(TWENTY_MB_FILE_URL).apply()
                 .build();
         liteDownloadManagerCommands.download(batch);
     };

@@ -38,7 +38,6 @@ class MigrationExtractor {
         this.basePath = basePath;
     }
 
-
     List<Migration> extractMigrations() {
         Cursor batchesCursor = database.rawQuery(BATCHES_QUERY);
 
@@ -80,7 +79,7 @@ class MigrationExtractor {
 
                         if (downloadsCursor.isFirst()) {
                             downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
-                            newBatchBuilder = Batch.with(downloadBatchId, batchTitle);
+                            newBatchBuilder = Batch.with(StorageRootFactory.createMissingStorageRoot(), downloadBatchId, batchTitle);
                         }
 
                         if (uris.contains(originalNetworkAddress) && fileIds.contains(originalFileId)) {
