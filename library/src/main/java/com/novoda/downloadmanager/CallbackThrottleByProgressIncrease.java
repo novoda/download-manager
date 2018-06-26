@@ -33,7 +33,7 @@ class CallbackThrottleByProgressIncrease implements CallbackThrottle {
 
     private boolean statusHasChanged(DownloadBatchStatus currentDownloadBatchStatus) {
         DownloadBatchStatus.Status newStatus = currentDownloadBatchStatus.status();
-        return currentStatus != newStatus;
+        return !currentStatus.equals(newStatus);
     }
 
     private boolean progressHasChanged(DownloadBatchStatus currentDownloadBatchStatus) {
@@ -43,7 +43,7 @@ class CallbackThrottleByProgressIncrease implements CallbackThrottle {
 
     private boolean errorHasChanged(DownloadBatchStatus currentDownloadBatchStatus) {
         DownloadError newDownloadError = currentDownloadBatchStatus.downloadError();
-        return currentDownloadError != newDownloadError;
+        return !currentDownloadError.equals(newDownloadError);
     }
 
     @Override
