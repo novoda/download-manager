@@ -27,7 +27,6 @@ import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
 import com.novoda.downloadmanager.StorageRoot;
-import com.novoda.downloadmanager.StorageRootFactory;
 
 import java.io.File;
 
@@ -48,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String FIVE_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/5MB.zip";
     private static final String TEN_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/10MB.zip";
     private static final String TWENTY_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/20MB.zip";
+
+    private final StorageRoot primaryStorageWithDownloadsSubpackage = () -> getApplicationContext().getFilesDir().getAbsolutePath() + "/downloads";
 
     private TextView databaseCloningUpdates;
     private TextView databaseMigrationUpdates;
@@ -138,15 +139,13 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private final View.OnClickListener downloadBatchesOnClick = v -> {
-        StorageRoot primaryStorageRoot = StorageRootFactory.createPrimaryStorageRoot(getApplicationContext());
-
-        Batch batch = Batch.with(primaryStorageRoot, BATCH_ID_1, "Made in chelsea")
-                .downloadFrom(FIVE_MB_FILE_URL).saveTo("foo/bar/", "5mb.zip").withIdentifier(FILE_ID_1).apply()
+        Batch batch = Batch.with(primaryStorageWithDownloadsSubpackage, BATCH_ID_1, "Made in chelsea")
+                .downloadFrom(FIVE_MB_FILE_URL).saveTo("foo/bar", "5mb.zip").withIdentifier(FILE_ID_1).apply()
                 .downloadFrom(TEN_MB_FILE_URL).apply()
                 .build();
         liteDownloadManagerCommands.download(batch);
 
-        batch = Batch.with(primaryStorageRoot, BATCH_ID_2, "Hollyoaks")
+        batch = Batch.with(primaryStorageWithDownloadsSubpackage, BATCH_ID_2, "Hollyoaks")
                 .downloadFrom(TEN_MB_FILE_URL).apply()
                 .downloadFrom(TWENTY_MB_FILE_URL).apply()
                 .build();
@@ -159,8 +158,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private final View.OnClickListener logFileDirectoryOnClick = v -> {
-        StorageRoot primaryStorageRoot = StorageRootFactory.createPrimaryStorageRoot(getApplicationContext());
-        File downloadsDir = new File(primaryStorageRoot.path());
+        File downloadsDir = new File(primaryStorageWithDownloadsSubpackage.path());
         Log.d(TAG, "LogFileDirectory. Downloads dir: " + downloadsDir.getAbsolutePath());
         if (downloadsDir.exists()) {
             logAllFiles(downloadsDir.listFiles());
