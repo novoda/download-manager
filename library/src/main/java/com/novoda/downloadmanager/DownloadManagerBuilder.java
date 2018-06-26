@@ -27,11 +27,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETING;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.*;
 
 @SuppressWarnings("PMD.ExcessiveImports")
 public final class DownloadManagerBuilder {
@@ -64,7 +60,7 @@ public final class DownloadManagerBuilder {
         Context applicationContext = context.getApplicationContext();
 
         StorageRequirementRules storageRequirementRule = StorageRequirementRules.newInstance();
-        FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(applicationContext);
+        FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newPathBasedPersistenceCreator(applicationContext);
         FileDownloaderCreator fileDownloaderCreator = FileDownloaderCreator.newNetworkFileDownloaderCreator();
 
         NetworkRequestCreator requestCreator = new NetworkRequestCreator();

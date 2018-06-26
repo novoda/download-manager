@@ -5,6 +5,7 @@ import java.security.InvalidParameterException;
 public enum FilePersistenceType {
     INTERNAL("internal"),
     EXTERNAL("external"),
+    PATH("path"),
     CUSTOM("custom");
 
     private final String rawValue;

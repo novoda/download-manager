@@ -136,15 +136,11 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private final View.OnClickListener downloadBatchesOnClick = v -> {
-        Batch batch = Batch.with(BATCH_ID_1, "Made in chelsea")
-                .downloadFrom(FIVE_MB_FILE_URL).saveTo("foo/bar/", "5mb.zip").withIdentifier(FILE_ID_1).apply()
-                .downloadFrom(TEN_MB_FILE_URL).apply()
-                .build();
-        liteDownloadManagerCommands.download(batch);
+        String primaryStorageApplicationDirectory = getApplicationContext().getFilesDir().getAbsolutePath();
 
-        batch = Batch.with(BATCH_ID_2, "Hollyoaks")
-                .downloadFrom(TEN_MB_FILE_URL).apply()
-                .downloadFrom(TWENTY_MB_FILE_URL).apply()
+        Batch batch = Batch.with(BATCH_ID_1, "Made in chelsea")
+                .downloadFrom(FIVE_MB_FILE_URL).saveTo(primaryStorageApplicationDirectory + "/foo/bar/", "5mb.zip").withIdentifier(FILE_ID_1).apply()
+                .downloadFrom(TEN_MB_FILE_URL).saveTo(primaryStorageApplicationDirectory).apply()
                 .build();
         liteDownloadManagerCommands.download(batch);
     };

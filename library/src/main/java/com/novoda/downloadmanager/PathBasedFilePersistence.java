@@ -40,14 +40,14 @@ class PathBasedFilePersistence implements FilePersistence {
         try {
             File file = new File(absoluteFilePath.path());
 
-            if (storageRequirementRule.hasViolatedRule(file, fileSize)) {
-                return FilePersistenceResult.ERROR_INSUFFICIENT_SPACE;
-            }
-
             boolean parentDirectoriesExist = ensureParentDirectoriesExistFor(file);
 
             if (!parentDirectoriesExist) {
                 return FilePersistenceResult.ERROR_OPENING_FILE;
+            }
+
+            if (storageRequirementRule.hasViolatedRule(file.getParentFile(), fileSize)) {
+                return FilePersistenceResult.ERROR_INSUFFICIENT_SPACE;
             }
 
             fileOutputStream = new FileOutputStream(file, APPEND);

@@ -8,7 +8,8 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
     private final String networkAddress;
 
     private Optional<DownloadFileId> downloadFileId = Optional.absent();
-    private Optional<String> path = Optional.absent();
+    private String path;
+    private String fileName;
 
     private InternalBatchBuilder parentBuilder;
 
@@ -37,24 +38,28 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
 
     @Override
     public BatchFileBuilder saveTo(String path, String fileName) {
-        if (path != null && fileName != null) {
-            this.path = Optional.of(path + fileName);
-        }
+        this.path = path;
+        this.fileName = fileName;
 
         return this;
     }
 
     @Override
     public BatchBuilder apply() {
-        String networkAddressDerivedFileName = FileNameExtractor.extractFrom(networkAddress);
-        String pathPrependedWithBatchId = prependBatchIdTo(path.or(networkAddressDerivedFileName), downloadBatchId);
+        StringBuilder stringBuilder = new StringBuilder(path);
+        if (!path.endsWith("/")) {
+            stringBuilder.append("/");
+        }
 
-        parentBuilder.withFile(new BatchFile(networkAddress, downloadFileId, pathPrependedWithBatchId));
+        if (fileName.startsWith("/")) {
+            fileName = fileName.replaceFirst("/", "");
+        }
+        stringBuilder.append(downloadBatchId.rawId());
+        stringBuilder.append(File.separatorChar);
+        stringBuilder.append(fileName);
+
+        parentBuilder.withFile(new BatchFile(networkAddress, downloadFileId, stringBuilder.toString()));
         return parentBuilder;
-    }
-
-    private static String prependBatchIdTo(String filePath, DownloadBatchId downloadBatchId) {
-        return downloadBatchId.rawId() + File.separatorChar + filePath;
     }
 
 }
