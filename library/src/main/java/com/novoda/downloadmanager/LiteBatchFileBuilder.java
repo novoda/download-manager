@@ -53,16 +53,16 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
 
         StringBuilder absolutePath = new StringBuilder(storageRoot.path());
 
-        absolutePath.append(File.separatorChar);
-        absolutePath.append(downloadBatchId.rawId());
-        absolutePath.append(File.separatorChar);
+        absolutePath = absolutePath.append(File.separatorChar)
+                .append(downloadBatchId.rawId())
+                .append(File.separatorChar);
 
         if (path != null) {
-            absolutePath.append(path);
-            absolutePath.append(File.separatorChar);
+            absolutePath = absolutePath.append(path)
+                    .append(File.separatorChar);
         }
 
-        absolutePath.append(fileName);
+        absolutePath = absolutePath.append(fileName);
 
         parentBuilder.withFile(new BatchFile(networkAddress, downloadFileId, absolutePath.toString()));
         return parentBuilder;
