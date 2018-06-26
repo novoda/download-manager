@@ -122,7 +122,7 @@ class DownloadFile {
             case ERROR_INSUFFICIENT_SPACE:
                 return DownloadErrorFactory.createInsufficientFreeSpaceError(downloadFileStatus);
             case ERROR_EXTERNAL_STORAGE_NON_WRITABLE:
-                return DownloadErrorFactory.createStorageNotAvailableError(filePersistence);
+                return DownloadErrorFactory.createStorageNotAvailableError(filePath);
             case ERROR_OPENING_FILE:
                 return DownloadErrorFactory.createCannotWriteToFileError(downloadFileStatus);
             default:

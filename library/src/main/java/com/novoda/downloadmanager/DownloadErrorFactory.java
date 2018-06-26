@@ -41,9 +41,9 @@ final class DownloadErrorFactory {
         return new DownloadError(DownloadError.Type.FILE_CANNOT_BE_WRITTEN, cannotWriteToFileMessage);
     }
 
-    static DownloadError createStorageNotAvailableError(FilePersistence filePersistence) {
-        // TODO: Can we pass the base path here? It might vary between downloads.
-        String storageUnavailableMessage = "Storage with base path: " + filePersistence.basePath() + " is not available";
+    static DownloadError createStorageNotAvailableError(FilePath filePath) {
+        // QUESTION: is it enough to swap out the basePath with the filePath?
+        String storageUnavailableMessage = "Storage unavailable to save file to: " + filePath;
         return new DownloadError(DownloadError.Type.STORAGE_UNAVAILABLE, storageUnavailableMessage);
     }
 

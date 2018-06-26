@@ -23,11 +23,6 @@ class PathBasedFilePersistence implements FilePersistence {
     }
 
     @Override
-    public FilePath basePath() {
-        return FilePathCreator.create("", ""); // TODO: Remove this from the persistence.
-    }
-
-    @Override
     public FilePersistenceResult create(FilePath absoluteFilePath, FileSize fileSize) {
         if (fileSize.isTotalSizeUnknown()) {
             return FilePersistenceResult.ERROR_UNKNOWN_TOTAL_FILE_SIZE;

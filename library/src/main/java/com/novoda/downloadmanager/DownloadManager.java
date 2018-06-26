@@ -4,7 +4,6 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -214,13 +213,6 @@ class DownloadManager implements LiteDownloadManagerCommands {
                 downloadBatch.waitForNetwork();
             }
         }
-    }
-
-    @Override
-    public File getDownloadsDir() { // TODO: Not really relevant, this can vary between application runs.
-        FilePersistence filePersistence = fileOperations.filePersistenceCreator().create();
-        FilePath filePath = filePersistence.basePath();
-        return new File(filePath.path());
     }
 
 }

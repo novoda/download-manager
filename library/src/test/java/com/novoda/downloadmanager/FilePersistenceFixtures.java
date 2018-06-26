@@ -7,7 +7,7 @@ class FilePersistenceFixtures {
     private FilePersistenceResult filePersistenceResult = FilePersistenceResult.SUCCESS;
     private boolean writeResult = true;
     private long currentSize = 100;
-    private FilePersistenceType filePersistenceType = FilePersistenceType.INTERNAL;
+    private FilePersistenceType filePersistenceType = FilePersistenceType.PATH;
 
     static FilePersistenceFixtures aFilePersistence() {
         return new FilePersistenceFixtures();
@@ -38,11 +38,6 @@ class FilePersistenceFixtures {
             @Override
             public void initialiseWith(Context context, StorageRequirementRule storageRequirementRule) {
 
-            }
-
-            @Override
-            public FilePath basePath() {
-                return FilePathCreator.create("foo/bar", "/");
             }
 
             @Override
