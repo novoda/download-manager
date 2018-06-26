@@ -124,6 +124,6 @@ class PathBasedFilePersistence implements FilePersistence {
 
     @Override
     public FilePersistenceType getType() {
-        return FilePersistenceType.EXTERNAL;
+        return FilePersistenceType.PATH;
     }
 }
