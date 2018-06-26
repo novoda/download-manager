@@ -53,7 +53,7 @@ class MigrationJob implements Runnable {
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
 
-        FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(context);
+        FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newPathBasedPersistenceCreator(context);
         StorageRequirementRule storageRequirementRule = StorageRequirementRuleFactory.createPercentageBasedRule(TEN_PERCENT);
         filePersistenceCreator.withStorageRequirementRules(storageRequirementRule);
         FilePersistence filePersistence = filePersistenceCreator.create();
@@ -144,7 +144,7 @@ class MigrationJob implements Runnable {
                     fileMetadata.newFileLocation(),
                     fileMetadata.fileSize().totalSize(),
                     url,
-                    FilePersistenceType.INTERNAL
+                    FilePersistenceType.PATH
             );
             downloadsPersistence.persistFile(persistedFile);
         }
