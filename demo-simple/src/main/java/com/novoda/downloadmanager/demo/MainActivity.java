@@ -27,6 +27,7 @@ import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
 import com.novoda.downloadmanager.StorageRoot;
+import com.novoda.downloadmanager.StorageRootFactory;
 
 import java.io.File;
 
@@ -48,8 +49,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String TEN_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/10MB.zip";
     private static final String TWENTY_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/20MB.zip";
 
-    private final StorageRoot primaryStorageWithDownloadsSubpackage = () -> getApplicationContext().getFilesDir().getAbsolutePath() + "/downloads";
-
     private TextView databaseCloningUpdates;
     private TextView databaseMigrationUpdates;
     private TextView textViewBatch1;
@@ -58,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private DownloadMigrator downloadMigrator;
     private VersionOneDatabaseCloner versionOneDatabaseCloner;
     private Spinner downloadFileSizeSpinner;
+    private StorageRoot primaryStorageWithDownloadsSubpackage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +81,8 @@ public class MainActivity extends AppCompatActivity {
         downloadFileSizeSpinner = findViewById(R.id.database_download_file_size);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.file_sizes, android.R.layout.simple_spinner_item);
         downloadFileSizeSpinner.setAdapter(adapter);
+
+        primaryStorageWithDownloadsSubpackage = StorageRootFactory.createPrimaryStorageDownloadsDirectoryRoot(getApplicationContext());
 
         databaseCloningUpdates = findViewById(R.id.database_cloning_updates);
         View buttonCreateDB = findViewById(R.id.button_create_v1_db);

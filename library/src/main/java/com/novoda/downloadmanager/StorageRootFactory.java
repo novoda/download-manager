@@ -8,8 +8,8 @@ public final class StorageRootFactory {
         // Uses static factory methods.
     }
 
-    public static StorageRoot createPrimaryStorageRoot(Context context) {
-        return new PrimaryStorageRoot(context);
+    public static StorageRoot createPrimaryStorageDownloadsDirectoryRoot(Context context) {
+        return new PrimaryStorageDownloadsDirectoryRoot(context);
     }
 
     public static StorageRoot createMissingStorageRoot() {
