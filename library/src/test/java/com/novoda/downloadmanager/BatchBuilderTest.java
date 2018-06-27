@@ -14,31 +14,31 @@ public class BatchBuilderTest {
 
     @Test
     public void returnsBatch_whenOptionalParametersAreNotSupplied() {
-        Batch batch = Batch.with(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
+        Batch batch = Batch.with(TestStorageRootFactory.create(), DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
                 .downloadFrom("http://example.com/5mb.zip").apply()
                 .build();
 
-        BatchFile expectedBatchFile = new BatchFile("http://example.com/5mb.zip", Optional.absent(), "download_batch_id/5mb.zip");
-        Batch expectedBatch = new Batch(storageRoot, DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE, Collections.singletonList(expectedBatchFile));
+        BatchFile expectedBatchFile = new BatchFile("http://example.com/5mb.zip", Optional.absent(), "root/download_batch_id/5mb.zip");
+        Batch expectedBatch = new Batch(TestStorageRootFactory.create(), DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE, Collections.singletonList(expectedBatchFile));
 
         assertThat(batch).isEqualTo(expectedBatch);
     }
 
     @Test
     public void returnsBatch_whenOptionalParametersAreSupplied() {
-        Batch batch = Batch.with(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
-                .downloadFrom("http://example.com/5mb.zip").withIdentifier(DOWNLOAD_FILE_ID).saveTo("foo/bar/", "5mb.zip").apply()
+        Batch batch = Batch.with(TestStorageRootFactory.create(), DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
+                .downloadFrom("http://example.com/5mb.zip").withIdentifier(DOWNLOAD_FILE_ID).saveTo("foo/bar", "5mb.zip").apply()
                 .build();
 
-        BatchFile expectedBatchFile = new BatchFile("http://example.com/5mb.zip", Optional.of(DOWNLOAD_FILE_ID), "download_batch_id/foo/bar/5mb.zip");
-        Batch expectedBatch = new Batch(storageRoot, DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE, Collections.singletonList(expectedBatchFile));
+        BatchFile expectedBatchFile = new BatchFile("http://example.com/5mb.zip", Optional.of(DOWNLOAD_FILE_ID), "root/download_batch_id/foo/bar/5mb.zip");
+        Batch expectedBatch = new Batch(TestStorageRootFactory.create(), DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE, Collections.singletonList(expectedBatchFile));
 
         assertThat(batch).isEqualTo(expectedBatch);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throwsException_whenDuplicatedFileIDsAreSupplied() {
-        Batch.with(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
+        Batch.with(TestStorageRootFactory.create(), DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
                 .downloadFrom("net_address").withIdentifier(DOWNLOAD_FILE_ID).apply()
                 .downloadFrom("another_address").withIdentifier(DOWNLOAD_FILE_ID).apply()
                 .build();
@@ -46,7 +46,7 @@ public class BatchBuilderTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void throwsException_whenDuplicatedNetworkAddressWithoutFileIDsAreSupplied() {
-        Batch.with(DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
+        Batch.with(TestStorageRootFactory.create(), DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
                 .downloadFrom("net_address").apply()
                 .downloadFrom("net_address").apply()
                 .build();

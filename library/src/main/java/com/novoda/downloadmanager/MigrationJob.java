@@ -59,7 +59,12 @@ class MigrationJob implements Runnable {
         FilePersistence filePersistence = filePersistenceCreator.create();
 
         PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database, basePath);
-        MigrationExtractor migrationExtractor = new MigrationExtractor(database, filePersistence, basePath);
+        MigrationExtractor migrationExtractor = new MigrationExtractor(
+                StorageRootFactory.createMissingStorageRoot(),
+                database,
+                filePersistence,
+                basePath
+        );
         List<Migration> partialMigrations = partialDownloadMigrationExtractor.extractMigrations();
         List<Migration> completeMigrations = migrationExtractor.extractMigrations();
         DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);

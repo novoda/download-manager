@@ -2,12 +2,12 @@ package com.novoda.downloadmanager;
 
 import android.database.Cursor;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -48,13 +48,13 @@ public class MigrationExtractorTest {
             .build();
 
     private final SqlDatabaseWrapper database = mock(SqlDatabaseWrapper.class);
-    private final InternalFilePersistence internalFilePersistence = mock(InternalFilePersistence.class);
+    private final FilePersistence filePersistence = mock(FilePersistence.class);
 
     private MigrationExtractor migrationExtractor;
 
     @Before
     public void setUp() {
-        migrationExtractor = new MigrationExtractor(database, internalFilePersistence, "base");
+        migrationExtractor = new MigrationExtractor(TestStorageRootFactory.create(), database, filePersistence, "base");
     }
 
     @Test
@@ -62,7 +62,7 @@ public class MigrationExtractorTest {
         given(database.rawQuery(BATCHES_QUERY)).willReturn(BATCHES_CURSOR);
         given(database.rawQuery(eq(DOWNLOADS_QUERY), eq("1"))).willReturn(BATCH_ONE_DOWNLOADS_CURSOR);
         given(database.rawQuery(eq(DOWNLOADS_QUERY), eq("2"))).willReturn(BATCH_TWO_DOWNLOADS_CURSOR);
-        given(internalFilePersistence.getCurrentSize(any(FilePath.class)))
+        given(filePersistence.getCurrentSize(any(FilePath.class)))
                 .willReturn(1000L)
                 .willReturn(2000L)
                 .willReturn(500L)
@@ -76,7 +76,7 @@ public class MigrationExtractorTest {
     private List<Migration> expectedMigrations() {
         String firstUri = "uri_1";
         String secondUri = "uri_2";
-        Batch firstBatch = Batch.with(DownloadBatchIdCreator.createSanitizedFrom(String.valueOf("file_1".hashCode())), "title_1")
+        Batch firstBatch = Batch.with(TestStorageRootFactory.create(), DownloadBatchIdCreator.createSanitizedFrom(String.valueOf("file_1".hashCode())), "title_1")
                 .downloadFrom(firstUri).withIdentifier(DownloadFileIdCreator.createFrom("file_1")).apply()
                 .downloadFrom(secondUri).withIdentifier(DownloadFileIdCreator.createFrom("file_2")).apply()
                 .build();
@@ -87,7 +87,7 @@ public class MigrationExtractorTest {
 
         String thirdUri = "uri_3";
         String fourthUri = "uri_4";
-        Batch secondBatch = Batch.with(DownloadBatchIdCreator.createSanitizedFrom(String.valueOf("file_3".hashCode())), "title_2")
+        Batch secondBatch = Batch.with(TestStorageRootFactory.create(), DownloadBatchIdCreator.createSanitizedFrom(String.valueOf("file_3".hashCode())), "title_2")
                 .downloadFrom(thirdUri).withIdentifier(DownloadFileIdCreator.createFrom("file_3")).apply()
                 .downloadFrom(fourthUri).withIdentifier(DownloadFileIdCreator.createFrom("file_4")).apply()
                 .build();
