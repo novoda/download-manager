@@ -7,7 +7,7 @@ import android.content.Context;
  */
 public interface FilePersistence {
 
-    void initialiseWith(Context context, StorageRequirementsRule storageRequirementsRule);
+    void initialiseWith(Context context, StorageRequirementRule storageRequirementRule);
 
     FilePath basePath();
 

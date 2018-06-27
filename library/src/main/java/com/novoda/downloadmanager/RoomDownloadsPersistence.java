@@ -4,6 +4,7 @@ import android.content.Context;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 final class RoomDownloadsPersistence implements DownloadsPersistence {
 
@@ -177,7 +178,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
 
     private String rawFileIdFrom(DownloadBatchTitle batch, CompletedDownloadBatch.CompletedDownloadFile completedDownloadFile) {
         if (completedDownloadFile.fileId() == null || completedDownloadFile.fileId().isEmpty()) {
-            return batch.asString() + System.nanoTime();
+            return batch.asString() + UUID.randomUUID();
         } else {
             return completedDownloadFile.fileId();
         }

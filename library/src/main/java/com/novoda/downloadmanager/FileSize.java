@@ -6,6 +6,8 @@ public interface FileSize {
 
     long totalSize();
 
+    long remainingSize();
+
     boolean isTotalSizeKnown();
 
     boolean isTotalSizeUnknown();
