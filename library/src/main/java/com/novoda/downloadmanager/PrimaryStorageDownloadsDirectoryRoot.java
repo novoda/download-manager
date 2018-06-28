@@ -17,4 +17,3 @@ class PrimaryStorageDownloadsDirectoryRoot implements StorageRoot {
         return context.getApplicationContext().getFilesDir().getAbsolutePath() + DOWNLOADS_DIR;
     }
 }
-
