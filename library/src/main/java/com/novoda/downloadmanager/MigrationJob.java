@@ -53,13 +53,18 @@ class MigrationJob implements Runnable {
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databasePath.getAbsolutePath(), null, 0);
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
 
-        FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(context);
+        FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newPathBasedPersistenceCreator(context);
         StorageRequirementRule storageRequirementRule = StorageRequirementRuleFactory.createPercentageBasedRule(TEN_PERCENT);
         filePersistenceCreator.withStorageRequirementRules(storageRequirementRule);
         FilePersistence filePersistence = filePersistenceCreator.create();
 
         PartialDownloadMigrationExtractor partialDownloadMigrationExtractor = new PartialDownloadMigrationExtractor(database, basePath);
-        MigrationExtractor migrationExtractor = new MigrationExtractor(database, filePersistence, basePath);
+        MigrationExtractor migrationExtractor = new MigrationExtractor(
+                StorageRootFactory.createMissingStorageRoot(),
+                database,
+                filePersistence,
+                basePath
+        );
         List<Migration> partialMigrations = partialDownloadMigrationExtractor.extractMigrations();
         List<Migration> completeMigrations = migrationExtractor.extractMigrations();
         DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(context);
@@ -144,7 +149,7 @@ class MigrationJob implements Runnable {
                     fileMetadata.newFileLocation(),
                     fileMetadata.fileSize().totalSize(),
                     url,
-                    FilePersistenceType.INTERNAL
+                    FilePersistenceType.PATH
             );
             downloadsPersistence.persistFile(persistedFile);
         }

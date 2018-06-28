@@ -12,12 +12,8 @@ class FilePersistenceCreator {
 
     private StorageRequirementRule storageRequirementRule;
 
-    static FilePersistenceCreator newInternalFilePersistenceCreator(Context context) {
-        return new FilePersistenceCreator(context, FilePersistenceType.INTERNAL, null);
-    }
-
-    static FilePersistenceCreator newExternalFilePersistenceCreator(Context context) {
-        return new FilePersistenceCreator(context, FilePersistenceType.EXTERNAL, null);
+    static FilePersistenceCreator newPathBasedPersistenceCreator(Context context) {
+        return new FilePersistenceCreator(context, FilePersistenceType.PATH, null);
     }
 
     static FilePersistenceCreator newCustomFilePersistenceCreator(Context context, Class<? extends FilePersistence> customClass) {
@@ -42,14 +38,11 @@ class FilePersistenceCreator {
         FilePersistence filePersistence;
 
         switch (type) {
-            case INTERNAL:
-                filePersistence = new InternalFilePersistence();
-                break;
-            case EXTERNAL:
-                filePersistence = new ExternalFilePersistence();
-                break;
             case CUSTOM:
                 filePersistence = createCustomFilePersistence();
+                break;
+            case PATH:
+                filePersistence = new PathBasedFilePersistence();
                 break;
             default:
                 throw new IllegalStateException("Persistence of type " + type + " is not supported");

@@ -8,11 +8,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-class InternalFilePersistence implements FilePersistence {
+class PathBasedFilePersistence implements FilePersistence {
 
-    private static final String DOWNLOADS_DIR = "/downloads/";
+    private static final boolean APPEND = true;
 
-    private Context context;
     private StorageRequirementRule storageRequirementRule;
 
     @Nullable
@@ -20,13 +19,7 @@ class InternalFilePersistence implements FilePersistence {
 
     @Override
     public void initialiseWith(Context context, StorageRequirementRule storageRequirementRule) {
-        this.context = context.getApplicationContext();
         this.storageRequirementRule = storageRequirementRule;
-    }
-
-    @Override
-    public FilePath basePath() {
-        return FilePathCreator.create(context.getFilesDir().getAbsolutePath(), DOWNLOADS_DIR);
     }
 
     @Override
@@ -35,27 +28,24 @@ class InternalFilePersistence implements FilePersistence {
             return FilePersistenceResult.ERROR_UNKNOWN_TOTAL_FILE_SIZE;
         }
 
-        if (storageRequirementRule.hasViolatedRule(context.getFilesDir(), fileSize)) {
-            return FilePersistenceResult.ERROR_INSUFFICIENT_SPACE;
-        }
-
-        return create(absoluteFilePath);
-    }
-
-    private FilePersistenceResult create(FilePath absoluteFilePath) {
         if (absoluteFilePath.isUnknown()) {
             return FilePersistenceResult.ERROR_OPENING_FILE;
         }
 
         try {
-            File outputFile = new File(absoluteFilePath.path());
-            boolean parentDirectoriesExist = ensureParentDirectoriesExistFor(outputFile);
+            File file = new File(absoluteFilePath.path());
+
+            boolean parentDirectoriesExist = ensureParentDirectoriesExistFor(file);
 
             if (!parentDirectoriesExist) {
                 return FilePersistenceResult.ERROR_OPENING_FILE;
             }
 
-            fileOutputStream = new FileOutputStream(outputFile, true);
+            if (storageRequirementRule.hasViolatedRule(file.getParentFile(), fileSize)) {
+                return FilePersistenceResult.ERROR_INSUFFICIENT_SPACE;
+            }
+
+            fileOutputStream = new FileOutputStream(file, APPEND);
         } catch (FileNotFoundException e) {
             Logger.e(e, "File could not be opened");
             return FilePersistenceResult.ERROR_OPENING_FILE;
@@ -93,7 +83,7 @@ class InternalFilePersistence implements FilePersistence {
     @Override
     public void delete(FilePath absoluteFilePath) {
         if (absoluteFilePath == null || absoluteFilePath.isUnknown()) {
-            Logger.w("Cannot delete, you must create the file first");
+            Logger.w("Cannot delete, you must create the file first.");
             return;
         }
 
@@ -123,12 +113,12 @@ class InternalFilePersistence implements FilePersistence {
         try {
             fileOutputStream.close();
         } catch (IOException e) {
-            Logger.e(e, "Failed to close.");
+            Logger.e(e, "Failed to close fileOutputStream.");
         }
     }
 
     @Override
     public FilePersistenceType getType() {
-        return FilePersistenceType.INTERNAL;
+        return FilePersistenceType.PATH;
     }
 }

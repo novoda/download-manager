@@ -150,7 +150,9 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
             if (deleteSync(downloadBatchStatus)) {
                 deleteCallback.onDeleted(downloadBatchStatus.getDownloadBatchId());
             } else {
-                Logger.e("could not delete batch " + downloadBatchStatus.getDownloadBatchId().rawId() + " with status " + downloadBatchStatus.status());
+                Logger.e("could not delete batch "
+                                 + downloadBatchStatus.getDownloadBatchId().rawId()
+                                 + " with status " + downloadBatchStatus.status());
             }
         });
     }
@@ -196,7 +198,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                     downloadsPersistence.transactionSuccess();
                 } else {
                     Logger.e("could not update notification to status " + downloadBatchStatus.status()
-                            + " for batch id " + downloadBatchStatus.getDownloadBatchId().rawId());
+                                     + " for batch id " + downloadBatchStatus.getDownloadBatchId().rawId());
                 }
             } finally {
                 downloadsPersistence.endTransaction();

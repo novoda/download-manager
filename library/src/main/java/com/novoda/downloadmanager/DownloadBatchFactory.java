@@ -35,8 +35,7 @@ final class DownloadBatchFactory {
 
             FilePersistence filePersistence = fileOperations.filePersistenceCreator().create();
 
-            String basePath = filePersistence.basePath().path();
-            FilePath filePath = FilePathCreator.create(basePath, batchFile.path());
+            FilePath filePath = FilePathCreator.create(batchFile.path(), batchFile.path());
 
             DownloadFileId downloadFileId = FallbackDownloadFileIdProvider.downloadFileIdFor(batch.downloadBatchId(), batchFile);
             InternalDownloadFileStatus downloadFileStatus = new LiteDownloadFileStatus(

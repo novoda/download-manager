@@ -58,7 +58,7 @@ class PartialDownloadMigrationExtractor {
 
                 if (downloadsCursor.isFirst()) {
                     downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
-                    newBatchBuilder = Batch.with(downloadBatchId, batchTitle);
+                    newBatchBuilder = Batch.with(StorageRootFactory.createMissingStorageRoot(), downloadBatchId, batchTitle);
                 }
 
                 if (uris.contains(uri) && fileIds.contains(originalFileId)) {

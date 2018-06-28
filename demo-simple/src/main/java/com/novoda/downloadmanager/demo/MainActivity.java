@@ -26,6 +26,8 @@ import com.novoda.downloadmanager.DownloadMigratorBuilder;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.MigrationCallback;
 import com.novoda.downloadmanager.MigrationStatus;
+import com.novoda.downloadmanager.StorageRoot;
+import com.novoda.downloadmanager.StorageRootFactory;
 
 import java.io.File;
 
@@ -55,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private DownloadMigrator downloadMigrator;
     private VersionOneDatabaseCloner versionOneDatabaseCloner;
     private Spinner downloadFileSizeSpinner;
+    private StorageRoot primaryStorageWithDownloadsSubpackage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +81,8 @@ public class MainActivity extends AppCompatActivity {
         downloadFileSizeSpinner = findViewById(R.id.database_download_file_size);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.file_sizes, android.R.layout.simple_spinner_item);
         downloadFileSizeSpinner.setAdapter(adapter);
+
+        primaryStorageWithDownloadsSubpackage = StorageRootFactory.createPrimaryStorageDownloadsDirectoryRoot(getApplicationContext());
 
         databaseCloningUpdates = findViewById(R.id.database_cloning_updates);
         View buttonCreateDB = findViewById(R.id.button_create_v1_db);
@@ -136,13 +141,13 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private final View.OnClickListener downloadBatchesOnClick = v -> {
-        Batch batch = Batch.with(BATCH_ID_1, "Made in chelsea")
-                .downloadFrom(FIVE_MB_FILE_URL).saveTo("foo/bar/", "5mb.zip").withIdentifier(FILE_ID_1).apply()
+        Batch batch = Batch.with(primaryStorageWithDownloadsSubpackage, BATCH_ID_1, "Made in chelsea")
+                .downloadFrom(FIVE_MB_FILE_URL).saveTo("foo/bar", "5mb.zip").withIdentifier(FILE_ID_1).apply()
                 .downloadFrom(TEN_MB_FILE_URL).apply()
                 .build();
         liteDownloadManagerCommands.download(batch);
 
-        batch = Batch.with(BATCH_ID_2, "Hollyoaks")
+        batch = Batch.with(primaryStorageWithDownloadsSubpackage, BATCH_ID_2, "Hollyoaks")
                 .downloadFrom(TEN_MB_FILE_URL).apply()
                 .downloadFrom(TWENTY_MB_FILE_URL).apply()
                 .build();
@@ -155,8 +160,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private final View.OnClickListener logFileDirectoryOnClick = v -> {
-        LiteDownloadManagerCommands downloadManagerCommands = ((DemoApplication) getApplication()).getLiteDownloadManagerCommands();
-        File downloadsDir = downloadManagerCommands.getDownloadsDir();
+        File downloadsDir = new File(primaryStorageWithDownloadsSubpackage.path());
         Log.d(TAG, "LogFileDirectory. Downloads dir: " + downloadsDir.getAbsolutePath());
         if (downloadsDir.exists()) {
             logAllFiles(downloadsDir.listFiles());

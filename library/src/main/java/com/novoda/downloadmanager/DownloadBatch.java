@@ -158,7 +158,13 @@ class DownloadBatch {
         }
         downloadBatchStatus.markAsWaitingForNetwork(downloadsBatchPersistence);
         notifyCallback(callback, downloadBatchStatus);
-        Logger.v("scheduleRecovery for batch " + downloadBatchStatus.getDownloadBatchId().rawId() + ", " + STATUS + " " + downloadBatchStatus.status());
+        Logger.v(
+                "scheduleRecovery for batch "
+                        + downloadBatchStatus.getDownloadBatchId().rawId()
+                        + ", "
+                        + STATUS
+                        + " " + downloadBatchStatus.status()
+        );
         DownloadsNetworkRecoveryCreator.getInstance().scheduleRecovery();
     }
 

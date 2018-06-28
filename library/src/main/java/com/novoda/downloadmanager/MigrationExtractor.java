@@ -28,16 +28,17 @@ class MigrationExtractor {
     private static final int FILE_UNIQUE_LOCATION_COLUMN = 2;
     private static final int FILE_ID_COLUMN = 3;
 
+    private final StorageRoot storageRoot;
     private final SqlDatabaseWrapper database;
     private final FilePersistence filePersistence;
     private final String basePath;
 
-    MigrationExtractor(SqlDatabaseWrapper database, FilePersistence filePersistence, String basePath) {
+    MigrationExtractor(StorageRoot storageRoot, SqlDatabaseWrapper database, FilePersistence filePersistence, String basePath) {
+        this.storageRoot = storageRoot;
         this.database = database;
         this.filePersistence = filePersistence;
         this.basePath = basePath;
     }
-
 
     List<Migration> extractMigrations() {
         Cursor batchesCursor = database.rawQuery(BATCHES_QUERY);
@@ -80,7 +81,7 @@ class MigrationExtractor {
 
                         if (downloadsCursor.isFirst()) {
                             downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
-                            newBatchBuilder = Batch.with(downloadBatchId, batchTitle);
+                            newBatchBuilder = Batch.with(storageRoot, downloadBatchId, batchTitle);
                         }
 
                         if (uris.contains(originalNetworkAddress) && fileIds.contains(originalFileId)) {

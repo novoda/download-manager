@@ -64,7 +64,7 @@ public final class DownloadManagerBuilder {
         Context applicationContext = context.getApplicationContext();
 
         StorageRequirementRules storageRequirementRule = StorageRequirementRules.newInstance();
-        FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(applicationContext);
+        FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newPathBasedPersistenceCreator(applicationContext);
         FileDownloaderCreator fileDownloaderCreator = FileDownloaderCreator.newNetworkFileDownloaderCreator();
 
         NetworkRequestCreator requestCreator = new NetworkRequestCreator();
@@ -139,16 +139,6 @@ public final class DownloadManagerBuilder {
         this.allowNetworkRecovery = allowNetworkRecovery;
         this.callbackThrottleCreatorType = callbackThrottleCreatorType;
         this.logHandle = logHandle;
-    }
-
-    public DownloadManagerBuilder withFilePersistenceInternal() {
-        filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(applicationContext);
-        return this;
-    }
-
-    public DownloadManagerBuilder withFilePersistenceExternal() {
-        filePersistenceCreator = FilePersistenceCreator.newExternalFilePersistenceCreator(applicationContext);
-        return this;
     }
 
     public DownloadManagerBuilder withFileDownloaderCustom(FileSizeRequester fileSizeRequester,

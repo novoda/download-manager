@@ -12,8 +12,8 @@ public class BatchFile {
         this.path = path;
     }
 
-    static InternalBatchFileBuilder from(DownloadBatchId downloadBatchId, String networkAddress) {
-        return new LiteBatchFileBuilder(downloadBatchId, networkAddress);
+    static InternalBatchFileBuilder from(StorageRoot storageRoot, DownloadBatchId downloadBatchId, String networkAddress) {
+        return new LiteBatchFileBuilder(storageRoot, downloadBatchId, networkAddress);
     }
 
     public String networkAddress() {
