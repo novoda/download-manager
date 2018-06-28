@@ -47,8 +47,7 @@ public class MigrationExtractorTest {
             .with("notificationextras", "file_3", "file_4")
             .build();
 
-    private static final StorageRoot STORAGE_ROOT = TestStorageRootFactory.create();
-
+    private final StorageRoot storageRoot = TestStorageRootFactory.create();
     private final SqlDatabaseWrapper database = mock(SqlDatabaseWrapper.class);
     private final FilePersistence filePersistence = mock(FilePersistence.class);
 
@@ -56,7 +55,7 @@ public class MigrationExtractorTest {
 
     @Before
     public void setUp() {
-        migrationExtractor = new MigrationExtractor(STORAGE_ROOT, database, filePersistence, "base");
+        migrationExtractor = new MigrationExtractor(storageRoot, database, filePersistence, "base");
     }
 
     @Test
@@ -78,7 +77,7 @@ public class MigrationExtractorTest {
     private List<Migration> expectedMigrations() {
         String firstUri = "uri_1";
         String secondUri = "uri_2";
-        Batch firstBatch = Batch.with(STORAGE_ROOT, DownloadBatchIdCreator.createSanitizedFrom(String.valueOf("file_1".hashCode())), "title_1")
+        Batch firstBatch = Batch.with(storageRoot, DownloadBatchIdCreator.createSanitizedFrom(String.valueOf("file_1".hashCode())), "title_1")
                 .downloadFrom(firstUri).withIdentifier(DownloadFileIdCreator.createFrom("file_1")).apply()
                 .downloadFrom(secondUri).withIdentifier(DownloadFileIdCreator.createFrom("file_2")).apply()
                 .build();
@@ -89,7 +88,7 @@ public class MigrationExtractorTest {
 
         String thirdUri = "uri_3";
         String fourthUri = "uri_4";
-        Batch secondBatch = Batch.with(STORAGE_ROOT, DownloadBatchIdCreator.createSanitizedFrom(String.valueOf("file_3".hashCode())), "title_2")
+        Batch secondBatch = Batch.with(storageRoot, DownloadBatchIdCreator.createSanitizedFrom(String.valueOf("file_3".hashCode())), "title_2")
                 .downloadFrom(thirdUri).withIdentifier(DownloadFileIdCreator.createFrom("file_3")).apply()
                 .downloadFrom(fourthUri).withIdentifier(DownloadFileIdCreator.createFrom("file_4")).apply()
                 .build();
