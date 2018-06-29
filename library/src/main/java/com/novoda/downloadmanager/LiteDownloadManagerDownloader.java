@@ -2,8 +2,8 @@ package com.novoda.downloadmanager;
 
 import android.os.Handler;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
@@ -21,7 +21,7 @@ class LiteDownloadManagerDownloader {
     private final DownloadsBatchPersistence downloadsBatchPersistence;
     private final DownloadsFilePersistence downloadsFilePersistence;
     private final DownloadBatchStatusNotificationDispatcher notificationDispatcher;
-    private final List<DownloadBatchStatusCallback> callbacks;
+    private final Set<DownloadBatchStatusCallback> callbacks;
     private final ConnectionChecker connectionChecker;
 
     private final CallbackThrottleCreator callbackThrottleCreator;
@@ -39,7 +39,7 @@ class LiteDownloadManagerDownloader {
                                   DownloadsFilePersistence downloadsFilePersistence,
                                   DownloadBatchStatusNotificationDispatcher notificationDispatcher,
                                   ConnectionChecker connectionChecker,
-                                  List<DownloadBatchStatusCallback> callbacks,
+                                  Set<DownloadBatchStatusCallback> callbacks,
                                   CallbackThrottleCreator callbackThrottleCreator) {
         this.waitForDownloadService = waitForDownloadService;
         this.waitForDownloadBatchStatusCallback = waitForDownloadBatchStatusCallback;
@@ -56,12 +56,12 @@ class LiteDownloadManagerDownloader {
 
     void download(Batch batch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         DownloadBatch downloadBatch = DownloadBatchFactory.newInstance(
-            batch,
-            fileOperations,
-            downloadsBatchPersistence,
-            downloadsFilePersistence,
-            callbackThrottleCreator.create(),
-            connectionChecker
+                batch,
+                fileOperations,
+                downloadsBatchPersistence,
+                downloadsFilePersistence,
+                callbackThrottleCreator.create(),
+                connectionChecker
         );
 
         downloadBatchMap.put(downloadBatch.getId(), downloadBatch);
@@ -77,7 +77,7 @@ class LiteDownloadManagerDownloader {
         }
 
         executor.submit(() -> Wait.<Void>waitFor(downloadService, waitForDownloadService)
-            .thenPerform(executeDownload(downloadBatch, downloadBatchMap)));
+                .thenPerform(executeDownload(downloadBatch, downloadBatchMap)));
     }
 
     private Wait.ThenPerform.Action<Void> executeDownload(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
