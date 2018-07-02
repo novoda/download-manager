@@ -18,10 +18,10 @@ import android.support.v4.app.NotificationManagerCompat;
 
 import com.novoda.merlin.MerlinsBeard;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -112,7 +112,8 @@ public final class DownloadManagerBuilder {
         );
     }
 
-    @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})     // Can't group anymore these are customisable options.
+    @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
+    // Can't group anymore these are customisable options.
     private DownloadManagerBuilder(Context applicationContext,
                                    Handler callbackHandler,
                                    StorageRequirementRules storageRequirementRules,
@@ -254,7 +255,7 @@ public final class DownloadManagerBuilder {
 
         filePersistenceCreator.withStorageRequirementRules(storageRequirementRules);
         FileOperations fileOperations = new FileOperations(filePersistenceCreator, fileSizeRequester, fileDownloaderCreator);
-        List<DownloadBatchStatusCallback> callbacks = new ArrayList<>();
+        Set<DownloadBatchStatusCallback> callbacks = new CopyOnWriteArraySet<>();
 
         CallbackThrottleCreator callbackThrottleCreator = getCallbackThrottleCreator(
                 callbackThrottleCreatorType,

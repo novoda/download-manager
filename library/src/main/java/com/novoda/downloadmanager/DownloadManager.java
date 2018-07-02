@@ -7,6 +7,7 @@ import android.support.annotation.WorkerThread;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 class DownloadManager implements LiteDownloadManagerCommands {
@@ -16,7 +17,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
     private final ExecutorService executor;
     private final Handler callbackHandler;
     private final Map<DownloadBatchId, DownloadBatch> downloadBatchMap;
-    private final List<DownloadBatchStatusCallback> callbacks;
+    private final Set<DownloadBatchStatusCallback> callbacks;
     private final FileOperations fileOperations;
     private final DownloadsBatchPersistence downloadsBatchPersistence;
     private final LiteDownloadManagerDownloader downloader;
@@ -31,7 +32,7 @@ class DownloadManager implements LiteDownloadManagerCommands {
                     ExecutorService executor,
                     Handler callbackHandler,
                     Map<DownloadBatchId, DownloadBatch> downloadBatchMap,
-                    List<DownloadBatchStatusCallback> callbacks,
+                    Set<DownloadBatchStatusCallback> callbacks,
                     FileOperations fileOperations,
                     DownloadsBatchPersistence downloadsBatchPersistence,
                     LiteDownloadManagerDownloader downloader,
