@@ -6,7 +6,7 @@ class DownloadBatchStatusFilter {
     private DownloadBatchStatus.Status currentStatus;
     private DownloadError currentDownloadError;
 
-    boolean shouldFilter(DownloadBatchStatus currentDownloadBatchStatus) {
+    boolean shouldFilterOut(DownloadBatchStatus currentDownloadBatchStatus) {
         if (currentDownloadBatchStatus == null) {
             return true;
         }

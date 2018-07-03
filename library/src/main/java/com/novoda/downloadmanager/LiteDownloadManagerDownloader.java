@@ -97,7 +97,7 @@ class LiteDownloadManagerDownloader {
 
     private DownloadBatchStatusCallback downloadBatchCallback(Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         return downloadBatchStatus -> {
-            if (downloadBatchStatus == null || downloadBatchStatusFilter.shouldFilter(downloadBatchStatus)) {
+            if (downloadBatchStatus == null || downloadBatchStatusFilter.shouldFilterOut(downloadBatchStatus)) {
                 return;
             }
 
