@@ -6,14 +6,7 @@ import android.support.annotation.WorkerThread;
 import java.util.List;
 import java.util.Map;
 
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETING;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADING;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.WAITING_FOR_NETWORK;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.QUEUED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.*;
 
 // This model knows how to interact with low level components.
 @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.StdCyclomaticComplexity", "PMD.ModifiedCyclomaticComplexity"})
@@ -83,6 +76,7 @@ class DownloadBatch {
         }
 
         deleteBatchIfNeeded(downloadBatchStatus, downloadsBatchPersistence, callbackThrottle);
+        notifyCallback(callbackThrottle, downloadBatchStatus);
         Logger.v("end sync download " + rawBatchId);
     }
 
