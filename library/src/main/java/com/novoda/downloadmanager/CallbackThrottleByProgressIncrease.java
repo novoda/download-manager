@@ -19,6 +19,7 @@ class CallbackThrottleByProgressIncrease implements CallbackThrottle {
             return;
         }
 
+        Logger.v("Try to emit: " + currentDownloadBatchStatus.status().toRawValue());
         if (statusHasChanged(currentDownloadBatchStatus)
                 || progressHasChanged(currentDownloadBatchStatus)
                 || errorHasChanged(currentDownloadBatchStatus)) {
@@ -26,6 +27,8 @@ class CallbackThrottleByProgressIncrease implements CallbackThrottle {
             currentStatus = currentDownloadBatchStatus.status();
             currentProgress = currentDownloadBatchStatus.percentageDownloaded();
             currentDownloadError = currentDownloadBatchStatus.downloadError();
+
+            Logger.v("Emitting: " + currentDownloadBatchStatus.status().toRawValue());
 
             callback.onUpdate(currentDownloadBatchStatus);
         }
