@@ -27,11 +27,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETING;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.*;
 
 @SuppressWarnings("PMD.ExcessiveImports")
 public final class DownloadManagerBuilder {
@@ -292,6 +288,8 @@ public final class DownloadManagerBuilder {
                 new HashSet<>()
         );
 
+        DownloadBatchStatusFilter downloadBatchStatusFilter = new DownloadBatchStatusFilter();
+
         LiteDownloadManagerDownloader downloader = new LiteDownloadManagerDownloader(
                 SERVICE_LOCK,
                 CALLBACK_LOCK,
@@ -303,7 +301,8 @@ public final class DownloadManagerBuilder {
                 batchStatusNotificationDispatcher,
                 connectionChecker,
                 callbacks,
-                callbackThrottleCreator
+                callbackThrottleCreator,
+                downloadBatchStatusFilter
         );
 
         downloadManager = new DownloadManager(
