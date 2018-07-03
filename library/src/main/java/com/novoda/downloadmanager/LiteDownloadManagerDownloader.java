@@ -6,7 +6,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.*;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETING;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
 
 class LiteDownloadManagerDownloader {
 

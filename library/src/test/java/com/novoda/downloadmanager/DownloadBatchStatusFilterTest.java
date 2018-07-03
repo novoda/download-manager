@@ -4,27 +4,24 @@ import org.junit.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.novoda.downloadmanager.InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 
 public class DownloadBatchStatusFilterTest {
 
-    private final DownloadBatchStatusCallback downloadBatchCallback = mock(DownloadBatchStatusCallback.class);
-    private final DownloadBatchStatus firstPercentageStatus = anInternalDownloadsBatchStatus()
+    private final InternalDownloadBatchStatus firstPercentageStatus = anInternalDownloadsBatchStatus()
             .withPercentageDownloaded(75)
             .build();
-    private final DownloadBatchStatus secondPercentageStatus = anInternalDownloadsBatchStatus()
+    private final InternalDownloadBatchStatus secondPercentageStatus = anInternalDownloadsBatchStatus()
             .withPercentageDownloaded(80)
             .build();
-    private final DownloadBatchStatus firstErrorStatus = anInternalDownloadsBatchStatus()
+    private final InternalDownloadBatchStatus firstErrorStatus = anInternalDownloadsBatchStatus()
             .withDownloadError(DownloadErrorFactory.createNetworkError("first"))
             .build();
-    private final DownloadBatchStatus secondErrorStatus = anInternalDownloadsBatchStatus()
+    private final InternalDownloadBatchStatus secondErrorStatus = anInternalDownloadsBatchStatus()
             .withDownloadError(DownloadErrorFactory.createNetworkError("second"))
             .build();
-    private final DownloadBatchStatus firstStatus = anInternalDownloadsBatchStatus()
+    private final InternalDownloadBatchStatus firstStatus = anInternalDownloadsBatchStatus()
             .build();
-    private final DownloadBatchStatus secondStatus = anInternalDownloadsBatchStatus()
+    private final InternalDownloadBatchStatus secondStatus = anInternalDownloadsBatchStatus()
             .withStatus(DownloadBatchStatus.Status.DOWNLOADED)
             .build();
 
@@ -84,8 +81,7 @@ public class DownloadBatchStatusFilterTest {
         assertThat(shouldFilterOut).isTrue();
     }
 
-    private void givenPreviousUpdate(DownloadBatchStatus downloadBatchStatus) {
+    private void givenPreviousUpdate(InternalDownloadBatchStatus downloadBatchStatus) {
         downloadBatchStatusFilter.shouldFilterOut(downloadBatchStatus);
-        reset(downloadBatchCallback);
     }
 }

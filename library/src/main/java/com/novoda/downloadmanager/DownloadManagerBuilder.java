@@ -27,7 +27,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.*;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETING;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
 
 @SuppressWarnings("PMD.ExcessiveImports")
 public final class DownloadManagerBuilder {
