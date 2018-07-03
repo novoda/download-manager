@@ -14,12 +14,6 @@ public class CallbackThrottleByProgressIncreaseTest {
     private final DownloadBatchStatus percentageIncreasedStatus = anInternalDownloadsBatchStatus()
             .withPercentageDownloaded(DOWNLOAD_PERCENTAGE)
             .build();
-    private final DownloadBatchStatus firstErrorStatus = anInternalDownloadsBatchStatus()
-            .withDownloadError(DownloadErrorFactory.createNetworkError("first"))
-            .build();
-    private final DownloadBatchStatus secondErrorStatus = anInternalDownloadsBatchStatus()
-            .withDownloadError(DownloadErrorFactory.createNetworkError("second"))
-            .build();
 
     private final CallbackThrottleByProgressIncrease callbackThrottleByProgressIncrease = new CallbackThrottleByProgressIncrease();
 
@@ -39,24 +33,6 @@ public class CallbackThrottleByProgressIncreaseTest {
     }
 
     @Test
-    public void emitsError_whenNotMatchingPrevious() {
-        callbackThrottleByProgressIncrease.setCallback(downloadBatchCallback);
-        givenPreviousUpdate(firstErrorStatus);
-
-        callbackThrottleByProgressIncrease.update(secondErrorStatus);
-        then(downloadBatchCallback).should().onUpdate(secondErrorStatus);
-    }
-
-    @Test
-    public void doesNotEmit_whenErrorIsUnchanged() {
-        callbackThrottleByProgressIncrease.setCallback(downloadBatchCallback);
-        givenPreviousUpdate(firstErrorStatus);
-
-        callbackThrottleByProgressIncrease.update(firstErrorStatus);
-        then(downloadBatchCallback).should(never()).onUpdate(firstErrorStatus);
-    }
-
-    @Test
     public void doesNotEmit_whenPercentageIsUnchanged() {
         callbackThrottleByProgressIncrease.setCallback(downloadBatchCallback);
         givenPreviousUpdate(percentageIncreasedStatus);
@@ -67,7 +43,7 @@ public class CallbackThrottleByProgressIncreaseTest {
     }
 
     @Test
-    public void emitsLastStatus_whenStoppingUpdates() {
+    public void doesNotEmitsStatus_whenStoppingUpdates() {
         callbackThrottleByProgressIncrease.setCallback(downloadBatchCallback);
         callbackThrottleByProgressIncrease.stopUpdates();
 
