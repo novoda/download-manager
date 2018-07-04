@@ -58,7 +58,7 @@ publish {
     userOrg = 'novoda'
     groupId = 'com.novoda'
     artifactId = 'download-manager'
-    publishVersion = 'SNAPSHOT-2.0.48'
+    publishVersion = 'SNAPSHOT-2.0.49'
     desc = 'Download Manager capable of batching, auto-resume, internal and external storage and highly customizable.'
     website = 'https://github.com/novoda/download-manager'
 }
