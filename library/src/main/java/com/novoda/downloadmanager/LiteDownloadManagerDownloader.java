@@ -23,8 +23,8 @@ class LiteDownloadManagerDownloader {
     private final DownloadBatchStatusNotificationDispatcher notificationDispatcher;
     private final Set<DownloadBatchStatusCallback> callbacks;
     private final ConnectionChecker connectionChecker;
-
     private final CallbackThrottleCreator callbackThrottleCreator;
+    private final DownloadBatchStatusFilter downloadBatchStatusFilter;
 
     private DownloadService downloadService;
 
@@ -40,7 +40,8 @@ class LiteDownloadManagerDownloader {
                                   DownloadBatchStatusNotificationDispatcher notificationDispatcher,
                                   ConnectionChecker connectionChecker,
                                   Set<DownloadBatchStatusCallback> callbacks,
-                                  CallbackThrottleCreator callbackThrottleCreator) {
+                                  CallbackThrottleCreator callbackThrottleCreator,
+                                  DownloadBatchStatusFilter downloadBatchStatusFilter) {
         this.waitForDownloadService = waitForDownloadService;
         this.waitForDownloadBatchStatusCallback = waitForDownloadBatchStatusCallback;
         this.executor = executor;
@@ -52,6 +53,7 @@ class LiteDownloadManagerDownloader {
         this.connectionChecker = connectionChecker;
         this.callbacks = callbacks;
         this.callbackThrottleCreator = callbackThrottleCreator;
+        this.downloadBatchStatusFilter = downloadBatchStatusFilter;
     }
 
     void download(Batch batch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
@@ -68,7 +70,6 @@ class LiteDownloadManagerDownloader {
         executor.submit(downloadBatch::updateTotalSize);
         download(downloadBatch, downloadBatchMap);
     }
-
 
     void download(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         DownloadBatchId downloadBatchId = downloadBatch.getId();
@@ -99,7 +100,7 @@ class LiteDownloadManagerDownloader {
 
     private DownloadBatchStatusCallback downloadBatchCallback(Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         return downloadBatchStatus -> {
-            if (downloadBatchStatus == null) {
+            if (downloadBatchStatus == null || downloadBatchStatusFilter.shouldFilterOut(downloadBatchStatus)) {
                 return;
             }
 

@@ -5,8 +5,6 @@ class CallbackThrottleByProgressIncrease implements CallbackThrottle {
     private DownloadBatchStatusCallback callback;
 
     private int currentProgress;
-    private DownloadBatchStatus.Status currentStatus;
-    private DownloadError currentDownloadError;
 
     @Override
     public void setCallback(DownloadBatchStatusCallback callback) {
@@ -19,31 +17,15 @@ class CallbackThrottleByProgressIncrease implements CallbackThrottle {
             return;
         }
 
-        if (statusHasChanged(currentDownloadBatchStatus)
-                || progressHasChanged(currentDownloadBatchStatus)
-                || errorHasChanged(currentDownloadBatchStatus)) {
-
-            currentStatus = currentDownloadBatchStatus.status();
+        if (progressHasChanged(currentDownloadBatchStatus)) {
             currentProgress = currentDownloadBatchStatus.percentageDownloaded();
-            currentDownloadError = currentDownloadBatchStatus.downloadError();
-
             callback.onUpdate(currentDownloadBatchStatus);
         }
-    }
-
-    private boolean statusHasChanged(DownloadBatchStatus currentDownloadBatchStatus) {
-        DownloadBatchStatus.Status newStatus = currentDownloadBatchStatus.status();
-        return newStatus != null && !newStatus.equals(currentStatus);
     }
 
     private boolean progressHasChanged(DownloadBatchStatus currentDownloadBatchStatus) {
         int newProgress = currentDownloadBatchStatus.percentageDownloaded();
         return currentProgress != newProgress;
-    }
-
-    private boolean errorHasChanged(DownloadBatchStatus currentDownloadBatchStatus) {
-        DownloadError newDownloadError = currentDownloadBatchStatus.downloadError();
-        return newDownloadError != null && !newDownloadError.equals(currentDownloadError);
     }
 
     @Override

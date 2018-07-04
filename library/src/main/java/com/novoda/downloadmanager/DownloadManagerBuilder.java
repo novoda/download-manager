@@ -292,6 +292,8 @@ public final class DownloadManagerBuilder {
                 new HashSet<>()
         );
 
+        DownloadBatchStatusFilter downloadBatchStatusFilter = new DownloadBatchStatusFilter();
+
         LiteDownloadManagerDownloader downloader = new LiteDownloadManagerDownloader(
                 SERVICE_LOCK,
                 CALLBACK_LOCK,
@@ -303,7 +305,8 @@ public final class DownloadManagerBuilder {
                 batchStatusNotificationDispatcher,
                 connectionChecker,
                 callbacks,
-                callbackThrottleCreator
+                callbackThrottleCreator,
+                downloadBatchStatusFilter
         );
 
         downloadManager = new DownloadManager(
