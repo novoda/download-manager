@@ -8,13 +8,14 @@ import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadFileIdCreator;
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
+import com.novoda.downloadmanager.StorageRoot;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class PartialDownloadBatchesExtractor {
+class PartialDownloadBatchesExtractor {
 
     private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title "
             + "FROM batches INNER JOIN DownloadsByBatch ON DownloadsByBatch.batch_id = batches._id "
@@ -31,12 +32,14 @@ public class PartialDownloadBatchesExtractor {
     private static final int FILE_LOCATION_COLUMN = 2;
 
     private final SqlDatabaseWrapper database;
+    private final StorageRoot storageRoot;
 
-    public PartialDownloadBatchesExtractor(SqlDatabaseWrapper database) {
+    PartialDownloadBatchesExtractor(SqlDatabaseWrapper database, StorageRoot storageRoot) {
         this.database = database;
+        this.storageRoot = storageRoot;
     }
 
-    public List<VersionOnePartialDownloadBatch> extractMigrations() {
+    List<VersionOnePartialDownloadBatch> extractMigrations() {
         Cursor batchesCursor = database.rawQuery(BATCHES_QUERY);
 
         List<VersionOnePartialDownloadBatch> partialMigrations = new ArrayList<>();
@@ -61,7 +64,7 @@ public class PartialDownloadBatchesExtractor {
 
                 if (downloadsCursor.isFirst()) {
                     downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
-                    newBatchBuilder = Batch.with(downloadBatchId, batchTitle);
+                    newBatchBuilder = Batch.with(storageRoot, downloadBatchId, batchTitle);
                 }
 
                 if (uris.contains(uri) && fileIds.contains(originalFileId)) {

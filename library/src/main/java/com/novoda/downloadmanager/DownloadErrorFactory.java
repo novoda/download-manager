@@ -41,11 +41,6 @@ final class DownloadErrorFactory {
         return new DownloadError(DownloadError.Type.FILE_CANNOT_BE_WRITTEN, cannotWriteToFileMessage);
     }
 
-    static DownloadError createStorageNotAvailableError(FilePersistence filePersistence) {
-        String storageUnavailableMessage = "Storage with base path: " + filePersistence.basePath() + " is not available";
-        return new DownloadError(DownloadError.Type.STORAGE_UNAVAILABLE, storageUnavailableMessage);
-    }
-
     static DownloadError createNetworkError(String networkErrorCause) {
         String networkErrorMessage = "Network error, cannot download file. Cause: " + networkErrorCause;
         return new DownloadError(DownloadError.Type.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE, networkErrorMessage);

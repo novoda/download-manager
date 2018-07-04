@@ -9,8 +9,6 @@ public interface FilePersistence {
 
     void initialiseWith(Context context, StorageRequirementRule storageRequirementRule);
 
-    FilePath basePath();
-
     FilePersistenceResult create(FilePath absoluteFilePath, FileSize fileSize);
 
     boolean write(byte[] buffer, int offset, int numberOfBytesToWrite);

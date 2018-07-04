@@ -6,11 +6,13 @@ import java.util.Set;
 
 final class LiteBatchBuilder implements InternalBatchBuilder {
 
+    private final StorageRoot storageRoot;
     private final DownloadBatchId downloadBatchId;
     private final String title;
     private final List<BatchFile> batchFiles;
 
-    LiteBatchBuilder(DownloadBatchId downloadBatchId, String title, List<BatchFile> batchFiles) {
+    LiteBatchBuilder(StorageRoot storageRoot, DownloadBatchId downloadBatchId, String title, List<BatchFile> batchFiles) {
+        this.storageRoot = storageRoot;
         this.downloadBatchId = downloadBatchId;
         this.title = title;
         this.batchFiles = batchFiles;
@@ -23,13 +25,13 @@ final class LiteBatchBuilder implements InternalBatchBuilder {
 
     @Override
     public BatchFileBuilder downloadFrom(String networkAddress) {
-        return BatchFile.from(downloadBatchId, networkAddress).withParentBuilder(this);
+        return BatchFile.from(storageRoot, downloadBatchId, networkAddress).withParentBuilder(this);
     }
 
     @Override
     public Batch build() {
         ensureNoFileIdDuplicates(batchFiles);
-        return new Batch(downloadBatchId, title, batchFiles);
+        return new Batch(storageRoot, downloadBatchId, title, batchFiles);
     }
 
     private void ensureNoFileIdDuplicates(List<BatchFile> batchFiles) {

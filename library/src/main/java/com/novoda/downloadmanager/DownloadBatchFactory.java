@@ -19,7 +19,7 @@ final class DownloadBatchFactory {
                                      FileOperations fileOperations,
                                      DownloadsBatchPersistence downloadsBatchPersistence,
                                      DownloadsFilePersistence downloadsFilePersistence,
-                                     CallbackThrottle callbackThrottle,
+                                     FileCallbackThrottle fileCallbackThrottle,
                                      ConnectionChecker connectionChecker) {
         DownloadBatchTitle downloadBatchTitle = DownloadBatchTitleCreator.createFrom(batch);
         DownloadBatchId downloadBatchId = batch.downloadBatchId();
@@ -35,8 +35,7 @@ final class DownloadBatchFactory {
 
             FilePersistence filePersistence = fileOperations.filePersistenceCreator().create();
 
-            String basePath = filePersistence.basePath().path();
-            FilePath filePath = FilePathCreator.create(basePath, batchFile.path());
+            FilePath filePath = FilePathCreator.create(batchFile.path(), batchFile.path());
 
             DownloadFileId downloadFileId = FallbackDownloadFileIdProvider.downloadFileIdFor(batch.downloadBatchId(), batchFile);
             InternalDownloadFileStatus downloadFileStatus = new LiteDownloadFileStatus(
@@ -81,7 +80,7 @@ final class DownloadBatchFactory {
                 downloadFiles,
                 new HashMap<>(),
                 downloadsBatchPersistence,
-                callbackThrottle,
+                fileCallbackThrottle,
                 connectionChecker
         );
     }

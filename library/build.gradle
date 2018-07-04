@@ -39,17 +39,18 @@ android {
 }
 
 dependencies {
-    annotationProcessor 'android.arch.persistence.room:compiler:1.0.0'
+    annotationProcessor 'android.arch.persistence.room:compiler:1.1.1'
     implementation 'com.novoda:merlin:1.1.7'
     implementation 'com.facebook.stetho:stetho:1.5.0'
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
-    implementation 'android.arch.persistence.room:runtime:1.0.0'
-    implementation('com.evernote:android-job:1.2.5') {
+    implementation('android.arch.persistence.room:runtime:1.1.1') {
         exclude group: 'com.android.support', module: 'support-v4'
+        exclude group: 'android.arch.core', module: 'runtime'
     }
+    implementation 'com.evernote:android-job:1.2.6'
     testImplementation 'junit:junit:4.12'
-    testImplementation 'org.mockito:mockito-core:2.16.0'
-    testImplementation 'com.google.truth:truth:0.39'
+    testImplementation 'org.mockito:mockito-core:2.19.0'
+    testImplementation 'com.google.truth:truth:0.41'
 }
 
 publish {
@@ -57,7 +58,7 @@ publish {
     userOrg = 'novoda'
     groupId = 'com.novoda'
     artifactId = 'download-manager'
-    publishVersion = 'SNAPSHOT-2.0.46'
+    publishVersion = 'SNAPSHOT-2.0.49'
     desc = 'Download Manager capable of batching, auto-resume, internal and external storage and highly customizable.'
     website = 'https://github.com/novoda/download-manager'
 }

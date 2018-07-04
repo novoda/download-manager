@@ -2,14 +2,14 @@ package com.novoda.downloadmanager.demo;
 
 import android.util.Log;
 
-import com.novoda.downloadmanager.CallbackThrottle;
+import com.novoda.downloadmanager.FileCallbackThrottle;
 import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.DownloadBatchStatusCallback;
 
 // Must be public
-public class CustomCallbackThrottle implements CallbackThrottle {
+public class CustomFileCallbackThrottle implements FileCallbackThrottle {
 
-    private static final String TAG = CustomCallbackThrottle.class.getSimpleName();
+    private static final String TAG = CustomFileCallbackThrottle.class.getSimpleName();
     private DownloadBatchStatusCallback callback;
 
     @Override

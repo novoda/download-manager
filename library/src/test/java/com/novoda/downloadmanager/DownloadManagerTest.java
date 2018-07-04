@@ -2,18 +2,20 @@ package com.novoda.downloadmanager;
 
 import android.os.Handler;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.InOrder;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.InOrder;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.novoda.downloadmanager.DownloadBatchIdFixtures.aDownloadBatchId;
@@ -36,7 +38,7 @@ public class DownloadManagerTest {
     private static final InternalDownloadBatchStatus ADDITIONAL_BATCH_STATUS = anInternalDownloadsBatchStatus().build();
     private static final DownloadBatchId DOWNLOAD_BATCH_ID = aDownloadBatchId().withRawDownloadBatchId("id01").build();
     private static final DownloadBatchId ADDITIONAL_DOWNLOAD_BATCH_ID = aDownloadBatchId().withRawDownloadBatchId("id02").build();
-    private static final Batch BATCH = Batch.with(DOWNLOAD_BATCH_ID, "title").build();
+    private static final Batch BATCH = Batch.with(TestStorageRootFactory.create(), DOWNLOAD_BATCH_ID, "title").build();
     private static final DownloadFileId DOWNLOAD_FILE_ID = aDownloadFileId().withRawDownloadFileId("file_id_01").build();
     private static final DownloadFileStatus DOWNLOAD_FILE_STATUS = aDownloadFileStatus().withDownloadFileId(DOWNLOAD_FILE_ID).build();
     private static final ConnectionType ANY_CONNECTION_TYPE = ConnectionType.METERED;
@@ -62,7 +64,7 @@ public class DownloadManagerTest {
     private DownloadManager downloadManager;
     private Map<DownloadBatchId, DownloadBatch> downloadingBatches = new HashMap<>();
     private List<DownloadBatchStatus> downloadBatchStatuses = new ArrayList<>();
-    private List<DownloadBatchStatusCallback> downloadBatchCallbacks = new ArrayList<>();
+    private Set<DownloadBatchStatusCallback> downloadBatchCallbacks = new CopyOnWriteArraySet<>();
     private DownloadFileStatus downloadFileStatus = null;
 
     @Before

@@ -9,6 +9,7 @@ import com.novoda.downloadmanager.CompletedDownloadBatch;
 import com.novoda.downloadmanager.FileSizeExtractor;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
+import com.novoda.downloadmanager.StorageRoot;
 
 import java.io.File;
 import java.util.List;
@@ -19,6 +20,7 @@ public class MigrationJob implements Runnable {
     private static final String V1_BASE_PATH = "/data/data/com.novoda.downloadmanager.demo.simple/files/Pictures/";
 
     private final File databaseFile;
+    private final StorageRoot primaryStorageWithDownloadsSubpackage;
     private final LiteDownloadManagerCommands downloadManager;
     private final Handler callbackHandler;
     private final MigrationJobCallback migrationJobCallback;
@@ -28,10 +30,12 @@ public class MigrationJob implements Runnable {
     }
 
     public MigrationJob(File databaseFile,
+                        StorageRoot primaryStorageWithDownloadsSubpackage,
                         LiteDownloadManagerCommands downloadManager,
                         Handler callbackHandler,
                         MigrationJobCallback migrationJobCallback) {
         this.databaseFile = databaseFile;
+        this.primaryStorageWithDownloadsSubpackage = primaryStorageWithDownloadsSubpackage;
         this.downloadManager = downloadManager;
         this.callbackHandler = callbackHandler;
         this.migrationJobCallback = migrationJobCallback;
@@ -41,7 +45,10 @@ public class MigrationJob implements Runnable {
     public void run() {
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase(databaseFile.getAbsolutePath(), null, 0);
         SqlDatabaseWrapper database = new SqlDatabaseWrapper(sqLiteDatabase);
-        PartialDownloadBatchesExtractor partialDownloadMigrationExtractor = new PartialDownloadBatchesExtractor(database);
+        PartialDownloadBatchesExtractor partialDownloadMigrationExtractor = new PartialDownloadBatchesExtractor(
+                database,
+                primaryStorageWithDownloadsSubpackage
+        );
 
         FileSizeExtractor fileSizeExtractor = new FileSizeExtractor();
         CompletedDownloadBatchesExtractor migrationExtractor = new CompletedDownloadBatchesExtractor(database, V1_BASE_PATH, fileSizeExtractor);
@@ -61,11 +68,7 @@ public class MigrationJob implements Runnable {
 
         onUpdate("Migrating Complete Downloads");
         for (CompletedDownloadBatch completeDownloadBatch : completeDownloadBatches) {
-            if (downloadManager.addCompletedBatch(completeDownloadBatch)) {
-                for (CompletedDownloadBatch.CompletedDownloadFile completedDownloadFile : completeDownloadBatch.completedDownloadFiles()) {
-                    deleteVersionOneFile(completedDownloadFile.originalFileLocation());
-                }
-            }
+            downloadManager.addCompletedBatch(completeDownloadBatch);
         }
 
         onUpdate("Deleting V1 Database");

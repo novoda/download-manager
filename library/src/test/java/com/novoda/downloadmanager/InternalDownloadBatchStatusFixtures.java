@@ -62,114 +62,15 @@ class InternalDownloadBatchStatusFixtures {
     }
 
     InternalDownloadBatchStatus build() {
-        return new InternalDownloadBatchStatus() {
-
-            @Override
-            public DownloadBatchTitle getDownloadBatchTitle() {
-                return downloadBatchTitle;
-            }
-
-            @Override
-            public int percentageDownloaded() {
-                return percentageDownloaded;
-            }
-
-            @Override
-            public long bytesDownloaded() {
-                return bytesDownloaded;
-            }
-
-            @Override
-            public long bytesTotalSize() {
-                return bytesTotalSize;
-            }
-
-            @Override
-            public DownloadBatchId getDownloadBatchId() {
-                return downloadBatchId;
-            }
-
-            @Override
-            public Status status() {
-                return status;
-            }
-
-            @Override
-            public long downloadedDateTimeInMillis() {
-                return downloadedDateTimeInMillis;
-            }
-
-            @Override
-            public DownloadError downloadError() {
-                return downloadError;
-            }
-
-            @Override
-            public void updateTotalSize(long totalBatchSizeBytes) {
-                // do nothing.
-            }
-
-            @Override
-            public void updateDownloaded(long currentBytesDownloaded) {
-                // do nothing.
-            }
-
-            @Override
-            public void markAsDownloading(DownloadsBatchStatusPersistence persistence) {
-                status = Status.DOWNLOADING;
-                persistence.updateStatusAsync(downloadBatchId, status);
-            }
-
-            @Override
-            public void markAsPaused(DownloadsBatchStatusPersistence persistence) {
-                status = Status.PAUSED;
-                persistence.updateStatusAsync(downloadBatchId, status);
-            }
-
-            @Override
-            public void markAsQueued(DownloadsBatchStatusPersistence persistence) {
-                status = Status.QUEUED;
-                persistence.updateStatusAsync(downloadBatchId, status);
-            }
-
-            @Override
-            public void markAsDeleting() {
-                status = Status.DELETING;
-            }
-
-            @Override
-            public void markAsDeleted() {
-                status = Status.DELETED;
-            }
-
-            @Override
-            public void markAsError(Optional<DownloadError> downloadError, DownloadsBatchStatusPersistence persistence) {
-                status = Status.ERROR;
-                InternalDownloadBatchStatusFixtures.this.downloadError = downloadError.get();
-                persistence.updateStatusAsync(downloadBatchId, status);
-            }
-
-            @Override
-            public void markAsDownloaded(DownloadsBatchStatusPersistence persistence) {
-                status = Status.DOWNLOADED;
-                persistence.updateStatusAsync(downloadBatchId, status);
-            }
-
-            @Override
-            public void markAsWaitingForNetwork(DownloadsBatchPersistence persistence) {
-                status = Status.WAITING_FOR_NETWORK;
-                persistence.updateStatusAsync(downloadBatchId, status);
-            }
-
-            @Override
-            public InternalDownloadBatchStatus copy() {
-                return build();
-            }
-
-            @Override
-            public boolean notificationSeen() {
-                return notificationSeen;
-            }
-        };
+        return new LiteDownloadBatchStatus(
+                downloadBatchId,
+                downloadBatchTitle,
+                downloadedDateTimeInMillis,
+                bytesDownloaded,
+                bytesTotalSize,
+                status,
+                notificationSeen,
+                Optional.fromNullable(downloadError)
+        );
     }
 }

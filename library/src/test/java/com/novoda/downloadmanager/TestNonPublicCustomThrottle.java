@@ -4,7 +4,7 @@ package com.novoda.downloadmanager;
  * Used to test the {@link CallbackThrottleCreator} to ensure that a
  * {@link IllegalAccessException} is thrown for the custom throttle.
  */
-class TestNonPublicCustomThrottle implements CallbackThrottle {
+class TestNonPublicCustomThrottle implements FileCallbackThrottle {
 
     private TestNonPublicCustomThrottle() {
     }

@@ -133,14 +133,14 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                 NO_DOWNLOAD_ERROR
         );
 
-        CallbackThrottle callbackThrottle = callbackThrottleCreator.create();
+        FileCallbackThrottle fileCallbackThrottle = callbackThrottleCreator.create();
 
         return new DownloadBatch(
                 liteDownloadBatchStatus,
                 downloadFiles,
                 downloadedFileSizeMap,
                 DownloadsBatchPersistence.this,
-                callbackThrottle,
+                fileCallbackThrottle,
                 connectionChecker
         );
     }
@@ -150,7 +150,9 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
             if (deleteSync(downloadBatchStatus)) {
                 deleteCallback.onDeleted(downloadBatchStatus.getDownloadBatchId());
             } else {
-                Logger.e("could not delete batch " + downloadBatchStatus.getDownloadBatchId().rawId() + " with status " + downloadBatchStatus.status());
+                Logger.e("could not delete batch "
+                                 + downloadBatchStatus.getDownloadBatchId().rawId()
+                                 + " with status " + downloadBatchStatus.status());
             }
         });
     }

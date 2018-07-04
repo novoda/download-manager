@@ -3,7 +3,6 @@ package com.novoda.downloadmanager;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 
-import java.io.File;
 import java.util.List;
 
 public interface LiteDownloadManagerCommands {
@@ -106,13 +105,6 @@ public interface LiteDownloadManagerCommands {
      * @param allowedConnectionType that must be satisfied in order to download.
      */
     void updateAllowedConnectionType(ConnectionType allowedConnectionType);
-
-    /**
-     * Retrieves the root directory used to store downloads.
-     *
-     * @return a {@link File} representing the root directory for downloads.
-     */
-    File getDownloadsDir();
 
     /**
      * Adds a {@link CompletedDownloadBatch} to the download manager.

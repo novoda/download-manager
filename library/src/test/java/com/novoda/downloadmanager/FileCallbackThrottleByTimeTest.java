@@ -10,17 +10,17 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.Mockito.*;
 
-public class CallbackThrottleByTimeTest {
+public class FileCallbackThrottleByTimeTest {
 
     private final ActionScheduler actionScheduler = mock(ActionScheduler.class);
     private final DownloadBatchStatusCallback callback = mock(DownloadBatchStatusCallback.class);
     private final DownloadBatchStatus downloadBatchStatus = mock(DownloadBatchStatus.class);
 
-    private CallbackThrottleByTime callbackThrottleByTime;
+    private FileCallbackThrottleByTime callbackThrottleByTime;
 
     @Before
     public void setUp() {
-        callbackThrottleByTime = new CallbackThrottleByTime(actionScheduler);
+        callbackThrottleByTime = new FileCallbackThrottleByTime(actionScheduler);
 
         final ArgumentCaptor<ActionScheduler.Action> argumentCaptor = ArgumentCaptor.forClass(ActionScheduler.Action.class);
         willAnswer(new Answer<Void>() {
