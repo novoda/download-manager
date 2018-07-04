@@ -170,7 +170,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
                     new LiteFilePath(completedDownloadFile.newFileLocation()),
                     completedDownloadFile.fileSize().totalSize(),
                     url,
-                    FilePersistenceType.INTERNAL
+                    FilePersistenceType.PATH
             );
             persistFile(persistedFile);
         }

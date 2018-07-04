@@ -38,6 +38,7 @@ public class CompletedDownloadBatch {
 
     public Batch asBatch() {
         return new Batch(
+                StorageRootFactory.createMissingStorageRoot(),
                 downloadBatchId,
                 downloadBatchTitle.asString(),
                 asBatchFiles()

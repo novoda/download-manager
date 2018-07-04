@@ -26,7 +26,7 @@ class DownloadBatch {
     private final InternalDownloadBatchStatus downloadBatchStatus;
     private final List<DownloadFile> downloadFiles;
     private final DownloadsBatchPersistence downloadsBatchPersistence;
-    private final CallbackThrottle callbackThrottle;
+    private final FileCallbackThrottle fileCallbackThrottle;
     private final ConnectionChecker connectionChecker;
 
     private long totalBatchSizeBytes;
@@ -36,19 +36,19 @@ class DownloadBatch {
                   List<DownloadFile> downloadFiles,
                   Map<DownloadFileId, Long> fileBytesDownloadedMap,
                   DownloadsBatchPersistence downloadsBatchPersistence,
-                  CallbackThrottle callbackThrottle,
+                  FileCallbackThrottle fileCallbackThrottle,
                   ConnectionChecker connectionChecker) {
         this.downloadFiles = downloadFiles;
         this.fileBytesDownloadedMap = fileBytesDownloadedMap;
         this.downloadBatchStatus = internalDownloadBatchStatus;
         this.downloadsBatchPersistence = downloadsBatchPersistence;
-        this.callbackThrottle = callbackThrottle;
+        this.fileCallbackThrottle = fileCallbackThrottle;
         this.connectionChecker = connectionChecker;
     }
 
     void setCallback(DownloadBatchStatusCallback callback) {
         this.callback = callback;
-        callbackThrottle.setCallback(callback);
+        fileCallbackThrottle.setCallback(callback);
     }
 
     void download() {
@@ -86,7 +86,7 @@ class DownloadBatch {
 
         deleteBatchIfNeeded(downloadBatchStatus, downloadsBatchPersistence, callback);
         notifyCallback(callback, downloadBatchStatus);
-        callbackThrottle.stopUpdates();
+        fileCallbackThrottle.stopUpdates();
         Logger.v("end sync download " + rawBatchId);
     }
 
@@ -158,7 +158,13 @@ class DownloadBatch {
         }
         downloadBatchStatus.markAsWaitingForNetwork(downloadsBatchPersistence);
         notifyCallback(callback, downloadBatchStatus);
-        Logger.v("scheduleRecovery for batch " + downloadBatchStatus.getDownloadBatchId().rawId() + ", " + STATUS + " " + downloadBatchStatus.status());
+        Logger.v(
+                "scheduleRecovery for batch "
+                        + downloadBatchStatus.getDownloadBatchId().rawId()
+                        + ", "
+                        + STATUS
+                        + " " + downloadBatchStatus.status()
+        );
         DownloadsNetworkRecoveryCreator.getInstance().scheduleRecovery();
     }
 
@@ -221,7 +227,7 @@ class DownloadBatch {
             if (currentBytesDownloaded > totalBatchSizeBytes) {
                 DownloadError downloadError = DownloadErrorFactory.createSizeMismatchError(downloadFileStatus);
                 downloadBatchStatus.markAsError(Optional.of(downloadError), downloadsBatchPersistence);
-                callbackThrottle.update(downloadBatchStatus);
+                fileCallbackThrottle.update(downloadBatchStatus);
                 return;
             }
 
@@ -237,7 +243,7 @@ class DownloadBatch {
                 downloadBatchStatus.markAsWaitingForNetwork(downloadsBatchPersistence);
             }
 
-            callbackThrottle.update(downloadBatchStatus);
+            fileCallbackThrottle.update(downloadBatchStatus);
         }
     };
 

@@ -2,8 +2,8 @@ package com.novoda.downloadmanager;
 
 import android.os.Handler;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
@@ -21,10 +21,10 @@ class LiteDownloadManagerDownloader {
     private final DownloadsBatchPersistence downloadsBatchPersistence;
     private final DownloadsFilePersistence downloadsFilePersistence;
     private final DownloadBatchStatusNotificationDispatcher notificationDispatcher;
-    private final List<DownloadBatchStatusCallback> callbacks;
+    private final Set<DownloadBatchStatusCallback> callbacks;
     private final ConnectionChecker connectionChecker;
-
     private final CallbackThrottleCreator callbackThrottleCreator;
+    private final DownloadBatchStatusFilter downloadBatchStatusFilter;
 
     private DownloadService downloadService;
 
@@ -39,8 +39,9 @@ class LiteDownloadManagerDownloader {
                                   DownloadsFilePersistence downloadsFilePersistence,
                                   DownloadBatchStatusNotificationDispatcher notificationDispatcher,
                                   ConnectionChecker connectionChecker,
-                                  List<DownloadBatchStatusCallback> callbacks,
-                                  CallbackThrottleCreator callbackThrottleCreator) {
+                                  Set<DownloadBatchStatusCallback> callbacks,
+                                  CallbackThrottleCreator callbackThrottleCreator,
+                                  DownloadBatchStatusFilter downloadBatchStatusFilter) {
         this.waitForDownloadService = waitForDownloadService;
         this.waitForDownloadBatchStatusCallback = waitForDownloadBatchStatusCallback;
         this.executor = executor;
@@ -52,6 +53,7 @@ class LiteDownloadManagerDownloader {
         this.connectionChecker = connectionChecker;
         this.callbacks = callbacks;
         this.callbackThrottleCreator = callbackThrottleCreator;
+        this.downloadBatchStatusFilter = downloadBatchStatusFilter;
     }
 
     void download(Batch batch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
@@ -98,7 +100,7 @@ class LiteDownloadManagerDownloader {
 
     private DownloadBatchStatusCallback downloadBatchCallback(Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         return downloadBatchStatus -> {
-            if (downloadBatchStatus == null) {
+            if (downloadBatchStatus == null || downloadBatchStatusFilter.shouldFilterOut(downloadBatchStatus)) {
                 return;
             }
 

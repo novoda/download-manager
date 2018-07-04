@@ -18,10 +18,10 @@ import android.support.v4.app.NotificationManagerCompat;
 
 import com.novoda.merlin.MerlinsBeard;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,7 +53,7 @@ public final class DownloadManagerBuilder {
     private NotificationChannelProvider notificationChannelProvider;
     private ConnectionType connectionTypeAllowed;
     private boolean allowNetworkRecovery;
-    private Class<? extends CallbackThrottle> customCallbackThrottle;
+    private Class<? extends FileCallbackThrottle> customCallbackThrottle;
     private DownloadsPersistence downloadsPersistence;
     private CallbackThrottleCreator.Type callbackThrottleCreatorType;
     private TimeUnit timeUnit;
@@ -64,7 +64,7 @@ public final class DownloadManagerBuilder {
         Context applicationContext = context.getApplicationContext();
 
         StorageRequirementRules storageRequirementRule = StorageRequirementRules.newInstance();
-        FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(applicationContext);
+        FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newPathBasedPersistenceCreator(applicationContext);
         FileDownloaderCreator fileDownloaderCreator = FileDownloaderCreator.newNetworkFileDownloaderCreator();
 
         NetworkRequestCreator requestCreator = new NetworkRequestCreator();
@@ -112,7 +112,8 @@ public final class DownloadManagerBuilder {
         );
     }
 
-    @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})     // Can't group anymore these are customisable options.
+    @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
+    // Can't group anymore these are customisable options.
     private DownloadManagerBuilder(Context applicationContext,
                                    Handler callbackHandler,
                                    StorageRequirementRules storageRequirementRules,
@@ -139,16 +140,6 @@ public final class DownloadManagerBuilder {
         this.allowNetworkRecovery = allowNetworkRecovery;
         this.callbackThrottleCreatorType = callbackThrottleCreatorType;
         this.logHandle = logHandle;
-    }
-
-    public DownloadManagerBuilder withFilePersistenceInternal() {
-        filePersistenceCreator = FilePersistenceCreator.newInternalFilePersistenceCreator(applicationContext);
-        return this;
-    }
-
-    public DownloadManagerBuilder withFilePersistenceExternal() {
-        filePersistenceCreator = FilePersistenceCreator.newExternalFilePersistenceCreator(applicationContext);
-        return this;
     }
 
     public DownloadManagerBuilder withFileDownloaderCustom(FileSizeRequester fileSizeRequester,
@@ -207,7 +198,7 @@ public final class DownloadManagerBuilder {
         return this;
     }
 
-    public DownloadManagerBuilder withCallbackThrottleCustom(Class<? extends CallbackThrottle> customCallbackThrottle) {
+    public DownloadManagerBuilder withCallbackThrottleCustom(Class<? extends FileCallbackThrottle> customCallbackThrottle) {
         this.callbackThrottleCreatorType = CallbackThrottleCreator.Type.CUSTOM;
         this.customCallbackThrottle = customCallbackThrottle;
         return this;
@@ -264,7 +255,7 @@ public final class DownloadManagerBuilder {
 
         filePersistenceCreator.withStorageRequirementRules(storageRequirementRules);
         FileOperations fileOperations = new FileOperations(filePersistenceCreator, fileSizeRequester, fileDownloaderCreator);
-        List<DownloadBatchStatusCallback> callbacks = new ArrayList<>();
+        Set<DownloadBatchStatusCallback> callbacks = new CopyOnWriteArraySet<>();
 
         CallbackThrottleCreator callbackThrottleCreator = getCallbackThrottleCreator(
                 callbackThrottleCreatorType,
@@ -301,6 +292,8 @@ public final class DownloadManagerBuilder {
                 new HashSet<>()
         );
 
+        DownloadBatchStatusFilter downloadBatchStatusFilter = new DownloadBatchStatusFilter();
+
         LiteDownloadManagerDownloader downloader = new LiteDownloadManagerDownloader(
                 SERVICE_LOCK,
                 CALLBACK_LOCK,
@@ -312,7 +305,8 @@ public final class DownloadManagerBuilder {
                 batchStatusNotificationDispatcher,
                 connectionChecker,
                 callbacks,
-                callbackThrottleCreator
+                callbackThrottleCreator,
+                downloadBatchStatusFilter
         );
 
         downloadManager = new DownloadManager(
@@ -334,7 +328,7 @@ public final class DownloadManagerBuilder {
     private CallbackThrottleCreator getCallbackThrottleCreator(CallbackThrottleCreator.Type callbackThrottleType,
                                                                TimeUnit timeUnit,
                                                                long frequency,
-                                                               Class<? extends CallbackThrottle> customCallbackThrottle) {
+                                                               Class<? extends FileCallbackThrottle> customCallbackThrottle) {
         switch (callbackThrottleType) {
             case THROTTLE_BY_TIME:
                 return CallbackThrottleCreator.byTime(timeUnit, frequency);

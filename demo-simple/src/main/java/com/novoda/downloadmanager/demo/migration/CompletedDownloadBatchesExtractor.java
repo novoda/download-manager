@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class CompletedDownloadBatchesExtractor {
+class CompletedDownloadBatchesExtractor {
 
     private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title, batches.last_modified_timestamp FROM "
             + "batches INNER JOIN DownloadsByBatch ON DownloadsByBatch.batch_id = batches._id "
@@ -43,13 +43,13 @@ public class CompletedDownloadBatchesExtractor {
     private final String basePath;
     private final FileSizeExtractor fileSizeExtractor;
 
-    public CompletedDownloadBatchesExtractor(SqlDatabaseWrapper database, String basePath, FileSizeExtractor fileSizeExtractor) {
+    CompletedDownloadBatchesExtractor(SqlDatabaseWrapper database, String basePath, FileSizeExtractor fileSizeExtractor) {
         this.database = database;
         this.basePath = basePath;
         this.fileSizeExtractor = fileSizeExtractor;
     }
 
-    public List<CompletedDownloadBatch> extractMigrations() {
+    List<CompletedDownloadBatch> extractMigrations() {
         Cursor batchesCursor = database.rawQuery(BATCHES_QUERY);
 
         if (batchesCursor == null) {

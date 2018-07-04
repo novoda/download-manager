@@ -1,13 +1,13 @@
 package com.novoda.downloadmanager;
 
-class CallbackThrottleByTime implements CallbackThrottle {
+class FileCallbackThrottleByTime implements FileCallbackThrottle {
 
     private final ActionScheduler actionScheduler;
 
     private DownloadBatchStatus downloadBatchStatus;
     private DownloadBatchStatusCallback callback;
 
-    CallbackThrottleByTime(ActionScheduler actionScheduler) {
+    FileCallbackThrottleByTime(ActionScheduler actionScheduler) {
         this.actionScheduler = actionScheduler;
     }
 
