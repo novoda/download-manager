@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-public interface CallbackThrottle {
+public interface FileCallbackThrottle {
 
     void setCallback(DownloadBatchStatusCallback callback);
 

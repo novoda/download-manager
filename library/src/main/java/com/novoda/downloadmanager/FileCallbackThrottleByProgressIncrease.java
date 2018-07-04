@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-class CallbackThrottleByProgressIncrease implements CallbackThrottle {
+class FileCallbackThrottleByProgressIncrease implements FileCallbackThrottle {
 
     private DownloadBatchStatusCallback callback;
 

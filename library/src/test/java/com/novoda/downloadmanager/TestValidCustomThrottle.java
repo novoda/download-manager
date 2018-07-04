@@ -2,9 +2,9 @@ package com.novoda.downloadmanager;
 
 /**
  * Used to test the {@link CallbackThrottleCreator} to ensure that a
- * valid {@link CallbackThrottle} is returned.
+ * valid {@link FileCallbackThrottle} is returned.
  */
-public class TestValidCustomThrottle implements CallbackThrottle {
+public class TestValidCustomThrottle implements FileCallbackThrottle {
 
     @Override
     public void setCallback(DownloadBatchStatusCallback callback) {

@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 final class CallbackThrottleCreator {
 
-    private static final Class<? extends CallbackThrottle> NO_CUSTOM_CALLBACK_THROTTLE = null;
+    private static final Class<? extends FileCallbackThrottle> NO_CUSTOM_CALLBACK_THROTTLE = null;
     private static final TimeUnit UNUSED_TIME_UNIT = TimeUnit.SECONDS;
     private static final int UNUSED_FREQUENCY = 0;
 
@@ -17,7 +17,7 @@ final class CallbackThrottleCreator {
     private final Type type;
     private final TimeUnit timeUnit;
     private final long frequency;
-    private final Class<? extends CallbackThrottle> customCallbackThrottle;
+    private final Class<? extends FileCallbackThrottle> customCallbackThrottle;
 
     static CallbackThrottleCreator byTime(TimeUnit timeUnit, long quantity) {
         return new CallbackThrottleCreator(Type.THROTTLE_BY_TIME, timeUnit, quantity, NO_CUSTOM_CALLBACK_THROTTLE);
@@ -27,24 +27,24 @@ final class CallbackThrottleCreator {
         return new CallbackThrottleCreator(Type.THROTTLE_BY_PROGRESS_INCREASE, UNUSED_TIME_UNIT, UNUSED_FREQUENCY, NO_CUSTOM_CALLBACK_THROTTLE);
     }
 
-    static CallbackThrottleCreator byCustomThrottle(Class<? extends CallbackThrottle> customCallbackThrottle) {
+    static CallbackThrottleCreator byCustomThrottle(Class<? extends FileCallbackThrottle> customCallbackThrottle) {
         return new CallbackThrottleCreator(Type.CUSTOM, UNUSED_TIME_UNIT, UNUSED_FREQUENCY, customCallbackThrottle);
     }
 
-    private CallbackThrottleCreator(Type type, TimeUnit timeUnit, long frequency, Class<? extends CallbackThrottle> customCallbackThrottle) {
+    private CallbackThrottleCreator(Type type, TimeUnit timeUnit, long frequency, Class<? extends FileCallbackThrottle> customCallbackThrottle) {
         this.type = type;
         this.timeUnit = timeUnit;
         this.frequency = frequency;
         this.customCallbackThrottle = customCallbackThrottle;
     }
 
-    CallbackThrottle create() {
+    FileCallbackThrottle create() {
         switch (type) {
             case THROTTLE_BY_TIME:
                 ActionScheduler actionScheduler = SchedulerFactory.createFixedRateTimerScheduler(timeUnit.toMillis(frequency));
-                return new CallbackThrottleByTime(actionScheduler);
+                return new FileCallbackThrottleByTime(actionScheduler);
             case THROTTLE_BY_PROGRESS_INCREASE:
-                return new CallbackThrottleByProgressIncrease();
+                return new FileCallbackThrottleByProgressIncrease();
             case CUSTOM:
                 return createCallbackThrottle();
             default:
@@ -52,7 +52,7 @@ final class CallbackThrottleCreator {
         }
     }
 
-    private CallbackThrottle createCallbackThrottle() {
+    private FileCallbackThrottle createCallbackThrottle() {
         if (customCallbackThrottle == null) {
             throw new CustomCallbackThrottleException("CustomCallbackThrottle class cannot be accessed, is it public?");
         }
@@ -60,7 +60,7 @@ final class CallbackThrottleCreator {
         try {
             ClassLoader systemClassLoader = getClass().getClassLoader();
             Class<?> customCallbackThrottleClass = systemClassLoader.loadClass(customCallbackThrottle.getCanonicalName());
-            return (CallbackThrottle) customCallbackThrottleClass.newInstance();
+            return (FileCallbackThrottle) customCallbackThrottleClass.newInstance();
         } catch (IllegalAccessException e) {
             throw new CustomCallbackThrottleException(customCallbackThrottle, "Class cannot be accessed, is it public?", e);
         } catch (ClassNotFoundException e) {
