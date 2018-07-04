@@ -6,7 +6,7 @@ import static com.novoda.downloadmanager.InternalDownloadBatchStatusFixtures.anI
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.*;
 
-public class CallbackThrottleByProgressIncreaseTest {
+public class FileCallbackThrottleByProgressIncreaseTest {
 
     private static final int DOWNLOAD_PERCENTAGE = 75;
 
@@ -15,7 +15,7 @@ public class CallbackThrottleByProgressIncreaseTest {
             .withPercentageDownloaded(DOWNLOAD_PERCENTAGE)
             .build();
 
-    private final CallbackThrottleByProgressIncrease callbackThrottleByProgressIncrease = new CallbackThrottleByProgressIncrease();
+    private final FileCallbackThrottleByProgressIncrease callbackThrottleByProgressIncrease = new FileCallbackThrottleByProgressIncrease();
 
     @Test
     public void doesNothing_whenCallbackUnset() {

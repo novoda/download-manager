@@ -53,7 +53,7 @@ public final class DownloadManagerBuilder {
     private NotificationChannelProvider notificationChannelProvider;
     private ConnectionType connectionTypeAllowed;
     private boolean allowNetworkRecovery;
-    private Class<? extends CallbackThrottle> customCallbackThrottle;
+    private Class<? extends FileCallbackThrottle> customCallbackThrottle;
     private DownloadsPersistence downloadsPersistence;
     private CallbackThrottleCreator.Type callbackThrottleCreatorType;
     private TimeUnit timeUnit;
@@ -198,7 +198,7 @@ public final class DownloadManagerBuilder {
         return this;
     }
 
-    public DownloadManagerBuilder withCallbackThrottleCustom(Class<? extends CallbackThrottle> customCallbackThrottle) {
+    public DownloadManagerBuilder withCallbackThrottleCustom(Class<? extends FileCallbackThrottle> customCallbackThrottle) {
         this.callbackThrottleCreatorType = CallbackThrottleCreator.Type.CUSTOM;
         this.customCallbackThrottle = customCallbackThrottle;
         return this;
@@ -328,7 +328,7 @@ public final class DownloadManagerBuilder {
     private CallbackThrottleCreator getCallbackThrottleCreator(CallbackThrottleCreator.Type callbackThrottleType,
                                                                TimeUnit timeUnit,
                                                                long frequency,
-                                                               Class<? extends CallbackThrottle> customCallbackThrottle) {
+                                                               Class<? extends FileCallbackThrottle> customCallbackThrottle) {
         switch (callbackThrottleType) {
             case THROTTLE_BY_TIME:
                 return CallbackThrottleCreator.byTime(timeUnit, frequency);
