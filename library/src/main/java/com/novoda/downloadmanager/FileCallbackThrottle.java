@@ -3,7 +3,8 @@ package com.novoda.downloadmanager;
 /**
  * Controls the rate at which a {@link DownloadFile} calls back to
  * a {@link DownloadBatch}. Essentially controls the rate of notifications
- * during a download of a file.
+ * during a download of a file. Use {@link DownloadManagerBuilder#withCallbackThrottleCustom(Class)} to
+ * attach a Custom Throttle.
  * <p>
  * Note: This does not control the overall emissions of {@link DownloadBatchStatus} between the client and this library.
  */
