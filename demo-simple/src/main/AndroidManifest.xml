@@ -20,6 +20,7 @@
 
     </activity>
     <activity android:name="com.novoda.downloadmanager.demo.MainActivity" />
+    <activity android:name="com.novoda.downloadmanager.demo.MigrationActivity" />
   </application>
 
 </manifest>

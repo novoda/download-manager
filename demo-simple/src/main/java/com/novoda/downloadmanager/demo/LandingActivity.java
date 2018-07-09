@@ -17,7 +17,7 @@ public class LandingActivity extends AppCompatActivity {
         View downloadsView = findViewById(R.id.downloads);
 
         migrationView.setOnClickListener(view -> {
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            Intent intent = new Intent(getApplicationContext(), MigrationActivity.class);
             startActivity(intent);
         });
 
