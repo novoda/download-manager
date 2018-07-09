@@ -39,20 +39,9 @@
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
     android:text="@string/resume"
-    app:layout_constraintEnd_toStartOf="@+id/button_requeue"
-    app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toEndOf="@+id/button_pause_downloading"
-    app:layout_constraintTop_toBottomOf="@+id/download_batch_status" />
-
-  <Button
-    android:id="@+id/button_requeue"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:text="@string/re_queue"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toEndOf="@+id/button_resume_downloading"
+    app:layout_constraintStart_toEndOf="@+id/button_pause_downloading"
     app:layout_constraintTop_toBottomOf="@+id/download_batch_status" />
 
 </merge>
