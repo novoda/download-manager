@@ -15,7 +15,6 @@ public class DownloadBatchStatusView extends ConstraintLayout {
     private TextView downloadBatchStatusView;
 
     private DownloadBatchStatusListener downloadBatchStatusListener;
-    private DownloadBatchStatus downloadBatchStatus;
 
     public DownloadBatchStatusView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -31,17 +30,17 @@ public class DownloadBatchStatusView extends ConstraintLayout {
         View resumeDownloadView = findViewById(R.id.button_resume_downloading);
 
         pauseDownloadView.setOnClickListener(view -> {
-            if (downloadBatchStatusListener == null || downloadBatchStatus == null) {
+            if (downloadBatchStatusListener == null) {
                 return;
             }
-            downloadBatchStatusListener.onBatchPaused(downloadBatchStatus);
+            downloadBatchStatusListener.onBatchPaused();
         });
 
         resumeDownloadView.setOnClickListener(view -> {
-            if (downloadBatchStatusListener == null || downloadBatchStatus == null) {
+            if (downloadBatchStatusListener == null) {
                 return;
             }
-            downloadBatchStatusListener.onBatchResumed(downloadBatchStatus);
+            downloadBatchStatusListener.onBatchResumed();
         });
     }
 
@@ -50,7 +49,6 @@ public class DownloadBatchStatusView extends ConstraintLayout {
     }
 
     public void update(DownloadBatchStatus downloadBatchStatus) {
-        this.downloadBatchStatus = downloadBatchStatus;
         downloadBatchStatusView.setText(createMessageFrom(downloadBatchStatus));
     }
 
@@ -76,9 +74,9 @@ public class DownloadBatchStatusView extends ConstraintLayout {
 
     interface DownloadBatchStatusListener {
 
-        void onBatchPaused(DownloadBatchStatus downloadBatchStatus);
+        void onBatchPaused();
 
-        void onBatchResumed(DownloadBatchStatus downloadBatchStatus);
+        void onBatchResumed();
     }
 
 }

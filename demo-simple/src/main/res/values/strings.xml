@@ -11,8 +11,7 @@
   <string name="delete_all">Delete all</string>
   <string name="log_file_directory">Log File Directory</string>
   <string formatted="false" name="example_batch_status">Batch {DownloadBatchTitle} downloaded: 98% bytes: 1024 total: 2048 status: DOWNLOADING</string>
-  <string name="batch_status_one">Batch Status One</string>
-  <string name="batch_status_two">Batch Status Two</string>
+  <string name="batch_status_one">Batch Status</string>
   <string name="migration">Migration</string>
   <string name="downloads">Downloads</string>
   <string name="re_queue">Re-queue</string>

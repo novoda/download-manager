@@ -7,75 +7,24 @@
   tools:context="com.novoda.downloadmanager.demo.MainActivity"
   tools:layout_editor_absoluteY="81dp">
 
-  <TextView
+  <com.novoda.downloadmanager.demo.DownloadBatchStatusView
     android:id="@+id/batch_1"
-    android:layout_width="184dp"
-    android:layout_height="0dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
-    android:lines="6"
-    android:text="@string/batch_status_one"
     app:layout_constraintEnd_toStartOf="@+id/batch_2"
-    app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    tools:text="@string/example_batch_status" />
+    app:layout_constraintTop_toTopOf="parent" />
 
-  <Button
-    android:id="@+id/button_pause_downloading_1"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:text="@string/pause"
-    app:layout_constraintEnd_toStartOf="@+id/button_resume_downloading_2"
-    app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toEndOf="@+id/button_resume_downloading_1"
-    app:layout_constraintTop_toBottomOf="@+id/batch_1" />
-
-  <Button
-    android:id="@+id/button_resume_downloading_1"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:text="@string/resume"
-    app:layout_constraintEnd_toStartOf="@+id/button_pause_downloading_1"
-    app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/batch_1" />
-
-  <TextView
+  <com.novoda.downloadmanager.demo.DownloadBatchStatusView
     android:id="@+id/batch_2"
-    android:layout_width="176dp"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
-    android:lines="6"
-    android:text="@string/batch_status_two"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toEndOf="@+id/batch_1"
-    app:layout_constraintTop_toTopOf="parent"
-    tools:text="@string/example_batch_status" />
-
-  <Button
-    android:id="@+id/button_pause_downloading_2"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:text="@string/pause"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toEndOf="@+id/button_resume_downloading_2"
-    app:layout_constraintTop_toBottomOf="@+id/batch_2" />
-
-  <Button
-    android:id="@+id/button_resume_downloading_2"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:text="@string/resume"
-    app:layout_constraintEnd_toStartOf="@+id/button_pause_downloading_2"
-    app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toEndOf="@+id/button_pause_downloading_1"
-    app:layout_constraintTop_toBottomOf="@+id/batch_2" />
+    app:layout_constraintTop_toTopOf="parent" />
 
   <CheckBox
     android:id="@+id/check_wifi_only"
@@ -94,7 +43,7 @@
     android:layout_height="wrap_content"
     android:layout_marginEnd="16dp"
     android:layout_marginRight="16dp"
-    android:layout_marginTop="12dp"
+    android:layout_marginTop="16dp"
     android:text="@string/log_file_directory"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintHorizontal_bias="0.5"
@@ -111,7 +60,7 @@
     app:layout_constraintEnd_toStartOf="@+id/button_delete_all"
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/button_requeue_1" />
+    app:layout_constraintTop_toBottomOf="@+id/batch_1" />
 
   <Button
     android:id="@+id/button_delete_all"
@@ -122,28 +71,6 @@
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toEndOf="@+id/button_start_downloading"
-    app:layout_constraintTop_toBottomOf="@+id/button_requeue_2" />
-
-  <Button
-    android:id="@+id/button_requeue_1"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:text="@string/re_queue"
-    app:layout_constraintEnd_toStartOf="@+id/button_requeue_2"
-    app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/button_resume_downloading_1" />
-
-  <Button
-    android:id="@+id/button_requeue_2"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="8dp"
-    android:text="@string/re_queue"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toEndOf="@+id/button_requeue_1"
-    app:layout_constraintTop_toBottomOf="@+id/button_resume_downloading_2" />
+    app:layout_constraintTop_toBottomOf="@+id/batch_2" />
 
 </android.support.constraint.ConstraintLayout>
