@@ -9,60 +9,50 @@
 
   <TextView
     android:id="@+id/batch_1"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_marginEnd="8dp"
-    android:layout_marginLeft="8dp"
-    android:layout_marginRight="8dp"
-    android:layout_marginStart="8dp"
+    android:layout_width="184dp"
+    android:layout_height="0dp"
+    android:layout_marginTop="8dp"
     android:lines="6"
     android:text="@string/batch_status_one"
-    app:layout_constraintBaseline_toBaselineOf="@+id/button_pause_downloading_1"
-    app:layout_constraintEnd_toStartOf="@+id/button_pause_downloading_1"
+    app:layout_constraintEnd_toStartOf="@+id/batch_2"
+    app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="@+id/button_pause_downloading_1"
+    app:layout_constraintTop_toTopOf="parent"
     tools:text="@string/example_batch_status" />
 
   <Button
     android:id="@+id/button_pause_downloading_1"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginEnd="8dp"
-    android:layout_marginRight="8dp"
     android:layout_marginTop="8dp"
     android:text="@string/pause"
-    app:layout_constraintEnd_toStartOf="@+id/button_resume_downloading_1"
-    app:layout_constraintTop_toBottomOf="@+id/button_migrate" />
+    app:layout_constraintEnd_toStartOf="@+id/button_resume_downloading_2"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toEndOf="@+id/button_resume_downloading_1"
+    app:layout_constraintTop_toBottomOf="@+id/batch_1" />
 
   <Button
     android:id="@+id/button_resume_downloading_1"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginEnd="8dp"
-    android:layout_marginRight="8dp"
     android:layout_marginTop="8dp"
     android:text="@string/resume"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/button_migrate" />
+    app:layout_constraintEnd_toStartOf="@+id/button_pause_downloading_1"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/batch_1" />
 
   <TextView
     android:id="@+id/batch_2"
     android:layout_width="176dp"
-    android:layout_height="72dp"
-    android:layout_marginBottom="24dp"
-    android:layout_marginEnd="8dp"
-    android:layout_marginLeft="8dp"
-    android:layout_marginRight="8dp"
-    android:layout_marginStart="8dp"
+    android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
     android:lines="6"
     android:text="@string/batch_status_two"
-    app:layout_constraintBaseline_toBaselineOf="@+id/button_pause_downloading_2"
-    app:layout_constraintBottom_toTopOf="@+id/check_wifi_only"
-    app:layout_constraintEnd_toStartOf="@+id/button_pause_downloading_2"
-    app:layout_constraintHorizontal_bias="0.0"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/batch_1"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toEndOf="@+id/batch_1"
+    app:layout_constraintTop_toTopOf="parent"
     tools:text="@string/example_batch_status" />
 
   <Button
@@ -71,71 +61,68 @@
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
     android:text="@string/pause"
-    app:layout_constraintTop_toBottomOf="@+id/batch_1"
-    tools:layout_editor_absoluteX="192dp" />
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toEndOf="@+id/button_resume_downloading_2"
+    app:layout_constraintTop_toBottomOf="@+id/batch_2" />
 
   <Button
     android:id="@+id/button_resume_downloading_2"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginEnd="8dp"
-    android:layout_marginLeft="8dp"
-    android:layout_marginRight="8dp"
-    android:layout_marginStart="8dp"
+    android:layout_marginTop="8dp"
     android:text="@string/resume"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toEndOf="@+id/button_pause_downloading_2"
-    app:layout_constraintTop_toTopOf="@+id/button_pause_downloading_2" />
+    app:layout_constraintEnd_toStartOf="@+id/button_pause_downloading_2"
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toEndOf="@+id/button_pause_downloading_1"
+    app:layout_constraintTop_toBottomOf="@+id/batch_2" />
 
   <CheckBox
     android:id="@+id/check_wifi_only"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginLeft="8dp"
-    android:layout_marginStart="8dp"
-    android:layout_marginTop="8dp"
     android:checked="false"
     android:text="@string/download_only_over_wifi"
+    app:layout_constraintBaseline_toBaselineOf="@+id/button_log_file_directory"
+    app:layout_constraintEnd_toStartOf="@+id/button_log_file_directory"
+    app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/batch_2" />
+    tools:layout_editor_absoluteY="329dp" />
 
   <Button
     android:id="@+id/button_log_file_directory"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginEnd="8dp"
-    android:layout_marginLeft="8dp"
-    android:layout_marginRight="8dp"
-    android:layout_marginStart="8dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginRight="16dp"
+    android:layout_marginTop="8dp"
     android:text="@string/log_file_directory"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.529"
+    app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toEndOf="@+id/check_wifi_only"
-    app:layout_constraintTop_toTopOf="@+id/check_wifi_only"
+    app:layout_constraintTop_toBottomOf="@+id/button_delete_all"
     tools:ignore="ButtonStyle" />
 
   <Button
     android:id="@+id/button_start_downloading"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginEnd="90dp"
-    android:layout_marginLeft="8dp"
-    android:layout_marginRight="90dp"
-    android:layout_marginStart="8dp"
     android:layout_marginTop="8dp"
     android:text="@string/start_downloading"
     app:layout_constraintEnd_toStartOf="@+id/button_delete_all"
+    app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@+id/button_log_file_directory" />
+    app:layout_constraintTop_toBottomOf="@+id/button_pause_downloading_1" />
 
   <Button
     android:id="@+id/button_delete_all"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginEnd="8dp"
-    android:layout_marginRight="8dp"
+    android:layout_marginTop="8dp"
     android:text="@string/delete_all"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toTopOf="@+id/button_start_downloading" />
+    app:layout_constraintHorizontal_bias="0.5"
+    app:layout_constraintStart_toEndOf="@+id/button_start_downloading"
+    app:layout_constraintTop_toBottomOf="@+id/button_resume_downloading_2" />
 
 </android.support.constraint.ConstraintLayout>
