@@ -104,9 +104,6 @@ public class MainActivity extends AppCompatActivity {
         View buttonLogFileDirectory = findViewById(R.id.button_log_file_directory);
         buttonLogFileDirectory.setOnClickListener(logFileDirectoryOnClick);
 
-        View buttonLogDownloadFileStatus = findViewById(R.id.button_log_download_file_status);
-        buttonLogDownloadFileStatus.setOnClickListener(logDownloadFileStatusOnClick);
-
         DemoApplication demoApplication = (DemoApplication) getApplicationContext();
         liteDownloadManagerCommands = demoApplication.getLiteDownloadManagerCommands();
         liteDownloadManagerCommands.addDownloadBatchCallback(callback);
@@ -176,11 +173,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-    private final View.OnClickListener logDownloadFileStatusOnClick = v -> liteDownloadManagerCommands.getDownloadFileStatusWithMatching(
-            BATCH_ID_1, FILE_ID_1,
-            downloadFileStatus -> Log.d(TAG, "FileStatus: " + downloadFileStatus)
-    );
 
     private final DownloadBatchStatusCallback callback = downloadBatchStatus -> {
         String status = getStatusMessage(downloadBatchStatus);

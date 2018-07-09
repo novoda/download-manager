@@ -137,13 +137,6 @@
       android:text="@string/log_file_directory"
       tools:ignore="ButtonStyle" />
 
-    <Button
-      android:id="@+id/button_log_download_file_status"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:text="@string/log_download_file_status"
-      tools:ignore="ButtonStyle" />
-
   </LinearLayout>
 
 </LinearLayout>
