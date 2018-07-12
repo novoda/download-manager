@@ -3,6 +3,7 @@ package com.novoda.downloadmanager;
 class InternalDownloadBatchStatusFixtures {
 
     private DownloadBatchTitle downloadBatchTitle = DownloadBatchTitleFixtures.aDownloadBatchTitle().build();
+    private String storageRoot = "/storage/root/";
     private int percentageDownloaded = 10;
     private long bytesDownloaded = 100;
     private long bytesTotalSize = 1000;
@@ -18,6 +19,11 @@ class InternalDownloadBatchStatusFixtures {
 
     InternalDownloadBatchStatusFixtures withDownloadBatchTitle(DownloadBatchTitle downloadBatchTitle) {
         this.downloadBatchTitle = downloadBatchTitle;
+        return this;
+    }
+
+    InternalDownloadBatchStatusFixtures withStorageRoot(String storageRoot) {
+        this.storageRoot = storageRoot;
         return this;
     }
 
@@ -65,6 +71,7 @@ class InternalDownloadBatchStatusFixtures {
         return new LiteDownloadBatchStatus(
                 downloadBatchId,
                 downloadBatchTitle,
+                storageRoot,
                 downloadedDateTimeInMillis,
                 bytesDownloaded,
                 bytesTotalSize,

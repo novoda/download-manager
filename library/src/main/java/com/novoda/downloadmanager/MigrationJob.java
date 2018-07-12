@@ -133,7 +133,8 @@ class MigrationJob implements Runnable {
                 downloadBatchId,
                 downloadBatchStatus,
                 downloadedDateTimeInMillis,
-                notificationSeen
+                notificationSeen,
+                StorageRootFactory.createMissingStorageRoot().path()
         );
         downloadsPersistence.persistBatch(persistedBatch);
 

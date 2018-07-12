@@ -9,6 +9,7 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
 
     private final DownloadBatchTitle downloadBatchTitle;
     private final DownloadBatchId downloadBatchId;
+    private final String storageRoot;
     private final long downloadedDateTimeInMillis;
 
     private Status status;
@@ -21,6 +22,7 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
     LiteDownloadBatchStatus(DownloadBatchId downloadBatchId,
                             DownloadBatchTitle downloadBatchTitle,
+                            String storageRoot,
                             long downloadedDateTimeInMillis,
                             long bytesDownloaded,
                             long totalBatchSizeBytes,
@@ -29,6 +31,7 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
                             Optional<DownloadError> downloadError) {
         this.downloadBatchTitle = downloadBatchTitle;
         this.downloadBatchId = downloadBatchId;
+        this.storageRoot = storageRoot;
         this.downloadedDateTimeInMillis = downloadedDateTimeInMillis;
         this.bytesDownloaded = bytesDownloaded;
         this.totalBatchSizeBytes = totalBatchSizeBytes;
@@ -80,6 +83,11 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     @Override
     public DownloadBatchTitle getDownloadBatchTitle() {
         return downloadBatchTitle;
+    }
+
+    @Override
+    public String storageRoot() {
+        return storageRoot;
     }
 
     @Override
@@ -146,6 +154,7 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
         return new LiteDownloadBatchStatus(
                 downloadBatchId,
                 downloadBatchTitle,
+                storageRoot,
                 downloadedDateTimeInMillis,
                 bytesDownloaded,
                 totalBatchSizeBytes,
@@ -188,6 +197,9 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
         if (downloadedDateTimeInMillis != that.downloadedDateTimeInMillis) {
             return false;
         }
+        if (notificationSeen != that.notificationSeen) {
+            return false;
+        }
         if (bytesDownloaded != that.bytesDownloaded) {
             return false;
         }
@@ -197,13 +209,13 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
         if (percentageDownloaded != that.percentageDownloaded) {
             return false;
         }
-        if (notificationSeen != that.notificationSeen) {
-            return false;
-        }
         if (downloadBatchTitle != null ? !downloadBatchTitle.equals(that.downloadBatchTitle) : that.downloadBatchTitle != null) {
             return false;
         }
         if (downloadBatchId != null ? !downloadBatchId.equals(that.downloadBatchId) : that.downloadBatchId != null) {
+            return false;
+        }
+        if (storageRoot != null ? !storageRoot.equals(that.storageRoot) : that.storageRoot != null) {
             return false;
         }
         if (status != that.status) {
@@ -216,12 +228,13 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     public int hashCode() {
         int result = downloadBatchTitle != null ? downloadBatchTitle.hashCode() : 0;
         result = 31 * result + (downloadBatchId != null ? downloadBatchId.hashCode() : 0);
+        result = 31 * result + (storageRoot != null ? storageRoot.hashCode() : 0);
         result = 31 * result + (int) (downloadedDateTimeInMillis ^ (downloadedDateTimeInMillis >>> 32));
+        result = 31 * result + (status != null ? status.hashCode() : 0);
+        result = 31 * result + (notificationSeen ? 1 : 0);
         result = 31 * result + (int) (bytesDownloaded ^ (bytesDownloaded >>> 32));
         result = 31 * result + (int) (totalBatchSizeBytes ^ (totalBatchSizeBytes >>> 32));
         result = 31 * result + percentageDownloaded;
-        result = 31 * result + (status != null ? status.hashCode() : 0);
-        result = 31 * result + (notificationSeen ? 1 : 0);
         result = 31 * result + (downloadError != null ? downloadError.hashCode() : 0);
         return result;
     }
@@ -231,12 +244,13 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
         return "LiteDownloadBatchStatus{"
                 + "downloadBatchTitle=" + downloadBatchTitle
                 + ", downloadBatchId=" + downloadBatchId
+                + ", storageRoot='" + storageRoot + '\''
                 + ", downloadedDateTimeInMillis=" + downloadedDateTimeInMillis
+                + ", status=" + status
+                + ", notificationSeen=" + notificationSeen
                 + ", bytesDownloaded=" + bytesDownloaded
                 + ", totalBatchSizeBytes=" + totalBatchSizeBytes
                 + ", percentageDownloaded=" + percentageDownloaded
-                + ", status=" + status
-                + ", notificationSeen=" + notificationSeen
                 + ", downloadError=" + downloadError
                 + '}';
     }

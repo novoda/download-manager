@@ -22,6 +22,7 @@ final class DownloadBatchFactory {
                                      FileCallbackThrottle fileCallbackThrottle,
                                      ConnectionChecker connectionChecker) {
         DownloadBatchTitle downloadBatchTitle = DownloadBatchTitleCreator.createFrom(batch);
+        StorageRoot storageRoot = batch.storageRoot();
         DownloadBatchId downloadBatchId = batch.downloadBatchId();
         long downloadedDateTimeInMillis = System.currentTimeMillis();
 
@@ -67,6 +68,7 @@ final class DownloadBatchFactory {
         InternalDownloadBatchStatus liteDownloadBatchStatus = new LiteDownloadBatchStatus(
                 downloadBatchId,
                 downloadBatchTitle,
+                storageRoot.path(),
                 downloadedDateTimeInMillis,
                 BYTES_DOWNLOADED,
                 TOTAL_BATCH_SIZE_BYTES,

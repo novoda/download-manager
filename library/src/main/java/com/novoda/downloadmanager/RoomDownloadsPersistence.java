@@ -56,7 +56,8 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
                     DownloadBatchIdCreator.createSanitizedFrom(roomBatch.id),
                     DownloadBatchStatus.Status.from(roomBatch.status),
                     roomBatch.downloadedDateTimeInMillis,
-                    roomBatch.notificationSeen
+                    roomBatch.notificationSeen,
+                    "foo" // TODO:
             );
             batchPersistedList.add(batchPersisted);
         }
