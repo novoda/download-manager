@@ -8,7 +8,7 @@ import android.arch.persistence.room.migration.Migration;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-@Database(entities = {RoomBatch.class, RoomFile.class}, version = 2)
+@Database(entities = {RoomBatch.class, RoomFile.class}, version = 3)
 abstract class RoomAppDatabase extends RoomDatabase {
 
     private static volatile RoomAppDatabase singleInstance;
@@ -30,12 +30,14 @@ abstract class RoomAppDatabase extends RoomDatabase {
     }
 
     static RoomAppDatabase newInstance(Context context) {
+        StorageRoot storageRoot = StorageRootFactory.createPrimaryStorageDownloadsDirectoryRoot(context.getApplicationContext());
         return Room.databaseBuilder(
                 context.getApplicationContext(),
                 RoomAppDatabase.class,
                 "database-litedownloadmanager"
         )
                 .addMigrations(MIGRATION_V1_TO_V2)
+                .addMigrations(new VersionTwoToVersionThreeMigration(storageRoot))
                 .build();
     }
 
@@ -53,5 +55,20 @@ abstract class RoomAppDatabase extends RoomDatabase {
             database.execSQL("ALTER TABLE RoomFileTemp RENAME TO RoomFile");
         }
     };
+
+    private static class VersionTwoToVersionThreeMigration extends Migration {
+
+        private final StorageRoot storageRoot;
+
+        private VersionTwoToVersionThreeMigration(StorageRoot storageRoot) {
+            super(2, 3);
+            this.storageRoot = storageRoot;
+        }
+
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE RoomBatch ADD COLUMN 'storage_root' TEXT DEFAULT '" + storageRoot.path() + "'");
+        }
+    }
 
 }
