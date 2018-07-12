@@ -8,6 +8,7 @@ final class DownloadsBatchPersistedFixtures {
     private DownloadBatchTitle downloadBatchTitle = new LiteDownloadBatchTitle("title");
     private long downloadedDateTimeInMillis = 123456789L;
     private boolean notificationSeen = false;
+    private String storageRoot = "/storage/root/";
 
     static DownloadsBatchPersistedFixtures aDownloadsBatchPersisted() {
         return new DownloadsBatchPersistedFixtures();
@@ -47,6 +48,11 @@ final class DownloadsBatchPersistedFixtures {
         return this;
     }
 
+    DownloadsBatchPersistedFixtures withStorageRoot(String storageRoot) {
+        this.storageRoot = storageRoot;
+        return this;
+    }
+
     DownloadsBatchPersisted build() {
         return new DownloadsBatchPersisted() {
             @Override
@@ -72,6 +78,11 @@ final class DownloadsBatchPersistedFixtures {
             @Override
             public boolean notificationSeen() {
                 return notificationSeen;
+            }
+
+            @Override
+            public String storageRoot() {
+                return storageRoot;
             }
         };
     }
