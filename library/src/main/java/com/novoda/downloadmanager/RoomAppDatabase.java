@@ -11,6 +11,10 @@ import android.support.annotation.NonNull;
 @Database(entities = {RoomBatch.class, RoomFile.class}, version = 3)
 abstract class RoomAppDatabase extends RoomDatabase {
 
+    private static final int VERSION_ONE = 1;
+    private static final int VERSION_TWO = 2;
+    private static final int VERSION_THREE = 3;
+
     private static volatile RoomAppDatabase singleInstance;
 
     abstract RoomBatchDao roomBatchDao();
@@ -41,7 +45,7 @@ abstract class RoomAppDatabase extends RoomDatabase {
                 .build();
     }
 
-    private static final Migration MIGRATION_V1_TO_V2 = new Migration(1, 2) {
+    private static final Migration MIGRATION_V1_TO_V2 = new Migration(VERSION_ONE, VERSION_TWO) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("CREATE TABLE IF NOT EXISTS `RoomFileTemp` (`file_id` TEXT NOT NULL, `batch_id` TEXT NOT NULL, "
@@ -56,12 +60,12 @@ abstract class RoomAppDatabase extends RoomDatabase {
         }
     };
 
-    private static class VersionTwoToVersionThreeMigration extends Migration {
+    private static final class VersionTwoToVersionThreeMigration extends Migration {
 
         private final StorageRoot storageRoot;
 
         private VersionTwoToVersionThreeMigration(StorageRoot storageRoot) {
-            super(2, 3);
+            super(VERSION_TWO, VERSION_THREE);
             this.storageRoot = storageRoot;
         }
 
