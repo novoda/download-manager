@@ -64,7 +64,7 @@ abstract class RoomAppDatabase extends RoomDatabase {
 
         private final StorageRoot storageRoot;
 
-        private VersionTwoToVersionThreeMigration(StorageRoot storageRoot) {
+        VersionTwoToVersionThreeMigration(StorageRoot storageRoot) {
             super(VERSION_TWO, VERSION_THREE);
             this.storageRoot = storageRoot;
         }
