@@ -25,6 +25,10 @@ public class Batch {
         return downloadBatchId;
     }
 
+    public StorageRoot storageRoot() {
+        return storageRoot;
+    }
+
     public String title() {
         return title;
     }
