@@ -66,7 +66,7 @@ public class CompletedDownloadBatchesExtractorTest {
 
     @Before
     public void setUp() {
-        migrationExtractor = new CompletedDownloadBatchesExtractor(database, "base", fileSizeExtractor);
+        migrationExtractor = new CompletedDownloadBatchesExtractor(database, "base", fileSizeExtractor, primaryStorageWithDownloadsSubpackage);
     }
 
     @Test
@@ -109,8 +109,8 @@ public class CompletedDownloadBatchesExtractorTest {
         secondFileMetadata.add(new CompletedDownloadBatch.CompletedDownloadFile("file_4", "base/data_4", "base/-1274506704/data_4", FileSizeCreator.createForCompletedDownloadBatch(750), fourthUri));
 
         return Arrays.asList(
-                new CompletedDownloadBatch(firstBatch.downloadBatchId(), DownloadBatchTitleCreator.createFrom(firstBatch), 12345, firstFileMetadata),
-                new CompletedDownloadBatch(secondBatch.downloadBatchId(), DownloadBatchTitleCreator.createFrom(secondBatch), 67890, secondFileMetadata)
+                new CompletedDownloadBatch(firstBatch.downloadBatchId(), DownloadBatchTitleCreator.createFrom(firstBatch), 12345, firstFileMetadata, primaryStorageWithDownloadsSubpackage),
+                new CompletedDownloadBatch(secondBatch.downloadBatchId(), DownloadBatchTitleCreator.createFrom(secondBatch), 67890, secondFileMetadata, primaryStorageWithDownloadsSubpackage)
         );
     }
 }

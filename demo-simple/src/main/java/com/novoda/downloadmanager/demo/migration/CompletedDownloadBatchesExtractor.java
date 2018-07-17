@@ -12,6 +12,7 @@ import com.novoda.downloadmanager.FileSize;
 import com.novoda.downloadmanager.FileSizeCreator;
 import com.novoda.downloadmanager.FileSizeExtractor;
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
+import com.novoda.downloadmanager.StorageRoot;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,11 +43,16 @@ class CompletedDownloadBatchesExtractor {
     private final SqlDatabaseWrapper database;
     private final String basePath;
     private final FileSizeExtractor fileSizeExtractor;
+    private final StorageRoot primaryStorageWithDownloadsSubpackage;
 
-    CompletedDownloadBatchesExtractor(SqlDatabaseWrapper database, String basePath, FileSizeExtractor fileSizeExtractor) {
+    CompletedDownloadBatchesExtractor(SqlDatabaseWrapper database,
+                                      String basePath,
+                                      FileSizeExtractor fileSizeExtractor,
+                                      StorageRoot primaryStorageWithDownloadsSubpackage) {
         this.database = database;
         this.basePath = basePath;
         this.fileSizeExtractor = fileSizeExtractor;
+        this.primaryStorageWithDownloadsSubpackage = primaryStorageWithDownloadsSubpackage;
     }
 
     List<CompletedDownloadBatch> extractMigrations() {
@@ -126,7 +132,8 @@ class CompletedDownloadBatchesExtractor {
                         downloadBatchId,
                         downloadBatchTitle,
                         downloadedDateTimeInMillis,
-                        downloadFiles
+                        downloadFiles,
+                        primaryStorageWithDownloadsSubpackage
                 );
                 completedDownloadBatches.add(completedDownloadBatch);
             }

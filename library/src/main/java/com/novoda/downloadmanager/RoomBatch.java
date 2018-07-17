@@ -26,4 +26,7 @@ class RoomBatch {
 
     @ColumnInfo(name = "notification_seen")
     public boolean notificationSeen;
+
+    @ColumnInfo(name = "storage_root")
+    public String storageRoot;
 }

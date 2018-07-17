@@ -21,6 +21,7 @@ public class MigrationJob implements Runnable {
 
     private final File databaseFile;
     private final StorageRoot primaryStorageWithDownloadsSubpackage;
+    private final StorageRoot primaryStorageWithPicturesSubpackage;
     private final LiteDownloadManagerCommands downloadManager;
     private final Handler callbackHandler;
     private final MigrationJobCallback migrationJobCallback;
@@ -31,11 +32,13 @@ public class MigrationJob implements Runnable {
 
     public MigrationJob(File databaseFile,
                         StorageRoot primaryStorageWithDownloadsSubpackage,
+                        StorageRoot primaryStorageWithPicturesSubpackage,
                         LiteDownloadManagerCommands downloadManager,
                         Handler callbackHandler,
                         MigrationJobCallback migrationJobCallback) {
         this.databaseFile = databaseFile;
         this.primaryStorageWithDownloadsSubpackage = primaryStorageWithDownloadsSubpackage;
+        this.primaryStorageWithPicturesSubpackage = primaryStorageWithPicturesSubpackage;
         this.downloadManager = downloadManager;
         this.callbackHandler = callbackHandler;
         this.migrationJobCallback = migrationJobCallback;
@@ -51,7 +54,12 @@ public class MigrationJob implements Runnable {
         );
 
         FileSizeExtractor fileSizeExtractor = new FileSizeExtractor();
-        CompletedDownloadBatchesExtractor migrationExtractor = new CompletedDownloadBatchesExtractor(database, V1_BASE_PATH, fileSizeExtractor);
+        CompletedDownloadBatchesExtractor migrationExtractor = new CompletedDownloadBatchesExtractor(
+                database,
+                V1_BASE_PATH,
+                fileSizeExtractor,
+                primaryStorageWithPicturesSubpackage
+        );
 
         onUpdate("Extracting V1 downloads");
         List<VersionOnePartialDownloadBatch> partialDownloadBatches = partialDownloadMigrationExtractor.extractMigrations();

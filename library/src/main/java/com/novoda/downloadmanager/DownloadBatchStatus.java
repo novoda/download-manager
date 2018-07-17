@@ -35,6 +35,8 @@ public interface DownloadBatchStatus {
 
     DownloadBatchTitle getDownloadBatchTitle();
 
+    String storageRoot();
+
     int percentageDownloaded();
 
     long bytesDownloaded();
