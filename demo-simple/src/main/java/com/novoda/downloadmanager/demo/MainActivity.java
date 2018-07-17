@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private Spinner downloadFileSizeSpinner;
     private MigrationJob migrationJob;
     private StorageRoot primaryStorageWithDownloadsSubpackage;
+    private StorageRoot primaryStorageWithPicturesSubpackage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
         downloadFileSizeSpinner.setAdapter(adapter);
 
         primaryStorageWithDownloadsSubpackage = StorageRootFactory.createPrimaryStorageDownloadsDirectoryRoot(getApplicationContext());
+        primaryStorageWithPicturesSubpackage = new PrimaryStoragePicturesDirectoryRoot(getApplicationContext());
 
         databaseCloningUpdates = findViewById(R.id.database_cloning_updates);
         View buttonCreateDB = findViewById(R.id.button_create_v1_db);
@@ -102,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
         migrationJob = new MigrationJob(
                 getDatabasePath("downloads.db"),
                 primaryStorageWithDownloadsSubpackage,
+                primaryStorageWithPicturesSubpackage,
                 liteDownloadManagerCommands,
                 migrationCallbackHandler,
                 migrationJobCallback

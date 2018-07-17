@@ -37,9 +37,10 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                       DownloadBatchStatus.Status status,
                       List<DownloadFile> downloadFiles,
                       long downloadedDateTimeInMillis,
-                      boolean notificationSeen) {
+                      boolean notificationSeen,
+                      String storageRoot) {
         executor.execute(() -> {
-            persist(downloadBatchTitle, downloadBatchId, status, downloadFiles, downloadedDateTimeInMillis, notificationSeen);
+            persist(downloadBatchTitle, downloadBatchId, status, downloadFiles, downloadedDateTimeInMillis, notificationSeen, storageRoot);
         });
     }
 
@@ -49,7 +50,8 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                  DownloadBatchStatus.Status status,
                  List<DownloadFile> downloadFiles,
                  long downloadedDateTimeInMillis,
-                 boolean notificationSeen) {
+                 boolean notificationSeen,
+                 String storageRoot) {
         List<DownloadFile> downloadFilesToPersist = new ArrayList<>(downloadFiles);
         downloadsPersistence.startTransaction();
 
@@ -59,7 +61,8 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                     downloadBatchId,
                     status,
                     downloadedDateTimeInMillis,
-                    notificationSeen
+                    notificationSeen,
+                    storageRoot
             );
             downloadsPersistence.persistBatch(batchPersisted);
             for (DownloadFile downloadFile : downloadFilesToPersist) {
@@ -95,6 +98,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
         DownloadBatchTitle downloadBatchTitle = batchPersisted.downloadBatchTitle();
         long downloadedDateTimeInMillis = batchPersisted.downloadedDateTimeInMillis();
         boolean notificationSeen = batchPersisted.notificationSeen();
+        String storageRoot = batchPersisted.storageRoot();
 
         List<DownloadFile> downloadFiles = downloadsFilePersistence.loadSync(
                 downloadBatchId,
@@ -125,6 +129,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
         InternalDownloadBatchStatus liteDownloadBatchStatus = new LiteDownloadBatchStatus(
                 downloadBatchId,
                 downloadBatchTitle,
+                storageRoot,
                 downloadedDateTimeInMillis,
                 currentBytesDownloaded,
                 totalBatchSizeBytes,

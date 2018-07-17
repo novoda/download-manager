@@ -9,15 +9,18 @@ public class CompletedDownloadBatch {
     private final DownloadBatchTitle downloadBatchTitle;
     private final long downloadedDateTimeInMillis;
     private final List<CompletedDownloadFile> completedDownloadFiles;
+    private final StorageRoot storageRoot;
 
     public CompletedDownloadBatch(DownloadBatchId downloadBatchId,
                                   DownloadBatchTitle downloadBatchTitle,
                                   long downloadedDateTimeInMillis,
-                                  List<CompletedDownloadFile> completedDownloadFiles) {
+                                  List<CompletedDownloadFile> completedDownloadFiles,
+                                  StorageRoot storageRoot) {
         this.downloadBatchId = downloadBatchId;
         this.downloadBatchTitle = downloadBatchTitle;
         this.downloadedDateTimeInMillis = downloadedDateTimeInMillis;
         this.completedDownloadFiles = completedDownloadFiles;
+        this.storageRoot = storageRoot;
     }
 
     public DownloadBatchId downloadBatchId() {
@@ -36,9 +39,13 @@ public class CompletedDownloadBatch {
         return completedDownloadFiles;
     }
 
+    public StorageRoot storageRoot() {
+        return storageRoot;
+    }
+
     public Batch asBatch() {
         return new Batch(
-                StorageRootFactory.createMissingStorageRoot(),
+                storageRoot,
                 downloadBatchId,
                 downloadBatchTitle.asString(),
                 asBatchFiles()
@@ -73,7 +80,10 @@ public class CompletedDownloadBatch {
         if (downloadBatchTitle != null ? !downloadBatchTitle.equals(that.downloadBatchTitle) : that.downloadBatchTitle != null) {
             return false;
         }
-        return completedDownloadFiles != null ? completedDownloadFiles.equals(that.completedDownloadFiles) : that.completedDownloadFiles == null;
+        if (completedDownloadFiles != null ? !completedDownloadFiles.equals(that.completedDownloadFiles) : that.completedDownloadFiles != null) {
+            return false;
+        }
+        return storageRoot != null ? storageRoot.equals(that.storageRoot) : that.storageRoot == null;
     }
 
     @Override
@@ -82,6 +92,7 @@ public class CompletedDownloadBatch {
         result = 31 * result + (downloadBatchTitle != null ? downloadBatchTitle.hashCode() : 0);
         result = 31 * result + (int) (downloadedDateTimeInMillis ^ (downloadedDateTimeInMillis >>> 32));
         result = 31 * result + (completedDownloadFiles != null ? completedDownloadFiles.hashCode() : 0);
+        result = 31 * result + (storageRoot != null ? storageRoot.hashCode() : 0);
         return result;
     }
 
@@ -92,6 +103,7 @@ public class CompletedDownloadBatch {
                 + ", downloadBatchTitle=" + downloadBatchTitle
                 + ", downloadedDateTimeInMillis=" + downloadedDateTimeInMillis
                 + ", completedDownloadFiles=" + completedDownloadFiles
+                + ", storageRoot=" + storageRoot
                 + '}';
     }
 

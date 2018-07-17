@@ -97,7 +97,9 @@ public class FixedRateTimerActionSchedulerTest {
 
         scheduler.cancelAll();
 
-        verify(timer).cancel();
+        for (Map.Entry<ActionScheduler.Action, TimerTask> actionTimerTaskEntry : actionTimerTasks.entrySet()) {
+            verify(actionTimerTaskEntry.getValue()).cancel();
+        }
     }
 
     @Test

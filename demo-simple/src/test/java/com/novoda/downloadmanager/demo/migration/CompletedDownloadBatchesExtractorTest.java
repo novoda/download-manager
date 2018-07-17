@@ -12,7 +12,6 @@ import com.novoda.downloadmanager.FileSizeCreator;
 import com.novoda.downloadmanager.FileSizeExtractor;
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
 import com.novoda.downloadmanager.StorageRoot;
-import com.novoda.downloadmanager.StorageRootFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +26,7 @@ import static org.mockito.Mockito.mock;
 
 public class CompletedDownloadBatchesExtractorTest {
 
-    private static final StorageRoot STORAGE_ROOT = StorageRootFactory.createMissingStorageRoot();
+    private static final StorageRoot STORAGE_ROOT = () -> "/storage/root/";
 
     private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title, batches.last_modified_timestamp FROM "
             + "batches INNER JOIN DownloadsByBatch ON DownloadsByBatch.batch_id = batches._id "
@@ -66,7 +65,7 @@ public class CompletedDownloadBatchesExtractorTest {
 
     @Before
     public void setUp() {
-        migrationExtractor = new CompletedDownloadBatchesExtractor(database, "base", fileSizeExtractor);
+        migrationExtractor = new CompletedDownloadBatchesExtractor(database, "base", fileSizeExtractor, STORAGE_ROOT);
     }
 
     @Test
@@ -109,8 +108,8 @@ public class CompletedDownloadBatchesExtractorTest {
         secondFileMetadata.add(new CompletedDownloadBatch.CompletedDownloadFile("file_4", "base/data_4", "base/-1274506704/data_4", FileSizeCreator.createForCompletedDownloadBatch(750), fourthUri));
 
         return Arrays.asList(
-                new CompletedDownloadBatch(firstBatch.downloadBatchId(), DownloadBatchTitleCreator.createFrom(firstBatch), 12345, firstFileMetadata),
-                new CompletedDownloadBatch(secondBatch.downloadBatchId(), DownloadBatchTitleCreator.createFrom(secondBatch), 67890, secondFileMetadata)
+                new CompletedDownloadBatch(firstBatch.downloadBatchId(), DownloadBatchTitleCreator.createFrom(firstBatch), 12345, firstFileMetadata, STORAGE_ROOT),
+                new CompletedDownloadBatch(secondBatch.downloadBatchId(), DownloadBatchTitleCreator.createFrom(secondBatch), 67890, secondFileMetadata, STORAGE_ROOT)
         );
     }
 }
