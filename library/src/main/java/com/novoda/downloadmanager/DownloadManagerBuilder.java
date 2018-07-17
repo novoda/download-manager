@@ -64,7 +64,7 @@ public final class DownloadManagerBuilder {
         Context applicationContext = context.getApplicationContext();
 
         StorageRequirementRules storageRequirementRule = StorageRequirementRules.newInstance();
-        FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newPathBasedPersistenceCreator(applicationContext);
+        FilePersistenceCreator filePersistenceCreator = new FilePersistenceCreator(applicationContext);
         FileDownloaderCreator fileDownloaderCreator = FileDownloaderCreator.newNetworkFileDownloaderCreator();
 
         NetworkRequestCreator requestCreator = new NetworkRequestCreator();

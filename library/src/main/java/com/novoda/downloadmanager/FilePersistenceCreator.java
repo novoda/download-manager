@@ -2,15 +2,11 @@ package com.novoda.downloadmanager;
 
 import android.content.Context;
 
-class FilePersistenceCreator {
+final class FilePersistenceCreator {
 
     private final Context context;
 
     private StorageRequirementRule storageRequirementRule;
-
-    static FilePersistenceCreator newPathBasedPersistenceCreator(Context context) {
-        return new FilePersistenceCreator(context);
-    }
 
     FilePersistenceCreator(Context context) {
         this.context = context.getApplicationContext();
