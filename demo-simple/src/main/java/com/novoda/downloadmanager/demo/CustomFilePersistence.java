@@ -6,7 +6,6 @@ import android.util.Log;
 import com.novoda.downloadmanager.FilePath;
 import com.novoda.downloadmanager.FilePersistence;
 import com.novoda.downloadmanager.FilePersistenceResult;
-import com.novoda.downloadmanager.FilePersistenceType;
 import com.novoda.downloadmanager.FileSize;
 import com.novoda.downloadmanager.StorageRequirementRule;
 
@@ -49,10 +48,5 @@ public class CustomFilePersistence implements FilePersistence {
     @Override
     public void close() {
         Log.v(TAG, "close");
-    }
-
-    @Override
-    public FilePersistenceType getType() {
-        return FilePersistenceType.CUSTOM;
     }
 }

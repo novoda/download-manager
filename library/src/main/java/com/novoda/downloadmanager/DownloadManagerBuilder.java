@@ -149,11 +149,6 @@ public final class DownloadManagerBuilder {
         return this;
     }
 
-    public DownloadManagerBuilder withFilePersistenceCustom(Class<? extends FilePersistence> customFilePersistenceClass) {
-        filePersistenceCreator = FilePersistenceCreator.newCustomFilePersistenceCreator(applicationContext, customFilePersistenceClass);
-        return this;
-    }
-
     public DownloadManagerBuilder withStorageRequirementRules(StorageRequirementRule... storageRequirementRules) {
         for (StorageRequirementRule storageRequirementRule : storageRequirementRules) {
             this.storageRequirementRules.addRule(storageRequirementRule);

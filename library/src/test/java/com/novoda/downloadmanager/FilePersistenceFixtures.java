@@ -64,11 +64,6 @@ class FilePersistenceFixtures {
             public void close() {
                 // do nothing.
             }
-
-            @Override
-            public FilePersistenceType getType() {
-                return filePersistenceType;
-            }
         };
     }
 }
