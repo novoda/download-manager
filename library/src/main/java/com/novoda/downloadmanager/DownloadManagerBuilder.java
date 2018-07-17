@@ -42,9 +42,9 @@ public final class DownloadManagerBuilder {
 
     private final Context applicationContext;
     private final Handler callbackHandler;
+    private final FilePersistenceCreator filePersistenceCreator;
     private final StorageRequirementRules storageRequirementRules;
 
-    private FilePersistenceCreator filePersistenceCreator;
     private FileSizeRequester fileSizeRequester;
     private FileDownloaderCreator fileDownloaderCreator;
     private DownloadService downloadService;
