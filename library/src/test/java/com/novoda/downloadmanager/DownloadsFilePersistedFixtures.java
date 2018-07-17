@@ -8,7 +8,6 @@ class DownloadsFilePersistedFixtures {
     private long totalFileSize;
     private String url;
     private DownloadFileId downloadFileId;
-    private FilePersistenceType filePersistenceType;
 
     private DownloadsFilePersistedFixtures() {
         // use aFile() to get an instance of this class
@@ -43,11 +42,6 @@ class DownloadsFilePersistedFixtures {
         return this;
     }
 
-    DownloadsFilePersistedFixtures withFilePersistenceType(FilePersistenceType filePersistenceType) {
-        this.filePersistenceType = filePersistenceType;
-        return this;
-    }
-
     DownloadsFilePersisted build() {
         return new DownloadsFilePersisted() {
             @Override
@@ -75,10 +69,6 @@ class DownloadsFilePersistedFixtures {
                 return downloadFileId;
             }
 
-            @Override
-            public FilePersistenceType filePersistenceType() {
-                return filePersistenceType;
-            }
         };
     }
 }
