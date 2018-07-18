@@ -41,13 +41,18 @@ abstract class RoomAppDatabase extends RoomDatabase {
                 RoomAppDatabase.class,
                 "database-litedownloadmanager"
         )
-                .addMigrations(MIGRATION_V1_TO_V2)
-                .addMigrations(new VersionThreeToVersionFourMigration())
+                .addMigrations(new VersionOneToVersionTwoMigration())
                 .addMigrations(new VersionTwoToVersionThreeMigration(storageRoot))
+                .addMigrations(new VersionThreeToVersionFourMigration())
                 .build();
     }
 
-    private static final Migration MIGRATION_V1_TO_V2 = new Migration(VERSION_ONE, VERSION_TWO) {
+    private static final class VersionOneToVersionTwoMigration extends Migration {
+
+        VersionOneToVersionTwoMigration() {
+            super(VERSION_ONE, VERSION_TWO);
+        }
+
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("CREATE TABLE IF NOT EXISTS `RoomFileTemp` (`file_id` TEXT NOT NULL, `batch_id` TEXT NOT NULL, "
@@ -60,7 +65,7 @@ abstract class RoomAppDatabase extends RoomDatabase {
             database.execSQL("DROP TABLE RoomFile");
             database.execSQL("ALTER TABLE RoomFileTemp RENAME TO RoomFile");
         }
-    };
+    }
 
     private static final class VersionTwoToVersionThreeMigration extends Migration {
 
