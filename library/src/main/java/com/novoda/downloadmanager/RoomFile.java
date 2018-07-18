@@ -32,7 +32,4 @@ class RoomFile {
 
     @ColumnInfo(name = "url")
     String url;
-
-    @ColumnInfo(name = "persistence_type")
-    String persistenceType;
 }
