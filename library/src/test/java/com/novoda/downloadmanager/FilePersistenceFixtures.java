@@ -7,7 +7,6 @@ class FilePersistenceFixtures {
     private FilePersistenceResult filePersistenceResult = FilePersistenceResult.SUCCESS;
     private boolean writeResult = true;
     private long currentSize = 100;
-    private FilePersistenceType filePersistenceType = FilePersistenceType.PATH;
 
     static FilePersistenceFixtures aFilePersistence() {
         return new FilePersistenceFixtures();
@@ -25,11 +24,6 @@ class FilePersistenceFixtures {
 
     FilePersistenceFixtures withCurrentSize(long currentSize) {
         this.currentSize = currentSize;
-        return this;
-    }
-
-    FilePersistenceFixtures withFilePersistenceType(FilePersistenceType filePersistenceType) {
-        this.filePersistenceType = filePersistenceType;
         return this;
     }
 
@@ -63,11 +57,6 @@ class FilePersistenceFixtures {
             @Override
             public void close() {
                 // do nothing.
-            }
-
-            @Override
-            public FilePersistenceType getType() {
-                return filePersistenceType;
             }
         };
     }
