@@ -45,7 +45,10 @@ class FixedRateTimerActionScheduler implements ActionScheduler {
 
     @Override
     public void cancelAll() {
-        timer.cancel();
+        for (Map.Entry<Action, TimerTask> timerTaskEntry : actionTimerTasks.entrySet()) {
+            TimerTask timerTask = timerTaskEntry.getValue();
+            timerTask.cancel();
+        }
         actionTimerTasks.clear();
     }
 

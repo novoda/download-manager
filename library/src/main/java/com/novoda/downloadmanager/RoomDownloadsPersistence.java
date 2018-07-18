@@ -41,6 +41,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
         roomBatch.title = batchPersisted.downloadBatchTitle().asString();
         roomBatch.downloadedDateTimeInMillis = batchPersisted.downloadedDateTimeInMillis();
         roomBatch.notificationSeen = batchPersisted.notificationSeen();
+        roomBatch.storageRoot = batchPersisted.storageRoot();
 
         database.roomBatchDao().insert(roomBatch);
     }
@@ -56,7 +57,8 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
                     DownloadBatchIdCreator.createSanitizedFrom(roomBatch.id),
                     DownloadBatchStatus.Status.from(roomBatch.status),
                     roomBatch.downloadedDateTimeInMillis,
-                    roomBatch.notificationSeen
+                    roomBatch.notificationSeen,
+                    roomBatch.storageRoot
             );
             batchPersistedList.add(batchPersisted);
         }

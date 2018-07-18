@@ -11,4 +11,6 @@ public interface DownloadsBatchPersisted {
     long downloadedDateTimeInMillis();
 
     boolean notificationSeen();
+
+    String storageRoot();
 }

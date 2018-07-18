@@ -363,7 +363,8 @@ class DownloadBatch {
                 downloadBatchStatus.status(),
                 downloadFiles,
                 downloadBatchStatus.downloadedDateTimeInMillis(),
-                downloadBatchStatus.notificationSeen()
+                downloadBatchStatus.notificationSeen(),
+                downloadBatchStatus.storageRoot()
         );
     }
 
@@ -375,7 +376,8 @@ class DownloadBatch {
                 downloadBatchStatus.status(),
                 downloadFiles,
                 downloadBatchStatus.downloadedDateTimeInMillis(),
-                downloadBatchStatus.notificationSeen()
+                downloadBatchStatus.notificationSeen(),
+                downloadBatchStatus.storageRoot()
         );
     }
 
