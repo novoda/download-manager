@@ -20,8 +20,7 @@ class DownloadsFilePersistence {
                         FilePath filePath,
                         FileSize fileSize,
                         String url,
-                        DownloadFileStatus downloadFileStatus,
-                        FilePersistenceType filePersistenceType) {
+                        DownloadFileStatus downloadFileStatus) {
         if (downloadFileStatus.status() == DownloadFileStatus.Status.DELETED) {
             return false;
         }
@@ -30,8 +29,7 @@ class DownloadsFilePersistence {
                 downloadFileStatus.downloadFileId(),
                 filePath,
                 fileSize.totalSize(),
-                url,
-                filePersistenceType
+                url
         );
 
         downloadsPersistence.startTransaction();
@@ -58,7 +56,7 @@ class DownloadsFilePersistence {
             DownloadFileId downloadFileId = filePersisted.downloadFileId();
 
             FilePersistenceCreator filePersistenceCreator = fileOperations.filePersistenceCreator();
-            FilePersistence filePersistence = filePersistenceCreator.create(filePersisted.filePersistenceType());
+            FilePersistence filePersistence = filePersistenceCreator.create();
 
             long currentSize = filePersistence.getCurrentSize(filePersisted.filePath());
             long totalFileSize = filePersisted.totalFileSize();

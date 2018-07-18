@@ -12,5 +12,4 @@ public interface DownloadsFilePersisted {
 
     DownloadFileId downloadFileId();
 
-    FilePersistenceType filePersistenceType();
 }
