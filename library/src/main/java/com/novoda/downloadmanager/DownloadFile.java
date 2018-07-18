@@ -197,8 +197,7 @@ class DownloadFile {
                 filePath,
                 fileSize,
                 url,
-                downloadFileStatus,
-                filePersistence.getType()
+                downloadFileStatus
         );
     }
 

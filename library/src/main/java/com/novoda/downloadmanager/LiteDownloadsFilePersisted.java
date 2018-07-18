@@ -7,20 +7,17 @@ class LiteDownloadsFilePersisted implements DownloadsFilePersisted {
     private final FilePath filePath;
     private final long totalFileSize;
     private final String url;
-    private final FilePersistenceType filePersistenceType;
 
     LiteDownloadsFilePersisted(DownloadBatchId downloadBatchId,
                                DownloadFileId downloadFileId,
                                FilePath filePath,
                                long totalFileSize,
-                               String url,
-                               FilePersistenceType filePersistenceType) {
+                               String url) {
         this.downloadBatchId = downloadBatchId;
         this.downloadFileId = downloadFileId;
         this.filePath = filePath;
         this.totalFileSize = totalFileSize;
         this.url = url;
-        this.filePersistenceType = filePersistenceType;
     }
 
     @Override
@@ -48,8 +45,4 @@ class LiteDownloadsFilePersisted implements DownloadsFilePersisted {
         return downloadFileId;
     }
 
-    @Override
-    public FilePersistenceType filePersistenceType() {
-        return filePersistenceType;
-    }
 }

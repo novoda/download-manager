@@ -42,9 +42,9 @@ public final class DownloadManagerBuilder {
 
     private final Context applicationContext;
     private final Handler callbackHandler;
+    private final FilePersistenceCreator filePersistenceCreator;
     private final StorageRequirementRules storageRequirementRules;
 
-    private FilePersistenceCreator filePersistenceCreator;
     private FileSizeRequester fileSizeRequester;
     private FileDownloaderCreator fileDownloaderCreator;
     private DownloadService downloadService;
@@ -64,7 +64,7 @@ public final class DownloadManagerBuilder {
         Context applicationContext = context.getApplicationContext();
 
         StorageRequirementRules storageRequirementRule = StorageRequirementRules.newInstance();
-        FilePersistenceCreator filePersistenceCreator = FilePersistenceCreator.newPathBasedPersistenceCreator(applicationContext);
+        FilePersistenceCreator filePersistenceCreator = new FilePersistenceCreator(applicationContext);
         FileDownloaderCreator fileDownloaderCreator = FileDownloaderCreator.newNetworkFileDownloaderCreator();
 
         NetworkRequestCreator requestCreator = new NetworkRequestCreator();
@@ -146,11 +146,6 @@ public final class DownloadManagerBuilder {
                                                            Class<? extends FileDownloader> customFileDownloaderClass) {
         this.fileSizeRequester = fileSizeRequester;
         this.fileDownloaderCreator = FileDownloaderCreator.newCustomFileDownloaderCreator(customFileDownloaderClass);
-        return this;
-    }
-
-    public DownloadManagerBuilder withFilePersistenceCustom(Class<? extends FilePersistence> customFilePersistenceClass) {
-        filePersistenceCreator = FilePersistenceCreator.newCustomFilePersistenceCreator(applicationContext, customFilePersistenceClass);
         return this;
     }
 

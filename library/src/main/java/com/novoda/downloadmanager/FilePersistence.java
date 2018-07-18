@@ -18,6 +18,4 @@ public interface FilePersistence {
     long getCurrentSize(FilePath filePath);
 
     void close();
-
-    FilePersistenceType getType();
 }

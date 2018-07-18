@@ -76,7 +76,6 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
         roomFile.url = filePersisted.url();
         roomFile.path = filePersisted.filePath().path();
         roomFile.fileId = filePersisted.downloadFileId().rawId();
-        roomFile.persistenceType = filePersisted.filePersistenceType().toRawValue();
 
         database.roomFileDao().insert(roomFile);
     }
@@ -101,8 +100,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
                     DownloadFileIdCreator.createFrom(roomFile.fileId),
                     new LiteFilePath(roomFile.path),
                     roomFile.totalSize,
-                    roomFile.url,
-                    FilePersistenceType.from(roomFile.persistenceType)
+                    roomFile.url
             );
             filePersistedList.add(filePersisted);
         }
@@ -173,8 +171,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
                     downloadFileId,
                     new LiteFilePath(completedDownloadFile.newFileLocation()),
                     completedDownloadFile.fileSize().totalSize(),
-                    url,
-                    FilePersistenceType.PATH
+                    url
             );
             persistFile(persistedFile);
         }

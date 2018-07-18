@@ -116,9 +116,4 @@ class PathBasedFilePersistence implements FilePersistence {
             Logger.e(e, "Failed to close fileOutputStream.");
         }
     }
-
-    @Override
-    public FilePersistenceType getType() {
-        return FilePersistenceType.PATH;
-    }
 }
