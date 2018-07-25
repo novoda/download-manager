@@ -83,9 +83,9 @@ class LiteDownloadManagerDownloader {
 
     private Wait.ThenPerform.Action<Void> executeDownload(DownloadBatch downloadBatch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         return () -> {
-            downloadBatch.persistAsync();
             InternalDownloadBatchStatus downloadBatchStatus = downloadBatch.status();
             updateStatusToQueuedIfNeeded(downloadBatchStatus);
+            downloadBatch.persistAsync();
             downloadService.download(downloadBatch, downloadBatchCallback(downloadBatchMap));
             return null;
         };
