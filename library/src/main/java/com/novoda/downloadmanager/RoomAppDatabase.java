@@ -59,6 +59,7 @@ abstract class RoomAppDatabase extends RoomDatabase {
                                      + "`file_path` TEXT, `total_size` INTEGER NOT NULL, `url` TEXT, `persistence_type` TEXT, "
                                      + "PRIMARY KEY(`file_id`, `batch_id`), FOREIGN KEY(`batch_id`) "
                                      + "REFERENCES `RoomBatch`(`batch_id`) ON UPDATE NO ACTION ON DELETE CASCADE )");
+            database.execSQL("DROP INDEX IF EXISTS `index_RoomFileTemp_batch_id`");
             database.execSQL("CREATE INDEX IF NOT EXISTS `index_RoomFileTemp_batch_id` ON `RoomFileTemp` (`batch_id`)");
             database.execSQL("INSERT INTO RoomFileTemp (file_id, batch_id, file_path, total_size, url, persistence_type) "
                                      + "SELECT file_id, batch_id, file_path, total_size, url, persistence_type FROM RoomFile");
@@ -94,6 +95,7 @@ abstract class RoomAppDatabase extends RoomDatabase {
                                      + "`file_path` TEXT, `total_size` INTEGER NOT NULL, `url` TEXT, "
                                      + "PRIMARY KEY(`file_id`, `batch_id`), FOREIGN KEY(`batch_id`) "
                                      + "REFERENCES `RoomBatch`(`batch_id`) ON UPDATE NO ACTION ON DELETE CASCADE )");
+            database.execSQL("DROP INDEX IF EXISTS `index_RoomFileTemp_batch_id`");
             database.execSQL("CREATE INDEX IF NOT EXISTS `index_RoomFileTemp_batch_id` ON `RoomFileTemp` (`batch_id`)");
             database.execSQL("INSERT INTO RoomFileTemp (file_id, batch_id, file_path, total_size, url) "
                                      + "SELECT file_id, batch_id, file_path, total_size, url FROM RoomFile");
