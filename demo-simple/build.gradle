@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
     buildToolsVersion "27.0.3"
 
     defaultConfig {
         applicationId "com.novoda.downloadmanager.demo.simple"
         minSdkVersion 14
-        targetSdkVersion 27
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -37,6 +37,6 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation project(path: ':library')
     testImplementation 'junit:junit:4.12'
-    testImplementation 'org.mockito:mockito-core:2.16.0'
-    testImplementation 'com.google.truth:truth:0.39'
+    testImplementation 'org.mockito:mockito-core:2.21.0'
+    testImplementation 'com.google.truth:truth:0.41'
 }
