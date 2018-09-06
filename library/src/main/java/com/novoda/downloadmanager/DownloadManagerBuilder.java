@@ -216,6 +216,8 @@ public final class DownloadManagerBuilder {
         return this;
     }
 
+    // It creates the whole DownloadManager, it is a long process!
+    @SuppressWarnings("PMD.ExcessiveMethodLength")
     public LiteDownloadManagerCommands build() {
         if (logHandle.isPresent()) {
             Logger.attach(logHandle.get());
