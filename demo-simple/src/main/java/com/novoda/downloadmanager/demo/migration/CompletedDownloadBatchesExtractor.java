@@ -3,6 +3,7 @@ package com.novoda.downloadmanager.demo.migration;
 import android.database.Cursor;
 
 import com.novoda.downloadmanager.CompletedDownloadBatch;
+import com.novoda.downloadmanager.CompletedDownloadFile;
 import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchTitle;
@@ -76,7 +77,7 @@ class CompletedDownloadBatchesExtractor {
                 String batchTitle = batchesCursor.getString(TITLE_COLUMN);
                 long downloadedDateTimeInMillis = batchesCursor.getLong(MODIFIED_TIMESTAMP_COLUMN);
 
-                List<CompletedDownloadBatch.CompletedDownloadFile> downloadFiles = new ArrayList<>();
+                List<CompletedDownloadFile> downloadFiles = new ArrayList<>();
                 Set<String> uris = new HashSet<>();
                 Set<String> fileIds = new HashSet<>();
 
@@ -114,7 +115,7 @@ class CompletedDownloadBatchesExtractor {
 
                         FileSize fileSize = FileSizeCreator.createForCompletedDownloadBatch(rawFileSize);
 
-                        CompletedDownloadBatch.CompletedDownloadFile downloadFile = new CompletedDownloadBatch.CompletedDownloadFile(
+                        CompletedDownloadFile downloadFile = new CompletedDownloadFile(
                                 originalFileId,
                                 originalFileLocation,
                                 newFilePath.path(),

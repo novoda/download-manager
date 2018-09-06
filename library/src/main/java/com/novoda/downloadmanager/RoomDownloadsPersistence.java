@@ -160,7 +160,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
         );
         persistBatch(persistedBatch);
 
-        for (CompletedDownloadBatch.CompletedDownloadFile completedDownloadFile : completedDownloadBatch.completedDownloadFiles()) {
+        for (CompletedDownloadFile completedDownloadFile : completedDownloadBatch.completedDownloadFiles()) {
             String url = completedDownloadFile.originalNetworkAddress();
 
             String rawDownloadFileId = rawFileIdFrom(completedDownloadBatch.downloadBatchTitle(), completedDownloadFile);
@@ -177,7 +177,7 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
         }
     }
 
-    private String rawFileIdFrom(DownloadBatchTitle batch, CompletedDownloadBatch.CompletedDownloadFile completedDownloadFile) {
+    private String rawFileIdFrom(DownloadBatchTitle batch, CompletedDownloadFile completedDownloadFile) {
         if (completedDownloadFile.fileId() == null || completedDownloadFile.fileId().isEmpty()) {
             return batch.asString() + UUID.randomUUID();
         } else {

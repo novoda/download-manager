@@ -5,6 +5,7 @@ import android.database.Cursor;
 import com.google.common.truth.Truth;
 import com.novoda.downloadmanager.Batch;
 import com.novoda.downloadmanager.CompletedDownloadBatch;
+import com.novoda.downloadmanager.CompletedDownloadFile;
 import com.novoda.downloadmanager.DownloadBatchIdCreator;
 import com.novoda.downloadmanager.DownloadBatchTitleCreator;
 import com.novoda.downloadmanager.DownloadFileIdCreator;
@@ -92,9 +93,9 @@ public class CompletedDownloadBatchesExtractorTest {
                 .downloadFrom(secondUri).withIdentifier(DownloadFileIdCreator.createFrom("file_2")).apply()
                 .build();
 
-        List<CompletedDownloadBatch.CompletedDownloadFile> firstFileMetadata = new ArrayList<>();
-        firstFileMetadata.add(new CompletedDownloadBatch.CompletedDownloadFile("file_1", "base/data_1", "base/-1274506706/data_1", FileSizeCreator.createForCompletedDownloadBatch(1000), firstUri));
-        firstFileMetadata.add(new CompletedDownloadBatch.CompletedDownloadFile("file_2", "base/data_2-1", "base/-1274506706/data_2", FileSizeCreator.createForCompletedDownloadBatch(2000), secondUri));
+        List<CompletedDownloadFile> firstFileMetadata = new ArrayList<>();
+        firstFileMetadata.add(new CompletedDownloadFile("file_1", "base/data_1", "base/-1274506706/data_1", FileSizeCreator.createForCompletedDownloadBatch(1000), firstUri));
+        firstFileMetadata.add(new CompletedDownloadFile("file_2", "base/data_2-1", "base/-1274506706/data_2", FileSizeCreator.createForCompletedDownloadBatch(2000), secondUri));
 
         String thirdUri = "uri_3";
         String fourthUri = "uri_4";
@@ -103,9 +104,9 @@ public class CompletedDownloadBatchesExtractorTest {
                 .downloadFrom(fourthUri).withIdentifier(DownloadFileIdCreator.createFrom("file_4")).apply()
                 .build();
 
-        List<CompletedDownloadBatch.CompletedDownloadFile> secondFileMetadata = new ArrayList<>();
-        secondFileMetadata.add(new CompletedDownloadBatch.CompletedDownloadFile("file_3", "base/data_3-1", "base/-1274506704/data_3", FileSizeCreator.createForCompletedDownloadBatch(500), thirdUri));
-        secondFileMetadata.add(new CompletedDownloadBatch.CompletedDownloadFile("file_4", "base/data_4", "base/-1274506704/data_4", FileSizeCreator.createForCompletedDownloadBatch(750), fourthUri));
+        List<CompletedDownloadFile> secondFileMetadata = new ArrayList<>();
+        secondFileMetadata.add(new CompletedDownloadFile("file_3", "base/data_3-1", "base/-1274506704/data_3", FileSizeCreator.createForCompletedDownloadBatch(500), thirdUri));
+        secondFileMetadata.add(new CompletedDownloadFile("file_4", "base/data_4", "base/-1274506704/data_4", FileSizeCreator.createForCompletedDownloadBatch(750), fourthUri));
 
         return Arrays.asList(
                 new CompletedDownloadBatch(firstBatch.downloadBatchId(), DownloadBatchTitleCreator.createFrom(firstBatch), 12345, firstFileMetadata, STORAGE_ROOT),
