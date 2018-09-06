@@ -42,6 +42,8 @@ class DownloadFile {
         this.downloadsFilePersistence = downloadsFilePersistence;
     }
 
+    // This ia complex because we have to constantly check states and perform updates.
+    @SuppressWarnings("PMD.NPathComplexity")
     void download(Callback callback) {
         downloadFileStatus.markAsDownloading();
 
