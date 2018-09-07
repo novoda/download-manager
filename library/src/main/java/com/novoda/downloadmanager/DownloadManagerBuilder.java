@@ -27,11 +27,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETING;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.*;
 
 @SuppressWarnings("PMD.ExcessiveImports")
 public final class DownloadManagerBuilder {
@@ -216,6 +212,8 @@ public final class DownloadManagerBuilder {
         return this;
     }
 
+    // It creates the whole DownloadManager, it is a long process!
+    @SuppressWarnings("PMD.ExcessiveMethodLength")
     public LiteDownloadManagerCommands build() {
         if (logHandle.isPresent()) {
             Logger.attach(logHandle.get());
