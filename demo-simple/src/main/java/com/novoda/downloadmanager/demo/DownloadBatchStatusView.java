@@ -12,7 +12,7 @@ import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 
 public class DownloadBatchStatusView extends ConstraintLayout {
 
-    private TextView downloadBatchStatusView;
+    private TextView statusTextView;
 
     private DownloadBatchStatusListener downloadBatchStatusListener = DownloadBatchStatusListener.NO_OP;
 
@@ -25,7 +25,7 @@ public class DownloadBatchStatusView extends ConstraintLayout {
         super.onFinishInflate();
         View.inflate(getContext(), R.layout.merge_download_batch_status, this);
 
-        downloadBatchStatusView = findViewById(R.id.download_batch_status);
+        statusTextView = findViewById(R.id.download_batch_status);
 
         findViewById(R.id.button_pause_downloading).setOnClickListener(view -> downloadBatchStatusListener.onBatchPaused());
         findViewById(R.id.button_resume_downloading).setOnClickListener(view -> downloadBatchStatusListener.onBatchResumed());
@@ -36,7 +36,7 @@ public class DownloadBatchStatusView extends ConstraintLayout {
     }
 
     public void update(DownloadBatchStatus downloadBatchStatus) {
-        downloadBatchStatusView.setText(createMessageFrom(downloadBatchStatus));
+        statusTextView.setText(createMessageFrom(downloadBatchStatus));
     }
 
     private String createMessageFrom(DownloadBatchStatus downloadBatchStatus) {
