@@ -14,7 +14,6 @@
   <string name="batch_status_one">Batch Status</string>
   <string name="migration">Migration</string>
   <string name="downloads">Downloads</string>
-  <string name="re_queue">Re-queue</string>
 
   <string-array name="file_sizes">
     <item>10MB</item>
