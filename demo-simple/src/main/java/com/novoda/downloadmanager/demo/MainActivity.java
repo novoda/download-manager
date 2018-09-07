@@ -1,16 +1,11 @@
 package com.novoda.downloadmanager.demo;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.novoda.downloadmanager.AllBatchStatusesCallback;
 import com.novoda.downloadmanager.Batch;
@@ -24,12 +19,8 @@ import com.novoda.downloadmanager.DownloadFileIdCreator;
 import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.StorageRoot;
 import com.novoda.downloadmanager.StorageRootFactory;
-import com.novoda.downloadmanager.demo.migration.MigrationJob;
 
 import java.io.File;
-import java.util.concurrent.Executors;
-
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 
 // Need to extract collaborators for this demo to reduce complexity. GH Issue #286
 @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.StdCyclomaticComplexity", "PMD.ModifiedCyclomaticComplexity"})
@@ -44,41 +35,50 @@ public class MainActivity extends AppCompatActivity {
     private static final String TEN_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/10MB.zip";
     private static final String TWENTY_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/20MB.zip";
 
-    private TextView databaseCloningUpdates;
-    private TextView versionOneMigrationStatus;
-    private TextView textViewBatch1;
-    private TextView textViewBatch2;
+    private DownloadBatchStatusView downloadBatchStatusViewOne;
+    private DownloadBatchStatusView downloadBatchStatusViewTwo;
+
     private LiteDownloadManagerCommands liteDownloadManagerCommands;
-    private VersionOneDatabaseCloner versionOneDatabaseCloner;
-    private Spinner downloadFileSizeSpinner;
-    private MigrationJob migrationJob;
     private StorageRoot primaryStorageWithDownloadsSubpackage;
-    private StorageRoot primaryStorageWithPicturesSubpackage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        textViewBatch1 = findViewById(R.id.batch_1);
-        textViewBatch2 = findViewById(R.id.batch_2);
+        DemoApplication demoApplication = (DemoApplication) getApplicationContext();
+        liteDownloadManagerCommands = demoApplication.getLiteDownloadManagerCommands();
+        liteDownloadManagerCommands.addDownloadBatchCallback(callback);
+        liteDownloadManagerCommands.getAllDownloadBatchStatuses(batchStatusesCallback);
 
-        versionOneDatabaseCloner = DatabaseClonerFactory.databaseCloner(this, cloneCallback);
+        downloadBatchStatusViewOne = findViewById(R.id.batch_1);
+        downloadBatchStatusViewTwo = findViewById(R.id.batch_2);
 
-        downloadFileSizeSpinner = findViewById(R.id.database_download_file_size);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.file_sizes, android.R.layout.simple_spinner_item);
-        downloadFileSizeSpinner.setAdapter(adapter);
+        downloadBatchStatusViewOne.setListener(new DownloadBatchStatusView.DownloadBatchStatusListener() {
+            @Override
+            public void onBatchPaused() {
+                liteDownloadManagerCommands.pause(BATCH_ID_1);
+            }
+
+            @Override
+            public void onBatchResumed() {
+                liteDownloadManagerCommands.resume(BATCH_ID_1);
+            }
+        });
+
+        downloadBatchStatusViewTwo.setListener(new DownloadBatchStatusView.DownloadBatchStatusListener() {
+            @Override
+            public void onBatchPaused() {
+                liteDownloadManagerCommands.pause(BATCH_ID_2);
+            }
+
+            @Override
+            public void onBatchResumed() {
+                liteDownloadManagerCommands.resume(BATCH_ID_2);
+            }
+        });
 
         primaryStorageWithDownloadsSubpackage = StorageRootFactory.createPrimaryStorageDownloadsDirectoryRoot(getApplicationContext());
-        primaryStorageWithPicturesSubpackage = new PrimaryStoragePicturesDirectoryRoot(getApplicationContext());
-
-        databaseCloningUpdates = findViewById(R.id.database_cloning_updates);
-        View buttonCreateDB = findViewById(R.id.button_create_v1_db);
-        buttonCreateDB.setOnClickListener(createDatabaseOnClick);
-
-        versionOneMigrationStatus = findViewById(R.id.database_migration_updates);
-        View buttonMigrate = findViewById(R.id.button_migrate);
-        buttonMigrate.setOnClickListener(startMigrationOnClick);
 
         CheckBox checkWifiOnly = findViewById(R.id.check_wifi_only);
         checkWifiOnly.setOnCheckedChangeListener(wifiOnlyOnCheckedChange);
@@ -91,36 +91,7 @@ public class MainActivity extends AppCompatActivity {
 
         View buttonLogFileDirectory = findViewById(R.id.button_log_file_directory);
         buttonLogFileDirectory.setOnClickListener(logFileDirectoryOnClick);
-
-        View buttonLogDownloadFileStatus = findViewById(R.id.button_log_download_file_status);
-        buttonLogDownloadFileStatus.setOnClickListener(logDownloadFileStatusOnClick);
-
-        DemoApplication demoApplication = (DemoApplication) getApplicationContext();
-        liteDownloadManagerCommands = demoApplication.getLiteDownloadManagerCommands();
-        liteDownloadManagerCommands.addDownloadBatchCallback(callback);
-        liteDownloadManagerCommands.getAllDownloadBatchStatuses(batchStatusesCallback);
-
-        Handler migrationCallbackHandler = new Handler(Looper.getMainLooper());
-        migrationJob = new MigrationJob(
-                getDatabasePath("downloads.db"),
-                primaryStorageWithDownloadsSubpackage,
-                primaryStorageWithPicturesSubpackage,
-                liteDownloadManagerCommands,
-                migrationCallbackHandler,
-                migrationJobCallback
-        );
-
-        bindBatchViews();
     }
-
-    private final VersionOneDatabaseCloner.CloneCallback cloneCallback = updateMessage -> databaseCloningUpdates.setText(updateMessage);
-
-    private final View.OnClickListener createDatabaseOnClick = v -> {
-        String selectedFileSize = (String) downloadFileSizeSpinner.getSelectedItem();
-        versionOneDatabaseCloner.cloneDatabaseWithDownloadSize(selectedFileSize);
-    };
-
-    private final View.OnClickListener startMigrationOnClick = v -> Executors.newSingleThreadExecutor().submit(migrationJob);
 
     private final CompoundButton.OnCheckedChangeListener wifiOnlyOnCheckedChange = (buttonView, isChecked) -> {
         LiteDownloadManagerCommands downloadManagerCommands = ((DemoApplication) getApplication()).getLiteDownloadManagerCommands();
@@ -168,58 +139,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private final View.OnClickListener logDownloadFileStatusOnClick = v -> liteDownloadManagerCommands.getDownloadFileStatusWithMatching(
-            BATCH_ID_1, FILE_ID_1,
-            downloadFileStatus -> Log.d(TAG, "FileStatus: " + downloadFileStatus)
-    );
-
     private final DownloadBatchStatusCallback callback = downloadBatchStatus -> {
-        String status = getStatusMessage(downloadBatchStatus);
-
-        String message = "Batch " + downloadBatchStatus.getDownloadBatchTitle().asString()
-                + "\ndownloaded: " + downloadBatchStatus.percentageDownloaded() + "%"
-                + "\nbytes: " + downloadBatchStatus.bytesDownloaded()
-                + "\ntotal: " + downloadBatchStatus.bytesTotalSize()
-                + status
-                + "\n";
-
         DownloadBatchId downloadBatchId = downloadBatchStatus.getDownloadBatchId();
         if (downloadBatchId.equals(BATCH_ID_1)) {
-            textViewBatch1.setText(message);
+            downloadBatchStatusViewOne.update(downloadBatchStatus);
         } else if (downloadBatchId.equals(BATCH_ID_2)) {
-            textViewBatch2.setText(message);
+            downloadBatchStatusViewTwo.update(downloadBatchStatus);
         }
     };
-
-    private String getStatusMessage(DownloadBatchStatus downloadBatchStatus) {
-        if (downloadBatchStatus.status() == ERROR) {
-            return "\nstatus: " + downloadBatchStatus.status()
-                    + " - " + downloadBatchStatus.downloadError().type();
-        } else {
-            return "\nstatus: " + downloadBatchStatus.status();
-        }
-    }
 
     private final AllBatchStatusesCallback batchStatusesCallback = downloadBatchStatuses -> {
         for (DownloadBatchStatus downloadBatchStatus : downloadBatchStatuses) {
             callback.onUpdate(downloadBatchStatus);
         }
     };
-
-    private final MigrationJob.MigrationJobCallback migrationJobCallback = message -> versionOneMigrationStatus.setText(message);
-
-    private void bindBatchViews() {
-        View buttonPauseDownload1 = findViewById(R.id.button_pause_downloading_1);
-        buttonPauseDownload1.setOnClickListener(v -> liteDownloadManagerCommands.pause(BATCH_ID_1));
-
-        View buttonPauseDownload2 = findViewById(R.id.button_pause_downloading_2);
-        buttonPauseDownload2.setOnClickListener(v -> liteDownloadManagerCommands.pause(BATCH_ID_2));
-
-        View buttonResumeDownload1 = findViewById(R.id.button_resume_downloading_1);
-        buttonResumeDownload1.setOnClickListener(v -> liteDownloadManagerCommands.resume(BATCH_ID_1));
-
-        View buttonResumeDownload2 = findViewById(R.id.button_resume_downloading_2);
-        buttonResumeDownload2.setOnClickListener(v -> liteDownloadManagerCommands.resume(BATCH_ID_2));
-    }
 
 }
