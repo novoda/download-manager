@@ -9,6 +9,22 @@ public class FilePathCreatorTest {
     private static final String BASE_PATH = "/data/data/com.novoda.downloadmanager.demo.simple/files/";
 
     @Test
+    public void returnsFilePath() {
+        FilePath filePath = FilePathCreator.create("foo/bar/10MB.zip");
+
+        String expectedAbsolutePath = "foo/bar/10MB.zip";
+        assertThat(filePath).isEqualTo(new LiteFilePath(expectedAbsolutePath));
+    }
+
+    @Test
+    public void returnsUnknownFilePath() {
+        FilePath filePath = FilePathCreator.unknownFilePath();
+
+        String expectedAbsolutePath = "unknown";
+        assertThat(filePath).isEqualTo(new LiteFilePath(expectedAbsolutePath));
+    }
+
+    @Test
     public void returnsFilePath_whenAssetUrlOnlyContainsFileName() {
         String assetUrl = "10MB.zip";
 

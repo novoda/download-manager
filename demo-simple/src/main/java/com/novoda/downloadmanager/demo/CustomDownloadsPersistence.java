@@ -2,6 +2,7 @@ package com.novoda.downloadmanager.demo;
 
 import android.util.Log;
 
+import com.novoda.downloadmanager.CompletedDownloadBatch;
 import com.novoda.downloadmanager.DownloadBatchId;
 import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.DownloadsBatchPersisted;
@@ -74,5 +75,10 @@ public class CustomDownloadsPersistence implements DownloadsPersistence {
     public boolean update(DownloadBatchId downloadBatchId, boolean notificationSeen) {
         Log.v(TAG, "update batch id: " + downloadBatchId.rawId() + " with notificationSeen: " + notificationSeen);
         return true;
+    }
+
+    @Override
+    public void persistCompletedBatch(CompletedDownloadBatch completedDownloadBatch) {
+        Log.v(TAG, "Persist completed batch id: " + completedDownloadBatch.downloadBatchId());
     }
 }

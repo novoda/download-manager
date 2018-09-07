@@ -34,4 +34,6 @@ public interface LiteDownloadManagerCommands {
 
     void updateAllowedConnectionType(ConnectionType allowedConnectionType);
 
+    @WorkerThread
+    boolean addCompletedBatch(CompletedDownloadBatch completedDownloadBatch);
 }

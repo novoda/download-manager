@@ -16,4 +16,8 @@ public final class FileSizeCreator {
     public static FileSize createFromTotalSize(long totalFileSize) {
         return new LiteFileSize(ZERO_BYTES, totalFileSize);
     }
+
+    public static FileSize createForCompletedDownloadBatch(long totalFileSize) {
+        return new LiteFileSize(totalFileSize, totalFileSize);
+    }
 }

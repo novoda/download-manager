@@ -1,15 +1,23 @@
-package com.novoda.downloadmanager;
+package com.novoda.downloadmanager.demo.migration;
 
 import android.database.Cursor;
+
+import com.novoda.downloadmanager.Batch;
+import com.novoda.downloadmanager.BatchBuilder;
+import com.novoda.downloadmanager.DownloadBatchId;
+import com.novoda.downloadmanager.DownloadBatchIdCreator;
+import com.novoda.downloadmanager.DownloadFileIdCreator;
+import com.novoda.downloadmanager.SqlDatabaseWrapper;
+import com.novoda.downloadmanager.StorageRoot;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-class PartialDownloadMigrationExtractor {
+class PartialDownloadBatchesExtractor {
 
-    private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title, batches.last_modified_timestamp "
+    private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title "
             + "FROM batches INNER JOIN DownloadsByBatch ON DownloadsByBatch.batch_id = batches._id "
             + "WHERE DownloadsByBatch.batch_total_bytes != DownloadsByBatch.batch_current_bytes "
             + "OR DownloadsByBatch._data IS NULL "
@@ -17,7 +25,6 @@ class PartialDownloadMigrationExtractor {
 
     private static final int BATCH_ID_COLUMN = 0;
     private static final int TITLE_COLUMN = 1;
-    private static final int MODIFIED_TIMESTAMP_COLUMN = 2;
 
     private static final String DOWNLOADS_QUERY = "SELECT uri, notificationextras, hint FROM Downloads WHERE batch_id = ?";
     private static final int URI_COLUMN = 0;
@@ -25,40 +32,39 @@ class PartialDownloadMigrationExtractor {
     private static final int FILE_LOCATION_COLUMN = 2;
 
     private final SqlDatabaseWrapper database;
-    private final String basePath;
+    private final StorageRoot storageRoot;
 
-    PartialDownloadMigrationExtractor(SqlDatabaseWrapper database, String basePath) {
+    PartialDownloadBatchesExtractor(SqlDatabaseWrapper database, StorageRoot storageRoot) {
         this.database = database;
-        this.basePath = basePath;
+        this.storageRoot = storageRoot;
     }
 
-    List<Migration> extractMigrations() {
+    List<VersionOnePartialDownloadBatch> extractMigrations() {
         Cursor batchesCursor = database.rawQuery(BATCHES_QUERY);
 
-        List<Migration> migrations = new ArrayList<>();
+        List<VersionOnePartialDownloadBatch> partialMigrations = new ArrayList<>();
         while (batchesCursor.moveToNext()) {
 
             String batchId = batchesCursor.getString(BATCH_ID_COLUMN);
             String batchTitle = batchesCursor.getString(TITLE_COLUMN);
-            long downloadedDateTimeInMillis = batchesCursor.getLong(MODIFIED_TIMESTAMP_COLUMN);
 
             Cursor downloadsCursor = database.rawQuery(DOWNLOADS_QUERY, batchId);
             BatchBuilder newBatchBuilder = null;
-            List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
             Set<String> uris = new HashSet<>();
             Set<String> fileIds = new HashSet<>();
 
-            DownloadBatchId downloadBatchId = null;
+            DownloadBatchId downloadBatchId;
+            List<String> originalFileLocations = new ArrayList<>();
             while (downloadsCursor.moveToNext()) {
                 String originalFileId = downloadsCursor.getString(FILE_ID_COLUMN);
                 String uri = downloadsCursor.getString(URI_COLUMN);
                 String originalFileLocation = downloadsCursor.getString(FILE_LOCATION_COLUMN);
                 String sanitizedOriginalFileLocation = MigrationStoragePathSanitizer.sanitize(originalFileLocation);
-                FilePath originalFilePath = new LiteFilePath(sanitizedOriginalFileLocation);
+                originalFileLocations.add(sanitizedOriginalFileLocation);
 
                 if (downloadsCursor.isFirst()) {
                     downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
-                    newBatchBuilder = Batch.with(StorageRootFactory.createMissingStorageRoot(), downloadBatchId, batchTitle);
+                    newBatchBuilder = Batch.with(storageRoot, downloadBatchId, batchTitle);
                 }
 
                 if (uris.contains(uri) && fileIds.contains(originalFileId)) {
@@ -76,25 +82,14 @@ class PartialDownloadMigrationExtractor {
                             .withIdentifier(DownloadFileIdCreator.createFrom(originalFileId))
                             .apply();
                 }
-
-                FilePath newFilePath = MigrationPathExtractor.extractMigrationPath(basePath, originalFilePath.path(), downloadBatchId);
-
-                Migration.FileMetadata fileMetadata = new Migration.FileMetadata(
-                        originalFileId,
-                        originalFilePath,
-                        newFilePath,
-                        FileSizeCreator.unknownFileSize(),
-                        uri
-                );
-                fileMetadataList.add(fileMetadata);
             }
             downloadsCursor.close();
 
             Batch batch = newBatchBuilder.build();
-            migrations.add(new Migration(batch, fileMetadataList, downloadedDateTimeInMillis, Migration.Type.PARTIAL));
+            partialMigrations.add(new VersionOnePartialDownloadBatch(batch, originalFileLocations));
         }
         batchesCursor.close();
-        return migrations;
+        return partialMigrations;
     }
 
     private DownloadBatchId createDownloadBatchIdFrom(String originalFileId, String batchId) {

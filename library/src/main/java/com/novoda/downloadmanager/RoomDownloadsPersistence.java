@@ -4,9 +4,11 @@ import android.content.Context;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 final class RoomDownloadsPersistence implements DownloadsPersistence {
 
+    private static final boolean NOTIFICATION_SEEN = true;
     private final RoomAppDatabase database;
 
     static RoomDownloadsPersistence newInstance(Context context) {
@@ -138,5 +140,48 @@ final class RoomDownloadsPersistence implements DownloadsPersistence {
         roomBatch.notificationSeen = notificationSeen;
         database.roomBatchDao().update(roomBatch);
         return true;
+    }
+
+    @Override
+    public void persistCompletedBatch(CompletedDownloadBatch completedDownloadBatch) {
+        DownloadBatchId downloadBatchId = completedDownloadBatch.downloadBatchId();
+        DownloadBatchTitle downloadBatchTitle = completedDownloadBatch.downloadBatchTitle();
+        DownloadBatchStatus.Status downloadBatchStatus = DownloadBatchStatus.Status.DOWNLOADED;
+        long downloadedDateTimeInMillis = completedDownloadBatch.downloadedDateTimeInMillis();
+        StorageRoot storageRoot = completedDownloadBatch.storageRoot();
+
+        DownloadsBatchPersisted persistedBatch = new LiteDownloadsBatchPersisted(
+                downloadBatchTitle,
+                downloadBatchId,
+                downloadBatchStatus,
+                downloadedDateTimeInMillis,
+                NOTIFICATION_SEEN,
+                storageRoot.path()
+        );
+        persistBatch(persistedBatch);
+
+        for (CompletedDownloadFile completedDownloadFile : completedDownloadBatch.completedDownloadFiles()) {
+            String url = completedDownloadFile.originalNetworkAddress();
+
+            String rawDownloadFileId = rawFileIdFrom(completedDownloadBatch.downloadBatchTitle(), completedDownloadFile);
+            DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(rawDownloadFileId);
+
+            DownloadsFilePersisted persistedFile = new LiteDownloadsFilePersisted(
+                    downloadBatchId,
+                    downloadFileId,
+                    new LiteFilePath(completedDownloadFile.newFileLocation()),
+                    completedDownloadFile.fileSize().totalSize(),
+                    url
+            );
+            persistFile(persistedFile);
+        }
+    }
+
+    private String rawFileIdFrom(DownloadBatchTitle batch, CompletedDownloadFile completedDownloadFile) {
+        if (completedDownloadFile.fileId() == null || completedDownloadFile.fileId().isEmpty()) {
+            return batch.asString() + UUID.randomUUID();
+        } else {
+            return completedDownloadFile.fileId();
+        }
     }
 }

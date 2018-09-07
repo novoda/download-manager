@@ -216,4 +216,19 @@ class DownloadManager implements LiteDownloadManagerCommands {
         }
     }
 
+    @WorkerThread
+    @Override
+    public boolean addCompletedBatch(CompletedDownloadBatch completedDownloadBatch) throws IllegalArgumentException {
+        if (alreadyContainsBatch(completedDownloadBatch)) {
+            Logger.w("CompletedDownloadBatch with id: " + completedDownloadBatch.downloadBatchId() + " already exists.");
+            return false;
+        }
+
+        return downloader.addCompletedBatch(completedDownloadBatch, downloadBatchMap);
+    }
+
+    private boolean alreadyContainsBatch(CompletedDownloadBatch completedDownloadBatch) {
+        return downloadBatchMap.containsKey(completedDownloadBatch.downloadBatchId());
+    }
+
 }

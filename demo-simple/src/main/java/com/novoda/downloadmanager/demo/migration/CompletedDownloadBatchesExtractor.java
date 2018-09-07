@@ -1,6 +1,19 @@
-package com.novoda.downloadmanager;
+package com.novoda.downloadmanager.demo.migration;
 
 import android.database.Cursor;
+
+import com.novoda.downloadmanager.CompletedDownloadBatch;
+import com.novoda.downloadmanager.CompletedDownloadFile;
+import com.novoda.downloadmanager.DownloadBatchId;
+import com.novoda.downloadmanager.DownloadBatchIdCreator;
+import com.novoda.downloadmanager.DownloadBatchTitle;
+import com.novoda.downloadmanager.DownloadBatchTitleCreator;
+import com.novoda.downloadmanager.FilePath;
+import com.novoda.downloadmanager.FileSize;
+import com.novoda.downloadmanager.FileSizeCreator;
+import com.novoda.downloadmanager.FileSizeExtractor;
+import com.novoda.downloadmanager.SqlDatabaseWrapper;
+import com.novoda.downloadmanager.StorageRoot;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,7 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-class MigrationExtractor {
+class CompletedDownloadBatchesExtractor {
 
     private static final String BATCHES_QUERY = "SELECT batches._id, batches.batch_title, batches.last_modified_timestamp FROM "
             + "batches INNER JOIN DownloadsByBatch ON DownloadsByBatch.batch_id = batches._id "
@@ -28,19 +41,22 @@ class MigrationExtractor {
     private static final int FILE_UNIQUE_LOCATION_COLUMN = 2;
     private static final int FILE_ID_COLUMN = 3;
 
-    private final StorageRoot storageRoot;
     private final SqlDatabaseWrapper database;
-    private final FilePersistence filePersistence;
     private final String basePath;
+    private final FileSizeExtractor fileSizeExtractor;
+    private final StorageRoot primaryStorageWithDownloadsSubpackage;
 
-    MigrationExtractor(StorageRoot storageRoot, SqlDatabaseWrapper database, FilePersistence filePersistence, String basePath) {
-        this.storageRoot = storageRoot;
+    CompletedDownloadBatchesExtractor(SqlDatabaseWrapper database,
+                                      String basePath,
+                                      FileSizeExtractor fileSizeExtractor,
+                                      StorageRoot primaryStorageWithDownloadsSubpackage) {
         this.database = database;
-        this.filePersistence = filePersistence;
         this.basePath = basePath;
+        this.fileSizeExtractor = fileSizeExtractor;
+        this.primaryStorageWithDownloadsSubpackage = primaryStorageWithDownloadsSubpackage;
     }
 
-    List<Migration> extractMigrations() {
+    List<CompletedDownloadBatch> extractMigrations() {
         Cursor batchesCursor = database.rawQuery(BATCHES_QUERY);
 
         if (batchesCursor == null) {
@@ -48,7 +64,7 @@ class MigrationExtractor {
         }
 
         try {
-            List<Migration> migrations = new ArrayList<>();
+            List<CompletedDownloadBatch> completedDownloadBatches = new ArrayList<>();
 
             while (batchesCursor.moveToNext()) {
                 String batchId = batchesCursor.getString(BATCH_ID_COLUMN);
@@ -61,8 +77,7 @@ class MigrationExtractor {
                 String batchTitle = batchesCursor.getString(TITLE_COLUMN);
                 long downloadedDateTimeInMillis = batchesCursor.getLong(MODIFIED_TIMESTAMP_COLUMN);
 
-                BatchBuilder newBatchBuilder = null;
-                List<Migration.FileMetadata> fileMetadataList = new ArrayList<>();
+                List<CompletedDownloadFile> downloadFiles = new ArrayList<>();
                 Set<String> uris = new HashSet<>();
                 Set<String> fileIds = new HashSet<>();
 
@@ -81,7 +96,6 @@ class MigrationExtractor {
 
                         if (downloadsCursor.isFirst()) {
                             downloadBatchId = createDownloadBatchIdFrom(originalFileId, batchId);
-                            newBatchBuilder = Batch.with(storageRoot, downloadBatchId, batchTitle);
                         }
 
                         if (uris.contains(originalNetworkAddress) && fileIds.contains(originalFileId)) {
@@ -91,39 +105,41 @@ class MigrationExtractor {
                             fileIds.add(originalFileId);
                         }
 
-                        if (originalFileId == null) {
-                            newBatchBuilder.downloadFrom(originalNetworkAddress)
-                                    .apply();
-                        } else {
-                            newBatchBuilder.downloadFrom(originalNetworkAddress)
-                                    .withIdentifier(DownloadFileIdCreator.createFrom(originalFileId))
-                                    .apply();
-                        }
+                        FilePath newFilePath = MigrationPathExtractor.extractMigrationPath(
+                                basePath,
+                                sanitizedOriginalUniqueFileLocation,
+                                downloadBatchId
+                        );
 
-                        String rawNewFilePath = new LiteFilePath(sanitizedOriginalUniqueFileLocation).path();
-                        FilePath newFilePath = MigrationPathExtractor.extractMigrationPath(basePath, rawNewFilePath, downloadBatchId);
+                        long rawFileSize = fileSizeExtractor.fileSizeFor(originalFileLocation);
 
-                        FilePath originalFilePath = new LiteFilePath(originalFileLocation);
-                        long rawFileSize = filePersistence.getCurrentSize(originalFilePath);
-                        FileSize fileSize = new LiteFileSize(rawFileSize, rawFileSize);
-                        Migration.FileMetadata fileMetadata = new Migration.FileMetadata(
+                        FileSize fileSize = FileSizeCreator.createForCompletedDownloadBatch(rawFileSize);
+
+                        CompletedDownloadFile downloadFile = new CompletedDownloadFile(
                                 originalFileId,
-                                originalFilePath,
-                                newFilePath,
+                                originalFileLocation,
+                                newFilePath.path(),
                                 fileSize,
                                 originalNetworkAddress
                         );
-                        fileMetadataList.add(fileMetadata);
+                        downloadFiles.add(downloadFile);
                     }
                 } finally {
                     downloadsCursor.close();
                 }
 
-                Batch batch = newBatchBuilder.build();
-                migrations.add(new Migration(batch, fileMetadataList, downloadedDateTimeInMillis, Migration.Type.COMPLETE));
+                DownloadBatchTitle downloadBatchTitle = DownloadBatchTitleCreator.createFrom(batchTitle);
+                CompletedDownloadBatch completedDownloadBatch = new CompletedDownloadBatch(
+                        downloadBatchId,
+                        downloadBatchTitle,
+                        downloadedDateTimeInMillis,
+                        downloadFiles,
+                        primaryStorageWithDownloadsSubpackage
+                );
+                completedDownloadBatches.add(completedDownloadBatch);
             }
 
-            return migrations;
+            return completedDownloadBatches;
         } finally {
             batchesCursor.close();
         }
