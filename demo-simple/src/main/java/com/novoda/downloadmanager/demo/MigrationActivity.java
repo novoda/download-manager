@@ -77,5 +77,7 @@ public class MigrationActivity extends AppCompatActivity {
         databaseMigrationUpdates.setText(migrationStatus.status().toRawValue());
     };
 
-    private final View.OnClickListener startMigrationOnClick = v -> downloadMigrator.startMigration("migrationJob", getDatabasePath("downloads.db"), V1_BASE_PATH);
+    private final View.OnClickListener startMigrationOnClick = v -> {
+        downloadMigrator.startMigration("migrationJob", getDatabasePath("downloads.db"), V1_BASE_PATH);
+    };
 }
