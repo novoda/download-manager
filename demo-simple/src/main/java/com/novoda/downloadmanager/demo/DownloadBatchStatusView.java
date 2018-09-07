@@ -14,7 +14,7 @@ public class DownloadBatchStatusView extends ConstraintLayout {
 
     private TextView downloadBatchStatusView;
 
-    private DownloadBatchStatusListener downloadBatchStatusListener;
+    private DownloadBatchStatusListener downloadBatchStatusListener = DownloadBatchStatusListener.NO_OP;
 
     public DownloadBatchStatusView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -26,22 +26,9 @@ public class DownloadBatchStatusView extends ConstraintLayout {
         View.inflate(getContext(), R.layout.merge_download_batch_status, this);
 
         downloadBatchStatusView = findViewById(R.id.download_batch_status);
-        View pauseDownloadView = findViewById(R.id.button_pause_downloading);
-        View resumeDownloadView = findViewById(R.id.button_resume_downloading);
 
-        pauseDownloadView.setOnClickListener(view -> {
-            if (downloadBatchStatusListener == null) {
-                return;
-            }
-            downloadBatchStatusListener.onBatchPaused();
-        });
-
-        resumeDownloadView.setOnClickListener(view -> {
-            if (downloadBatchStatusListener == null) {
-                return;
-            }
-            downloadBatchStatusListener.onBatchResumed();
-        });
+        findViewById(R.id.button_pause_downloading).setOnClickListener(view -> downloadBatchStatusListener.onBatchPaused());
+        findViewById(R.id.button_resume_downloading).setOnClickListener(view -> downloadBatchStatusListener.onBatchResumed());
     }
 
     public void setListener(DownloadBatchStatusListener downloadBatchStatusListener) {
@@ -77,6 +64,18 @@ public class DownloadBatchStatusView extends ConstraintLayout {
         void onBatchPaused();
 
         void onBatchResumed();
+
+        DownloadBatchStatusListener NO_OP = new DownloadBatchStatusListener() {
+            @Override
+            public void onBatchPaused() {
+                // no-op
+            }
+
+            @Override
+            public void onBatchResumed() {
+                // no-op
+            }
+        };
     }
 
 }
