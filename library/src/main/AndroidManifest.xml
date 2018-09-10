@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
   package="com.novoda.downloadmanager">
 
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -10,7 +11,9 @@
     android:name="android.permission.WRITE_EXTERNAL_STORAGE"
     android:maxSdkVersion="18" />
 
-  <application>
+  <application
+    android:networkSecurityConfig="@xml/network_security_config"
+    tools:targetApi="n">
 
     <service android:name="com.novoda.downloadmanager.LiteDownloadService" />
 
