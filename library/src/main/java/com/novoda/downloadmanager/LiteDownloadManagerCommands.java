@@ -53,7 +53,7 @@ public interface LiteDownloadManagerCommands {
 
     /**
      * Retrieves all stored batches from the persistence layer and queues them ready for download,
-     * repopulating the internal map.
+     * repopulating the internal map. Normally called when first starting the app, after a migration or restart.
      *
      * @param callback to be notified when all downloads are queued.
      */
