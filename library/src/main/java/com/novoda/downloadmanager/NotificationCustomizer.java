@@ -13,7 +13,7 @@ import android.support.v4.app.NotificationCompat;
 public interface NotificationCustomizer<T> {
 
     /**
-     * Should return a given {@link NotificationDisplayState} for a given {@link T} payload.
+     * Returns a given {@link NotificationDisplayState} for a given {@link T} payload.
      * Different payloads may want to hide or show differing notifications.
      * See {@link DownloadManagerBuilder.DownloadNotificationCustomizer} for an example.
      *
