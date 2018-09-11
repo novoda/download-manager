@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * For defining the persistence layer that the download-manager will use to
- * persist {@link DownloadBatch} and {@link BatchFile}.
+ * persist and retrieve {@link DownloadsBatchPersisted} and {@link DownloadsFilePersisted}.
  */
 public interface DownloadsPersistence {
 
