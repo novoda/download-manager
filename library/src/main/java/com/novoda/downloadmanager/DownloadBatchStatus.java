@@ -55,23 +55,45 @@ public interface DownloadBatchStatus {
      */
     String storageRoot();
 
+    /**
+     * @return The currently downloaded percentage of a {@link DownloadBatchStatus}.
+     */
     int percentageDownloaded();
 
+    /**
+     * @return The number of bytes that have been downloaded so far.
+     */
     long bytesDownloaded();
 
+    /**
+     * @return The total number of bytes to download.
+     */
     long bytesTotalSize();
 
+    /**
+     * @return The unique identifier for this batch.
+     */
     DownloadBatchId getDownloadBatchId();
 
+    /**
+     * @return The current {@link DownloadBatchStatus.Status} for the batch.
+     */
     Status status();
 
+    /**
+     * @return The time at which the batch started to download. Represented as the difference,
+     * measured in milliseconds, between the current time and midnight, January 1, 1970 UTC.
+     */
     long downloadedDateTimeInMillis();
 
     /**
-     * @return null if {@link DownloadBatchStatus#status()} is not {@link Status#ERROR}.
+     * @return The {@link DownloadError} or null if {@link DownloadBatchStatus#status()} is not {@link Status#ERROR}.
      */
     @Nullable
     DownloadError downloadError();
 
+    /**
+     * @return whether the notification has been dispatched from {@link DownloadBatchStatusNotificationDispatcher}.
+     */
     boolean notificationSeen();
 }
