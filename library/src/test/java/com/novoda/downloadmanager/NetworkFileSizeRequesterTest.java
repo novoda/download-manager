@@ -12,10 +12,10 @@ import static org.mockito.Mockito.mock;
 
 public class NetworkFileSizeRequesterTest {
 
-    private static final HttpClient.NetworkResponse UNSUCCESSFUL_RESPONSE = aNetworkResponse().withSuccessful(false).build();
-    private static final HttpClient.NetworkResponse SUCCESSFUL_RESPONSE = aNetworkResponse().withHeader("1000").withSuccessful(true).build();
-    private static final String ANY_RAW_URL = "http://example.com";
     private static final int FILE_BYTES = 1000;
+    private static final HttpClient.NetworkResponse UNSUCCESSFUL_RESPONSE = aNetworkResponse().withSuccessful(false).build();
+    private static final HttpClient.NetworkResponse SUCCESSFUL_RESPONSE = aNetworkResponse().withHeader("1000").withSuccessful(true).withBodyContentLength(FILE_BYTES).build();
+    private static final String ANY_RAW_URL = "http://example.com";
 
     private final HttpClient httpClient = mock(HttpClient.class);
     private final NetworkRequestCreator requestCreator = new NetworkRequestCreator();
@@ -29,7 +29,7 @@ public class NetworkFileSizeRequesterTest {
 
     @Test
     public void returnsUnknownSize_whenHttpClientErrors() throws IOException {
-        given(httpClient.execute(requestCreator.createFileSizeHeadRequest(ANY_RAW_URL))).willThrow(IOException.class);
+        given(httpClient.execute(requestCreator.createFileSizeBodyRequest(ANY_RAW_URL))).willThrow(IOException.class);
 
         FileSize fileSize = fileSizeRequester.requestFileSize(ANY_RAW_URL);
 
@@ -48,7 +48,7 @@ public class NetworkFileSizeRequesterTest {
 
     @Test
     public void returnsFileSize_whenResponseSuccessful() throws IOException {
-        given(httpClient.execute(requestCreator.createFileSizeHeadRequest(ANY_RAW_URL))).willReturn(SUCCESSFUL_RESPONSE);
+        given(httpClient.execute(requestCreator.createFileSizeBodyRequest(ANY_RAW_URL))).willReturn(SUCCESSFUL_RESPONSE);
 
         FileSize fileSize = fileSizeRequester.requestFileSize(ANY_RAW_URL);
 
