@@ -4,8 +4,14 @@ import android.support.annotation.Nullable;
 
 import java.security.InvalidParameterException;
 
+/**
+ * Represents the information of a {@link DownloadBatch} that is accessible to clients.
+ */
 public interface DownloadBatchStatus {
 
+    /**
+     * The current download status for a whole batch.
+     */
     enum Status {
         QUEUED,
         DOWNLOADING,
@@ -33,8 +39,20 @@ public interface DownloadBatchStatus {
 
     }
 
+    /**
+     * @return The title associated to a {@link DownloadBatch}.
+     * Specified when calling {@link Batch#with(StorageRoot, DownloadBatchId, String)}.
+     */
     DownloadBatchTitle getDownloadBatchTitle();
 
+    /**
+     * Returns the shared storage root for all download files in this batch.
+     * The shared storage root for a downloaded file with storage location
+     * `/data/user/0/com.novoda.downloadmanager.demo.simple/files/downloads/batch_id_2/20MB.zip`
+     * would be `/data/user/0/com.novoda.downloadmanager.demo.simple/files/downloads`.
+     *
+     * @return The shared storage root.
+     */
     String storageRoot();
 
     int percentageDownloaded();
