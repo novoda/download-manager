@@ -3,8 +3,23 @@ package com.novoda.downloadmanager;
 import android.app.Notification;
 import android.support.v4.app.NotificationCompat;
 
+/**
+ * Used to customize the download notifications that are shown to the user.
+ * Clients of this library can create their own custom implementation and
+ * pass it to {@link DownloadManagerBuilder#withNotification(NotificationCustomizer)}.
+ *
+ * @param <T> The payload that is used to drive the customization.
+ */
 public interface NotificationCustomizer<T> {
 
+    /**
+     * Should return a given {@link NotificationDisplayState} for a given {@link T} payload.
+     * Different payloads may want to hide or show differing notifications.
+     * See {@link DownloadManagerBuilder.DownloadNotificationCustomizer} for an example.
+     *
+     * @param payload to determine the {@link NotificationDisplayState} from.
+     * @return the {@link NotificationDisplayState} used to display notifications.
+     */
     NotificationDisplayState notificationDisplayState(T payload);
 
     /**
@@ -16,6 +31,9 @@ public interface NotificationCustomizer<T> {
      */
     Notification customNotificationFrom(NotificationCompat.Builder builder, T payload);
 
+    /**
+     * Represents the different ways in which a notification can be displayed to a user.
+     */
     enum NotificationDisplayState {
         SINGLE_PERSISTENT_NOTIFICATION,
         STACK_NOTIFICATION_NOT_DISMISSIBLE,
