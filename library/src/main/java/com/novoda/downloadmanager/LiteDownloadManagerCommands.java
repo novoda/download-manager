@@ -100,7 +100,8 @@ public interface LiteDownloadManagerCommands {
 
     /**
      * Changes the {@link ConnectionType} that must be satisfied in order to download.
-     * Will pause all current downloads that are violating this condition.
+     * Will pause all current downloads that are violating this condition, resuming
+     * all those that satisfy the condition.
      *
      * @param allowedConnectionType that must be satisfied in order to download.
      */
