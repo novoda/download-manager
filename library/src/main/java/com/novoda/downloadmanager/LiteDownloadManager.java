@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-class DownloadManager implements LiteDownloadManagerCommands {
+class LiteDownloadManager implements LiteDownloadManagerCommands {
 
     private final Object waitForDownloadService;
     private final Object waitForDownloadBatchStatusCallback;
@@ -25,18 +25,18 @@ class DownloadManager implements LiteDownloadManagerCommands {
 
     private DownloadService downloadService;
 
-    // DownloadManager is a complex object.
+    // LiteDownloadManager is a complex object.
     @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
-    DownloadManager(Object waitForDownloadService,
-                    Object waitForDownloadBatchStatusCallback,
-                    ExecutorService executor,
-                    Handler callbackHandler,
-                    Map<DownloadBatchId, DownloadBatch> downloadBatchMap,
-                    Set<DownloadBatchStatusCallback> callbacks,
-                    FileOperations fileOperations,
-                    DownloadsBatchPersistence downloadsBatchPersistence,
-                    LiteDownloadManagerDownloader downloader,
-                    ConnectionChecker connectionChecker) {
+    LiteDownloadManager(Object waitForDownloadService,
+                        Object waitForDownloadBatchStatusCallback,
+                        ExecutorService executor,
+                        Handler callbackHandler,
+                        Map<DownloadBatchId, DownloadBatch> downloadBatchMap,
+                        Set<DownloadBatchStatusCallback> callbacks,
+                        FileOperations fileOperations,
+                        DownloadsBatchPersistence downloadsBatchPersistence,
+                        LiteDownloadManagerDownloader downloader,
+                        ConnectionChecker connectionChecker) {
         this.waitForDownloadService = waitForDownloadService;
         this.waitForDownloadBatchStatusCallback = waitForDownloadBatchStatusCallback;
         this.executor = executor;

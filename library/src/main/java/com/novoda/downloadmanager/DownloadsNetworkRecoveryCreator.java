@@ -14,8 +14,8 @@ final class DownloadsNetworkRecoveryCreator {
         DownloadsNetworkRecoveryCreator.singleInstance = DownloadsNetworkRecovery.DISABLED;
     }
 
-    static void createEnabled(Context context, DownloadManager downloadManager, ConnectionType connectionType) {
-        DownloadsNetworkRecoveryCreator.singleInstance = new LiteDownloadsNetworkRecoveryEnabled(context, downloadManager, connectionType);
+    static void createEnabled(Context context, LiteDownloadManager liteDownloadManager, ConnectionType connectionType) {
+        DownloadsNetworkRecoveryCreator.singleInstance = new LiteDownloadsNetworkRecoveryEnabled(context, liteDownloadManager, connectionType);
     }
 
     static DownloadsNetworkRecovery getInstance() {

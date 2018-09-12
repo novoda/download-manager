@@ -7,16 +7,16 @@ class LiteJobCreator implements JobCreator {
 
     static final String TAG = "download-manager-reschedule";
 
-    private final DownloadManager downloadManager;
+    private final LiteDownloadManager liteDownloadManager;
 
-    LiteJobCreator(DownloadManager downloadManager) {
-        this.downloadManager = downloadManager;
+    LiteJobCreator(LiteDownloadManager liteDownloadManager) {
+        this.liteDownloadManager = liteDownloadManager;
     }
 
     @Override
     public Job create(String tag) {
         if (tag.equals(TAG)) {
-            return new LiteJobDownload(downloadManager);
+            return new LiteJobDownload(liteDownloadManager);
         }
 
         return null;
