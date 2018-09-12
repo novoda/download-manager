@@ -22,24 +22,24 @@ dependencies {
 1. Create a `LiteDownloadManagerCommands`:
 
 ```
-        LiteDownloadManagerCommands liteDownloadManagerCommands = DownloadManagerBuilder
-                .newInstance(this, handler, R.mipmap.ic_launcher_round)
-                .withLogHandle(new DemoLogHandle())
-                .withStorageRequirementRules(StorageRequirementRuleFactory.createByteBasedRule(TWO_HUNDRED_MB_IN_BYTES))
-                .build();
+LiteDownloadManagerCommands liteDownloadManagerCommands = DownloadManagerBuilder
+        .newInstance(this, handler, R.mipmap.ic_launcher_round)
+        .withLogHandle(new DemoLogHandle())
+        .withStorageRequirementRules(StorageRequirementRuleFactory.createByteBasedRule(TWO_HUNDRED_MB_IN_BYTES))
+        .build();
 ```
 
 2. Create a `Batch` of files to download:
 
 ```
-        Batch batch = Batch.with(primaryStorageWithDownloadsSubpackage, BATCH_ID_1, "Batch 1 Title")
-                .downloadFrom(FIVE_MB_FILE_URL).saveTo("foo/bar", "5mb.zip").withIdentifier(FILE_ID_1).apply()
-                .downloadFrom(TEN_MB_FILE_URL).apply()
-                .build();
+Batch batch = Batch.with(primaryStorageWithDownloadsSubpackage, DownloadBatchIdCreator.createSanitizedFrom("batch_id_1"), "batch one title")
+        .downloadFrom("http://ipv4.download.thinkbroadband.com/5MB.zip").saveTo("foo/bar", "local-filename-5mb.zip").withIdentifier(DownloadFileIdCreator.createFrom("file_id_1")).apply()
+        .downloadFrom("http://ipv4.download.thinkbroadband.com/10MB.zip").apply()
+        .build();
 ```   
 
 3. Schedule the batch for download:
 
 ```
-        liteDownloadManagerCommands.download(batch);
+liteDownloadManagerCommands.download(batch);
 ```
