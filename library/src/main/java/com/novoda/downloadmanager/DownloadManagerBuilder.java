@@ -44,7 +44,7 @@ public final class DownloadManagerBuilder {
     private FileSizeRequester fileSizeRequester;
     private FileDownloaderCreator fileDownloaderCreator;
     private DownloadService downloadService;
-    private DownloadManager downloadManager;
+    private LiteDownloadManager liteDownloadManager;
     private NotificationCreator<DownloadBatchStatus> notificationCreator;
     private NotificationChannelProvider notificationChannelProvider;
     private ConnectionType connectionTypeAllowed;
@@ -212,9 +212,9 @@ public final class DownloadManagerBuilder {
         return this;
     }
 
-    // It creates the whole DownloadManager, it is a long process!
+    // It creates the whole LiteDownloadManager, it is a long process!
     @SuppressWarnings("PMD.ExcessiveMethodLength")
-    public LiteDownloadManagerCommands build() {
+    public DownloadManager build() {
         if (logHandle.isPresent()) {
             Logger.attach(logHandle.get());
         }
@@ -226,11 +226,11 @@ public final class DownloadManagerBuilder {
                 if (service instanceof LiteDownloadService.DownloadServiceBinder) {
                     LiteDownloadService.DownloadServiceBinder binder = (LiteDownloadService.DownloadServiceBinder) service;
                     downloadService = binder.getService();
-                    downloadManager.submitAllStoredDownloads(() -> {
-                        downloadManager.initialise(downloadService);
+                    liteDownloadManager.submitAllStoredDownloads(() -> {
+                        liteDownloadManager.initialise(downloadService);
 
                         if (allowNetworkRecovery) {
-                            DownloadsNetworkRecoveryCreator.createEnabled(applicationContext, downloadManager, connectionTypeAllowed);
+                            DownloadsNetworkRecoveryCreator.createEnabled(applicationContext, liteDownloadManager, connectionTypeAllowed);
                         } else {
                             DownloadsNetworkRecoveryCreator.createDisabled();
                         }
@@ -302,7 +302,7 @@ public final class DownloadManagerBuilder {
                 downloadBatchStatusFilter
         );
 
-        downloadManager = new DownloadManager(
+        liteDownloadManager = new LiteDownloadManager(
                 SERVICE_LOCK,
                 CALLBACK_LOCK,
                 EXECUTOR,
@@ -315,7 +315,7 @@ public final class DownloadManagerBuilder {
                 connectionChecker
         );
 
-        return downloadManager;
+        return liteDownloadManager;
     }
 
     private CallbackThrottleCreator getCallbackThrottleCreator(CallbackThrottleCreator.Type callbackThrottleType,

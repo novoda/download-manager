@@ -15,10 +15,10 @@ class LiteDownloadsNetworkRecoveryEnabled implements DownloadsNetworkRecovery {
 
     private ConnectionType connectionType;
 
-    LiteDownloadsNetworkRecoveryEnabled(Context context, DownloadManager downloadManager, ConnectionType connectionType) {
+    LiteDownloadsNetworkRecoveryEnabled(Context context, LiteDownloadManager liteDownloadManager, ConnectionType connectionType) {
         this.connectionType = connectionType;
         JobManager jobManager = JobManager.create(context);
-        jobManager.addJobCreator(new LiteJobCreator(downloadManager));
+        jobManager.addJobCreator(new LiteJobCreator(liteDownloadManager));
     }
 
     @Override

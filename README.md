@@ -19,10 +19,10 @@ dependencies {
 
 ## Simple usage
 
-1. Create a `LiteDownloadManagerCommands`:
+1. Create a `DownloadManager`:
 
 ```
-LiteDownloadManagerCommands liteDownloadManagerCommands = DownloadManagerBuilder
+DownloadManager downloadManager = DownloadManagerBuilder
         .newInstance(this, handler, R.mipmap.ic_launcher_round)
         .withLogHandle(new DemoLogHandle())
         .withStorageRequirementRules(StorageRequirementRuleFactory.createByteBasedRule(TWO_HUNDRED_MB_IN_BYTES))
@@ -41,5 +41,5 @@ Batch batch = Batch.with(primaryStorageWithDownloadsSubpackage, DownloadBatchIdC
 3. Schedule the batch for download:
 
 ```
-liteDownloadManagerCommands.download(batch);
+downloadManager.download(batch);
 ```

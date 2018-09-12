@@ -32,7 +32,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
-public class DownloadManagerTest {
+public class LiteDownloadManagerTest {
 
     private static final InternalDownloadBatchStatus BATCH_STATUS = anInternalDownloadsBatchStatus().build();
     private static final InternalDownloadBatchStatus ADDITIONAL_BATCH_STATUS = anInternalDownloadsBatchStatus().build();
@@ -61,7 +61,7 @@ public class DownloadManagerTest {
     private final LiteDownloadManagerDownloader downloadManagerDownloader = mock(LiteDownloadManagerDownloader.class);
     private final ConnectionChecker connectionChecker = mock(ConnectionChecker.class);
 
-    private DownloadManager downloadManager;
+    private LiteDownloadManager liteDownloadManager;
     private Map<DownloadBatchId, DownloadBatch> downloadingBatches = new HashMap<>();
     private List<DownloadBatchStatus> downloadBatchStatuses = new ArrayList<>();
     private Set<DownloadBatchStatusCallback> downloadBatchCallbacks = new CopyOnWriteArraySet<>();
@@ -75,7 +75,7 @@ public class DownloadManagerTest {
 
         downloadBatchCallbacks.add(downloadBatchCallback);
 
-        downloadManager = new DownloadManager(
+        liteDownloadManager = new LiteDownloadManager(
                 serviceLock,
                 callbackLock,
                 executorService,
@@ -143,7 +143,7 @@ public class DownloadManagerTest {
 
     @Test
     public void setDownloadService_whenInitialising() {
-        downloadManager.initialise(downloadService);
+        liteDownloadManager.initialise(downloadService);
 
         verify(downloadManagerDownloader).setDownloadService(downloadService);
     }
@@ -151,7 +151,7 @@ public class DownloadManagerTest {
     @Test(timeout = 500)
     public void notifyAll_whenInitialising() throws InterruptedException {
         synchronized (serviceLock) {
-            Executors.newSingleThreadExecutor().submit(() -> downloadManager.initialise(downloadService));
+            Executors.newSingleThreadExecutor().submit(() -> liteDownloadManager.initialise(downloadService));
 
             serviceLock.wait();
         }
@@ -159,7 +159,7 @@ public class DownloadManagerTest {
 
     @Test
     public void triggersDownloadOfBatches_whenSubmittingAllStoredDownloads() {
-        downloadManager.submitAllStoredDownloads(allStoredDownloadsSubmittedCallback);
+        liteDownloadManager.submitAllStoredDownloads(allStoredDownloadsSubmittedCallback);
 
         InOrder inOrder = inOrder(downloadManagerDownloader);
         inOrder.verify(downloadManagerDownloader).download(downloadBatch, downloadingBatches);
@@ -168,7 +168,7 @@ public class DownloadManagerTest {
 
     @Test
     public void notifies_whenSubmittingAllStoredDownloads() {
-        downloadManager.submitAllStoredDownloads(allStoredDownloadsSubmittedCallback);
+        liteDownloadManager.submitAllStoredDownloads(allStoredDownloadsSubmittedCallback);
 
         verify(allStoredDownloadsSubmittedCallback).onAllDownloadsSubmitted();
     }
@@ -177,35 +177,35 @@ public class DownloadManagerTest {
     public void downloadGivenBatch_whenBatchIsNotAlreadyBeingDownloaded() {
         downloadingBatches.clear();
 
-        downloadManager.download(BATCH);
+        liteDownloadManager.download(BATCH);
 
         verify(downloadManagerDownloader).download(BATCH, downloadingBatches);
     }
 
     @Test
     public void doesNotDownload_whenBatchIsAlreadyBeingDownloaded() {
-        downloadManager.download(BATCH);
+        liteDownloadManager.download(BATCH);
 
         verify(downloadManagerDownloader, never()).download(BATCH, downloadingBatches);
     }
 
     @Test
     public void doesNotPause_whenBatchIdIsUnknown() {
-        downloadManager.pause(new LiteDownloadBatchId("unknown"));
+        liteDownloadManager.pause(new LiteDownloadBatchId("unknown"));
 
         verifyZeroInteractions(downloadBatch, additionalDownloadBatch);
     }
 
     @Test
     public void pausesBatch() {
-        downloadManager.pause(DOWNLOAD_BATCH_ID);
+        liteDownloadManager.pause(DOWNLOAD_BATCH_ID);
 
         verify(downloadBatch).pause();
     }
 
     @Test
     public void doesNotResume_whenBatchIdIsUnknown() {
-        downloadManager.pause(new LiteDownloadBatchId("unknown"));
+        liteDownloadManager.pause(new LiteDownloadBatchId("unknown"));
 
         verifyZeroInteractions(downloadBatch, additionalDownloadBatch);
     }
@@ -214,7 +214,7 @@ public class DownloadManagerTest {
     public void doesNotResume_whenBatchIsAlreadyDownloading() {
         given(downloadBatch.status()).willReturn(anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.DOWNLOADING).build());
 
-        downloadManager.resume(DOWNLOAD_BATCH_ID);
+        liteDownloadManager.resume(DOWNLOAD_BATCH_ID);
 
         InOrder inOrder = inOrder(downloadBatch);
         inOrder.verify(downloadBatch).status();
@@ -225,7 +225,7 @@ public class DownloadManagerTest {
     public void resumesBatch() {
         given(downloadBatch.status()).willReturn(anInternalDownloadsBatchStatus().build());
 
-        downloadManager.resume(DOWNLOAD_BATCH_ID);
+        liteDownloadManager.resume(DOWNLOAD_BATCH_ID);
 
         verify(downloadBatch).resume();
     }
@@ -234,21 +234,21 @@ public class DownloadManagerTest {
     public void triggersDownload_whenResumingBatch() {
         given(downloadBatch.status()).willReturn(anInternalDownloadsBatchStatus().build());
 
-        downloadManager.resume(DOWNLOAD_BATCH_ID);
+        liteDownloadManager.resume(DOWNLOAD_BATCH_ID);
 
         verify(downloadManagerDownloader).download(downloadBatch, downloadingBatches);
     }
 
     @Test
     public void doesNotDelete_whenBatchIdIsUnknown() {
-        downloadManager.delete(new LiteDownloadBatchId("unknown"));
+        liteDownloadManager.delete(new LiteDownloadBatchId("unknown"));
 
         verifyZeroInteractions(downloadBatch, additionalDownloadBatch);
     }
 
     @Test
     public void deletesBatch() {
-        downloadManager.delete(DOWNLOAD_BATCH_ID);
+        liteDownloadManager.delete(DOWNLOAD_BATCH_ID);
 
         verify(downloadBatch).delete();
     }
@@ -257,14 +257,14 @@ public class DownloadManagerTest {
     public void addsCallbackToInternalList() {
         DownloadBatchStatusCallback additionalDownloadBatchCallback = mock(DownloadBatchStatusCallback.class);
 
-        downloadManager.addDownloadBatchCallback(additionalDownloadBatchCallback);
+        liteDownloadManager.addDownloadBatchCallback(additionalDownloadBatchCallback);
 
         assertThat(downloadBatchCallbacks).contains(additionalDownloadBatchCallback);
     }
 
     @Test
     public void removesCallbackFromInternalList() {
-        downloadManager.removeDownloadBatchCallback(downloadBatchCallback);
+        liteDownloadManager.removeDownloadBatchCallback(downloadBatchCallback);
 
         assertThat(downloadBatchCallbacks).doesNotContain(downloadBatchCallback);
     }
@@ -273,16 +273,16 @@ public class DownloadManagerTest {
     public void waitsForServiceToExist_whenGettingAllBatchStatuses() {
         notifyLockOnAnotherThread();
 
-        downloadManager.getAllDownloadBatchStatuses(allBatchStatusesCallback);
+        liteDownloadManager.getAllDownloadBatchStatuses(allBatchStatusesCallback);
 
         assertThat(downloadBatchStatuses).containsExactly(BATCH_STATUS, ADDITIONAL_BATCH_STATUS);
     }
 
     @Test
     public void getsAllBatchStatuses_whenServiceAlreadyExists() {
-        downloadManager.initialise(mock(DownloadService.class));
+        liteDownloadManager.initialise(mock(DownloadService.class));
 
-        downloadManager.getAllDownloadBatchStatuses(allBatchStatusesCallback);
+        liteDownloadManager.getAllDownloadBatchStatuses(allBatchStatusesCallback);
 
         assertThat(downloadBatchStatuses).containsExactly(BATCH_STATUS, ADDITIONAL_BATCH_STATUS);
     }
@@ -291,16 +291,16 @@ public class DownloadManagerTest {
     public void waitsForServiceToExist_whenGettingAllBatchStatusesWithSynchronousCall() {
         notifyLockOnAnotherThread();
 
-        List<DownloadBatchStatus> allDownloadBatchStatuses = downloadManager.getAllDownloadBatchStatuses();
+        List<DownloadBatchStatus> allDownloadBatchStatuses = liteDownloadManager.getAllDownloadBatchStatuses();
 
         assertThat(allDownloadBatchStatuses).containsExactly(BATCH_STATUS, ADDITIONAL_BATCH_STATUS);
     }
 
     @Test
     public void getsAllBatchStatusesWithSynchronousCall_whenServiceAlreadyExists() {
-        downloadManager.initialise(mock(DownloadService.class));
+        liteDownloadManager.initialise(mock(DownloadService.class));
 
-        List<DownloadBatchStatus> allDownloadBatchStatuses = downloadManager.getAllDownloadBatchStatuses();
+        List<DownloadBatchStatus> allDownloadBatchStatuses = liteDownloadManager.getAllDownloadBatchStatuses();
 
         assertThat(allDownloadBatchStatuses).containsExactly(BATCH_STATUS, ADDITIONAL_BATCH_STATUS);
     }
@@ -309,16 +309,16 @@ public class DownloadManagerTest {
     public void waitsForServiceToExist_whenGettingDownloadStatusWithMatchingId() {
         notifyLockOnAnotherThread();
 
-        downloadManager.getDownloadFileStatusWithMatching(DOWNLOAD_BATCH_ID, DOWNLOAD_FILE_ID, downloadFileStatusCallback);
+        liteDownloadManager.getDownloadFileStatusWithMatching(DOWNLOAD_BATCH_ID, DOWNLOAD_FILE_ID, downloadFileStatusCallback);
 
         assertThat(downloadFileStatus).isEqualTo(DOWNLOAD_FILE_STATUS);
     }
 
     @Test
     public void getsDownloadStatusMatchingId_whenServiceAlreadyExists() {
-        downloadManager.initialise(mock(DownloadService.class));
+        liteDownloadManager.initialise(mock(DownloadService.class));
 
-        downloadManager.getDownloadFileStatusWithMatching(DOWNLOAD_BATCH_ID, DOWNLOAD_FILE_ID, downloadFileStatusCallback);
+        liteDownloadManager.getDownloadFileStatusWithMatching(DOWNLOAD_BATCH_ID, DOWNLOAD_FILE_ID, downloadFileStatusCallback);
 
         assertThat(downloadFileStatus).isEqualTo(DOWNLOAD_FILE_STATUS);
     }
@@ -327,23 +327,23 @@ public class DownloadManagerTest {
     public void waitsForServiceToExist_whenGettingDownloadStatusWithMatchingIdWithSynchronousCall() {
         notifyLockOnAnotherThread();
 
-        DownloadFileStatus fileStatus = downloadManager.getDownloadFileStatusWithMatching(DOWNLOAD_BATCH_ID, DOWNLOAD_FILE_ID);
+        DownloadFileStatus fileStatus = liteDownloadManager.getDownloadFileStatusWithMatching(DOWNLOAD_BATCH_ID, DOWNLOAD_FILE_ID);
 
         assertThat(fileStatus).isEqualTo(DOWNLOAD_FILE_STATUS);
     }
 
     @Test
     public void getsDownloadStatusMatchingIdWithSynchronousCall_whenServiceAlreadyExists() {
-        downloadManager.initialise(mock(DownloadService.class));
+        liteDownloadManager.initialise(mock(DownloadService.class));
 
-        DownloadFileStatus fileStatus = downloadManager.getDownloadFileStatusWithMatching(DOWNLOAD_BATCH_ID, DOWNLOAD_FILE_ID);
+        DownloadFileStatus fileStatus = liteDownloadManager.getDownloadFileStatusWithMatching(DOWNLOAD_BATCH_ID, DOWNLOAD_FILE_ID);
 
         assertThat(fileStatus).isEqualTo(DOWNLOAD_FILE_STATUS);
     }
 
     @Test
     public void updateAllowedConnectionTypeInConnectionChecker_whenUpdatedInDownloadManager() {
-        downloadManager.updateAllowedConnectionType(ANY_CONNECTION_TYPE);
+        liteDownloadManager.updateAllowedConnectionType(ANY_CONNECTION_TYPE);
 
         verify(connectionChecker).updateAllowedConnectionType(ANY_CONNECTION_TYPE);
     }
@@ -352,7 +352,7 @@ public class DownloadManagerTest {
     public void stopFileDownloader_whenUpdatedInDownloadManager_andConnectionTypeNotAllowed() {
         given(connectionChecker.isAllowedToDownload()).willReturn(false);
 
-        downloadManager.updateAllowedConnectionType(ANY_CONNECTION_TYPE);
+        liteDownloadManager.updateAllowedConnectionType(ANY_CONNECTION_TYPE);
 
         for (DownloadBatch batch : downloadingBatches.values()) {
             verify(batch).waitForNetwork();
@@ -361,7 +361,7 @@ public class DownloadManagerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void throwException_whenUpdatedWithNullConnectionType() {
-        downloadManager.updateAllowedConnectionType(null);
+        liteDownloadManager.updateAllowedConnectionType(null);
     }
 
     private void notifyLockOnAnotherThread() {

@@ -6,16 +6,16 @@ import com.evernote.android.job.Job;
 
 class LiteJobDownload extends Job {
 
-    private final DownloadManager downloadManager;
+    private final LiteDownloadManager liteDownloadManager;
 
-    LiteJobDownload(DownloadManager downloadManager) {
-        this.downloadManager = downloadManager;
+    LiteJobDownload(LiteDownloadManager liteDownloadManager) {
+        this.liteDownloadManager = liteDownloadManager;
     }
 
     @NonNull
     @Override
     protected Result onRunJob(Params params) {
-        downloadManager.submitAllStoredDownloads(() -> Logger.v("LiteJobDownload all jobs submitted"));
+        liteDownloadManager.submitAllStoredDownloads(() -> Logger.v("LiteJobDownload all jobs submitted"));
         Logger.v("LiteJobDownload run network recovery job");
         return Result.SUCCESS;
     }
