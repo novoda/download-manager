@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-class LiteDownloadManager implements LiteDownloadManagerCommands {
+class LiteDownloadManager implements DownloadManager {
 
     private final Object waitForDownloadService;
     private final Object waitForDownloadBatchStatusCallback;

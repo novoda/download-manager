@@ -6,8 +6,8 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.novoda.downloadmanager.CompletedDownloadBatch;
+import com.novoda.downloadmanager.DownloadManager;
 import com.novoda.downloadmanager.FileSizeExtractor;
-import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
 import com.novoda.downloadmanager.StorageRoot;
 
@@ -22,7 +22,7 @@ public class MigrationJob implements Runnable {
     private final File databaseFile;
     private final StorageRoot primaryStorageWithDownloadsSubpackage;
     private final StorageRoot primaryStorageWithPicturesSubpackage;
-    private final LiteDownloadManagerCommands downloadManager;
+    private final DownloadManager downloadManager;
     private final Handler callbackHandler;
     private final MigrationJobCallback migrationJobCallback;
 
@@ -33,7 +33,7 @@ public class MigrationJob implements Runnable {
     public MigrationJob(File databaseFile,
                         StorageRoot primaryStorageWithDownloadsSubpackage,
                         StorageRoot primaryStorageWithPicturesSubpackage,
-                        LiteDownloadManagerCommands downloadManager,
+                        DownloadManager downloadManager,
                         Handler callbackHandler,
                         MigrationJobCallback migrationJobCallback) {
         this.databaseFile = databaseFile;

@@ -16,7 +16,7 @@ import com.novoda.downloadmanager.DownloadBatchStatus;
 import com.novoda.downloadmanager.DownloadBatchStatusCallback;
 import com.novoda.downloadmanager.DownloadFileId;
 import com.novoda.downloadmanager.DownloadFileIdCreator;
-import com.novoda.downloadmanager.LiteDownloadManagerCommands;
+import com.novoda.downloadmanager.DownloadManager;
 import com.novoda.downloadmanager.StorageRoot;
 import com.novoda.downloadmanager.StorageRootFactory;
 
@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private DownloadBatchStatusView downloadBatchStatusViewOne;
     private DownloadBatchStatusView downloadBatchStatusViewTwo;
 
-    private LiteDownloadManagerCommands liteDownloadManagerCommands;
+    private DownloadManager downloadManager;
     private StorageRoot primaryStorageWithDownloadsSubpackage;
 
     @Override
@@ -47,9 +47,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         DemoApplication demoApplication = (DemoApplication) getApplicationContext();
-        liteDownloadManagerCommands = demoApplication.getLiteDownloadManagerCommands();
-        liteDownloadManagerCommands.addDownloadBatchCallback(callback);
-        liteDownloadManagerCommands.getAllDownloadBatchStatuses(batchStatusesCallback);
+        downloadManager = demoApplication.getDownloadManager();
+        downloadManager.addDownloadBatchCallback(callback);
+        downloadManager.getAllDownloadBatchStatuses(batchStatusesCallback);
 
         downloadBatchStatusViewOne = findViewById(R.id.batch_1);
         downloadBatchStatusViewTwo = findViewById(R.id.batch_2);
@@ -57,24 +57,24 @@ public class MainActivity extends AppCompatActivity {
         downloadBatchStatusViewOne.setListener(new DownloadBatchStatusView.DownloadBatchStatusListener() {
             @Override
             public void onBatchPaused() {
-                liteDownloadManagerCommands.pause(BATCH_ID_1);
+                downloadManager.pause(BATCH_ID_1);
             }
 
             @Override
             public void onBatchResumed() {
-                liteDownloadManagerCommands.resume(BATCH_ID_1);
+                downloadManager.resume(BATCH_ID_1);
             }
         });
 
         downloadBatchStatusViewTwo.setListener(new DownloadBatchStatusView.DownloadBatchStatusListener() {
             @Override
             public void onBatchPaused() {
-                liteDownloadManagerCommands.pause(BATCH_ID_2);
+                downloadManager.pause(BATCH_ID_2);
             }
 
             @Override
             public void onBatchResumed() {
-                liteDownloadManagerCommands.resume(BATCH_ID_2);
+                downloadManager.resume(BATCH_ID_2);
             }
         });
 
@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private final CompoundButton.OnCheckedChangeListener wifiOnlyOnCheckedChange = (buttonView, isChecked) -> {
-        LiteDownloadManagerCommands downloadManagerCommands = ((DemoApplication) getApplication()).getLiteDownloadManagerCommands();
+        DownloadManager downloadManagerCommands = ((DemoApplication) getApplication()).getDownloadManager();
         if (isChecked) {
             downloadManagerCommands.updateAllowedConnectionType(ConnectionType.UNMETERED);
         } else {
@@ -107,18 +107,18 @@ public class MainActivity extends AppCompatActivity {
                 .downloadFrom(FIVE_MB_FILE_URL).saveTo("foo/bar", "5mb.zip").withIdentifier(FILE_ID_1).apply()
                 .downloadFrom(TEN_MB_FILE_URL).apply()
                 .build();
-        liteDownloadManagerCommands.download(batch);
+        downloadManager.download(batch);
 
         batch = Batch.with(primaryStorageWithDownloadsSubpackage, BATCH_ID_2, "Batch 2 Title")
                 .downloadFrom(TEN_MB_FILE_URL).apply()
                 .downloadFrom(TWENTY_MB_FILE_URL).apply()
                 .build();
-        liteDownloadManagerCommands.download(batch);
+        downloadManager.download(batch);
     };
 
     private final View.OnClickListener deleteAllOnClick = v -> {
-        liteDownloadManagerCommands.delete(BATCH_ID_1);
-        liteDownloadManagerCommands.delete(BATCH_ID_2);
+        downloadManager.delete(BATCH_ID_1);
+        downloadManager.delete(BATCH_ID_2);
     };
 
     private final View.OnClickListener logFileDirectoryOnClick = v -> {

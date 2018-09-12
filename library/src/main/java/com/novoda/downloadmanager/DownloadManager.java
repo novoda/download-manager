@@ -5,7 +5,7 @@ import android.support.annotation.WorkerThread;
 
 import java.util.List;
 
-public interface LiteDownloadManagerCommands {
+public interface DownloadManager {
 
     /**
      * Downloads a given batch of files.
