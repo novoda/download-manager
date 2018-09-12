@@ -2,6 +2,9 @@ package com.novoda.downloadmanager;
 
 import android.content.Context;
 
+/**
+ * For defining the mechanism by which files should be persisted on the device.
+ */
 public interface FilePersistence {
 
     void initialiseWith(Context context, StorageRequirementRule storageRequirementRule);

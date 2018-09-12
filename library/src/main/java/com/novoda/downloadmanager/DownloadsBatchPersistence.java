@@ -56,7 +56,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
         downloadsPersistence.startTransaction();
 
         try {
-            LiteDownloadsBatchPersisted batchPersisted = new LiteDownloadsBatchPersisted(
+            DownloadsBatchPersisted batchPersisted = new LiteDownloadsBatchPersisted(
                     downloadBatchTitle,
                     downloadBatchId,
                     status,

@@ -103,13 +103,13 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private final View.OnClickListener downloadBatchesOnClick = v -> {
-        Batch batch = Batch.with(primaryStorageWithDownloadsSubpackage, BATCH_ID_1, "Made in chelsea")
+        Batch batch = Batch.with(primaryStorageWithDownloadsSubpackage, BATCH_ID_1, "Batch 1 Title")
                 .downloadFrom(FIVE_MB_FILE_URL).saveTo("foo/bar", "5mb.zip").withIdentifier(FILE_ID_1).apply()
                 .downloadFrom(TEN_MB_FILE_URL).apply()
                 .build();
         liteDownloadManagerCommands.download(batch);
 
-        batch = Batch.with(primaryStorageWithDownloadsSubpackage, BATCH_ID_2, "Hollyoaks")
+        batch = Batch.with(primaryStorageWithDownloadsSubpackage, BATCH_ID_2, "Batch 2 Title")
                 .downloadFrom(TEN_MB_FILE_URL).apply()
                 .downloadFrom(TWENTY_MB_FILE_URL).apply()
                 .build();
