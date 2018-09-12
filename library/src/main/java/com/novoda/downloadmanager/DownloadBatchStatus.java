@@ -42,6 +42,7 @@ public interface DownloadBatchStatus {
     /**
      * @return The title associated to a {@link DownloadBatch}.
      * Specified when calling {@link Batch#with(StorageRoot, DownloadBatchId, String)}.
+     * This title is used by the default {@link NotificationCustomizer}.
      */
     DownloadBatchTitle getDownloadBatchTitle();
 

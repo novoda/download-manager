@@ -40,6 +40,7 @@ public interface DownloadFileStatus {
 
     /**
      * @return The local path to this download file.
+     * e.g. `/data/user/0/com.novoda.downloadmanager.demo.simple/files/downloads/batch_id_2/20MB.zip`.
      */
     FilePath localFilePath();
 

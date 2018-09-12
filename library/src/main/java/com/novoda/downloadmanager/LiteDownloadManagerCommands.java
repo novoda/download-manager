@@ -52,8 +52,8 @@ public interface LiteDownloadManagerCommands {
     void removeDownloadBatchCallback(DownloadBatchStatusCallback downloadBatchCallback);
 
     /**
-     * Retrieves all stored batches from the persistence layer and queues them ready for download,
-     * repopulating the internal map. Normally called when first starting the app, after a migration or restart.
+     * Retrieves all stored batches from the persistence layer and queues them ready for download.
+     * Normally called when first starting the app, after a migration or restart.
      *
      * @param callback to be notified when all downloads are queued.
      */
@@ -62,6 +62,7 @@ public interface LiteDownloadManagerCommands {
     /**
      * Retrieves a list of {@link DownloadBatchStatus} synchronously. Clients should
      * specify their own Threading mechanism.
+     * This is a long-running blocking operation, clients should call this using their own Threading mechanism.
      *
      * @return a list of {@link DownloadBatchStatus}.
      */
@@ -78,7 +79,7 @@ public interface LiteDownloadManagerCommands {
     /**
      * Retrieves {@link DownloadFileStatus} with the associated {@link DownloadBatchId} and {@link DownloadFileId}.
      * Will return null if a {@link DownloadFileStatus} is not found with the matching {@link DownloadBatchId} and {@link DownloadFileId}.
-     * This call is synchronous, clients should specify their own Threading mechanism.
+     * This is a long-running blocking operation, clients should call this using their own Threading mechanism.
      *
      * @param downloadBatchId of the {@link DownloadFileStatus} to retrieve.
      * @param downloadFileId  of the {@link DownloadFileStatus} to retrieve.
@@ -109,7 +110,8 @@ public interface LiteDownloadManagerCommands {
 
     /**
      * Adds a {@link CompletedDownloadBatch} to the download manager.
-     * This call is synchronous, clients should specify their own Threading mechanism.
+     * Clients should use this to store already downloaded assets i.e. when migrating from v1.
+     * This is a long-running blocking operation, clients should call this using their own Threading mechanism.
      *
      * @param completedDownloadBatch to add to the download manager.
      * @return whether the addition was successful.
