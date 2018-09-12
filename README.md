@@ -19,7 +19,7 @@ dependencies {
 
 ## Simple usage
 
-1. Create a `LiteDownloadManagerCommands`:
+1. Create a `DownloadManager`:
 
 ```
 DownloadManager downloadManager = DownloadManagerBuilder
