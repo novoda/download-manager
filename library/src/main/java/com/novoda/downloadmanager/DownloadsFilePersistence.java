@@ -24,7 +24,7 @@ class DownloadsFilePersistence {
         if (downloadFileStatus.status() == DownloadFileStatus.Status.DELETED) {
             return false;
         }
-        LiteDownloadsFilePersisted filePersisted = new LiteDownloadsFilePersisted(
+        DownloadsFilePersisted filePersisted = new LiteDownloadsFilePersisted(
                 downloadBatchId,
                 downloadFileStatus.downloadFileId(),
                 filePath,
