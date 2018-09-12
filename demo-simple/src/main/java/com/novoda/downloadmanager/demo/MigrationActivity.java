@@ -9,7 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.novoda.downloadmanager.LiteDownloadManagerCommands;
+import com.novoda.downloadmanager.DownloadManager;
 import com.novoda.downloadmanager.StorageRootFactory;
 import com.novoda.downloadmanager.demo.migration.MigrationJob;
 
@@ -26,7 +26,7 @@ public class MigrationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_migration);
 
         DemoApplication demoApplication = (DemoApplication) getApplicationContext();
-        LiteDownloadManagerCommands liteDownloadManagerCommands = demoApplication.getLiteDownloadManagerCommands();
+        DownloadManager downloadManager = demoApplication.getDownloadManager();
 
         TextView databaseMigrationUpdates = findViewById(R.id.database_migration_updates);
         Handler migrationCallbackHandler = new Handler(Looper.getMainLooper());
@@ -34,7 +34,7 @@ public class MigrationActivity extends AppCompatActivity {
                 getDatabasePath("downloads.db"),
                 StorageRootFactory.createPrimaryStorageDownloadsDirectoryRoot(getApplicationContext()),
                 new PrimaryStoragePicturesDirectoryRoot(getApplicationContext()),
-                liteDownloadManagerCommands,
+                downloadManager,
                 migrationCallbackHandler,
                 databaseMigrationUpdates::setText
         );

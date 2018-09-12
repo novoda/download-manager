@@ -5,14 +5,14 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.facebook.stetho.Stetho;
+import com.novoda.downloadmanager.DownloadManager;
 import com.novoda.downloadmanager.DownloadManagerBuilder;
-import com.novoda.downloadmanager.LiteDownloadManagerCommands;
 import com.novoda.downloadmanager.StorageRequirementRuleFactory;
 
 public class DemoApplication extends Application {
 
     private static final int TWO_HUNDRED_MB_IN_BYTES = 209715200;
-    private volatile LiteDownloadManagerCommands liteDownloadManagerCommands;
+    private volatile DownloadManager downloadManager;
 
     @Override
     public void onCreate() {
@@ -24,14 +24,14 @@ public class DemoApplication extends Application {
     private void createLiteDownloadManager() {
         Handler handler = new Handler(Looper.getMainLooper());
 
-        liteDownloadManagerCommands = DownloadManagerBuilder
+        downloadManager = DownloadManagerBuilder
                 .newInstance(this, handler, R.mipmap.ic_launcher_round)
                 .withLogHandle(new DemoLogHandle())
                 .withStorageRequirementRules(StorageRequirementRuleFactory.createByteBasedRule(TWO_HUNDRED_MB_IN_BYTES))
                 .build();
     }
 
-    public LiteDownloadManagerCommands getLiteDownloadManagerCommands() {
-        return liteDownloadManagerCommands;
+    public DownloadManager getDownloadManager() {
+        return downloadManager;
     }
 }
