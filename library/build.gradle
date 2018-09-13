@@ -1,5 +1,35 @@
 apply plugin: 'com.android.library'
 apply plugin: 'bintray-release'
+apply plugin: 'jacoco'
+apply plugin: 'com.novoda.build-properties'
+
+buildProperties {
+    cli {
+        using(project)
+    }
+    bintray {
+        def bintrayCredentials = {
+            boolean isDryRun = cli['dryRun'].or(true).boolean
+            return isDryRun ?
+                    ['bintrayRepo': 'n/a', 'bintrayUser': 'n/a', 'bintrayKey': 'n/a'] :
+                    new File("${System.getenv('BINTRAY_PROPERTIES')}")
+        }
+        using(bintrayCredentials()).or(cli)
+        description = '''This should contain the following properties:
+                       | - bintrayRepo: name of the repo of the organisation to deploy the artifacts to
+                       | - bintrayUser: name of the account used to deploy the artifacts
+                       | - bintrayKey: API key of the account used to deploy the artifacts
+        '''.stripMargin()
+    }
+    publish {
+        def generateVersion = {
+            boolean isSnapshot = cli['bintraySnapshot'].or(false).boolean
+            return isSnapshot ? "SNAPSHOT-${System.getenv('BUILD_NUMBER') ?: 'LOCAL'}" : version
+        }
+        using(['version': "${generateVersion()}"])
+                .or(buildProperties.bintray)
+    }
+}
 
 android {
     compileSdkVersion 28
@@ -8,11 +38,7 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 28
-        versionCode 1
-        versionName "0.1"
-
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments = ["room.schemaLocation": "$projectDir/roomSchemas".toString()]
@@ -32,6 +58,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -54,11 +81,15 @@ dependencies {
 }
 
 publish {
-    repoName = 'maven-private'
     userOrg = 'novoda'
+    repoName = buildProperties.publish['bintrayRepo'].string
     groupId = 'com.novoda'
     artifactId = 'download-manager'
-    publishVersion = 'SNAPSHOT-2.0.55'
-    desc = 'Download Manager capable of batching, auto-resume, internal and external storage and highly customizable.'
+    version = buildProperties.publish['version'].string
+    bintrayUser = buildProperties.publish['bintrayUser'].string
+    bintrayKey = buildProperties.publish['bintrayKey'].string
+    publishVersion = version
+    uploadName = 'download-manager'
+    desc = 'A library that handles long-running downloads'
     website = 'https://github.com/novoda/download-manager'
 }
