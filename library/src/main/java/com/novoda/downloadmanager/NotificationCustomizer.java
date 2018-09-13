@@ -15,7 +15,6 @@ public interface NotificationCustomizer<T> {
     /**
      * Returns a given {@link NotificationDisplayState} for a given {@link T} payload.
      * Different payloads may want to hide or show differing notifications.
-     * See {@link DownloadManagerBuilder.DownloadNotificationCustomizer} for an example.
      *
      * @param payload to determine the {@link NotificationDisplayState} from.
      * @return the {@link NotificationDisplayState} used to display notifications.
