@@ -1,4 +1,4 @@
-# download-manager [![CI status](https://ci.novoda.com/buildStatus/icon?job=download-manager)](https://ci.novoda.com/job/download-manager/lastBuild/console) [![Download from Bintray](https://api.bintray.com/packages/novoda/maven/download-manager/images/download.svg)](https://bintray.com/novoda/maven/download-manager/_latestVersion)[![Apache 2.0 Licence](https://img.shields.io/github/license/novoda/no-player.svg)](https://github.com/novoda/no-player/blob/master/LICENSE)
+# download-manager [![CI status](https://ci.novoda.com/buildStatus/icon?job=download-manager)](https://ci.novoda.com/job/download-manager/lastBuild/console) [![Download from Bintray](https://api.bintray.com/packages/novoda/maven/download-manager/images/download.svg)](https://bintray.com/novoda/maven/download-manager/_latestVersion)[![Apache 2.0 Licence](https://img.shields.io/github/license/novoda/download-manager.svg)](https://github.com/novoda/download-manager/blob/master/LICENSE)
 
 A library that handles long-running downloads, handling the network interactions and retrying downloads automatically after failures. Clients can request
 downloads in batches, receiving a single notification for all of the files allocated to a batch while being able to retrieve the single files after downloads complete.
@@ -43,3 +43,25 @@ Batch batch = Batch.with(primaryStorageWithDownloadsSubpackage, DownloadBatchIdC
 ```
 downloadManager.download(batch);
 ```
+
+## Snapshots
+
+[![CI status](https://ci.novoda.com/buildStatus/icon?job=download-manager-snapshot)](https://ci.novoda.com/job/download-manager-snapshot/lastBuild/console) [![Download from Bintray](https://api.bintray.com/packages/novoda/snapshots/download-manager/images/download.svg)](https://bintray.com/novoda/snapshots/download-manager/_latestVersion)
+
+Snapshot builds from [`develop`](https://github.com/novoda/download-manager/compare/release...develop) are automatically deployed to a [repository](https://bintray.com/novoda/snapshots/download-manager/_latestVersion) that is not synced with JCenter.
+To consume a snapshot build add an additional maven repo as follows:
+```
+repositories {
+    maven {
+        url 'https://novoda.bintray.com/snapshots'
+    }
+}
+```
+
+You can find the latest snapshot version following this [link](https://bintray.com/novoda/snapshots/download-manager/_latestVersion).
+
+## Contributing
+
+We always welcome people to contribute new features or bug fixes, [here is how](https://github.com/novoda/novoda/blob/master/CONTRIBUTING.md).
+
+If you have a problem, check the [Issues Page](https://github.com/novoda/download-manager/issues) first to see if we are already working on it.
