@@ -33,12 +33,12 @@ class NetworkFileSizeRequester implements FileSizeRequester {
     }
 
     private long executeRequestFileSize(String url) throws IOException {
-        long fileSize = requestFileSizeThroughBodyRequest(url);
+        long fileSize = requestFileSizeThroughHeaderRequest(url);
         if (fileSize == UNKNOWN_CONTENT_LENGTH || fileSize == ZERO_FILE_SIZE) {
-            Logger.w(String.format("file size body request '%s' returned %s, we'll try with a header request", url, fileSize));
-            fileSize = requestFileSizeThroughHeaderRequest(url);
+            Logger.w(String.format("file size header request '%s' returned %s, we'll try with a body request", url, fileSize));
+            fileSize = requestFileSizeThroughBodyRequest(url);
             if (fileSize == UNKNOWN_CONTENT_LENGTH || fileSize == ZERO_FILE_SIZE) {
-                Logger.w(String.format("file size header request '%s' returned %s", url, fileSize));
+                Logger.w(String.format("file size body request '%s' returned %s", url, fileSize));
             }
         }
 
