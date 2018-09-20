@@ -9,10 +9,10 @@ class ServiceNotificationDispatcher<T> {
     private static final String NOTIFICATION_TAG = "download-manager";
 
     private final Object waitForDownloadService;
+    private final Wait.Criteria serviceCriteria;
     private final NotificationCreator<T> notificationCreator;
     private final NotificationManagerCompat notificationManager;
 
-    private Wait.Criteria serviceCriteria;
     private int persistentNotificationId;
     private DownloadManagerService service;
 
