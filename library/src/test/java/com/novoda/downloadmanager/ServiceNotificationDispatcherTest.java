@@ -3,6 +3,7 @@ package com.novoda.downloadmanager;
 import android.app.Notification;
 import android.support.v4.app.NotificationManagerCompat;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.Before;
@@ -37,9 +38,9 @@ public class ServiceNotificationDispatcherTest {
     public static class ServiceDoesNotExist extends BaseTest {
 
         @Rule
-        public Timeout timeout = new Timeout(100) {
+        public Timeout timeout = new Timeout(500, TimeUnit.MILLISECONDS) {
             public Statement apply(Statement base, Description description) {
-                return new FailOnTimeout(base, 100) {
+                return new FailOnTimeout(base, 500) {
                     @Override
                     public void evaluate() throws Throwable {
                         try {

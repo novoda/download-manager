@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.Before;
@@ -45,9 +46,9 @@ public class LiteDownloadManagerTest {
     public static class ServiceDoesNotExist extends BaseTest {
 
         @Rule
-        public Timeout timeout = new Timeout(100) {
+        public Timeout timeout = new Timeout(500, TimeUnit.MILLISECONDS) {
             public Statement apply(Statement base, Description description) {
-                return new FailOnTimeout(base, 100) {
+                return new FailOnTimeout(base, 500) {
                     @Override
                     public void evaluate() throws Throwable {
                         try {
