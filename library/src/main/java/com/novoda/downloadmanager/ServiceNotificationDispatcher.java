@@ -14,11 +14,14 @@ class ServiceNotificationDispatcher<T> {
 
     private Wait.Criteria serviceCriteria;
     private int persistentNotificationId;
+    private DownloadManagerService service;
 
     ServiceNotificationDispatcher(Object waitForDownloadService,
+                                  Wait.Criteria serviceCriteria,
                                   NotificationCreator<T> notificationCreator,
                                   NotificationManagerCompat notificationManager) {
         this.waitForDownloadService = waitForDownloadService;
+        this.serviceCriteria = serviceCriteria;
         this.notificationCreator = notificationCreator;
         this.notificationManager = notificationManager;
     }
@@ -67,7 +70,7 @@ class ServiceNotificationDispatcher<T> {
 
     private void updatePersistentNotification(NotificationInformation notificationInformation) {
         persistentNotificationId = notificationInformation.getId();
-        ((DownloadManagerService) serviceCriteria).start(notificationInformation.getId(), notificationInformation.getNotification());
+        service.start(notificationInformation.getId(), notificationInformation.getNotification());
     }
 
     private void stackNotification(NotificationInformation notificationInformation) {
@@ -85,11 +88,12 @@ class ServiceNotificationDispatcher<T> {
 
     private void dismissPersistentIfCurrent(NotificationInformation notificationInformation) {
         if (persistentNotificationId == notificationInformation.getId()) {
-            ((DownloadManagerService) serviceCriteria).stop(true);
+            service.stop(true);
         }
     }
 
     void setService(DownloadManagerService service) {
+        this.service = service;
         serviceCriteria.update(service);
     }
 }

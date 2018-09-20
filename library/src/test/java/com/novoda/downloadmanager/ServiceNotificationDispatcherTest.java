@@ -33,6 +33,7 @@ public class ServiceNotificationDispatcherTest {
     private final NotificationCreator<DownloadBatchStatus> notificationCreator = mock(NotificationCreator.class);
     private final NotificationManagerCompat notificationManager = mock(NotificationManagerCompat.class);
     private final DownloadManagerService downloadService = mock(DownloadManagerService.class);
+    private final Wait.Criteria serviceCriteria = new Wait.Criteria();
 
     private ServiceNotificationDispatcher<DownloadBatchStatus> notificationDispatcher;
 
@@ -40,7 +41,7 @@ public class ServiceNotificationDispatcherTest {
     public void setUp() {
         given(notificationCreator.createNotification(any(DownloadBatchStatus.class))).willReturn(createNotificationInfo(SINGLE_PERSISTENT_NOTIFICATION, 100));
 
-        notificationDispatcher = new ServiceNotificationDispatcher<>(lock, notificationCreator, notificationManager);
+        notificationDispatcher = new ServiceNotificationDispatcher<>(lock, serviceCriteria, notificationCreator, notificationManager);
         notificationDispatcher.setService(downloadService);
     }
 
