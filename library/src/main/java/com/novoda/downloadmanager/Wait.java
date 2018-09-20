@@ -1,17 +1,29 @@
 package com.novoda.downloadmanager;
 
-import android.support.annotation.Nullable;
-
+import edu.umd.cs.findbugs.annotations.Nullable;
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 
 final class Wait {
+
+    static class Holder {
+        @Nullable
+        private ToWaitFor toWaitFor;
+
+        void update(ToWaitFor toWaitFor) {
+            this.toWaitFor = toWaitFor;
+        }
+
+        ToWaitFor toWaitFor() {
+            return toWaitFor;
+        }
+    }
 
     private Wait() {
         // Uses static factory method.
     }
 
-    static <T> ThenPerform<T> waitFor(@Nullable ToWaitFor instanceToWaitFor, Object lock) {
-        return new ThenPerform<>(instanceToWaitFor, lock);
+    static <T> ThenPerform<T> waitFor(Holder holder, Object lock) {
+        return new ThenPerform<>(holder, lock);
     }
 
     static class ThenPerform<T> {
@@ -20,16 +32,16 @@ final class Wait {
             T performAction();
         }
 
-        private final ToWaitFor instanceToWaitFor;
+        private final Holder holder;
         private final Object lock;
 
-        ThenPerform(ToWaitFor instanceToWaitFor, Object lock) {
-            this.instanceToWaitFor = instanceToWaitFor;
+        ThenPerform(Holder holder, Object lock) {
+            this.holder = holder;
             this.lock = lock;
         }
 
         T thenPerform(Action<T> action) {
-            if (instanceToWaitFor == null) {
+            if (holder.toWaitFor() == null) {
                 waitForLock();
             }
             return action.performAction();
@@ -39,7 +51,7 @@ final class Wait {
         private void waitForLock() {
             try {
                 synchronized (lock) {
-                    if (instanceToWaitFor == null) {
+                    while (holder.toWaitFor() == null) {
                         lock.wait();
                     }
                 }

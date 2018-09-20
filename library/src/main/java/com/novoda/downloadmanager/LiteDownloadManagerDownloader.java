@@ -25,6 +25,7 @@ class LiteDownloadManagerDownloader {
     private final ConnectionChecker connectionChecker;
     private final CallbackThrottleCreator callbackThrottleCreator;
     private final DownloadBatchStatusFilter downloadBatchStatusFilter;
+    private final Wait.Holder serviceHolder;
 
     private DownloadService downloadService;
 
@@ -41,7 +42,8 @@ class LiteDownloadManagerDownloader {
                                   ConnectionChecker connectionChecker,
                                   Set<DownloadBatchStatusCallback> callbacks,
                                   CallbackThrottleCreator callbackThrottleCreator,
-                                  DownloadBatchStatusFilter downloadBatchStatusFilter) {
+                                  DownloadBatchStatusFilter downloadBatchStatusFilter,
+                                  Wait.Holder serviceHolder) {
         this.waitForDownloadService = waitForDownloadService;
         this.waitForDownloadBatchStatusCallback = waitForDownloadBatchStatusCallback;
         this.executor = executor;
@@ -54,6 +56,7 @@ class LiteDownloadManagerDownloader {
         this.callbacks = callbacks;
         this.callbackThrottleCreator = callbackThrottleCreator;
         this.downloadBatchStatusFilter = downloadBatchStatusFilter;
+        this.serviceHolder = serviceHolder;
     }
 
     void download(Batch batch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
@@ -80,7 +83,7 @@ class LiteDownloadManagerDownloader {
         executor.submit(new Runnable() {
             @Override
             public void run() {
-                Wait.<Void>waitFor(downloadService, waitForDownloadService)
+                Wait.<Void>waitFor(serviceHolder, waitForDownloadService)
                         .thenPerform(executeDownload(downloadBatch, downloadBatchMap));
             }
         });

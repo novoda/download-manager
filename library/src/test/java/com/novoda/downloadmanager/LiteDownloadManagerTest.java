@@ -2,11 +2,6 @@ package com.novoda.downloadmanager;
 
 import android.os.Handler;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.InOrder;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,6 +11,11 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.InOrder;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.novoda.downloadmanager.DownloadBatchIdFixtures.aDownloadBatchId;
@@ -60,6 +60,7 @@ public class LiteDownloadManagerTest {
     private final DownloadsBatchPersistence downloadsBatchPersistence = mock(DownloadsBatchPersistence.class);
     private final LiteDownloadManagerDownloader downloadManagerDownloader = mock(LiteDownloadManagerDownloader.class);
     private final ConnectionChecker connectionChecker = mock(ConnectionChecker.class);
+    private final Wait.Holder serviceHolder = new Wait.Holder();
 
     private LiteDownloadManager liteDownloadManager;
     private Map<DownloadBatchId, DownloadBatch> downloadingBatches = new HashMap<>();
@@ -85,7 +86,8 @@ public class LiteDownloadManagerTest {
                 fileOperations,
                 downloadsBatchPersistence,
                 downloadManagerDownloader,
-                connectionChecker
+                connectionChecker,
+                serviceHolder
         );
 
         setupDownloadBatchesResponse();
@@ -271,7 +273,7 @@ public class LiteDownloadManagerTest {
 
     @Test(timeout = 500)
     public void waitsForServiceToExist_whenGettingAllBatchStatuses() {
-        notifyLockOnAnotherThread();
+        initialiseOnAnotherThread();
 
         liteDownloadManager.getAllDownloadBatchStatuses(allBatchStatusesCallback);
 
@@ -289,7 +291,7 @@ public class LiteDownloadManagerTest {
 
     @Test(timeout = 500)
     public void waitsForServiceToExist_whenGettingAllBatchStatusesWithSynchronousCall() {
-        notifyLockOnAnotherThread();
+        initialiseOnAnotherThread();
 
         List<DownloadBatchStatus> allDownloadBatchStatuses = liteDownloadManager.getAllDownloadBatchStatuses();
 
@@ -307,7 +309,7 @@ public class LiteDownloadManagerTest {
 
     @Test(timeout = 500)
     public void waitsForServiceToExist_whenGettingDownloadStatusWithMatchingId() {
-        notifyLockOnAnotherThread();
+        initialiseOnAnotherThread();
 
         liteDownloadManager.getDownloadFileStatusWithMatching(DOWNLOAD_BATCH_ID, DOWNLOAD_FILE_ID, downloadFileStatusCallback);
 
@@ -325,7 +327,7 @@ public class LiteDownloadManagerTest {
 
     @Test(timeout = 500)
     public void waitsForServiceToExist_whenGettingDownloadStatusWithMatchingIdWithSynchronousCall() {
-        notifyLockOnAnotherThread();
+        initialiseOnAnotherThread();
 
         DownloadFileStatus fileStatus = liteDownloadManager.getDownloadFileStatusWithMatching(DOWNLOAD_BATCH_ID, DOWNLOAD_FILE_ID);
 
@@ -364,7 +366,7 @@ public class LiteDownloadManagerTest {
         liteDownloadManager.updateAllowedConnectionType(null);
     }
 
-    private void notifyLockOnAnotherThread() {
+    private void initialiseOnAnotherThread() {
         Executors.newSingleThreadExecutor()
                 .submit(() -> {
                     try {
@@ -372,10 +374,7 @@ public class LiteDownloadManagerTest {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-
-                    synchronized (serviceLock) {
-                        serviceLock.notifyAll();
-                    }
+                    liteDownloadManager.initialise(downloadService);
                 });
     }
 

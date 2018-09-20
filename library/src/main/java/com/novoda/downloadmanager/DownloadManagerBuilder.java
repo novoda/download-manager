@@ -291,6 +291,8 @@ public final class DownloadManagerBuilder {
 
         DownloadBatchStatusFilter downloadBatchStatusFilter = new DownloadBatchStatusFilter();
 
+        Wait.Holder serviceHolder = new Wait.Holder();
+
         LiteDownloadManagerDownloader downloader = new LiteDownloadManagerDownloader(
                 SERVICE_LOCK,
                 CALLBACK_LOCK,
@@ -303,7 +305,8 @@ public final class DownloadManagerBuilder {
                 connectionChecker,
                 callbacks,
                 callbackThrottleCreator,
-                downloadBatchStatusFilter
+                downloadBatchStatusFilter,
+                serviceHolder
         );
 
         liteDownloadManager = new LiteDownloadManager(
@@ -316,7 +319,8 @@ public final class DownloadManagerBuilder {
                 fileOperations,
                 downloadsBatchPersistence,
                 downloader,
-                connectionChecker
+                connectionChecker,
+                serviceHolder
         );
 
         return liteDownloadManager;
