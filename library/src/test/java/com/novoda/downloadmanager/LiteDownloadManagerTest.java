@@ -60,7 +60,7 @@ public class LiteDownloadManagerTest {
     private final DownloadsBatchPersistence downloadsBatchPersistence = mock(DownloadsBatchPersistence.class);
     private final LiteDownloadManagerDownloader downloadManagerDownloader = mock(LiteDownloadManagerDownloader.class);
     private final ConnectionChecker connectionChecker = mock(ConnectionChecker.class);
-    private final Wait.Holder serviceHolder = new Wait.Holder();
+    private final Wait.Criteria serviceCriteria = new Wait.Criteria();
 
     private LiteDownloadManager liteDownloadManager;
     private Map<DownloadBatchId, DownloadBatch> downloadingBatches = new HashMap<>();
@@ -87,7 +87,7 @@ public class LiteDownloadManagerTest {
                 downloadsBatchPersistence,
                 downloadManagerDownloader,
                 connectionChecker,
-                serviceHolder
+                serviceCriteria
         );
 
         setupDownloadBatchesResponse();

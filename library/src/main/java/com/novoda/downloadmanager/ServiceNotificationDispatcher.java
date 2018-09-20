@@ -12,7 +12,7 @@ class ServiceNotificationDispatcher<T> {
     private final NotificationCreator<T> notificationCreator;
     private final NotificationManagerCompat notificationManager;
 
-    private Wait.Holder serviceHolder;
+    private Wait.Criteria serviceCriteria;
     private int persistentNotificationId;
 
     ServiceNotificationDispatcher(Object waitForDownloadService,
@@ -25,7 +25,7 @@ class ServiceNotificationDispatcher<T> {
 
     @WorkerThread
     void updateNotification(T payload) {
-        Wait.<Void>waitFor(serviceHolder, waitForDownloadService)
+        Wait.<Void>waitFor(serviceCriteria, waitForDownloadService)
                 .thenPerform(executeUpdateNotification(payload));
     }
 
@@ -67,7 +67,7 @@ class ServiceNotificationDispatcher<T> {
 
     private void updatePersistentNotification(NotificationInformation notificationInformation) {
         persistentNotificationId = notificationInformation.getId();
-        ((DownloadManagerService) serviceHolder).start(notificationInformation.getId(), notificationInformation.getNotification());
+        ((DownloadManagerService) serviceCriteria).start(notificationInformation.getId(), notificationInformation.getNotification());
     }
 
     private void stackNotification(NotificationInformation notificationInformation) {
@@ -85,11 +85,11 @@ class ServiceNotificationDispatcher<T> {
 
     private void dismissPersistentIfCurrent(NotificationInformation notificationInformation) {
         if (persistentNotificationId == notificationInformation.getId()) {
-            ((DownloadManagerService) serviceHolder).stop(true);
+            ((DownloadManagerService) serviceCriteria).stop(true);
         }
     }
 
     void setService(DownloadManagerService service) {
-        serviceHolder.update(service);
+        serviceCriteria.update(service);
     }
 }

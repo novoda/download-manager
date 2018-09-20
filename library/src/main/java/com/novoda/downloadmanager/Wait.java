@@ -5,7 +5,7 @@ import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 
 final class Wait {
 
-    static class Holder {
+    static class Criteria {
         @Nullable
         private ToWaitFor toWaitFor;
 
@@ -13,8 +13,8 @@ final class Wait {
             this.toWaitFor = toWaitFor;
         }
 
-        ToWaitFor toWaitFor() {
-            return toWaitFor;
+        boolean isNotSatisfied() {
+            return toWaitFor == null;
         }
     }
 
@@ -22,8 +22,8 @@ final class Wait {
         // Uses static factory method.
     }
 
-    static <T> ThenPerform<T> waitFor(Holder holder, Object lock) {
-        return new ThenPerform<>(holder, lock);
+    static <T> ThenPerform<T> waitFor(Criteria criteria, Object lock) {
+        return new ThenPerform<>(criteria, lock);
     }
 
     static class ThenPerform<T> {
@@ -32,16 +32,16 @@ final class Wait {
             T performAction();
         }
 
-        private final Holder holder;
+        private final Criteria criteria;
         private final Object lock;
 
-        ThenPerform(Holder holder, Object lock) {
-            this.holder = holder;
+        ThenPerform(Criteria criteria, Object lock) {
+            this.criteria = criteria;
             this.lock = lock;
         }
 
         T thenPerform(Action<T> action) {
-            if (holder.toWaitFor() == null) {
+            if (criteria.isNotSatisfied()) {
                 waitForLock();
             }
             return action.performAction();
@@ -51,7 +51,7 @@ final class Wait {
         private void waitForLock() {
             try {
                 synchronized (lock) {
-                    while (holder.toWaitFor() == null) {
+                    while (criteria.isNotSatisfied()) {
                         lock.wait();
                     }
                 }
