@@ -54,7 +54,7 @@ public class LiteDownloadManagerTest {
                         try {
                             super.evaluate();
                             throw new TimeoutException();
-                        } catch (Exception e) {
+                        } catch (Exception ignored) {
                         }
                     }
                 };
