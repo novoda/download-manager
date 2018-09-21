@@ -9,23 +9,26 @@ class ServiceNotificationDispatcher<T> {
     private static final String NOTIFICATION_TAG = "download-manager";
 
     private final Object waitForDownloadService;
+    private final Wait.Criteria serviceCriteria;
     private final NotificationCreator<T> notificationCreator;
     private final NotificationManagerCompat notificationManager;
 
-    private DownloadManagerService service;
     private int persistentNotificationId;
+    private DownloadManagerService service;
 
     ServiceNotificationDispatcher(Object waitForDownloadService,
+                                  Wait.Criteria serviceCriteria,
                                   NotificationCreator<T> notificationCreator,
                                   NotificationManagerCompat notificationManager) {
         this.waitForDownloadService = waitForDownloadService;
+        this.serviceCriteria = serviceCriteria;
         this.notificationCreator = notificationCreator;
         this.notificationManager = notificationManager;
     }
 
     @WorkerThread
     void updateNotification(T payload) {
-        Wait.<Void>waitFor(service, waitForDownloadService)
+        Wait.<Void>waitFor(serviceCriteria, waitForDownloadService)
                 .thenPerform(executeUpdateNotification(payload));
     }
 
@@ -91,5 +94,6 @@ class ServiceNotificationDispatcher<T> {
 
     void setService(DownloadManagerService service) {
         this.service = service;
+        serviceCriteria.update(service);
     }
 }

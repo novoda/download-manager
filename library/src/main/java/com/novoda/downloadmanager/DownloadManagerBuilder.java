@@ -277,9 +277,11 @@ public final class DownloadManagerBuilder {
             notificationChannelProvider.registerNotificationChannel(applicationContext);
         }
 
+        Wait.Criteria serviceCriteria = new Wait.Criteria();
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(applicationContext);
         ServiceNotificationDispatcher<DownloadBatchStatus> notificationDispatcher = new ServiceNotificationDispatcher<>(
                 SERVICE_LOCK,
+                serviceCriteria,
                 notificationCreator,
                 notificationManager
         );
@@ -303,7 +305,8 @@ public final class DownloadManagerBuilder {
                 connectionChecker,
                 callbacks,
                 callbackThrottleCreator,
-                downloadBatchStatusFilter
+                downloadBatchStatusFilter,
+                serviceCriteria
         );
 
         liteDownloadManager = new LiteDownloadManager(
@@ -316,7 +319,8 @@ public final class DownloadManagerBuilder {
                 fileOperations,
                 downloadsBatchPersistence,
                 downloader,
-                connectionChecker
+                connectionChecker,
+                serviceCriteria
         );
 
         return liteDownloadManager;

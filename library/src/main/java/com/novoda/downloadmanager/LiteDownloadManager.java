@@ -22,8 +22,7 @@ class LiteDownloadManager implements DownloadManager {
     private final DownloadsBatchPersistence downloadsBatchPersistence;
     private final LiteDownloadManagerDownloader downloader;
     private final ConnectionChecker connectionChecker;
-
-    private DownloadService downloadService;
+    private final Wait.Criteria serviceCriteria;
 
     // LiteDownloadManager is a complex object.
     @SuppressWarnings({"checkstyle:parameternumber", "PMD.ExcessiveParameterList"})
@@ -36,7 +35,8 @@ class LiteDownloadManager implements DownloadManager {
                         FileOperations fileOperations,
                         DownloadsBatchPersistence downloadsBatchPersistence,
                         LiteDownloadManagerDownloader downloader,
-                        ConnectionChecker connectionChecker) {
+                        ConnectionChecker connectionChecker,
+                        Wait.Criteria serviceCriteria) {
         this.waitForDownloadService = waitForDownloadService;
         this.waitForDownloadBatchStatusCallback = waitForDownloadBatchStatusCallback;
         this.executor = executor;
@@ -47,11 +47,12 @@ class LiteDownloadManager implements DownloadManager {
         this.downloadsBatchPersistence = downloadsBatchPersistence;
         this.downloader = downloader;
         this.connectionChecker = connectionChecker;
+        this.serviceCriteria = serviceCriteria;
     }
 
     void initialise(DownloadService downloadService) {
-        this.downloadService = downloadService;
         downloader.setDownloadService(downloadService);
+        serviceCriteria.update(downloadService);
         synchronized (waitForDownloadService) {
             waitForDownloadService.notifyAll();
         }
@@ -141,7 +142,7 @@ class LiteDownloadManager implements DownloadManager {
     @WorkerThread
     @Override
     public List<DownloadBatchStatus> getAllDownloadBatchStatuses() {
-        return Wait.<List<DownloadBatchStatus>>waitFor(downloadService, waitForDownloadService)
+        return Wait.<List<DownloadBatchStatus>>waitFor(serviceCriteria, waitForDownloadService)
                 .thenPerform(this::executeGetAllDownloadBatchStatuses);
     }
 
@@ -156,7 +157,7 @@ class LiteDownloadManager implements DownloadManager {
 
     @Override
     public void getAllDownloadBatchStatuses(AllBatchStatusesCallback callback) {
-        executor.submit((Runnable) () -> Wait.<Void>waitFor(downloadService, waitForDownloadService)
+        executor.submit((Runnable) () -> Wait.<Void>waitFor(serviceCriteria, waitForDownloadService)
                 .thenPerform(() -> {
                     List<DownloadBatchStatus> downloadBatchStatuses = executeGetAllDownloadBatchStatuses();
                     callbackHandler.post(() -> callback.onReceived(downloadBatchStatuses));
@@ -168,7 +169,7 @@ class LiteDownloadManager implements DownloadManager {
     @WorkerThread
     @Override
     public DownloadFileStatus getDownloadFileStatusWithMatching(DownloadBatchId downloadBatchId, DownloadFileId downloadFileId) {
-        return Wait.<DownloadFileStatus>waitFor(downloadService, waitForDownloadService)
+        return Wait.<DownloadFileStatus>waitFor(serviceCriteria, waitForDownloadService)
                 .thenPerform(() -> executeGetDownloadStatusWithMatching(downloadBatchId, downloadFileId));
     }
 
@@ -191,7 +192,7 @@ class LiteDownloadManager implements DownloadManager {
     public void getDownloadFileStatusWithMatching(DownloadBatchId downloadBatchId,
                                                   DownloadFileId downloadFileId,
                                                   DownloadFileStatusCallback callback) {
-        executor.submit((Runnable) () -> Wait.<Void>waitFor(downloadService, waitForDownloadService)
+        executor.submit((Runnable) () -> Wait.<Void>waitFor(serviceCriteria, waitForDownloadService)
                 .thenPerform(() -> {
                     DownloadFileStatus downloadFileStatus = executeGetDownloadStatusWithMatching(downloadBatchId, downloadFileId);
                     callbackHandler.post(() -> callback.onReceived(downloadFileStatus));
