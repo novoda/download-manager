@@ -10,8 +10,8 @@ public final class StorageRequirementRuleFactory {
 
     /**
      * Creates a storage requirement rule, where the storage bytes must be greater than the
-     * given bytes after a download completes. e.g. if specifying 100mb then the rule will
-     * be violated if the system memory remaining after the download is 99mb, preventing the
+     * given bytes after a download completes. e.g. if specifying 100MB then the rule will
+     * be violated if the system memory remaining after the download is 99MB, preventing the
      * download from being started.
      *
      * @param bytesRemainingAfterDownload the amount of storage in bytes that must be remaining after a download completes.
