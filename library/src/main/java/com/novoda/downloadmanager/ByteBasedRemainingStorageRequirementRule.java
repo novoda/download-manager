@@ -2,12 +2,12 @@ package com.novoda.downloadmanager;
 
 import java.io.File;
 
-class ByteBasedStorageRequirementRule implements StorageRequirementRule {
+class ByteBasedRemainingStorageRequirementRule implements StorageRequirementRule {
 
     private final StorageCapacityReader storageCapacityReader;
     private final long bytesRemainingAfterDownload;
 
-    ByteBasedStorageRequirementRule(StorageCapacityReader storageCapacityReader, long bytesRemainingAfterDownload) {
+    ByteBasedRemainingStorageRequirementRule(StorageCapacityReader storageCapacityReader, long bytesRemainingAfterDownload) {
         this.storageCapacityReader = storageCapacityReader;
         this.bytesRemainingAfterDownload = bytesRemainingAfterDownload;
     }

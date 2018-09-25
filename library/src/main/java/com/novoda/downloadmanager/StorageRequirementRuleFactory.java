@@ -8,11 +8,30 @@ public final class StorageRequirementRuleFactory {
         // Uses static factory methods.
     }
 
+    /**
+     * Creates a storage requirement rule, where the storage bytes must be greater than the
+     * given bytes after a download completes. e.g. if specifying 100mb then the rule will
+     * be violated if the system memory remaining after the download is 99mb, preventing the
+     * download from being started.
+     *
+     * @param bytesRemainingAfterDownload the amount of storage in bytes that must be remaining after a download completes.
+     * @return the storage requirement rule to be evaluated when creating a file.
+     */
     public static StorageRequirementRule createByteBasedRule(long bytesRemainingAfterDownload) {
-        return new ByteBasedStorageRequirementRule(new StorageCapacityReader(), bytesRemainingAfterDownload);
+        return new ByteBasedRemainingStorageRequirementRule(new StorageCapacityReader(), bytesRemainingAfterDownload);
     }
 
+    /**
+     * Creates a storage requirement rule, where the storage bytes must be greater than the
+     * a given percentage of the storage bytes after a download completes. e.g. if you specify 10% then the rule
+     * will be violated if the remaining system memory is at 9% of the total system memory, preventing the download
+     * from being started.
+     *
+     * @param percentageOfStorageRemaining the amount of storage, as a percentage of the system storage, that must
+     *                                     be remaining after a download completes.
+     * @return the storage requirement rule to be evaluated when creating a file.
+     */
     public static StorageRequirementRule createPercentageBasedRule(@FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
-        return new PercentageBasedStorageRequirementRule(new StorageCapacityReader(), percentageOfStorageRemaining);
+        return new PercentageBasedRemainingStorageRequirementRule(new StorageCapacityReader(), percentageOfStorageRemaining);
     }
 }

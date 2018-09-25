@@ -4,13 +4,13 @@ import android.support.annotation.FloatRange;
 
 import java.io.File;
 
-class PercentageBasedStorageRequirementRule implements StorageRequirementRule {
+class PercentageBasedRemainingStorageRequirementRule implements StorageRequirementRule {
 
     private final StorageCapacityReader storageCapacityReader;
     private final float percentageOfStorageRemaining;
 
-    PercentageBasedStorageRequirementRule(StorageCapacityReader storageCapacityReader,
-                                          @FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
+    PercentageBasedRemainingStorageRequirementRule(StorageCapacityReader storageCapacityReader,
+                                                   @FloatRange(from = 0.0, to = 0.5) float percentageOfStorageRemaining) {
         this.storageCapacityReader = storageCapacityReader;
         this.percentageOfStorageRemaining = percentageOfStorageRemaining;
     }
