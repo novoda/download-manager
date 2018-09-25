@@ -10,7 +10,7 @@ public final class StorageRequirementRuleFactory {
 
     /**
      * Creates a storage requirement rule, where the storage bytes must be greater than the
-     * given bytes after a download completes. e.g. if specifying 100MB then the rule will
+     * given bytes after a download completes. E.g. if specifying 100MB then the rule will
      * be violated if the system memory remaining after the download is 99MB, preventing the
      * download from being started.
      *
@@ -23,7 +23,7 @@ public final class StorageRequirementRuleFactory {
 
     /**
      * Creates a storage requirement rule, where the storage bytes must be greater than the
-     * a given percentage of the storage bytes after a download completes. e.g. if you specify 10% then the rule
+     * a given percentage of the storage bytes after a download completes. E.g. if you specify 10% then the rule
      * will be violated if the remaining system memory is at 9% of the total system memory, preventing the download
      * from being started.
      *
