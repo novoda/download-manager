@@ -12,18 +12,21 @@ class FileDownloaderCreator {
     private final FileDownloaderType type;
     @Nullable
     private final Class<? extends FileDownloader> customClass;
+    @Nullable
+    private final HttpClient httpClient;
 
-    static FileDownloaderCreator newNetworkFileDownloaderCreator() {
-        return new FileDownloaderCreator(FileDownloaderType.NETWORK, null);
+    static FileDownloaderCreator newNetworkFileDownloaderCreator(HttpClient httpClient) {
+        return new FileDownloaderCreator(FileDownloaderType.NETWORK, null, httpClient);
     }
 
     static FileDownloaderCreator newCustomFileDownloaderCreator(Class<? extends FileDownloader> customClass) {
-        return new FileDownloaderCreator(FileDownloaderType.CUSTOM, customClass);
+        return new FileDownloaderCreator(FileDownloaderType.CUSTOM, customClass, null);
     }
 
-    FileDownloaderCreator(FileDownloaderType type, @Nullable Class<? extends FileDownloader> customClass) {
+    FileDownloaderCreator(FileDownloaderType type, @Nullable Class<? extends FileDownloader> customClass, @Nullable HttpClient httpClient) {
         this.type = type;
         this.customClass = customClass;
+        this.httpClient = httpClient;
     }
 
     FileDownloader create() {
@@ -31,7 +34,6 @@ class FileDownloaderCreator {
 
         switch (type) {
             case NETWORK:
-                HttpClient httpClient = new LiteHttpClientFactory().create();
                 NetworkRequestCreator requestCreator = new NetworkRequestCreator();
                 fileDownloader = new NetworkFileDownloader(httpClient, requestCreator);
                 break;
