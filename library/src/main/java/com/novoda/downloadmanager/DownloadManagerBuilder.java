@@ -63,7 +63,7 @@ public final class DownloadManagerBuilder {
     public static DownloadManagerBuilder newInstance(Context context, Handler callbackHandler, @DrawableRes final int notificationIcon) {
         Context applicationContext = context.getApplicationContext();
 
-        HttpClient httpClient = new LiteHttpClientFactory().create();
+        HttpClient httpClient = HttpClientFactory.getInstance();
         StorageRequirementRules storageRequirementRule = StorageRequirementRules.newInstance();
         FilePersistenceCreator filePersistenceCreator = new FilePersistenceCreator(applicationContext);
         FileDownloaderCreator fileDownloaderCreator = FileDownloaderCreator.newNetworkFileDownloaderCreator(httpClient);
@@ -142,9 +142,8 @@ public final class DownloadManagerBuilder {
         this.logHandle = logHandle;
     }
 
-    public DownloadManagerBuilder withCustomHttpClientFactory(HttpClientFactory httpClientFactory) {
+    public DownloadManagerBuilder withCustomHttpClient(HttpClient httpClient) {
         NetworkRequestCreator requestCreator = new NetworkRequestCreator();
-        HttpClient httpClient = httpClientFactory.create();
         this.fileSizeRequester = new NetworkFileSizeRequester(httpClient, requestCreator);
         this.fileDownloaderCreator = FileDownloaderCreator.newNetworkFileDownloaderCreator(httpClient);
         return this;

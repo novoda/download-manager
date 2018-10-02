@@ -3,7 +3,7 @@ package com.novoda.downloadmanager;
 import java.io.IOException;
 import java.io.InputStream;
 
-interface HttpClient {
+public interface HttpClient {
 
     NetworkResponse execute(NetworkRequest networkRequest) throws IOException;
 
