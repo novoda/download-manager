@@ -68,7 +68,7 @@ public final class DownloadManagerBuilder {
         FileDownloaderCreator fileDownloaderCreator = FileDownloaderCreator.newNetworkFileDownloaderCreator();
 
         NetworkRequestCreator requestCreator = new NetworkRequestCreator();
-        HttpClient httpClient = HttpClientFactory.getInstance();
+        HttpClient httpClient = new LiteHttpClientFactory().create();
         FileSizeRequester fileSizeRequester = new NetworkFileSizeRequester(httpClient, requestCreator);
 
         DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(applicationContext);

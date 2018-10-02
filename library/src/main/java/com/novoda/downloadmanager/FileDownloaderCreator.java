@@ -31,7 +31,7 @@ class FileDownloaderCreator {
 
         switch (type) {
             case NETWORK:
-                HttpClient httpClient = HttpClientFactory.getInstance();
+                HttpClient httpClient = new LiteHttpClientFactory().create();
                 NetworkRequestCreator requestCreator = new NetworkRequestCreator();
                 fileDownloader = new NetworkFileDownloader(httpClient, requestCreator);
                 break;
