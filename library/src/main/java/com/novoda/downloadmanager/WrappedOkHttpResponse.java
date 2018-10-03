@@ -5,7 +5,7 @@ import java.io.InputStream;
 
 import okhttp3.Response;
 
-class WrappedOkHttpResponse implements HttpClient.NetworkResponse {
+class WrappedOkHttpResponse implements NetworkResponse {
 
     private final Response response;
 

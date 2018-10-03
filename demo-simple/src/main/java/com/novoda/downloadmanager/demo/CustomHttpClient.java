@@ -2,6 +2,7 @@ package com.novoda.downloadmanager.demo;
 
 import com.novoda.downloadmanager.HttpClient;
 import com.novoda.downloadmanager.NetworkRequest;
+import com.novoda.downloadmanager.NetworkResponse;
 
 import java.io.IOException;
 import java.util.Map;
