@@ -21,7 +21,7 @@ dependencies {
 
 1. Create a `DownloadManager`:
 
-```
+```java
 DownloadManager downloadManager = DownloadManagerBuilder
         .newInstance(this, handler, R.mipmap.ic_launcher_round)
         .withLogHandle(new DemoLogHandle())
@@ -31,7 +31,7 @@ DownloadManager downloadManager = DownloadManagerBuilder
 
 2. Create a `Batch` of files to download:
 
-```
+```java
 Batch batch = Batch.with(primaryStorageWithDownloadsSubpackage, DownloadBatchIdCreator.createSanitizedFrom("batch_id_1"), "batch one title")
         .downloadFrom("http://ipv4.download.thinkbroadband.com/5MB.zip").saveTo("foo/bar", "local-filename-5mb.zip").withIdentifier(DownloadFileIdCreator.createFrom("file_id_1")).apply()
         .downloadFrom("http://ipv4.download.thinkbroadband.com/10MB.zip").apply()
@@ -40,7 +40,7 @@ Batch batch = Batch.with(primaryStorageWithDownloadsSubpackage, DownloadBatchIdC
 
 3. Schedule the batch for download:
 
-```
+```java
 downloadManager.download(batch);
 ```
 
@@ -50,7 +50,7 @@ downloadManager.download(batch);
 
 Snapshot builds from [`develop`](https://github.com/novoda/download-manager/compare/release...develop) are automatically deployed to a [repository](https://bintray.com/novoda/snapshots/download-manager/_latestVersion) that is not synced with JCenter.
 To consume a snapshot build add an additional maven repo as follows:
-```
+```groovy
 repositories {
     maven {
         url 'https://novoda.bintray.com/snapshots'
