@@ -10,7 +10,7 @@ import java.io.InputStream;
 public interface NetworkResponse {
 
     /**
-     * @return the http status code.
+     * @return the HTTP status code.
      */
     int code();
 

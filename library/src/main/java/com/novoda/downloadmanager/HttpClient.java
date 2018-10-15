@@ -3,7 +3,7 @@ package com.novoda.downloadmanager;
 import java.io.IOException;
 
 /**
- * Used to customize the http client that will be used to request file sizes
+ * Used to customize the HTTP client that will be used to request file sizes
  * and download assets. Clients of this library can create their own
  * implementation and pass it to {@link DownloadManagerBuilder#withCustomHttpClient(HttpClient)}.
  */
