@@ -13,15 +13,15 @@ class NetworkRequestCreator {
     }
 
     NetworkRequest createFileSizeHeadRequest(String url) {
-        return new NetworkRequest(DISABLE_COMPRESSION_HEADERS, url, NetworkRequest.Method.HEAD);
+        return new LiteNetworkRequest(DISABLE_COMPRESSION_HEADERS, url, NetworkRequest.Method.HEAD);
     }
 
     NetworkRequest createFileSizeBodyRequest(String url) {
-        return new NetworkRequest(DISABLE_COMPRESSION_HEADERS, url, NetworkRequest.Method.GET);
+        return new LiteNetworkRequest(DISABLE_COMPRESSION_HEADERS, url, NetworkRequest.Method.GET);
     }
 
     NetworkRequest createDownloadRequest(String url) {
-        return new NetworkRequest(new HashMap<>(), url, NetworkRequest.Method.GET);
+        return new LiteNetworkRequest(new HashMap<>(), url, NetworkRequest.Method.GET);
     }
 
     NetworkRequest createDownloadRequestWithDownloadedBytesHeader(String url, long currentSize, long totalSize) {
@@ -29,6 +29,6 @@ class NetworkRequestCreator {
         String headerValue = String.format(DOWNLOADED_BYTES_VALUE_FORMAT, currentSize, totalSize);
         headers.put("Range", headerValue);
 
-        return new NetworkRequest(headers, url, NetworkRequest.Method.GET);
+        return new LiteNetworkRequest(headers, url, NetworkRequest.Method.GET);
     }
 }

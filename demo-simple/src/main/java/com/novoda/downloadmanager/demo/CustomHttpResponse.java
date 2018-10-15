@@ -1,15 +1,17 @@
-package com.novoda.downloadmanager;
+package com.novoda.downloadmanager.demo;
+
+import com.novoda.downloadmanager.NetworkResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 import okhttp3.Response;
 
-class WrappedOkHttpResponse implements NetworkResponse {
+class CustomHttpResponse implements NetworkResponse {
 
     private final Response response;
 
-    WrappedOkHttpResponse(Response response) {
+    CustomHttpResponse(Response response) {
         this.response = response;
     }
 

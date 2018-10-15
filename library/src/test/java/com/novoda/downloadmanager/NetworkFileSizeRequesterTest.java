@@ -12,8 +12,8 @@ import static org.mockito.Mockito.mock;
 
 public class NetworkFileSizeRequesterTest {
 
-    private static final HttpClient.NetworkResponse UNSUCCESSFUL_RESPONSE = aNetworkResponse().withSuccessful(false).build();
-    private static final HttpClient.NetworkResponse SUCCESSFUL_RESPONSE = aNetworkResponse().withHeader("1000").withSuccessful(true).build();
+    private static final NetworkResponse UNSUCCESSFUL_RESPONSE = aNetworkResponse().withSuccessful(false).build();
+    private static final NetworkResponse SUCCESSFUL_RESPONSE = aNetworkResponse().withHeader("1000").withSuccessful(true).build();
     private static final String ANY_RAW_URL = "http://example.com";
     private static final int FILE_BYTES = 1000;
 

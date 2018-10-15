@@ -19,14 +19,14 @@ public class NetworkFileDownloaderTest {
 
     private static final String MESSAGE = "message";
     private static final byte[] BYTES_TO_RECEIVE = "s".getBytes();
-    private static final HttpClient.NetworkResponse RESPONSE_WITH_INPUT_STREAM = aNetworkResponse()
+    private static final NetworkResponse RESPONSE_WITH_INPUT_STREAM = aNetworkResponse()
             .withInputStream(new ByteArrayInputStream(BYTES_TO_RECEIVE))
             .build();
 
     private static final String ANY_RAW_URL = "http://example.com";
     private static final FileSize KNOWN_FILE_SIZE = aFileSize().withAreBytesDownloadedKnown(true).build();
     private static final FileSize UNKNOWN_FILE_SIZE = aFileSize().withAreBytesDownloadedKnown(false).build();
-    private static final HttpClient.NetworkResponse INVALID_RESPONSE = aNetworkResponse().withCode(418).build();
+    private static final NetworkResponse INVALID_RESPONSE = aNetworkResponse().withCode(418).build();
 
     private final FileDownloader.Callback callback = mock(FileDownloader.Callback.class);
     private final HttpClient httpClient = mock(HttpClient.class);
@@ -53,7 +53,7 @@ public class NetworkFileDownloaderTest {
 
     @Test
     public void closesByteStream_whenDownloaded() throws IOException {
-        HttpClient.NetworkResponse networkResponse = spy(aNetworkResponse().build());
+        NetworkResponse networkResponse = spy(aNetworkResponse().build());
         given(httpClient.execute(requestCreator.createDownloadRequest(ANY_RAW_URL))).willReturn(networkResponse);
 
         networkFileDownloader.startDownloading(ANY_RAW_URL, UNKNOWN_FILE_SIZE, callback);
