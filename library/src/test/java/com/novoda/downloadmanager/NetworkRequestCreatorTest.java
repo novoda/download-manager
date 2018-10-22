@@ -52,7 +52,8 @@ public class NetworkRequestCreatorTest {
         NetworkRequest networkRequest = networkRequestCreator.createDownloadRequestWithDownloadedBytesHeader(
                 "http://www.google.com",
                 100,
-                500);
+                500
+        );
 
         NetworkRequest expectedNetworkRequest = aNetworkRequest()
                 .withHeader("Range", "bytes=100-499")
