@@ -10,7 +10,7 @@ public class NetworkRequestCreatorTest {
     private final NetworkRequestCreator networkRequestCreator = new NetworkRequestCreator();
 
     @Test
-    public void givenSimpleRequest_whenCreatingFileSizeHeadRequest_thenReturnsExpectedResumeRequest() {
+    public void createsFileSizeHeadRequest() {
         NetworkRequest networkRequest = networkRequestCreator.createFileSizeHeadRequest("http://www.google.com");
 
         NetworkRequest expectedNetworkRequest = aNetworkRequest()
