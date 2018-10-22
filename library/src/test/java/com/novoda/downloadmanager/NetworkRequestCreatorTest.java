@@ -48,7 +48,7 @@ public class NetworkRequestCreatorTest {
     }
 
     @Test
-    public void givenPartiallyDownloadedFile_whenCreatingResumeRequest_thenReturnsExpectedResumeRequest() {
+    public void createsResumeRequest() {
         NetworkRequest networkRequest = networkRequestCreator.createDownloadRequestWithDownloadedBytesHeader(
                 "http://www.google.com",
                 100,
