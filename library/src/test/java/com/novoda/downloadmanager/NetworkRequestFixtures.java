@@ -58,5 +58,25 @@ class NetworkRequestFixtures {
         public Method method() {
             return method;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof StubNetworkRequest)) return false;
+
+            StubNetworkRequest that = (StubNetworkRequest) o;
+
+            if (!headers.equals(that.headers)) return false;
+            if (!url.equals(that.url)) return false;
+            return method == that.method;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = headers.hashCode();
+            result = 31 * result + url.hashCode();
+            result = 31 * result + method.hashCode();
+            return result;
+        }
     }
 }
