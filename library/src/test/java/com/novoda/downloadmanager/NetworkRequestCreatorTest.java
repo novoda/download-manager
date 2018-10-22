@@ -23,7 +23,7 @@ public class NetworkRequestCreatorTest {
     }
 
     @Test
-    public void givenSimpleRequest_whenCreatingFileSizeBodyRequest_thenReturnsExpectedResumeRequest() {
+    public void createsFileSizeBodyRequest() {
         NetworkRequest networkRequest = networkRequestCreator.createFileSizeBodyRequest("http://www.google.com");
 
         NetworkRequest expectedNetworkRequest = aNetworkRequest()
