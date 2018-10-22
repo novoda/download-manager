@@ -78,5 +78,14 @@ class NetworkRequestFixtures {
             result = 31 * result + method.hashCode();
             return result;
         }
+
+        @Override
+        public String toString() {
+            return "StubNetworkRequest{" +
+                    "headers=" + headers +
+                    ", url='" + url + '\'' +
+                    ", method=" + method +
+                    '}';
+        }
     }
 }
