@@ -36,7 +36,7 @@ public class NetworkRequestCreatorTest {
     }
 
     @Test
-    public void givenSimpleRequest_whenCreatingRequest_thenReturnsExpectedResumeRequest() {
+    public void createsDownloadRequest() {
         NetworkRequest networkRequest = networkRequestCreator.createDownloadRequest("http://www.google.com");
 
         NetworkRequest expectedNetworkRequest = aNetworkRequest()
