@@ -12,6 +12,7 @@ import com.novoda.downloadmanager.FileSizeExtractor;
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
 import com.novoda.downloadmanager.StorageRoot;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -172,16 +173,8 @@ public class MigrationJob implements Runnable {
         } catch (IOException e) {
             Log.e(getClass().getSimpleName(), e.getMessage());
         } finally {
-            try {
-                if (outputStream != null) {
-                    outputStream.close();
-                }
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-            } catch (IOException e) {
-                Log.e(getClass().getSimpleName(), e.getMessage());
-            }
+            closeStream(outputStream);
+            closeStream(inputStream);
         }
     }
 
@@ -193,6 +186,16 @@ public class MigrationJob implements Runnable {
 
         Log.w(getClass().getSimpleName(), String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
         return outputFile.getParentFile().mkdirs();
+    }
+
+    private void closeStream(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                Log.e(getClass().getSimpleName(), e.getMessage());
+            }
+        }
     }
 
     private void onUpdate(String message) {
