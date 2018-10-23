@@ -77,7 +77,11 @@ public class MigrationJob implements Runnable {
             partialDownloadBatches.remove(i);
 
             for (String originalFileLocation : partialDownloadBatch.originalFileLocations()) {
-                boolean usedInFurtherBatches = originalFileUsedInFurtherBatches(originalFileLocation, partialDownloadBatches, completeDownloadBatches);
+                boolean usedInFurtherBatches = originalFileUsedInFurtherBatches(
+                        originalFileLocation,
+                        partialDownloadBatches,
+                        completeDownloadBatches
+                );
                 if (!usedInFurtherBatches) {
                     deleteVersionOneFile(originalFileLocation);
                 }
@@ -94,7 +98,11 @@ public class MigrationJob implements Runnable {
             for (CompletedDownloadFile completedDownloadFile : completedDownloadBatch.completedDownloadFiles()) {
                 migrateV1FileToV2Location(completedDownloadFile);
 
-                boolean usedInFurtherBatches = originalFileUsedInFurtherBatches(completedDownloadFile.originalFileLocation(), partialDownloadBatches, completeDownloadBatches);
+                boolean usedInFurtherBatches = originalFileUsedInFurtherBatches(
+                        completedDownloadFile.originalFileLocation(),
+                        partialDownloadBatches,
+                        completeDownloadBatches
+                );
                 if (!usedInFurtherBatches) {
                     deleteVersionOneFile(completedDownloadFile.originalFileLocation());
                 }
