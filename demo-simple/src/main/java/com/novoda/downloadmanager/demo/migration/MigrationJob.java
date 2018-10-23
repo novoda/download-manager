@@ -6,16 +6,21 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.novoda.downloadmanager.CompletedDownloadBatch;
+import com.novoda.downloadmanager.CompletedDownloadFile;
 import com.novoda.downloadmanager.DownloadManager;
 import com.novoda.downloadmanager.FileSizeExtractor;
 import com.novoda.downloadmanager.SqlDatabaseWrapper;
 import com.novoda.downloadmanager.StorageRoot;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 public class MigrationJob implements Runnable {
 
+    private static final int RANDOMLY_CHOSEN_BUFFER_SIZE_THAT_SEEMS_TO_WORK = 4096;
     @SuppressLint("SdCardPath")
     private static final String V1_BASE_PATH = "/data/data/com.novoda.downloadmanager.demo.simple/files/Pictures/";
 
@@ -77,6 +82,11 @@ public class MigrationJob implements Runnable {
         onUpdate("Migrating Complete Downloads");
         for (CompletedDownloadBatch completeDownloadBatch : completeDownloadBatches) {
             downloadManager.addCompletedBatch(completeDownloadBatch);
+
+            for (CompletedDownloadFile completedDownloadFile : completeDownloadBatch.completedDownloadFiles()) {
+                migrateV1FileToV2Location(completedDownloadFile);
+                deleteVersionOneFile(completedDownloadFile.originalFileLocation());
+            }
         }
 
         onUpdate("Deleting V1 Database");
@@ -93,6 +103,53 @@ public class MigrationJob implements Runnable {
                 Log.e(getClass().getSimpleName(), message);
             }
         }
+    }
+
+    private void migrateV1FileToV2Location(CompletedDownloadFile completedDownloadFile) {
+        FileInputStream inputStream = null;
+        FileOutputStream outputStream = null;
+        try {
+            File originalFile = new File(completedDownloadFile.originalFileLocation());
+            File newFile = new File(completedDownloadFile.newFileLocation());
+            ensureParentDirectoriesExistFor(newFile);
+
+            // open the v1 file
+            outputStream = new FileOutputStream(newFile, true);
+            inputStream = new FileInputStream(originalFile);
+            byte[] bytes = new byte[RANDOMLY_CHOSEN_BUFFER_SIZE_THAT_SEEMS_TO_WORK];
+            // read the v1 file
+            int readLast = 0;
+            while (readLast != -1) {
+                readLast = inputStream.read(bytes);
+                if (readLast != 0 && readLast != -1) {
+                    // write the v1 file to the v2 location
+                    outputStream.write(bytes, 0, readLast);
+                }
+            }
+        } catch (IOException e) {
+            Log.e(getClass().getSimpleName(), e.getMessage());
+        } finally {
+            try {
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+                Log.e(getClass().getSimpleName(), e.getMessage());
+            }
+        }
+    }
+
+    private boolean ensureParentDirectoriesExistFor(File outputFile) {
+        boolean parentExists = outputFile.getParentFile().exists();
+        if (parentExists) {
+            return true;
+        }
+
+        Log.w(getClass().getSimpleName(), String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
+        return outputFile.getParentFile().mkdirs();
     }
 
     private void onUpdate(String message) {
