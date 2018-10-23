@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 public class LiteDownloadService extends Service implements DownloadService {
 
     private static final long TEN_MINUTES_IN_MILLIS = TimeUnit.MINUTES.toMillis(10);
-    private static final String WAKELOCK_TAG = "WakelockTag";
+    private static final String WAKELOCK_TAG = "liteDownloadService:wakelocktag";
 
     private ExecutorService executor;
     private IBinder binder;

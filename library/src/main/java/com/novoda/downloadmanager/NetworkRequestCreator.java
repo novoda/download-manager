@@ -26,7 +26,7 @@ class NetworkRequestCreator {
 
     NetworkRequest createDownloadRequestWithDownloadedBytesHeader(String url, long currentSize, long totalSize) {
         Map<String, String> headers = new HashMap<>();
-        String headerValue = String.format(DOWNLOADED_BYTES_VALUE_FORMAT, currentSize, totalSize);
+        String headerValue = String.format(DOWNLOADED_BYTES_VALUE_FORMAT, currentSize, totalSize - 1);
         headers.put("Range", headerValue);
 
         return new LiteNetworkRequest(headers, url, NetworkRequest.Method.GET);
