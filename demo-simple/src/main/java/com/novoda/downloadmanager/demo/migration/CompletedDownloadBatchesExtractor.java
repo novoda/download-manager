@@ -88,11 +88,9 @@ class CompletedDownloadBatchesExtractor {
                         String originalFileId = downloadsCursor.getString(FILE_ID_COLUMN);
                         String originalNetworkAddress = downloadsCursor.getString(NETWORK_ADDRESS_COLUMN);
 
-                        // hint: file:/data/user/0/com.channel4.ondemand/files/all4/23241337
                         String originalUniqueFileLocation = downloadsCursor.getString(FILE_UNIQUE_LOCATION_COLUMN);
                         String sanitizedOriginalUniqueFileLocation = MigrationStoragePathSanitizer.sanitize(originalUniqueFileLocation);
 
-                        // _data: /data/user/0/com.channel4.ondemand/files/all4/23241337-1
                         String originalFileLocation = downloadsCursor.getString(FILE_ORIGINAL_LOCATION_COLUMN);
 
                         if (downloadsCursor.isFirst()) {

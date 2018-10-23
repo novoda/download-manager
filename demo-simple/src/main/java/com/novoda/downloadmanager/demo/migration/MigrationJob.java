@@ -71,27 +71,62 @@ public class MigrationJob implements Runnable {
         List<CompletedDownloadBatch> completeDownloadBatches = migrationExtractor.extractMigrations();
 
         onUpdate("Queuing Partial Downloads");
-        for (VersionOnePartialDownloadBatch partialDownloadBatch : partialDownloadBatches) {
+        for (int i = partialDownloadBatches.size() - 1; i >= 0; i--) {
+            VersionOnePartialDownloadBatch partialDownloadBatch = partialDownloadBatches.get(i);
             downloadManager.download(partialDownloadBatch.batch());
+            partialDownloadBatches.remove(i);
 
             for (String originalFileLocation : partialDownloadBatch.originalFileLocations()) {
-                deleteVersionOneFile(originalFileLocation);
+                boolean usedInFurtherBatches = originalFileUsedInFurtherBatches(originalFileLocation, partialDownloadBatches, completeDownloadBatches);
+                if (!usedInFurtherBatches) {
+                    deleteVersionOneFile(originalFileLocation);
+                }
             }
         }
 
         onUpdate("Migrating Complete Downloads");
-        for (CompletedDownloadBatch completeDownloadBatch : completeDownloadBatches) {
-            downloadManager.addCompletedBatch(completeDownloadBatch);
 
-            for (CompletedDownloadFile completedDownloadFile : completeDownloadBatch.completedDownloadFiles()) {
+        for (int i = completeDownloadBatches.size() - 1; i >= 0; i--) {
+            CompletedDownloadBatch completedDownloadBatch = completeDownloadBatches.get(i);
+            downloadManager.addCompletedBatch(completedDownloadBatch);
+            completeDownloadBatches.remove(i);
+
+            for (CompletedDownloadFile completedDownloadFile : completedDownloadBatch.completedDownloadFiles()) {
                 migrateV1FileToV2Location(completedDownloadFile);
-                deleteVersionOneFile(completedDownloadFile.originalFileLocation());
+
+                boolean usedInFurtherBatches = originalFileUsedInFurtherBatches(completedDownloadFile.originalFileLocation(), partialDownloadBatches, completeDownloadBatches);
+                if (!usedInFurtherBatches) {
+                    deleteVersionOneFile(completedDownloadFile.originalFileLocation());
+                }
             }
         }
 
         onUpdate("Deleting V1 Database");
         database.deleteDatabase();
         onUpdate("Completed Migration");
+    }
+
+    private boolean originalFileUsedInFurtherBatches(String originalFile,
+                                                     List<VersionOnePartialDownloadBatch> partialDownloadBatches,
+                                                     List<CompletedDownloadBatch> completeDownloadBatches) {
+
+        for (VersionOnePartialDownloadBatch partialDownloadBatch : partialDownloadBatches) {
+            for (String originalFileLocation : partialDownloadBatch.originalFileLocations()) {
+                if (originalFileLocation.equals(originalFile)) {
+                    return true;
+                }
+            }
+        }
+
+        for (CompletedDownloadBatch completeDownloadBatch : completeDownloadBatches) {
+            for (CompletedDownloadFile completedDownloadFile : completeDownloadBatch.completedDownloadFiles()) {
+                if (completedDownloadFile.originalFileLocation().equals(originalFile)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private void deleteVersionOneFile(String originalFileLocation) {
