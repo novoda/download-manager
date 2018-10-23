@@ -120,10 +120,8 @@ public class MigrationJob implements Runnable {
                                                      List<CompletedDownloadBatch> completeDownloadBatches) {
 
         for (VersionOnePartialDownloadBatch partialDownloadBatch : partialDownloadBatches) {
-            for (String originalFileLocation : partialDownloadBatch.originalFileLocations()) {
-                if (originalFileLocation.equals(originalFile)) {
-                    return true;
-                }
+            if (partialDownloadBatch.originalFileLocations().contains(originalFile)) {
+                return true;
             }
         }
 
