@@ -42,8 +42,8 @@ class NetworkResponseFixtures {
     }
 
 
-    HttpClient.NetworkResponse build() {
-        return new HttpClient.NetworkResponse() {
+    NetworkResponse build() {
+        return new NetworkResponse() {
             @Override
             public int code() {
                 return code;

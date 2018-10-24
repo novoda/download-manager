@@ -2,57 +2,26 @@ package com.novoda.downloadmanager;
 
 import java.util.Map;
 
-class NetworkRequest {
+/**
+ * Represents the minimum set of information that will be passed to
+ * a {@link HttpClient} to perform a request.
+ */
+public interface NetworkRequest {
 
-    private final Map<String, String> headers;
-    private final String url;
-    private final Method method;
+    /**
+     * @return the headers associated with a request.
+     */
+    Map<String, String> headers();
 
-    NetworkRequest(Map<String, String> headers, String url, Method method) {
-        this.headers = headers;
-        this.url = url;
-        this.method = method;
-    }
+    /**
+     * @return the address for the asset to download.
+     */
+    String url();
 
-    Map<String, String> headers() {
-        return headers;
-    }
-
-    String url() {
-        return url;
-    }
-
-    Method method() {
-        return method;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        NetworkRequest that = (NetworkRequest) o;
-
-        if (!headers.equals(that.headers)) {
-            return false;
-        }
-        if (!url.equals(that.url)) {
-            return false;
-        }
-        return method == that.method;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = headers.hashCode();
-        result = 31 * result + url.hashCode();
-        result = 31 * result + method.hashCode();
-        return result;
-    }
+    /**
+     * @return the method used when requesting a resource.
+     */
+    Method method();
 
     enum Method {
         GET("get"),
@@ -64,7 +33,7 @@ class NetworkRequest {
             this.rawMethod = rawMethod;
         }
 
-        String rawMethod() {
+        public String rawMethod() {
             return rawMethod;
         }
     }

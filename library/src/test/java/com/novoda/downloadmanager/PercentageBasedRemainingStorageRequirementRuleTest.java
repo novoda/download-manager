@@ -9,19 +9,18 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-public class ByteBasedStorageRequirementRuleTest {
+public class PercentageBasedRemainingStorageRequirementRuleTest {
 
     private static final long CAPACITY_ONE_GB_IN_BYTES = 1000000000;
-    private static final long USABLE_THREE_HUNDRED_MB_IN_BYTES = 300000000;
+    private static final long USABLE_TWO_HUNDRED_MB_IN_BYTES = 200000000;
     private static final long REMAINING_OVER_ONE_HUNDRED_MB_IN_BYTES = 100000001;
     private static final long REMAINING_ONE_HUNDRED_MB_IN_BYTES = 100000000;
-
-    private static final long TWO_HUNDRED_MB_IN_BYTES_REMAINING = 200000000;
+    private static final float TEN_PERCENT = 0.1f;
 
     private final FileSize fileSize = mock(FileSize.class);
     private final File file = createFile();
     private final StorageCapacityReader storageCapacityReader = createStorageCapacityReader();
-    private final ByteBasedStorageRequirementRule storageRequirementRule = new ByteBasedStorageRequirementRule(storageCapacityReader, TWO_HUNDRED_MB_IN_BYTES_REMAINING);
+    private final PercentageBasedRemainingStorageRequirementRule storageRequirementRule = new PercentageBasedRemainingStorageRequirementRule(storageCapacityReader, TEN_PERCENT);
 
     @Test
     public void doesNotViolateRule_whenRemainingFileSizeIsLessThanRestriction() {
@@ -44,7 +43,7 @@ public class ByteBasedStorageRequirementRuleTest {
     private static File createFile() {
         File file = mock(File.class);
         given(file.getPath()).willReturn("any_path");
-        given(file.getUsableSpace()).willReturn(USABLE_THREE_HUNDRED_MB_IN_BYTES);
+        given(file.getUsableSpace()).willReturn(USABLE_TWO_HUNDRED_MB_IN_BYTES);
         return file;
     }
 
@@ -53,4 +52,5 @@ public class ByteBasedStorageRequirementRuleTest {
         given(storageCapacityReader.storageCapacityInBytes(anyString())).willReturn(CAPACITY_ONE_GB_IN_BYTES);
         return storageCapacityReader;
     }
+
 }

@@ -27,7 +27,8 @@ class CompletedDownloadBatchesExtractor {
             + "batches INNER JOIN DownloadsByBatch ON DownloadsByBatch.batch_id = batches._id "
             + "WHERE batches._id NOT IN (SELECT DownloadsByBatch.batch_id FROM DownloadsByBatch "
             + "INNER JOIN batches ON batches._id = DownloadsByBatch.batch_id "
-            + "WHERE DownloadsByBatch._data IS NULL "
+            + "WHERE DownloadsByBatch.batch_total_bytes != DownloadsByBatch.batch_current_bytes "
+            + "OR DownloadsByBatch._data IS NULL "
             + "GROUP BY DownloadsByBatch.batch_id) "
             + "GROUP BY batches._id";
 
@@ -87,11 +88,9 @@ class CompletedDownloadBatchesExtractor {
                         String originalFileId = downloadsCursor.getString(FILE_ID_COLUMN);
                         String originalNetworkAddress = downloadsCursor.getString(NETWORK_ADDRESS_COLUMN);
 
-                        // hint: file:/data/user/0/com.channel4.ondemand/files/all4/23241337
                         String originalUniqueFileLocation = downloadsCursor.getString(FILE_UNIQUE_LOCATION_COLUMN);
                         String sanitizedOriginalUniqueFileLocation = MigrationStoragePathSanitizer.sanitize(originalUniqueFileLocation);
 
-                        // _data: /data/user/0/com.channel4.ondemand/files/all4/23241337-1
                         String originalFileLocation = downloadsCursor.getString(FILE_ORIGINAL_LOCATION_COLUMN);
 
                         if (downloadsCursor.isFirst()) {

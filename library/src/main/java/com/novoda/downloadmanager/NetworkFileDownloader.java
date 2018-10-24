@@ -23,7 +23,7 @@ class NetworkFileDownloader implements FileDownloader {
         canDownload = true;
 
         NetworkRequest request = createRequestFrom(url, fileSize);
-        HttpClient.NetworkResponse response = null;
+        NetworkResponse response = null;
         try {
             response = httpClient.execute(request);
             int responseCode = response.code();
@@ -44,7 +44,7 @@ class NetworkFileDownloader implements FileDownloader {
         callback.onDownloadFinished();
     }
 
-    private void processResponse(Callback callback, HttpClient.NetworkResponse response, int responseCode, String url) throws IOException {
+    private void processResponse(Callback callback, NetworkResponse response, int responseCode, String url) throws IOException {
         if (isValid(responseCode)) {
             byte[] buffer = new byte[BUFFER_SIZE];
             int readLast = 0;

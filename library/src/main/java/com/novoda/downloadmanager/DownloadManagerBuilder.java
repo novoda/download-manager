@@ -63,12 +63,12 @@ public final class DownloadManagerBuilder {
     public static DownloadManagerBuilder newInstance(Context context, Handler callbackHandler, @DrawableRes final int notificationIcon) {
         Context applicationContext = context.getApplicationContext();
 
+        HttpClient httpClient = HttpClientFactory.getInstance();
         StorageRequirementRules storageRequirementRule = StorageRequirementRules.newInstance();
         FilePersistenceCreator filePersistenceCreator = new FilePersistenceCreator(applicationContext);
-        FileDownloaderCreator fileDownloaderCreator = FileDownloaderCreator.newNetworkFileDownloaderCreator();
+        FileDownloaderCreator fileDownloaderCreator = FileDownloaderCreator.newNetworkFileDownloaderCreator(httpClient);
 
         NetworkRequestCreator requestCreator = new NetworkRequestCreator();
-        HttpClient httpClient = HttpClientFactory.getInstance();
         FileSizeRequester fileSizeRequester = new NetworkFileSizeRequester(httpClient, requestCreator);
 
         DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(applicationContext);
@@ -140,6 +140,13 @@ public final class DownloadManagerBuilder {
         this.allowNetworkRecovery = allowNetworkRecovery;
         this.callbackThrottleCreatorType = callbackThrottleCreatorType;
         this.logHandle = logHandle;
+    }
+
+    public DownloadManagerBuilder withCustomHttpClient(HttpClient httpClient) {
+        NetworkRequestCreator requestCreator = new NetworkRequestCreator();
+        this.fileSizeRequester = new NetworkFileSizeRequester(httpClient, requestCreator);
+        this.fileDownloaderCreator = FileDownloaderCreator.newNetworkFileDownloaderCreator(httpClient);
+        return this;
     }
 
     public DownloadManagerBuilder withFileDownloaderCustom(FileSizeRequester fileSizeRequester,
@@ -277,9 +284,11 @@ public final class DownloadManagerBuilder {
             notificationChannelProvider.registerNotificationChannel(applicationContext);
         }
 
+        Wait.Criteria serviceCriteria = new Wait.Criteria();
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(applicationContext);
         ServiceNotificationDispatcher<DownloadBatchStatus> notificationDispatcher = new ServiceNotificationDispatcher<>(
                 SERVICE_LOCK,
+                serviceCriteria,
                 notificationCreator,
                 notificationManager
         );
@@ -303,7 +312,8 @@ public final class DownloadManagerBuilder {
                 connectionChecker,
                 callbacks,
                 callbackThrottleCreator,
-                downloadBatchStatusFilter
+                downloadBatchStatusFilter,
+                serviceCriteria
         );
 
         liteDownloadManager = new LiteDownloadManager(
@@ -316,7 +326,8 @@ public final class DownloadManagerBuilder {
                 fileOperations,
                 downloadsBatchPersistence,
                 downloader,
-                connectionChecker
+                connectionChecker,
+                serviceCriteria
         );
 
         return liteDownloadManager;
