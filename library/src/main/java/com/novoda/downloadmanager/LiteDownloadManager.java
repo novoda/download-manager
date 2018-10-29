@@ -120,6 +120,7 @@ class LiteDownloadManager implements DownloadManager {
         }
 
         downloadBatch.delete();
+        downloadBatchMap.remove(downloadBatchId);
     }
 
     @Override
