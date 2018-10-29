@@ -2,21 +2,21 @@ package com.novoda.downloadmanager;
 
 import android.os.Handler;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willAnswer;
-import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -77,12 +77,12 @@ public class LiteDownloadManagerDownloaderTest {
     }
 
     private void setUpBatches() {
-        willReturn(downloadBatchId).given(downloadBatch).getId();
-        willReturn(downloadBatchId).given(anotherDownloadBatchWithTheSameId).getId();
+        given(downloadBatch.getId()).willReturn(downloadBatchId);
+        given(anotherDownloadBatchWithTheSameId.getId()).willReturn(downloadBatchId);
     }
 
     @Test
-    public void addDownloadBatchIntoQueue_whenDownloadingBatchWithNewId() {
+    public void addsDownloadBatchToQueue() {
         downloadingBatches.clear();
 
         downloader.download(downloadBatch, downloadingBatches);
@@ -91,16 +91,7 @@ public class LiteDownloadManagerDownloaderTest {
     }
 
     @Test
-    public void downloadBatchByNewRef_whenDownloadingBatchWithNewId() {
-        downloadingBatches.clear();
-
-        downloader.download(downloadBatch, downloadingBatches);
-
-        verify(downloadService).download(eq(downloadBatch), any());
-    }
-
-    @Test
-    public void doesNotAddDownloadBatchIntoQueue_whenDownloadingBatchWithExistingId() {
+    public void doesNotAddDownloadBatchToQueue_whenIdAlreadyExists() {
         downloadingBatches.put(downloadBatchId, anotherDownloadBatchWithTheSameId);
 
         downloader.download(downloadBatch, downloadingBatches);
@@ -109,7 +100,16 @@ public class LiteDownloadManagerDownloaderTest {
     }
 
     @Test
-    public void downloadBatchByOldRef_whenDownloadingBatchWithExistingId() {
+    public void downloadsBatch() {
+        downloadingBatches.clear();
+
+        downloader.download(downloadBatch, downloadingBatches);
+
+        verify(downloadService).download(eq(downloadBatch), any());
+    }
+
+    @Test
+    public void downloadsBatchByOriginalReference_whenIdAlreadyExists() {
         downloadingBatches.put(downloadBatchId, anotherDownloadBatchWithTheSameId);
 
         downloader.download(downloadBatch, downloadingBatches);
