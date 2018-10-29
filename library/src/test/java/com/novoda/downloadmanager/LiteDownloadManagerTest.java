@@ -105,6 +105,15 @@ public class LiteDownloadManagerTest {
         }
 
         @Test
+        public void doesNotPutBatchesIntoDownloadsMap_whenSubmittingAllStoredDownloads() {
+            downloadingBatches.clear();
+
+            liteDownloadManager.submitAllStoredDownloads(allStoredDownloadsSubmittedCallback);
+
+            assertThat(downloadingBatches).isEmpty();
+        }
+
+        @Test
         public void notifies_whenSubmittingAllStoredDownloads() {
             liteDownloadManager.submitAllStoredDownloads(allStoredDownloadsSubmittedCallback);
 
