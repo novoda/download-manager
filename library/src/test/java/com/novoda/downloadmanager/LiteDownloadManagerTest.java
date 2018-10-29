@@ -192,6 +192,13 @@ public class LiteDownloadManagerTest {
         }
 
         @Test
+        public void removesBatchFromMap_whenDeletingBatch() {
+            liteDownloadManager.delete(DOWNLOAD_BATCH_ID);
+
+            assertThat(downloadingBatches).doesNotContainKey(DOWNLOAD_BATCH_ID);
+        }
+
+        @Test
         public void addsCallbackToInternalList() {
             DownloadBatchStatusCallback additionalDownloadBatchCallback = mock(DownloadBatchStatusCallback.class);
 
