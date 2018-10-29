@@ -69,7 +69,6 @@ class LiteDownloadManagerDownloader {
                 connectionChecker
         );
 
-        downloadBatchMap.put(downloadBatch.getId(), downloadBatch);
         executor.submit(downloadBatch::updateTotalSize);
         download(downloadBatch, downloadBatchMap);
     }
@@ -80,11 +79,13 @@ class LiteDownloadManagerDownloader {
             downloadBatchMap.put(downloadBatchId, downloadBatch);
         }
 
+        DownloadBatch batchToDownload = downloadBatchMap.get(downloadBatchId);
+
         executor.submit(new Runnable() {
             @Override
             public void run() {
                 Wait.<Void>waitFor(serviceCriteria, waitForDownloadService)
-                        .thenPerform(executeDownload(downloadBatch, downloadBatchMap));
+                        .thenPerform(executeDownload(batchToDownload, downloadBatchMap));
             }
         });
     }
