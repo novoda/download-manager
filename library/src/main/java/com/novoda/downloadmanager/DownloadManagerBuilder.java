@@ -44,6 +44,7 @@ public final class DownloadManagerBuilder {
     private final Handler callbackHandler;
     private final FilePersistenceCreator filePersistenceCreator;
     private final StorageRequirementRules storageRequirementRules;
+    private final DownloadBatchRequirementRules downloadBatchRequirementRules;
 
     private FileSizeRequester fileSizeRequester;
     private FileDownloaderCreator fileDownloaderCreator;
@@ -65,6 +66,7 @@ public final class DownloadManagerBuilder {
 
         HttpClient httpClient = HttpClientFactory.getInstance();
         StorageRequirementRules storageRequirementRule = StorageRequirementRules.newInstance();
+        DownloadBatchRequirementRules downloadBatchRequirementRule = DownloadBatchRequirementRules.newInstance();
         FilePersistenceCreator filePersistenceCreator = new FilePersistenceCreator(applicationContext);
         FileDownloaderCreator fileDownloaderCreator = FileDownloaderCreator.newNetworkFileDownloaderCreator(httpClient);
 
@@ -99,6 +101,7 @@ public final class DownloadManagerBuilder {
                 applicationContext,
                 callbackHandler,
                 storageRequirementRule,
+                downloadBatchRequirementRule,
                 filePersistenceCreator,
                 downloadsPersistence,
                 fileSizeRequester,
@@ -117,6 +120,7 @@ public final class DownloadManagerBuilder {
     private DownloadManagerBuilder(Context applicationContext,
                                    Handler callbackHandler,
                                    StorageRequirementRules storageRequirementRules,
+                                   DownloadBatchRequirementRules downloadBatchRequirementRules,
                                    FilePersistenceCreator filePersistenceCreator,
                                    DownloadsPersistence downloadsPersistence,
                                    FileSizeRequester fileSizeRequester,
@@ -130,6 +134,7 @@ public final class DownloadManagerBuilder {
         this.applicationContext = applicationContext;
         this.callbackHandler = callbackHandler;
         this.storageRequirementRules = storageRequirementRules;
+        this.downloadBatchRequirementRules = downloadBatchRequirementRules;
         this.filePersistenceCreator = filePersistenceCreator;
         this.downloadsPersistence = downloadsPersistence;
         this.fileSizeRequester = fileSizeRequester;
@@ -159,6 +164,13 @@ public final class DownloadManagerBuilder {
     public DownloadManagerBuilder withStorageRequirementRules(StorageRequirementRule... storageRequirementRules) {
         for (StorageRequirementRule storageRequirementRule : storageRequirementRules) {
             this.storageRequirementRules.addRule(storageRequirementRule);
+        }
+        return this;
+    }
+
+    public DownloadManagerBuilder withDownloadBatchRequirementRules(DownloadBatchRequirementRule... downloadBatchRequirementRules) {
+        for (DownloadBatchRequirementRule downloadBatchRequirementRule : downloadBatchRequirementRules) {
+            this.downloadBatchRequirementRules.addRule(downloadBatchRequirementRule);
         }
         return this;
     }
@@ -277,8 +289,8 @@ public final class DownloadManagerBuilder {
                 downloadsFilePersistence,
                 downloadsPersistence,
                 callbackThrottleCreator,
-                connectionChecker
-        );
+                connectionChecker,
+                downloadBatchRequirementRules);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             notificationChannelProvider.registerNotificationChannel(applicationContext);
@@ -309,6 +321,7 @@ public final class DownloadManagerBuilder {
                 downloadsBatchPersistence,
                 downloadsFilePersistence,
                 batchStatusNotificationDispatcher,
+                downloadBatchRequirementRules,
                 connectionChecker,
                 callbacks,
                 callbackThrottleCreator,

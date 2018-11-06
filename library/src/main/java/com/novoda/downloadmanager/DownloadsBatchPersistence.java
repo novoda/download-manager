@@ -19,17 +19,19 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
     private final DownloadsPersistence downloadsPersistence;
     private final CallbackThrottleCreator callbackThrottleCreator;
     private final ConnectionChecker connectionChecker;
+    private final DownloadBatchRequirementRule downloadBatchRequirementRule;
 
     DownloadsBatchPersistence(Executor executor,
                               DownloadsFilePersistence downloadsFilePersistence,
                               DownloadsPersistence downloadsPersistence,
                               CallbackThrottleCreator callbackThrottleCreator,
-                              ConnectionChecker connectionChecker) {
+                              ConnectionChecker connectionChecker, DownloadBatchRequirementRule downloadBatchRequirementRule) {
         this.executor = executor;
         this.downloadsFilePersistence = downloadsFilePersistence;
         this.downloadsPersistence = downloadsPersistence;
         this.callbackThrottleCreator = callbackThrottleCreator;
         this.connectionChecker = connectionChecker;
+        this.downloadBatchRequirementRule = downloadBatchRequirementRule;
     }
 
     void persistAsync(DownloadBatchTitle downloadBatchTitle,
@@ -146,8 +148,8 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                 downloadedFileSizeMap,
                 DownloadsBatchPersistence.this,
                 fileCallbackThrottle,
-                connectionChecker
-        );
+                connectionChecker,
+                downloadBatchRequirementRule);
     }
 
     void deleteAsync(DownloadBatchStatus downloadBatchStatus, DeleteCallback deleteCallback) {

@@ -20,7 +20,8 @@ final class DownloadBatchFactory {
                                      DownloadsBatchPersistence downloadsBatchPersistence,
                                      DownloadsFilePersistence downloadsFilePersistence,
                                      FileCallbackThrottle fileCallbackThrottle,
-                                     ConnectionChecker connectionChecker) {
+                                     ConnectionChecker connectionChecker,
+                                     DownloadBatchRequirementRule downloadBatchRequirementRule) {
         DownloadBatchTitle downloadBatchTitle = DownloadBatchTitleCreator.createFrom(batch);
         StorageRoot storageRoot = batch.storageRoot();
         DownloadBatchId downloadBatchId = batch.downloadBatchId();
@@ -83,8 +84,8 @@ final class DownloadBatchFactory {
                 new HashMap<>(),
                 downloadsBatchPersistence,
                 fileCallbackThrottle,
-                connectionChecker
-        );
+                connectionChecker,
+                downloadBatchRequirementRule);
     }
 
 }
