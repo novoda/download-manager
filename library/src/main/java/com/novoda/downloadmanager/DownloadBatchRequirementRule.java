@@ -3,7 +3,7 @@ package com.novoda.downloadmanager;
 /**
  * Used to define the rules that need to be satisfied to download an batch.
  * Clients of this library can create their own custom implementations and
- * pass them to {@link DownloadManagerBuilder#withStorageRequirementRules(StorageRequirementRule...)}.
+ * pass them to {@link DownloadManagerBuilder#withDownloadBatchRequirementRules(DownloadBatchRequirementRule...)}.
  */
 public interface DownloadBatchRequirementRule {
 

@@ -290,7 +290,8 @@ public final class DownloadManagerBuilder {
                 downloadsPersistence,
                 callbackThrottleCreator,
                 connectionChecker,
-                downloadBatchRequirementRules);
+                downloadBatchRequirementRules
+        );
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             notificationChannelProvider.registerNotificationChannel(applicationContext);
