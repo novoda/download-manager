@@ -203,7 +203,7 @@ class DownloadBatch {
             return true;
         }
 
-        if (downloadBatchRequirementRule.hasViolatedRule(totalBatchSizeBytes)) {
+        if (downloadBatchRequirementRule.hasViolatedRule(downloadBatchStatus, totalBatchSizeBytes)) {
             return true;
         }
 
