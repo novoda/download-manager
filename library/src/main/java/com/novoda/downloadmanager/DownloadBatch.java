@@ -64,7 +64,13 @@ class DownloadBatch {
                          + " " + STATUS + " " + downloadBatchStatus.status()
                          + " totalBatchSize " + totalBatchSizeBytes);
 
-        if (shouldAbortAfterGettingTotalBatchSize(downloadBatchStatus, downloadsBatchPersistence, callback, downloadBatchRequirementRule, totalBatchSizeBytes)) {
+        if (shouldAbortAfterGettingTotalBatchSize(
+                downloadBatchStatus,
+                downloadsBatchPersistence,
+                callback,
+                downloadBatchRequirementRule,
+                totalBatchSizeBytes
+        )) {
             Logger.v("abort after getting total batch size download " + rawBatchId + ", " + STATUS + " " + downloadBatchStatus.status());
             return;
         }
