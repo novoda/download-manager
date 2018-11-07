@@ -20,9 +20,9 @@ final class DownloadBatchRequirementRules implements DownloadBatchRequirementRul
     }
 
     @Override
-    public boolean hasViolatedRule(DownloadBatchStatus downloadBatchStatus, Long batchSize) {
+    public boolean hasViolatedRule(DownloadBatchStatus downloadBatchStatus) {
         for (DownloadBatchRequirementRule requirementRule : rules) {
-            if (requirementRule.hasViolatedRule(downloadBatchStatus, batchSize)) {
+            if (requirementRule.hasViolatedRule(downloadBatchStatus)) {
                 return true;
             }
         }

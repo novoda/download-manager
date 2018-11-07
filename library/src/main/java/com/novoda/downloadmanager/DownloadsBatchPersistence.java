@@ -25,7 +25,8 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                               DownloadsFilePersistence downloadsFilePersistence,
                               DownloadsPersistence downloadsPersistence,
                               CallbackThrottleCreator callbackThrottleCreator,
-                              ConnectionChecker connectionChecker, DownloadBatchRequirementRule downloadBatchRequirementRule) {
+                              ConnectionChecker connectionChecker,
+                              DownloadBatchRequirementRule downloadBatchRequirementRule) {
         this.executor = executor;
         this.downloadsFilePersistence = downloadsFilePersistence;
         this.downloadsPersistence = downloadsPersistence;
@@ -149,7 +150,8 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
                 DownloadsBatchPersistence.this,
                 fileCallbackThrottle,
                 connectionChecker,
-                downloadBatchRequirementRule);
+                downloadBatchRequirementRule
+        );
     }
 
     void deleteAsync(DownloadBatchStatus downloadBatchStatus, DeleteCallback deleteCallback) {

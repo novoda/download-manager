@@ -85,7 +85,8 @@ final class DownloadBatchFactory {
                 downloadsBatchPersistence,
                 fileCallbackThrottle,
                 connectionChecker,
-                downloadBatchRequirementRule);
+                downloadBatchRequirementRule
+        );
     }
 
 }

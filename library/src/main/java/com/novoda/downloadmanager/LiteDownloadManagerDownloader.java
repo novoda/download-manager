@@ -85,9 +85,12 @@ class LiteDownloadManagerDownloader {
 
         DownloadBatch batchToDownload = downloadBatchMap.get(downloadBatchId);
 
-        executor.submit(() -> {
-            Wait.<Void>waitFor(serviceCriteria, waitForDownloadService)
-                    .thenPerform(executeDownload(batchToDownload, downloadBatchMap));
+        executor.submit(new Runnable() {
+            @Override
+            public void run() {
+                Wait.<Void>waitFor(serviceCriteria, waitForDownloadService)
+                        .thenPerform(executeDownload(batchToDownload, downloadBatchMap));
+            }
         });
     }
 

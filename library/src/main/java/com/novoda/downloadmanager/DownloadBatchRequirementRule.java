@@ -10,9 +10,8 @@ public interface DownloadBatchRequirementRule {
     /**
      * Determines whether a {@link DownloadBatch} has violated a size requirement rule.
      *
-     * @param batchSize of the batch to check.
      * @param downloadBatchStatus of batch to check.
      * @return whether the {@link DownloadBatch} has violated the rule.
      */
-    boolean hasViolatedRule(DownloadBatchStatus downloadBatchStatus, Long batchSize);
+    boolean hasViolatedRule(DownloadBatchStatus downloadBatchStatus);
 }
