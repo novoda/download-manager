@@ -14,6 +14,7 @@ import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.WAITING_FOR_NETWORK;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.QUEUED;
+import static com.novoda.downloadmanager.DownloadError.Type.REQUIREMENT_RULE_VIOLATED;
 
 // This model knows how to interact with low level components.
 @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.StdCyclomaticComplexity", "PMD.ModifiedCyclomaticComplexity"})
@@ -209,7 +210,14 @@ class DownloadBatch {
             return true;
         }
 
-        return downloadBatchRequirementRule.hasViolatedRule(downloadBatchStatus);
+        if (downloadBatchRequirementRule.hasViolatedRule(downloadBatchStatus)) {
+            Optional<DownloadError> error = Optional.fromNullable(new DownloadError(REQUIREMENT_RULE_VIOLATED));
+            downloadBatchStatus.markAsError(error, downloadsBatchPersistence);
+            notifyCallback(callback, downloadBatchStatus);
+            return true;
+        }
+
+        return false;
     }
 
     private static boolean batchCannotContinue(InternalDownloadBatchStatus downloadBatchStatus,
