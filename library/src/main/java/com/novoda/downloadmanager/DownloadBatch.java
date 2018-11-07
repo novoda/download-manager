@@ -6,14 +6,7 @@ import android.support.annotation.WorkerThread;
 import java.util.List;
 import java.util.Map;
 
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETING;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADING;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.QUEUED;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.WAITING_FOR_NETWORK;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.*;
 
 // This model knows how to interact with low level components.
 @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.StdCyclomaticComplexity", "PMD.ModifiedCyclomaticComplexity"})
@@ -68,8 +61,8 @@ class DownloadBatch {
         updateTotalSize();
 
         Logger.v("batch " + downloadBatchStatus.getDownloadBatchId().rawId()
-                + " " + STATUS + " " + downloadBatchStatus.status()
-                + " totalBatchSize " + totalBatchSizeBytes);
+                         + " " + STATUS + " " + downloadBatchStatus.status()
+                         + " totalBatchSize " + totalBatchSizeBytes);
 
         if (shouldAbortAfterGettingTotalBatchSize(downloadBatchStatus, downloadsBatchPersistence, callback, downloadBatchRequirementRule, totalBatchSizeBytes)) {
             Logger.v("abort after getting total batch size download " + rawBatchId + ", " + STATUS + " " + downloadBatchStatus.status());
@@ -324,8 +317,8 @@ class DownloadBatch {
 
         downloadBatchStatus.markAsDeleting();
         Logger.v("delete request for batch " + downloadBatchStatus.getDownloadBatchId().rawId()
-                + ", " + STATUS + " " + downloadBatchStatus.status()
-                + ", should be deleting");
+                         + ", " + STATUS + " " + downloadBatchStatus.status()
+                         + ", should be deleting");
         notifyCallback(callback, downloadBatchStatus);
 
         for (DownloadFile downloadFile : downloadFiles) {
@@ -342,8 +335,8 @@ class DownloadBatch {
         }
 
         Logger.v("delete request for batch end " + downloadBatchStatus.getDownloadBatchId().rawId()
-                + ", " + STATUS + ": " + downloadBatchStatus.status()
-                + ", should be deleting");
+                         + ", " + STATUS + ": " + downloadBatchStatus.status()
+                         + ", should be deleting");
     }
 
     DownloadBatchId getId() {
