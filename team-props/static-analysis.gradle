@@ -3,8 +3,7 @@ apply plugin: 'com.novoda.static-analysis'
 staticAnalysis {
     penalty {
         maxErrors = 0
-//      Need to address GH Issue #284 before reducing.
-        maxWarnings = 5
+        maxWarnings = 0
     }
 
     checkstyle {
