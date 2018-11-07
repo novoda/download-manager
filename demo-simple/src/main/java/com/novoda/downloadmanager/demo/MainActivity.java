@@ -111,12 +111,12 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
+                Log.d(TAG, "SeekBar#onStartTrackingTouch");
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                Log.d(TAG, "SeekBar#onStopTrackingTouch");
             }
         });
     }
