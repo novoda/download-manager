@@ -14,6 +14,7 @@
   <string name="batch_status_one">Batch Status</string>
   <string name="migration">Migration</string>
   <string name="downloads">Downloads</string>
+  <string formatted="false" name="max_batch_size">Max batch size is %1$d bytes</string>
 
   <string-array name="file_sizes">
     <item>10MB</item>

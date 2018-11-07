@@ -6,6 +6,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.novoda.downloadmanager.AllBatchStatusesCallback;
 import com.novoda.downloadmanager.Batch;
@@ -34,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String FIVE_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/5MB.zip";
     private static final String TEN_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/10MB.zip";
     private static final String TWENTY_MB_FILE_URL = "http://ipv4.download.thinkbroadband.com/20MB.zip";
+    private static final Long MAX_BATCH_SIZE = 60L * 1024L * 1024L; // 60 MB
 
     private DownloadBatchStatusView downloadBatchStatusViewOne;
     private DownloadBatchStatusView downloadBatchStatusViewTwo;
@@ -50,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
         downloadManager = demoApplication.getDownloadManager();
         downloadManager.addDownloadBatchCallback(callback);
         downloadManager.getAllDownloadBatchStatuses(batchStatusesCallback);
+        DemoBatchSizeProvider batchSizeProvider = demoApplication.getBatchSizeProvider();
+        batchSizeProvider.setMaxSizeOfBatch(MAX_BATCH_SIZE);
 
         downloadBatchStatusViewOne = findViewById(R.id.batch_1);
         downloadBatchStatusViewTwo = findViewById(R.id.batch_2);
@@ -91,6 +96,29 @@ public class MainActivity extends AppCompatActivity {
 
         View buttonLogFileDirectory = findViewById(R.id.button_log_file_directory);
         buttonLogFileDirectory.setOnClickListener(logFileDirectoryOnClick);
+
+        TextView batchSizeLabel = findViewById(R.id.storage_size_label);
+        batchSizeLabel.setText(getString(R.string.max_batch_size, MAX_BATCH_SIZE));
+
+        SeekBar batchSizeSeekBar = findViewById(R.id.batch_size_seek_bar);
+        batchSizeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                long maxSizeOfBatch = MAX_BATCH_SIZE * progress / batchSizeSeekBar.getMax();
+                batchSizeLabel.setText(getString(R.string.max_batch_size, maxSizeOfBatch));
+                batchSizeProvider.setMaxSizeOfBatch(maxSizeOfBatch);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
     }
 
     private final CompoundButton.OnCheckedChangeListener wifiOnlyOnCheckedChange = (buttonView, isChecked) -> {
