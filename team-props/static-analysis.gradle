@@ -29,6 +29,12 @@ staticAnalysis {
         excludeFilter teamPropsFile('static-analysis/findbugs-excludes.xml')
         includeVariants { variant -> excludeTestAndRelease(variant) }
     }
+
+    lintOptions {
+        lintConfig rootProject.file('team-props/lint-rules/lint-config.xml')
+        checkReleaseBuilds false
+        includeVariants { variant -> excludeTestAndRelease(variant) }
+    }
 }
 
 static boolean excludeTestAndRelease(variant) {
