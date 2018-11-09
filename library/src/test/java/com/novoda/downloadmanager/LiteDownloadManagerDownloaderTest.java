@@ -30,6 +30,7 @@ public class LiteDownloadManagerDownloaderTest {
     private final DownloadsBatchPersistence downloadsBatchPersistence = mock(DownloadsBatchPersistence.class);
     private final DownloadsFilePersistence downloadsFilePersistence = mock(DownloadsFilePersistence.class);
     private final DownloadBatchStatusNotificationDispatcher notificationDispatcher = mock(DownloadBatchStatusNotificationDispatcher.class);
+    private final DownloadBatchRequirementRule downloadBatchRequirementRule = mock(DownloadBatchRequirementRule.class);
     private final ConnectionChecker connectionChecker = mock(ConnectionChecker.class);
     private final Set<DownloadBatchStatusCallback> callbacks = new HashSet<>();
     private final CallbackThrottleCreator callbackThrottleCreator = mock(CallbackThrottleCreator.class);
@@ -59,6 +60,7 @@ public class LiteDownloadManagerDownloaderTest {
                 downloadsBatchPersistence,
                 downloadsFilePersistence,
                 notificationDispatcher,
+                downloadBatchRequirementRule,
                 connectionChecker,
                 callbacks,
                 callbackThrottleCreator,

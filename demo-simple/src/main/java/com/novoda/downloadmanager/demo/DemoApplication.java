@@ -19,6 +19,7 @@ public class DemoApplication extends Application {
     private static final int TIMEOUT = 5;
     private static final int TWO_HUNDRED_MB_IN_BYTES = 209715200;
     private volatile DownloadManager downloadManager;
+    private final DemoBatchSizeProvider batchSizeProvider = new DemoBatchSizeProvider();
 
     @Override
     public void onCreate() {
@@ -35,6 +36,7 @@ public class DemoApplication extends Application {
                 .withCustomHttpClient(customHttpClient())
                 .withLogHandle(new DemoLogHandle())
                 .withStorageRequirementRules(StorageRequirementRuleFactory.createByteBasedRule(TWO_HUNDRED_MB_IN_BYTES))
+                .withDownloadBatchRequirementRules(new DownloadBatchSizeRequirementRule(batchSizeProvider))
                 .build();
     }
 
@@ -50,5 +52,9 @@ public class DemoApplication extends Application {
 
     public DownloadManager getDownloadManager() {
         return downloadManager;
+    }
+
+    public DemoBatchSizeProvider getBatchSizeProvider() {
+        return batchSizeProvider;
     }
 }
