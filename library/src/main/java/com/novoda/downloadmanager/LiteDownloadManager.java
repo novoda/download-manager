@@ -66,7 +66,6 @@ class LiteDownloadManager implements DownloadManager {
     private DownloadsBatchPersistence.LoadBatchesCallback loadBatchesCallback(AllStoredDownloadsSubmittedCallback callback) {
         return downloadBatches -> {
             for (DownloadBatch downloadBatch : downloadBatches) {
-                downloadBatchMap.put(downloadBatch.getId(), downloadBatch);
                 downloader.download(downloadBatch, downloadBatchMap);
             }
 
@@ -121,6 +120,7 @@ class LiteDownloadManager implements DownloadManager {
         }
 
         downloadBatch.delete();
+        downloadBatchMap.remove(downloadBatchId);
     }
 
     @Override

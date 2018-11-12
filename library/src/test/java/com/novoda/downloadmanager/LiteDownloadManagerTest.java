@@ -105,6 +105,15 @@ public class LiteDownloadManagerTest {
         }
 
         @Test
+        public void doesNotPutBatchesIntoDownloadsMap_whenSubmittingAllStoredDownloads() {
+            downloadingBatches.clear();
+
+            liteDownloadManager.submitAllStoredDownloads(allStoredDownloadsSubmittedCallback);
+
+            assertThat(downloadingBatches).isEmpty();
+        }
+
+        @Test
         public void notifies_whenSubmittingAllStoredDownloads() {
             liteDownloadManager.submitAllStoredDownloads(allStoredDownloadsSubmittedCallback);
 
@@ -189,6 +198,13 @@ public class LiteDownloadManagerTest {
             liteDownloadManager.delete(DOWNLOAD_BATCH_ID);
 
             verify(downloadBatch).delete();
+        }
+
+        @Test
+        public void removesBatchFromMap_whenDeletingBatch() {
+            liteDownloadManager.delete(DOWNLOAD_BATCH_ID);
+
+            assertThat(downloadingBatches).doesNotContainKey(DOWNLOAD_BATCH_ID);
         }
 
         @Test

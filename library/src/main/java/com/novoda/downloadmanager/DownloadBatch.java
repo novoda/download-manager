@@ -14,6 +14,7 @@ import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.WAITING_FOR_NETWORK;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.QUEUED;
+import static com.novoda.downloadmanager.DownloadError.Type.REQUIREMENT_RULE_VIOLATED;
 
 // This model knows how to interact with low level components.
 @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.StdCyclomaticComplexity", "PMD.ModifiedCyclomaticComplexity"})
@@ -28,6 +29,7 @@ class DownloadBatch {
     private final DownloadsBatchPersistence downloadsBatchPersistence;
     private final FileCallbackThrottle fileCallbackThrottle;
     private final ConnectionChecker connectionChecker;
+    private final DownloadBatchRequirementRule downloadBatchRequirementRule;
 
     private long totalBatchSizeBytes;
     private DownloadBatchStatusCallback callback;
@@ -37,13 +39,15 @@ class DownloadBatch {
                   Map<DownloadFileId, Long> fileBytesDownloadedMap,
                   DownloadsBatchPersistence downloadsBatchPersistence,
                   FileCallbackThrottle fileCallbackThrottle,
-                  ConnectionChecker connectionChecker) {
+                  ConnectionChecker connectionChecker,
+                  DownloadBatchRequirementRule downloadBatchRequirementRule) {
         this.downloadFiles = downloadFiles;
         this.fileBytesDownloadedMap = fileBytesDownloadedMap;
         this.downloadBatchStatus = internalDownloadBatchStatus;
         this.downloadsBatchPersistence = downloadsBatchPersistence;
         this.fileCallbackThrottle = fileCallbackThrottle;
         this.connectionChecker = connectionChecker;
+        this.downloadBatchRequirementRule = downloadBatchRequirementRule;
     }
 
     void setCallback(DownloadBatchStatusCallback callback) {
@@ -68,7 +72,13 @@ class DownloadBatch {
                          + " " + STATUS + " " + downloadBatchStatus.status()
                          + " totalBatchSize " + totalBatchSizeBytes);
 
-        if (shouldAbortAfterGettingTotalBatchSize(downloadBatchStatus, downloadsBatchPersistence, callback, totalBatchSizeBytes)) {
+        if (shouldAbortAfterGettingTotalBatchSize(
+                downloadBatchStatus,
+                downloadsBatchPersistence,
+                callback,
+                downloadBatchRequirementRule,
+                totalBatchSizeBytes
+        )) {
             Logger.v("abort after getting total batch size download " + rawBatchId + ", " + STATUS + " " + downloadBatchStatus.status());
             return;
         }
@@ -181,6 +191,7 @@ class DownloadBatch {
     private static boolean shouldAbortAfterGettingTotalBatchSize(InternalDownloadBatchStatus downloadBatchStatus,
                                                                  DownloadsBatchPersistence downloadsBatchPersistence,
                                                                  DownloadBatchStatusCallback callback,
+                                                                 DownloadBatchRequirementRule downloadBatchRequirementRule,
                                                                  long totalBatchSizeBytes) {
         if (downloadBatchStatus.status() == PAUSED) {
             notifyCallback(callback, downloadBatchStatus);
@@ -195,6 +206,13 @@ class DownloadBatch {
 
         if (totalBatchSizeBytes <= ZERO_BYTES) {
             processNetworkError(downloadBatchStatus, callback, downloadsBatchPersistence);
+            notifyCallback(callback, downloadBatchStatus);
+            return true;
+        }
+
+        if (downloadBatchRequirementRule.hasViolatedRule(downloadBatchStatus)) {
+            Optional<DownloadError> error = Optional.fromNullable(new DownloadError(REQUIREMENT_RULE_VIOLATED));
+            downloadBatchStatus.markAsError(error, downloadsBatchPersistence);
             notifyCallback(callback, downloadBatchStatus);
             return true;
         }

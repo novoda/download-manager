@@ -3,8 +3,7 @@ apply plugin: 'com.novoda.static-analysis'
 staticAnalysis {
     penalty {
         maxErrors = 0
-//      Need to address GH Issue #284 before reducing.
-        maxWarnings = 5
+        maxWarnings = 0
     }
 
     checkstyle {
@@ -28,6 +27,12 @@ staticAnalysis {
     findbugs {
         toolVersion findbugsVersion
         excludeFilter teamPropsFile('static-analysis/findbugs-excludes.xml')
+        includeVariants { variant -> excludeTestAndRelease(variant) }
+    }
+
+    lintOptions {
+        lintConfig rootProject.file('team-props/lint-rules/lint-config.xml')
+        checkReleaseBuilds false
         includeVariants { variant -> excludeTestAndRelease(variant) }
     }
 }

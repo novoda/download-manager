@@ -41,9 +41,9 @@
     android:id="@+id/button_log_file_directory"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_marginTop="16dp"
     android:layout_marginEnd="16dp"
     android:layout_marginRight="16dp"
-    android:layout_marginTop="16dp"
     android:text="@string/log_file_directory"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintHorizontal_bias="0.5"
@@ -54,7 +54,7 @@
   <Button
     android:id="@+id/button_start_downloading"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_height="46dp"
     android:layout_marginTop="8dp"
     android:text="@string/start_downloading"
     app:layout_constraintEnd_toStartOf="@+id/button_delete_all"
@@ -72,5 +72,21 @@
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toEndOf="@+id/button_start_downloading"
     app:layout_constraintTop_toBottomOf="@+id/batch_2" />
+
+  <TextView
+    android:id="@+id/storage_size_label"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="32dp"
+    android:gravity="center_horizontal"
+    app:layout_constraintTop_toBottomOf="@+id/check_wifi_only" />
+
+  <SeekBar
+    android:id="@+id/batch_size_seek_bar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:max="60"
+    android:progress="60"
+    app:layout_constraintTop_toBottomOf="@+id/storage_size_label" />
 
 </android.support.constraint.ConstraintLayout>

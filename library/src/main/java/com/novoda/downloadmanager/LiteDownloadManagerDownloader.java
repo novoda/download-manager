@@ -21,6 +21,7 @@ class LiteDownloadManagerDownloader {
     private final DownloadsBatchPersistence downloadsBatchPersistence;
     private final DownloadsFilePersistence downloadsFilePersistence;
     private final DownloadBatchStatusNotificationDispatcher notificationDispatcher;
+    private final DownloadBatchRequirementRule downloadBatchRequirementRule;
     private final Set<DownloadBatchStatusCallback> callbacks;
     private final ConnectionChecker connectionChecker;
     private final CallbackThrottleCreator callbackThrottleCreator;
@@ -39,6 +40,7 @@ class LiteDownloadManagerDownloader {
                                   DownloadsBatchPersistence downloadsBatchPersistence,
                                   DownloadsFilePersistence downloadsFilePersistence,
                                   DownloadBatchStatusNotificationDispatcher notificationDispatcher,
+                                  DownloadBatchRequirementRule downloadBatchRequirementRule,
                                   ConnectionChecker connectionChecker,
                                   Set<DownloadBatchStatusCallback> callbacks,
                                   CallbackThrottleCreator callbackThrottleCreator,
@@ -52,6 +54,7 @@ class LiteDownloadManagerDownloader {
         this.downloadsBatchPersistence = downloadsBatchPersistence;
         this.downloadsFilePersistence = downloadsFilePersistence;
         this.notificationDispatcher = notificationDispatcher;
+        this.downloadBatchRequirementRule = downloadBatchRequirementRule;
         this.connectionChecker = connectionChecker;
         this.callbacks = callbacks;
         this.callbackThrottleCreator = callbackThrottleCreator;
@@ -66,10 +69,10 @@ class LiteDownloadManagerDownloader {
                 downloadsBatchPersistence,
                 downloadsFilePersistence,
                 callbackThrottleCreator.create(),
-                connectionChecker
+                connectionChecker,
+                downloadBatchRequirementRule
         );
 
-        downloadBatchMap.put(downloadBatch.getId(), downloadBatch);
         executor.submit(downloadBatch::updateTotalSize);
         download(downloadBatch, downloadBatchMap);
     }
@@ -80,11 +83,13 @@ class LiteDownloadManagerDownloader {
             downloadBatchMap.put(downloadBatchId, downloadBatch);
         }
 
+        DownloadBatch batchToDownload = downloadBatchMap.get(downloadBatchId);
+
         executor.submit(new Runnable() {
             @Override
             public void run() {
                 Wait.<Void>waitFor(serviceCriteria, waitForDownloadService)
-                        .thenPerform(executeDownload(downloadBatch, downloadBatchMap));
+                        .thenPerform(executeDownload(batchToDownload, downloadBatchMap));
             }
         });
     }
@@ -141,7 +146,8 @@ class LiteDownloadManagerDownloader {
                 downloadsBatchPersistence,
                 downloadsFilePersistence,
                 callbackThrottleCreator.create(),
-                connectionChecker
+                connectionChecker,
+                downloadBatchRequirementRule
         );
         downloadBatchMap.put(downloadBatch.getId(), downloadBatch);
         return downloadsBatchPersistence.persistCompletedBatch(completedDownloadBatch);
