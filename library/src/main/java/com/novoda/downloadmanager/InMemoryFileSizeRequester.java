@@ -8,4 +8,9 @@ class InMemoryFileSizeRequester implements FileSizeRequester {
     public FileSize requestFileSize(String url) {
         return FileSizeCreator.createFromTotalSize(TOTAL_FILE_SIZE);
     }
+
+    @Override
+    public void requestFileSize(String url, Callback callback) {
+
+    }
 }

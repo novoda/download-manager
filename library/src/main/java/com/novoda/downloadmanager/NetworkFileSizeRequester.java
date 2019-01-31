@@ -32,6 +32,11 @@ class NetworkFileSizeRequester implements FileSizeRequester {
         return FileSizeCreator.unknownFileSize();
     }
 
+    @Override
+    public void requestFileSize(String url, Callback callback) {
+
+    }
+
     private long executeRequestFileSize(String url) throws IOException {
         long fileSize = requestFileSizeThroughHeaderRequest(url);
         if (fileSize == UNKNOWN_CONTENT_LENGTH || fileSize == ZERO_FILE_SIZE) {
