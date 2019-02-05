@@ -2,56 +2,57 @@ package com.novoda.downloadmanager;
 
 import java.io.IOException;
 
-class NetworkFileSizeHeaderRequest implements FileSizeRequester {
+class NetworkFileSizeHeaderRequest {
 
+    private static final int ZERO_FILE_SIZE = 0;
     private static final String HEADER_CONTENT_LENGTH = "Content-Length";
     private static final int UNKNOWN_CONTENT_LENGTH = -1;
 
     private final HttpClient httpClient;
     private final NetworkRequestCreator requestCreator;
+    private final NetworkFileSizeBodyRequest bodyRequest;
 
-    NetworkFileSizeHeaderRequest(HttpClient httpClient, NetworkRequestCreator requestCreator) {
+    NetworkFileSizeHeaderRequest(HttpClient httpClient, NetworkRequestCreator requestCreator, NetworkFileSizeBodyRequest bodyRequest) {
         this.httpClient = httpClient;
         this.requestCreator = requestCreator;
+        this.bodyRequest = bodyRequest;
     }
 
-    @Override
-    public void requestFileSize(String url, Callback callback) {
+    public Either<FileSize, DownloadError> requestFileSize(String url) {
         NetworkRequest fileSizeRequest = requestCreator.createFileSizeHeadRequest(url);
         NetworkResponse response = null;
+        Either<FileSize, DownloadError> fileSizeOrError;
         try {
             response = httpClient.execute(fileSizeRequest);
-            processResponse(callback, response, url);
+            long headerResponseFileSize = processResponse(response);
+
+            if (headerResponseFileSize == UNKNOWN_CONTENT_LENGTH || headerResponseFileSize == ZERO_FILE_SIZE) {
+                Logger.w(String.format("file size header request '%s' returned %s, we'll try with a body request", url, headerResponseFileSize));
+                fileSizeOrError = bodyRequest.requestFileSize(url);
+            } else {
+                fileSizeOrError = Either.asLeft(FileSizeCreator.createFromTotalSize(headerResponseFileSize));
+            }
+
         } catch (IOException e) {
-            callback.onError(e.getMessage());
+            return Either.asRight(DownloadErrorFactory.createTotalSizeRequestFailedError(e.getMessage()));
         } finally {
             if (response != null) {
                 try {
                     response.closeByteStream();
                 } catch (IOException e) {
-                    callback.onError(e.getMessage());
+                    Logger.e(e, "Error requesting file size for " + url);
                 }
             }
         }
+        return fileSizeOrError;
     }
 
-    private void processResponse(Callback callback, NetworkResponse response, String url) {
+    private long processResponse(NetworkResponse response) {
+        long fileSize = ZERO_FILE_SIZE;
         if (response.isSuccessful()) {
-            long rawFileSize = Long.parseLong(response.header(HEADER_CONTENT_LENGTH, String.valueOf(UNKNOWN_CONTENT_LENGTH)));
-            callback.onFileSizeReceived(FileSizeCreator.createFromTotalSize(rawFileSize));
-        } else {
-            Logger.e("Network response code is not ok, responseCode: " + response.code());
-            String networkErrorMessage = String.format(
-                    "File Size Header Request: %s with response code: %s failed.",
-                    url,
-                    response.code()
-            );
-            callback.onError(networkErrorMessage);
+            fileSize = Long.parseLong(response.header(HEADER_CONTENT_LENGTH, String.valueOf(UNKNOWN_CONTENT_LENGTH)));
+            return fileSize;
         }
-    }
-
-    @Override
-    public FileSize requestFileSize(String url) {
-        return null;
+        return fileSize;
     }
 }
