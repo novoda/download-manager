@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager;
 
+import android.support.annotation.NonNull;
+
 public class FileSizeResult {
 
     private final FileSize fileSize;
@@ -62,5 +64,14 @@ public class FileSizeResult {
         int result = fileSize != null ? fileSize.hashCode() : 0;
         result = 31 * result + (failureMessage != null ? failureMessage.hashCode() : 0);
         return result;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "FileSizeResult{"
+                + "fileSize=" + fileSize
+                + ", failureMessage='" + failureMessage + '\''
+                + '}';
     }
 }

@@ -2,7 +2,6 @@ package com.novoda.downloadmanager;
 
 import java.io.IOException;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -10,7 +9,7 @@ import static com.novoda.downloadmanager.NetworkResponseFixtures.aNetworkRespons
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-public class NetworkFileSizeRequesterTest {
+public class NetworkFileSizeHeaderRequestTest {
 
     private static final NetworkResponse UNSUCCESSFUL_RESPONSE = aNetworkResponse().withSuccessful(false).build();
     private static final NetworkResponse SUCCESSFUL_RESPONSE = aNetworkResponse().withHeader("1000").withSuccessful(true).build();
@@ -19,21 +18,16 @@ public class NetworkFileSizeRequesterTest {
 
     private final HttpClient httpClient = mock(HttpClient.class);
     private final NetworkRequestCreator requestCreator = new NetworkRequestCreator();
-
-    private NetworkFileSizeRequester fileSizeRequester;
-
-    @Before
-    public void setUp() {
-        fileSizeRequester = new NetworkFileSizeRequester(httpClient, requestCreator);
-    }
+    private final NetworkFileSizeBodyRequest networkFileSizeBodyRequest = new NetworkFileSizeBodyRequest(httpClient, requestCreator);
+    private final NetworkFileSizeHeaderRequest fileSizeHeaderRequest = new NetworkFileSizeHeaderRequest(httpClient, requestCreator, networkFileSizeBodyRequest);
 
     @Test
     public void returnsUnknownSize_whenHttpClientErrors() throws IOException {
-        given(httpClient.execute(requestCreator.createFileSizeHeadRequest(ANY_RAW_URL))).willThrow(IOException.class);
+        given(httpClient.execute(requestCreator.createFileSizeHeadRequest(ANY_RAW_URL))).willThrow(new IOException("error message"));
 
-        FileSize fileSize = fileSizeRequester.requestFileSize(ANY_RAW_URL);
+        FileSizeResult fileSizeResult = fileSizeHeaderRequest.requestFileSizeResult(ANY_RAW_URL);
 
-        assertThat(fileSize).isEqualTo(FileSizeCreator.unknownFileSize());
+        assertThat(fileSizeResult).isEqualTo(FileSizeResult.failure("error message"));
     }
 
     @Test
@@ -41,17 +35,18 @@ public class NetworkFileSizeRequesterTest {
         given(httpClient.execute(requestCreator.createFileSizeHeadRequest(ANY_RAW_URL))).willReturn(UNSUCCESSFUL_RESPONSE);
         given(httpClient.execute(requestCreator.createFileSizeBodyRequest(ANY_RAW_URL))).willReturn(UNSUCCESSFUL_RESPONSE);
 
-        FileSize fileSize = fileSizeRequester.requestFileSize(ANY_RAW_URL);
+        FileSizeResult fileSizeResult = fileSizeHeaderRequest.requestFileSizeResult(ANY_RAW_URL);
 
-        assertThat(fileSize).isEqualTo(FileSizeCreator.unknownFileSize());
+        assertThat(fileSizeResult).isEqualTo(FileSizeResult.failure("File Size Body Request: 'http://example.com' with response code: '200' failed."));
     }
 
     @Test
     public void returnsFileSize_whenResponseSuccessful() throws IOException {
         given(httpClient.execute(requestCreator.createFileSizeHeadRequest(ANY_RAW_URL))).willReturn(SUCCESSFUL_RESPONSE);
 
-        FileSize fileSize = fileSizeRequester.requestFileSize(ANY_RAW_URL);
+        FileSizeResult fileSizeResult = fileSizeHeaderRequest.requestFileSizeResult(ANY_RAW_URL);
 
-        assertThat(fileSize).isEqualTo(FileSizeCreator.createFromTotalSize(FILE_BYTES));
+        assertThat(fileSizeResult).isEqualTo(FileSizeResult.success(FileSizeCreator.createFromTotalSize(FILE_BYTES)));
     }
+
 }
