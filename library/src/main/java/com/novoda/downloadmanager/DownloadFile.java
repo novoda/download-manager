@@ -135,7 +135,7 @@ class DownloadFile {
         InternalFileSize updatedFileSize = fileSize.copy();
 
         if (fileSize.isTotalSizeUnknown()) {
-            FileSizeResult fileSizeResult = fileSizeRequester.requestFileSizeResult(url);
+            FileSizeResult fileSizeResult = fileSizeRequester.requestFileSize(url);
             if (fileSizeResult.isSuccess()) {
                 updatedFileSize.setTotalSize(fileSizeResult.fileSize().totalSize());
             }
@@ -178,7 +178,7 @@ class DownloadFile {
     @WorkerThread
     long getTotalSize() {
         if (fileSize.isTotalSizeUnknown()) {
-            FileSizeResult fileSizeResult = fileSizeRequester.requestFileSizeResult(url);
+            FileSizeResult fileSizeResult = fileSizeRequester.requestFileSize(url);
             if (fileSizeResult.isSuccess()) {
                 fileSize.setTotalSize(fileSizeResult.fileSize().totalSize());
             }

@@ -27,7 +27,7 @@ public class NetworkFileSizeHeaderRequestTest {
     public void returnsUnknownSize_whenHttpClientErrors() throws IOException {
         given(httpClient.execute(requestCreator.createFileSizeHeadRequest(ANY_RAW_URL))).willThrow(new IOException("error message"));
 
-        FileSizeResult fileSizeResult = fileSizeHeaderRequest.requestFileSizeResult(ANY_RAW_URL);
+        FileSizeResult fileSizeResult = fileSizeHeaderRequest.requestFileSize(ANY_RAW_URL);
 
         assertThat(fileSizeResult).isEqualTo(FileSizeResult.failure("error message"));
     }
@@ -37,7 +37,7 @@ public class NetworkFileSizeHeaderRequestTest {
         given(httpClient.execute(requestCreator.createFileSizeHeadRequest(ANY_RAW_URL))).willReturn(UNSUCCESSFUL_RESPONSE);
         given(httpClient.execute(requestCreator.createFileSizeBodyRequest(ANY_RAW_URL))).willReturn(UNSUCCESSFUL_RESPONSE);
 
-        FileSizeResult fileSizeResult = fileSizeHeaderRequest.requestFileSizeResult(ANY_RAW_URL);
+        FileSizeResult fileSizeResult = fileSizeHeaderRequest.requestFileSize(ANY_RAW_URL);
 
         assertThat(fileSizeResult).isEqualTo(FileSizeResult.failure("File Size Body Request: 'http://example.com' with response code: '200' failed."));
     }
@@ -46,7 +46,7 @@ public class NetworkFileSizeHeaderRequestTest {
     public void returnsHeaderFileSize_whenResponseSuccessful() throws IOException {
         given(httpClient.execute(requestCreator.createFileSizeHeadRequest(ANY_RAW_URL))).willReturn(SUCCESSFUL_HEADER_RESPONSE);
 
-        FileSizeResult fileSizeResult = fileSizeHeaderRequest.requestFileSizeResult(ANY_RAW_URL);
+        FileSizeResult fileSizeResult = fileSizeHeaderRequest.requestFileSize(ANY_RAW_URL);
 
         assertThat(fileSizeResult).isEqualTo(FileSizeResult.success(FileSizeCreator.createFromTotalSize(FILE_HEADER_BYTES)));
     }
@@ -56,7 +56,7 @@ public class NetworkFileSizeHeaderRequestTest {
         given(httpClient.execute(requestCreator.createFileSizeHeadRequest(ANY_RAW_URL))).willReturn(UNSUCCESSFUL_RESPONSE);
         given(httpClient.execute(requestCreator.createFileSizeBodyRequest(ANY_RAW_URL))).willReturn(SUCCESSFUL_BODY_RESPONSE);
 
-        FileSizeResult fileSizeResult = fileSizeHeaderRequest.requestFileSizeResult(ANY_RAW_URL);
+        FileSizeResult fileSizeResult = fileSizeHeaderRequest.requestFileSize(ANY_RAW_URL);
 
         assertThat(fileSizeResult).isEqualTo(FileSizeResult.success(FileSizeCreator.createFromTotalSize(FILE_BODY_BYTES)));
     }

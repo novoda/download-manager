@@ -6,11 +6,6 @@ package com.novoda.downloadmanager;
  */
 public interface FileSizeRequester {
 
-    FileSizeResult requestFileSizeResult(String url);
+    FileSizeResult requestFileSize(String url);
 
-    interface Callback {
-        void onFileSizeReceived(FileSize fileSize);
-
-        void onError(String message);
-    }
 }

@@ -19,7 +19,7 @@ class NetworkFileSizeHeaderRequest implements FileSizeRequester {
     }
 
     @Override
-    public FileSizeResult requestFileSizeResult(String url) {
+    public FileSizeResult requestFileSize(String url) {
         NetworkRequest fileSizeRequest = requestCreator.createFileSizeHeadRequest(url);
         NetworkResponse response = null;
         FileSizeResult fileSizeOrError;
@@ -29,7 +29,7 @@ class NetworkFileSizeHeaderRequest implements FileSizeRequester {
 
             if (headerResponseFileSize == UNKNOWN_CONTENT_LENGTH || headerResponseFileSize == ZERO_FILE_SIZE) {
                 Logger.w(String.format("file size header request '%s' returned %s, we'll try with a body request", url, headerResponseFileSize));
-                fileSizeOrError = bodyRequest.requestFileSizeResult(url);
+                fileSizeOrError = bodyRequest.requestFileSize(url);
             } else {
                 fileSizeOrError = FileSizeResult.success(FileSizeCreator.createFromTotalSize(headerResponseFileSize));
             }
