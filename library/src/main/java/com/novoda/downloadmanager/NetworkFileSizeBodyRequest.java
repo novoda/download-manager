@@ -15,15 +15,15 @@ class NetworkFileSizeBodyRequest {
         this.requestCreator = requestCreator;
     }
 
-    public Either<FileSize, DownloadError> requestFileSize(String url) {
+    public FileSizeResult requestFileSize(String url) {
         NetworkRequest fileSizeRequest = requestCreator.createFileSizeBodyRequest(url);
         NetworkResponse response = null;
-        Either<FileSize, DownloadError> fileSizeOrError;
+        FileSizeResult fileSizeOrError;
         try {
             response = httpClient.execute(fileSizeRequest);
             fileSizeOrError = processResponse(response, url);
         } catch (IOException e) {
-            return Either.asRight(DownloadErrorFactory.createTotalSizeRequestFailedError(e.getMessage()));
+            return FileSizeResult.failure(e.getMessage());
         } finally {
             if (response != null) {
                 try {
@@ -36,7 +36,7 @@ class NetworkFileSizeBodyRequest {
         return fileSizeOrError;
     }
 
-    private Either<FileSize, DownloadError> processResponse(NetworkResponse response, String url) {
+    private FileSizeResult processResponse(NetworkResponse response, String url) {
         if (response.isSuccessful()) {
             long fileSize = response.bodyContentLength();
             if (fileSize == UNKNOWN_CONTENT_LENGTH || fileSize == ZERO_FILE_SIZE) {
@@ -45,10 +45,10 @@ class NetworkFileSizeBodyRequest {
                         url,
                         fileSize
                 );
-                return Either.asRight(DownloadErrorFactory.createTotalSizeRequestFailedError(errorMessage));
+                return FileSizeResult.failure(errorMessage);
             }
 
-            return Either.asLeft(FileSizeCreator.createFromTotalSize(fileSize));
+            return FileSizeResult.success(FileSizeCreator.createFromTotalSize(fileSize));
         } else {
             Logger.w(String.format("file size body request '%s'", url));
             String errorMessage = String.format(
@@ -56,7 +56,7 @@ class NetworkFileSizeBodyRequest {
                     url,
                     response.code()
             );
-            return Either.asRight(DownloadErrorFactory.createTotalSizeRequestFailedError(errorMessage));
+            return FileSizeResult.failure(errorMessage);
         }
     }
 }

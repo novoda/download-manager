@@ -18,10 +18,10 @@ class NetworkFileSizeHeaderRequest {
         this.bodyRequest = bodyRequest;
     }
 
-    public Either<FileSize, DownloadError> requestFileSize(String url) {
+    public FileSizeResult requestFileSize(String url) {
         NetworkRequest fileSizeRequest = requestCreator.createFileSizeHeadRequest(url);
         NetworkResponse response = null;
-        Either<FileSize, DownloadError> fileSizeOrError;
+        FileSizeResult fileSizeOrError;
         try {
             response = httpClient.execute(fileSizeRequest);
             long headerResponseFileSize = processResponse(response);
@@ -30,11 +30,11 @@ class NetworkFileSizeHeaderRequest {
                 Logger.w(String.format("file size header request '%s' returned %s, we'll try with a body request", url, headerResponseFileSize));
                 fileSizeOrError = bodyRequest.requestFileSize(url);
             } else {
-                fileSizeOrError = Either.asLeft(FileSizeCreator.createFromTotalSize(headerResponseFileSize));
+                fileSizeOrError = FileSizeResult.success(FileSizeCreator.createFromTotalSize(headerResponseFileSize));
             }
 
         } catch (IOException e) {
-            return Either.asRight(DownloadErrorFactory.createTotalSizeRequestFailedError(e.getMessage()));
+            return FileSizeResult.failure(e.getMessage());
         } finally {
             if (response != null) {
                 try {
