@@ -12,4 +12,9 @@ class CustomFileSizeRequester implements FileSizeRequester {
     public FileSize requestFileSize(String url) {
         return FileSizeCreator.createFromTotalSize(FILE_TOTAL_SIZE);
     }
+
+    @Override
+    public void requestFileSize(String url, Callback callback) {
+        callback.onFileSizeReceived(FileSizeCreator.createFromTotalSize(FILE_TOTAL_SIZE));
+    }
 }
