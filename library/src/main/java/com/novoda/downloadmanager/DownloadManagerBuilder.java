@@ -71,7 +71,8 @@ public final class DownloadManagerBuilder {
         FileDownloaderCreator fileDownloaderCreator = FileDownloaderCreator.newNetworkFileDownloaderCreator(httpClient);
 
         NetworkRequestCreator requestCreator = new NetworkRequestCreator();
-        FileSizeRequester fileSizeRequester = new NetworkFileSizeRequester(httpClient, requestCreator);
+        NetworkFileSizeBodyRequest fileSizeBodyRequest = new NetworkFileSizeBodyRequest(httpClient, requestCreator);
+        FileSizeRequester fileSizeHeaderRequest = new NetworkFileSizeHeaderRequest(httpClient, requestCreator, fileSizeBodyRequest);
 
         DownloadsPersistence downloadsPersistence = RoomDownloadsPersistence.newInstance(applicationContext);
 
@@ -104,7 +105,7 @@ public final class DownloadManagerBuilder {
                 downloadBatchRequirementRule,
                 filePersistenceCreator,
                 downloadsPersistence,
-                fileSizeRequester,
+                fileSizeHeaderRequest,
                 fileDownloaderCreator,
                 notificationChannelProvider,
                 notificationCreator,
@@ -149,7 +150,8 @@ public final class DownloadManagerBuilder {
 
     public DownloadManagerBuilder withCustomHttpClient(HttpClient httpClient) {
         NetworkRequestCreator requestCreator = new NetworkRequestCreator();
-        this.fileSizeRequester = new NetworkFileSizeRequester(httpClient, requestCreator);
+        NetworkFileSizeBodyRequest bodyRequest = new NetworkFileSizeBodyRequest(httpClient, requestCreator);
+        this.fileSizeRequester = new NetworkFileSizeHeaderRequest(httpClient, requestCreator, bodyRequest);
         this.fileDownloaderCreator = FileDownloaderCreator.newNetworkFileDownloaderCreator(httpClient);
         return this;
     }
