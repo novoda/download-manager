@@ -1,15 +1,15 @@
 package com.novoda.downloadmanager;
 
-class FileSizeResult {
+public class FileSizeResult {
 
     private final FileSize fileSize;
     private final String failureMessage;
 
-    static FileSizeResult success(FileSize fileSize) {
+    public static FileSizeResult success(FileSize fileSize) {
         return new FileSizeResult(fileSize, null);
     }
 
-    static FileSizeResult failure(String failureMessage) {
+    public static FileSizeResult failure(String failureMessage) {
         return new FileSizeResult(null, failureMessage);
     }
 
@@ -32,11 +32,11 @@ class FileSizeResult {
         return failureMessage;
     }
 
-    boolean isSuccess() {
+    public boolean isSuccess() {
         return fileSize != null;
     }
 
-    boolean isFailure() {
+    public boolean isFailure() {
         return failureMessage != null;
     }
 

@@ -8,7 +8,7 @@ public interface FileSizeRequester {
 
     FileSize requestFileSize(String url);
 
-    void requestFileSize(String url, Callback callback);
+    FileSizeResult requestFileSizeResult(String url);
 
     interface Callback {
         void onFileSizeReceived(FileSize fileSize);

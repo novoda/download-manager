@@ -3,6 +3,7 @@ package com.novoda.downloadmanager.demo;
 import com.novoda.downloadmanager.FileSize;
 import com.novoda.downloadmanager.FileSizeCreator;
 import com.novoda.downloadmanager.FileSizeRequester;
+import com.novoda.downloadmanager.FileSizeResult;
 
 class CustomFileSizeRequester implements FileSizeRequester {
 
@@ -14,7 +15,7 @@ class CustomFileSizeRequester implements FileSizeRequester {
     }
 
     @Override
-    public void requestFileSize(String url, Callback callback) {
-        callback.onFileSizeReceived(FileSizeCreator.createFromTotalSize(FILE_TOTAL_SIZE));
+    public FileSizeResult requestFileSizeResult(String url) {
+        return FileSizeResult.success(FileSizeCreator.createFromTotalSize(FILE_TOTAL_SIZE));
     }
 }

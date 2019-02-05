@@ -2,7 +2,7 @@ package com.novoda.downloadmanager;
 
 import java.io.IOException;
 
-class NetworkFileSizeBodyRequest {
+class NetworkFileSizeBodyRequest implements FileSizeRequester {
 
     private static final int ZERO_FILE_SIZE = 0;
     private static final int UNKNOWN_CONTENT_LENGTH = -1;
@@ -15,7 +15,13 @@ class NetworkFileSizeBodyRequest {
         this.requestCreator = requestCreator;
     }
 
-    public FileSizeResult requestFileSize(String url) {
+    @Override
+    public FileSize requestFileSize(String url) {
+        return null;
+    }
+
+    @Override
+    public FileSizeResult requestFileSizeResult(String url) {
         NetworkRequest fileSizeRequest = requestCreator.createFileSizeBodyRequest(url);
         NetworkResponse response = null;
         FileSizeResult fileSizeOrError;

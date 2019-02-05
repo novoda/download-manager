@@ -2,7 +2,7 @@ package com.novoda.downloadmanager;
 
 import java.io.IOException;
 
-class NetworkFileSizeHeaderRequest {
+class NetworkFileSizeHeaderRequest implements FileSizeRequester {
 
     private static final int ZERO_FILE_SIZE = 0;
     private static final String HEADER_CONTENT_LENGTH = "Content-Length";
@@ -18,7 +18,13 @@ class NetworkFileSizeHeaderRequest {
         this.bodyRequest = bodyRequest;
     }
 
-    public FileSizeResult requestFileSize(String url) {
+    @Override
+    public FileSize requestFileSize(String url) {
+        return null;
+    }
+
+    @Override
+    public FileSizeResult requestFileSizeResult(String url) {
         NetworkRequest fileSizeRequest = requestCreator.createFileSizeHeadRequest(url);
         NetworkResponse response = null;
         FileSizeResult fileSizeOrError;
@@ -28,7 +34,7 @@ class NetworkFileSizeHeaderRequest {
 
             if (headerResponseFileSize == UNKNOWN_CONTENT_LENGTH || headerResponseFileSize == ZERO_FILE_SIZE) {
                 Logger.w(String.format("file size header request '%s' returned %s, we'll try with a body request", url, headerResponseFileSize));
-                fileSizeOrError = bodyRequest.requestFileSize(url);
+                fileSizeOrError = bodyRequest.requestFileSizeResult(url);
             } else {
                 fileSizeOrError = FileSizeResult.success(FileSizeCreator.createFromTotalSize(headerResponseFileSize));
             }

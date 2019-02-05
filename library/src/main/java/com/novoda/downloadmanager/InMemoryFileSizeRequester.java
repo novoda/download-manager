@@ -10,7 +10,7 @@ class InMemoryFileSizeRequester implements FileSizeRequester {
     }
 
     @Override
-    public void requestFileSize(String url, Callback callback) {
-
+    public FileSizeResult requestFileSizeResult(String url) {
+        return null;
     }
 }
