@@ -135,9 +135,9 @@ class DownloadFile {
         InternalFileSize updatedFileSize = fileSize.copy();
 
         if (fileSize.isTotalSizeUnknown()) {
-            FileSize requestFileSize = fileSizeRequester.requestFileSize(url);
-            if (requestFileSize.isTotalSizeKnown()) {
-                updatedFileSize.setTotalSize(requestFileSize.totalSize());
+            FileSizeResult fileSizeResult = fileSizeRequester.requestFileSizeResult(url);
+            if (fileSizeResult.isSuccess()) {
+                updatedFileSize.setTotalSize(fileSizeResult.fileSize().totalSize());
             }
         }
 
@@ -178,8 +178,11 @@ class DownloadFile {
     @WorkerThread
     long getTotalSize() {
         if (fileSize.isTotalSizeUnknown()) {
-            FileSize requestFileSize = fileSizeRequester.requestFileSize(url);
-            fileSize.setTotalSize(requestFileSize.totalSize());
+            FileSizeResult fileSizeResult = fileSizeRequester.requestFileSizeResult(url);
+            if (fileSizeResult.isSuccess()) {
+                fileSize.setTotalSize(fileSizeResult.fileSize().totalSize());
+            }
+
             if (fileStatus().status() == DownloadFileStatus.Status.DELETED) {
                 Logger.e("file getTotalSize return zero because is deleted, " + downloadFileId.rawId()
                                  + " from batch " + downloadBatchId.rawId()

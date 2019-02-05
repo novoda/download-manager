@@ -19,11 +19,6 @@ class NetworkFileSizeHeaderRequest implements FileSizeRequester {
     }
 
     @Override
-    public FileSize requestFileSize(String url) {
-        return null;
-    }
-
-    @Override
     public FileSizeResult requestFileSizeResult(String url) {
         NetworkRequest fileSizeRequest = requestCreator.createFileSizeHeadRequest(url);
         NetworkResponse response = null;
