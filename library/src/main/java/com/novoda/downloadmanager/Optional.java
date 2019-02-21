@@ -57,9 +57,35 @@ final class Optional<T> {
         return isPresent() ? this : elseFunc.call();
     }
 
+    Optional<T> filter(Predicate<T> condition) {
+        return isPresent() && condition.test(get()) ? this : absent();
+    }
+
+    Optional<T> filterNot(Predicate<T> condition) {
+        return filter((it) -> !condition.test(it));
+    }
+
+    <P> Optional<P> map(Func1<T, P> transformation) {
+        return isPresent() ? Optional.of(transformation.call(get())) : absent();
+    }
+
+    T getOrElse(Func0<T> elseFunc) {
+        return isPresent() ? get() : elseFunc.call();
+    }
+
     interface Func0<V> {
 
         V call();
+    }
+
+    interface Func1<V, R> {
+
+        R call(V value);
+    }
+
+    interface Predicate<V> {
+
+        boolean test(V value);
     }
 
     @Override
