@@ -58,11 +58,11 @@ final class Optional<T> {
     }
 
     Optional<T> filter(Predicate<T> condition) {
-        return isPresent() && condition.test(get()) ? this : absent();
+        return isPresent() && condition.isValid(get()) ? this : absent();
     }
 
     Optional<T> filterNot(Predicate<T> condition) {
-        return filter((it) -> !condition.test(it));
+        return filter((it) -> !condition.isValid(it));
     }
 
     <P> Optional<P> map(Func1<T, P> transformation) {
@@ -85,7 +85,7 @@ final class Optional<T> {
 
     interface Predicate<V> {
 
-        boolean test(V value);
+        boolean isValid(V value);
     }
 
     @Override
