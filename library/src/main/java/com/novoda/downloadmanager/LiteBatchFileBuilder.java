@@ -4,8 +4,6 @@ import java.io.File;
 
 final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
 
-    private static Optional.Predicate<String> rootPath = (it) -> it.equals("/");
-
     private final StorageRoot storageRoot;
     private final DownloadBatchId downloadBatchId;
     private final String networkAddress;
@@ -42,7 +40,7 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
 
     @Override
     public BatchFileBuilder saveTo(String path, String fileName) {
-        this.path = Optional.fromNullable(path).filterNot(rootPath);
+        this.path = Optional.fromNullable(path).filterNot("/"::equals);
         this.fileName = Optional.fromNullable(fileName);
         return this;
     }
