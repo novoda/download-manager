@@ -36,6 +36,18 @@ public class BatchBuilderTest {
         assertThat(batch).isEqualTo(expectedBatch);
     }
 
+    @Test
+    public void acceptsRoot_asBasePath() {
+        Batch batch = Batch.with(TestStorageRootFactory.create(), DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
+                .downloadFrom("http://example.com/5mb.zip").withIdentifier(DOWNLOAD_FILE_ID).saveTo("/", "5mb.zip").apply()
+                .build();
+
+        BatchFile expectedBatchFile = new BatchFile("http://example.com/5mb.zip", Optional.of(DOWNLOAD_FILE_ID), "root/download_batch_id/5mb.zip");
+        Batch expectedBatch = new Batch(TestStorageRootFactory.create(), DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE, Collections.singletonList(expectedBatchFile));
+
+        assertThat(batch).isEqualTo(expectedBatch);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void throwsException_whenDuplicatedFileIDsAreSupplied() {
         Batch.with(TestStorageRootFactory.create(), DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE)
