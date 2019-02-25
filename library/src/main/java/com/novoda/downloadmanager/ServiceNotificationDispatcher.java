@@ -42,6 +42,10 @@ class ServiceNotificationDispatcher<T> {
                 case SINGLE_PERSISTENT_NOTIFICATION:
                     updatePersistentNotification(notificationInformation);
                     break;
+                case SINGLE_DISMISSIBLE_NOTIFICATION:
+                    notificationManager.cancelAll();
+                    stackNotification(notificationInformation);
+                    break;
                 case STACK_NOTIFICATION_NOT_DISMISSIBLE:
                     stackNotificationNotDismissible(notificationInformation);
                     break;
