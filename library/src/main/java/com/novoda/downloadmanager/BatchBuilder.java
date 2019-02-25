@@ -20,4 +20,12 @@ public interface BatchBuilder {
      * @return an instance of {@link Batch}.
      */
     Batch build();
+
+    static BatchBuilder from(Batch batch) {
+        InternalBatchBuilder builder = (InternalBatchBuilder) Batch.with(batch.storageRoot(), batch.downloadBatchId(), batch.title());
+        for (BatchFile batchFile : batch.batchFiles()) {
+            builder.withFile(batchFile);
+        }
+        return builder;
+    }
 }
