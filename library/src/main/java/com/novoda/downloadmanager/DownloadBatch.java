@@ -275,7 +275,9 @@ class DownloadBatch {
 
     private static boolean networkError(InternalDownloadBatchStatus downloadBatchStatus) {
         if (downloadBatchStatus.status() == DELETING) {
-            Logger.v("abort networkError check because the batch " + downloadBatchStatus.getDownloadBatchId().rawId() + " is deleting");
+            Logger.v("batch " + downloadBatchStatus.getDownloadBatchId().rawId()
+                             + STATUS + downloadBatchStatus.status()
+                             + " abort network error");
             return false;
         }
         DownloadBatchStatus.Status status = downloadBatchStatus.status();
@@ -292,7 +294,9 @@ class DownloadBatch {
         Logger.v("pause batch " + downloadBatchStatus.getDownloadBatchId().rawId() + STATUS + downloadBatchStatus.status());
         DownloadBatchStatus.Status status = downloadBatchStatus.status();
         if (status == PAUSED || status == DOWNLOADED) {
-            Logger.v("abort pause batch " + downloadBatchStatus.getDownloadBatchId().rawId() + " because the status is " + status);
+            Logger.v("batch " + downloadBatchStatus.getDownloadBatchId().rawId()
+                             + STATUS + downloadBatchStatus.status()
+                             + " abort pause batch");
             return;
         }
         downloadBatchStatus.markAsPaused(downloadsBatchPersistence);
@@ -306,7 +310,9 @@ class DownloadBatch {
     void waitForNetwork() {
         DownloadBatchStatus.Status status = downloadBatchStatus.status();
         if (status != DOWNLOADING) {
-            Logger.v("abort `wait for network` on batch " + downloadBatchStatus.getDownloadBatchId().rawId() + " because the status is " + status);
+            Logger.v("batch " + downloadBatchStatus.getDownloadBatchId().rawId()
+                             + STATUS + downloadBatchStatus.status()
+                             + " abort wait for network");
             return;
         }
 
@@ -318,7 +324,9 @@ class DownloadBatch {
     void resume() {
         DownloadBatchStatus.Status status = downloadBatchStatus.status();
         if (status == QUEUED || status == DOWNLOADING || status == DOWNLOADED) {
-            Logger.v("abort resume batch " + downloadBatchStatus.getDownloadBatchId().rawId() + " because the status is " + status);
+            Logger.v("batch " + downloadBatchStatus.getDownloadBatchId().rawId()
+                             + STATUS + downloadBatchStatus.status()
+                             + " abort resume batch");
             return;
         }
         downloadBatchStatus.markAsQueued(downloadsBatchPersistence);
@@ -331,7 +339,9 @@ class DownloadBatch {
     void delete() {
         DownloadBatchStatus.Status status = downloadBatchStatus.status();
         if (status == DELETING || status == DELETED) {
-            Logger.v("abort delete batch " + downloadBatchStatus.getDownloadBatchId().rawId() + " because the status is " + status);
+            Logger.v("batch " + downloadBatchStatus.getDownloadBatchId().rawId()
+                             + STATUS + downloadBatchStatus.status()
+                             + " abort delete batch");
             return;
         }
 
