@@ -58,21 +58,21 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
         return parentBuilder;
     }
 
-    private String buildPath(String... elements) {
+    private String buildPath(String... paths) {
         StringBuilder stringBuilder = new StringBuilder();
 
-        if (elements[0].startsWith(File.separator)) {
+        if (paths[0].startsWith(File.separator)) {
             stringBuilder.append(File.separator); // if storage path starts with /, we honour it
         }
 
-        for (String element : elements) {
-            if (element.isEmpty()) {
+        for (String path : paths) {
+            if (path.isEmpty()) {
                 continue; // ignore empty paths
             }
             if (!isLastCharFileSeparator(stringBuilder)) {
                 stringBuilder.append(File.separatorChar);
             }
-            stringBuilder.append(removeLeadingTrailingFileSeparator(element));
+            stringBuilder.append(removeLeadingTrailingFileSeparator(path));
         }
 
         return stringBuilder.toString();
