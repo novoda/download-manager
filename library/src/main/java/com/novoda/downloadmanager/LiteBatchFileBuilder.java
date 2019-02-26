@@ -75,22 +75,22 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
     }
 
     private String sanitise(String path) {
-        String[] pathSegments = path.split(File.separator);
+        String[] pathSegments = path.split(File.separatorChar == '\\' ? "\\\\" : File.separator);
         CharSequence[] filteredPathSegments = filterEmptySegmentsOut(pathSegments);
         return joinWithFileSeparator(filteredPathSegments);
     }
 
-    private CharSequence[] filterEmptySegmentsOut(String[] pathSegments) {
+    private CharSequence[] filterEmptySegmentsOut(String... pathSegments) {
         List<CharSequence> filteredPathSegments = new ArrayList<>();
         for (String pathSegment : pathSegments) {
             if (!pathSegment.isEmpty()) {
                 filteredPathSegments.add(pathSegment);
             }
         }
-        return filteredPathSegments.toArray(new CharSequence[0]);
+        return filteredPathSegments.toArray(new CharSequence[filteredPathSegments.size()]);
     }
 
-    private String joinWithFileSeparator(CharSequence[] elements) {
+    private String joinWithFileSeparator(CharSequence... elements) {
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < elements.length; i++) {
             stringBuilder.append(elements[i]);
