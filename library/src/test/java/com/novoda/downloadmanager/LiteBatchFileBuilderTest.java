@@ -14,17 +14,15 @@ public class LiteBatchFileBuilderTest {
     private final InternalBatchBuilder batchBuilder = mock(InternalBatchBuilder.class);
     private final StorageRoot storageRoot = mock(StorageRoot.class);
     private final DownloadBatchId downloadBatchId = mock(DownloadBatchId.class);
-
-    private LiteBatchFileBuilder liteBatchFileBuilder;
+    private final LiteBatchFileBuilder liteBatchFileBuilder = new LiteBatchFileBuilder(
+            storageRoot,
+            downloadBatchId,
+            ANY_NETWORK_ADDRESS
+    );
 
     @Before
     public void setUp() {
         when(downloadBatchId.rawId()).thenReturn("my-movie");
-        liteBatchFileBuilder = new LiteBatchFileBuilder(
-                storageRoot,
-                downloadBatchId,
-                ANY_NETWORK_ADDRESS
-        );
     }
 
     @Test
