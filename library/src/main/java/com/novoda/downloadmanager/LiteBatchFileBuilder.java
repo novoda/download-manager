@@ -93,8 +93,8 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
         return element.substring(beginIndex, endIndex);
     }
 
-    private boolean isLastCharNotFileSeparator(StringBuilder stringBuilder) {
-        return stringBuilder.length() > 0 && stringBuilder.charAt(stringBuilder.length() - 1) != File.separatorChar;
+    private boolean isLastCharNotFileSeparator(CharSequence charSequence) {
+        return charSequence.length() > 0 && charSequence.charAt(charSequence.length() - 1) != File.separatorChar;
     }
 
 }
