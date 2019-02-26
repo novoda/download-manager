@@ -70,7 +70,7 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
             if (path.isEmpty()) {
                 continue; // ignore empty paths
             }
-            if (!isLastCharFileSeparator(stringBuilder)) {
+            if (isLastCharNotFileSeparator(stringBuilder)) {
                 stringBuilder.append(File.separatorChar);
             }
             stringBuilder.append(removeLeadingTrailingFileSeparator(path));
@@ -93,8 +93,8 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
         return element.substring(beginIndex, endIndex);
     }
 
-    private boolean isLastCharFileSeparator(StringBuilder stringBuilder) {
-        return stringBuilder.length() <= 0 || stringBuilder.charAt(stringBuilder.length() - 1) == File.separatorChar;
+    private boolean isLastCharNotFileSeparator(StringBuilder stringBuilder) {
+        return stringBuilder.length() > 0 && stringBuilder.charAt(stringBuilder.length() - 1) != File.separatorChar;
     }
 
 }
