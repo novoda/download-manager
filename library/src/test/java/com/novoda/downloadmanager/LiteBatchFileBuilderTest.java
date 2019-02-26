@@ -38,8 +38,8 @@ public class LiteBatchFileBuilderTest {
     }
 
     @Test
-    public void doesNotAddDuplicatePathSeparators() {
-        given(storageRoot.path()).willReturn("root/");
+    public void doesNotAddDuplicateSeparators() {
+        given(storageRoot.path()).willReturn("/root/");
         given(downloadBatchId.rawId()).willReturn("/my-movie/");
 
         liteBatchFileBuilder
@@ -47,7 +47,7 @@ public class LiteBatchFileBuilderTest {
                 .saveTo("/my/path/", "/my-movie.mp4")
                 .apply();
 
-        verify(batchBuilder).withFile(batchFileWithPath("root/my-movie/my/path/my-movie.mp4"));
+        verify(batchBuilder).withFile(batchFileWithPath("/root/my-movie/my/path/my-movie.mp4"));
     }
 
     @Test
