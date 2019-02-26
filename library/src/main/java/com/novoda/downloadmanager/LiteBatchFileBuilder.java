@@ -6,6 +6,8 @@ import java.util.List;
 
 final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
 
+    private static final String SEPARATOR_AS_REGEX = File.separatorChar == '\\' ? "\\\\" : File.separator;
+
     private final StorageRoot storageRoot;
     private final DownloadBatchId downloadBatchId;
     private final String networkAddress;
@@ -75,7 +77,7 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
     }
 
     private String sanitise(String path) {
-        String[] pathSegments = path.split(File.separatorChar == '\\' ? "\\\\" : File.separator);
+        String[] pathSegments = path.split(SEPARATOR_AS_REGEX);
         CharSequence[] filteredPathSegments = filterEmptySegmentsOut(pathSegments);
         return joinWithFileSeparator(filteredPathSegments);
     }
