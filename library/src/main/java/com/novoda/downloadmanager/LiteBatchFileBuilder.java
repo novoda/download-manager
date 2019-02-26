@@ -75,7 +75,7 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
     }
 
     private String sanitise(String path) {
-        String[] pathSegments = path.split("/");
+        String[] pathSegments = path.split(File.separator);
         CharSequence[] filteredPathSegments = filterEmptySegmentsOut(pathSegments);
         return joinWithFileSeparator(filteredPathSegments);
     }
