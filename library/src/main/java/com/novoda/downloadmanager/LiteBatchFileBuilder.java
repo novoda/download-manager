@@ -40,20 +40,60 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
 
     @Override
     public BatchFileBuilder saveTo(String path, String fileName) {
-        this.path = Optional.fromNullable(path).filterNot("/"::equals);
+        this.path = Optional.fromNullable(path);
         this.fileName = Optional.fromNullable(fileName);
         return this;
     }
 
     @Override
     public BatchBuilder apply() {
-        String absolutePath = storageRoot.path() + File.separator
-                + downloadBatchId.rawId() + File.separator
-                + path.map((it) -> it + File.separator).or("")
-                + fileName.getOrElse(() -> FileNameExtractor.extractFrom(networkAddress));
+        String absolutePath = buildPath(
+                storageRoot.path(),
+                downloadBatchId.rawId(),
+                path.or(""),
+                fileName.getOrElse(() -> FileNameExtractor.extractFrom(networkAddress))
+        );
 
         parentBuilder.withFile(new BatchFile(networkAddress, downloadFileId, absolutePath));
         return parentBuilder;
+    }
+
+    private String buildPath(String... elements) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        if (elements[0].startsWith(File.separator)) {
+            stringBuilder.append(File.separator); // if storage path starts with /, we honour it
+        }
+
+        for (String element : elements) {
+            if (element.isEmpty()) {
+                continue; // ignore empty paths
+            }
+            if (!isLastCharFileSeparator(stringBuilder)) {
+                stringBuilder.append(File.separatorChar);
+            }
+            stringBuilder.append(removeLeadingTrailingFileSeparator(element));
+        }
+
+        return stringBuilder.toString();
+    }
+
+    private String removeLeadingTrailingFileSeparator(String element) {
+        int beginIndex = 0;
+        int endIndex = element.length();
+
+        if (element.charAt(0) == File.separatorChar) {
+            beginIndex = 1;
+        }
+        int lastIndexOfSeparator = element.lastIndexOf(File.separatorChar);
+        if (lastIndexOfSeparator != 0 && lastIndexOfSeparator == element.length() - 1) {
+            endIndex = element.length() - 1;
+        }
+        return element.substring(beginIndex, endIndex);
+    }
+
+    private boolean isLastCharFileSeparator(StringBuilder stringBuilder) {
+        return stringBuilder.length() <= 0 || stringBuilder.charAt(stringBuilder.length() - 1) == File.separatorChar;
     }
 
 }
