@@ -19,7 +19,7 @@ class FileCallbackThrottleByTime implements FileCallbackThrottle {
     @Override
     public void update(DownloadBatchStatus downloadBatchStatus) {
         if (callback == null) {
-            return;
+            throw new IllegalStateException("A DownloadBatchStatusCallback must be set before an update is called.");
         }
 
         this.downloadBatchStatus = downloadBatchStatus;

@@ -3,40 +3,35 @@ package com.novoda.downloadmanager;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willAnswer;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 public class FileCallbackThrottleByTimeTest {
 
     private final ActionScheduler actionScheduler = mock(ActionScheduler.class);
     private final DownloadBatchStatusCallback callback = mock(DownloadBatchStatusCallback.class);
     private final DownloadBatchStatus downloadBatchStatus = mock(DownloadBatchStatus.class);
-
-    private FileCallbackThrottleByTime callbackThrottleByTime;
+    private final FileCallbackThrottleByTime callbackThrottleByTime = new FileCallbackThrottleByTime(actionScheduler);
 
     @Before
     public void setUp() {
-        callbackThrottleByTime = new FileCallbackThrottleByTime(actionScheduler);
-
         final ArgumentCaptor<ActionScheduler.Action> argumentCaptor = ArgumentCaptor.forClass(ActionScheduler.Action.class);
-        willAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                argumentCaptor.getValue().perform();
-                return null;
-            }
+        willAnswer((Answer<Void>) invocation -> {
+            argumentCaptor.getValue().perform();
+            return null;
         }).given(actionScheduler).schedule(argumentCaptor.capture());
     }
 
-    @Test
-    public void doesNothing_whenCallbackIsAbsent() {
+    @Test(expected = IllegalStateException.class)
+    public void throws_whenCallbackIsAbsent() {
         callbackThrottleByTime.update(downloadBatchStatus);
-
-        verifyZeroInteractions(actionScheduler, callback, downloadBatchStatus);
     }
 
     @Test
