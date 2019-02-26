@@ -4,7 +4,10 @@ import org.junit.Test;
 
 import static com.novoda.downloadmanager.InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 
 public class FileCallbackThrottleByProgressIncreaseTest {
 
@@ -17,15 +20,14 @@ public class FileCallbackThrottleByProgressIncreaseTest {
 
     private final FileCallbackThrottleByProgressIncrease callbackThrottleByProgressIncrease = new FileCallbackThrottleByProgressIncrease();
 
-    @Test
+    @Test(expected = IllegalStateException.class)
     public void doesNothing_whenCallbackUnset() {
         callbackThrottleByProgressIncrease.update(percentageIncreasedStatus);
-
-        then(downloadBatchCallback).should(never()).onUpdate(percentageIncreasedStatus);
     }
 
     @Test
     public void doesNothing_whenDownloadBatchStatusIsUnchanged() {
+        callbackThrottleByProgressIncrease.setCallback(downloadBatchCallback);
         givenPreviousUpdate(percentageIncreasedStatus);
 
         callbackThrottleByProgressIncrease.update(percentageIncreasedStatus);
@@ -40,16 +42,6 @@ public class FileCallbackThrottleByProgressIncreaseTest {
         callbackThrottleByProgressIncrease.update(percentageIncreasedStatus);
 
         then(downloadBatchCallback).should(never()).onUpdate(any(DownloadBatchStatus.class));
-    }
-
-    @Test
-    public void doesNotEmitsStatus_whenStoppingUpdates() {
-        callbackThrottleByProgressIncrease.setCallback(downloadBatchCallback);
-        callbackThrottleByProgressIncrease.stopUpdates();
-
-        callbackThrottleByProgressIncrease.update(percentageIncreasedStatus);
-
-        then(downloadBatchCallback).should(never()).onUpdate(percentageIncreasedStatus);
     }
 
     private void givenPreviousUpdate(DownloadBatchStatus downloadBatchStatus) {
