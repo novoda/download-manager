@@ -21,7 +21,7 @@ public class FileCallbackThrottleByProgressIncreaseTest {
     private final FileCallbackThrottleByProgressIncrease callbackThrottleByProgressIncrease = new FileCallbackThrottleByProgressIncrease();
 
     @Test(expected = IllegalStateException.class)
-    public void doesNothing_whenCallbackUnset() {
+    public void throws_whenCallbackUnset() {
         callbackThrottleByProgressIncrease.update(percentageIncreasedStatus);
     }
 
@@ -42,6 +42,16 @@ public class FileCallbackThrottleByProgressIncreaseTest {
         callbackThrottleByProgressIncrease.update(percentageIncreasedStatus);
 
         then(downloadBatchCallback).should(never()).onUpdate(any(DownloadBatchStatus.class));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void removesCallback_whenStoppingUpdates() {
+        callbackThrottleByProgressIncrease.setCallback(downloadBatchCallback);
+        callbackThrottleByProgressIncrease.stopUpdates();
+
+        callbackThrottleByProgressIncrease.update(percentageIncreasedStatus);
+
+        then(downloadBatchCallback).should(never()).onUpdate(percentageIncreasedStatus);
     }
 
     private void givenPreviousUpdate(DownloadBatchStatus downloadBatchStatus) {
