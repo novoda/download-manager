@@ -3,9 +3,9 @@ package com.novoda.downloadmanager;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class LiteBatchFileBuilderTest {
 
@@ -22,12 +22,12 @@ public class LiteBatchFileBuilderTest {
 
     @Before
     public void setUp() {
-        when(downloadBatchId.rawId()).thenReturn("my-movie");
+        given(downloadBatchId.rawId()).willReturn("my-movie");
     }
 
     @Test
     public void concatenatesAllPaths() {
-        when(storageRoot.path()).thenReturn("root");
+        given(storageRoot.path()).willReturn("root");
 
         liteBatchFileBuilder
                 .withParentBuilder(batchBuilder)
@@ -39,8 +39,8 @@ public class LiteBatchFileBuilderTest {
 
     @Test
     public void doesNotAddDuplicatePathSeparators() {
-        when(storageRoot.path()).thenReturn("root/");
-        when(downloadBatchId.rawId()).thenReturn("/my-movie/");
+        given(storageRoot.path()).willReturn("root/");
+        given(downloadBatchId.rawId()).willReturn("/my-movie/");
 
         liteBatchFileBuilder
                 .withParentBuilder(batchBuilder)
@@ -52,7 +52,7 @@ public class LiteBatchFileBuilderTest {
 
     @Test
     public void ignoresEmptyPath() {
-        when(storageRoot.path()).thenReturn("root");
+        given(storageRoot.path()).willReturn("root");
 
         liteBatchFileBuilder
                 .withParentBuilder(batchBuilder)
@@ -64,7 +64,7 @@ public class LiteBatchFileBuilderTest {
 
     @Test
     public void ignoreSeparatorAsPath() {
-        when(storageRoot.path()).thenReturn("root/");
+        given(storageRoot.path()).willReturn("root/");
 
         liteBatchFileBuilder
                 .withParentBuilder(batchBuilder)
@@ -76,7 +76,7 @@ public class LiteBatchFileBuilderTest {
 
     @Test
     public void doesNotIgnoreSeparatorAsRoot() {
-        when(storageRoot.path()).thenReturn("/");
+        given(storageRoot.path()).willReturn("/");
 
         liteBatchFileBuilder
                 .withParentBuilder(batchBuilder)
