@@ -1,6 +1,8 @@
 package com.novoda.downloadmanager;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
 
@@ -66,35 +68,36 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
             stringBuilder.append(File.separator);
         }
 
-        for (String path : paths) {
-            if (path.isEmpty()) {
-                continue; // ignore empty paths
-            }
-            if (isLastCharNotFileSeparator(stringBuilder)) {
-                stringBuilder.append(File.separatorChar);
-            }
-            stringBuilder.append(removeLeadingTrailingFileSeparator(path));
-        }
+        String joinedPaths = sanitise(joinWithFileSeparator(paths));
+        stringBuilder.append(joinedPaths);
 
         return stringBuilder.toString();
     }
 
-    private String removeLeadingTrailingFileSeparator(String element) {
-        int beginIndex = 0;
-        int endIndex = element.length();
-
-        if (element.charAt(0) == File.separatorChar) {
-            beginIndex = 1;
-        }
-        int lastIndexOfSeparator = element.lastIndexOf(File.separatorChar);
-        if (lastIndexOfSeparator != 0 && lastIndexOfSeparator == element.length() - 1) {
-            endIndex = element.length() - 1;
-        }
-        return element.substring(beginIndex, endIndex);
+    private String sanitise(String path) {
+        String[] pathSegments = path.split("/");
+        CharSequence[] filteredPathSegments = filterEmptySegmentsOut(pathSegments);
+        return joinWithFileSeparator(filteredPathSegments);
     }
 
-    private boolean isLastCharNotFileSeparator(CharSequence charSequence) {
-        return charSequence.length() > 0 && charSequence.charAt(charSequence.length() - 1) != File.separatorChar;
+    private CharSequence[] filterEmptySegmentsOut(String[] pathSegments) {
+        List<CharSequence> filteredPathSegments = new ArrayList<>();
+        for (String pathSegment : pathSegments) {
+            if (!pathSegment.isEmpty()) {
+                filteredPathSegments.add(pathSegment);
+            }
+        }
+        return filteredPathSegments.toArray(new CharSequence[0]);
     }
 
+    private String joinWithFileSeparator(CharSequence[] elements) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < elements.length; i++) {
+            stringBuilder.append(elements[i]);
+            if (i < elements.length - 1) {
+                stringBuilder.append((CharSequence) File.separator);
+            }
+        }
+        return stringBuilder.toString();
+    }
 }

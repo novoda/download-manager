@@ -14,11 +14,11 @@ public class LiteBatchFileBuilderTest {
     private final InternalBatchBuilder batchBuilder = mock(InternalBatchBuilder.class);
     private final StorageRoot storageRoot = mock(StorageRoot.class);
     private final DownloadBatchId downloadBatchId = mock(DownloadBatchId.class);
-    private final LiteBatchFileBuilder liteBatchFileBuilder = new LiteBatchFileBuilder(
+    private final BatchFileBuilder liteBatchFileBuilder = new LiteBatchFileBuilder(
             storageRoot,
             downloadBatchId,
             ANY_NETWORK_ADDRESS
-    );
+    ).withParentBuilder(batchBuilder);
 
     @Before
     public void setUp() {
@@ -29,35 +29,36 @@ public class LiteBatchFileBuilderTest {
     public void concatenatesAllPaths() {
         given(storageRoot.path()).willReturn("root");
 
-        liteBatchFileBuilder
-                .withParentBuilder(batchBuilder)
-                .saveTo("my/path", "my-movie.mp4")
-                .apply();
+        whenLiteBatchFileBuilderApply("my/path", "my-movie.mp4");
 
         verify(batchBuilder).withFile(batchFileWithPath("root/my-movie/my/path/my-movie.mp4"));
     }
 
     @Test
-    public void doesNotAddDuplicateSeparators() {
+    public void doesNotAddDuplicateLeadingOrTrailingSeparators() {
         given(storageRoot.path()).willReturn("/root/");
         given(downloadBatchId.rawId()).willReturn("/my-movie/");
 
-        liteBatchFileBuilder
-                .withParentBuilder(batchBuilder)
-                .saveTo("/my/path/", "/my-movie.mp4")
-                .apply();
+        whenLiteBatchFileBuilderApply("/my/path/", "/my-movie.mp4");
 
         verify(batchBuilder).withFile(batchFileWithPath("/root/my-movie/my/path/my-movie.mp4"));
+    }
+
+    @Test
+    public void doesNotAddDuplicateSeparatorsWhenInMiddleOfSegments() {
+        given(storageRoot.path()).willReturn("/root//to///the//path/");
+        given(downloadBatchId.rawId()).willReturn("/my///movie/");
+
+        whenLiteBatchFileBuilderApply("///my/////path/", "//my-movie.mp4");
+
+        verify(batchBuilder).withFile(batchFileWithPath("/root/to/the/path/my/movie/my/path/my-movie.mp4"));
     }
 
     @Test
     public void ignoresEmptyPath() {
         given(storageRoot.path()).willReturn("root");
 
-        liteBatchFileBuilder
-                .withParentBuilder(batchBuilder)
-                .saveTo("", "my-movie.mp4")
-                .apply();
+        whenLiteBatchFileBuilderApply("", "my-movie.mp4");
 
         verify(batchBuilder).withFile(batchFileWithPath("root/my-movie/my-movie.mp4"));
     }
@@ -66,10 +67,7 @@ public class LiteBatchFileBuilderTest {
     public void ignoreSeparatorAsPath() {
         given(storageRoot.path()).willReturn("root/");
 
-        liteBatchFileBuilder
-                .withParentBuilder(batchBuilder)
-                .saveTo("/", "/my-movie.mp4")
-                .apply();
+        whenLiteBatchFileBuilderApply("/", "/my-movie.mp4");
 
         verify(batchBuilder).withFile(batchFileWithPath("root/my-movie/my-movie.mp4"));
     }
@@ -78,12 +76,13 @@ public class LiteBatchFileBuilderTest {
     public void doesNotIgnoreSeparatorAsRoot() {
         given(storageRoot.path()).willReturn("/");
 
-        liteBatchFileBuilder
-                .withParentBuilder(batchBuilder)
-                .saveTo("my/path", "/my-movie.mp4")
-                .apply();
+        whenLiteBatchFileBuilderApply("my/path", "/my-movie.mp4");
 
         verify(batchBuilder).withFile(batchFileWithPath("/my-movie/my/path/my-movie.mp4"));
+    }
+
+    private void whenLiteBatchFileBuilderApply(String path, String fileName) {
+        liteBatchFileBuilder.saveTo(path, fileName).apply();
     }
 
     private BatchFile batchFileWithPath(String path) {
