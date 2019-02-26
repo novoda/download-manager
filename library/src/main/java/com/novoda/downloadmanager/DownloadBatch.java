@@ -8,12 +8,12 @@ import java.util.Map;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETING;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADING;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADING;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.WAITING_FOR_NETWORK;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.QUEUED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.WAITING_FOR_NETWORK;
 import static com.novoda.downloadmanager.DownloadError.Type.REQUIREMENT_RULE_VIOLATED;
 
 // This model knows how to interact with low level components.
@@ -246,6 +246,7 @@ class DownloadBatch {
                 DownloadError downloadError = DownloadErrorFactory.createSizeMismatchError(downloadFileStatus);
                 downloadBatchStatus.markAsError(Optional.of(downloadError), downloadsBatchPersistence);
                 fileCallbackThrottle.update(downloadBatchStatus);
+                Logger.e("Abort fileDownloadCallback: " + downloadError.message());
                 return;
             }
 
@@ -292,6 +293,7 @@ class DownloadBatch {
         Logger.v("pause batch " + downloadBatchStatus.getDownloadBatchId().rawId() + ", " + STATUS + " " + downloadBatchStatus.status());
         DownloadBatchStatus.Status status = downloadBatchStatus.status();
         if (status == PAUSED || status == DOWNLOADED) {
+            Logger.v("abort pause batch " + downloadBatchStatus.getDownloadBatchId().rawId() + " because the " + STATUS + " is " + status);
             return;
         }
         downloadBatchStatus.markAsPaused(downloadsBatchPersistence);
@@ -305,6 +307,7 @@ class DownloadBatch {
     void waitForNetwork() {
         DownloadBatchStatus.Status status = downloadBatchStatus.status();
         if (status != DOWNLOADING) {
+            Logger.v("abort `wait for network` on batch " + downloadBatchStatus.getDownloadBatchId().rawId() + " because the " + STATUS + " is " + status);
             return;
         }
 
@@ -316,6 +319,7 @@ class DownloadBatch {
     void resume() {
         DownloadBatchStatus.Status status = downloadBatchStatus.status();
         if (status == QUEUED || status == DOWNLOADING || status == DOWNLOADED) {
+            Logger.v("abort resume batch " + downloadBatchStatus.getDownloadBatchId().rawId() + " because the " + STATUS + " is " + status);
             return;
         }
         downloadBatchStatus.markAsQueued(downloadsBatchPersistence);

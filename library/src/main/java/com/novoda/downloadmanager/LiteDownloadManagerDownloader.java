@@ -114,6 +114,7 @@ class LiteDownloadManagerDownloader {
     private DownloadBatchStatusCallback downloadBatchCallback(Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         return downloadBatchStatus -> {
             if (downloadBatchStatus == null || downloadBatchStatusFilter.shouldFilterOut(downloadBatchStatus)) {
+                Logger.v("Abort download batch callback download batch status is filtered.");
                 return;
             }
 
