@@ -32,9 +32,16 @@ public interface NotificationCustomizer<T> {
 
     /**
      * Represents the different ways in which a notification can be displayed to a user.
+     * <p>
+     * SINGLE_PERSISTENT_NOTIFICATION - normally used for DOWNLOADING, bound to a foreground service
+     * SINGLE_DISMISSIBLE_NOTIFICATION - single dismissible notification IN ADDITION to the SINGLE_PERSISTENT_NOTIFICATION for DOWNLOADING
+     * STACK_NOTIFICATION_NOT_DISMISSIBLE - stack notifications but do not allow user to dismiss
+     * STACK_NOTIFICATION_DISMISSIBLE - stack notifications allowing user to dismiss
+     * HIDDEN_NOTIFICATION - do not display a notification
      */
     enum NotificationDisplayState {
         SINGLE_PERSISTENT_NOTIFICATION,
+        SINGLE_DISMISSIBLE_NOTIFICATION,
         STACK_NOTIFICATION_NOT_DISMISSIBLE,
         STACK_NOTIFICATION_DISMISSIBLE,
         HIDDEN_NOTIFICATION
