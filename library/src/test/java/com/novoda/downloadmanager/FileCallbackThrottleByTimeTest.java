@@ -29,9 +29,11 @@ public class FileCallbackThrottleByTimeTest {
         }).given(actionScheduler).schedule(argumentCaptor.capture());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void throws_whenCallbackIsAbsent() {
+    @Test
+    public void doesNothing_whenCallbackIsAbsent() {
         callbackThrottleByTime.update(downloadBatchStatus);
+
+        verifyZeroInteractions(actionScheduler, callback, downloadBatchStatus);
     }
 
     @Test

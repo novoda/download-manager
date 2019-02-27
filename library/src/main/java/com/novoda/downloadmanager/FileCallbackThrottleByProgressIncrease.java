@@ -14,7 +14,8 @@ class FileCallbackThrottleByProgressIncrease implements FileCallbackThrottle {
     @Override
     public void update(DownloadBatchStatus currentDownloadBatchStatus) {
         if (callback == null) {
-            throw new IllegalStateException("A DownloadBatchStatusCallback must be set before an update is called.");
+            Logger.w("A DownloadBatchStatusCallback must be set before an update is called.");
+            return;
         }
 
         if (progressHasChanged(currentDownloadBatchStatus)) {
