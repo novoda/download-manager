@@ -17,8 +17,13 @@ final class DownloadErrorFactory {
         return new DownloadError(DownloadError.Type.FILE_CURRENT_AND_TOTAL_SIZE_MISMATCH, sizeMismatchMessage);
     }
 
-    static DownloadError createTotalSizeRequestFailedError(String errorCause) {
-        String networkErrorMessage = "Total size request error. Cause: " + errorCause;
+    static DownloadError createTotalSizeRequestFailedError(DownloadFileId downloadFileId, String url, String errorCause) {
+        String networkErrorMessage = "Total size request failed for File with ID:"
+                + downloadFileId.rawId()
+                + " and Request: "
+                + url
+                + " and Cause: "
+                + errorCause;
         return new DownloadError(DownloadError.Type.FILE_TOTAL_SIZE_REQUEST_FAILED, networkErrorMessage);
     }
 
