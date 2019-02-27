@@ -89,6 +89,7 @@ class PathBasedFilePersistence implements FilePersistence {
 
         File fileToDelete = new File(absoluteFilePath.path());
         if (!fileToDelete.exists()) {
+            Logger.w("Abort delete, file does not exist: " + absoluteFilePath.path());
             return;
         }
 
@@ -107,6 +108,7 @@ class PathBasedFilePersistence implements FilePersistence {
     @Override
     public void close() {
         if (fileOutputStream == null) {
+            Logger.w("Abort closing stream, does not exist.");
             return;
         }
 

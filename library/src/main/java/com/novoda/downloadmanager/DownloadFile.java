@@ -59,6 +59,7 @@ class DownloadFile {
             } else {
                 DownloadError downloadError = DownloadErrorFactory.createTotalSizeRequestFailedError(downloadFileId, url, fileSizeResult.failureMessage());
                 updateAndFeedbackWithStatus(downloadError, callback);
+                Logger.w("abort download file, cause: " + downloadError.message());
                 return;
             }
         }
@@ -66,6 +67,7 @@ class DownloadFile {
         fileSize.setCurrentSize(filePersistence.getCurrentSize(filePath));
 
         if (downloadFileStatus.isMarkedAsDeleted()) {
+            Logger.v("abort download file " + downloadFileId + " marked as deleted");
             return;
         }
 
@@ -78,6 +80,7 @@ class DownloadFile {
         if (fileSize.currentSize() == fileSize.totalSize()) {
             downloadFileStatus.update(fileSize, filePath);
             callback.onUpdate(downloadFileStatus);
+            Logger.w("abort download file " + downloadFileId + " because already downloaded");
             return;
         }
 
@@ -85,6 +88,7 @@ class DownloadFile {
         if (result != FilePersistenceResult.SUCCESS) {
             DownloadError downloadError = convertError(result);
             updateAndFeedbackWithStatus(downloadError, callback);
+            Logger.w("failed to persist file " + downloadFileId + " because " + downloadError.message());
             return;
         }
 
