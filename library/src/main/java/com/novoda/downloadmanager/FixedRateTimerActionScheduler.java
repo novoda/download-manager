@@ -21,6 +21,7 @@ class FixedRateTimerActionScheduler implements ActionScheduler {
     @Override
     public void schedule(final Action action) {
         if (actionTimerTasks.containsKey(action)) {
+            Logger.v("Already contains action, aborting schedule");
             return;
         }
 
