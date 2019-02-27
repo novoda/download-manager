@@ -49,12 +49,18 @@ class DownloadFile {
 
         callback.onUpdate(downloadFileStatus);
 
-        fileSize = requestTotalFileSizeIfNecessary(fileSize);
+        InternalFileSize updatedFileSize = fileSize.copy();
 
         if (fileSize.isTotalSizeUnknown()) {
-            DownloadError downloadError = DownloadErrorFactory.createTotalSizeRequestFailedError(downloadFileId, url);
-            updateAndFeedbackWithStatus(downloadError, callback);
-            return;
+            FileSizeResult fileSizeResult = fileSizeRequester.requestFileSize(url);
+            if (fileSizeResult.isSuccess()) {
+                updatedFileSize.setTotalSize(fileSizeResult.fileSize().totalSize());
+                fileSize = updatedFileSize;
+            } else {
+                DownloadError downloadError = DownloadErrorFactory.createTotalSizeRequestFailedError(downloadFileId, url, fileSizeResult.failureMessage());
+                updateAndFeedbackWithStatus(downloadError, callback);
+                return;
+            }
         }
 
         fileSize.setCurrentSize(filePersistence.getCurrentSize(filePath));
@@ -129,19 +135,6 @@ class DownloadFile {
                 Logger.e("Status " + status + " missing to be processed");
                 return DownloadErrorFactory.createUnknownErrorFor(status);
         }
-    }
-
-    private InternalFileSize requestTotalFileSizeIfNecessary(InternalFileSize fileSize) {
-        InternalFileSize updatedFileSize = fileSize.copy();
-
-        if (fileSize.isTotalSizeUnknown()) {
-            FileSizeResult fileSizeResult = fileSizeRequester.requestFileSize(url);
-            if (fileSizeResult.isSuccess()) {
-                updatedFileSize.setTotalSize(fileSizeResult.fileSize().totalSize());
-            }
-        }
-
-        return updatedFileSize;
     }
 
     private void updateAndFeedbackWithStatus(DownloadError downloadError, Callback callback) {
