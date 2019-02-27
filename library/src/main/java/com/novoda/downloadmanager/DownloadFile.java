@@ -174,15 +174,18 @@ class DownloadFile {
             FileSizeResult fileSizeResult = fileSizeRequester.requestFileSize(url);
             if (fileSizeResult.isSuccess()) {
                 fileSize.setTotalSize(fileSizeResult.fileSize().totalSize());
-            }
-
-            if (fileStatus().status() == DownloadFileStatus.Status.DELETED) {
-                Logger.e("file getTotalSize return zero because is deleted, " + downloadFileId.rawId()
-                                 + " from batch " + downloadBatchId.rawId()
-                                 + " with file status " + fileStatus().status());
+                persist();
+            } else {
+                Logger.w(DownloadErrorFactory.createTotalSizeRequestFailedError(downloadFileId, url, fileSizeResult.failureMessage()));
                 return 0;
             }
-            persist();
+        }
+
+        if (fileStatus().status() == DownloadFileStatus.Status.DELETED) {
+            Logger.e("file getTotalSize return zero because is deleted, " + downloadFileId.rawId()
+                             + " from batch " + downloadBatchId.rawId()
+                             + " with file status " + fileStatus().status());
+            return 0;
         }
 
         return fileSize.totalSize();
