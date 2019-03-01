@@ -14,7 +14,7 @@ final class DownloadErrorFactory {
                 + " than the total size: "
                 + downloadFileStatus.totalBytes();
 
-        return new DownloadError(DownloadError.Type.FILE_CURRENT_AND_TOTAL_SIZE_MISMATCH, sizeMismatchMessage);
+        return new DownloadError<>(DownloadError.Type.FILE_CURRENT_AND_TOTAL_SIZE_MISMATCH, sizeMismatchMessage);
     }
 
     static DownloadError createTotalSizeRequestFailedError(DownloadFileId downloadFileId, String url) {
@@ -23,7 +23,7 @@ final class DownloadErrorFactory {
                 + " and Request: "
                 + url;
 
-        return new DownloadError(DownloadError.Type.FILE_TOTAL_SIZE_REQUEST_FAILED, totalSizeRequestFailedMessage);
+        return new DownloadError<>(DownloadError.Type.FILE_TOTAL_SIZE_REQUEST_FAILED, totalSizeRequestFailedMessage);
     }
 
     static DownloadError createInsufficientFreeSpaceError(DownloadFileStatus downloadFileStatus) {
@@ -33,21 +33,21 @@ final class DownloadErrorFactory {
                         + " Bytes Required: "
                         + downloadFileStatus.totalBytes();
 
-        return new DownloadError(DownloadError.Type.FILE_CANNOT_BE_CREATED_LOCALLY_INSUFFICIENT_FREE_SPACE, insufficientFreeSpaceMessage);
+        return new DownloadError<>(DownloadError.Type.FILE_CANNOT_BE_CREATED_LOCALLY_INSUFFICIENT_FREE_SPACE, insufficientFreeSpaceMessage);
     }
 
     static DownloadError createCannotWriteToFileError(DownloadFileStatus downloadFileStatus) {
         String cannotWriteToFileMessage = "Cannot write to file with Id: " + downloadFileStatus.downloadFileId().rawId();
-        return new DownloadError(DownloadError.Type.FILE_CANNOT_BE_WRITTEN, cannotWriteToFileMessage);
+        return new DownloadError<>(DownloadError.Type.FILE_CANNOT_BE_WRITTEN, cannotWriteToFileMessage);
     }
 
     static DownloadError createNetworkError(String networkErrorCause) {
         String networkErrorMessage = "Network error, cannot download file. Cause: " + networkErrorCause;
-        return new DownloadError(DownloadError.Type.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE, networkErrorMessage);
+        return new DownloadError<>(DownloadError.Type.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE, networkErrorMessage);
     }
 
     static DownloadError createUnknownErrorFor(FilePersistenceResult status) {
         String unknownErrorMessage = "Unhandled error for FilePersistenceResult: " + status.name();
-        return new DownloadError(DownloadError.Type.UNKNOWN, unknownErrorMessage);
+        return new DownloadError<>(DownloadError.Type.UNKNOWN, unknownErrorMessage);
     }
 }
