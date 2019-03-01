@@ -15,6 +15,11 @@ public interface NetworkResponse {
     int code();
 
     /**
+     * @return a status message corresponding to {@link NetworkResponse#code()}.
+     */
+    String statusMessage();
+
+    /**
      * @return whether the request resulted in a successful response.
      * Ordinarily this will be tied to the {@link NetworkResponse#code()}.
      */

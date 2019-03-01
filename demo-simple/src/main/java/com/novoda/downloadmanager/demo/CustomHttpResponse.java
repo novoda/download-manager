@@ -21,6 +21,11 @@ class CustomHttpResponse implements NetworkResponse {
     }
 
     @Override
+    public String statusMessage() {
+        return response.message();
+    }
+
+    @Override
     public boolean isSuccessful() {
         return response.isSuccessful();
     }
