@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-public class DownloadError {
+public class DownloadError<T> {
 
     public enum Type {
         FILE_CURRENT_AND_TOTAL_SIZE_MISMATCH,
@@ -13,23 +13,18 @@ public class DownloadError {
     }
 
     private final Type type;
-    private final String message;
+    private final T message;
 
-    DownloadError(Type type, String message) {
+    DownloadError(Type type, T message) {
         this.type = type;
         this.message = message;
-    }
-
-    DownloadError(Type type) {
-        this.type = type;
-        this.message = "";
     }
 
     public Type type() {
         return type;
     }
 
-    public String message() {
+    public T message() {
         return message;
     }
 
@@ -42,7 +37,7 @@ public class DownloadError {
             return false;
         }
 
-        DownloadError that = (DownloadError) o;
+        DownloadError<?> that = (DownloadError<?>) o;
 
         if (type != that.type) {
             return false;
@@ -61,7 +56,7 @@ public class DownloadError {
     public String toString() {
         return "DownloadError{"
                 + "type=" + type
-                + ", message='" + message + '\''
+                + ", message=" + message
                 + '}';
     }
 }

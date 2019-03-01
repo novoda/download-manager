@@ -211,7 +211,7 @@ class DownloadBatch {
         }
 
         if (downloadBatchRequirementRule.hasViolatedRule(downloadBatchStatus)) {
-            Optional<DownloadError> error = Optional.fromNullable(new DownloadError(REQUIREMENT_RULE_VIOLATED));
+            Optional<DownloadError> error = Optional.fromNullable(new DownloadError<>(REQUIREMENT_RULE_VIOLATED, ""));
             downloadBatchStatus.markAsError(error, downloadsBatchPersistence);
             notifyCallback(callback, downloadBatchStatus);
             return true;
