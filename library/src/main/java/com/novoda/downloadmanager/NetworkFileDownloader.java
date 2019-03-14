@@ -30,7 +30,7 @@ class NetworkFileDownloader implements FileDownloader {
             processResponse(callback, response, responseCode, url);
         } catch (IOException e) {
             Logger.e(e, "Exception with http request");
-            callback.onError(e.getMessage());
+            callback.onError(FileDownloadError.createFrom(url, e.getMessage(), -1));
         } finally {
             try {
                 if (response != null) {
@@ -64,7 +64,7 @@ class NetworkFileDownloader implements FileDownloader {
                     url,
                     responseCode
             );
-            callback.onError(networkErrorMessage);
+            callback.onError(FileDownloadError.createFrom(url, networkErrorMessage, responseCode));
         }
     }
 

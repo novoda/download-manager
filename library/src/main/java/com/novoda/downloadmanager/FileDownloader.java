@@ -23,7 +23,7 @@ public interface FileDownloader {
 
         void onBytesRead(byte[] buffer, int bytesRead);
 
-        void onError(String cause);
+        void onError(FileDownloadError cause);
 
         void onDownloadFinished();
     }
