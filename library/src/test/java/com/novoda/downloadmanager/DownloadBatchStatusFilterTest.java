@@ -7,6 +7,17 @@ import static com.novoda.downloadmanager.InternalDownloadBatchStatusFixtures.anI
 
 public class DownloadBatchStatusFilterTest {
 
+    private final FileDownloader.FileDownloadError firstError = FileDownloader.FileDownloadError.createFrom(
+            "www.example.com",
+            "first",
+            -1
+    );
+
+    private final FileDownloader.FileDownloadError secondError = FileDownloader.FileDownloadError.createFrom(
+            "www.example.com",
+            "second",
+            -1
+    );
     private final InternalDownloadBatchStatus firstPercentageStatus = anInternalDownloadsBatchStatus()
             .withPercentageDownloaded(75)
             .build();
@@ -14,10 +25,10 @@ public class DownloadBatchStatusFilterTest {
             .withPercentageDownloaded(80)
             .build();
     private final InternalDownloadBatchStatus firstErrorStatus = anInternalDownloadsBatchStatus()
-            .withDownloadError(DownloadErrorFactory.createNetworkError("first"))
+            .withDownloadError(DownloadErrorFactory.createNetworkError(firstError))
             .build();
     private final InternalDownloadBatchStatus secondErrorStatus = anInternalDownloadsBatchStatus()
-            .withDownloadError(DownloadErrorFactory.createNetworkError("second"))
+            .withDownloadError(DownloadErrorFactory.createNetworkError(secondError))
             .build();
     private final InternalDownloadBatchStatus firstStatus = anInternalDownloadsBatchStatus()
             .build();
