@@ -28,13 +28,36 @@ public interface FileDownloader {
         void onDownloadFinished();
     }
 
+    /**
+     * Represents the information of a {@link LiteFileDownloadError} that is accessible to clients.
+     */
     interface FileDownloadError {
 
+        /**
+         * Use to create instances of {@link LiteFileDownloadError}.
+         *
+         * @param rawRequest the raw request from which the error occurs.
+         * @param message    any message associated with the error.
+         * @param errorCode  the code associated with the error.
+         * @return an instance of {@link FileDownloadError}.
+         */
+        static FileDownloader.FileDownloadError createFrom(String rawRequest, String message, int errorCode) {
+            return new LiteFileDownloadError(rawRequest, message, errorCode);
+        }
+
+        /**
+         * @return the raw request performed when the error occurred.
+         */
         String rawRequest();
 
+        /**
+         * @return a message representing the error that occurred.
+         */
         String message();
 
+        /**
+         * @return a short code representing the error that occurred.
+         */
         int errorCode();
-
     }
 }
