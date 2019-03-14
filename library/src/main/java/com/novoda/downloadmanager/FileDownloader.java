@@ -27,4 +27,14 @@ public interface FileDownloader {
 
         void onDownloadFinished();
     }
+
+    interface FileDownloadError {
+
+        String rawRequest();
+
+        String message();
+
+        int errorCode();
+
+    }
 }
