@@ -7,13 +7,13 @@ import static com.novoda.downloadmanager.InternalDownloadBatchStatusFixtures.anI
 
 public class DownloadBatchStatusFilterTest {
 
-    private final FileDownloader.FileDownloadError firstError = FileDownloader.FileDownloadError.createFrom(
+    private final FileDownloader.Error firstError = FileDownloader.Error.createFrom(
             "www.example.com",
             "first",
             -1
     );
 
-    private final FileDownloader.FileDownloadError secondError = FileDownloader.FileDownloadError.createFrom(
+    private final FileDownloader.Error secondError = FileDownloader.Error.createFrom(
             "www.example.com",
             "second",
             -1

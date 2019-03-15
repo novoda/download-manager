@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-class LiteFileDownloadError implements FileDownloader.FileDownloadError {
+class LiteFileDownloadError implements FileDownloader.Error {
 
     private final String requestUrl;
     private final String message;

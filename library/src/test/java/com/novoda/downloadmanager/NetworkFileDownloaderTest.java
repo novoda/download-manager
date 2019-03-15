@@ -67,12 +67,12 @@ public class NetworkFileDownloaderTest {
 
         networkFileDownloader.startDownloading(ANY_RAW_URL, UNKNOWN_FILE_SIZE, callback);
 
-        FileDownloader.FileDownloadError expectedFileDownloadError = FileDownloader.FileDownloadError.createFrom(
+        FileDownloader.Error expectedError = FileDownloader.Error.createFrom(
                 ANY_RAW_URL,
                 "Request: http://example.com with response code: 418 failed.",
                 418
         );
-        verify(callback).onError(expectedFileDownloadError);
+        verify(callback).onError(expectedError);
     }
 
     @Test
@@ -92,12 +92,12 @@ public class NetworkFileDownloaderTest {
 
         networkFileDownloader.startDownloading(ANY_RAW_URL, UNKNOWN_FILE_SIZE, callback);
 
-        FileDownloader.FileDownloadError expectedFileDownloadError = FileDownloader.FileDownloadError.createFrom(
+        FileDownloader.Error expectedError = FileDownloader.Error.createFrom(
                 ANY_RAW_URL,
                 MESSAGE,
                 -1
         );
-        verify(callback).onError(expectedFileDownloadError);
+        verify(callback).onError(expectedError);
     }
 
     @Test

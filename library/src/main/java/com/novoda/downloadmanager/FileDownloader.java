@@ -23,7 +23,7 @@ public interface FileDownloader {
 
         void onBytesRead(byte[] buffer, int bytesRead);
 
-        void onError(FileDownloadError error);
+        void onError(Error error);
 
         void onDownloadFinished();
     }
@@ -31,7 +31,7 @@ public interface FileDownloader {
     /**
      * Represents the information of a {@link LiteFileDownloadError} that is accessible to clients.
      */
-    interface FileDownloadError {
+    interface Error {
 
         /**
          * Use to create instances of {@link LiteFileDownloadError}.
@@ -39,9 +39,9 @@ public interface FileDownloader {
          * @param rawRequest the raw request from which the error occurs.
          * @param message    any message associated with the error.
          * @param errorCode  the code associated with the error.
-         * @return an instance of {@link FileDownloadError}.
+         * @return an instance of {@link Error}.
          */
-        static FileDownloader.FileDownloadError createFrom(String rawRequest, String message, int errorCode) {
+        static Error createFrom(String rawRequest, String message, int errorCode) {
             return new LiteFileDownloadError(rawRequest, message, errorCode);
         }
 
