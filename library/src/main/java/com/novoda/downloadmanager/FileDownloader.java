@@ -33,6 +33,8 @@ public interface FileDownloader {
      */
     interface Error {
 
+        int UNEXPECTED_ERROR_CODE = -1;
+
         /**
          * Use to create instances of {@link LiteFileDownloadError}.
          *
