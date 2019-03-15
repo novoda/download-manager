@@ -29,7 +29,7 @@ public interface FileDownloader {
     }
 
     /**
-     * Represents the information of a {@link LiteFileDownloadError} that is accessible to clients.
+     * Represents error information that is accessible to clients.
      */
     interface Error {
 
