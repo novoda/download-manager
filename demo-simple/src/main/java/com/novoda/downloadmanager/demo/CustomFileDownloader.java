@@ -17,7 +17,7 @@ class CustomFileDownloader implements FileDownloader {
     private boolean canDownload;
 
     @Override
-    public void startDownloading(String url, FileSize fileSize, Callback callback) {
+    public void startDownloading(String requestUrl, FileSize fileSize, Callback callback) {
         Log.v(TAG, "Start downloading");
 
         canDownload = true;

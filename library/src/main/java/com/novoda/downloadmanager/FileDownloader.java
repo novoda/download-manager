@@ -8,11 +8,11 @@ public interface FileDownloader {
     /**
      * Called internally to start downloading a file.
      *
-     * @param url      of the asset to download.
-     * @param fileSize the byte ranges, represented as file sizes, used to download an asset.
-     * @param callback that is notified of download progress.
+     * @param requestUrl of the asset to download.
+     * @param fileSize   the byte ranges, represented as file sizes, used to download an asset.
+     * @param callback   that is notified of download progress.
      */
-    void startDownloading(String url, FileSize fileSize, Callback callback);
+    void startDownloading(String requestUrl, FileSize fileSize, Callback callback);
 
     /**
      * Called internally to stop downloading a file.
@@ -48,7 +48,7 @@ public interface FileDownloader {
         /**
          * @return the raw request performed when the error occurred.
          */
-        String rawRequest();
+        String requestUrl();
 
         /**
          * @return a message representing the error that occurred.

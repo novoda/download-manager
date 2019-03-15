@@ -19,18 +19,18 @@ class NetworkFileDownloader implements FileDownloader {
     }
 
     @Override
-    public void startDownloading(String url, FileSize fileSize, Callback callback) {
+    public void startDownloading(String requestUrl, FileSize fileSize, Callback callback) {
         canDownload = true;
 
-        NetworkRequest request = createRequestFrom(url, fileSize);
+        NetworkRequest request = createRequestFrom(requestUrl, fileSize);
         NetworkResponse response = null;
         try {
             response = httpClient.execute(request);
             int responseCode = response.code();
-            processResponse(callback, response, responseCode, url);
+            processResponse(callback, response, responseCode, requestUrl);
         } catch (IOException e) {
             Logger.e(e, "Exception with http request");
-            callback.onError(FileDownloadError.createFrom(url, e.getMessage(), -1));
+            callback.onError(FileDownloadError.createFrom(requestUrl, e.getMessage(), -1));
         } finally {
             try {
                 if (response != null) {

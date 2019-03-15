@@ -2,19 +2,19 @@ package com.novoda.downloadmanager;
 
 class LiteFileDownloadError implements FileDownloader.FileDownloadError {
 
-    private final String rawRequest;
+    private final String requestUrl;
     private final String message;
     private final int errorCode;
 
-    LiteFileDownloadError(String rawRequest, String message, int errorCode) {
-        this.rawRequest = rawRequest;
+    LiteFileDownloadError(String requestUrl, String message, int errorCode) {
+        this.requestUrl = requestUrl;
         this.message = message;
         this.errorCode = errorCode;
     }
 
     @Override
-    public String rawRequest() {
-        return rawRequest;
+    public String requestUrl() {
+        return requestUrl;
     }
 
     @Override
@@ -41,7 +41,7 @@ class LiteFileDownloadError implements FileDownloader.FileDownloadError {
         if (errorCode != that.errorCode) {
             return false;
         }
-        if (rawRequest != null ? !rawRequest.equals(that.rawRequest) : that.rawRequest != null) {
+        if (requestUrl != null ? !requestUrl.equals(that.requestUrl) : that.requestUrl != null) {
             return false;
         }
         return message != null ? message.equals(that.message) : that.message == null;
@@ -49,7 +49,7 @@ class LiteFileDownloadError implements FileDownloader.FileDownloadError {
 
     @Override
     public int hashCode() {
-        int result = rawRequest != null ? rawRequest.hashCode() : 0;
+        int result = requestUrl != null ? requestUrl.hashCode() : 0;
         result = 31 * result + (message != null ? message.hashCode() : 0);
         result = 31 * result + errorCode;
         return result;
@@ -58,7 +58,7 @@ class LiteFileDownloadError implements FileDownloader.FileDownloadError {
     @Override
     public String toString() {
         return "LiteFileDownloadError{"
-                + "rawRequest='" + rawRequest + '\''
+                + "requestUrl='" + requestUrl + '\''
                 + ", message='" + message + '\''
                 + ", errorCode=" + errorCode
                 + '}';
