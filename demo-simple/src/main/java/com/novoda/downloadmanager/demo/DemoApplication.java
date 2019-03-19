@@ -16,7 +16,7 @@ import okhttp3.OkHttpClient;
 
 public class DemoApplication extends Application {
 
-    private static final int TIMEOUT = 5;
+    private static final int TIMEOUT = 6;
     private static final int TWO_HUNDRED_MB_IN_BYTES = 209715200;
     private volatile DownloadManager downloadManager;
     private final DemoBatchSizeProvider batchSizeProvider = new DemoBatchSizeProvider();
