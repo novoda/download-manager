@@ -41,8 +41,8 @@ final class DownloadErrorFactory {
         return new DownloadError(DownloadError.Type.FILE_CANNOT_BE_WRITTEN, cannotWriteToFileMessage);
     }
 
-    static DownloadError createNetworkError(String networkErrorCause) {
-        String networkErrorMessage = "Network error, cannot download file. Cause: " + networkErrorCause;
+    static DownloadError createNetworkError(FileDownloader.Error error) {
+        String networkErrorMessage = "Network error, cannot download file. Cause: " + error.message();
         return new DownloadError(DownloadError.Type.NETWORK_ERROR_CANNOT_DOWNLOAD_FILE, networkErrorMessage);
     }
 

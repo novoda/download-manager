@@ -103,8 +103,8 @@ class DownloadFile {
             }
 
             @Override
-            public void onError(String cause) {
-                DownloadError downloadError = DownloadErrorFactory.createNetworkError(cause);
+            public void onError(FileDownloader.Error error) {
+                DownloadError downloadError = DownloadErrorFactory.createNetworkError(error);
                 updateAndFeedbackWithStatus(downloadError, callback);
             }
 
