@@ -21,7 +21,7 @@ class DownloadBatchStatusNotificationDispatcher {
         this.downloadBatchIdNotificationSeen = downloadBatchIdNotificationSeen;
     }
 
-    void updateNotification(DownloadBatchStatus downloadBatchStatus) {
+    void updateNotification(InternalDownloadBatchStatus downloadBatchStatus) {
         if (downloadBatchStatus.notificationSeen()) {
             Logger.v("DownloadBatchStatus:", downloadBatchStatus.getDownloadBatchId(), "notification has already been seen.");
             return;
@@ -38,7 +38,7 @@ class DownloadBatchStatusNotificationDispatcher {
             Logger.v("start updateNotificationSeenAsync " + rawDownloadBatchId
                              + ", seen: " + NOTIFICATION_SEEN
                              + ", status: " + downloadBatchStatus.status());
-            notificationSeenPersistence.updateNotificationSeenAsync(downloadBatchStatus, NOTIFICATION_SEEN);
+            downloadBatchStatus.markAsNotificationSeen(notificationSeenPersistence);
         }
 
         notificationDispatcher.updateNotification(downloadBatchStatus);

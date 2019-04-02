@@ -129,7 +129,11 @@ class LiteDownloadManagerDownloader {
                     for (DownloadBatchStatusCallback callback : callbacks) {
                         callback.onUpdate(downloadBatchStatus);
                     }
-                    notificationDispatcher.updateNotification(downloadBatchStatus);
+
+                    DownloadBatch downloadBatch = downloadBatchMap.get(downloadBatchId);
+                    if (downloadBatch != null) {
+                        notificationDispatcher.updateNotification(downloadBatch.status());
+                    }
                 }
             });
         };

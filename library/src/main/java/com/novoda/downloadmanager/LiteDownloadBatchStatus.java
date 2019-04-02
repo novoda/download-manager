@@ -6,6 +6,7 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
 
     private static final long ZERO_BYTES = 0;
     private static final int TOTAL_PERCENTAGE = 100;
+    private static final boolean NOTIFICATION_SEEN = true;
 
     private final DownloadBatchTitle downloadBatchTitle;
     private final DownloadBatchId downloadBatchId;
@@ -147,6 +148,12 @@ class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
     public void markAsWaitingForNetwork(DownloadsBatchPersistence persistence) {
         this.status = Status.WAITING_FOR_NETWORK;
         updateStatusAsync(status, persistence);
+    }
+
+    @Override
+    public void markAsNotificationSeen(DownloadsNotificationSeenPersistence persistence) {
+        this.notificationSeen = NOTIFICATION_SEEN;
+        persistence.updateNotificationSeenAsync(this, NOTIFICATION_SEEN);
     }
 
     @Override
