@@ -19,6 +19,7 @@ class FileCallbackThrottleByTime implements FileCallbackThrottle {
     @Override
     public void update(DownloadBatchStatus downloadBatchStatus) {
         if (callback == null) {
+            Logger.w("A DownloadBatchStatusCallback must be set before an update is called.");
             return;
         }
 

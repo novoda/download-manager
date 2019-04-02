@@ -22,5 +22,7 @@ interface InternalDownloadBatchStatus extends DownloadBatchStatus {
 
     void markAsWaitingForNetwork(DownloadsBatchPersistence persistence);
 
+    void markAsNotificationSeen(DownloadsNotificationSeenPersistence persistence);
+
     InternalDownloadBatchStatus copy();
 }

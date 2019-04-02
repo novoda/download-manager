@@ -114,6 +114,7 @@ class LiteDownloadManagerDownloader {
     private DownloadBatchStatusCallback downloadBatchCallback(Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
         return downloadBatchStatus -> {
             if (downloadBatchStatus == null || downloadBatchStatusFilter.shouldFilterOut(downloadBatchStatus)) {
+                Logger.v("Abort download batch callback download batch status is filtered.");
                 return;
             }
 
@@ -128,7 +129,11 @@ class LiteDownloadManagerDownloader {
                     for (DownloadBatchStatusCallback callback : callbacks) {
                         callback.onUpdate(downloadBatchStatus);
                     }
-                    notificationDispatcher.updateNotification(downloadBatchStatus);
+
+                    DownloadBatch downloadBatch = downloadBatchMap.get(downloadBatchId);
+                    if (downloadBatch != null) {
+                        notificationDispatcher.updateNotification(downloadBatch.status());
+                    }
                 }
             });
         };
