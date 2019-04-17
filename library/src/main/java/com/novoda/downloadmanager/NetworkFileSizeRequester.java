@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager;
 
+import android.util.Log;
+
 import java.io.IOException;
 
 class NetworkFileSizeRequester implements FileSizeRequester {
@@ -18,6 +20,7 @@ class NetworkFileSizeRequester implements FileSizeRequester {
 
     @Override
     public FileSize requestFileSize(String url) {
+        Log.e("TAG", "requestFileSize: " + url);
         try {
             long fileSize = executeRequestFileSize(url);
             if (fileSize == UNKNOWN_CONTENT_LENGTH || fileSize == ZERO_FILE_SIZE) {

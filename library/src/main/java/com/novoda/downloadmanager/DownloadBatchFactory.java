@@ -34,6 +34,9 @@ final class DownloadBatchFactory {
             String networkAddress = batchFile.networkAddress();
 
             InternalFileSize fileSize = InternalFileSizeCreator.unknownFileSize();
+            if (batchFile.fileSize().isPresent()) {
+                fileSize = InternalFileSizeCreator.from(batchFile.fileSize().get());
+            }
 
             FilePersistence filePersistence = fileOperations.filePersistenceCreator().create();
 

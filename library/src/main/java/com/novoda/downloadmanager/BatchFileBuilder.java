@@ -34,6 +34,8 @@ public interface BatchFileBuilder {
      */
     BatchFileBuilder saveTo(String path, String fileName);
 
+    BatchFileBuilder withSize(FileSize fileSize);
+
     /**
      * Creates a {@link BatchFile} from the {@link BatchFileBuilder} and
      * adds it to the parent {@link BatchBuilder} before returning to

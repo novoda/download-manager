@@ -5,11 +5,13 @@ public class BatchFile {
     private final String networkAddress;
     private final String path;
     private final Optional<DownloadFileId> downloadFileId;
+    private final Optional<FileSize> fileSize;
 
-    BatchFile(String networkAddress, Optional<DownloadFileId> downloadFileId, String path) {
+    public BatchFile(String networkAddress, String path, Optional<DownloadFileId> downloadFileId, Optional<FileSize> fileSize) {
         this.networkAddress = networkAddress;
-        this.downloadFileId = downloadFileId;
         this.path = path;
+        this.downloadFileId = downloadFileId;
+        this.fileSize = fileSize;
     }
 
     static InternalBatchFileBuilder from(StorageRoot storageRoot, DownloadBatchId downloadBatchId, String networkAddress) {
@@ -26,6 +28,10 @@ public class BatchFile {
 
     public Optional<DownloadFileId> downloadFileId() {
         return downloadFileId;
+    }
+
+    public Optional<FileSize> fileSize() {
+        return fileSize;
     }
 
     @Override
@@ -45,7 +51,10 @@ public class BatchFile {
         if (path != null ? !path.equals(batchFile.path) : batchFile.path != null) {
             return false;
         }
-        return downloadFileId != null ? downloadFileId.equals(batchFile.downloadFileId) : batchFile.downloadFileId == null;
+        if (downloadFileId != null ? !downloadFileId.equals(batchFile.downloadFileId) : batchFile.downloadFileId != null) {
+            return false;
+        }
+        return fileSize != null ? fileSize.equals(batchFile.fileSize) : batchFile.fileSize == null;
     }
 
     @Override
@@ -53,6 +62,7 @@ public class BatchFile {
         int result = networkAddress != null ? networkAddress.hashCode() : 0;
         result = 31 * result + (path != null ? path.hashCode() : 0);
         result = 31 * result + (downloadFileId != null ? downloadFileId.hashCode() : 0);
+        result = 31 * result + (fileSize != null ? fileSize.hashCode() : 0);
         return result;
     }
 
@@ -62,7 +72,7 @@ public class BatchFile {
                 + "networkAddress='" + networkAddress + '\''
                 + ", path='" + path + '\''
                 + ", downloadFileId=" + downloadFileId
+                + ", fileSize=" + fileSize
                 + '}';
     }
-
 }
