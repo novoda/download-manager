@@ -1,5 +1,6 @@
 package com.novoda.downloadmanager;
 
+import android.annotation.SuppressLint;
 import android.support.annotation.FloatRange;
 
 import java.io.File;
@@ -15,6 +16,7 @@ class PercentageBasedRemainingStorageRequirementRule implements StorageRequireme
         this.percentageOfStorageRemaining = percentageOfStorageRemaining;
     }
 
+    @SuppressLint("UsableSpace")
     @Override
     public boolean hasViolatedRule(File storageDirectory,
                                    FileSize downloadFileSize) {

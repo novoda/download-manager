@@ -1,5 +1,7 @@
 package com.novoda.downloadmanager;
 
+import android.annotation.SuppressLint;
+
 import java.io.File;
 
 class ByteBasedRemainingStorageRequirementRule implements StorageRequirementRule {
@@ -12,6 +14,7 @@ class ByteBasedRemainingStorageRequirementRule implements StorageRequirementRule
         this.bytesRemainingAfterDownload = bytesRemainingAfterDownload;
     }
 
+    @SuppressLint("UsableSpace")
     @Override
     public boolean hasViolatedRule(File storageDirectory,
                                    FileSize downloadFileSize) {
