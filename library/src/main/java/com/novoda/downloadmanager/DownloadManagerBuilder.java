@@ -250,13 +250,13 @@ public final class DownloadManagerBuilder {
                     LiteDownloadService.DownloadServiceBinder binder = (LiteDownloadService.DownloadServiceBinder) service;
                     downloadService = binder.getService();
                     liteDownloadManager.submitAllStoredDownloads(() -> {
-                        liteDownloadManager.initialise(downloadService);
-
                         if (allowNetworkRecovery) {
                             DownloadsNetworkRecoveryCreator.createEnabled(applicationContext, liteDownloadManager, connectionTypeAllowed);
                         } else {
                             DownloadsNetworkRecoveryCreator.createDisabled();
                         }
+
+                        liteDownloadManager.initialise(downloadService);
                     });
                 }
             }
