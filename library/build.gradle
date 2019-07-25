@@ -70,7 +70,7 @@ dependencies {
     annotationProcessor 'android.arch.persistence.room:compiler:1.1.1'
     implementation 'com.novoda:merlin:1.2.1'
     implementation 'com.facebook.stetho:stetho:1.5.1'
-    implementation 'com.squareup.okhttp3:okhttp:3.12.1'
+    implementation 'com.squareup.okhttp3:okhttp:3.14.2'
     implementation('android.arch.persistence.room:runtime:1.1.1') {
         exclude group: 'com.android.support', module: 'support-v4'
         exclude group: 'android.arch.core', module: 'runtime'
