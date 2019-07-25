@@ -119,10 +119,6 @@ class LiteDownloadManagerDownloader {
             }
 
             DownloadBatchId downloadBatchId = downloadBatchStatus.getDownloadBatchId();
-            if (downloadBatchStatus.status() == DELETED) {
-                Logger.v("batch " + downloadBatchId.rawId() + " is finally deleted, removing it from the map");
-                downloadBatchMap.remove(downloadBatchId);
-            }
 
             callbackHandler.post(() -> {
                 synchronized (waitForDownloadBatchStatusCallback) {
