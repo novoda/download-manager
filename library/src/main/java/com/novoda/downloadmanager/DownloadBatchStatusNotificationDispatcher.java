@@ -51,9 +51,4 @@ class DownloadBatchStatusNotificationDispatcher {
     void setDownloadService(DownloadService downloadService) {
         notificationDispatcher.setService(downloadService);
     }
-
-    void removeDeletedBatchNotification(DownloadBatchStatus downloadBatchStatus) {
-        downloadBatchIdNotificationSeen.remove(downloadBatchStatus.getDownloadBatchId().rawId());
-        notificationDispatcher.updateNotification(downloadBatchStatus);
-    }
 }

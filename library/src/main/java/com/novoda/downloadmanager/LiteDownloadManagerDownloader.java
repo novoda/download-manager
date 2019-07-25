@@ -133,19 +133,15 @@ class LiteDownloadManagerDownloader {
                     DownloadBatch downloadBatch = downloadBatchMap.get(downloadBatchId);
                     if (downloadBatch != null) {
                         notificationDispatcher.updateNotification(downloadBatch.status());
-                    } else {
-                        removeNotificationForDeletedBatch(downloadBatchStatus);
+
+                        if (downloadBatch.status().status() == DELETED) {
+                            Logger.v("batch " + downloadBatchId.rawId() + " is finally deleted, removing it from the map");
+                            downloadBatchMap.remove(downloadBatchId);
+                        }
                     }
                 }
             });
         };
-    }
-
-    private void removeNotificationForDeletedBatch(DownloadBatchStatus downloadBatchStatus) {
-        if (downloadBatchStatus.status() == DELETED) {
-            Logger.v("batch " + downloadBatchStatus.getDownloadBatchId().rawId() + " has been deleted, remove notification.");
-            notificationDispatcher.removeDeletedBatchNotification(downloadBatchStatus);
-        }
     }
 
     void setDownloadService(DownloadService downloadService) {

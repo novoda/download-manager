@@ -58,14 +58,4 @@ public class DownloadBatchStatusNotificationDispatcherTest {
 
         verify(notificationDispatcher).setService(downloadService);
     }
-
-    @Test
-    public void updatesNotification_whenRemovingDeletedBatchNotification() {
-        InternalDownloadBatchStatus notificationDeletedBatchStatus = anInternalDownloadsBatchStatus().withStatus(DownloadBatchStatus.Status.DELETED).build();
-
-        downloadBatchStatusNotificationDispatcher.removeDeletedBatchNotification(notificationDeletedBatchStatus);
-
-        verify(notificationDispatcher).updateNotification(notificationDeletedBatchStatus);
-    }
-
 }
