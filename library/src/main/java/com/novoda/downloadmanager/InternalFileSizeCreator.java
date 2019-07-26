@@ -16,4 +16,8 @@ final class InternalFileSizeCreator {
     static InternalFileSize createFromCurrentAndTotalSize(long currentSize, long totalSize) {
         return new LiteFileSize(currentSize, totalSize);
     }
+
+    static InternalFileSize from(FileSize fileSize) {
+        return new LiteFileSize(fileSize.currentSize(), fileSize.totalSize());
+    }
 }

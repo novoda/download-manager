@@ -44,8 +44,9 @@ public class CompletedDownloadFile {
         DownloadFileId downloadFileId = DownloadFileIdCreator.createFrom(fileId);
         return new BatchFile(
                 originalNetworkAddress,
+                newFileLocation,
                 Optional.of(downloadFileId),
-                newFileLocation
+                Optional.of(fileSize)
         );
     }
 

@@ -18,7 +18,7 @@ public class BatchBuilderTest {
                 .downloadFrom("http://example.com/5mb.zip").apply()
                 .build();
 
-        BatchFile expectedBatchFile = new BatchFile("http://example.com/5mb.zip", Optional.absent(), "root/download_batch_id/5mb.zip");
+        BatchFile expectedBatchFile = new BatchFile("http://example.com/5mb.zip", "root/download_batch_id/5mb.zip", Optional.absent(), Optional.absent());
         Batch expectedBatch = new Batch(TestStorageRootFactory.create(), DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE, Collections.singletonList(expectedBatchFile));
 
         assertThat(batch).isEqualTo(expectedBatch);
@@ -30,7 +30,7 @@ public class BatchBuilderTest {
                 .downloadFrom("http://example.com/5mb.zip").withIdentifier(DOWNLOAD_FILE_ID).saveTo("foo/bar", "5mb.zip").apply()
                 .build();
 
-        BatchFile expectedBatchFile = new BatchFile("http://example.com/5mb.zip", Optional.of(DOWNLOAD_FILE_ID), "root/download_batch_id/foo/bar/5mb.zip");
+        BatchFile expectedBatchFile = new BatchFile("http://example.com/5mb.zip", "root/download_batch_id/foo/bar/5mb.zip", Optional.of(DOWNLOAD_FILE_ID), Optional.absent());
         Batch expectedBatch = new Batch(TestStorageRootFactory.create(), DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE, Collections.singletonList(expectedBatchFile));
 
         assertThat(batch).isEqualTo(expectedBatch);
@@ -42,7 +42,7 @@ public class BatchBuilderTest {
                 .downloadFrom("http://example.com/5mb.zip").withIdentifier(DOWNLOAD_FILE_ID).saveTo("/", "5mb.zip").apply()
                 .build();
 
-        BatchFile expectedBatchFile = new BatchFile("http://example.com/5mb.zip", Optional.of(DOWNLOAD_FILE_ID), "root/download_batch_id/5mb.zip");
+        BatchFile expectedBatchFile = new BatchFile("http://example.com/5mb.zip", "root/download_batch_id/5mb.zip", Optional.of(DOWNLOAD_FILE_ID), Optional.absent());
         Batch expectedBatch = new Batch(TestStorageRootFactory.create(), DOWNLOAD_BATCH_ID, DOWNLOAD_BATCH_TITLE, Collections.singletonList(expectedBatchFile));
 
         assertThat(batch).isEqualTo(expectedBatch);
