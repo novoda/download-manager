@@ -119,10 +119,6 @@ class LiteDownloadManagerDownloader {
             }
 
             DownloadBatchId downloadBatchId = downloadBatchStatus.getDownloadBatchId();
-            if (downloadBatchStatus.status() == DELETED) {
-                Logger.v("batch " + downloadBatchId.rawId() + " is finally deleted, removing it from the map");
-                downloadBatchMap.remove(downloadBatchId);
-            }
 
             callbackHandler.post(() -> {
                 synchronized (waitForDownloadBatchStatusCallback) {
@@ -133,6 +129,11 @@ class LiteDownloadManagerDownloader {
                     DownloadBatch downloadBatch = downloadBatchMap.get(downloadBatchId);
                     if (downloadBatch != null) {
                         notificationDispatcher.updateNotification(downloadBatch.status());
+
+                        if (downloadBatch.status().status() == DELETED) {
+                            Logger.v("batch " + downloadBatchId.rawId() + " is finally deleted, removing it from the map");
+                            downloadBatchMap.remove(downloadBatchId);
+                        }
                     }
                 }
             });

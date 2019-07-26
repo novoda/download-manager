@@ -58,5 +58,4 @@ public class DownloadBatchStatusNotificationDispatcherTest {
 
         verify(notificationDispatcher).setService(downloadService);
     }
-
 }
