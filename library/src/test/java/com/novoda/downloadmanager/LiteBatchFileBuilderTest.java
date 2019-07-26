@@ -88,8 +88,9 @@ public class LiteBatchFileBuilderTest {
     private BatchFile batchFileWithPath(String path) {
         return new BatchFile(
                 ANY_NETWORK_ADDRESS,
+                path,
                 Optional.absent(),
-                path
+                Optional.absent()
         );
     }
 

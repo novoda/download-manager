@@ -15,6 +15,7 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
     private Optional<DownloadFileId> downloadFileId = Optional.absent();
     private Optional<String> path = Optional.absent();
     private Optional<String> fileName = Optional.absent();
+    private Optional<FileSize> fileSize = Optional.absent();
 
     private InternalBatchBuilder parentBuilder;
 
@@ -50,6 +51,12 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
     }
 
     @Override
+    public BatchFileBuilder withSize(FileSize fileSize) {
+        this.fileSize = Optional.fromNullable(fileSize);
+        return this;
+    }
+
+    @Override
     public BatchBuilder apply() {
         String absolutePath = buildPath(
                 storageRoot.path(),
@@ -58,7 +65,7 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
                 fileName.getOrElse(() -> FileNameExtractor.extractFrom(networkAddress))
         );
 
-        parentBuilder.withFile(new BatchFile(networkAddress, downloadFileId, absolutePath));
+        parentBuilder.withFile(new BatchFile(networkAddress, absolutePath, downloadFileId, fileSize));
         return parentBuilder;
     }
 

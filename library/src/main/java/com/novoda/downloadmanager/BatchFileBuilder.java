@@ -35,6 +35,15 @@ public interface BatchFileBuilder {
     BatchFileBuilder saveTo(String path, String fileName);
 
     /**
+     * Sets {@link BatchFileBuilder} to build a {@link BatchFile} with a given file size.
+     * This can be used to bypass the initial head requests for size. See {@link FileSizeRequester}.
+     *
+     * @param fileSize to assign to the file.
+     * @return {@link BatchFileBuilder}.
+     */
+    BatchFileBuilder withSize(FileSize fileSize);
+
+    /**
      * Creates a {@link BatchFile} from the {@link BatchFileBuilder} and
      * adds it to the parent {@link BatchBuilder} before returning to
      * continue the fluent API.
