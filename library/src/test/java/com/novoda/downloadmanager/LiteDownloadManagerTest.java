@@ -200,11 +200,15 @@ public class LiteDownloadManagerTest {
             verify(downloadBatch).delete();
         }
 
+        /**
+         * The removal from the map occurs in {@link LiteDownloadManagerDownloader} after the notification has been sent
+         * to avoid race conditions between the map removal and the executor attempting to send notifications.
+         */
         @Test
-        public void removesBatchFromMap_whenDeletingBatch() {
+        public void doesNotRemoveBatchFromMap_whenDeletingBatch() {
             liteDownloadManager.delete(DOWNLOAD_BATCH_ID);
 
-            assertThat(downloadingBatches).doesNotContainKey(DOWNLOAD_BATCH_ID);
+            assertThat(downloadingBatches).containsKey(DOWNLOAD_BATCH_ID);
         }
 
         @Test
