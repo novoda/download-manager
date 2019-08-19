@@ -6,14 +6,12 @@ import java.util.Set;
 
 final class LiteBatchBuilder implements InternalBatchBuilder {
 
-    private final StorageRoot storageRoot;
-    private final DownloadBatchId downloadBatchId;
     private final String title;
     private final List<BatchFile> batchFiles;
+    private final DownloadBatchStorageRoot batchStorageRoot;
 
-    LiteBatchBuilder(StorageRoot storageRoot, DownloadBatchId downloadBatchId, String title, List<BatchFile> batchFiles) {
-        this.storageRoot = storageRoot;
-        this.downloadBatchId = downloadBatchId;
+    LiteBatchBuilder(DownloadBatchStorageRoot batchStorageRoot, String title, List<BatchFile> batchFiles) {
+        this.batchStorageRoot = batchStorageRoot;
         this.title = title;
         this.batchFiles = batchFiles;
     }
@@ -25,23 +23,23 @@ final class LiteBatchBuilder implements InternalBatchBuilder {
 
     @Override
     public BatchFileBuilder downloadFrom(String networkAddress) {
-        return BatchFile.from(storageRoot, downloadBatchId, networkAddress).withParentBuilder(this);
+        return BatchFile.from(batchStorageRoot, networkAddress).withParentBuilder(this);
     }
 
     @Override
     public Batch build() {
         ensureNoFileIdDuplicates(batchFiles);
-        return new Batch(storageRoot, downloadBatchId, title, batchFiles);
+        return new Batch(batchStorageRoot.getStorageRootPath(), batchStorageRoot.getDownloadBatchId(), title, batchFiles);
     }
 
     private void ensureNoFileIdDuplicates(List<BatchFile> batchFiles) {
         Set<DownloadFileId> rawIdsWithoutDuplicates = new HashSet<>();
         for (BatchFile batchFile : batchFiles) {
-            rawIdsWithoutDuplicates.add(FallbackDownloadFileIdProvider.downloadFileIdFor(downloadBatchId, batchFile));
+            rawIdsWithoutDuplicates.add(FallbackDownloadFileIdProvider.downloadFileIdFor(batchStorageRoot.getDownloadBatchId(), batchFile));
         }
 
         if (rawIdsWithoutDuplicates.size() != batchFiles.size()) {
-            throw new IllegalArgumentException(String.format("Duplicated file for batch %s (batchId: %s)", title, downloadBatchId.rawId()));
+            throw new IllegalArgumentException(String.format("Duplicated file for batch %s (batchId: %s)", title, batchStorageRoot.getDownloadBatchId()));
         }
     }
 

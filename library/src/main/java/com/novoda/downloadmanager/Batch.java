@@ -11,7 +11,7 @@ public class Batch {
     private final List<BatchFile> batchFiles;
 
     public static BatchBuilder with(StorageRoot storageRoot, DownloadBatchId downloadBatchId, String title) {
-        return new LiteBatchBuilder(storageRoot, downloadBatchId, title, new ArrayList<>());
+        return new LiteBatchBuilder(DownloadBatchStorageRoot.with(storageRoot, downloadBatchId), title, new ArrayList<>());
     }
 
     Batch(StorageRoot storageRoot, DownloadBatchId downloadBatchId, String title, List<BatchFile> batchFiles) {

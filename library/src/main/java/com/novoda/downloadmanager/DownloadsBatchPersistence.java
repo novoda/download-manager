@@ -145,6 +145,7 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
 
         return new DownloadBatch(
                 liteDownloadBatchStatus,
+                DownloadBatchStorageRoot.with(() -> storageRoot, downloadBatchId),
                 downloadFiles,
                 downloadedFileSizeMap,
                 DownloadsBatchPersistence.this,

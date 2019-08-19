@@ -3,6 +3,7 @@ package com.novoda.downloadmanager;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -31,17 +32,20 @@ class DownloadBatch {
     private final FileCallbackThrottle fileCallbackThrottle;
     private final ConnectionChecker connectionChecker;
     private final DownloadBatchRequirementRule downloadBatchRequirementRule;
+    private final DownloadBatchStorageRoot batchStorageRoot;
 
     private long totalBatchSizeBytes;
     private DownloadBatchStatusCallback callback;
 
     DownloadBatch(InternalDownloadBatchStatus internalDownloadBatchStatus,
+                  DownloadBatchStorageRoot batchStorageRoot,
                   List<DownloadFile> downloadFiles,
                   Map<DownloadFileId, Long> fileBytesDownloadedMap,
                   DownloadsBatchPersistence downloadsBatchPersistence,
                   FileCallbackThrottle fileCallbackThrottle,
                   ConnectionChecker connectionChecker,
-                  DownloadBatchRequirementRule downloadBatchRequirementRule) {
+                  DownloadBatchRequirementRule downloadBatchRequirementRule
+    ) {
         this.downloadFiles = downloadFiles;
         this.fileBytesDownloadedMap = fileBytesDownloadedMap;
         this.downloadBatchStatus = internalDownloadBatchStatus;
@@ -49,6 +53,7 @@ class DownloadBatch {
         this.fileCallbackThrottle = fileCallbackThrottle;
         this.connectionChecker = connectionChecker;
         this.downloadBatchRequirementRule = downloadBatchRequirementRule;
+        this.batchStorageRoot = batchStorageRoot;
     }
 
     void setCallback(DownloadBatchStatusCallback callback) {
@@ -355,6 +360,7 @@ class DownloadBatch {
         for (DownloadFile downloadFile : downloadFiles) {
             downloadFile.delete();
         }
+        deleteDownloadDirs();
 
         if (status == PAUSED || status == DOWNLOADED || status == WAITING_FOR_NETWORK || status == ERROR) {
             Logger.v("delete async paused or downloaded " + BATCH + downloadBatchStatus.getDownloadBatchId().rawId());
@@ -368,6 +374,22 @@ class DownloadBatch {
         Logger.v("delete request for " + BATCH + "end " + downloadBatchStatus.getDownloadBatchId().rawId()
                          + STATUS + status
                          + ", should be deleting");
+    }
+
+    private void deleteDownloadDirs() {
+        File batchRootDir = new File(batchStorageRoot.getBatchStorageRootPath());
+        if (batchRootDir.exists()) {
+            deleteDir(batchRootDir);
+        }
+    }
+
+    private void deleteDir(File batchRootDir) {
+        if (batchRootDir.isDirectory()) {
+            for (File child : batchRootDir.listFiles()) {
+                deleteDir(child);
+            }
+        }
+        batchRootDir.delete();
     }
 
     DownloadBatchId getId() {

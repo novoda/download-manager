@@ -14,8 +14,8 @@ public class BatchFile {
         this.fileSize = fileSize;
     }
 
-    static InternalBatchFileBuilder from(StorageRoot storageRoot, DownloadBatchId downloadBatchId, String networkAddress) {
-        return new LiteBatchFileBuilder(storageRoot, downloadBatchId, networkAddress);
+    static InternalBatchFileBuilder from(DownloadBatchStorageRoot batchStorageRoot, String networkAddress) {
+        return new LiteBatchFileBuilder(batchStorageRoot, networkAddress);
     }
 
     public String networkAddress() {
