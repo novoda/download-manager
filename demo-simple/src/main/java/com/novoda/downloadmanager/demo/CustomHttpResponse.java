@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 class CustomHttpResponse implements NetworkResponse {
 
@@ -32,16 +33,31 @@ class CustomHttpResponse implements NetworkResponse {
 
     @Override
     public InputStream openByteStream() throws IOException {
-        return response.body().byteStream();
+        ResponseBody body = response.body();
+        if (body == null) {
+            throw new IOException("Response body is null");
+        } else {
+            return body.byteStream();
+        }
     }
 
     @Override
     public void closeByteStream() throws IOException {
-        response.body().close();
+        ResponseBody body = response.body();
+        if (body == null) {
+            throw new IOException("Response body is null");
+        } else {
+            body.close();
+        }
     }
 
     @Override
     public long bodyContentLength() {
-        return response.body().contentLength();
+        ResponseBody body = response.body();
+        if (body == null) {
+            return -1;
+        } else {
+            return body.contentLength();
+        }
     }
 }
