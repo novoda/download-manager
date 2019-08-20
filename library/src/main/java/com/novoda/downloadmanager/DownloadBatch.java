@@ -32,13 +32,11 @@ class DownloadBatch {
     private final FileCallbackThrottle fileCallbackThrottle;
     private final ConnectionChecker connectionChecker;
     private final DownloadBatchRequirementRule downloadBatchRequirementRule;
-    private final BatchStorageRoot batchStorageRoot;
 
     private long totalBatchSizeBytes;
     private DownloadBatchStatusCallback callback;
 
     DownloadBatch(InternalDownloadBatchStatus internalDownloadBatchStatus,
-                  BatchStorageRoot batchStorageRoot,
                   List<DownloadFile> downloadFiles,
                   Map<DownloadFileId, Long> fileBytesDownloadedMap,
                   DownloadsBatchPersistence downloadsBatchPersistence,
@@ -53,7 +51,6 @@ class DownloadBatch {
         this.fileCallbackThrottle = fileCallbackThrottle;
         this.connectionChecker = connectionChecker;
         this.downloadBatchRequirementRule = downloadBatchRequirementRule;
-        this.batchStorageRoot = batchStorageRoot;
     }
 
     void setCallback(DownloadBatchStatusCallback callback) {
@@ -377,6 +374,7 @@ class DownloadBatch {
     }
 
     private void deleteDownloadDirs() {
+        BatchStorageRoot batchStorageRoot = BatchStorageRoot.with(() -> downloadBatchStatus.storageRoot(), downloadBatchStatus.getDownloadBatchId());
         File batchRootDir = new File(batchStorageRoot.path());
         if (batchRootDir.exists()) {
             deleteDir(batchRootDir);
@@ -385,11 +383,16 @@ class DownloadBatch {
 
     private void deleteDir(File batchRootDir) {
         if (batchRootDir.isDirectory()) {
-            for (File child : batchRootDir.listFiles()) {
-                deleteDir(child);
+            File[] nestedDirs = batchRootDir.listFiles();
+            if (nestedDirs != null) {
+                for (File child : nestedDirs) {
+                    deleteDir(child);
+                }
             }
         }
-        batchRootDir.delete();
+        boolean deleted = batchRootDir.delete();
+        String message = String.format("File or Directory: %s deleted: %s", batchRootDir.getAbsolutePath(), deleted);
+        Logger.d(getClass().getSimpleName(), message);
     }
 
     DownloadBatchId getId() {

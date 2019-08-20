@@ -15,7 +15,7 @@ final class LiteBatchBuilder implements InternalBatchBuilder {
     LiteBatchBuilder(StorageRoot storageRoot, DownloadBatchId downloadBatchId, String title, List<BatchFile> batchFiles) {
         this.storageRoot = storageRoot;
         this.downloadBatchId = downloadBatchId;
-        this.batchStorageRoot = BatchStorageRoot.with(storageRoot,downloadBatchId);
+        this.batchStorageRoot = BatchStorageRoot.with(storageRoot, downloadBatchId);
         this.title = title;
         this.batchFiles = batchFiles;
     }
