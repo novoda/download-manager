@@ -83,7 +83,7 @@ final class DownloadBatchFactory {
 
         return new DownloadBatch(
                 liteDownloadBatchStatus,
-                DownloadBatchStorageRoot.with(storageRoot, downloadBatchId),
+                BatchStorageRoot.with(storageRoot, downloadBatchId),
                 downloadFiles,
                 new HashMap<>(),
                 downloadsBatchPersistence,

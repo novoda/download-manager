@@ -9,7 +9,7 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
     private static final String SEPARATOR_AS_REGEX = File.separatorChar == '\\' ? "\\\\" : File.separator;
 
     private final String networkAddress;
-    private final DownloadBatchStorageRoot batchStorageRoot;
+    private final BatchStorageRoot batchStorageRoot;
 
     private Optional<DownloadFileId> downloadFileId = Optional.absent();
     private Optional<String> path = Optional.absent();
@@ -18,7 +18,7 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
 
     private InternalBatchBuilder parentBuilder;
 
-    LiteBatchFileBuilder(DownloadBatchStorageRoot batchStorageRoot, String networkAddress) {
+    LiteBatchFileBuilder(BatchStorageRoot batchStorageRoot, String networkAddress) {
         this.batchStorageRoot = batchStorageRoot;
         this.networkAddress = networkAddress;
     }
@@ -57,7 +57,7 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
     @Override
     public BatchBuilder apply() {
         String absolutePath = buildPath(
-                batchStorageRoot.getBatchStorageRootPath(),
+                batchStorageRoot.path(),
                 path.or(""),
                 fileName.getOrElse(() -> FileNameExtractor.extractFrom(networkAddress))
         );

@@ -32,13 +32,13 @@ class DownloadBatch {
     private final FileCallbackThrottle fileCallbackThrottle;
     private final ConnectionChecker connectionChecker;
     private final DownloadBatchRequirementRule downloadBatchRequirementRule;
-    private final DownloadBatchStorageRoot batchStorageRoot;
+    private final BatchStorageRoot batchStorageRoot;
 
     private long totalBatchSizeBytes;
     private DownloadBatchStatusCallback callback;
 
     DownloadBatch(InternalDownloadBatchStatus internalDownloadBatchStatus,
-                  DownloadBatchStorageRoot batchStorageRoot,
+                  BatchStorageRoot batchStorageRoot,
                   List<DownloadFile> downloadFiles,
                   Map<DownloadFileId, Long> fileBytesDownloadedMap,
                   DownloadsBatchPersistence downloadsBatchPersistence,
@@ -377,7 +377,7 @@ class DownloadBatch {
     }
 
     private void deleteDownloadDirs() {
-        File batchRootDir = new File(batchStorageRoot.getBatchStorageRootPath());
+        File batchRootDir = new File(batchStorageRoot.path());
         if (batchRootDir.exists()) {
             deleteDir(batchRootDir);
         }

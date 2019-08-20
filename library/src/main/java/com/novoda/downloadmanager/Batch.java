@@ -9,14 +9,16 @@ public class Batch {
     private final DownloadBatchId downloadBatchId;
     private final String title;
     private final List<BatchFile> batchFiles;
+    private final BatchStorageRoot batchStorageRoot;
 
     public static BatchBuilder with(StorageRoot storageRoot, DownloadBatchId downloadBatchId, String title) {
-        return new LiteBatchBuilder(DownloadBatchStorageRoot.with(storageRoot, downloadBatchId), title, new ArrayList<>());
+        return new LiteBatchBuilder(storageRoot, downloadBatchId, title, new ArrayList<>());
     }
 
     Batch(StorageRoot storageRoot, DownloadBatchId downloadBatchId, String title, List<BatchFile> batchFiles) {
         this.storageRoot = storageRoot;
         this.downloadBatchId = downloadBatchId;
+        this.batchStorageRoot = BatchStorageRoot.with(storageRoot, downloadBatchId);
         this.title = title;
         this.batchFiles = batchFiles;
     }
@@ -35,6 +37,10 @@ public class Batch {
 
     public List<BatchFile> batchFiles() {
         return batchFiles;
+    }
+
+    public BatchStorageRoot batchStorageRoot() {
+        return batchStorageRoot;
     }
 
     @Override
