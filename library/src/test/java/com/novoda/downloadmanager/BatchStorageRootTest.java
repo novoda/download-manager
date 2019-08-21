@@ -9,9 +9,9 @@ public class BatchStorageRootTest {
     private final DownloadBatchId downloadBatchId = () -> "batch_1";
 
     @Test
-    public void path() {
+    public void appendsDownloadBatchIdToStorageRoot() {
         BatchStorageRoot batchStorageRoot = BatchStorageRoot.with(storageRoot, downloadBatchId);
-        String expected = "path/to/the/root/downloads/batch_1";
-        Assert.assertEquals(batchStorageRoot.path(), expected);
+
+        Assert.assertEquals(batchStorageRoot.path(), "path/to/the/root/downloads/batch_1");
     }
 }

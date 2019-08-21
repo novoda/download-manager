@@ -357,7 +357,7 @@ class DownloadBatch {
         for (DownloadFile downloadFile : downloadFiles) {
             downloadFile.delete();
         }
-        deleteDownloadDirs();
+        deleteDownloadDirectories();
 
         if (status == PAUSED || status == DOWNLOADED || status == WAITING_FOR_NETWORK || status == ERROR) {
             Logger.v("delete async paused or downloaded " + BATCH + downloadBatchStatus.getDownloadBatchId().rawId());
@@ -373,25 +373,25 @@ class DownloadBatch {
                          + ", should be deleting");
     }
 
-    private void deleteDownloadDirs() {
-        BatchStorageRoot batchStorageRoot = BatchStorageRoot.with(() -> downloadBatchStatus.storageRoot(), downloadBatchStatus.getDownloadBatchId());
+    private void deleteDownloadDirectories() {
+        BatchStorageRoot batchStorageRoot = BatchStorageRoot.with(downloadBatchStatus::storageRoot, downloadBatchStatus.getDownloadBatchId());
         File batchRootDir = new File(batchStorageRoot.path());
         if (batchRootDir.exists()) {
-            deleteDir(batchRootDir);
+            deleteDirectory(batchRootDir);
         }
     }
 
-    private void deleteDir(File batchRootDir) {
-        if (batchRootDir.isDirectory()) {
-            File[] nestedDirs = batchRootDir.listFiles();
+    private void deleteDirectory(File batchRootDirectory) {
+        if (batchRootDirectory.isDirectory()) {
+            File[] nestedDirs = batchRootDirectory.listFiles();
             if (nestedDirs != null) {
                 for (File child : nestedDirs) {
-                    deleteDir(child);
+                    deleteDirectory(child);
                 }
             }
         }
-        boolean deleted = batchRootDir.delete();
-        String message = String.format("File or Directory: %s deleted: %s", batchRootDir.getAbsolutePath(), deleted);
+        boolean deleted = batchRootDirectory.delete();
+        String message = String.format("File or Directory: %s deleted: %s", batchRootDirectory.getAbsolutePath(), deleted);
         Logger.d(getClass().getSimpleName(), message);
     }
 
