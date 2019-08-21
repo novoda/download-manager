@@ -1,7 +1,8 @@
 package com.novoda.downloadmanager;
 
-import org.junit.Assert;
 import org.junit.Test;
+
+import static com.google.common.truth.Truth.assertThat;
 
 public class BatchStorageRootTest {
 
@@ -12,6 +13,6 @@ public class BatchStorageRootTest {
     public void appendsDownloadBatchIdToStorageRoot() {
         BatchStorageRoot batchStorageRoot = BatchStorageRoot.with(storageRoot, downloadBatchId);
 
-        Assert.assertEquals(batchStorageRoot.path(), "path/to/the/root/downloads/batch_1");
+        assertThat(batchStorageRoot.path()).isEqualTo("path/to/the/root/downloads/batch_1");
     }
 }
