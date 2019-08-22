@@ -113,6 +113,7 @@ class DownloadFile {
                 filePersistence.close();
                 if (downloadFileStatus.isMarkedAsDeleted()) {
                     filePersistence.delete(filePath);
+                    callback.onDelete();
                 }
                 if (downloadFileStatus.isMarkedAsWaitingForNetwork()) {
                     callback.onUpdate(downloadFileStatus);
@@ -226,5 +227,7 @@ class DownloadFile {
     interface Callback {
 
         void onUpdate(InternalDownloadFileStatus downloadFileStatus);
+
+        void onDelete();
     }
 }

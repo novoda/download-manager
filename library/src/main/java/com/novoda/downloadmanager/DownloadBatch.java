@@ -266,6 +266,11 @@ class DownloadBatch {
 
             fileCallbackThrottle.update(downloadBatchStatus);
         }
+
+        @Override
+        public void onDelete() {
+            deleteDownloadDirectories();
+        }
     };
 
     private static long getBytesDownloadedFrom(Map<DownloadFileId, Long> fileBytesDownloadedMap) {
@@ -357,6 +362,7 @@ class DownloadBatch {
         for (DownloadFile downloadFile : downloadFiles) {
             downloadFile.delete();
         }
+
         deleteDownloadDirectories();
 
         if (status == PAUSED || status == DOWNLOADED || status == WAITING_FOR_NETWORK || status == ERROR) {
@@ -374,6 +380,8 @@ class DownloadBatch {
     }
 
     private void deleteDownloadDirectories() {
+        // from root, delete folders IF empty
+
         BatchStorageRoot batchStorageRoot = BatchStorageRoot.with(downloadBatchStatus::storageRoot, downloadBatchStatus.getDownloadBatchId());
         File batchRootDir = new File(batchStorageRoot.path());
         if (batchRootDir.exists()) {
