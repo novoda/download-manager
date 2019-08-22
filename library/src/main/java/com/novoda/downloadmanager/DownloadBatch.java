@@ -383,9 +383,9 @@ class DownloadBatch {
 
     private void deleteDirectory(File batchRootDirectory) {
         if (batchRootDirectory.isDirectory()) {
-            File[] nestedDirs = batchRootDirectory.listFiles();
-            if (nestedDirs != null) {
-                for (File child : nestedDirs) {
+            File[] nestedDirectories = batchRootDirectory.listFiles();
+            if (nestedDirectories != null) {
+                for (File child : nestedDirectories) {
                     deleteDirectory(child);
                 }
             }
