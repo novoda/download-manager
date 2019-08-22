@@ -18,4 +18,29 @@ final class BatchStorageRoot {
         return path;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        BatchStorageRoot batchStorageRoot = (BatchStorageRoot) o;
+
+        return (path != null ? path.equals(batchStorageRoot.path) : batchStorageRoot.path == null);
+    }
+
+    @Override
+    public int hashCode() {
+        return (path != null ? path.hashCode() : 0);
+    }
+
+    @Override
+    public String toString() {
+        return "BatchStorageRoot{"
+                + "path='" + path + "\'}";
+    }
+
 }
