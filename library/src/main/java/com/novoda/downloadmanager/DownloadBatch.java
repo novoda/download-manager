@@ -380,27 +380,36 @@ class DownloadBatch {
     }
 
     private void deleteDownloadDirectories() {
-        // from root, delete folders IF empty
-
         BatchStorageRoot batchStorageRoot = BatchStorageRoot.with(downloadBatchStatus::storageRoot, downloadBatchStatus.getDownloadBatchId());
         File batchRootDir = new File(batchStorageRoot.path());
         if (batchRootDir.exists()) {
-            deleteDirectory(batchRootDir);
+            deleteDirectoriesIfEmpty(batchRootDir);
         }
     }
 
-    private void deleteDirectory(File batchRootDirectory) {
+    private void deleteDirectoriesIfEmpty(File batchRootDirectory) {
         if (batchRootDirectory.isDirectory()) {
             File[] nestedDirectories = batchRootDirectory.listFiles();
             if (nestedDirectories != null) {
                 for (File child : nestedDirectories) {
-                    deleteDirectory(child);
+                    deleteDirectoriesIfEmpty(child);
                 }
             }
         }
-        boolean deleted = batchRootDirectory.delete();
-        String message = String.format("File or Directory: %s deleted: %s", batchRootDirectory.getAbsolutePath(), deleted);
-        Logger.d(getClass().getSimpleName(), message);
+
+        if (isDirectoryEmpty(batchRootDirectory)) {
+            boolean deleted = batchRootDirectory.delete();
+            String message = String.format("File or Directory: %s deleted: %s", batchRootDirectory.getAbsolutePath(), deleted);
+            Logger.d(getClass().getSimpleName(), message);
+        }
+    }
+
+    private boolean isDirectoryEmpty(File directory) {
+        if (directory.isDirectory()) {
+            String[] children = directory.list();
+            return children == null || children.length == 0;
+        }
+        return false;
     }
 
     DownloadBatchId getId() {
