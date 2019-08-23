@@ -1,6 +1,5 @@
 package com.novoda.downloadmanager;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.mockito.BDDMockito.given;
@@ -12,22 +11,15 @@ public class LiteBatchFileBuilderTest {
     private static final String ANY_NETWORK_ADDRESS = "http://ak.assets.com/some-file";
 
     private final InternalBatchBuilder batchBuilder = mock(InternalBatchBuilder.class);
-    private final StorageRoot storageRoot = mock(StorageRoot.class);
-    private final DownloadBatchId downloadBatchId = mock(DownloadBatchId.class);
+    private final BatchStorageRoot batchStorageRoot = mock(BatchStorageRoot.class);
     private final BatchFileBuilder liteBatchFileBuilder = new LiteBatchFileBuilder(
-            storageRoot,
-            downloadBatchId,
+            batchStorageRoot,
             ANY_NETWORK_ADDRESS
     ).withParentBuilder(batchBuilder);
 
-    @Before
-    public void setUp() {
-        given(downloadBatchId.rawId()).willReturn("my-movie");
-    }
-
     @Test
     public void concatenatesAllPaths() {
-        given(storageRoot.path()).willReturn("root");
+        given(batchStorageRoot.path()).willReturn("root/my-movie");
 
         whenLiteBatchFileBuilderApply("my/path", "my-movie.mp4");
 
@@ -36,8 +28,7 @@ public class LiteBatchFileBuilderTest {
 
     @Test
     public void doesNotAddDuplicateLeadingOrTrailingSeparators() {
-        given(storageRoot.path()).willReturn("/root/");
-        given(downloadBatchId.rawId()).willReturn("/my-movie/");
+        given(batchStorageRoot.path()).willReturn("/root/my-movie/");
 
         whenLiteBatchFileBuilderApply("/my/path/", "/my-movie.mp4");
 
@@ -46,8 +37,7 @@ public class LiteBatchFileBuilderTest {
 
     @Test
     public void doesNotAddDuplicateSeparatorsWhenInMiddleOfSegments() {
-        given(storageRoot.path()).willReturn("/root//to///the//path/");
-        given(downloadBatchId.rawId()).willReturn("/my///movie/");
+        given(batchStorageRoot.path()).willReturn("/root///to///the//path/my///movie/");
 
         whenLiteBatchFileBuilderApply("///my/////path/", "//my-movie.mp4");
 
@@ -56,7 +46,7 @@ public class LiteBatchFileBuilderTest {
 
     @Test
     public void ignoresEmptyPath() {
-        given(storageRoot.path()).willReturn("root");
+        given(batchStorageRoot.path()).willReturn("root/my-movie");
 
         whenLiteBatchFileBuilderApply("", "my-movie.mp4");
 
@@ -65,7 +55,7 @@ public class LiteBatchFileBuilderTest {
 
     @Test
     public void ignoreSeparatorAsPath() {
-        given(storageRoot.path()).willReturn("root/");
+        given(batchStorageRoot.path()).willReturn("root/my-movie");
 
         whenLiteBatchFileBuilderApply("/", "/my-movie.mp4");
 
@@ -74,7 +64,7 @@ public class LiteBatchFileBuilderTest {
 
     @Test
     public void doesNotIgnoreSeparatorAsRoot() {
-        given(storageRoot.path()).willReturn("/");
+        given(batchStorageRoot.path()).willReturn("/my-movie");
 
         whenLiteBatchFileBuilderApply("my/path", "/my-movie.mp4");
 
