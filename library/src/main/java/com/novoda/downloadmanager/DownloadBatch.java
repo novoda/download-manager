@@ -3,6 +3,7 @@ package com.novoda.downloadmanager;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +42,8 @@ class DownloadBatch {
                   DownloadsBatchPersistence downloadsBatchPersistence,
                   FileCallbackThrottle fileCallbackThrottle,
                   ConnectionChecker connectionChecker,
-                  DownloadBatchRequirementRule downloadBatchRequirementRule) {
+                  DownloadBatchRequirementRule downloadBatchRequirementRule
+    ) {
         this.downloadFiles = downloadFiles;
         this.fileBytesDownloadedMap = fileBytesDownloadedMap;
         this.downloadBatchStatus = internalDownloadBatchStatus;
@@ -264,6 +266,11 @@ class DownloadBatch {
 
             fileCallbackThrottle.update(downloadBatchStatus);
         }
+
+        @Override
+        public void onDelete() {
+            deleteDownloadDirectories();
+        }
     };
 
     private static long getBytesDownloadedFrom(Map<DownloadFileId, Long> fileBytesDownloadedMap) {
@@ -356,6 +363,8 @@ class DownloadBatch {
             downloadFile.delete();
         }
 
+        deleteDownloadDirectories();
+
         if (status == PAUSED || status == DOWNLOADED || status == WAITING_FOR_NETWORK || status == ERROR) {
             Logger.v("delete async paused or downloaded " + BATCH + downloadBatchStatus.getDownloadBatchId().rawId());
             downloadsBatchPersistence.deleteAsync(downloadBatchStatus, downloadBatchId -> {
@@ -368,6 +377,39 @@ class DownloadBatch {
         Logger.v("delete request for " + BATCH + "end " + downloadBatchStatus.getDownloadBatchId().rawId()
                          + STATUS + status
                          + ", should be deleting");
+    }
+
+    private void deleteDownloadDirectories() {
+        BatchStorageRoot batchStorageRoot = BatchStorageRoot.with(downloadBatchStatus::storageRoot, downloadBatchStatus.getDownloadBatchId());
+        File batchRootDir = new File(batchStorageRoot.path());
+        if (batchRootDir.exists()) {
+            deleteDirectoriesIfEmpty(batchRootDir);
+        }
+    }
+
+    private void deleteDirectoriesIfEmpty(File batchRootDirectory) {
+        if (batchRootDirectory.isDirectory()) {
+            File[] nestedDirectories = batchRootDirectory.listFiles();
+            if (nestedDirectories != null) {
+                for (File child : nestedDirectories) {
+                    deleteDirectoriesIfEmpty(child);
+                }
+            }
+        }
+
+        if (isDirectoryEmpty(batchRootDirectory)) {
+            boolean deleted = batchRootDirectory.delete();
+            String message = String.format("File or Directory: %s deleted: %s", batchRootDirectory.getAbsolutePath(), deleted);
+            Logger.d(getClass().getSimpleName(), message);
+        }
+    }
+
+    private boolean isDirectoryEmpty(File directory) {
+        if (directory.isDirectory()) {
+            String[] children = directory.list();
+            return children == null || children.length == 0;
+        }
+        return false;
     }
 
     DownloadBatchId getId() {

@@ -10,10 +10,12 @@ final class LiteBatchBuilder implements InternalBatchBuilder {
     private final DownloadBatchId downloadBatchId;
     private final String title;
     private final List<BatchFile> batchFiles;
+    private final BatchStorageRoot batchStorageRoot;
 
     LiteBatchBuilder(StorageRoot storageRoot, DownloadBatchId downloadBatchId, String title, List<BatchFile> batchFiles) {
         this.storageRoot = storageRoot;
         this.downloadBatchId = downloadBatchId;
+        this.batchStorageRoot = BatchStorageRoot.with(storageRoot, downloadBatchId);
         this.title = title;
         this.batchFiles = batchFiles;
     }
@@ -25,7 +27,7 @@ final class LiteBatchBuilder implements InternalBatchBuilder {
 
     @Override
     public BatchFileBuilder downloadFrom(String networkAddress) {
-        return BatchFile.from(storageRoot, downloadBatchId, networkAddress).withParentBuilder(this);
+        return BatchFile.from(batchStorageRoot, networkAddress).withParentBuilder(this);
     }
 
     @Override

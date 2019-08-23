@@ -242,33 +242,6 @@ public final class DownloadManagerBuilder {
             Logger.attach(logHandle.get());
         }
 
-        Intent intent = new Intent(applicationContext, LiteDownloadService.class);
-        ServiceConnection serviceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                if (service instanceof LiteDownloadService.DownloadServiceBinder) {
-                    LiteDownloadService.DownloadServiceBinder binder = (LiteDownloadService.DownloadServiceBinder) service;
-                    downloadService = binder.getService();
-                    liteDownloadManager.submitAllStoredDownloads(() -> {
-                        if (allowNetworkRecovery) {
-                            DownloadsNetworkRecoveryCreator.createEnabled(applicationContext, liteDownloadManager, connectionTypeAllowed);
-                        } else {
-                            DownloadsNetworkRecoveryCreator.createDisabled();
-                        }
-
-                        liteDownloadManager.initialise(downloadService);
-                    });
-                }
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                // no-op
-            }
-        };
-
-        applicationContext.bindService(intent, serviceConnection, Service.BIND_AUTO_CREATE);
-
         filePersistenceCreator.withStorageRequirementRules(storageRequirementRules);
         FileOperations fileOperations = new FileOperations(filePersistenceCreator, fileSizeRequester, fileDownloaderCreator);
         Set<DownloadBatchStatusCallback> callbacks = new CopyOnWriteArraySet<>();
@@ -343,6 +316,33 @@ public final class DownloadManagerBuilder {
                 connectionChecker,
                 serviceCriteria
         );
+
+        Intent intent = new Intent(applicationContext, LiteDownloadService.class);
+        ServiceConnection serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                if (service instanceof LiteDownloadService.DownloadServiceBinder) {
+                    LiteDownloadService.DownloadServiceBinder binder = (LiteDownloadService.DownloadServiceBinder) service;
+                    downloadService = binder.getService();
+                    liteDownloadManager.submitAllStoredDownloads(() -> {
+                        if (allowNetworkRecovery) {
+                            DownloadsNetworkRecoveryCreator.createEnabled(applicationContext, liteDownloadManager, connectionTypeAllowed);
+                        } else {
+                            DownloadsNetworkRecoveryCreator.createDisabled();
+                        }
+
+                        liteDownloadManager.initialise(downloadService);
+                    });
+                }
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                // no-op
+            }
+        };
+
+        applicationContext.bindService(intent, serviceConnection, Service.BIND_AUTO_CREATE);
 
         return liteDownloadManager;
     }
