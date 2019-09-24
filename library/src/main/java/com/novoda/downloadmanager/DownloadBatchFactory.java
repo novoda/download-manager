@@ -81,6 +81,8 @@ final class DownloadBatchFactory {
                 DOWNLOAD_ERROR
         );
 
+        SequentialFilesDownloader filesDownloader = new SequentialFilesDownloader(liteDownloadBatchStatus, connectionChecker, downloadsBatchPersistence);
+
         return new DownloadBatch(
                 liteDownloadBatchStatus,
                 downloadFiles,
@@ -88,7 +90,8 @@ final class DownloadBatchFactory {
                 downloadsBatchPersistence,
                 fileCallbackThrottle,
                 connectionChecker,
-                downloadBatchRequirementRule
+                downloadBatchRequirementRule,
+                filesDownloader
         );
     }
 

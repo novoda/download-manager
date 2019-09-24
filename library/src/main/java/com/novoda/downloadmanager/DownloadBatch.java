@@ -32,6 +32,7 @@ class DownloadBatch {
     private final FileCallbackThrottle fileCallbackThrottle;
     private final ConnectionChecker connectionChecker;
     private final DownloadBatchRequirementRule downloadBatchRequirementRule;
+    private final FilesDownloader filesDownloader;
 
     private long totalBatchSizeBytes;
     private DownloadBatchStatusCallback callback;
@@ -42,7 +43,8 @@ class DownloadBatch {
                   DownloadsBatchPersistence downloadsBatchPersistence,
                   FileCallbackThrottle fileCallbackThrottle,
                   ConnectionChecker connectionChecker,
-                  DownloadBatchRequirementRule downloadBatchRequirementRule
+                  DownloadBatchRequirementRule downloadBatchRequirementRule,
+                  FilesDownloader filesDownloader
     ) {
         this.downloadFiles = downloadFiles;
         this.fileBytesDownloadedMap = fileBytesDownloadedMap;
@@ -51,6 +53,7 @@ class DownloadBatch {
         this.fileCallbackThrottle = fileCallbackThrottle;
         this.connectionChecker = connectionChecker;
         this.downloadBatchRequirementRule = downloadBatchRequirementRule;
+        this.filesDownloader = filesDownloader;
     }
 
     void setCallback(DownloadBatchStatusCallback callback) {
@@ -86,12 +89,7 @@ class DownloadBatch {
             return;
         }
 
-        for (DownloadFile downloadFile : downloadFiles) {
-            if (batchCannotContinue(downloadBatchStatus, connectionChecker, downloadsBatchPersistence, callback)) {
-                break;
-            }
-            downloadFile.download(fileDownloadCallback);
-        }
+        filesDownloader.download(downloadFiles, callback, fileDownloadCallback);
 
         if (networkError(downloadBatchStatus)) {
             processNetworkError(downloadBatchStatus, callback, downloadsBatchPersistence);
@@ -103,7 +101,7 @@ class DownloadBatch {
         Logger.v("end sync download " + rawBatchId);
     }
 
-    private static boolean shouldAbortStartingBatch(ConnectionChecker connectionChecker,
+  private static boolean shouldAbortStartingBatch(ConnectionChecker connectionChecker,
                                                     DownloadBatchStatusCallback callback,
                                                     InternalDownloadBatchStatus downloadBatchStatus,
                                                     DownloadsBatchPersistence downloadsBatchPersistence) {
@@ -222,7 +220,7 @@ class DownloadBatch {
         return false;
     }
 
-    private static boolean batchCannotContinue(InternalDownloadBatchStatus downloadBatchStatus,
+    static boolean batchCannotContinue(InternalDownloadBatchStatus downloadBatchStatus,
                                                ConnectionChecker connectionChecker,
                                                DownloadsBatchPersistence downloadsBatchPersistence,
                                                DownloadBatchStatusCallback callback) {
