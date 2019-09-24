@@ -3,6 +3,7 @@ package com.novoda.downloadmanager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 final class DownloadBatchFactory {
 
@@ -86,7 +87,7 @@ final class DownloadBatchFactory {
         return new DownloadBatch(
                 liteDownloadBatchStatus,
                 downloadFiles,
-                new HashMap<>(),
+                new ConcurrentHashMap<>(),
                 downloadsBatchPersistence,
                 fileCallbackThrottle,
                 connectionChecker,
