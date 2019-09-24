@@ -1,7 +1,6 @@
 package com.novoda.downloadmanager;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,7 +21,8 @@ final class DownloadBatchFactory {
                                      DownloadsFilePersistence downloadsFilePersistence,
                                      FileCallbackThrottle fileCallbackThrottle,
                                      ConnectionChecker connectionChecker,
-                                     DownloadBatchRequirementRule downloadBatchRequirementRule) {
+                                     DownloadBatchRequirementRule downloadBatchRequirementRule,
+                                     boolean enableConcurrentFileDownloading) {
         DownloadBatchTitle downloadBatchTitle = DownloadBatchTitleCreator.createFrom(batch);
         StorageRoot storageRoot = batch.storageRoot();
         DownloadBatchId downloadBatchId = batch.downloadBatchId();
@@ -82,7 +82,7 @@ final class DownloadBatchFactory {
                 DOWNLOAD_ERROR
         );
 
-        SequentialFilesDownloader filesDownloader = new SequentialFilesDownloader(liteDownloadBatchStatus, connectionChecker, downloadsBatchPersistence);
+        FilesDownloader filesDownloader = createFilesDownloader(enableConcurrentFileDownloading, downloadsBatchPersistence, connectionChecker, liteDownloadBatchStatus);
 
         return new DownloadBatch(
                 liteDownloadBatchStatus,
@@ -96,4 +96,14 @@ final class DownloadBatchFactory {
         );
     }
 
+    private static FilesDownloader createFilesDownloader(boolean enableConcurrentFileDownloading,
+                                                         DownloadsBatchPersistence downloadsBatchPersistence,
+                                                         ConnectionChecker connectionChecker,
+                                                         InternalDownloadBatchStatus liteDownloadBatchStatus) {
+        if (enableConcurrentFileDownloading) {
+              return new ConcurrentFilesDownloader(liteDownloadBatchStatus, connectionChecker, downloadsBatchPersistence);
+        } else {
+              return new SequentialFilesDownloader(liteDownloadBatchStatus, connectionChecker, downloadsBatchPersistence);
+        }
+    }
 }

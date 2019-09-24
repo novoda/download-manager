@@ -60,6 +60,7 @@ public final class DownloadManagerBuilder {
     private TimeUnit timeUnit;
     private long frequency;
     private Optional<LogHandle> logHandle;
+    private boolean enableConcurrentFileDownloading;
 
     public static DownloadManagerBuilder newInstance(Context context, Handler callbackHandler, @DrawableRes final int notificationIcon) {
         Context applicationContext = context.getApplicationContext();
@@ -96,6 +97,7 @@ public final class DownloadManagerBuilder {
         CallbackThrottleCreator.Type callbackThrottleCreatorType = CallbackThrottleCreator.Type.THROTTLE_BY_PROGRESS_INCREASE;
 
         Optional<LogHandle> logHandle = Optional.absent();
+        boolean enableConcurrentFileDownloading = false;
 
         return new DownloadManagerBuilder(
                 applicationContext,
@@ -111,7 +113,8 @@ public final class DownloadManagerBuilder {
                 connectionTypeAllowed,
                 allowNetworkRecovery,
                 callbackThrottleCreatorType,
-                logHandle
+                logHandle,
+                enableConcurrentFileDownloading
         );
     }
 
@@ -130,7 +133,9 @@ public final class DownloadManagerBuilder {
                                    ConnectionType connectionTypeAllowed,
                                    boolean allowNetworkRecovery,
                                    CallbackThrottleCreator.Type callbackThrottleCreatorType,
-                                   Optional<LogHandle> logHandle) {
+                                   Optional<LogHandle> logHandle,
+                                   boolean enableConcurrentFileDownloading
+        ) {
         this.applicationContext = applicationContext;
         this.callbackHandler = callbackHandler;
         this.storageRequirementRules = storageRequirementRules;
@@ -145,6 +150,7 @@ public final class DownloadManagerBuilder {
         this.allowNetworkRecovery = allowNetworkRecovery;
         this.callbackThrottleCreatorType = callbackThrottleCreatorType;
         this.logHandle = logHandle;
+        this.enableConcurrentFileDownloading = enableConcurrentFileDownloading;
     }
 
     public DownloadManagerBuilder withCustomHttpClient(HttpClient httpClient) {
@@ -235,6 +241,11 @@ public final class DownloadManagerBuilder {
         return this;
     }
 
+    public DownloadManagerBuilder withConcurrentFileDownloading() {
+        this.enableConcurrentFileDownloading = true;
+        return this;
+    }
+
     // It creates the whole LiteDownloadManager, it is a long process!
     @SuppressWarnings("PMD.ExcessiveMethodLength")
     public DownloadManager build() {
@@ -300,7 +311,8 @@ public final class DownloadManagerBuilder {
                 callbacks,
                 callbackThrottleCreator,
                 downloadBatchStatusFilter,
-                serviceCriteria
+                serviceCriteria,
+                enableConcurrentFileDownloading
         );
 
         liteDownloadManager = new LiteDownloadManager(
