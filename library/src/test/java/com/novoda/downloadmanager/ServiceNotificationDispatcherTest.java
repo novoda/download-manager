@@ -1,8 +1,8 @@
 package com.novoda.downloadmanager;
 
 import android.app.Notification;
-import android.support.v4.app.NotificationManagerCompat;
 
+import androidx.core.app.NotificationManagerCompat;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 

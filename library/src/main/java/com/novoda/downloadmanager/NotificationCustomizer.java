@@ -1,7 +1,7 @@
 package com.novoda.downloadmanager;
 
 import android.app.Notification;
-import android.support.v4.app.NotificationCompat;
+import androidx.core.app.NotificationCompat;
 
 /**
  * Used to customize the download notifications that are shown to the user.
