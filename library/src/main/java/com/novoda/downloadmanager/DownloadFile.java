@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-import android.support.annotation.WorkerThread;
+import androidx.annotation.WorkerThread;
 
 // This model knows how to interact with low level components.
 @SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.StdCyclomaticComplexity", "PMD.ModifiedCyclomaticComplexity"})

@@ -1,11 +1,11 @@
 package com.novoda.downloadmanager;
 
+import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.migration.Migration;
 import android.content.Context;
-import android.support.annotation.NonNull;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 @Database(entities = {RoomBatch.class, RoomFile.class}, version = 4)
