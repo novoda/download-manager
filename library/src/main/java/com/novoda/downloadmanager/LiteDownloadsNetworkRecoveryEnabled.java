@@ -1,52 +1,41 @@
 package com.novoda.downloadmanager;
 
 import android.content.Context;
-
-import com.evernote.android.job.JobManager;
-import com.evernote.android.job.JobRequest;
-
-import java.util.concurrent.TimeUnit;
+import androidx.work.Constraints;
+import androidx.work.NetworkType;
+import androidx.work.WorkManager;
 
 class LiteDownloadsNetworkRecoveryEnabled implements DownloadsNetworkRecovery {
 
-    private static final long ONE_SECOND_IN_MILLIS = TimeUnit.SECONDS.toMillis(1);
-    private static final long FIVE_MINUTES_IN_MILLIS = TimeUnit.MINUTES.toMillis(5);
-    private static final boolean ENFORCE_NETWORK_REQUIREMENTS = true;
-
+    private final WorkManager workManager;
     private ConnectionType connectionType;
 
-    LiteDownloadsNetworkRecoveryEnabled(Context context, LiteDownloadManager liteDownloadManager, ConnectionType connectionType) {
+    LiteDownloadsNetworkRecoveryEnabled(Context context, ConnectionType connectionType) {
         this.connectionType = connectionType;
-        JobManager jobManager = JobManager.create(context);
-        jobManager.addJobCreator(new LiteJobCreator(liteDownloadManager));
+        this.workManager = WorkManager.getInstance(context);
     }
 
     @Override
     public void scheduleRecovery() {
-        JobRequest.Builder builder = new JobRequest.Builder(LiteJobCreator.TAG)
-                .setExecutionWindow(ONE_SECOND_IN_MILLIS, FIVE_MINUTES_IN_MILLIS)
-                .setRequirementsEnforced(ENFORCE_NETWORK_REQUIREMENTS);
+        Constraints.Builder builder = new Constraints.Builder();
 
         switch (connectionType) {
             case ALL:
-                builder.setRequiredNetworkType(JobRequest.NetworkType.CONNECTED);
+                builder.setRequiredNetworkType(NetworkType.CONNECTED);
                 break;
             case UNMETERED:
-                builder.setRequiredNetworkType(JobRequest.NetworkType.UNMETERED);
+                builder.setRequiredNetworkType(NetworkType.UNMETERED);
                 break;
             case METERED:
-                builder.setRequiredNetworkType(JobRequest.NetworkType.METERED);
+                builder.setRequiredNetworkType(NetworkType.METERED);
                 break;
             default:
                 Logger.w("Unknown ConnectionType: " + connectionType);
                 break;
         }
 
-        JobRequest jobRequest = builder.build();
-        JobManager jobManager = JobManager.instance();
-
-        jobManager.cancelAllForTag(LiteJobCreator.TAG);
-        jobManager.schedule(jobRequest);
+        workManager.cancelAllWorkByTag(LiteJobCreator.TAG);
+        workManager.enqueue(LiteJobDownload.newInstance(LiteJobCreator.TAG, builder.build()));
         Logger.v("Scheduling Network Recovery.");
     }
 

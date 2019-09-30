@@ -7,6 +7,7 @@ import android.os.Looper;
 import com.facebook.stetho.Stetho;
 import com.novoda.downloadmanager.DownloadManager;
 import com.novoda.downloadmanager.DownloadManagerBuilder;
+import com.novoda.downloadmanager.DownloadManagerInitialiser;
 import com.novoda.downloadmanager.HttpClient;
 import com.novoda.downloadmanager.StorageRequirementRuleFactory;
 
@@ -38,6 +39,7 @@ public class DemoApplication extends Application {
                 .withStorageRequirementRules(StorageRequirementRuleFactory.createByteBasedRule(TWO_HUNDRED_MB_IN_BYTES))
                 .withDownloadBatchRequirementRules(new DownloadBatchSizeRequirementRule(batchSizeProvider))
                 .build();
+        DownloadManagerInitialiser.initialise(this, downloadManager);
     }
 
     private HttpClient customHttpClient() {

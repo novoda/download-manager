@@ -326,7 +326,7 @@ public final class DownloadManagerBuilder {
                     downloadService = binder.getService();
                     liteDownloadManager.submitAllStoredDownloads(() -> {
                         if (allowNetworkRecovery) {
-                            DownloadsNetworkRecoveryCreator.createEnabled(applicationContext, liteDownloadManager, connectionTypeAllowed);
+                            DownloadsNetworkRecoveryCreator.createEnabled(applicationContext, connectionTypeAllowed);
                         } else {
                             DownloadsNetworkRecoveryCreator.createDisabled();
                         }

@@ -1,21 +1,32 @@
 package com.novoda.downloadmanager;
 
+import android.content.Context;
 import androidx.annotation.NonNull;
-import com.evernote.android.job.Job;
+import androidx.work.Constraints;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkRequest;
+import androidx.work.Worker;
+import androidx.work.WorkerParameters;
 
-class LiteJobDownload extends Job {
+class LiteJobDownload extends Worker {
 
-    private final LiteDownloadManager liteDownloadManager;
+    private final DownloadManager downloadManager;
 
-    LiteJobDownload(LiteDownloadManager liteDownloadManager) {
-        this.liteDownloadManager = liteDownloadManager;
+    public static WorkRequest newInstance(String tag, Constraints constraints) {
+        return new OneTimeWorkRequest.Builder(LiteJobDownload.class)
+            .addTag(tag)
+            .setConstraints(constraints)
+            .build();
     }
 
-    @NonNull
-    @Override
-    protected Result onRunJob(Params params) {
-        liteDownloadManager.submitAllStoredDownloads(() -> Logger.v("LiteJobDownload all jobs submitted"));
+    LiteJobDownload(DownloadManager downloadManager, Context context, WorkerParameters params) {
+        super(context, params);
+        this.downloadManager = downloadManager;
+    }
+
+    @NonNull @Override public Result doWork() {
+        downloadManager.submitAllStoredDownloads(() -> Logger.v("LiteJobDownload all jobs submitted"));
         Logger.v("LiteJobDownload run network recovery job");
-        return Result.SUCCESS;
+        return Result.success();
     }
 }
