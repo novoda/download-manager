@@ -1,11 +1,11 @@
 package com.novoda.downloadmanager.demo;
 
 import android.content.Context;
-import android.support.constraint.ConstraintLayout;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import com.novoda.downloadmanager.DownloadBatchStatus;
 
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
