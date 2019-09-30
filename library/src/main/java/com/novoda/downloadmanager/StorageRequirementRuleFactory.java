@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-import android.support.annotation.FloatRange;
+import androidx.annotation.FloatRange;
 
 public final class StorageRequirementRuleFactory {
 

@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-import android.support.annotation.WorkerThread;
+import androidx.annotation.WorkerThread;
 
 interface DownloadsBatchStatusPersistence {
 
