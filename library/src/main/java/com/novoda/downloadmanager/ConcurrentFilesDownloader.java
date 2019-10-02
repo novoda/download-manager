@@ -3,6 +3,7 @@ package com.novoda.downloadmanager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -27,7 +28,7 @@ class ConcurrentFilesDownloader implements FilesDownloader{
         for (DownloadFile downloadFile : downloadFiles) {
             callables.add(Executors.callable(() -> {
                 if (DownloadBatch.batchCannotContinue(downloadBatchStatus, connectionChecker, downloadsBatchPersistence, statusCallback)) {
-                    throw new RuntimeException("Ignored interrupt download exception");
+                    throw new CancellationException("Ignored interrupt download exception");
                 }
                 downloadFile.download(fileCallback);
             }));
