@@ -143,7 +143,11 @@ class DownloadsBatchPersistence implements DownloadsBatchStatusPersistence, Down
 
         FileCallbackThrottle fileCallbackThrottle = callbackThrottleCreator.create();
 
-        SequentialFilesDownloader filesDownloader = new SequentialFilesDownloader(liteDownloadBatchStatus, connectionChecker, DownloadsBatchPersistence.this);
+        SequentialFilesDownloader filesDownloader = new SequentialFilesDownloader(
+                liteDownloadBatchStatus,
+                connectionChecker,
+                DownloadsBatchPersistence.this
+        );
 
         return new DownloadBatch(
                 liteDownloadBatchStatus,

@@ -15,6 +15,8 @@ final class DownloadBatchFactory {
         // non instantiable factory class
     }
 
+    // The download batch is where the majority of the logic sits
+    @SuppressWarnings("checkstyle:parameternumber")
     static DownloadBatch newInstance(Batch batch,
                                      FileOperations fileOperations,
                                      DownloadsBatchPersistence downloadsBatchPersistence,
@@ -82,7 +84,12 @@ final class DownloadBatchFactory {
                 DOWNLOAD_ERROR
         );
 
-        FilesDownloader filesDownloader = createFilesDownloader(enableConcurrentFileDownloading, downloadsBatchPersistence, connectionChecker, liteDownloadBatchStatus);
+        FilesDownloader filesDownloader = createFilesDownloader(
+                enableConcurrentFileDownloading,
+                downloadsBatchPersistence,
+                connectionChecker,
+                liteDownloadBatchStatus
+        );
 
         return new DownloadBatch(
                 liteDownloadBatchStatus,

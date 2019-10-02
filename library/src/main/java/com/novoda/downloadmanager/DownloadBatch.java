@@ -37,6 +37,8 @@ class DownloadBatch {
     private long totalBatchSizeBytes;
     private DownloadBatchStatusCallback callback;
 
+    // The download batch is where the majority of the logic sits
+    @SuppressWarnings("checkstyle:parameternumber")
     DownloadBatch(InternalDownloadBatchStatus internalDownloadBatchStatus,
                   List<DownloadFile> downloadFiles,
                   Map<DownloadFileId, Long> fileBytesDownloadedMap,

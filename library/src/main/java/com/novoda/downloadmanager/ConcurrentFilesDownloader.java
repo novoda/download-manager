@@ -7,7 +7,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-class ConcurrentFilesDownloader implements FilesDownloader{
+class ConcurrentFilesDownloader implements FilesDownloader {
 
     private static final ExecutorService CONCURRENT_EXECUTOR_SERVICE = Executors.newFixedThreadPool(4);
 
@@ -15,7 +15,8 @@ class ConcurrentFilesDownloader implements FilesDownloader{
     private final ConnectionChecker connectionChecker;
     private final DownloadsBatchPersistence downloadsBatchPersistence;
 
-    ConcurrentFilesDownloader(InternalDownloadBatchStatus downloadBatchStatus, ConnectionChecker connectionChecker, DownloadsBatchPersistence downloadsBatchPersistence) {
+    ConcurrentFilesDownloader(InternalDownloadBatchStatus downloadBatchStatus, ConnectionChecker connectionChecker,
+                              DownloadsBatchPersistence downloadsBatchPersistence) {
         this.downloadBatchStatus = downloadBatchStatus;
         this.connectionChecker = connectionChecker;
         this.downloadsBatchPersistence = downloadsBatchPersistence;
