@@ -1,7 +1,7 @@
 package com.novoda.downloadmanager;
 
 import android.annotation.SuppressLint;
-import android.support.annotation.FloatRange;
+import androidx.annotation.FloatRange;
 
 import java.io.File;
 
