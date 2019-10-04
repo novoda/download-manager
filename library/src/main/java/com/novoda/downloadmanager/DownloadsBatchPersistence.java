@@ -1,7 +1,7 @@
 package com.novoda.downloadmanager;
 
 import android.database.sqlite.SQLiteConstraintException;
-import android.support.annotation.WorkerThread;
+import androidx.annotation.WorkerThread;
 
 import java.util.ArrayList;
 import java.util.Collections;

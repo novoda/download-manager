@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 class LiteDownloadBatchStatus implements InternalDownloadBatchStatus {
 

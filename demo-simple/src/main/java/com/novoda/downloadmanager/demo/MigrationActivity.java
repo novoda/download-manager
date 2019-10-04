@@ -3,12 +3,12 @@ package com.novoda.downloadmanager.demo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import com.novoda.downloadmanager.DownloadManager;
 import com.novoda.downloadmanager.StorageRootFactory;
 import com.novoda.downloadmanager.demo.migration.MigrationJob;
