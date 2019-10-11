@@ -21,7 +21,7 @@ class LiteDownloadManagerDownloader {
     private final DownloadsBatchPersistence downloadsBatchPersistence;
     private final DownloadsFilePersistence downloadsFilePersistence;
     private final DownloadBatchStatusNotificationDispatcher notificationDispatcher;
-    private final DownloadBatchRequirementRule downloadBatchRequirementRule;
+    private final DownloadBatchRequirementCompositeRule downloadBatchRequirementRules;
     private final Set<DownloadBatchStatusCallback> callbacks;
     private final ConnectionChecker connectionChecker;
     private final CallbackThrottleCreator callbackThrottleCreator;
@@ -40,7 +40,7 @@ class LiteDownloadManagerDownloader {
                                   DownloadsBatchPersistence downloadsBatchPersistence,
                                   DownloadsFilePersistence downloadsFilePersistence,
                                   DownloadBatchStatusNotificationDispatcher notificationDispatcher,
-                                  DownloadBatchRequirementRule downloadBatchRequirementRule,
+                                  DownloadBatchRequirementCompositeRule downloadBatchRequirementRules,
                                   ConnectionChecker connectionChecker,
                                   Set<DownloadBatchStatusCallback> callbacks,
                                   CallbackThrottleCreator callbackThrottleCreator,
@@ -54,7 +54,7 @@ class LiteDownloadManagerDownloader {
         this.downloadsBatchPersistence = downloadsBatchPersistence;
         this.downloadsFilePersistence = downloadsFilePersistence;
         this.notificationDispatcher = notificationDispatcher;
-        this.downloadBatchRequirementRule = downloadBatchRequirementRule;
+        this.downloadBatchRequirementRules = downloadBatchRequirementRules;
         this.connectionChecker = connectionChecker;
         this.callbacks = callbacks;
         this.callbackThrottleCreator = callbackThrottleCreator;
@@ -70,7 +70,7 @@ class LiteDownloadManagerDownloader {
                 downloadsFilePersistence,
                 callbackThrottleCreator.create(),
                 connectionChecker,
-                downloadBatchRequirementRule
+                downloadBatchRequirementRules
         );
 
         executor.submit(downloadBatch::updateTotalSize);
@@ -153,7 +153,7 @@ class LiteDownloadManagerDownloader {
                 downloadsFilePersistence,
                 callbackThrottleCreator.create(),
                 connectionChecker,
-                downloadBatchRequirementRule
+                downloadBatchRequirementRules
         );
         downloadBatchMap.put(downloadBatch.getId(), downloadBatch);
         return downloadsBatchPersistence.persistCompletedBatch(completedDownloadBatch);

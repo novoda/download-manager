@@ -5,6 +5,8 @@ import com.novoda.downloadmanager.DownloadBatchStatus;
 
 public class DownloadBatchSizeRequirementRule implements DownloadBatchRequirementRule {
 
+    public final static int CODE = DownloadBatchRequirementRule.class.hashCode();
+
     private final DemoBatchSizeProvider batchSizeProvider;
 
     public DownloadBatchSizeRequirementRule(DemoBatchSizeProvider batchSizeProvider) {
@@ -14,5 +16,10 @@ public class DownloadBatchSizeRequirementRule implements DownloadBatchRequiremen
     @Override
     public boolean hasViolatedRule(DownloadBatchStatus downloadBatchStatus) {
         return batchSizeProvider.getMaxSizeOfBatch() < downloadBatchStatus.bytesTotalSize();
+    }
+
+    @Override
+    public Integer getCode() {
+        return CODE;
     }
 }

@@ -31,7 +31,7 @@ class DownloadBatch {
     private final DownloadsBatchPersistence downloadsBatchPersistence;
     private final FileCallbackThrottle fileCallbackThrottle;
     private final ConnectionChecker connectionChecker;
-    private final DownloadBatchRequirementRule downloadBatchRequirementRule;
+    private final DownloadBatchRequirementCompositeRule downloadBatchRequirementRule;
 
     private long totalBatchSizeBytes;
     private DownloadBatchStatusCallback callback;
@@ -42,7 +42,7 @@ class DownloadBatch {
                   DownloadsBatchPersistence downloadsBatchPersistence,
                   FileCallbackThrottle fileCallbackThrottle,
                   ConnectionChecker connectionChecker,
-                  DownloadBatchRequirementRule downloadBatchRequirementRule
+                  DownloadBatchRequirementCompositeRule downloadBatchRequirementRule
     ) {
         this.downloadFiles = downloadFiles;
         this.fileBytesDownloadedMap = fileBytesDownloadedMap;
@@ -193,7 +193,7 @@ class DownloadBatch {
     private static boolean shouldAbortAfterGettingTotalBatchSize(InternalDownloadBatchStatus downloadBatchStatus,
                                                                  DownloadsBatchPersistence downloadsBatchPersistence,
                                                                  DownloadBatchStatusCallback callback,
-                                                                 DownloadBatchRequirementRule downloadBatchRequirementRule,
+                                                                 DownloadBatchRequirementCompositeRule downloadBatchRequirementRule,
                                                                  long totalBatchSizeBytes) {
         if (downloadBatchStatus.status() == PAUSED) {
             notifyCallback(callback, downloadBatchStatus);
@@ -212,8 +212,14 @@ class DownloadBatch {
             return true;
         }
 
-        if (downloadBatchRequirementRule.hasViolatedRule(downloadBatchStatus)) {
-            Optional<DownloadError> error = Optional.fromNullable(new DownloadError(REQUIREMENT_RULE_VIOLATED));
+        Optional<Integer> violatedRuleCode = downloadBatchRequirementRule
+                .getViolatedRule(downloadBatchStatus)
+                .map(DownloadBatchRequirementRule::getCode);
+        if (violatedRuleCode.isPresent()) {
+            DownloadError downloadError = new DownloadError(
+                    REQUIREMENT_RULE_VIOLATED,
+                    violatedRuleCode.get());
+            Optional<DownloadError> error = Optional.fromNullable(downloadError);
             downloadBatchStatus.markAsError(error, downloadsBatchPersistence);
             notifyCallback(callback, downloadBatchStatus);
             return true;
