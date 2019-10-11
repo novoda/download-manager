@@ -44,7 +44,7 @@ public final class DownloadManagerBuilder {
     private final Handler callbackHandler;
     private final FilePersistenceCreator filePersistenceCreator;
     private final StorageRequirementRules storageRequirementRules;
-    private final DownloadBatchRequirementRules downloadBatchRequirementRules;
+    private final DownloadBatchRequirementRulesImpl downloadBatchRequirementRules;
 
     private FileSizeRequester fileSizeRequester;
     private FileDownloaderCreator fileDownloaderCreator;
@@ -67,7 +67,7 @@ public final class DownloadManagerBuilder {
 
         HttpClient httpClient = HttpClientFactory.getInstance();
         StorageRequirementRules storageRequirementRule = StorageRequirementRules.newInstance();
-        DownloadBatchRequirementRules downloadBatchRequirementRule = DownloadBatchRequirementRules.newInstance();
+        DownloadBatchRequirementRulesImpl downloadBatchRequirementRules = DownloadBatchRequirementRulesImpl.newInstance();
         FilePersistenceCreator filePersistenceCreator = new FilePersistenceCreator(applicationContext);
         FileDownloaderCreator fileDownloaderCreator = FileDownloaderCreator.newNetworkFileDownloaderCreator(httpClient);
 
@@ -103,7 +103,7 @@ public final class DownloadManagerBuilder {
                 applicationContext,
                 callbackHandler,
                 storageRequirementRule,
-                downloadBatchRequirementRule,
+                downloadBatchRequirementRules,
                 filePersistenceCreator,
                 downloadsPersistence,
                 fileSizeRequester,
@@ -123,7 +123,7 @@ public final class DownloadManagerBuilder {
     private DownloadManagerBuilder(Context applicationContext,
                                    Handler callbackHandler,
                                    StorageRequirementRules storageRequirementRules,
-                                   DownloadBatchRequirementRules downloadBatchRequirementRules,
+                                   DownloadBatchRequirementRulesImpl downloadBatchRequirementRules,
                                    FilePersistenceCreator filePersistenceCreator,
                                    DownloadsPersistence downloadsPersistence,
                                    FileSizeRequester fileSizeRequester,

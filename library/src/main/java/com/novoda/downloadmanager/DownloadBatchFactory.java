@@ -23,7 +23,7 @@ final class DownloadBatchFactory {
                                      DownloadsFilePersistence downloadsFilePersistence,
                                      FileCallbackThrottle fileCallbackThrottle,
                                      ConnectionChecker connectionChecker,
-                                     DownloadBatchRequirementRule downloadBatchRequirementRule,
+                                     DownloadBatchRequirementRules downloadBatchRequirementRule,
                                      boolean enableConcurrentFileDownloading) {
         DownloadBatchTitle downloadBatchTitle = DownloadBatchTitleCreator.createFrom(batch);
         StorageRoot storageRoot = batch.storageRoot();
