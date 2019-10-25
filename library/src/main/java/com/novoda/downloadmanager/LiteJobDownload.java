@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.evernote.android.job.Job;
 

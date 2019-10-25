@@ -2,7 +2,8 @@ package com.novoda.downloadmanager;
 
 import android.app.Notification;
 import android.content.Context;
-import android.support.v4.app.NotificationCompat;
+
+import androidx.core.app.NotificationCompat;
 
 class DownloadBatchStatusNotificationCreator implements NotificationCreator<DownloadBatchStatus> {
 

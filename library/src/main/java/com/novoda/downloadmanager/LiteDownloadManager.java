@@ -1,8 +1,9 @@
 package com.novoda.downloadmanager;
 
 import android.os.Handler;
-import android.support.annotation.Nullable;
-import android.support.annotation.WorkerThread;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,8 +1,9 @@
 package com.novoda.downloadmanager;
 
 import android.app.Notification;
-import android.support.annotation.WorkerThread;
-import android.support.v4.app.NotificationManagerCompat;
+
+import androidx.annotation.WorkerThread;
+import androidx.core.app.NotificationManagerCompat;
 
 class ServiceNotificationDispatcher<T> {
 

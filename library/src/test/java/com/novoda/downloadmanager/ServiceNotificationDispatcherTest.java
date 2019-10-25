@@ -1,10 +1,8 @@
 package com.novoda.downloadmanager;
 
 import android.app.Notification;
-import android.support.v4.app.NotificationManagerCompat;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import androidx.core.app.NotificationManagerCompat;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -16,6 +14,9 @@ import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.junit.runners.model.Statement;
 import org.mockito.InOrder;
+
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.novoda.downloadmanager.InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus;

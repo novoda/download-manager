@@ -1,7 +1,7 @@
 package com.novoda.downloadmanager;
 
-import android.support.annotation.IntDef;
-import android.support.v4.app.NotificationManagerCompat;
+import androidx.annotation.IntDef;
+import androidx.core.app.NotificationManagerCompat;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

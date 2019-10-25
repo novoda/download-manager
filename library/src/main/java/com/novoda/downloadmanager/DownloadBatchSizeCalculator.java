@@ -1,11 +1,11 @@
 package com.novoda.downloadmanager;
 
-import android.support.annotation.WorkerThread;
+import androidx.annotation.WorkerThread;
 
 import java.util.List;
 
-import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETING;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETED;
+import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DELETING;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
 
 final class DownloadBatchSizeCalculator {
