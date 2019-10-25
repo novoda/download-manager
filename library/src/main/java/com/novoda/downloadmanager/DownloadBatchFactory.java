@@ -1,8 +1,8 @@
 package com.novoda.downloadmanager;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 final class DownloadBatchFactory {
 
@@ -15,13 +15,16 @@ final class DownloadBatchFactory {
         // non instantiable factory class
     }
 
+    // The download batch is where the majority of the logic sits
+    @SuppressWarnings("checkstyle:parameternumber")
     static DownloadBatch newInstance(Batch batch,
                                      FileOperations fileOperations,
                                      DownloadsBatchPersistence downloadsBatchPersistence,
                                      DownloadsFilePersistence downloadsFilePersistence,
                                      FileCallbackThrottle fileCallbackThrottle,
                                      ConnectionChecker connectionChecker,
-                                     DownloadBatchRequirementRule downloadBatchRequirementRule) {
+                                     DownloadBatchRequirementRule downloadBatchRequirementRule,
+                                     boolean enableConcurrentFileDownloading) {
         DownloadBatchTitle downloadBatchTitle = DownloadBatchTitleCreator.createFrom(batch);
         StorageRoot storageRoot = batch.storageRoot();
         DownloadBatchId downloadBatchId = batch.downloadBatchId();
@@ -81,15 +84,33 @@ final class DownloadBatchFactory {
                 DOWNLOAD_ERROR
         );
 
+        FilesDownloader filesDownloader = createFilesDownloader(
+                enableConcurrentFileDownloading,
+                downloadsBatchPersistence,
+                connectionChecker,
+                liteDownloadBatchStatus
+        );
+
         return new DownloadBatch(
                 liteDownloadBatchStatus,
                 downloadFiles,
-                new HashMap<>(),
+                new ConcurrentHashMap<>(),
                 downloadsBatchPersistence,
                 fileCallbackThrottle,
                 connectionChecker,
-                downloadBatchRequirementRule
+                downloadBatchRequirementRule,
+                filesDownloader
         );
     }
 
+    private static FilesDownloader createFilesDownloader(boolean enableConcurrentFileDownloading,
+                                                         DownloadsBatchPersistence downloadsBatchPersistence,
+                                                         ConnectionChecker connectionChecker,
+                                                         InternalDownloadBatchStatus liteDownloadBatchStatus) {
+        if (enableConcurrentFileDownloading) {
+              return new ConcurrentFilesDownloader(liteDownloadBatchStatus, connectionChecker, downloadsBatchPersistence);
+        } else {
+              return new SequentialFilesDownloader(liteDownloadBatchStatus, connectionChecker, downloadsBatchPersistence);
+        }
+    }
 }

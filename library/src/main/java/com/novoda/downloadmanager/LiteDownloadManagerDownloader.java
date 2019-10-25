@@ -27,6 +27,7 @@ class LiteDownloadManagerDownloader {
     private final CallbackThrottleCreator callbackThrottleCreator;
     private final DownloadBatchStatusFilter downloadBatchStatusFilter;
     private final Wait.Criteria serviceCriteria;
+    private final boolean enableConcurrentFileDownloading;
 
     private DownloadService downloadService;
 
@@ -45,7 +46,8 @@ class LiteDownloadManagerDownloader {
                                   Set<DownloadBatchStatusCallback> callbacks,
                                   CallbackThrottleCreator callbackThrottleCreator,
                                   DownloadBatchStatusFilter downloadBatchStatusFilter,
-                                  Wait.Criteria serviceCriteria) {
+                                  Wait.Criteria serviceCriteria,
+                                  boolean enableConcurrentFileDownloading) {
         this.waitForDownloadService = waitForDownloadService;
         this.waitForDownloadBatchStatusCallback = waitForDownloadBatchStatusCallback;
         this.executor = executor;
@@ -60,6 +62,7 @@ class LiteDownloadManagerDownloader {
         this.callbackThrottleCreator = callbackThrottleCreator;
         this.downloadBatchStatusFilter = downloadBatchStatusFilter;
         this.serviceCriteria = serviceCriteria;
+        this.enableConcurrentFileDownloading = enableConcurrentFileDownloading;
     }
 
     void download(Batch batch, Map<DownloadBatchId, DownloadBatch> downloadBatchMap) {
@@ -70,7 +73,8 @@ class LiteDownloadManagerDownloader {
                 downloadsFilePersistence,
                 callbackThrottleCreator.create(),
                 connectionChecker,
-                downloadBatchRequirementRule
+                downloadBatchRequirementRule,
+                enableConcurrentFileDownloading
         );
 
         executor.submit(downloadBatch::updateTotalSize);
@@ -153,7 +157,8 @@ class LiteDownloadManagerDownloader {
                 downloadsFilePersistence,
                 callbackThrottleCreator.create(),
                 connectionChecker,
-                downloadBatchRequirementRule
+                downloadBatchRequirementRule,
+                enableConcurrentFileDownloading
         );
         downloadBatchMap.put(downloadBatch.getId(), downloadBatch);
         return downloadsBatchPersistence.persistCompletedBatch(completedDownloadBatch);
