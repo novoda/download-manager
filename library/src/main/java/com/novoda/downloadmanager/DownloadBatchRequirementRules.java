@@ -5,7 +5,7 @@ package com.novoda.downloadmanager;
  * and expose it as a single {@link DownloadBatchRequirementRule},
  * allowing calling code to identify which of the component rules was violated, if any.
  */
-public interface DownloadBatchRequirementRules extends DownloadBatchRequirementRule {
+interface DownloadBatchRequirementRules extends DownloadBatchRequirementRule {
 
     /**
      * Determines which of the component rules (of which the object consists) has been violated

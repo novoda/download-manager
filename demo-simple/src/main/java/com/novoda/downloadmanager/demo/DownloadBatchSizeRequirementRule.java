@@ -5,8 +5,6 @@ import com.novoda.downloadmanager.DownloadBatchStatus;
 
 public class DownloadBatchSizeRequirementRule implements DownloadBatchRequirementRule {
 
-    public static final int ERROR_CODE_DOWNLOAD_LIMIT_REACHED = 1;
-
     private final DemoBatchSizeProvider batchSizeProvider;
 
     public DownloadBatchSizeRequirementRule(DemoBatchSizeProvider batchSizeProvider) {
@@ -20,6 +18,6 @@ public class DownloadBatchSizeRequirementRule implements DownloadBatchRequiremen
 
     @Override
     public Integer getCode() {
-        return ERROR_CODE_DOWNLOAD_LIMIT_REACHED;
+        return null;
     }
 }
