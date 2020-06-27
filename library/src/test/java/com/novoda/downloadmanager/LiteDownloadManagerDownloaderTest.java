@@ -22,6 +22,8 @@ import static org.mockito.Mockito.verify;
 
 public class LiteDownloadManagerDownloaderTest {
 
+    private static final boolean DISABLED_CONCURRENT_FILE_DOWNLOADING = false;
+
     private final Object waitForDownloadService = new Object();
     private final Object waitForDownloadBatchStatusCallback = new Object();
     private final ExecutorService executor = mock(ExecutorService.class);
@@ -65,7 +67,8 @@ public class LiteDownloadManagerDownloaderTest {
                 callbacks,
                 callbackThrottleCreator,
                 downloadBatchStatusFilter,
-                serviceCriteria
+                serviceCriteria,
+                DISABLED_CONCURRENT_FILE_DOWNLOADING
         );
 
         downloader.setDownloadService(downloadService);

@@ -11,6 +11,7 @@ import java.io.IOException;
 class PathBasedFilePersistence implements FilePersistence {
 
     private static final boolean APPEND = true;
+    private static final Object LOCK = new Object();
 
     private StorageRequirementRule storageRequirementRule;
 
@@ -55,13 +56,15 @@ class PathBasedFilePersistence implements FilePersistence {
     }
 
     private boolean ensureParentDirectoriesExistFor(File outputFile) {
-        boolean parentExists = outputFile.getParentFile().exists();
-        if (parentExists) {
-            return true;
-        }
+        synchronized (LOCK) {
+            boolean parentExists = outputFile.getParentFile().exists();
+            if (parentExists) {
+                return true;
+            }
 
-        Logger.w(String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
-        return outputFile.getParentFile().mkdirs();
+            Logger.w(String.format("path: %s doesn't exist, creating parent directories...", outputFile.getAbsolutePath()));
+            return outputFile.getParentFile().mkdirs();
+        }
     }
 
     @Override
