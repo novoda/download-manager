@@ -39,7 +39,7 @@ import static com.novoda.downloadmanager.DownloadBatchStatus.Status.DOWNLOADED;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.ERROR;
 import static com.novoda.downloadmanager.DownloadBatchStatus.Status.PAUSED;
 
-@SuppressWarnings("PMD.ExcessiveImports")
+@SuppressWarnings({"PMD.ExcessiveImports", "PMD.GodClass"})
 public final class DownloadManagerBuilder {
 
     private static final Object SERVICE_LOCK = new Object();
@@ -141,7 +141,7 @@ public final class DownloadManagerBuilder {
                                    CallbackThrottleCreator.Type callbackThrottleCreatorType,
                                    Optional<LogHandle> logHandle,
                                    boolean enableConcurrentFileDownloading
-        ) {
+    ) {
         this.applicationContext = applicationContext;
         this.callbackHandler = callbackHandler;
         this.storageRequirementRules = storageRequirementRules;
