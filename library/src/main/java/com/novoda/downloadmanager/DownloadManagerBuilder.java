@@ -335,7 +335,9 @@ public final class DownloadManagerBuilder {
                 serviceCriteria
         );
 
-        addDownloadManagerToWorkManager(liteDownloadManager);
+        if (allowNetworkRecovery) {
+            addDownloadManagerToWorkManager(liteDownloadManager);
+        }
 
         Intent intent = new Intent(applicationContext, LiteDownloadService.class);
 
