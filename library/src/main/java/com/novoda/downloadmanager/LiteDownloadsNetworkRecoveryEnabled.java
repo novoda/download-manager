@@ -1,6 +1,5 @@
 package com.novoda.downloadmanager;
 
-import android.content.Context;
 import androidx.work.Constraints;
 import androidx.work.NetworkType;
 import androidx.work.WorkManager;
@@ -10,9 +9,9 @@ class LiteDownloadsNetworkRecoveryEnabled implements DownloadsNetworkRecovery {
     private final WorkManager workManager;
     private ConnectionType connectionType;
 
-    LiteDownloadsNetworkRecoveryEnabled(Context context, ConnectionType connectionType) {
+    LiteDownloadsNetworkRecoveryEnabled(WorkManager workManager, ConnectionType connectionType) {
         this.connectionType = connectionType;
-        this.workManager = WorkManager.getInstance(context);
+        this.workManager = workManager;
     }
 
     @Override

@@ -4,10 +4,12 @@ import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
 
+import androidx.work.Configuration;
+import androidx.work.DelegatingWorkerFactory;
+
 import com.facebook.stetho.Stetho;
 import com.novoda.downloadmanager.DownloadManager;
 import com.novoda.downloadmanager.DownloadManagerBuilder;
-import com.novoda.downloadmanager.DownloadManagerInitialiser;
 import com.novoda.downloadmanager.HttpClient;
 import com.novoda.downloadmanager.StorageRequirementRuleFactory;
 
@@ -15,12 +17,15 @@ import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 
-public class DemoApplication extends Application {
+public class DemoApplication extends Application implements Configuration.Provider {
 
     private static final int TIMEOUT = 5;
     private static final int TWO_HUNDRED_MB_IN_BYTES = 209715200;
     private volatile DownloadManager downloadManager;
     private final DemoBatchSizeProvider batchSizeProvider = new DemoBatchSizeProvider();
+    private final  Configuration workManagerConfig = new Configuration.Builder()
+            .setWorkerFactory(new DelegatingWorkerFactory())
+            .build();
 
     @Override
     public void onCreate() {
@@ -39,7 +44,6 @@ public class DemoApplication extends Application {
                 .withStorageRequirementRules(StorageRequirementRuleFactory.createByteBasedRule(TWO_HUNDRED_MB_IN_BYTES))
                 .withDownloadBatchRequirementRules(new DownloadBatchSizeRequirementRule(batchSizeProvider))
                 .build();
-        DownloadManagerInitialiser.initialise(this, downloadManager);
     }
 
     private HttpClient customHttpClient() {
@@ -58,5 +62,10 @@ public class DemoApplication extends Application {
 
     public DemoBatchSizeProvider getBatchSizeProvider() {
         return batchSizeProvider;
+    }
+
+    @Override
+    public Configuration getWorkManagerConfiguration() {
+        return workManagerConfig;
     }
 }

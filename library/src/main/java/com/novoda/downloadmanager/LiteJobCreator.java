@@ -1,6 +1,7 @@
 package com.novoda.downloadmanager;
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.work.ListenableWorker;

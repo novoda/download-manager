@@ -11,11 +11,17 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+
 import androidx.annotation.DrawableRes;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.work.Configuration;
+import androidx.work.DelegatingWorkerFactory;
+import androidx.work.WorkManager;
+import androidx.work.WorkerFactory;
+
 import com.novoda.merlin.MerlinsBeard;
 
 import java.util.HashMap;
@@ -329,7 +335,10 @@ public final class DownloadManagerBuilder {
                 serviceCriteria
         );
 
+        addDownloadManagerToWorkManager(liteDownloadManager);
+
         Intent intent = new Intent(applicationContext, LiteDownloadService.class);
+
         ServiceConnection serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
@@ -338,7 +347,8 @@ public final class DownloadManagerBuilder {
                     downloadService = binder.getService();
                     liteDownloadManager.submitAllStoredDownloads(() -> {
                         if (allowNetworkRecovery) {
-                            DownloadsNetworkRecoveryCreator.createEnabled(applicationContext, connectionTypeAllowed);
+                            WorkManager workManager = WorkManager.getInstance(applicationContext);
+                            DownloadsNetworkRecoveryCreator.createEnabled(workManager, connectionTypeAllowed);
                         } else {
                             DownloadsNetworkRecoveryCreator.createDisabled();
                         }
@@ -372,6 +382,20 @@ public final class DownloadManagerBuilder {
                 return CallbackThrottleCreator.byCustomThrottle(customCallbackThrottle);
             default:
                 throw new IllegalStateException("callbackThrottle type " + callbackThrottleType + " not implemented yet");
+        }
+    }
+
+    private void addDownloadManagerToWorkManager(DownloadManager downloadManager) {
+        if (applicationContext instanceof Configuration.Provider) {
+            WorkerFactory workerFactory = ((Configuration.Provider) applicationContext).getWorkManagerConfiguration().getWorkerFactory();
+            if (workerFactory instanceof DelegatingWorkerFactory) {
+                DelegatingWorkerFactory delegatingWorkerFactory = (DelegatingWorkerFactory) workerFactory;
+                delegatingWorkerFactory.addFactory(new LiteJobCreator(downloadManager));
+            } else {
+                throw new ConfigurationException("WorkerFactory must be " + DelegatingWorkerFactory.class.getName());
+            }
+        } else {
+            throw new ConfigurationException(Configuration.Provider.class.getName() + " not found, did you forget to add to your application?");
         }
     }
 
@@ -448,5 +472,11 @@ public final class DownloadManagerBuilder {
                     .build();
         }
 
+    }
+
+    static class ConfigurationException extends IllegalStateException {
+        ConfigurationException(String message) {
+            super(message);
+        }
     }
 }

@@ -1,6 +1,6 @@
 package com.novoda.downloadmanager;
 
-import android.content.Context;
+import androidx.work.WorkManager;
 
 final class DownloadsNetworkRecoveryCreator {
 
@@ -14,8 +14,8 @@ final class DownloadsNetworkRecoveryCreator {
         DownloadsNetworkRecoveryCreator.singleInstance = DownloadsNetworkRecovery.DISABLED;
     }
 
-    static void createEnabled(Context context, ConnectionType connectionType) {
-        DownloadsNetworkRecoveryCreator.singleInstance = new LiteDownloadsNetworkRecoveryEnabled(context, connectionType);
+    static void createEnabled(WorkManager workManager, ConnectionType connectionType) {
+        DownloadsNetworkRecoveryCreator.singleInstance = new LiteDownloadsNetworkRecoveryEnabled(workManager, connectionType);
     }
 
     static DownloadsNetworkRecovery getInstance() {
