@@ -21,6 +21,7 @@
         android:name="androidx.work.impl.WorkManagerInitializer"
         android:authorities="com.novoda.downloadmanager"
         android:enabled="false"
+        android:exported="false"
         tools:replace="android:authorities"/>
 
   </application>
