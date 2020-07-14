@@ -19,7 +19,23 @@ dependencies {
 
 ## Simple usage
 
-1. Create a `DownloadManager`:
+1. Provide `DelegatingWorkerFactory` for `WorkManager`, not needed if using `DownloadManagerBuilder.withoutNetworkRecovery`
+```java
+public class MyApplication extends Application implements Configuration.Provider {
+
+    private final  Configuration workManagerConfig = new Configuration.Builder()
+            .setWorkerFactory(new DelegatingWorkerFactory())
+            .build();
+
+    @Override
+    public Configuration getWorkManagerConfiguration() {
+        return workManagerConfig;
+    }
+
+}
+```
+
+2. Create a `DownloadManager`:
 
 ```java
 DownloadManager downloadManager = DownloadManagerBuilder
@@ -29,7 +45,7 @@ DownloadManager downloadManager = DownloadManagerBuilder
         .build();
 ```
 
-2. Create a `Batch` of files to download:
+3. Create a `Batch` of files to download:
 
 ```java
 Batch batch = Batch.with(primaryStorageWithDownloadsSubpackage, DownloadBatchIdCreator.createSanitizedFrom("batch_id_1"), "batch one title")
@@ -38,7 +54,7 @@ Batch batch = Batch.with(primaryStorageWithDownloadsSubpackage, DownloadBatchIdC
         .build();
 ```   
 
-3. Schedule the batch for download:
+4. Schedule the batch for download:
 
 ```java
 downloadManager.download(batch);
