@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -21,8 +22,6 @@ import androidx.work.Configuration;
 import androidx.work.DelegatingWorkerFactory;
 import androidx.work.WorkManager;
 import androidx.work.WorkerFactory;
-
-import com.novoda.merlin.MerlinsBeard;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -271,8 +270,8 @@ public final class DownloadManagerBuilder {
         );
 
         DownloadsFilePersistence downloadsFilePersistence = new DownloadsFilePersistence(downloadsPersistence);
-        MerlinsBeard merlinsBeard = MerlinsBeard.from(applicationContext);
-        ConnectionChecker connectionChecker = new ConnectionChecker(merlinsBeard, connectionTypeAllowed);
+        ConnectivityManager connectivityManager = (ConnectivityManager) applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectionChecker connectionChecker = new ConnectionChecker(connectivityManager, connectionTypeAllowed);
         Executor executor = Executors.newSingleThreadExecutor();
         DownloadsBatchPersistence downloadsBatchPersistence = new DownloadsBatchPersistence(
                 executor,
