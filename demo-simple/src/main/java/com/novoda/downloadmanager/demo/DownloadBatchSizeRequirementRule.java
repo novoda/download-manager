@@ -15,4 +15,9 @@ public class DownloadBatchSizeRequirementRule implements DownloadBatchRequiremen
     public boolean hasViolatedRule(DownloadBatchStatus downloadBatchStatus) {
         return batchSizeProvider.getMaxSizeOfBatch() < downloadBatchStatus.bytesTotalSize();
     }
+
+    @Override
+    public Integer getCode() {
+        return null;
+    }
 }

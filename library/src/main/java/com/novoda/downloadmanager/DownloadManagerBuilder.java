@@ -72,7 +72,7 @@ public final class DownloadManagerBuilder {
 
         HttpClient httpClient = HttpClientFactory.getInstance();
         StorageRequirementRules storageRequirementRule = StorageRequirementRules.newInstance();
-        DownloadBatchRequirementRules downloadBatchRequirementRule = DownloadBatchRequirementRules.newInstance();
+        DownloadBatchRequirementRules downloadBatchRequirementRules = DownloadBatchRequirementRules.newInstance();
         FilePersistenceCreator filePersistenceCreator = new FilePersistenceCreator(applicationContext);
         FileDownloaderCreator fileDownloaderCreator = FileDownloaderCreator.newNetworkFileDownloaderCreator(httpClient);
 
@@ -108,7 +108,7 @@ public final class DownloadManagerBuilder {
                 applicationContext,
                 callbackHandler,
                 storageRequirementRule,
-                downloadBatchRequirementRule,
+                downloadBatchRequirementRules,
                 filePersistenceCreator,
                 downloadsPersistence,
                 fileSizeRequester,
