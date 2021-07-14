@@ -19,12 +19,6 @@ public class DownloadError {
     @Nullable
     private final Integer violatedRuleCode;
 
-    DownloadError(Type type, String message, @Nullable Integer violatedRuleCode) {
-        this.type = type;
-        this.message = message;
-        this.violatedRuleCode = violatedRuleCode;
-    }
-
     DownloadError(Type type, Integer violatedRuleCode) {
         this(type, "", violatedRuleCode);
     }
@@ -33,8 +27,10 @@ public class DownloadError {
         this(type, message, null);
     }
 
-    DownloadError(Type type) {
-        this(type, "", null);
+    private DownloadError(Type type, String message, @Nullable Integer violatedRuleCode) {
+        this.type = type;
+        this.message = message;
+        this.violatedRuleCode = violatedRuleCode;
     }
 
     public Type type() {

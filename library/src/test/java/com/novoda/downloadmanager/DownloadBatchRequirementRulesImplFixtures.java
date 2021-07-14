@@ -1,8 +1,8 @@
 package com.novoda.downloadmanager;
 
 public class DownloadBatchRequirementRulesImplFixtures {
-    static DownloadBatchRequirementRulesImpl withRules(DownloadBatchRequirementRule... rules) {
-        DownloadBatchRequirementRulesImpl downloadBatchRequirementRules = DownloadBatchRequirementRulesImpl.newInstance();
+    static DownloadBatchRequirementRules withRules(DownloadBatchRequirementRule... rules) {
+        DownloadBatchRequirementRules downloadBatchRequirementRules = DownloadBatchRequirementRules.newInstance();
         for (DownloadBatchRequirementRule rule : rules) {
             downloadBatchRequirementRules.addRule(rule);
         }

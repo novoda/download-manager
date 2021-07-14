@@ -31,7 +31,7 @@ class DownloadBatch {
     private final DownloadsBatchPersistence downloadsBatchPersistence;
     private final FileCallbackThrottle fileCallbackThrottle;
     private final ConnectionChecker connectionChecker;
-    private final DownloadBatchRequirementRules downloadBatchRequirementRule;
+    private final DownloadBatchRequirementRules downloadBatchRequirementRules;
     private final FilesDownloader filesDownloader;
 
     private long totalBatchSizeBytes;
@@ -45,7 +45,7 @@ class DownloadBatch {
                   DownloadsBatchPersistence downloadsBatchPersistence,
                   FileCallbackThrottle fileCallbackThrottle,
                   ConnectionChecker connectionChecker,
-                  DownloadBatchRequirementRules downloadBatchRequirementRule,
+                  DownloadBatchRequirementRules downloadBatchRequirementRules,
                   FilesDownloader filesDownloader
     ) {
         this.downloadFiles = downloadFiles;
@@ -54,7 +54,7 @@ class DownloadBatch {
         this.downloadsBatchPersistence = downloadsBatchPersistence;
         this.fileCallbackThrottle = fileCallbackThrottle;
         this.connectionChecker = connectionChecker;
-        this.downloadBatchRequirementRule = downloadBatchRequirementRule;
+        this.downloadBatchRequirementRules = downloadBatchRequirementRules;
         this.filesDownloader = filesDownloader;
     }
 
@@ -84,7 +84,7 @@ class DownloadBatch {
                 downloadBatchStatus,
                 downloadsBatchPersistence,
                 callback,
-                downloadBatchRequirementRule,
+                downloadBatchRequirementRules,
                 totalBatchSizeBytes
         )) {
             Logger.v("abort after getting total " + BATCH + "size download " + rawBatchId + STATUS + downloadBatchStatus.status());
@@ -193,7 +193,7 @@ class DownloadBatch {
     private static boolean shouldAbortAfterGettingTotalBatchSize(InternalDownloadBatchStatus downloadBatchStatus,
                                                                  DownloadsBatchPersistence downloadsBatchPersistence,
                                                                  DownloadBatchStatusCallback callback,
-                                                                 DownloadBatchRequirementRules downloadBatchRequirementRule,
+                                                                 DownloadBatchRequirementRules downloadBatchRequirementRules,
                                                                  long totalBatchSizeBytes) {
         if (downloadBatchStatus.status() == PAUSED) {
             notifyCallback(callback, downloadBatchStatus);
@@ -212,7 +212,7 @@ class DownloadBatch {
             return true;
         }
 
-        Optional<DownloadBatchRequirementRule> violatedRule = downloadBatchRequirementRule.getViolatedRule(downloadBatchStatus);
+        Optional<DownloadBatchRequirementRule> violatedRule = downloadBatchRequirementRules.getViolatedRule(downloadBatchStatus);
         if (violatedRule.isPresent()) {
             Integer violatedRuleCode = violatedRule
                     .map(DownloadBatchRequirementRule::getCode)

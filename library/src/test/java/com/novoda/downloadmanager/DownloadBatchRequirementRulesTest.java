@@ -7,7 +7,7 @@ import static com.novoda.downloadmanager.DownloadBatchRequirementRulesImplFixtur
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-public class DownloadBatchRequirementRulesImplTest {
+public class DownloadBatchRequirementRulesTest {
     DownloadBatchStatus status = mock(DownloadBatchStatus.class);
 
     @Test
@@ -21,7 +21,7 @@ public class DownloadBatchRequirementRulesImplTest {
         given(rule2Satisfied.getCode()).willReturn(2);
         given(rule2Satisfied.hasViolatedRule(status)).willReturn(false);
 
-        DownloadBatchRequirementRulesImpl rules = withRules(rule1Satisfied, rule2Satisfied);
+        DownloadBatchRequirementRules rules = withRules(rule1Satisfied, rule2Satisfied);
 
         assertThat(rules.hasViolatedRule(status)).isFalse();
         Optional<DownloadBatchRequirementRule> violatedRule = rules.getViolatedRule(status);
@@ -39,7 +39,7 @@ public class DownloadBatchRequirementRulesImplTest {
         given(rule2Violated.getCode()).willReturn(2);
         given(rule2Violated.hasViolatedRule(status)).willReturn(true);
 
-        DownloadBatchRequirementRulesImpl rules = withRules(rule1Satisfied, rule2Violated);
+        DownloadBatchRequirementRules rules = withRules(rule1Satisfied, rule2Violated);
 
         assertThat(rules.hasViolatedRule(status)).isTrue();
         Optional<DownloadBatchRequirementRule> violatedRule = rules.getViolatedRule(status);
