@@ -18,10 +18,11 @@
     <service android:name="com.novoda.downloadmanager.LiteDownloadService" />
 
     <provider
-        android:name="androidx.work.impl.WorkManagerInitializer"
-        android:authorities="com.novoda.downloadmanager"
+        android:name="androidx.startup.InitializationProvider"
+        android:authorities="com.novoda.downloadmanager.androidx-startup"
         android:enabled="false"
         android:exported="false"
+        tools:node="remove"
         tools:replace="android:authorities"/>
 
   </application>
