@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
+    namespace 'com.novoda.downloadmanager.demo'
     compileSdkVersion 33
     buildToolsVersion '33.0.1'
 
@@ -10,7 +11,7 @@ android {
         targetSdkVersion 33
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     lintOptions {
@@ -36,11 +37,11 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.facebook.stetho:stetho:1.5.1'
+    implementation 'com.facebook.stetho:stetho:1.6.0'
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     implementation project(path: ':library')
     testImplementation 'org.mockito:mockito-core:4.1.0'
-    testImplementation 'com.google.truth:truth:1.0'
+    testImplementation 'com.google.truth:truth:1.1.3'
 }

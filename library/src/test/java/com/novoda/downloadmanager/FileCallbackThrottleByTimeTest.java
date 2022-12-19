@@ -11,7 +11,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 public class FileCallbackThrottleByTimeTest {
 
@@ -33,7 +33,7 @@ public class FileCallbackThrottleByTimeTest {
     public void doesNothing_whenCallbackIsAbsent() {
         callbackThrottleByTime.update(downloadBatchStatus);
 
-        verifyZeroInteractions(actionScheduler, callback, downloadBatchStatus);
+        verifyNoInteractions(actionScheduler, callback, downloadBatchStatus);
     }
 
     @Test
@@ -75,7 +75,7 @@ public class FileCallbackThrottleByTimeTest {
     public void doesNotEmitLastStatus_whenCallbackAbsent() {
         callbackThrottleByTime.stopUpdates();
 
-        verifyZeroInteractions(callback);
+        verifyNoInteractions(callback);
     }
 
 }

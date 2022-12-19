@@ -62,7 +62,7 @@ public class FixedRateTimerActionSchedulerTest {
 
         scheduler.schedule(anyAction);
 
-        verifyZeroInteractions(timer);
+        verifyNoInteractions(timer);
     }
 
     @Test

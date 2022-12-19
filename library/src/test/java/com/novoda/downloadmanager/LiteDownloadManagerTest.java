@@ -38,7 +38,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @RunWith(Enclosed.class)
 public class LiteDownloadManagerTest {
@@ -140,7 +140,7 @@ public class LiteDownloadManagerTest {
         public void doesNotPause_whenBatchIdIsUnknown() {
             liteDownloadManager.pause(new LiteDownloadBatchId("unknown"));
 
-            verifyZeroInteractions(downloadBatch, additionalDownloadBatch);
+            verifyNoInteractions(downloadBatch, additionalDownloadBatch);
         }
 
         @Test
@@ -154,7 +154,7 @@ public class LiteDownloadManagerTest {
         public void doesNotResume_whenBatchIdIsUnknown() {
             liteDownloadManager.pause(new LiteDownloadBatchId("unknown"));
 
-            verifyZeroInteractions(downloadBatch, additionalDownloadBatch);
+            verifyNoInteractions(downloadBatch, additionalDownloadBatch);
         }
 
         @Test
@@ -190,7 +190,7 @@ public class LiteDownloadManagerTest {
         public void doesNotDelete_whenBatchIdIsUnknown() {
             liteDownloadManager.delete(new LiteDownloadBatchId("unknown"));
 
-            verifyZeroInteractions(downloadBatch, additionalDownloadBatch);
+            verifyNoInteractions(downloadBatch, additionalDownloadBatch);
         }
 
         @Test

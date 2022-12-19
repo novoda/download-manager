@@ -8,29 +8,30 @@ def teamPropsFile(propsFile) {
 }
 
 ext {
-    checkstyleVersion = '8.5'
-    findbugsVersion = '3.0.1'
-    pmdVersion = '5.8.1'
+    checkstyleVersion = '8.8'
+//    findbugsVersion = '3.0.1'
+    pmdVersion = '6.52.0'
 }
 
 
 buildscript {
     repositories {
         google()
+        gradlePluginPortal()
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.1'
+        classpath 'com.android.tools.build:gradle:7.3.1'
         classpath 'com.novoda:bintray-release:0.9.1'
-        classpath 'com.novoda:gradle-static-analysis-plugin:1.1'
+        classpath 'com.gradleup:static-analysis-plugin:1.4'
         classpath 'com.novoda:gradle-build-properties-plugin:0.4.1'
-        classpath "com.github.ben-manes:gradle-versions-plugin:0.27.0"
+        classpath "com.github.ben-manes:gradle-versions-plugin:0.44.0"
     }
 }
 
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
-    gradleVersion = '5.6.3'
+    gradleVersion = '7.4'
 }
 
 allprojects {

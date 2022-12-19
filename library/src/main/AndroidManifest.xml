@@ -1,6 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:tools="http://schemas.android.com/tools"
-  package="com.novoda.downloadmanager">
+  xmlns:tools="http://schemas.android.com/tools">
 
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
   <uses-permission android:name="android.permission.INTERNET" />
@@ -18,12 +17,12 @@
     <service android:name="com.novoda.downloadmanager.LiteDownloadService" />
 
     <provider
-        android:name="androidx.startup.InitializationProvider"
-        android:authorities="com.novoda.downloadmanager.androidx-startup"
-        android:enabled="false"
-        android:exported="false"
-        tools:node="remove"
-        tools:replace="android:authorities"/>
+      android:name="androidx.startup.InitializationProvider"
+      android:authorities="com.novoda.downloadmanager.androidx-startup"
+      android:enabled="false"
+      android:exported="false"
+      tools:node="remove"
+      tools:replace="android:authorities" />
 
   </application>
 

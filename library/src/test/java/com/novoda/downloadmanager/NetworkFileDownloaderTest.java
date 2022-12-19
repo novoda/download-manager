@@ -1,12 +1,5 @@
 package com.novoda.downloadmanager;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-
 import static com.novoda.downloadmanager.InternalFileSizeFixtures.aFileSize;
 import static com.novoda.downloadmanager.NetworkResponseFixtures.aNetworkResponse;
 import static org.mockito.BDDMockito.given;
@@ -14,6 +7,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 public class NetworkFileDownloaderTest {
 
@@ -100,7 +100,7 @@ public class NetworkFileDownloaderTest {
         verify(callback).onDownloadFinished();
     }
 
-    @Ignore // How can we test the `canDownload` flag?
+    @Ignore("How can we test the `canDownload` flag?")
     @Test
     public void stopsEmittingBytes_whenStoppingDownload() {
         networkFileDownloader.startDownloading(ANY_RAW_URL, UNKNOWN_FILE_SIZE, callback);

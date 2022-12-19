@@ -1,4 +1,4 @@
-apply plugin: 'com.novoda.static-analysis'
+apply plugin: 'com.gradleup.static-analysis'
 
 staticAnalysis {
     penalty {
@@ -10,7 +10,7 @@ staticAnalysis {
         toolVersion checkstyleVersion
         exclude project.fileTree('src/test/java')
         exclude project.fileTree('src/testDebug/java')
-        configFile teamPropsFile('static-analysis/checkstyle-modules.xml')
+        configFile rootProject.file('team-props/static-analysis/checkstyle-modules.xml')
         includeVariants { variant -> excludeTestAndRelease(variant) }
     }
 
@@ -20,15 +20,16 @@ staticAnalysis {
         exclude project.fileTree('src/testDebug/java')
 
         ruleSetFiles = rootProject.files('team-props/static-analysis/pmd-rules.xml')
-        ruleSets = []   // Note: this is a workaround to make the <exclude-pattern>s in pmd-rules.xml actually work
+        ruleSets = []
+        // Note: this is a workaround to make the <exclude-pattern>s in pmd-rules.xml actually work
         includeVariants { variant -> excludeTestAndRelease(variant) }
     }
 
-    findbugs {
-        toolVersion findbugsVersion
-        excludeFilter teamPropsFile('static-analysis/findbugs-excludes.xml')
-        includeVariants { variant -> excludeTestAndRelease(variant) }
-    }
+//    spotbugs {
+//        toolVersion findbugsVersion
+//        excludeFilter teamPropsFile('static-analysis/findbugs-excludes.xml')
+//        includeVariants { variant -> excludeTestAndRelease(variant) }
+//    }
 
     lintOptions {
         lintConfig rootProject.file('team-props/lint-rules/lint-config.xml')
