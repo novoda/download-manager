@@ -50,8 +50,7 @@ final class Logger {
      * @param message to pass to each {@link LogHandle}
      */
     public static void v(Object... message) {
-        for (int i = 0; i < HANDLES.size(); i++) {
-            LogHandle handle = HANDLES.get(i);
+        for (LogHandle handle : HANDLES) {
             handle.v(getDetailedLog(message));
         }
     }
@@ -62,8 +61,7 @@ final class Logger {
      * @param message to pass to each {@link LogHandle}
      */
     public static void i(Object... message) {
-        for (int i = 0; i < HANDLES.size(); i++) {
-            LogHandle handle = HANDLES.get(i);
+        for (LogHandle handle : HANDLES) {
             handle.i(getDetailedLog(message));
         }
     }
@@ -74,8 +72,7 @@ final class Logger {
      * @param message to pass to each {@link LogHandle}
      */
     public static void d(Object... message) {
-        for (int i = 0; i < HANDLES.size(); i++) {
-            LogHandle handle = HANDLES.get(i);
+        for (LogHandle handle : HANDLES) {
             handle.d(getDetailedLog(message));
         }
     }
@@ -87,8 +84,7 @@ final class Logger {
      * @param message   to pass to each {@link LogHandle}
      */
     public static void d(Throwable throwable, Object... message) {
-        for (int i = 0; i < HANDLES.size(); i++) {
-            LogHandle handle = HANDLES.get(i);
+        for (LogHandle handle : HANDLES) {
             handle.d(throwable, getDetailedLog(message));
         }
     }
@@ -99,8 +95,7 @@ final class Logger {
      * @param message to pass to each {@link LogHandle}
      */
     public static void w(Object... message) {
-        for (int i = 0; i < HANDLES.size(); i++) {
-            LogHandle handle = HANDLES.get(i);
+        for (LogHandle handle : HANDLES) {
             handle.w(getDetailedLog(message));
         }
     }
@@ -112,8 +107,7 @@ final class Logger {
      * @param message   to pass to each {@link LogHandle}
      */
     public static void w(Throwable throwable, Object... message) {
-        for (int i = 0; i < HANDLES.size(); i++) {
-            LogHandle handle = HANDLES.get(i);
+        for (LogHandle handle : HANDLES) {
             handle.w(throwable, getDetailedLog(message));
         }
     }
@@ -124,8 +118,7 @@ final class Logger {
      * @param message to pass to each {@link LogHandle}
      */
     public static void e(Object... message) {
-        for (int i = 0; i < HANDLES.size(); i++) {
-            LogHandle handle = HANDLES.get(i);
+        for (LogHandle handle : HANDLES) {
             handle.e(getDetailedLog(message));
         }
     }
@@ -137,8 +130,7 @@ final class Logger {
      * @param message   to pass to each {@link LogHandle}
      */
     public static void e(Throwable throwable, Object... message) {
-        for (int i = 0; i < HANDLES.size(); i++) {
-            LogHandle handle = HANDLES.get(i);
+        for (LogHandle handle : HANDLES) {
             handle.e(throwable, getDetailedLog(message));
         }
     }
