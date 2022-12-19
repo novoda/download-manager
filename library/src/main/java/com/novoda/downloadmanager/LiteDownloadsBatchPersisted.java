@@ -1,5 +1,6 @@
 package com.novoda.downloadmanager;
 
+@SuppressWarnings("PMD.DataClass")
 class LiteDownloadsBatchPersisted implements DownloadsBatchPersisted {
 
     private final DownloadBatchTitle downloadBatchTitle;
