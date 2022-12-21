@@ -3,6 +3,7 @@ package com.novoda.downloadmanager;
 import android.database.sqlite.SQLiteConstraintException;
 
 import androidx.annotation.WorkerThread;
+
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,6 +96,7 @@ class DownloadsFilePersistence {
         return downloadFiles;
     }
 
+    @SuppressWarnings("PMD.CyclomaticComplexity")
     private InternalDownloadFileStatus.Status getFileStatusFrom(DownloadBatchStatus.Status batchStatus) {
         switch (batchStatus) {
             case QUEUED:

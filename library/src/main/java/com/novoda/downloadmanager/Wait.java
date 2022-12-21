@@ -1,7 +1,6 @@
 package com.novoda.downloadmanager;
 
-import edu.umd.cs.findbugs.annotations.Nullable;
-import edu.umd.cs.findbugs.annotations.SuppressWarnings;
+import androidx.annotation.Nullable;
 
 final class Wait {
 
@@ -47,7 +46,8 @@ final class Wait {
             return action.performAction();
         }
 
-        @SuppressWarnings(value = "WA_NOT_IN_LOOP", justification = "Using simple object lock.")
+        // Using simple object lock.
+        @SuppressWarnings(value = "WA_NOT_IN_LOOP")
         private void waitForLock() {
             try {
                 synchronized (lock) {

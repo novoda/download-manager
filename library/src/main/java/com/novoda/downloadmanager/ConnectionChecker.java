@@ -1,10 +1,8 @@
 package com.novoda.downloadmanager;
 
-import android.annotation.TargetApi;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkInfo;
-import android.os.Build;
 
 class ConnectionChecker {
 
@@ -42,15 +40,9 @@ class ConnectionChecker {
     }
 
     private boolean isConnectedTo(int networkType) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            return connectedToNetworkTypeForLollipop(networkType);
-        }
-
-        NetworkInfo networkInfo = connectivityManager.getNetworkInfo(networkType);
-        return networkInfo != null && networkInfo.isConnected();
+        return connectedToNetworkTypeForLollipop(networkType);
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private boolean connectedToNetworkTypeForLollipop(int networkType) {
         Network[] networks = connectivityManager.getAllNetworks();
 

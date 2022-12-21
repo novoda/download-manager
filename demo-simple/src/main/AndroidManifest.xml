@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:tools="http://schemas.android.com/tools"
-  package="com.novoda.downloadmanager.demo">
+  xmlns:tools="http://schemas.android.com/tools">
+
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
   <application
     android:name="com.novoda.downloadmanager.demo.DemoApplication"
@@ -12,9 +13,12 @@
     android:roundIcon="@mipmap/ic_launcher_round"
     android:supportsRtl="true"
     android:theme="@style/AppTheme"
+    tools:ignore="DataExtractionRules"
     tools:targetApi="n">
 
-    <activity android:name="com.novoda.downloadmanager.demo.LandingActivity">
+    <activity
+      android:name="com.novoda.downloadmanager.demo.LandingActivity"
+      android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
 
@@ -24,6 +28,20 @@
     </activity>
     <activity android:name="com.novoda.downloadmanager.demo.MainActivity" />
     <activity android:name="com.novoda.downloadmanager.demo.MigrationActivity" />
+
+    <provider
+      android:name="androidx.startup.InitializationProvider"
+      android:authorities="com.novoda.downloadmanager.demo.androidx-startup"
+      android:exported="false"
+      tools:node="merge"
+      tools:replace="android:authorities">
+
+      <meta-data
+        android:name="androidx.work.WorkManagerInitializer"
+        android:value="androidx.startup"
+        tools:node="remove" />
+    </provider>
+
   </application>
 
 </manifest>

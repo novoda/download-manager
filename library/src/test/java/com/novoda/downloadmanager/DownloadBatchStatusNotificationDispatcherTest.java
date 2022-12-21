@@ -1,14 +1,14 @@
 package com.novoda.downloadmanager;
 
-import java.util.HashSet;
+import static com.novoda.downloadmanager.InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.novoda.downloadmanager.InternalDownloadBatchStatusFixtures.anInternalDownloadsBatchStatus;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import java.util.HashSet;
 
 public class DownloadBatchStatusNotificationDispatcherTest {
 
@@ -38,7 +38,7 @@ public class DownloadBatchStatusNotificationDispatcherTest {
 
         downloadBatchStatusNotificationDispatcher.updateNotification(notificationSeenStatus);
 
-        verifyZeroInteractions(notificationDispatcher, persistence);
+        verifyNoInteractions(notificationDispatcher, persistence);
     }
 
     @Test

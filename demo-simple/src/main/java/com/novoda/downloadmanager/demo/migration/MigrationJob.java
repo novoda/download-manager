@@ -147,6 +147,8 @@ public class MigrationJob implements Runnable {
         }
     }
 
+    // the resources are closed but PMD doesn't see it
+    @SuppressWarnings("PMD.CloseResource")
     private void migrateV1FileToV2Location(CompletedDownloadFile completedDownloadFile) {
         FileInputStream inputStream = null;
         FileOutputStream outputStream = null;

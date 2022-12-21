@@ -93,7 +93,7 @@ final class LiteBatchFileBuilder implements InternalBatchFileBuilder {
                 filteredPathSegments.add(pathSegment);
             }
         }
-        return filteredPathSegments.toArray(new CharSequence[filteredPathSegments.size()]);
+        return filteredPathSegments.toArray(new CharSequence[0]);
     }
 
     private String joinWithFileSeparator(CharSequence... elements) {

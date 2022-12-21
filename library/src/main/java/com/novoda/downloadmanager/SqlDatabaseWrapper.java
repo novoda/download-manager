@@ -25,7 +25,7 @@ public class SqlDatabaseWrapper {
         arguments.add(selectionArgument);
         arguments.addAll(Arrays.asList(selectionArguments));
 
-        return sqLiteDatabase.rawQuery(query, arguments.toArray(new String[arguments.size()]));
+        return sqLiteDatabase.rawQuery(query, arguments.toArray(new String[0]));
     }
 
     public void close() {
@@ -58,6 +58,6 @@ public class SqlDatabaseWrapper {
         arguments.add(selectionArgument);
         arguments.addAll(Arrays.asList(selectionArguments));
 
-        sqLiteDatabase.delete(table, whereClause, arguments.toArray(new String[arguments.size()]));
+        sqLiteDatabase.delete(table, whereClause, arguments.toArray(new String[0]));
     }
 }
