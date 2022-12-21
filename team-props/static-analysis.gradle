@@ -25,12 +25,6 @@ staticAnalysis {
         includeVariants { variant -> excludeTestAndRelease(variant) }
     }
 
-//    spotbugs {
-//        toolVersion findbugsVersion
-//        excludeFilter teamPropsFile('static-analysis/findbugs-excludes.xml')
-//        includeVariants { variant -> excludeTestAndRelease(variant) }
-//    }
-
     lintOptions {
         lintConfig rootProject.file('team-props/lint-rules/lint-config.xml')
         checkReleaseBuilds false
